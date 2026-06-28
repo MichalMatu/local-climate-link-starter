@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "sensor": {
+    "profileId": "tp357_custom_v1",
+    "sensorId": "demo-tp357",
+    "runtimeAddress": "11:22:33:44:55:66",
+    "displayName": "TP357 demo",
+    "parserValidated": true
+  },
+  "output": {
+    "profileId": "shelly_plug_s_gen3",
+    "relayId": 0
+  },
+  "rule": {
+    "mode": "heating",
+    "control": {
+      "metric": "temperature",
+      "direction": "below",
+      "onThreshold": 19,
+      "offThreshold": 20
+    },
+    "vpdAssist": {
+      "enabled": false,
+      "targetKpa": 1.2
+    },
+    "staleTimeoutSec": 900,
+    "minChangeMs": 120000,
+    "maxOnMs": 14400000,
+    "rssiMin": -85,
+    "consecutiveHits": 2,
+    "failSafe": "off",
+    "bootState": "off"
+  },
+  "diagnostics": {
+    "enabled": true
+  }
+}

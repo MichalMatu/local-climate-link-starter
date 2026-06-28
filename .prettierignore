@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+coverage
+.vite
+pnpm-lock.yaml
+examples/shelly-scripts/*.generated.js
+docs/shelly_scripts_example/scripts/**
+apps/mobile/android/app/src/main/assets/**

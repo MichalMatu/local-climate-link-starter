@@ -1,0 +1,5 @@
+wykorzystajmy diode i przycisk ktory znajduje sie na gniazdku shellly,
+
+dioda mozna sygnalizowac niski poziom baterii w termometrzeslaby zasieg czy tryb pracy , blyskami i kolorrami 
+
+przycisk on off jak teraz ale tez dluzsze przytrzymanie powinno zatrzymywac skrypt, dobrze bylo by zrobid dodatkowy ekran konfiguracyjny dla kazdego z gniazdek
