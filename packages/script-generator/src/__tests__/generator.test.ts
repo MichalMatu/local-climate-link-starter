@@ -1,0 +1,343 @@
+import {
+  configHash,
+  createDefaultShellyThermostatConfig,
+  decodeShellyThermostatScript,
+  generateShellyBleDiscoveryScript,
+  generateShellyThermostatScript
+} from '../index.js';
+
+const byteLength = (value: string): number => new TextEncoder().encode(value).length;
+
+const readGeneratedDiagnostics = (script: string): unknown => {
+  const shelly = {
+    call: (
+      _method: string,
+      _params: unknown,
+      callback?: (_result: unknown, code: number) => void
+    ) => callback?.({}, 0),
+    getComponentStatus: (component: string) =>
+      component === 'sys'
+        ? { time: '09:31', unixtime: 1782667904, uptime: 12345 }
+        : component === 'switch:0'
+          ? {
+              output: false,
+              apower: 0,
+              voltage: 230.1,
+              current: 0,
+              aenergy: { total: 1234 },
+              temperature: { tC: 31.2 }
+            }
+          : null
+  };
+  const ble = {
+    Scanner: {
+      SCAN_RESULT: 'scan-result',
+      INFINITE_SCAN: -1,
+      subscribe: () => undefined,
+      start: () => true
+    }
+  };
+  const timer = { set: () => undefined };
+
+  return new Function('Shelly', 'BLE', 'Timer', `${script}\nreturn JSON.parse(diag());`)(
+    shelly,
+    ble,
+    timer
+  ) as unknown;
+};
+
+describe('generateShellyThermostatScript', () => {
+  it('generates deterministic script text for the same config', () => {
+    const config = createDefaultShellyThermostatConfig();
+
+    expect(generateShellyThermostatScript(config)).toBe(
+      generateShellyThermostatScript(config)
+    );
+  });
+
+  it('decodes generated thermostat runtime settings', () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const config = {
+      ...baseConfig,
+      sensor: {
+        ...baseConfig.sensor,
+        runtimeAddress: 'A4:C1:38:4F:24:CD'
+      },
+      rule: {
+        ...baseConfig.rule,
+        rssiMin: -80,
+        staleTimeoutSec: 600,
+        maxOnMs: 10_800_000,
+        vpdAssist: {
+          enabled: true,
+          targetKpa: 1.25
+        }
+      }
+    };
+
+    const decoded = decodeShellyThermostatScript(generateShellyThermostatScript(config));
+
+    expect(decoded?.runtimeMode).toBe('xiaomi-bthome-minimal');
+    expect(decoded?.settings).toMatchObject({
+      sensorProfileId: 'xiaomi_lywsd03mmc_bthome_v2',
+      runtimeAddress: 'A4:C1:38:4F:24:CD',
+      compactAddress: 'A4C1384F24CD',
+      mode: 'heating',
+      control: {
+        metric: 'temperature',
+        direction: 'below',
+        onThreshold: 19,
+        offThreshold: 20
+      },
+      vpdAssist: {
+        enabled: true,
+        targetKpa: 1.25
+      },
+      staleTimeoutSec: 600,
+      maxOnMs: 10_800_000,
+      rssiMin: -80
+    });
+  });
+
+  it('does not decode temporary BLE discovery scripts as thermostat settings', () => {
+    expect(decodeShellyThermostatScript(generateShellyBleDiscoveryScript())).toBeNull();
+  });
+
+  it('includes sensor and rule metadata in the diagnostics endpoint', () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const config = {
+      ...baseConfig,
+      sensor: {
+        ...baseConfig.sensor,
+        runtimeAddress: 'A4:C1:38:4F:24:CD',
+        displayName: 'Pokoj'
+      },
+      rule: {
+        ...baseConfig.rule,
+        control: {
+          ...baseConfig.rule.control,
+          onThreshold: 19,
+          offThreshold: 21.2
+        },
+        rssiMin: -80
+      }
+    };
+
+    const diagnostics = readGeneratedDiagnostics(generateShellyThermostatScript(config));
+
+    expect(diagnostics).toMatchObject({
+      v: 1,
+      z: configHash(config),
+      s: ['A4:C1:38:4F:24:CD', 'Pokoj'],
+      q: [0, 0, 19, 21.2, 900, -80],
+      y: ['09:31', 1782667904, 12345],
+      p: [false, 0, 230.1, 0, 1234, 31.2],
+      g: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        'b',
+        expect.anything(),
+        null,
+        0,
+        0,
+        null,
+        null,
+        null,
+        null
+      ]
+    });
+  });
+
+  it('returns null for unsupported or malformed thermostat scripts', () => {
+    expect(decodeShellyThermostatScript('var C={};var R={};')).toBeNull();
+    expect(
+      decodeShellyThermostatScript('// m: xiaomi-bthome-minimal\nvar X={};var R={};')
+    ).toBeNull();
+    expect(
+      decodeShellyThermostatScript('// m: xiaomi-bthome-minimal\nvar C={};')
+    ).toBeNull();
+    expect(
+      decodeShellyThermostatScript('// m: xiaomi-bthome-minimal\nvar C={bad};var R={};')
+    ).toBeNull();
+    expect(
+      decodeShellyThermostatScript(
+        '// m: xiaomi-bthome-minimal\nvar C={"a":"A"};var R={};'
+      )
+    ).toBeNull();
+  });
+
+  it('generates an ultra-minimal Xiaomi BTHome runtime', () => {
+    const script = generateShellyThermostatScript(
+      createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2')
+    );
+
+    expect(script).toContain('m: xiaomi-bthome-minimal');
+    expect(script).toContain('function ad(d)');
+    expect(script).toContain('function r2(d,o,s)');
+    expect(script).toContain('Shelly.call("Switch.Set"');
+    expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
+    expect(script).toContain('"st"');
+    expect(script).toContain('"mx"');
+    expect(script).toContain('sw(false,"b",true)');
+    expect(script).toContain('R.vp');
+    expect(script).toContain('R.eo');
+    expect(script).toContain('R.ef');
+    expect(script).not.toContain('BTHome.parseData');
+    expect(script).not.toContain('tp357');
+    expect(script).not.toContain('TP357');
+    expect(script).not.toContain('parseBthomeV2Payload');
+    expect(script).not.toContain('readUint16LE');
+    expect(script).not.toContain('function dataLength');
+    expect(byteLength(script)).toBeLessThanOrEqual(4000);
+    expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('generates an ultra-minimal TP357 runtime without BTHome code', () => {
+    const script = generateShellyThermostatScript(
+      createDefaultShellyThermostatConfig('tp357_custom_v1')
+    );
+
+    expect(script).toContain('m: tp357-minimal');
+    expect(script).toContain('function mf(d)');
+    expect(script).toContain('"tm"');
+    expect(script).toContain('Shelly.call("Switch.Set"');
+    expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
+    expect(script).toContain('R.vp');
+    expect(script).toContain('R.eo');
+    expect(script).toContain('R.ef');
+    expect(script).not.toContain('BTHome.parseData');
+    expect(script).not.toContain('parseBthomeV2Payload');
+    expect(script).not.toContain('xiaomi_lywsd03mmc_bthome_v2');
+    expect(byteLength(script)).toBeLessThanOrEqual(4000);
+    expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('keeps the runtime config compact and validates threshold directions', () => {
+    const coolingConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'cooling'
+    );
+    const humidifyingConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'humidifying'
+    );
+
+    expect(generateShellyThermostatScript(coolingConfig)).toContain('"d":1');
+    expect(generateShellyThermostatScript(humidifyingConfig)).toContain('"m":1');
+    expect(() =>
+      generateShellyThermostatScript({
+        ...createDefaultShellyThermostatConfig(),
+        rule: {
+          ...createDefaultShellyThermostatConfig().rule,
+          control: {
+            ...createDefaultShellyThermostatConfig().rule.control,
+            onThreshold: 20,
+            offThreshold: 20
+          }
+        }
+      })
+    ).toThrow(/onThreshold must be lower than offThreshold/);
+  });
+
+  it('adds VPD assist code only when enabled', () => {
+    const disabled = generateShellyThermostatScript(
+      createDefaultShellyThermostatConfig()
+    );
+    const baseConfig = createDefaultShellyThermostatConfig();
+    const enabled = generateShellyThermostatScript({
+      ...baseConfig,
+      rule: {
+        ...baseConfig.rule,
+        vpdAssist: {
+          enabled: true,
+          targetKpa: 1.25
+        }
+      }
+    });
+
+    expect(disabled).toContain('"vp":0');
+    expect(disabled).not.toContain('function sv(t)');
+    expect(enabled).toContain('"vp":1.25');
+    expect(enabled).toContain('function sv(t)');
+    expect(enabled).toContain('Math.exp');
+  });
+
+  it('rejects unreasonable RSSI thresholds and leaves no placeholders', () => {
+    expect(() =>
+      generateShellyThermostatScript({
+        ...createDefaultShellyThermostatConfig(),
+        rule: {
+          ...createDefaultShellyThermostatConfig().rule,
+          rssiMin: -120
+        }
+      })
+    ).toThrow();
+
+    const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
+    expect(script).not.toContain('{{');
+    expect(script).not.toContain('__PLACEHOLDER__');
+  });
+
+  it('matches minimal runtime snapshots', () => {
+    expect(
+      generateShellyThermostatScript(
+        createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2')
+      )
+    ).toMatchSnapshot('minimal Xiaomi BTHome runtime');
+    expect(
+      generateShellyThermostatScript(
+        createDefaultShellyThermostatConfig('tp357_custom_v1')
+      )
+    ).toMatchSnapshot('minimal TP357 runtime');
+  });
+});
+
+describe('generateShellyBleDiscoveryScript', () => {
+  it('generates a deterministic temporary Shelly-side BLE discovery script', () => {
+    expect(generateShellyBleDiscoveryScript()).toBe(generateShellyBleDiscoveryScript());
+  });
+
+  it('scans compatible sensors without controlling the relay', () => {
+    const script = generateShellyBleDiscoveryScript();
+
+    expect(script).toContain('m: discovery-debug');
+    expect(script).toContain('HTTPServer.registerEndpoint("ble-scan"');
+    expect(script).toContain('BLE.Scanner.subscribe(function(event, result)');
+    expect(script).toContain('BLE.Scanner.start || BLE.Scanner.Start');
+    expect(script).toContain('p: "x"');
+    expect(script).toContain('p: "t"');
+    expect(script).toContain('function btd(result)');
+    expect(script).toContain('function pbt(data)');
+    expect(script).toContain('function handleTp357Discovery(result)');
+    expect(script).toContain('D.n >= 4');
+    expect(script).toContain('c: candidateList()');
+    expect(script).toContain('function keepDiscoveryEndpointAlive()');
+    expect(script).toContain('duration_ms: BLE.Scanner.INFINITE_SCAN');
+    expect(script).not.toContain('Shelly.call("Switch.Set"');
+    expect(script).not.toContain('CFG.rule');
+  });
+
+  it('keeps the discovery script compact enough for Shelly Plug S Gen3 memory', () => {
+    const script = generateShellyBleDiscoveryScript();
+
+    expect(byteLength(script)).toBeLessThanOrEqual(9600);
+    expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('does not leave unreplaced placeholders in the discovery script', () => {
+    const script = generateShellyBleDiscoveryScript();
+
+    expect(script).not.toContain('{{');
+    expect(script).not.toContain('__PLACEHOLDER__');
+  });
+});

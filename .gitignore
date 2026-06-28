@@ -1,0 +1,54 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+build/
+dist/
+out/
+coverage/
+test-results/
+playwright-report/
+.vite/
+!packages/design-tokens/build/
+!packages/design-tokens/build/**
+
+# Capacitor / native build outputs
+apps/mobile/android/.gradle/
+apps/mobile/android/build/
+apps/mobile/android/app/build/
+apps/mobile/android/app/src/main/assets/
+apps/mobile/android/app/src/main/res/xml/config.xml
+apps/mobile/android/capacitor-cordova-android-plugins/
+apps/mobile/ios/App/Pods/
+apps/mobile/ios/App/build/
+apps/mobile/ios/App/DerivedData/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.mobileprovision
+
+# logs
+.make/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor / OS
+.DS_Store
+__MACOSX/
+._*
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# generated but not committed unless explicitly configured
+*.tsbuildinfo

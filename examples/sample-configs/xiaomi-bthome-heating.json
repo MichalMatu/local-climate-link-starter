@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "sensor": {
+    "profileId": "xiaomi_lywsd03mmc_bthome_v2",
+    "sensorId": "demo-xiaomi-bthome",
+    "runtimeAddress": "AA:BB:CC:DD:EE:FF",
+    "displayName": "Xiaomi LYWSD03MMC demo",
+    "parserValidated": true
+  },
+  "output": {
+    "profileId": "shelly_plug_s_gen3",
+    "relayId": 0
+  },
+  "rule": {
+    "mode": "heating",
+    "control": {
+      "metric": "temperature",
+      "direction": "below",
+      "onThreshold": 19,
+      "offThreshold": 20
+    },
+    "vpdAssist": {
+      "enabled": false,
+      "targetKpa": 1.2
+    },
+    "staleTimeoutSec": 900,
+    "minChangeMs": 120000,
+    "maxOnMs": 14400000,
+    "rssiMin": -85,
+    "consecutiveHits": 2,
+    "failSafe": "off",
+    "bootState": "off"
+  },
+  "diagnostics": {
+    "enabled": true
+  }
+}
