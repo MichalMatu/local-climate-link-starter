@@ -427,6 +427,12 @@ building compatibility, migration, backup, or recovery paths around them. Do not
 preserve old test scripts, old script IDs, or old generated-code variants unless
 the user explicitly asks for that.
 
+The user has granted standing authorization for local development smoke tests to
+toggle the Shelly relay through `Switch.Set` without asking for separate approval
+each time. Use this to avoid slowing hardware debugging. Keep relay tests short,
+verify the final relay state, and leave the relay OFF after tests or failures
+unless the current task explicitly requires a different final state.
+
 This developer shortcut applies to Local Climate Link test scripts on the local
 Shelly device only. Do not delete unrelated user scripts unless explicitly
 requested.

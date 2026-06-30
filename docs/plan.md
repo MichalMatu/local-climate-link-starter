@@ -110,9 +110,11 @@ scan failure    -> relay OFF
 manual recovery -> OFF first, then normal auto evaluation
 ```
 
-The app must never leave a relay test ON after failure. Destructive actions need
-confirmation, but Local Climate Link development scripts on local hardware are
-disposable when the user explicitly authorizes hardware actions.
+The app must never leave a relay test ON after failure. The user has granted
+standing authorization for local development smoke tests to toggle the Shelly
+relay without separate approval each time. Local Climate Link development
+scripts on local hardware are disposable when the user explicitly authorizes
+hardware actions.
 
 ## Active priorities
 
