@@ -76,7 +76,7 @@ export const generateShellyThermostatScript = (input: unknown): string => {
   const hash = configHash(config);
   const cfgJson = stableStringify(createRuntimeConfig(config, hash));
   const body = `var C=${cfgJson};
-var R={ls:null,t:null,h:null,b:null,r:null,on:false,rs:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null};
+var R={ls:null,t:null,h:null,b:null,r:null,on:false,rs:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,sa:0};
 function na(a){if(a===undefined||a===null)return"";var s=String(a).toUpperCase(),o="";for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c!==":"&&c!=="-")o+=c;}return o;}
 function fv(o,k){return o&&o[k]!==undefined?o[k]:null;}
 function sw(o,rs,f){var n=Date.now(),ch=R.on!==o;if(!f&&!ch){R.rs=rs;return;}if(!f&&n-R.lc<C.c){R.rs="mc";return;}Shelly.call("Switch.Set",{id:C.i,on:o},function(r,e){if(e!==0){R.rs="se";Shelly.call("Switch.Set",{id:C.i,on:false});R.on=false;return;}R.on=o;R.rs=rs;if(ch)R.lc=n;R.os=o?n:null;});}
@@ -88,10 +88,11 @@ function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStat
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ev(e,x){if(e!==BLE.Scanner.SCAN_RESULT||!x)return;if(na(x.addr)!==C.a)return;if(x.rssi!==undefined&&x.rssi<C.r){R.r=x.rssi;R.rs="rl";return;}parse(x);}
 sw(false,"b",true);
-var bt=BLE.Scanner.stop||BLE.Scanner.Stop;if(bt)bt.call(BLE.Scanner);
+var bt=BLE.Scanner.stop||BLE.Scanner.Stop;
 BLE.Scanner.subscribe(function(e,x){ev(e,x);});
-function bs(){var f=BLE.Scanner.start||BLE.Scanner.Start,S=f?f.call(BLE.Scanner,{duration_ms:BLE.Scanner.INFINITE_SCAN,active:false,interval_ms:1000,window_ms:50,rssi_thr:C.r}):null;if(S==null)sw(false,"bf",true);}
-Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();if(R.rs==="bf")bs();});`;
+function bs(){if(bt)bt.call(BLE.Scanner);R.sa=Date.now();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sw(false,"bf",true);}
+function bw(){if(R.sa&&Date.now()-(R.ls||R.sa)>9e4)bs();}
+Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw();});`;
   const compactBody = compactGeneratedShellyScript(body);
 
   return `// LCL
@@ -495,9 +496,9 @@ function startDiscoveryScan() {
     var started = startScanner({
       duration_ms: BLE.Scanner.INFINITE_SCAN,
       active: false,
-      interval_ms: 320,
-      window_ms: 160,
-      rssi_thr: -100
+      interval_ms: 241,
+      window_ms: 61,
+      rssi_thr: 0
     });
     if (started === null) {
       D.lr = "scan-start-unconfirmed";

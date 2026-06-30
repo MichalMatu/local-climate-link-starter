@@ -186,6 +186,8 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('function r2(d,o,s)');
     expect(script).toContain('Shelly.call("Switch.Set"');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
+    expect(script).toContain('interval_ms:241,window_ms:61,rssi_thr:0');
+    expect(script).toContain('Date.now()-(R.ls||R.sa)>9e4');
     expect(script).toContain('"st"');
     expect(script).toContain('"mx"');
     expect(script).toContain('sw(false,"b",true)');
@@ -323,6 +325,9 @@ describe('generateShellyBleDiscoveryScript', () => {
     expect(script).toContain('c: candidateList()');
     expect(script).toContain('function keepDiscoveryEndpointAlive()');
     expect(script).toContain('duration_ms: BLE.Scanner.INFINITE_SCAN');
+    expect(script).toContain('interval_ms: 241');
+    expect(script).toContain('window_ms: 61');
+    expect(script).toContain('rssi_thr: 0');
     expect(script).not.toContain('Shelly.call("Switch.Set"');
     expect(script).not.toContain('CFG.rule');
   });

@@ -84,6 +84,13 @@ sets the relay OFF, stops the main automation while scanning, and polls
 `/script/<id>/ble-scan` automatically. Closing the modal stops the scanner and
 restarts automation only if it was running before discovery. Switching away from
 the Shelly tab or backgrounding/closing the app should trigger the same cleanup.
+Both the temporary discovery script and generated runtime script request a
+passive BLE scan close to Shelly's documented script defaults
+(`interval_ms: 241`, `window_ms: 61`). Scan-level RSSI filtering is disabled
+(`rssi_thr: 0`) so packets reach the script first; Local Climate Link applies
+the configured RSSI threshold in JavaScript after receipt. These settings do not
+change radio transmit power because sensor advertisements are received, not
+sent, by the plug.
 
 If Shelly reports `out_of_memory`, the discovery script could not stay running
 within the plug's available script memory. Close the BLE scan modal, wait a few
