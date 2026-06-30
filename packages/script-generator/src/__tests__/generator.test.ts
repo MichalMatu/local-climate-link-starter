@@ -46,6 +46,67 @@ const readGeneratedDiagnostics = (script: string): unknown => {
   ) as unknown;
 };
 
+const createBthomeAdvertisement = (payload: number[]): number[] => [
+  payload.length + 3,
+  0x16,
+  0xd2,
+  0xfc,
+  ...payload
+];
+
+const createExecutableRuntime = (script: string) => {
+  let scanCallback:
+    | ((event: string, result: { addr: string; advData: number[]; rssi: number }) => void)
+    | undefined;
+  const switchCalls: Array<{ id: number; on: boolean }> = [];
+  const shelly = {
+    call: (
+      method: string,
+      params: { id: number; on: boolean },
+      callback?: (_result: unknown, code: number) => void
+    ) => {
+      if (method === 'Switch.Set') {
+        switchCalls.push(params);
+      }
+      callback?.({}, 0);
+    },
+    getComponentStatus: () => null
+  };
+  const ble = {
+    Scanner: {
+      SCAN_RESULT: 'scan-result',
+      INFINITE_SCAN: -1,
+      stop: () => undefined,
+      subscribe: (
+        callback: (
+          event: string,
+          result: { addr: string; advData: number[]; rssi: number }
+        ) => void
+      ) => {
+        scanCallback = callback;
+      },
+      start: () => true
+    }
+  };
+  const timer = { set: () => undefined };
+  const runtime = new Function(
+    'Shelly',
+    'BLE',
+    'Timer',
+    `${script}\nreturn {diag:function(){return JSON.parse(diag());}};`
+  )(shelly, ble, timer) as { diag: () => { g: unknown[] } };
+
+  if (!scanCallback) {
+    throw new Error('Generated runtime did not subscribe to BLE scanner.');
+  }
+
+  return {
+    runtime,
+    scan: scanCallback,
+    switchCalls
+  };
+};
+
 describe('generateShellyThermostatScript', () => {
   it('generates deterministic script text for the same config', () => {
     const config = createDefaultShellyThermostatConfig();
@@ -202,6 +263,33 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('function dataLength');
     expect(byteLength(script)).toBeLessThanOrEqual(4000);
     expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('ignores incomplete Xiaomi BTHome advertisements instead of forcing relay OFF', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'humidifying'
+    );
+    const script = generateShellyThermostatScript({
+      ...config,
+      sensor: {
+        ...config.sensor,
+        runtimeAddress: 'A4:C1:38:4F:24:CD'
+      }
+    });
+    const { runtime, scan, switchCalls } = createExecutableRuntime(script);
+
+    expect(switchCalls).toEqual([{ id: 0, on: false }]);
+
+    scan('scan-result', {
+      addr: 'A4:C1:38:4F:24:CD',
+      advData: createBthomeAdvertisement([0x40, 0x01, 100]),
+      rssi: -35
+    });
+
+    expect(switchCalls).toEqual([{ id: 0, on: false }]);
+    expect(runtime.diag().g[0]).toBeNull();
+    expect(runtime.diag().g[6]).toBe('cv');
   });
 
   it('generates an ultra-minimal TP357 runtime without BTHome code', () => {
