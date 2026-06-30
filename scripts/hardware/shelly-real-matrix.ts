@@ -31,8 +31,8 @@ interface ModeSpec {
   mode: RulePresetId;
   metric: RuleControlMetric;
   direction: ThresholdDirection;
-  onReason: 'below-threshold' | 'above-threshold';
-  offReason: 'below-threshold' | 'above-threshold';
+  onReason: 'bl' | 'ab';
+  offReason: 'bl' | 'ab';
 }
 
 interface MeasurementSnapshot {
@@ -71,40 +71,40 @@ interface MatrixResult {
 }
 
 const USAGE =
-  'Usage: SHELLY_URL=http://<shelly-ip> XIAOMI_MAC=<mac> TP357_MAC=<mac> pnpm hardware:shelly:matrix';
+  'Usage: SHELLY_URL=http://<shelly-ip> XIAOMI_MAC=<mac> TP357_MAC=<mac> [SENSOR_FILTER=xiaomi|tp357|all] [VPD_OPTIONS=off|on|both] pnpm hardware:shelly:matrix';
 
 const modes: ModeSpec[] = [
   {
     mode: 'heating',
     metric: 'temperature',
     direction: 'below',
-    onReason: 'below-threshold',
-    offReason: 'above-threshold'
+    onReason: 'bl',
+    offReason: 'ab'
   },
   {
     mode: 'cooling',
     metric: 'temperature',
     direction: 'above',
-    onReason: 'above-threshold',
-    offReason: 'below-threshold'
+    onReason: 'ab',
+    offReason: 'bl'
   },
   {
     mode: 'humidifying',
     metric: 'humidity',
     direction: 'below',
-    onReason: 'below-threshold',
-    offReason: 'above-threshold'
+    onReason: 'bl',
+    offReason: 'ab'
   },
   {
     mode: 'dehumidifying',
     metric: 'humidity',
     direction: 'above',
-    onReason: 'above-threshold',
-    offReason: 'below-threshold'
+    onReason: 'ab',
+    offReason: 'bl'
   }
 ];
 
-const vpdOptions = [false, true] as const;
+const allVpdOptions = [false, true] as const;
 
 const delay = (durationMs: number): Promise<void> =>
   new Promise((resolve) => {
@@ -143,6 +143,34 @@ const readIntegerEnv = (
   return parsed;
 };
 
+const readVpdOptionsEnv = (): readonly boolean[] => {
+  const raw = process.env.VPD_OPTIONS?.trim().toLowerCase();
+  if (!raw || raw === 'both' || raw === 'all') {
+    return allVpdOptions;
+  }
+  if (raw === 'off' || raw === 'false' || raw === '0') {
+    return [false];
+  }
+  if (raw === 'on' || raw === 'true' || raw === '1') {
+    return [true];
+  }
+  throw new Error('VPD_OPTIONS must be off, on, or both.');
+};
+
+const sensorMatchesFilter = (sensor: SensorUnderTest): boolean => {
+  const raw = process.env.SENSOR_FILTER?.trim().toLowerCase();
+  if (!raw || raw === 'all' || raw === 'both') {
+    return true;
+  }
+  if (raw === 'xiaomi') {
+    return sensor.profileId === 'xiaomi_lywsd03mmc_bthome_v2';
+  }
+  if (raw === 'tp357') {
+    return sensor.profileId === 'tp357_custom_v1';
+  }
+  throw new Error('SENSOR_FILTER must be xiaomi, tp357, or all.');
+};
+
 const normalizeMacAddress = (value: string): string => {
   const compact = value.trim().replace(/[:-]/g, '').toUpperCase();
   if (!/^[0-9A-F]{12}$/.test(compact)) {
@@ -160,7 +188,36 @@ const numericField = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
 const parseDiag = (raw: unknown): ParsedDiag => {
-  if (!isRecord(raw) || !isRecord(raw.g)) {
+  if (!isRecord(raw)) {
+    return { raw };
+  }
+
+  if (Array.isArray(raw.g)) {
+    const diagnostics = raw.g;
+    const temperatureC = numericField(diagnostics[1]);
+    const humidityPct = numericField(diagnostics[2]);
+    const lastSeen = numericField(diagnostics[0]);
+    const measurement =
+      temperatureC !== undefined && humidityPct !== undefined && lastSeen !== undefined
+        ? {
+            temperatureC,
+            humidityPct,
+            batteryPct: numericField(diagnostics[3]),
+            rssi: numericField(diagnostics[4]),
+            lastSeen
+          }
+        : undefined;
+
+    return {
+      raw,
+      measurement,
+      relayState: typeof diagnostics[5] === 'boolean' ? diagnostics[5] : undefined,
+      lastReason: typeof diagnostics[6] === 'string' ? diagnostics[6] : undefined,
+      lastControlValue: numericField(diagnostics[11])
+    };
+  }
+
+  if (!isRecord(raw.g)) {
     return { raw };
   }
 
@@ -488,24 +545,30 @@ const evalRuntime = async (
     'Script.Eval'
   );
 
-const readSensors = (): SensorUnderTest[] => [
-  {
-    profileId: 'xiaomi_lywsd03mmc_bthome_v2',
-    runtimeAddress: normalizeMacAddress(readRequiredEnv('XIAOMI_MAC')),
-    displayName: 'Xiaomi/PVVX hardware matrix'
-  },
-  {
-    profileId: 'tp357_custom_v1',
-    runtimeAddress: normalizeMacAddress(readRequiredEnv('TP357_MAC')),
-    displayName: 'TP357 hardware matrix'
-  }
-];
+const readSensors = (): SensorUnderTest[] =>
+  [
+    {
+      profileId: 'xiaomi_lywsd03mmc_bthome_v2',
+      runtimeAddress: normalizeMacAddress(readRequiredEnv('XIAOMI_MAC')),
+      displayName: 'Xiaomi/PVVX hardware matrix'
+    },
+    {
+      profileId: 'tp357_custom_v1',
+      runtimeAddress: normalizeMacAddress(readRequiredEnv('TP357_MAC')),
+      displayName: 'TP357 hardware matrix'
+    }
+  ].filter(sensorMatchesFilter);
 
 const run = async (): Promise<void> => {
   const shellyUrl = new URL(readRequiredEnv('SHELLY_URL'));
   const timeoutMs = readIntegerEnv('PHASE_TIMEOUT_MS', 90000, 10000, 300000);
   const pollMs = readIntegerEnv('POLL_MS', 2000, 500, 30000);
   const rpcTimeoutMs = readIntegerEnv('RPC_TIMEOUT_MS', 8000, 1000, 60000);
+  const selectedVpdOptions = readVpdOptionsEnv();
+  const sensors = readSensors();
+  if (sensors.length === 0) {
+    throw new Error('No sensors selected for the hardware matrix.');
+  }
   const transport = new FetchShellyRpcTransport({
     baseUrl: shellyUrl.toString(),
     defaultTimeoutMs: rpcTimeoutMs
@@ -514,6 +577,8 @@ const run = async (): Promise<void> => {
   const report: Record<string, unknown> = {
     startedAt: new Date().toISOString(),
     shellyUrl: shellyUrl.toString(),
+    sensorFilter: process.env.SENSOR_FILTER?.trim() || 'all',
+    vpdOptions: selectedVpdOptions.map((option) => (option ? 'on' : 'off')),
     cases: []
   };
   const cases = report.cases as MatrixResult[];
@@ -527,7 +592,7 @@ const run = async (): Promise<void> => {
       await transport.call({ method: RPC_METHODS.ShellyGetStatus })
     );
 
-    for (const sensor of readSensors()) {
+    for (const sensor of sensors) {
       console.log(`[probe] ${sensor.displayName} ${sensor.runtimeAddress}`);
       const probe = await installRuntime(client, createProbeConfig(sensor));
       finalScriptId = probe.scriptId;
@@ -546,7 +611,7 @@ const run = async (): Promise<void> => {
       }
 
       for (const spec of modes) {
-        for (const vpdAssist of vpdOptions) {
+        for (const vpdAssist of selectedVpdOptions) {
           const result: MatrixResult = {
             sensor: sensor.profileId,
             mode: spec.mode,

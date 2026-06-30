@@ -31,7 +31,10 @@ import { hashScriptCode } from './hash.js';
 
 const DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES = 1024;
 const DEFAULT_SCRIPT_MUTATION_DELAY_MS = 100;
+const BLE_SCANNER_CLEANUP_DELAY_MS = 1000;
 const MIN_SYNCED_UNIX_TIME_SEC = 1_600_000_000;
+const STOP_BLE_SCANNER_EVAL_CODE =
+  'if(typeof BLE!=="undefined"&&BLE.Scanner){var s=BLE.Scanner.stop||BLE.Scanner.Stop;if(s)s.call(BLE.Scanner);}"ok"';
 
 export interface RpcShellyClientOptions {
   mutationDelayMs?: number | undefined;
@@ -202,6 +205,14 @@ export class RpcShellyClient implements ShellyClient {
     return result;
   }
 
+  private async stopBleScannerInScript(scriptId: number): Promise<void> {
+    await this.callMutation<unknown>({
+      method: RPC_METHODS.ScriptEval,
+      params: { id: scriptId, code: STOP_BLE_SCANNER_EVAL_CODE }
+    });
+    await this.sleepMs(BLE_SCANNER_CLEANUP_DELAY_MS);
+  }
+
   async getDeviceInfo(): Promise<Result<ShellyDeviceInfo>> {
     const response = await this.transport.call<unknown>({
       method: RPC_METHODS.ShellyGetDeviceInfo
@@ -357,6 +368,7 @@ export class RpcShellyClient implements ShellyClient {
       scriptId = existingScript.id;
 
       if (existingScript.running) {
+        await this.stopBleScannerInScript(scriptId);
         const stopResult = await this.callMutation<null>({
           method: RPC_METHODS.ScriptStop,
           params: { id: scriptId }

@@ -88,9 +88,10 @@ function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStat
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ev(e,x){if(e!==BLE.Scanner.SCAN_RESULT||!x)return;if(na(x.addr)!==C.a)return;if(x.rssi!==undefined&&x.rssi<C.r){R.r=x.rssi;R.rs="rl";return;}parse(x);}
 sw(false,"b",true);
+var bt=BLE.Scanner.stop||BLE.Scanner.Stop;if(bt)bt.call(BLE.Scanner);
 BLE.Scanner.subscribe(function(e,x){ev(e,x);});
 function bs(){var f=BLE.Scanner.start||BLE.Scanner.Start,S=f?f.call(BLE.Scanner,{duration_ms:BLE.Scanner.INFINITE_SCAN,active:false,interval_ms:1000,window_ms:50,rssi_thr:C.r}):null;if(S==null)sw(false,"bf",true);}
-bs();Timer.set(30000,true,function(){stale();if(R.rs==="bf")bs();});`;
+Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();if(R.rs==="bf")bs();});`;
   const compactBody = compactGeneratedShellyScript(body);
 
   return `// LCL
@@ -479,6 +480,10 @@ function startDiscoveryScan() {
     D.lr = "ble-scanner-missing";
     return;
   }
+  var stop = BLE.Scanner.stop || BLE.Scanner.Stop;
+  if (stop) {
+    stop.call(BLE.Scanner);
+  }
   BLE.Scanner.subscribe(function(event, result) {
     onScanEvent(event, result);
   });
@@ -486,16 +491,18 @@ function startDiscoveryScan() {
   D.sa = Date.now();
   D.so = null;
   D.lr = "scan-running";
-  var started = startScanner({
-    duration_ms: BLE.Scanner.INFINITE_SCAN,
-    active: false,
-    interval_ms: 320,
-    window_ms: 160,
-    rssi_thr: -100
+  Timer.set(1000, false, function() {
+    var started = startScanner({
+      duration_ms: BLE.Scanner.INFINITE_SCAN,
+      active: false,
+      interval_ms: 320,
+      window_ms: 160,
+      rssi_thr: -100
+    });
+    if (started === null) {
+      D.lr = "scan-start-unconfirmed";
+    }
   });
-  if (started === null) {
-    D.lr = "scan-start-unconfirmed";
-  }
   Timer.set(30000, false, function() {
     stopDiscoveryScan("scan-complete");
   });

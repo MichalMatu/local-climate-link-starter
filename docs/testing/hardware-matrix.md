@@ -68,6 +68,13 @@ TP357_MAC=<tp357-runtime-mac> \
 pnpm hardware:shelly:matrix
 ```
 
+Use optional filters while isolating firmware or sensor issues:
+
+```bash
+SENSOR_FILTER=xiaomi|tp357|all
+VPD_OPTIONS=off|on|both
+```
+
 The matrix runner tests:
 
 ```text
@@ -91,24 +98,31 @@ runtime diagnostics array. User-facing labels are mapped in the app UI.
 
 ## Latest observed real hardware results
 
-Current conclusion: MVP `1.0.0` is ready for user hardware tests on the
-documented Shelly Plug S Gen3 + Xiaomi/PVVX BTHome v2 or TP357 path. Do not
-generalize these results to other plugs, firmware families, or random BLE
-sensors.
+Current conclusion: deterministic script generation and real relay decisions
+are validated, but the current Shelly Plug S Gen3 `1.7.5` hardware path is
+blocked until Shelly-side BLE again sees the documented Xiaomi/PVVX BTHome v2
+or TP357 advertisements. Do not generalize successful rows to other plugs,
+firmware families, or random BLE sensors.
 
-| Test                         | Expected                   | Result | Date       | Firmware       | Notes                                                                                                                                                  |
-| ---------------------------- | -------------------------- | ------ | ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Shelly manual IP check       | RPC responds               | ✅     | 2026-06-29 | unknown        | Shelly Plug S Gen3 reachable at `http://192.168.0.20/` during local network tests                                                                      |
-| Xiaomi Shelly-side BLE scan  | Shelly sees BTHome sensor  | ✅     | 2026-06-29 | unknown        | Temporary BLE discovery script saw `A4:C1:38:4F:24:CD` with RSSI around `-46 dBm`                                                                      |
-| BLE discovery cleanup safety | relay OFF after scan/close | ✅     | 2026-06-29 | unknown        | Discovery flow stops the scanner script and keeps relay OFF; firmware still unrecorded                                                                 |
-| ON/OFF and AUTO/MANUAL       | final relay OFF            | ✅     | 2026-06-29 | unknown        | RPC test: MANUAL stopped script `1`; AUTO restarted it; final `Switch.Set` left OFF                                                                    |
-| TP357 Shelly-side BLE scan   | Shelly sees TP357 sensor   | ✅     | 2026-06-29 | 1.2.3          | `F7:5F:8D:0F:76:20`, about `30.2°C`, `54%`, `32%`, RSSI around `-72 dBm`; relay OFF                                                                    |
-| TP357 minimal runtime        | script stays running       | ✅     | 2026-06-29 | 1.2.3          | `tp357-minimal`, 3603 bytes, `mem_peak` 3598, `/diag` 200, relay OFF                                                                                   |
-| Full real runtime matrix     | 16/16 combinations pass    | ✅     | 2026-06-29 | 1.2.3-matter22 | Xiaomi + TP357, heating/cooling/humidifying/dehumidifying, VPD off/on; each case saw real BLE, relay ON, relay OFF; final script stopped and relay OFF |
-| Full real runtime matrix     | 16/16 combinations pass    | ✅     | 2026-06-30 | 1.2.3-matter22 | Xiaomi + TP357, compact `/diag`, heating/cooling/humidifying/dehumidifying, VPD off/on; final script stopped and relay OFF                             |
-| Read-only Shelly clock diag  | `/diag` includes time      | ✅     | 2026-06-30 | 1.2.3-matter22 | Smoke install returned `y.t`, `y.u`, `y.p` from `sys`; final relay OFF                                                                                 |
-| Throttled script install     | script install still works | ✅     | 2026-06-30 | 1.2.3-matter22 | Smoke install with throttled `Script.*` RPC returned `/diag`, saw Xiaomi BLE, and final relay OFF                                                      |
-| Current MVP hardware audit   | full flow pass             | ✅     | 2026-06-30 | 1.2.3-matter22 | Status, Shelly-side BLE scan, runtime upload, safe relay test, `/diag`, RPC reboot, boot OFF, script auto-start, BLE retry after boot, final relay OFF |
+| Test                           | Expected                   | Result | Date       | Firmware       | Notes                                                                                                                                                                                                           |
+| ------------------------------ | -------------------------- | ------ | ---------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shelly manual IP check         | RPC responds               | ✅     | 2026-06-29 | unknown        | Shelly Plug S Gen3 reachable at `http://192.168.0.20/` during local network tests                                                                                                                               |
+| Xiaomi Shelly-side BLE scan    | Shelly sees BTHome sensor  | ✅     | 2026-06-29 | unknown        | Temporary BLE discovery script saw `A4:C1:38:4F:24:CD` with RSSI around `-46 dBm`                                                                                                                               |
+| BLE discovery cleanup safety   | relay OFF after scan/close | ✅     | 2026-06-29 | unknown        | Discovery flow stops the scanner script and keeps relay OFF; firmware still unrecorded                                                                                                                          |
+| ON/OFF and AUTO/MANUAL         | final relay OFF            | ✅     | 2026-06-29 | unknown        | RPC test: MANUAL stopped script `1`; AUTO restarted it; final `Switch.Set` left OFF                                                                                                                             |
+| TP357 Shelly-side BLE scan     | Shelly sees TP357 sensor   | ✅     | 2026-06-29 | 1.2.3          | `F7:5F:8D:0F:76:20`, about `30.2°C`, `54%`, `32%`, RSSI around `-72 dBm`; relay OFF                                                                                                                             |
+| TP357 minimal runtime          | script stays running       | ✅     | 2026-06-29 | 1.2.3          | `tp357-minimal`, 3603 bytes, `mem_peak` 3598, `/diag` 200, relay OFF                                                                                                                                            |
+| Full real runtime matrix       | 16/16 combinations pass    | ✅     | 2026-06-29 | 1.2.3-matter22 | Xiaomi + TP357, heating/cooling/humidifying/dehumidifying, VPD off/on; each case saw real BLE, relay ON, relay OFF; final script stopped and relay OFF                                                          |
+| Full real runtime matrix       | 16/16 combinations pass    | ✅     | 2026-06-30 | 1.2.3-matter22 | Xiaomi + TP357, compact `/diag`, heating/cooling/humidifying/dehumidifying, VPD off/on; final script stopped and relay OFF                                                                                      |
+| Read-only Shelly clock diag    | `/diag` includes time      | ✅     | 2026-06-30 | 1.2.3-matter22 | Smoke install returned `y.t`, `y.u`, `y.p` from `sys`; final relay OFF                                                                                                                                          |
+| Throttled script install       | script install still works | ✅     | 2026-06-30 | 1.2.3-matter22 | Smoke install with throttled `Script.*` RPC returned `/diag`, saw Xiaomi BLE, and final relay OFF                                                                                                               |
+| Current MVP hardware audit     | full flow pass             | ✅     | 2026-06-30 | 1.2.3-matter22 | Status, Shelly-side BLE scan, runtime upload, safe relay test, `/diag`, RPC reboot, boot OFF, script auto-start, BLE retry after boot, final relay OFF                                                          |
+| Real BLE runtime matrix        | stable BLE for every case  | ⚠️     | 2026-06-30 | 1.7.5          | Runner updated for compact `/diag`; blocked by unstable sensor advertisements: Xiaomi appeared only in raw scan at about `-96 dBm`, TP357 was not seen; final script stopped and relay OFF                      |
+| Generated runtime relay matrix | 16/16 combinations pass    | ✅     | 2026-06-30 | 1.7.5          | Synthetic `Script.Eval` measurements on real Shelly; Xiaomi + TP357, heating/cooling/humidifying/dehumidifying, VPD off/on; every generated runtime installed, drove relay ON, drove relay OFF, final relay OFF |
+| Xiaomi real BLE runtime        | heating VPD off works      | ✅     | 2026-06-30 | 1.7.5          | After scanner cleanup and delayed runtime scan start, Xiaomi non-VPD heating saw real BTHome data, drove relay ON, accepted threshold update, drove relay OFF, final relay OFF                                  |
+| Xiaomi real BLE VPD runtime    | receives BLE measurement   | ❌     | 2026-06-30 | 1.7.5          | Standalone first-after-reboot VPD runtime installed and stayed safe OFF, but `/diag` never received a BLE measurement; synthetic VPD relay logic still passed                                                   |
+| TP357 real BLE runtime         | VPD off matrix starts      | ❌     | 2026-06-30 | 1.7.5          | `SENSOR_FILTER=tp357 VPD_OPTIONS=off`; first runtime was 3637 bytes but `/diag` stayed empty with reason `st`; final script stopped and relay OFF                                                               |
+| Raw BLE target probe           | Shelly sees both sensors   | ❌     | 2026-06-30 | 1.7.5          | After sensors were moved within about 2 m, minimal raw probe received 67 BLE advertisements in 60 s, but none matched TP357 MAC/payload, Xiaomi MAC, BTHome `d2fc`, or TP357 manufacturer `c23d`; relay OFF     |
 
 ## Current MVP hardware audit — 2026-06-30
 
@@ -234,11 +248,12 @@ The hardware helper parses compact `/diag` fields from `{ v, z, s, q, y, p, g }`
 
 ## Firmware matrix
 
-| Device             | Firmware version | Tested date | Result | Notes                                                 |
-| ------------------ | ---------------- | ----------- | ------ | ----------------------------------------------------- |
-| Shelly Plug S Gen3 | 1.2.3-matter22   | 2026-06-29  | ✅     | BLE discovery and scripts work; Matter flag present   |
-| Xiaomi PVVX        |                  |             | ☐      | Record BTHome v2, encrypted off, advertising interval |
-| TP357              | stock            |             | ☐      | Record raw payload sample ID                          |
+| Device             | Firmware version | Tested date | Result | Notes                                                                                                                                                  |
+| ------------------ | ---------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Shelly Plug S Gen3 | 1.2.3-matter22   | 2026-06-29  | ✅     | BLE discovery and scripts work; Matter flag present                                                                                                    |
+| Shelly Plug S Gen3 | 1.7.5            | 2026-06-30  | ⚠️     | Matter OFF, MQTT OFF, scripts work; generated runtime relay matrix passed 16/16, but real BLE matrix was blocked by weak/missing sensor advertisements |
+| Xiaomi PVVX        |                  |             | ☐      | Record BTHome v2, encrypted off, advertising interval                                                                                                  |
+| TP357              | stock            |             | ☐      | Record raw payload sample ID                                                                                                                           |
 
 ## Support rule
 

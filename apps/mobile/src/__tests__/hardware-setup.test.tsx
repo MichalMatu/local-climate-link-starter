@@ -1503,9 +1503,13 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
 
-    const relayDialog = await screen.findByRole('dialog', {
-      name: 'Przetestuj przekaźnik przed użyciem'
-    });
+    const relayDialog = await screen.findByRole(
+      'dialog',
+      {
+        name: 'Przetestuj przekaźnik przed użyciem'
+      },
+      { timeout: 3000 }
+    );
     expect(
       within(relayDialog).getByText('Dla grzania domyślny tryb bezpieczeństwa to OFF.')
     ).toBeInTheDocument();
@@ -1629,24 +1633,27 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
 
-    await waitFor(() => {
-      const rpcBodies = vi
-        .mocked(fetch)
-        .mock.calls.map((call) => requestBody(call[1]))
-        .filter((body) => body.method);
-      const discoveryDeleteIndex = rpcBodies.findIndex(
-        (body) =>
-          body.method === 'Script.Delete' &&
-          (body.params as { id?: number } | undefined)?.id === 8
-      );
-      const putCodeIndex = rpcBodies.findIndex(
-        (body) => body.method === 'Script.PutCode'
-      );
+    await waitFor(
+      () => {
+        const rpcBodies = vi
+          .mocked(fetch)
+          .mock.calls.map((call) => requestBody(call[1]))
+          .filter((body) => body.method);
+        const discoveryDeleteIndex = rpcBodies.findIndex(
+          (body) =>
+            body.method === 'Script.Delete' &&
+            (body.params as { id?: number } | undefined)?.id === 8
+        );
+        const putCodeIndex = rpcBodies.findIndex(
+          (body) => body.method === 'Script.PutCode'
+        );
 
-      expect(discoveryDeleteIndex).toBeGreaterThanOrEqual(0);
-      expect(putCodeIndex).toBeGreaterThanOrEqual(0);
-      expect(discoveryDeleteIndex).toBeLessThan(putCodeIndex);
-    });
+        expect(discoveryDeleteIndex).toBeGreaterThanOrEqual(0);
+        expect(putCodeIndex).toBeGreaterThanOrEqual(0);
+        expect(discoveryDeleteIndex).toBeLessThan(putCodeIndex);
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('opens a Shelly script management modal for fetch and delete', async () => {
@@ -1704,9 +1711,13 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
-    const relayDialog = await screen.findByRole('dialog', {
-      name: 'Przetestuj przekaźnik przed użyciem'
-    });
+    const relayDialog = await screen.findByRole(
+      'dialog',
+      {
+        name: 'Przetestuj przekaźnik przed użyciem'
+      },
+      { timeout: 3000 }
+    );
     fireEvent.click(within(relayDialog).getByRole('button', { name: 'Przetestuj' }));
 
     expect(await screen.findByText('Gotowe — działa lokalnie')).toBeInTheDocument();
@@ -1787,18 +1798,29 @@ describe('HardwareSetupScreen', () => {
         body.method === 'Script.Delete' &&
         (body.params as { id?: number } | undefined)?.id === 1
     );
-    const stopIndex = rpcBodies.findIndex(
-      (body, index) =>
-        index < deleteIndex &&
-        body.method === 'Script.Stop' &&
+    let stopIndex = -1;
+    for (let index = deleteIndex - 1; index >= 0; index -= 1) {
+      const body = rpcBodies[index];
+      if (
+        body?.method === 'Script.Stop' &&
         (body.params as { id?: number } | undefined)?.id === 1
-    );
-    const offIndex = rpcBodies.findIndex(
-      (body, index) =>
-        index < stopIndex &&
-        body.method === 'Switch.Set' &&
+      ) {
+        stopIndex = index;
+        break;
+      }
+    }
+
+    let offIndex = -1;
+    for (let index = stopIndex - 1; index >= 0; index -= 1) {
+      const body = rpcBodies[index];
+      if (
+        body?.method === 'Switch.Set' &&
         (body.params as { on?: boolean } | undefined)?.on === false
-    );
+      ) {
+        offIndex = index;
+        break;
+      }
+    }
 
     expect(offIndex).toBeGreaterThanOrEqual(0);
     expect(stopIndex).toBeGreaterThan(offIndex);
