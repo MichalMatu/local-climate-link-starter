@@ -1050,6 +1050,10 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
                 value={settingsShelly.baseUrl}
               />
               <DiagnosticRow
+                label="Firmware"
+                value={settingsStatus?.firmwareId ?? 'brak danych'}
+              />
+              <DiagnosticRow
                 label="Przekaźnik"
                 value={
                   settingsStatus ? (settingsStatus.relayOn ? 'ON' : 'OFF') : 'brak danych'

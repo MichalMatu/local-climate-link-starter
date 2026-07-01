@@ -57,41 +57,53 @@ const mockShellyRpc = async (page: Page) => {
       id?: number | string;
       method?: string;
     };
-    const result =
-      requestBody.method === 'Shelly.GetStatus'
-        ? {
-            matter: { enabled: false },
-            script: { enable: true },
-            ble: { enable: true },
-            'switch:0': {
-              id: 0,
-              output: false,
-              apower: 0,
-              voltage: 230.1,
-              current: 0,
-              aenergy: { total: 1250 },
-              temperature: { tC: 32.4 }
-            },
-            wifi: { rssi: -55 },
-            sys: {
-              time: '14:00',
-              unixtime: 1782820000,
-              uptime: 3600,
-              last_sync_ts: 1782819900
-            }
+    let result: unknown = {};
+    switch (requestBody.method) {
+      case 'Shelly.GetDeviceInfo':
+        result = {
+          model: 'S3PL-00112EU',
+          gen: 3,
+          fw_id: '20260311-095902/1.7.5-g9979d16'
+        };
+        break;
+      case 'Shelly.GetStatus':
+        result = {
+          matter: { enabled: false },
+          script: { enable: true },
+          ble: { enable: true },
+          'switch:0': {
+            id: 0,
+            output: false,
+            apower: 0,
+            voltage: 230.1,
+            current: 0,
+            aenergy: { total: 1250 },
+            temperature: { tC: 32.4 }
+          },
+          wifi: { rssi: -55 },
+          sys: {
+            time: '14:00',
+            unixtime: 1782820000,
+            uptime: 3600,
+            last_sync_ts: 1782819900
           }
-        : requestBody.method === 'Script.List'
-          ? {
-              scripts: [
-                {
-                  id: 1,
-                  name: 'Local Climate Link Thermostat',
-                  enable: true,
-                  running: true
-                }
-              ]
+        };
+        break;
+      case 'Script.List':
+        result = {
+          scripts: [
+            {
+              id: 1,
+              name: 'Local Climate Link Thermostat',
+              enable: true,
+              running: true
             }
-          : {};
+          ]
+        };
+        break;
+      default:
+        result = {};
+    }
 
     await route.fulfill({
       status: 200,
@@ -198,6 +210,8 @@ const expectShellyCardActionsLayout = async (page: Page) => {
   await expect(settingsDialog).toBeVisible();
   await expect(settingsDialog.getByText('Adres IP')).toBeVisible();
   await expect(settingsDialog.getByText('http://192.168.0.20/')).toBeVisible();
+  await expect(settingsDialog.getByText('Firmware')).toBeVisible();
+  await expect(settingsDialog.getByText('20260311-095902/1.7.5-g9979d16')).toBeVisible();
   await expect(settingsDialog.getByRole('button', { name: 'Skanuj BLE' })).toBeVisible();
   await expect(settingsDialog.getByRole('button', { name: 'Usuń' })).toBeVisible();
   await settingsDialog.getByRole('button', { name: 'Zamknij' }).click();

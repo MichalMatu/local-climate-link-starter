@@ -359,7 +359,11 @@ describe('HardwareSetupScreen', () => {
 
         switch (body.method) {
           case 'Shelly.GetDeviceInfo':
-            return rpcResult({ model: 'S3PL-00112EU', gen: 3 });
+            return rpcResult({
+              model: 'S3PL-00112EU',
+              gen: 3,
+              fw_id: '20260311-095902/1.7.5-g9979d16'
+            });
           case 'Shelly.GetStatus':
             return rpcResult({
               ble: {},
@@ -866,6 +870,10 @@ describe('HardwareSetupScreen', () => {
     });
     expect(within(settingsDialog).getByText('Adres IP')).toBeInTheDocument();
     expect(within(settingsDialog).getByText('http://192.168.0.20/')).toBeInTheDocument();
+    expect(within(settingsDialog).getByText('Firmware')).toBeInTheDocument();
+    expect(
+      within(settingsDialog).getByText('20260311-095902/1.7.5-g9979d16')
+    ).toBeInTheDocument();
     expect(
       within(settingsDialog).getByRole('button', { name: 'Skanuj BLE' })
     ).toHaveAttribute('title', 'Skanuj termometry BLE przez to gniazdko');

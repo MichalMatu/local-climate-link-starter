@@ -559,6 +559,7 @@ export const useHardwareSetupFlow = () => {
           : 'manual'
         : 'missing',
       automationScriptId: automationScript?.id ?? null,
+      firmwareId: status.deviceInfo.firmwareId ?? null,
       telemetry: status.status.telemetry,
       clock: status.status.clock
     };
