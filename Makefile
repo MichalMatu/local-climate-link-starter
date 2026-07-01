@@ -327,7 +327,7 @@ shelly-soak-status: ## Show Shelly soak logger status and latest sample paths.
 		echo "summary: $$SOAK_SUMMARY_FILE"; \
 		echo "log: $$SOAK_LOG_FILE"; \
 		echo "error log: $$SOAK_ERROR_LOG_FILE"; \
-		if [ -n "$$SOAK_SCREEN_SESSION" ] && command -v screen >/dev/null 2>&1; then echo "screen: $$SOAK_SCREEN_SESSION"; fi; \
+		if [ -n "$$SOAK_SCREEN_SESSION" ] && command -v screen >/dev/null 2>&1 && screen -ls 2>/dev/null | grep -q "[.]$$SOAK_SCREEN_SESSION[[:space:]]"; then echo "screen: $$SOAK_SCREEN_SESSION"; fi; \
 		if [ -f "$$SOAK_OUT_FILE" ]; then echo ""; tail -n 3 "$$SOAK_OUT_FILE"; fi; \
 	else \
 		echo "No Shelly soak run file at $(SOAK_RUN_FILE)"; \
