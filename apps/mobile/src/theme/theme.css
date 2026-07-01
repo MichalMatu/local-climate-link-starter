@@ -442,6 +442,26 @@ select {
   padding: 0 var(--lcl-spacing-md);
 }
 
+.settings-modal-layout {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lcl-spacing-md);
+  min-height: 100%;
+}
+
+.settings-action-stack {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  margin-top: auto;
+  padding-top: var(--lcl-spacing-md);
+}
+
+.settings-action-stack .secondary-action {
+  width: 100%;
+}
+
 .setup-top-nav {
   background: var(--lcl-color-surface);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);

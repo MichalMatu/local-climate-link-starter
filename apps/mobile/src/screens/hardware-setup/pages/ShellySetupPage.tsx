@@ -78,6 +78,21 @@ const formatShellyClock = (clock: ShellyClockStatus | undefined): string =>
 const formatClockSyncState = (clock: ShellyClockStatus | undefined): string =>
   clock ? (clock.timeSynced ? 'zsynchronizowany' : 'brak synchronizacji') : 'brak danych';
 
+const formatAutomationMode = (
+  mode: NonNullable<ShellyControlCardState['status']>['automationMode'] | undefined
+): string => {
+  switch (mode) {
+    case 'auto':
+      return 'AUTO';
+    case 'manual':
+      return 'MANUAL';
+    case 'missing':
+      return 'brak reguły';
+    default:
+      return 'brak danych';
+  }
+};
+
 const formatBleCandidateProfile = (
   profileId: BleDiscoveryCandidate['profileId']
 ): string => (profileId === 'tp357_custom_v1' ? 'TP357' : 'Xiaomi/PVVX BTHome v2');
@@ -497,6 +512,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
     ? shellyControlStates[settingsShelly.id]
     : undefined;
   const isSettingsControlBusy = settingsControlState?.pendingAction != null;
+  const settingsStatus = settingsControlState?.status;
   const clockStatus = clockControlState?.status?.clock;
   const isClockRefreshPending = clockControlState?.pendingAction === 'status';
   const shouldShowBleRestart = Boolean(
@@ -1022,69 +1038,103 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
         open={settingsShelly !== null}
         size="diagnostic"
         title="Ustawienia gniazdka"
-        actions={
-          <>
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={settingsShelly === null || isAnyShellyCheckPending}
-              title="Sprawdź ponownie stan i kompatybilność gniazdka"
-              onClick={() => {
-                if (settingsShelly) {
-                  closeSettingsModal();
-                  recheckSavedShelly(settingsShelly, { returnToSettings: true });
-                }
-              }}
-            >
-              Sprawdź
-            </button>
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={
-                settingsShelly === null ||
-                isAnyShellyCheckPending ||
-                isBleDiscoveryBusy ||
-                isSettingsControlBusy
-              }
-              title="Skanuj termometry BLE przez to gniazdko"
-              onClick={() => {
-                if (settingsShelly) {
-                  closeSettingsModal();
-                  openBleScanModal(settingsShelly);
-                }
-              }}
-            >
-              <ActionIcon name="bluetooth" />
-              Skanuj BLE
-            </button>
-            <button
-              className="secondary-action secondary-action--danger"
-              type="button"
-              disabled={settingsShelly === null}
-              title="Usuń gniazdko tylko z aplikacji"
-              onClick={() => {
-                if (settingsShelly) {
-                  closeSettingsModal();
-                  removeSavedShelly(settingsShelly);
-                }
-              }}
-            >
-              <ActionIcon name="trash" />
-              Usuń
-            </button>
-          </>
-        }
         onClose={closeSettingsModal}
       >
         {settingsShelly && (
-          <div className="status-stack">
-            <DiagnosticRow
-              href={settingsShelly.baseUrl}
-              label="Adres IP"
-              linkLabel={`Otwórz panel Shelly: ${settingsShelly.baseUrl}`}
-              value={settingsShelly.baseUrl}
-            />
+          <div className="settings-modal-layout">
+            <div className="status-stack">
+              <DiagnosticRow
+                href={settingsShelly.baseUrl}
+                label="Adres IP"
+                linkLabel={`Otwórz panel Shelly: ${settingsShelly.baseUrl}`}
+                value={settingsShelly.baseUrl}
+              />
+              <DiagnosticRow
+                label="Przekaźnik"
+                value={
+                  settingsStatus ? (settingsStatus.relayOn ? 'ON' : 'OFF') : 'brak danych'
+                }
+                tone={settingsStatus?.relayOn ? 'warning' : 'normal'}
+              />
+              <DiagnosticRow
+                label="Tryb"
+                value={formatAutomationMode(settingsStatus?.automationMode)}
+                tone={settingsStatus?.automationMode === 'missing' ? 'warning' : 'normal'}
+              />
+              <DiagnosticRow
+                label="Moc"
+                value={formatPlugPower(settingsStatus?.telemetry.powerW)}
+              />
+              <DiagnosticRow
+                label="Napięcie"
+                value={formatPlugVoltage(settingsStatus?.telemetry.voltageV)}
+              />
+              <DiagnosticRow
+                label="Energia"
+                value={formatPlugEnergy(settingsStatus?.telemetry.energyWh)}
+              />
+              <DiagnosticRow
+                label="Wi-Fi RSSI"
+                value={
+                  settingsStatus?.telemetry.wifiRssiDbm === undefined
+                    ? 'brak'
+                    : `${settingsStatus.telemetry.wifiRssiDbm} dBm`
+                }
+              />
+              <DiagnosticRow
+                label="Czas Shelly"
+                value={formatShellyClock(settingsStatus?.clock)}
+              />
+              <DiagnosticRow
+                label="Uptime"
+                value={formatClockUptime(settingsStatus?.clock.uptimeSec)}
+              />
+            </div>
+            <div className="settings-action-stack" aria-label="Akcje gniazdka">
+              <button
+                className="secondary-action"
+                type="button"
+                disabled={settingsShelly === null || isAnyShellyCheckPending}
+                title="Sprawdź ponownie stan i kompatybilność gniazdka"
+                onClick={() => {
+                  closeSettingsModal();
+                  recheckSavedShelly(settingsShelly, { returnToSettings: true });
+                }}
+              >
+                Sprawdź
+              </button>
+              <button
+                className="secondary-action"
+                type="button"
+                disabled={
+                  settingsShelly === null ||
+                  isAnyShellyCheckPending ||
+                  isBleDiscoveryBusy ||
+                  isSettingsControlBusy
+                }
+                title="Skanuj termometry BLE przez to gniazdko"
+                onClick={() => {
+                  closeSettingsModal();
+                  openBleScanModal(settingsShelly);
+                }}
+              >
+                <ActionIcon name="bluetooth" />
+                Skanuj BLE
+              </button>
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={settingsShelly === null}
+                title="Usuń gniazdko tylko z aplikacji"
+                onClick={() => {
+                  closeSettingsModal();
+                  removeSavedShelly(settingsShelly);
+                }}
+              >
+                <ActionIcon name="trash" />
+                Usuń
+              </button>
+            </div>
           </div>
         )}
       </Modal>
