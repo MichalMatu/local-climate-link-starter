@@ -152,6 +152,10 @@ select {
   justify-content: space-between;
 }
 
+.add-device-action-row {
+  justify-content: flex-end;
+}
+
 .rule-action-row {
   gap: var(--lcl-spacing-md);
   justify-content: flex-end;
@@ -488,6 +492,22 @@ select {
   padding: var(--lcl-spacing-md);
 }
 
+.saved-list__card-header {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+}
+
+.saved-list__name-field {
+  min-width: 0;
+}
+
+.saved-list__name-input-row {
+  align-items: stretch;
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: minmax(0, 1fr) var(--lcl-size-control-min-height);
+}
+
 .saved-list__row {
   align-items: end;
   display: grid;
@@ -501,13 +521,7 @@ select {
 .shelly-metrics-row {
   grid-template-columns: repeat(
     auto-fit,
-    minmax(
-      min(
-        100%,
-        calc(var(--lcl-size-saved-list-column-min) - (var(--lcl-spacing-md) * 3))
-      ),
-      1fr
-    )
+    minmax(min(100%, calc((100% - var(--lcl-spacing-md)) / 2)), 1fr)
   );
 }
 
@@ -567,10 +581,6 @@ select {
   gap: var(--lcl-spacing-xs);
 }
 
-.side-action-row {
-  margin-right: var(--lcl-spacing-xl);
-}
-
 .control-action-row {
   align-items: center;
   display: inline-flex;
@@ -583,6 +593,19 @@ select {
 
 .control-action-row .secondary-action {
   flex: 0 0 auto;
+}
+
+.shelly-control-toolbar {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  margin-left: 0;
+  width: 100%;
+}
+
+.shelly-control-toolbar .secondary-action {
+  min-width: 0;
+  width: 100%;
 }
 
 .icon-action {
@@ -601,6 +624,11 @@ select {
     border-color var(--lcl-motion-fast),
     color var(--lcl-motion-fast);
   width: var(--lcl-size-compact-control-min-height);
+}
+
+.icon-action.saved-list__settings-toggle {
+  height: var(--lcl-size-control-min-height);
+  width: var(--lcl-size-control-min-height);
 }
 
 .icon-action:hover,

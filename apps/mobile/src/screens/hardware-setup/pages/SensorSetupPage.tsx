@@ -221,7 +221,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
 
   return (
     <section className="demo-panel" aria-label="Termometry BLE">
-      <div className="action-row">
+      <div className="action-row add-device-action-row">
         <button
           className="secondary-action"
           type="button"

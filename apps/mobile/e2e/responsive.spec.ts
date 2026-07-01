@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
 
 const draft = {
   shellyNameInput: 'Shelly Plug S Gen3',
@@ -171,6 +171,35 @@ const expectRelayActionVisible = async (page: Page) => {
   await expect(relayAction).toBeVisible();
 };
 
+const requiredBox = async (locator: Locator) => {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  return box!;
+};
+
+const expectShellyCardActionsLayout = async (page: Page) => {
+  const settingsToggle = page.getByRole('button', { name: 'Ustawienia gniazdka' });
+  await expect(settingsToggle).toBeVisible();
+  await settingsToggle.click();
+  const settingsDialog = page.getByRole('dialog', { name: 'Ustawienia gniazdka' });
+  await expect(settingsDialog).toBeVisible();
+  await expect(settingsDialog.getByText('Adres IP')).toBeVisible();
+  await expect(settingsDialog.getByText('http://192.168.0.20/')).toBeVisible();
+  await expect(settingsDialog.getByRole('button', { name: 'Skanuj BLE' })).toBeVisible();
+  await expect(settingsDialog.getByRole('button', { name: 'Usuń' })).toBeVisible();
+  await settingsDialog.getByRole('button', { name: 'Zamknij' }).click();
+
+  const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+  const boxes = await Promise.all([
+    requiredBox(shellyControls.getByRole('button', { name: 'Odśwież' })),
+    requiredBox(shellyControls.getByRole('button', { name: 'MANUAL' })),
+    requiredBox(shellyControls.getByRole('button', { name: /^(ON|OFF)$/ }))
+  ]);
+  const topSpread =
+    Math.max(...boxes.map((box) => box.y)) - Math.min(...boxes.map((box) => box.y));
+  expect(topSpread).toBeLessThan(3);
+};
+
 const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
   const metrics = await page.getByLabel(label).evaluate((element) => {
     const modal = element.closest('.lcl-modal');
@@ -227,6 +256,7 @@ for (const viewport of viewports) {
     await expectRelayActionVisible(page);
     await expect(shellyControls.getByRole('button', { name: 'MANUAL' })).toBeVisible();
     await expect(shellyControls.getByRole('button', { name: 'Odśwież' })).toBeVisible();
+    await expectShellyCardActionsLayout(page);
     await expectNoHorizontalOverflow(page);
 
     await page.getByRole('button', { name: 'Dodaj gniazdko' }).click();

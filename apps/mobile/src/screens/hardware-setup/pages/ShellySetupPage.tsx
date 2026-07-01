@@ -204,21 +204,17 @@ const ShellyAddForm = ({ flow, showValidationErrors }: ShellyAddFormProps) => {
 type SavedShellyDeviceCardProps = {
   device: ShellyDraftDevice;
   controlState: ShellyControlCardState | undefined;
-  isAnyShellyCheckPending: boolean;
-  isBleDiscoveryBusy: boolean;
   onRename: (deviceId: string, name: string) => void;
-  onRecheck: (device: ShellyDraftDevice) => void;
   onRelayOn: (device: ShellyDraftDevice) => void;
   onRelayOff: (device: ShellyDraftDevice) => void;
   onAutomationAuto: (device: ShellyDraftDevice) => void;
   onAutomationManual: (device: ShellyDraftDevice) => void;
   onRefreshControl: (device: ShellyDraftDevice) => void;
   onClockOpen: (device: ShellyDraftDevice) => void;
-  onBleScan: (device: ShellyDraftDevice) => void;
-  onRemove: (device: ShellyDraftDevice) => void;
+  onSettingsOpen: (device: ShellyDraftDevice) => void;
 };
 
-type ActionIconName = 'refresh' | 'bluetooth' | 'trash';
+type ActionIconName = 'refresh' | 'bluetooth' | 'trash' | 'settings';
 
 const ActionIcon = ({ name }: { name: ActionIconName }) => {
   const content = (() => {
@@ -242,6 +238,13 @@ const ActionIcon = ({ name }: { name: ActionIconName }) => {
             <path d="M13 11.5v5" />
           </>
         );
+      case 'settings':
+        return (
+          <>
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+            <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6" />
+          </>
+        );
     }
   })();
 
@@ -260,18 +263,14 @@ const ActionIcon = ({ name }: { name: ActionIconName }) => {
 const SavedShellyDeviceCard = ({
   device,
   controlState,
-  isAnyShellyCheckPending,
-  isBleDiscoveryBusy,
   onRename,
-  onRecheck,
   onRelayOn,
   onRelayOff,
   onAutomationAuto,
   onAutomationManual,
   onRefreshControl,
   onClockOpen,
-  onBleScan,
-  onRemove
+  onSettingsOpen
 }: SavedShellyDeviceCardProps) => {
   const controlStatus = controlState?.status ?? null;
   const pendingAction = controlState?.pendingAction ?? null;
@@ -309,29 +308,30 @@ const SavedShellyDeviceCard = ({
           : 'secondary-action automation-toggle automation-toggle--unknown';
   const telemetry = controlStatus?.telemetry;
   const clock = controlStatus?.clock;
+  const nameInputId = useId();
 
   return (
     <article className="saved-list__item" aria-busy={isControlBusy || undefined}>
-      <div className="saved-list__row">
-        <label className="field">
-          Nazwa
-          <input
-            type="text"
-            value={device.name}
-            onChange={(event) => onRename(device.id, event.currentTarget.value)}
-          />
-        </label>
-        <div className="saved-list__field">
-          <span>Adres</span>
-          <button
-            className="saved-list__field-button"
-            type="button"
-            disabled={isAnyShellyCheckPending}
-            title="Sprawdź ponownie stan i kompatybilność gniazdka"
-            onClick={() => onRecheck(device)}
-          >
-            {device.baseUrl}
-          </button>
+      <div className="saved-list__card-header">
+        <div className="field saved-list__name-field">
+          <label htmlFor={nameInputId}>Nazwa</label>
+          <div className="saved-list__name-input-row">
+            <input
+              id={nameInputId}
+              type="text"
+              value={device.name}
+              onChange={(event) => onRename(device.id, event.currentTarget.value)}
+            />
+            <button
+              className="icon-action saved-list__settings-toggle"
+              type="button"
+              aria-label="Ustawienia gniazdka"
+              title="Ustawienia gniazdka"
+              onClick={() => onSettingsOpen(device)}
+            >
+              <ActionIcon name="settings" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -364,70 +364,44 @@ const SavedShellyDeviceCard = ({
         </div>
       </div>
 
-      <div className="action-row" aria-label={`Sterowanie ${device.name}`}>
-        <div
-          className="icon-action-row side-action-row"
-          aria-label={`Akcje pomocnicze ${device.name}`}
+      <div
+        className="control-action-row shelly-control-toolbar"
+        aria-label={`Sterowanie ${device.name}`}
+      >
+        <button
+          className="icon-action"
+          type="button"
+          aria-label="Odśwież"
+          disabled={isControlBusy}
+          title="Odśwież stan gniazdka"
+          onClick={() => onRefreshControl(device)}
         >
-          <button
-            className="icon-action"
-            type="button"
-            aria-label="Skanuj BLE"
-            disabled={isAnyShellyCheckPending || isBleDiscoveryBusy || isControlBusy}
-            title="Skanuj termometry BLE przez to gniazdko"
-            onClick={() => onBleScan(device)}
-          >
-            <ActionIcon name="bluetooth" />
-          </button>
-          <button
-            className="icon-action icon-action--danger"
-            type="button"
-            aria-label="Usuń gniazdko"
-            title="Usuń gniazdko tylko z aplikacji"
-            onClick={() => onRemove(device)}
-          >
-            <ActionIcon name="trash" />
-          </button>
-        </div>
-        <div
-          className="control-action-row"
-          aria-label={`Przekaźnik i automatyzacja ${device.name}`}
+          <ActionIcon name="refresh" />
+        </button>
+        <button
+          className={automationToggleClass}
+          type="button"
+          disabled={isControlBusy}
+          title={automationToggleTitle}
+          onClick={() =>
+            automationMode === 'auto'
+              ? onAutomationManual(device)
+              : onAutomationAuto(device)
+          }
         >
-          <button
-            className="icon-action"
-            type="button"
-            aria-label="Odśwież"
-            disabled={isControlBusy}
-            title="Odśwież stan gniazdka"
-            onClick={() => onRefreshControl(device)}
-          >
-            <ActionIcon name="refresh" />
-          </button>
-          <button
-            className={relayToggleClass}
-            type="button"
-            disabled={isControlBusy}
-            title={relayToggleTitle}
-            onClick={() =>
-              controlStatus?.relayOn ? onRelayOff(device) : onRelayOn(device)
-            }
-          >
-            {relayToggleLabel}
-          </button>
-          <button
-            className={automationToggleClass}
-            type="button"
-            disabled={isControlBusy}
-            title={automationToggleTitle}
-            onClick={() =>
-              automationMode === 'auto'
-                ? onAutomationManual(device)
-                : onAutomationAuto(device)
-            }
-          >
-            {automationToggleLabel}
-          </button>
-        </div>
+          {automationToggleLabel}
+        </button>
+        <button
+          className={relayToggleClass}
+          type="button"
+          disabled={isControlBusy}
+          title={relayToggleTitle}
+          onClick={() =>
+            controlStatus?.relayOn ? onRelayOff(device) : onRelayOn(device)
+          }
+        >
+          {relayToggleLabel}
+        </button>
       </div>
     </article>
   );
@@ -445,6 +419,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [isBleScanModalOpen, setIsBleScanModalOpen] = useState(false);
   const [bleScanShelly, setBleScanShelly] = useState<ShellyDraftDevice | null>(null);
+  const [settingsShellyId, setSettingsShellyId] = useState<string | null>(null);
   const [clockShellyId, setClockShellyId] = useState<string | null>(null);
   const [shellyDevicePendingRemoval, setShellyDevicePendingRemoval] =
     useState<ShellyDraftDevice | null>(null);
@@ -452,6 +427,9 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
   const [statusModalAddress, setStatusModalAddress] = useState<string | null>(null);
   const [statusModalSource, setStatusModalSource] =
     useState<ShellyStatusModalSource>('add');
+  const [statusModalReturnSettingsId, setStatusModalReturnSettingsId] = useState<
+    string | null
+  >(null);
   const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
   const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
   const scanRangeErrorId = useId();
@@ -509,7 +487,15 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
     clockShellyId === null
       ? null
       : (shellyDevices.find((device) => device.id === clockShellyId) ?? null);
+  const settingsShelly =
+    settingsShellyId === null
+      ? null
+      : (shellyDevices.find((device) => device.id === settingsShellyId) ?? null);
   const clockControlState = clockShelly ? shellyControlStates[clockShelly.id] : undefined;
+  const settingsControlState = settingsShelly
+    ? shellyControlStates[settingsShelly.id]
+    : undefined;
+  const isSettingsControlBusy = settingsControlState?.pendingAction != null;
   const clockStatus = clockControlState?.status?.clock;
   const isClockRefreshPending = clockControlState?.pendingAction === 'status';
   const shouldShowBleRestart = Boolean(
@@ -693,6 +679,15 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
     flow.checkShellyMutation.reset();
     flow.recheckShellyMutation.reset();
     setIsStatusModalOpen(false);
+    if (statusModalReturnSettingsId) {
+      const canReturnToSettings = shellyDevices.some(
+        (device) => device.id === statusModalReturnSettingsId
+      );
+      if (canReturnToSettings) {
+        setSettingsShellyId(statusModalReturnSettingsId);
+      }
+      setStatusModalReturnSettingsId(null);
+    }
   };
 
   const openAddShellyModal = () => {
@@ -779,9 +774,13 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
     pushToast('ok', 'Zapisano termometr.');
   };
 
-  const recheckSavedShelly = (device: ShellyDraftDevice) => {
+  const recheckSavedShelly = (
+    device: ShellyDraftDevice,
+    options: { returnToSettings?: boolean } = {}
+  ) => {
     setStatusModalAddress(device.baseUrl);
     setStatusModalSource('recheck');
+    setStatusModalReturnSettingsId(options.returnToSettings ? device.id : null);
     setIsStatusModalOpen(true);
     flow.checkShellyMutation.reset();
     flow.recheckShellyMutation.mutate(device, {
@@ -791,6 +790,14 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
 
   const removeSavedShelly = (device: ShellyDraftDevice) => {
     setShellyDevicePendingRemoval(device);
+  };
+
+  const openSettingsModal = (device: ShellyDraftDevice) => {
+    setSettingsShellyId(device.id);
+  };
+
+  const closeSettingsModal = () => {
+    setSettingsShellyId(null);
   };
 
   const openClockModal = (device: ShellyDraftDevice) => {
@@ -813,7 +820,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
 
   return (
     <section className="demo-panel" aria-label="Gniazdka Shelly">
-      <div className="action-row">
+      <div className="action-row add-device-action-row">
         <button
           className="secondary-action"
           type="button"
@@ -1002,6 +1009,79 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
           Gniazdko zostanie usunięte tylko z aplikacji. Skrypt zapisany w Shelly
           pozostanie bez zmian.
         </p>
+      </Modal>
+
+      <Modal
+        closeLabel="Zamknij"
+        description={settingsShelly?.name ?? ''}
+        open={settingsShelly !== null}
+        size="diagnostic"
+        title="Ustawienia gniazdka"
+        actions={
+          <>
+            <button
+              className="secondary-action"
+              type="button"
+              disabled={settingsShelly === null || isAnyShellyCheckPending}
+              title="Sprawdź ponownie stan i kompatybilność gniazdka"
+              onClick={() => {
+                if (settingsShelly) {
+                  closeSettingsModal();
+                  recheckSavedShelly(settingsShelly, { returnToSettings: true });
+                }
+              }}
+            >
+              Sprawdź
+            </button>
+            <button
+              className="secondary-action"
+              type="button"
+              disabled={
+                settingsShelly === null ||
+                isAnyShellyCheckPending ||
+                isBleDiscoveryBusy ||
+                isSettingsControlBusy
+              }
+              title="Skanuj termometry BLE przez to gniazdko"
+              onClick={() => {
+                if (settingsShelly) {
+                  closeSettingsModal();
+                  openBleScanModal(settingsShelly);
+                }
+              }}
+            >
+              <ActionIcon name="bluetooth" />
+              Skanuj BLE
+            </button>
+            <button
+              className="secondary-action secondary-action--danger"
+              type="button"
+              disabled={settingsShelly === null}
+              title="Usuń gniazdko tylko z aplikacji"
+              onClick={() => {
+                if (settingsShelly) {
+                  closeSettingsModal();
+                  removeSavedShelly(settingsShelly);
+                }
+              }}
+            >
+              <ActionIcon name="trash" />
+              Usuń
+            </button>
+          </>
+        }
+        onClose={closeSettingsModal}
+      >
+        {settingsShelly && (
+          <div className="status-stack">
+            <DiagnosticRow
+              href={settingsShelly.baseUrl}
+              label="Adres IP"
+              linkLabel={`Otwórz panel Shelly: ${settingsShelly.baseUrl}`}
+              value={settingsShelly.baseUrl}
+            />
+          </div>
+        )}
       </Modal>
 
       <Modal
@@ -1206,18 +1286,14 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
             key={device.id}
             controlState={flow.shellyControlStates[device.id]}
             device={device}
-            isAnyShellyCheckPending={isAnyShellyCheckPending}
-            isBleDiscoveryBusy={isBleDiscoveryBusy}
             onAutomationAuto={flow.setAutomationAuto}
             onAutomationManual={flow.setAutomationManual}
-            onBleScan={openBleScanModal}
             onClockOpen={openClockModal}
             onRefreshControl={flow.refreshShellyControl}
             onRelayOff={flow.turnRelayOff}
             onRelayOn={flow.turnRelayOn}
-            onRecheck={recheckSavedShelly}
-            onRemove={removeSavedShelly}
             onRename={flow.setShellyDeviceName}
+            onSettingsOpen={openSettingsModal}
           />
         ))}
       </div>
