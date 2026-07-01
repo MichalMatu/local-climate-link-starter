@@ -104,6 +104,46 @@ separate advertisements only when both values are fresh in the short runtime
 window. `minChangeMs` guards only a new ON request; threshold, stale, max-ON,
 boot, and error OFF decisions remain immediate.
 
+## Long soak logger
+
+Use the soak logger when BLE/Shelly stability matters more than a short smoke
+result:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-start
+make shelly-soak-status
+make shelly-soak-stop
+```
+
+For supervised terminal sessions, use:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-run
+```
+
+The background logger runs until `make shelly-soak-stop`. Foreground mode runs
+until Ctrl-C. In both modes, `SOAK_DURATION_MS` can stop the logger
+automatically. It writes:
+
+```text
+artifacts/hardware/shelly-soak-<timestamp>.jsonl
+artifacts/hardware/shelly-soak-<timestamp>.summary.md
+artifacts/hardware/shelly-soak-<timestamp>.log
+```
+
+Each JSONL sample includes raw endpoint responses and parsed fields for:
+
+- generated `/script/<id>/diag`,
+- `Script.GetStatus` memory/running state,
+- `Switch.GetStatus` relay and plug telemetry,
+- `Shelly.GetDeviceInfo` firmware,
+- `Shelly.GetStatus` uptime and Wi-Fi RSSI.
+
+The summary reports sample counts, endpoint failures, script-not-running
+samples, relay changes, RSSI range, memory high/low marks, decision reason
+counts, and the longest observed gap without a new full measurement or target
+BLE packet.
+
 ## Latest observed real hardware results
 
 Current conclusion: deterministic script generation and real relay decisions

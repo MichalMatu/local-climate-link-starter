@@ -85,10 +85,16 @@ Hardware helpers take local environment variables:
 SHELLY_URL=http://<shelly-ip> make shelly-status
 SHELLY_URL=http://<shelly-ip> make shelly-diag
 SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install
+SHELLY_URL=http://<shelly-ip> make shelly-soak-start
+SHELLY_URL=http://<shelly-ip> make shelly-soak-run
+make shelly-soak-status
+make shelly-soak-stop
 ESP32_URL=http://<esp32-ip> make esp32-ble-status
 ```
 
 `make start` runs Vite in the background and writes its PID/logs under `.make/`.
+`make shelly-soak-start` runs a long Shelly diagnostic logger in the background
+and writes JSONL, stdout log, and a Markdown summary under `artifacts/hardware/`.
 
 ## Hardware Smoke Helper
 
@@ -104,13 +110,41 @@ Useful overrides:
 SENSOR_PROFILE=xiaomi_lywsd03mmc_bthome_v2 | tp357_custom_v1
 RSSI_MIN=-100
 OBSERVE_MS=15000
-ON_BELOW_C=19
-OFF_ABOVE_C=20
+ON_THRESHOLD=19
+OFF_THRESHOLD=20
 ```
 
 The helper generates the Shelly script from typed config, installs it through local RPC,
 polls the generated `/script/<id>/diag` endpoint when available, and always sends a
 final `Switch.Set` OFF command.
+
+For long stability checks, start a soak logger and stop it later:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-start
+make shelly-soak-status
+make shelly-soak-stop
+```
+
+Use foreground mode when a supervising terminal/session should own the long run:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-run
+```
+
+Useful overrides:
+
+```text
+SOAK_INTERVAL_MS=5000
+SOAK_RPC_TIMEOUT_MS=4000
+SOAK_DURATION_MS=0
+SOAK_OUT_FILE=artifacts/hardware/manual-soak.jsonl
+```
+
+`SOAK_DURATION_MS=0` means the background logger runs until
+`make shelly-soak-stop`; foreground mode runs until Ctrl-C.
+Each sample stores raw endpoint responses plus parsed fields for BLE freshness,
+relay state, decision reason, RSSI, Shelly memory, and plug telemetry.
 
 ## Demo Mode
 

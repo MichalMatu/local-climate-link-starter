@@ -22,6 +22,7 @@
     "tokens:build": "pnpm --filter @lcl/design-tokens build",
     "hardware:shelly:install": "tsx scripts/hardware/shelly-install-thermostat.ts",
     "hardware:shelly:matrix": "tsx scripts/hardware/shelly-real-matrix.ts",
+    "hardware:shelly:soak": "tsx scripts/hardware/shelly-soak-logger.ts",
     "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build",
     "check:full": "pnpm check && pnpm e2e:responsive"
   },

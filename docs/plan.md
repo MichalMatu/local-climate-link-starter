@@ -72,6 +72,8 @@ Already present in the codebase:
 - diagnostics view that reads compact `/script/<id>/diag` metadata from the
   installed script, including read-only Shelly clock status, script hash/running
   state, plug telemetry, and readable decision reasons.
+- long-running Shelly soak logger for background hardware stability checks, with
+  JSONL samples and Markdown summaries under `artifacts/hardware/`.
 
 The current MVP path is ready for user hardware testing. The latest dated
 Shelly Plug S Gen3 audit and full runtime matrix are recorded in
