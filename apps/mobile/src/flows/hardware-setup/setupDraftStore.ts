@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { z } from 'zod';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 
-export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v7';
+export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v8';
 
 const rulePresetSchema = z.enum(['heating', 'cooling', 'humidifying', 'dehumidifying']);
 

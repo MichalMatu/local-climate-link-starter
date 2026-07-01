@@ -209,7 +209,11 @@ const applyRelayTarget = (
   }
 
   const lastChangeMs = state.lastChangeMs;
-  if (lastChangeMs !== undefined && nowMs - lastChangeMs < rule.minChangeMs) {
+  if (
+    requestedRelayOn &&
+    lastChangeMs !== undefined &&
+    nowMs - lastChangeMs < rule.minChangeMs
+  ) {
     return {
       requestedRelayOn: state.relayOn,
       shouldCallRelay: false,
@@ -304,15 +308,6 @@ export const evaluateThresholdDecision = (input: AutomationInput): AutomationDec
       onHits: 0,
       offHits
     };
-
-    if (offHits < rule.consecutiveHits) {
-      return {
-        requestedRelayOn: state.relayOn,
-        shouldCallRelay: false,
-        reason: 'inside-band',
-        nextState: stateWithHits
-      };
-    }
 
     return applyRelayTarget(input, false, offReason, stateWithHits);
   }

@@ -30,8 +30,8 @@ const draft = {
   offThresholdInput: '20',
   vpdAssistEnabled: false,
   vpdTargetInput: '1.2',
-  rssiMinInput: '-100',
-  staleTimeoutMinInput: '15',
+  rssiMinInput: '-85',
+  staleTimeoutMinInput: '2',
   minChangeMinInput: '2',
   maxOnHoursInput: '4'
 };
@@ -47,7 +47,7 @@ const tabs = ['Shelly', 'Termometry', 'Reguła', 'Diag'] as const;
 
 const seedDraft = async (page: Page) => {
   await page.addInitScript((value) => {
-    window.localStorage.setItem('lcl.hardwareSetupDraft.v7', JSON.stringify(value));
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(value));
   }, draft);
 };
 
@@ -375,6 +375,9 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await expect(advancedDialog).toBeVisible();
   await expect(advancedDialog).toBeFocused();
   await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).not.toBeFocused();
+  await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
+  await expect(advancedDialog.getByLabel('Brak odczytu przez min')).toHaveValue('2');
+  await expect(advancedDialog.getByLabel('Ponowne ON po min')).toHaveValue('2');
   await advancedDialog.getByLabel('VPD assist').check();
   await advancedDialog.getByLabel('Docelowe VPD kPa').fill('1.25');
   await advancedDialog.getByLabel('Minimalny RSSI dBm').fill('-80');
@@ -402,6 +405,12 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
     '"x":10800000'
+  );
+  await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
+    'Shelly.getUptimeMs'
+  );
+  await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).not.toContainText(
+    'Date.now'
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
     'function sv(t)'

@@ -19,8 +19,8 @@ export type RuleAdvancedSettingsValidation = {
 export const DEFAULT_RULE_ADVANCED_SETTINGS: RuleAdvancedSettingsInput = {
   vpdAssistEnabled: false,
   vpdTargetInput: '1.2',
-  rssiMinInput: '-100',
-  staleTimeoutMinInput: '15',
+  rssiMinInput: '-85',
+  staleTimeoutMinInput: '2',
   minChangeMinInput: '2',
   maxOnHoursInput: '4'
 };

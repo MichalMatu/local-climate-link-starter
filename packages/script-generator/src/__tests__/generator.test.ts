@@ -27,7 +27,8 @@ const readGeneratedDiagnostics = (script: string): unknown => {
               aenergy: { total: 1234 },
               temperature: { tC: 31.2 }
             }
-          : null
+          : null,
+    getUptimeMs: () => Date.now()
   };
   const ble = {
     Scanner: {
@@ -72,7 +73,8 @@ const createExecutableRuntime = (script: string) => {
       }
       callback?.({}, 0);
     },
-    getComponentStatus: () => null
+    getComponentStatus: () => null,
+    getUptimeMs: () => Date.now()
   };
   const ble = {
     Scanner: {
@@ -207,7 +209,7 @@ describe('generateShellyThermostatScript', () => {
       v: 1,
       z: configHash(config),
       s: ['A4:C1:38:4F:24:CD', 'Pokoj'],
-      q: [0, 0, 19, 21.2, 900, -80],
+      q: [0, 0, 19, 21.2, 120, -80],
       y: ['09:31', 1782667904, 12345],
       p: [false, 0, 230.1, 0, 1234, 31.2],
       g: [
@@ -258,9 +260,11 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('function ad(d)');
     expect(script).toContain('function r2(d,o,s)');
     expect(script).toContain('Shelly.call("Switch.Set"');
+    expect(script).toContain('function nw(){return Shelly.getUptimeMs();}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).toContain('interval_ms:241,window_ms:61,rssi_thr:0');
-    expect(script).toContain('Date.now()-(R.l||R.sa)>9e4');
+    expect(script).toContain('nw()-(R.l||R.sa)>9e4');
+    expect(script).not.toContain('Date.now()');
     expect(script).toContain('"st"');
     expect(script).toContain('"mx"');
     expect(script).toContain('sw(false,"b",true)');
@@ -413,6 +417,163 @@ describe('generateShellyThermostatScript', () => {
     }
   });
 
+  it('composes alternating Xiaomi temperature and humidity packets for VPD assist', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const config = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      );
+      const script = generateShellyThermostatScript({
+        ...config,
+        sensor: {
+          ...config.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        },
+        rule: {
+          ...config.rule,
+          vpdAssist: {
+            enabled: true,
+            targetKpa: 1.2
+          }
+        }
+      });
+      const { runtime, scan, switchCalls } = createExecutableRuntime(script);
+      const tempOnly = createBthomeAdvertisement([0x40, 0x02, 0x08, 0x07]);
+      const humidityOnly = createBthomeAdvertisement([0x40, 0x03, 0x4c, 0x1d]);
+
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: tempOnly,
+        rssi: -35
+      });
+      expect(runtime.diag().g[6]).toBe('cv');
+      expect(runtime.diag().g[0]).toBeNull();
+
+      nowMs += 10_000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: humidityOnly,
+        rssi: -35
+      });
+      expect(runtime.diag().g[9]).toBe(1);
+
+      nowMs += 10_000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: tempOnly,
+        rssi: -35
+      });
+
+      expect(runtime.diag().g[6]).toBe('bl');
+      expect(runtime.diag().g[1]).toBe(18);
+      expect(runtime.diag().g[2]).toBe(75);
+      expect(runtime.diag().g[12]).toBeGreaterThan(0);
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: true });
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('does not compose stale Xiaomi humidity into a VPD decision', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const config = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      );
+      const script = generateShellyThermostatScript({
+        ...config,
+        sensor: {
+          ...config.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        },
+        rule: {
+          ...config.rule,
+          vpdAssist: {
+            enabled: true,
+            targetKpa: 1.2
+          }
+        }
+      });
+      const { runtime, scan, switchCalls } = createExecutableRuntime(script);
+
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: createBthomeAdvertisement([0x40, 0x03, 0x4c, 0x1d]),
+        rssi: -35
+      });
+      nowMs += 31_000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: createBthomeAdvertisement([0x40, 0x02, 0x34, 0x08]),
+        rssi: -35
+      });
+
+      expect(runtime.diag().g[6]).toBe('cv');
+      expect(runtime.diag().g[0]).toBeNull();
+      expect(switchCalls).toEqual([{ id: 0, on: false }]);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('keeps ON confirmed across sparse but useful target advertisements', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const config = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      );
+      const script = generateShellyThermostatScript({
+        ...config,
+        sensor: {
+          ...config.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        }
+      });
+      const { runtime, scan, switchCalls } = createExecutableRuntime(script);
+      const coldPacket = createBthomeAdvertisement([
+        0x40, 0x02, 0x08, 0x07, 0x03, 0x94, 0x11
+      ]);
+      const unrelatedPacket = {
+        addr: '11:22:33:44:55:66',
+        advData: createBthomeAdvertisement([0x40, 0x01, 99]),
+        rssi: -35
+      };
+
+      for (let index = 0; index < 9; index += 1) {
+        nowMs += 3_000;
+        scan('scan-result', unrelatedPacket);
+      }
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: coldPacket,
+        rssi: -35
+      });
+      expect(runtime.diag().g[9]).toBe(1);
+      expect(switchCalls).toEqual([{ id: 0, on: false }]);
+
+      for (let index = 0; index < 9; index += 1) {
+        nowMs += 3_000;
+        scan('scan-result', unrelatedPacket);
+      }
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: coldPacket,
+        rssi: -35
+      });
+
+      expect(runtime.diag().g[6]).toBe('bl');
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: true });
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
   it('uses target packet freshness for the BLE scanner watchdog', () => {
     let nowMs = 100_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
@@ -521,7 +682,9 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('function mf(d)');
     expect(script).toContain('"tm"');
     expect(script).toContain('Shelly.call("Switch.Set"');
+    expect(script).toContain('function nw(){return Shelly.getUptimeMs();}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
+    expect(script).not.toContain('Date.now()');
     expect(script).toContain('R.vp');
     expect(script).toContain('R.eo');
     expect(script).toContain('R.ef');

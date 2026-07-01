@@ -80,7 +80,7 @@ export const DEFAULT_HEATING_RULE: ThermostatRule = {
     onThreshold: 19,
     offThreshold: 20
   },
-  staleTimeoutSec: 900,
+  staleTimeoutSec: 120,
   minChangeMs: 120_000,
   maxOnMs: 14_400_000,
   rssiMin: -85,
@@ -101,7 +101,7 @@ export const DEFAULT_COOLING_RULE: ThermostatRule = {
     onThreshold: 26,
     offThreshold: 24
   },
-  staleTimeoutSec: 900,
+  staleTimeoutSec: 120,
   minChangeMs: 120_000,
   maxOnMs: 14_400_000,
   rssiMin: -85,
@@ -122,7 +122,7 @@ export const DEFAULT_HUMIDIFYING_RULE: ThermostatRule = {
     onThreshold: 45,
     offThreshold: 55
   },
-  staleTimeoutSec: 900,
+  staleTimeoutSec: 120,
   minChangeMs: 120_000,
   maxOnMs: 14_400_000,
   rssiMin: -85,
@@ -143,7 +143,7 @@ export const DEFAULT_DEHUMIDIFYING_RULE: ThermostatRule = {
     onThreshold: 65,
     offThreshold: 55
   },
-  staleTimeoutSec: 900,
+  staleTimeoutSec: 120,
   minChangeMs: 120_000,
   maxOnMs: 14_400_000,
   rssiMin: -85,

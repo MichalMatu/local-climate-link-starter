@@ -25,10 +25,7 @@ const createStoredThermostatScript = (): string => {
       runtimeAddress: 'A4:C1:38:4F:24:CD',
       displayName: 'Xiaomi salon'
     },
-    rule: {
-      ...config.rule,
-      rssiMin: -100
-    }
+    rule: config.rule
   });
 };
 
@@ -325,7 +322,7 @@ describe('HardwareSetupScreen', () => {
             v: 1,
             z: 'lcl-12345678',
             s: ['A4:C1:38:4F:24:CD', 'Xiaomi/PVVX BTHome'],
-            q: [0, 0, 19, 20, 900, -100],
+            q: [0, 0, 19, 20, 120, -85],
             y: ['09:31', 1782667904, 12345],
             p: [false, 0, 230.1, 0, 1234, 31.2],
             g: [
@@ -583,7 +580,7 @@ describe('HardwareSetupScreen', () => {
     ).toBeDisabled();
     expect(screen.queryByText('Pokaż skrypt')).not.toBeInTheDocument();
     expect(getRuleSummary()).toHaveTextContent(
-      'Gdy termometr zniknie na 15 min albo Shelly uruchomi się ponownie'
+      'Gdy termometr zniknie na 2 min albo Shelly uruchomi się ponownie'
     );
     expect(getRuleSummary()).toHaveTextContent(
       'Po świeżym odczycie automatyka znów zastosuje tę regułę'
@@ -1489,7 +1486,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('option', { name: 'Nawilżanie' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Osuszanie' })).toBeInTheDocument();
     expect(getRuleSummary()).toHaveTextContent(
-      'Gdy termometr A4:C1:38:4F:24:CD zniknie na 15 min albo Shelly http://192.168.0.20/ uruchomi się ponownie'
+      'Gdy termometr A4:C1:38:4F:24:CD zniknie na 2 min albo Shelly http://192.168.0.20/ uruchomi się ponownie'
     );
     expect(getRuleSummary()).toHaveTextContent(
       'Po świeżym odczycie automatyka znów zastosuje tę regułę'
@@ -1798,7 +1795,7 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(dialog).getByText('ON poniżej 19.0°C, OFF powyżej 20.0°C')
     ).toBeInTheDocument();
-    expect(within(dialog).getByText('min. -100 dBm')).toBeInTheDocument();
+    expect(within(dialog).getByText('min. -85 dBm')).toBeInTheDocument();
     const savedScriptPreview = within(dialog).getByLabelText('Skrypt zapisany w Shelly');
     expect(savedScriptPreview).toHaveClass('lcl-script-preview--tall');
     expect(savedScriptPreview).toHaveTextContent('m: xiaomi-bthome-minimal');
@@ -1994,7 +1991,7 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.getByLabelText('Termometr')).toHaveValue('C2:C0:00:30:64:01');
     expect(getRuleSummary()).toHaveTextContent(
-      'Gdy termometr C2:C0:00:30:64:01 zniknie na 15 min'
+      'Gdy termometr C2:C0:00:30:64:01 zniknie na 2 min'
     );
     expect(getRuleSummary()).not.toHaveTextContent('TP357, C2:C0:00:30:64:01');
     const scriptDialog = await openRuleScriptDialog();

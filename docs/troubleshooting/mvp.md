@@ -96,7 +96,10 @@ Generated runtime diagnostics separate radio freshness from control freshness:
 `lastPacketSeen` means Shelly saw any packet from the target runtime address,
 while `lastSeen` means the last full measurement usable by the selected rule.
 Battery-only or incomplete BTHome frames update telemetry only; they do not
-force OFF, reset hit counters, or refresh the stale-sensor timer.
+force OFF, reset ON hit counters, or refresh the stale-sensor timer. Xiaomi
+temperature and humidity may arrive in separate advertisements; when VPD assist
+is enabled, the runtime composes them only if both values are fresh within a
+short window.
 
 If Shelly reports `out_of_memory`, the discovery script could not stay running
 within the plug's available script memory. Close the BLE scan modal, wait a few

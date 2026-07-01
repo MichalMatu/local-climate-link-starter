@@ -5,6 +5,8 @@ import { configHash, stableStringify } from './hash.js';
 export type ShellyScriptGeneratorMode =
   'xiaomi-bthome-minimal' | 'tp357-minimal' | 'discovery-debug';
 
+const COMPOSITE_MEASUREMENT_WINDOW_MS = 30_000;
+
 const compactGeneratedShellyScript = (script: string): string =>
   script.replace(/\n\s*/g, '');
 
@@ -70,28 +72,46 @@ const renderRuntimeParser = (config: ShellyThermostatConfig): string =>
     ? renderTp357MinimalParser()
     : renderBthomeMinimalParser();
 
+const renderRuntimeState = (config: ShellyThermostatConfig): string =>
+  config.rule.vpdAssist.enabled
+    ? 'var R={ls:null,l:0,t:null,h:null,tt:null,ht:null,b:null,r:null,on:false,rs:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,sa:0};'
+    : 'var R={ls:null,l:0,t:null,h:null,b:null,r:null,on:false,rs:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,sa:0};';
+
+const renderMeasurementHelper = (config: ShellyThermostatConfig): string => {
+  const commonDecision =
+    'var T=th(t,h);R.eo=T.o;R.ef=T.f;R.vp=C.vp?vd(t,h):null;var go=C.d?v>T.o:v<T.o,stop=C.d?v<T.f:v>T.f,gr=C.d?"ab":"bl",sr=C.d?"bl":"ab";if(go){R.nh++;R.fh=0;if(R.nh<C.h){R.rs=gr+"h";return;}sw(true,gr,false);return;}if(stop){R.fh++;R.nh=0;sw(false,sr,false);return;}R.nh=0;R.fh=0;R.rs="ib";';
+
+  if (!config.rule.vpdAssist.enabled) {
+    return `function meas(t,h,b,r){var n=nw(),v=C.m?h:t;R.r=r;R.cv=v;if(b!=null)R.b=b;if(v==null){R.rs="cv";return;}R.ls=n;R.t=t;R.h=h;${commonDecision}}`;
+  }
+
+  return `function fr(x,n){return x!==null&&n-x<=${COMPOSITE_MEASUREMENT_WINDOW_MS};}
+function meas(t,h,b,r){var n=nw(),p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(t!=null){R.t=t;R.tt=n;}if(h!=null){R.h=h;R.ht=n;}if(!p){R.cv=null;R.rs="cv";return;}t=fr(R.tt,n)?R.t:null;h=fr(R.ht,n)?R.h:null;var v=C.m?h:t;R.cv=v;if(v==null||!fr(R.tt,n)||!fr(R.ht,n)){R.rs="cv";return;}R.ls=n;${commonDecision}}`;
+};
+
 export const generateShellyThermostatScript = (input: unknown): string => {
   const config = normalizeConfig(input);
   const mode = runtimeModeForConfig(config);
   const hash = configHash(config);
   const cfgJson = stableStringify(createRuntimeConfig(config, hash));
   const body = `var C=${cfgJson};
-var R={ls:null,l:0,t:null,h:null,b:null,r:null,on:false,rs:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,sa:0};
+${renderRuntimeState(config)}
+function nw(){return Shelly.getUptimeMs();}
 function na(a){if(a===undefined||a===null)return"";var s=String(a).toUpperCase(),o="";for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c!==":"&&c!=="-")o+=c;}return o;}
 function fv(o,k){return o&&o[k]!==undefined?o[k]:null;}
-function sw(o,rs,f){var n=Date.now(),ch=R.on!==o;if(!f&&!ch){R.rs=rs;return;}if(o&&!f&&n-R.lc<C.c){R.rs="mc";return;}Shelly.call("Switch.Set",{id:C.i,on:o},function(r,e){if(e!==0){R.rs="se";Shelly.call("Switch.Set",{id:C.i,on:false});R.on=false;return;}R.on=o;R.rs=rs;if(ch)R.lc=n;R.os=o?n:null;});}
-function stale(){var n=Date.now();if(R.ls===null||n-R.ls>C.s){R.nh=0;R.fh=0;sw(false,"st",true);return;}if(R.on&&R.os!==null&&n-R.os>=C.x){R.nh=0;R.fh=0;sw(false,"mx",true);}}
+function sw(o,rs,f){var n=nw(),ch=R.on!==o;if(!f&&!ch){R.rs=rs;return;}if(o&&!f&&n-R.lc<C.c){R.rs="mc";return;}Shelly.call("Switch.Set",{id:C.i,on:o},function(r,e){if(e!==0){R.rs="se";Shelly.call("Switch.Set",{id:C.i,on:false});R.on=false;return;}R.on=o;R.rs=rs;if(ch)R.lc=n;R.os=o?n:null;});}
+function stale(){var n=nw();if(R.ls===null||n-R.ls>C.s){R.nh=0;R.fh=0;sw(false,"st",true);return;}if(R.on&&R.os!==null&&n-R.os>=C.x){R.nh=0;R.fh=0;sw(false,"mx",true);}}
 ${renderThresholdHelper(config)}
-function meas(t,h,b,r){var v=C.m?h:t;R.r=r;R.cv=v;if(b!=null)R.b=b;if(v==null){R.rs="cv";return;}R.ls=Date.now();R.t=t;R.h=h;var T=th(t,h);R.eo=T.o;R.ef=T.f;R.vp=C.vp?vd(t,h):null;var go=C.d?v>T.o:v<T.o,stop=C.d?v<T.f:v>T.f,gr=C.d?"ab":"bl",sr=C.d?"bl":"ab";if(go){R.nh++;R.fh=0;if(R.nh<C.h){R.rs=gr+"h";return;}sw(true,gr,false);return;}if(stop){R.fh++;R.nh=0;if(R.fh<C.h){R.rs=sr+"h";return;}sw(false,sr,false);return;}R.nh=0;R.fh=0;R.rs="ib";}
+${renderMeasurementHelper(config)}
 ${renderRuntimeParser(config)}
 function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStatus("switch:0");return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[w.output===true,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l]});}
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
-function ev(e,x){if(e!==BLE.Scanner.SCAN_RESULT||!x)return;if(na(x.addr)!==C.a)return;R.l=Date.now();if(x.rssi!==undefined&&x.rssi<C.r){R.r=x.rssi;R.rs="rl";return;}parse(x);}
+function ev(e,x){if(e!==BLE.Scanner.SCAN_RESULT||!x)return;if(na(x.addr)!==C.a)return;R.l=nw();if(x.rssi!==undefined&&x.rssi<C.r){R.r=x.rssi;R.rs="rl";return;}parse(x);}
 sw(false,"b",true);
 var bt=BLE.Scanner.stop||BLE.Scanner.Stop;
 BLE.Scanner.subscribe(function(e,x){ev(e,x);});
-function bs(){if(bt)bt.call(BLE.Scanner);R.sa=Date.now();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sw(false,"bf",true);}
-function bw(){if(R.sa&&Date.now()-(R.l||R.sa)>9e4)bs();}
+function bs(){if(bt)bt.call(BLE.Scanner);R.sa=nw();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sw(false,"bf",true);}
+function bw(){if(R.sa&&nw()-(R.l||R.sa)>9e4)bs();}
 Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw();});`;
   const compactBody = compactGeneratedShellyScript(body);
 
