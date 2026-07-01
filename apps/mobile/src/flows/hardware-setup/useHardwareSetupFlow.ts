@@ -265,6 +265,12 @@ export const useHardwareSetupFlow = () => {
   const setStaleTimeoutMinInput = useHardwareSetupDraftStore(
     (state) => state.setStaleTimeoutMinInput
   );
+  const minChangeMinInput = useHardwareSetupDraftStore(
+    (state) => state.minChangeMinInput
+  );
+  const setMinChangeMinInput = useHardwareSetupDraftStore(
+    (state) => state.setMinChangeMinInput
+  );
   const maxOnHoursInput = useHardwareSetupDraftStore((state) => state.maxOnHoursInput);
   const setMaxOnHoursInput = useHardwareSetupDraftStore(
     (state) => state.setMaxOnHoursInput
@@ -388,10 +394,12 @@ export const useHardwareSetupFlow = () => {
         vpdTargetInput,
         rssiMinInput,
         staleTimeoutMinInput,
+        minChangeMinInput,
         maxOnHoursInput
       }),
     [
       maxOnHoursInput,
+      minChangeMinInput,
       rssiMinInput,
       staleTimeoutMinInput,
       vpdAssistEnabled,
@@ -416,6 +424,7 @@ export const useHardwareSetupFlow = () => {
         vpdTargetInput,
         rssiMinInput,
         staleTimeoutMinInput,
+        minChangeMinInput,
         maxOnHoursInput
       });
       const config: ShellyThermostatConfig = {
@@ -447,6 +456,7 @@ export const useHardwareSetupFlow = () => {
             targetKpa: advancedSettings.vpdTargetKpa
           },
           staleTimeoutSec: advancedSettings.staleTimeoutSec,
+          minChangeMs: advancedSettings.minChangeMs,
           maxOnMs: advancedSettings.maxOnMs,
           rssiMin: advancedSettings.rssiMin
         }
@@ -466,6 +476,7 @@ export const useHardwareSetupFlow = () => {
   }, [
     advancedSettingsValidation.isValid,
     maxOnHoursInput,
+    minChangeMinInput,
     offThresholdInput,
     onThresholdInput,
     rssiMinInput,
@@ -1218,6 +1229,8 @@ export const useHardwareSetupFlow = () => {
     setRssiMinInput,
     staleTimeoutMinInput,
     setStaleTimeoutMinInput,
+    minChangeMinInput,
+    setMinChangeMinInput,
     maxOnHoursInput,
     setMaxOnHoursInput,
     advancedSettingsValidation,

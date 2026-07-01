@@ -560,6 +560,7 @@
 }
 
 .lcl-modal__body {
+  align-content: start;
   display: grid;
   gap: var(--lcl-spacing-md);
   min-height: 0;
@@ -568,10 +569,12 @@
 }
 
 .lcl-modal__footer {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   display: flex;
   flex-wrap: wrap;
   gap: var(--lcl-spacing-sm);
   justify-content: flex-end;
+  padding-top: var(--lcl-spacing-md);
 }
 
 .lcl-modal__close {
@@ -596,12 +599,13 @@
   }
 
   .lcl-modal-backdrop {
-    align-items: flex-start;
+    align-items: stretch;
     padding: var(--lcl-spacing-sm);
   }
 
   .lcl-modal {
-    max-height: calc(100vh - (var(--lcl-spacing-sm) * 2));
+    height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
+    max-height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
     max-width: calc(100vw - (var(--lcl-spacing-sm) * 2));
     padding: var(--lcl-fluid-panel-padding);
   }
@@ -612,10 +616,18 @@
 
   .lcl-modal__footer {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--lcl-size-action-min-width)), 1fr)
+    );
+  }
+
+  .lcl-modal__footer > * {
+    width: 100%;
   }
 
   .lcl-modal__close {
+    grid-column: 1 / -1;
     width: 100%;
   }
 

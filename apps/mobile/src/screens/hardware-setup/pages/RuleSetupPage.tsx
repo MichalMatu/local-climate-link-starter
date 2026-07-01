@@ -123,6 +123,7 @@ const createAdvancedDraft = (
   vpdTargetInput: flow.vpdTargetInput,
   rssiMinInput: flow.rssiMinInput,
   staleTimeoutMinInput: flow.staleTimeoutMinInput,
+  minChangeMinInput: flow.minChangeMinInput,
   maxOnHoursInput: flow.maxOnHoursInput
 });
 
@@ -177,6 +178,7 @@ const formatRuleSummary = ({
   offThreshold,
   unit,
   staleTimeoutMin,
+  minChangeMin,
   maxOnHours,
   shellyAddress,
   sensorRuntimeAddress,
@@ -189,6 +191,7 @@ const formatRuleSummary = ({
   offThreshold: number;
   unit: string;
   staleTimeoutMin: number;
+  minChangeMin: number;
   maxOnHours: number;
   shellyAddress?: string | undefined;
   sensorRuntimeAddress?: string | undefined;
@@ -207,7 +210,7 @@ const formatRuleSummary = ({
     ? ` Sygnał termometru musi mieć co najmniej ${rssiMinDbm} dBm.`
     : '';
 
-  return `${actionName} włączy się ${onComparator} ${onThreshold.toFixed(1)}${unit} i wyłączy ${offComparator} ${offThreshold.toFixed(1)}${unit}. Gdy ${sensorLabel} zniknie na ${staleTimeoutMin} min albo ${shellyLabel} uruchomi się ponownie, przekaźnik wyłączy się bezpiecznie. Po świeżym odczycie automatyka znów zastosuje tę regułę. Maksymalny czas pracy: ${maxOnHours} h.${vpdCopy}${rssiCopy}`;
+  return `${actionName} włączy się ${onComparator} ${onThreshold.toFixed(1)}${unit} i wyłączy ${offComparator} ${offThreshold.toFixed(1)}${unit}. Gdy ${sensorLabel} zniknie na ${staleTimeoutMin} min albo ${shellyLabel} uruchomi się ponownie, przekaźnik wyłączy się bezpiecznie. Po świeżym odczycie automatyka znów zastosuje tę regułę. Maksymalny czas pracy: ${maxOnHours} h. Ponowne ON najwcześniej po ${minChangeMin} min.${vpdCopy}${rssiCopy}`;
 };
 
 export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
@@ -236,6 +239,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     : undefined;
   const advancedDraftValidation = validateRuleAdvancedSettings(advancedDraft);
   const staleTimeoutMin = Number(flow.staleTimeoutMinInput);
+  const minChangeMin = Number(flow.minChangeMinInput);
   const maxOnHours = Number(flow.maxOnHoursInput);
   const rssiMinDbm = Number(flow.rssiMinInput);
   const selectedScriptState =
@@ -271,6 +275,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     offThreshold: Number(flow.offThresholdInput),
     unit: copy.unit,
     staleTimeoutMin: Number.isFinite(staleTimeoutMin) ? staleTimeoutMin : 15,
+    minChangeMin: Number.isFinite(minChangeMin) ? minChangeMin : 2,
     maxOnHours: Number.isFinite(maxOnHours) ? maxOnHours : 4,
     shellyAddress: flow.selectedShelly ? shellyAddressLabel(flow) : undefined,
     sensorRuntimeAddress: flow.selectedSensor ? runtimeAddressLabel(flow) : undefined,
@@ -440,6 +445,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     flow.setVpdTargetInput(advancedDraft.vpdTargetInput);
     flow.setRssiMinInput(advancedDraft.rssiMinInput);
     flow.setStaleTimeoutMinInput(advancedDraft.staleTimeoutMinInput);
+    flow.setMinChangeMinInput(advancedDraft.minChangeMinInput);
     flow.setMaxOnHoursInput(advancedDraft.maxOnHoursInput);
     setIsAdvancedModalOpen(false);
   };
@@ -571,7 +577,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
         <button
           className="secondary-action"
           type="button"
-          title="Zmień RSSI, timeout, VPD i limity bezpieczeństwa"
+          title="Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa"
           onClick={openAdvancedModal}
         >
           Zaawansowane
@@ -822,70 +828,6 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       >
         <div className="advanced-settings">
           <section className="advanced-settings__section">
-            <h3>Odczyt termometru</h3>
-            <div className="field-row">
-              <label
-                className={`field ${
-                  advancedDraftValidation.isRssiMinValid ? '' : 'field--invalid'
-                }`}
-              >
-                Minimalny RSSI dBm
-                <input
-                  aria-describedby={
-                    advancedDraftValidation.isRssiMinValid
-                      ? undefined
-                      : 'advanced-rssi-error'
-                  }
-                  aria-invalid={!advancedDraftValidation.isRssiMinValid}
-                  max={RULE_ADVANCED_LIMITS.rssiMinMax}
-                  min={RULE_ADVANCED_LIMITS.rssiMinMin}
-                  step="1"
-                  type="number"
-                  value={advancedDraft.rssiMinInput}
-                  onChange={(event) =>
-                    updateAdvancedDraft({ rssiMinInput: event.currentTarget.value })
-                  }
-                />
-                {!advancedDraftValidation.isRssiMinValid && (
-                  <span className="field__error" id="advanced-rssi-error">
-                    Zakres: -100 do -20 dBm.
-                  </span>
-                )}
-              </label>
-              <label
-                className={`field ${
-                  advancedDraftValidation.isStaleTimeoutValid ? '' : 'field--invalid'
-                }`}
-              >
-                Brak odczytu przez min
-                <input
-                  aria-describedby={
-                    advancedDraftValidation.isStaleTimeoutValid
-                      ? undefined
-                      : 'advanced-stale-error'
-                  }
-                  aria-invalid={!advancedDraftValidation.isStaleTimeoutValid}
-                  max={RULE_ADVANCED_LIMITS.staleTimeoutMinMax}
-                  min={RULE_ADVANCED_LIMITS.staleTimeoutMinMin}
-                  step="1"
-                  type="number"
-                  value={advancedDraft.staleTimeoutMinInput}
-                  onChange={(event) =>
-                    updateAdvancedDraft({
-                      staleTimeoutMinInput: event.currentTarget.value
-                    })
-                  }
-                />
-                {!advancedDraftValidation.isStaleTimeoutValid && (
-                  <span className="field__error" id="advanced-stale-error">
-                    Zakres: 1 do 120 min.
-                  </span>
-                )}
-              </label>
-            </div>
-          </section>
-
-          <section className="advanced-settings__section">
             <h3>VPD</h3>
             <label className="toggle-row">
               <input
@@ -929,7 +871,67 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           </section>
 
           <section className="advanced-settings__section">
-            <h3>Bezpieczeństwo gniazdka</h3>
+            <h3>Przekaźnik</h3>
+            <div className="field-row">
+              <label
+                className={`field ${
+                  advancedDraftValidation.isMinChangeMinValid ? '' : 'field--invalid'
+                }`}
+              >
+                Ponowne ON po min
+                <input
+                  aria-describedby={
+                    advancedDraftValidation.isMinChangeMinValid
+                      ? undefined
+                      : 'advanced-min-change-error'
+                  }
+                  aria-invalid={!advancedDraftValidation.isMinChangeMinValid}
+                  max={RULE_ADVANCED_LIMITS.minChangeMinMax}
+                  min={RULE_ADVANCED_LIMITS.minChangeMinMin}
+                  step="0.25"
+                  type="number"
+                  value={advancedDraft.minChangeMinInput}
+                  onChange={(event) =>
+                    updateAdvancedDraft({
+                      minChangeMinInput: event.currentTarget.value
+                    })
+                  }
+                />
+                {!advancedDraftValidation.isMinChangeMinValid && (
+                  <span className="field__error" id="advanced-min-change-error">
+                    Zakres: 0.25 do 60 min.
+                  </span>
+                )}
+              </label>
+              <label
+                className={`field ${
+                  advancedDraftValidation.isMaxOnHoursValid ? '' : 'field--invalid'
+                }`}
+              >
+                Maksymalny czas pracy h
+                <input
+                  aria-describedby={
+                    advancedDraftValidation.isMaxOnHoursValid
+                      ? undefined
+                      : 'advanced-max-on-error'
+                  }
+                  aria-invalid={!advancedDraftValidation.isMaxOnHoursValid}
+                  max={RULE_ADVANCED_LIMITS.maxOnHoursMax}
+                  min={RULE_ADVANCED_LIMITS.maxOnHoursMin}
+                  step="0.25"
+                  type="number"
+                  value={advancedDraft.maxOnHoursInput}
+                  onChange={(event) =>
+                    updateAdvancedDraft({ maxOnHoursInput: event.currentTarget.value })
+                  }
+                />
+                {!advancedDraftValidation.isMaxOnHoursValid && (
+                  <span className="field__error" id="advanced-max-on-error">
+                    Zakres: 0.25 do 24 h.
+                  </span>
+                )}
+              </label>
+            </div>
             <div className="advanced-settings__readonly">
               <span>Po restarcie Shelly</span>
               <strong>OFF, potem AUTO po pierwszym odczycie</strong>
@@ -937,35 +939,67 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           </section>
 
           <section className="advanced-settings__section">
-            <h3>Limit pracy</h3>
-            <label
-              className={`field ${
-                advancedDraftValidation.isMaxOnHoursValid ? '' : 'field--invalid'
-              }`}
-            >
-              Maksymalny czas pracy h
-              <input
-                aria-describedby={
-                  advancedDraftValidation.isMaxOnHoursValid
-                    ? undefined
-                    : 'advanced-max-on-error'
-                }
-                aria-invalid={!advancedDraftValidation.isMaxOnHoursValid}
-                max={RULE_ADVANCED_LIMITS.maxOnHoursMax}
-                min={RULE_ADVANCED_LIMITS.maxOnHoursMin}
-                step="0.25"
-                type="number"
-                value={advancedDraft.maxOnHoursInput}
-                onChange={(event) =>
-                  updateAdvancedDraft({ maxOnHoursInput: event.currentTarget.value })
-                }
-              />
-              {!advancedDraftValidation.isMaxOnHoursValid && (
-                <span className="field__error" id="advanced-max-on-error">
-                  Zakres: 0.25 do 24 h.
-                </span>
-              )}
-            </label>
+            <h3>Odczyt termometru</h3>
+            <div className="field-row">
+              <label
+                className={`field ${
+                  advancedDraftValidation.isStaleTimeoutValid ? '' : 'field--invalid'
+                }`}
+              >
+                Brak odczytu przez min
+                <input
+                  aria-describedby={
+                    advancedDraftValidation.isStaleTimeoutValid
+                      ? undefined
+                      : 'advanced-stale-error'
+                  }
+                  aria-invalid={!advancedDraftValidation.isStaleTimeoutValid}
+                  max={RULE_ADVANCED_LIMITS.staleTimeoutMinMax}
+                  min={RULE_ADVANCED_LIMITS.staleTimeoutMinMin}
+                  step="1"
+                  type="number"
+                  value={advancedDraft.staleTimeoutMinInput}
+                  onChange={(event) =>
+                    updateAdvancedDraft({
+                      staleTimeoutMinInput: event.currentTarget.value
+                    })
+                  }
+                />
+                {!advancedDraftValidation.isStaleTimeoutValid && (
+                  <span className="field__error" id="advanced-stale-error">
+                    Zakres: 1 do 120 min.
+                  </span>
+                )}
+              </label>
+              <label
+                className={`field ${
+                  advancedDraftValidation.isRssiMinValid ? '' : 'field--invalid'
+                }`}
+              >
+                Minimalny RSSI dBm
+                <input
+                  aria-describedby={
+                    advancedDraftValidation.isRssiMinValid
+                      ? undefined
+                      : 'advanced-rssi-error'
+                  }
+                  aria-invalid={!advancedDraftValidation.isRssiMinValid}
+                  max={RULE_ADVANCED_LIMITS.rssiMinMax}
+                  min={RULE_ADVANCED_LIMITS.rssiMinMin}
+                  step="1"
+                  type="number"
+                  value={advancedDraft.rssiMinInput}
+                  onChange={(event) =>
+                    updateAdvancedDraft({ rssiMinInput: event.currentTarget.value })
+                  }
+                />
+                {!advancedDraftValidation.isRssiMinValid && (
+                  <span className="field__error" id="advanced-rssi-error">
+                    Zakres: -100 do -20 dBm.
+                  </span>
+                )}
+              </label>
+            </div>
           </section>
         </div>
       </Modal>

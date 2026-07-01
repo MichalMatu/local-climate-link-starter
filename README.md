@@ -125,11 +125,12 @@ coverage, generated Shelly runtime variants, and dated Shelly Plug S Gen3 smoke
 results in `docs/testing/hardware-matrix.md`.
 
 The current hardware setup draft is saved locally in the app/browser storage:
-saved Shelly plugs with manual IP addresses and names, saved Xiaomi/PVVX thermometers with names, the
-selected Shelly/sensor pair, rule parameter, thresholds, optional VPD assist target, RSSI minimum,
-diagnostic choices, and saved names survive screen remounts and ordinary app
-reloads. The generated script preview and `Zapisz i wyślij` action live on the
-`Reguła` page.
+saved Shelly plugs with manual IP addresses and names, saved Xiaomi/PVVX
+thermometers with names, the selected Shelly/sensor pair, rule parameter,
+thresholds, optional VPD assist target, RSSI minimum, stale timeout,
+`minChangeMs`, max ON time, diagnostic choices, and saved names survive screen
+remounts and ordinary app reloads. The generated script preview and
+`Zapisz i wyślij` action live on the `Reguła` page.
 
 During `pnpm dev`, the mobile web preview routes Shelly requests through a local
 Vite-only proxy. This keeps the browser flow usable when Shelly answers local RPC

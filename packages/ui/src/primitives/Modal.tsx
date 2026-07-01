@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 
+type ModalInitialFocus = 'dialog' | 'first-control';
+
 export interface ModalProps {
   open: boolean;
   title: string;
@@ -7,6 +9,7 @@ export interface ModalProps {
   closeLabel: string;
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
+  initialFocus?: ModalInitialFocus;
   size?: 'default' | 'diagnostic' | 'workspace';
   children: ReactNode;
   headerActions?: ReactNode;
@@ -38,6 +41,7 @@ export const Modal = ({
   closeLabel,
   closeOnBackdrop = true,
   closeOnEscape = true,
+  initialFocus = 'dialog',
   size = 'default',
   children,
   headerActions,
@@ -118,7 +122,11 @@ export const Modal = ({
       if (!modal) {
         return;
       }
-      (focusableElements(modal)[0] ?? modal).focus();
+      if (initialFocus === 'first-control') {
+        (focusableElements(modal)[0] ?? modal).focus();
+        return;
+      }
+      modal.focus();
     }, 0);
 
     return () => {
@@ -130,7 +138,7 @@ export const Modal = ({
       }
       previouslyFocusedElementRef.current = null;
     };
-  }, [closeOnEscape, open]);
+  }, [closeOnEscape, initialFocus, open]);
 
   if (!open) {
     return null;

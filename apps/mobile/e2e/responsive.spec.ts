@@ -32,6 +32,7 @@ const draft = {
   vpdTargetInput: '1.2',
   rssiMinInput: '-100',
   staleTimeoutMinInput: '15',
+  minChangeMinInput: '2',
   maxOnHoursInput: '4'
 };
 
@@ -46,7 +47,7 @@ const tabs = ['Shelly', 'Termometry', 'Reguła', 'Diag'] as const;
 
 const seedDraft = async (page: Page) => {
   await page.addInitScript((value) => {
-    window.localStorage.setItem('lcl.hardwareSetupDraft.v6', JSON.stringify(value));
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v7', JSON.stringify(value));
   }, draft);
 };
 
@@ -229,7 +230,12 @@ for (const viewport of viewports) {
     await expectNoHorizontalOverflow(page);
 
     await page.getByRole('button', { name: 'Dodaj gniazdko' }).click();
-    await expect(page.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBeVisible();
+    const addShellyDialog = page.getByRole('dialog', { name: 'Dodaj gniazdko' });
+    await expect(addShellyDialog).toBeVisible();
+    const shellyNameInputBox = await addShellyDialog
+      .getByLabel('Nazwa gniazdka')
+      .boundingBox();
+    expect(shellyNameInputBox?.height).toBeLessThan(90);
     await expectNoHorizontalOverflow(page);
     await page.getByRole('button', { name: 'Zamknij' }).click();
 
@@ -302,13 +308,18 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
 
   await page.getByRole('button', { name: 'Zaawansowane' }).click();
   const advancedDialog = page.getByRole('dialog', { name: 'Opcje zaawansowane' });
+  await expect(advancedDialog).toBeVisible();
+  await expect(advancedDialog).toBeFocused();
+  await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).not.toBeFocused();
   await advancedDialog.getByLabel('VPD assist').check();
   await advancedDialog.getByLabel('Docelowe VPD kPa').fill('1.25');
   await advancedDialog.getByLabel('Minimalny RSSI dBm').fill('-80');
   await advancedDialog.getByLabel('Brak odczytu przez min').fill('10');
+  await advancedDialog.getByLabel('Ponowne ON po min').fill('3');
   await advancedDialog.getByLabel('Maksymalny czas pracy h').fill('3');
   await advancedDialog.getByRole('button', { name: 'Zastosuj' }).click();
   await expect(page.getByText(/VPD assist uwzględni cel 1\.25 kPa/)).toBeVisible();
+  await expect(page.getByText(/Ponowne ON najwcześniej po 3 min/)).toBeVisible();
   await expect(
     page.getByText(/Sygnał termometru musi mieć co najmniej -80 dBm/)
   ).toBeVisible();
@@ -321,6 +332,9 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"r":-80');
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
     '"s":600000'
+  );
+  await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
+    '"c":180000'
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
     '"x":10800000'

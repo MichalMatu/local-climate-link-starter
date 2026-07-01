@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { z } from 'zod';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 
-export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v6';
+export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v7';
 
 const rulePresetSchema = z.enum(['heating', 'cooling', 'humidifying', 'dehumidifying']);
 
@@ -50,6 +50,7 @@ const hardwareSetupDraftSchema = z.object({
   vpdTargetInput: z.string(),
   rssiMinInput: z.string(),
   staleTimeoutMinInput: z.string(),
+  minChangeMinInput: z.string(),
   maxOnHoursInput: z.string()
 });
 
@@ -97,6 +98,7 @@ type HardwareSetupDraftState = HardwareSetupDraft & {
   setVpdTargetInput(value: string): void;
   setRssiMinInput(value: string): void;
   setStaleTimeoutMinInput(value: string): void;
+  setMinChangeMinInput(value: string): void;
   setMaxOnHoursInput(value: string): void;
 };
 
@@ -161,6 +163,7 @@ const createStoredDraft = (
   vpdTargetInput: patch.vpdTargetInput ?? state.vpdTargetInput,
   rssiMinInput: patch.rssiMinInput ?? state.rssiMinInput,
   staleTimeoutMinInput: patch.staleTimeoutMinInput ?? state.staleTimeoutMinInput,
+  minChangeMinInput: patch.minChangeMinInput ?? state.minChangeMinInput,
   maxOnHoursInput: patch.maxOnHoursInput ?? state.maxOnHoursInput
 });
 
@@ -314,6 +317,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setRssiMinInput: (rssiMinInput) => updateDraft({ rssiMinInput }),
     setStaleTimeoutMinInput: (staleTimeoutMinInput) =>
       updateDraft({ staleTimeoutMinInput }),
+    setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput })
   };
 });

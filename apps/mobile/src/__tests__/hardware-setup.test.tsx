@@ -594,7 +594,8 @@ describe('HardwareSetupScreen', () => {
     const profileSelect = within(dialog).getByLabelText('Typ termometru');
     const closeButton = within(dialog).getByRole('button', { name: 'Zamknij' });
 
-    await waitFor(() => expect(profileSelect).toHaveFocus());
+    await waitFor(() => expect(dialog).toHaveFocus());
+    expect(profileSelect).not.toHaveFocus();
 
     closeButton.focus();
     fireEvent.keyDown(window, { key: 'Tab' });
@@ -1394,7 +1395,7 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Zaawansowane' })).toHaveAttribute(
       'title',
-      'Zmień RSSI, timeout, VPD i limity bezpieczeństwa'
+      'Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa'
     );
     expect(screen.getByRole('button', { name: 'Skrypt Shelly' })).toHaveAttribute(
       'title',
@@ -2015,12 +2016,21 @@ describe('HardwareSetupScreen', () => {
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
       let advancedDialog = await openRuleAdvancedDialog();
+      await waitFor(() => expect(advancedDialog).toHaveFocus());
+      expect(
+        within(advancedDialog).getByLabelText('Minimalny RSSI dBm')
+      ).not.toHaveFocus();
       expect(
         within(advancedDialog).getByRole('button', { name: 'Domyślne' })
       ).toHaveAttribute('title', 'Przywróć domyślne opcje zaawansowane');
       expect(
         within(advancedDialog).getByRole('button', { name: 'Zastosuj' })
       ).toHaveAttribute('title', 'Zastosuj opcje zaawansowane do tej reguły');
+      expect(
+        within(advancedDialog)
+          .getAllByRole('heading', { level: 3 })
+          .map((heading) => heading.textContent)
+      ).toEqual(['VPD', 'Przekaźnik', 'Odczyt termometru']);
       expect(within(advancedDialog).getByLabelText('VPD assist')).not.toBeChecked();
       expect(
         within(advancedDialog).getByText('OFF, potem AUTO po pierwszym odczycie')
@@ -2035,6 +2045,9 @@ describe('HardwareSetupScreen', () => {
       fireEvent.change(within(advancedDialog).getByLabelText('Brak odczytu przez min'), {
         target: { value: '10' }
       });
+      fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+        target: { value: '3' }
+      });
       fireEvent.change(within(advancedDialog).getByLabelText('Maksymalny czas pracy h'), {
         target: { value: '3' }
       });
@@ -2043,6 +2056,7 @@ describe('HardwareSetupScreen', () => {
         'Gdy termometr A4:C1:38:4F:24:CD zniknie na 10 min albo Shelly http://192.168.0.20/ uruchomi się ponownie'
       );
       expect(getRuleSummary()).toHaveTextContent('Maksymalny czas pracy: 3 h');
+      expect(getRuleSummary()).toHaveTextContent('Ponowne ON najwcześniej po 3 min');
       expect(getRuleSummary()).toHaveTextContent('VPD assist uwzględni cel 1.25 kPa');
       expect(getRuleSummary()).toHaveTextContent(
         'Sygnał termometru musi mieć co najmniej -80 dBm'
@@ -2059,6 +2073,9 @@ describe('HardwareSetupScreen', () => {
       expect(
         within(scriptDialog).getByLabelText('Wygenerowany skrypt')
       ).toHaveTextContent('"s":600000');
+      expect(
+        within(scriptDialog).getByLabelText('Wygenerowany skrypt')
+      ).toHaveTextContent('"c":180000');
       expect(
         within(scriptDialog).getByLabelText('Wygenerowany skrypt')
       ).toHaveTextContent('"x":10800000');
@@ -2080,6 +2097,18 @@ describe('HardwareSetupScreen', () => {
       fireEvent.change(within(advancedDialog).getByLabelText(/Docelowe VPD kPa/), {
         target: { value: '1.25' }
       });
+      fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+        target: { value: '0' }
+      });
+      expect(
+        within(advancedDialog).getByRole('button', { name: 'Zastosuj' })
+      ).toBeDisabled();
+      expect(
+        within(advancedDialog).getByText('Zakres: 0.25 do 60 min.')
+      ).toBeInTheDocument();
+      fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+        target: { value: '3' }
+      });
       fireEvent.click(within(advancedDialog).getByRole('button', { name: 'Zastosuj' }));
 
       scriptDialog = await openRuleScriptDialog();
@@ -2094,6 +2123,7 @@ describe('HardwareSetupScreen', () => {
       );
       expect(writeText).toHaveBeenCalledWith(expect.stringContaining('"vp":1.25'));
       expect(writeText).toHaveBeenCalledWith(expect.stringContaining('"r":-80'));
+      expect(writeText).toHaveBeenCalledWith(expect.stringContaining('"c":180000'));
       expect(await screen.findByText('Skopiowano skrypt.')).toBeInTheDocument();
     } finally {
       if (originalClipboard) {
