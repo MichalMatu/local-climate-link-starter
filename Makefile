@@ -18,13 +18,18 @@ SOAK_OUT_FILE ?=
 SOAK_SUMMARY_FILE ?=
 SOAK_LOG_FILE ?=
 SOAK_ERROR_LOG_FILE ?=
+SOAK_CYCLE_RELAY ?= 0
+SOAK_CYCLE_PERIOD_MS ?= 120000
+SOAK_CYCLE_MARGIN ?=
+SOAK_CYCLE_MIN_CHANGE_MS ?= 1000
+SOAK_CYCLE_CONSECUTIVE_HITS ?= 1
 
 .DEFAULT_GOAL := help
 
 .PHONY: help install start stop restart status logs open dev test test-watch lint typecheck build check format format-check tokens diagnose shelly-status shelly-diag shelly-install shelly-off shelly-soak-start shelly-soak-run shelly-soak-stop shelly-soak-status shelly-soak-logs esp32-ble-status clean
 
 help: ## Show available make targets.
-	@awk 'BEGIN {FS = ":.*## "; printf "\nLocal Climate Link shortcuts\n\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2} END {printf "\nEnv examples:\n  SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install\n  SHELLY_URL=http://<shelly-ip> make shelly-diag\n  SHELLY_URL=http://<shelly-ip> make shelly-soak-start\n  SHELLY_URL=http://<shelly-ip> make shelly-soak-run\n  make shelly-soak-stop\n  ESP32_URL=http://<esp32-ip> make esp32-ble-status\n\n"}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*## "; printf "\nLocal Climate Link shortcuts\n\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2} END {printf "\nEnv examples:\n  SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install\n  SHELLY_URL=http://<shelly-ip> make shelly-diag\n  SHELLY_URL=http://<shelly-ip> make shelly-soak-start\n  SHELLY_URL=http://<shelly-ip> SOAK_CYCLE_RELAY=1 make shelly-soak-run\n  make shelly-soak-stop\n  ESP32_URL=http://<esp32-ip> make esp32-ble-status\n\n"}' $(MAKEFILE_LIST)
 
 install: ## Install dependencies with the lockfile.
 	CI=1 pnpm install --frozen-lockfile
@@ -202,10 +207,10 @@ shelly-soak-start: ## Start long Shelly soak logging in the background. Requires
 			exit 1; \
 		fi; \
 		rm -f "$(SOAK_PID_FILE)" "$(SOAK_RUN_FILE)"; \
-		SHELLY_URL="$$SHELLY_URL" SCRIPT_ID="$(SCRIPT_ID)" SOAK_OUT_FILE="$$out_file" SOAK_SUMMARY_FILE="$$summary_file" SOAK_INTERVAL_MS="$(SOAK_INTERVAL_MS)" SOAK_RPC_TIMEOUT_MS="$(SOAK_RPC_TIMEOUT_MS)" SOAK_DURATION_MS="$(SOAK_DURATION_MS)" nohup "$$node_bin" "$$tsx_cli" "$(ROOT_DIR)/scripts/hardware/shelly-soak-logger.ts" >"$$log_file" 2>"$$error_log_file" & \
+		SHELLY_URL="$$SHELLY_URL" SCRIPT_ID="$(SCRIPT_ID)" SOAK_OUT_FILE="$$out_file" SOAK_SUMMARY_FILE="$$summary_file" SOAK_INTERVAL_MS="$(SOAK_INTERVAL_MS)" SOAK_RPC_TIMEOUT_MS="$(SOAK_RPC_TIMEOUT_MS)" SOAK_DURATION_MS="$(SOAK_DURATION_MS)" SOAK_CYCLE_RELAY="$(SOAK_CYCLE_RELAY)" SOAK_CYCLE_PERIOD_MS="$(SOAK_CYCLE_PERIOD_MS)" SOAK_CYCLE_MARGIN="$(SOAK_CYCLE_MARGIN)" SOAK_CYCLE_MIN_CHANGE_MS="$(SOAK_CYCLE_MIN_CHANGE_MS)" SOAK_CYCLE_CONSECUTIVE_HITS="$(SOAK_CYCLE_CONSECUTIVE_HITS)" nohup "$$node_bin" "$$tsx_cli" "$(ROOT_DIR)/scripts/hardware/shelly-soak-logger.ts" >"$$log_file" 2>"$$error_log_file" & \
 		pid=$$!; \
 		echo "$$pid" >"$(SOAK_PID_FILE)"; \
-		printf 'SOAK_OUT_FILE=%s\nSOAK_SUMMARY_FILE=%s\nSOAK_LOG_FILE=%s\nSOAK_ERROR_LOG_FILE=%s\n' "$$out_file" "$$summary_file" "$$log_file" "$$error_log_file" >"$(SOAK_RUN_FILE)"; \
+		printf 'SOAK_OUT_FILE=%s\nSOAK_SUMMARY_FILE=%s\nSOAK_LOG_FILE=%s\nSOAK_ERROR_LOG_FILE=%s\nSOAK_CYCLE_RELAY=%s\nSOAK_CYCLE_PERIOD_MS=%s\nSOAK_CYCLE_MARGIN=%s\nSOAK_CYCLE_MIN_CHANGE_MS=%s\nSOAK_CYCLE_CONSECUTIVE_HITS=%s\n' "$$out_file" "$$summary_file" "$$log_file" "$$error_log_file" "$(SOAK_CYCLE_RELAY)" "$(SOAK_CYCLE_PERIOD_MS)" "$(SOAK_CYCLE_MARGIN)" "$(SOAK_CYCLE_MIN_CHANGE_MS)" "$(SOAK_CYCLE_CONSECUTIVE_HITS)" >"$(SOAK_RUN_FILE)"; \
 		echo "started Shelly soak: pid $$pid"; \
 		echo "jsonl: $$out_file"; \
 		echo "summary: $$summary_file"; \
@@ -227,7 +232,7 @@ shelly-soak-run: ## Run long Shelly soak logging in the foreground. Requires SHE
 	if [ -z "$$node_bin" ]; then echo "node is missing; run make install first"; exit 1; fi; \
 	tsx_cli="$(ROOT_DIR)/node_modules/tsx/dist/cli.mjs"; \
 	if [ ! -f "$$tsx_cli" ]; then echo "$$tsx_cli is missing; run make install first"; exit 1; fi; \
-	SHELLY_URL="$$SHELLY_URL" SCRIPT_ID="$(SCRIPT_ID)" SOAK_OUT_FILE="$$out_file" SOAK_SUMMARY_FILE="$$summary_file" SOAK_INTERVAL_MS="$(SOAK_INTERVAL_MS)" SOAK_RPC_TIMEOUT_MS="$(SOAK_RPC_TIMEOUT_MS)" SOAK_DURATION_MS="$(SOAK_DURATION_MS)" "$$node_bin" "$$tsx_cli" "$(ROOT_DIR)/scripts/hardware/shelly-soak-logger.ts"
+	SHELLY_URL="$$SHELLY_URL" SCRIPT_ID="$(SCRIPT_ID)" SOAK_OUT_FILE="$$out_file" SOAK_SUMMARY_FILE="$$summary_file" SOAK_INTERVAL_MS="$(SOAK_INTERVAL_MS)" SOAK_RPC_TIMEOUT_MS="$(SOAK_RPC_TIMEOUT_MS)" SOAK_DURATION_MS="$(SOAK_DURATION_MS)" SOAK_CYCLE_RELAY="$(SOAK_CYCLE_RELAY)" SOAK_CYCLE_PERIOD_MS="$(SOAK_CYCLE_PERIOD_MS)" SOAK_CYCLE_MARGIN="$(SOAK_CYCLE_MARGIN)" SOAK_CYCLE_MIN_CHANGE_MS="$(SOAK_CYCLE_MIN_CHANGE_MS)" SOAK_CYCLE_CONSECUTIVE_HITS="$(SOAK_CYCLE_CONSECUTIVE_HITS)" "$$node_bin" "$$tsx_cli" "$(ROOT_DIR)/scripts/hardware/shelly-soak-logger.ts"
 
 shelly-soak-stop: ## Stop the background Shelly soak logger and keep its data files.
 	@if [ -f "$(SOAK_PID_FILE)" ] && kill -0 "$$(cat "$(SOAK_PID_FILE)")" 2>/dev/null; then \

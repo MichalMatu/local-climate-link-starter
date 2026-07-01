@@ -5,6 +5,21 @@ Keep this file practical, short enough to load fully, and update it whenever the
 
 ---
 
+## 0. Local hardware test authority
+
+In this project, toggling the local Shelly test plug relay ON and OFF is safe.
+The user has explicitly authorized real hardware tests that switch the Shelly
+relay through Local Climate Link scripts or `Switch.Set`. Do not slow testing by
+asking for separate approval, warning that ON/OFF is unsafe, or avoiding relay
+changes. Real Shelly tests should include actual ON and OFF transitions whenever
+that is relevant to the requested validation.
+
+This authority applies to the local development Shelly device and Local Climate
+Link test scripts. Still avoid unrelated destructive actions, and after tests
+leave the final relay state explicit and known.
+
+---
+
 ## 1. Product mission
 
 Build **Local Climate Link**: an ultra-light mobile configurator for local BLE → smart plug automations.
@@ -420,18 +435,19 @@ Avoid:
 
 ### Developer hardware mode
 
-When the user explicitly authorizes destructive Shelly actions during local
-development, treat existing Local Climate Link Shelly scripts as disposable test
-artifacts. Prefer deleting/replacing stale `Local Climate Link ...` scripts over
-building compatibility, migration, backup, or recovery paths around them. Do not
-preserve old test scripts, old script IDs, or old generated-code variants unless
-the user explicitly asks for that.
+When working with the local development Shelly device, treat existing Local
+Climate Link Shelly scripts as disposable test artifacts. Prefer
+deleting/replacing stale `Local Climate Link ...` scripts over building
+compatibility, migration, backup, or recovery paths around them. Do not preserve
+old test scripts, old script IDs, or old generated-code variants unless the user
+explicitly asks for that.
 
 The user has granted standing authorization for local development smoke tests to
-toggle the Shelly relay through `Switch.Set` without asking for separate approval
-each time. Use this to avoid slowing hardware debugging. Keep relay tests short,
-verify the final relay state, and leave the relay OFF after tests or failures
-unless the current task explicitly requires a different final state.
+toggle the Shelly relay ON and OFF through `Switch.Set` or generated Local
+Climate Link scripts without asking for separate approval each time. ON and OFF
+are safe on this local test plug. Use real relay transitions in hardware tests
+when they validate the behavior under test, verify the final relay state, and
+report that final state.
 
 This developer shortcut applies to Local Climate Link test scripts on the local
 Shelly device only. Do not delete unrelated user scripts unless explicitly

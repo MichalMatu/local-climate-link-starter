@@ -2,13 +2,46 @@ import { mkdir, writeFile, appendFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 const USAGE =
-  'Usage: SHELLY_URL=http://<shelly-ip> [SCRIPT_ID=1] [SOAK_INTERVAL_MS=5000] pnpm hardware:shelly:soak';
+  'Usage: SHELLY_URL=http://<shelly-ip> [SCRIPT_ID=1] [SOAK_INTERVAL_MS=5000] [SOAK_CYCLE_RELAY=1] pnpm hardware:shelly:soak';
 
 type JsonRecord = Record<string, unknown>;
+type RuleMetric = 'temperature' | 'humidity';
+type RuleDirection = 'below' | 'above';
+type CyclePhase = 'on' | 'off';
 
 type EndpointResult =
   | { ok: true; value: unknown }
   | { ok: false; error: string; status?: number | undefined };
+
+interface CycleOptions {
+  enabled: boolean;
+  periodMs: number;
+  margin?: number | undefined;
+  minChangeMs: number;
+  consecutiveHits: number;
+}
+
+interface CycleState {
+  nextPhase: CyclePhase;
+  lastAtMs?: number | undefined;
+  requests: number;
+  skips: number;
+  errors: number;
+  lastPhase?: CyclePhase | undefined;
+  lastReason?: string | undefined;
+}
+
+interface CycleThresholdPlan {
+  phase: CyclePhase;
+  metric: RuleMetric;
+  direction: RuleDirection;
+  controlValue: number;
+  margin: number;
+  onThreshold: number;
+  offThreshold: number;
+  minChangeMs: number;
+  consecutiveHits: number;
+}
 
 interface ParsedSample {
   device: {
@@ -95,6 +128,11 @@ interface SummaryState {
   lastPacketWallMs?: number | undefined;
   reasonCounts: Record<string, number>;
   errorCounts: Record<string, number>;
+  cycleRequests: number;
+  cycleSkips: number;
+  cycleErrors: number;
+  lastCyclePhase?: CyclePhase | undefined;
+  lastCycleReason?: string | undefined;
 }
 
 const isRecord = (value: unknown): value is JsonRecord =>
@@ -135,6 +173,36 @@ const readIntegerEnv = (
     throw new Error(`${name} must be an integer between ${minimum} and ${maximum}.`);
   }
   return parsed;
+};
+
+const readOptionalNumberEnv = (
+  name: string,
+  minimum: number,
+  maximum: number
+): number | undefined => {
+  const raw = readOptionalEnv(name);
+  if (raw === undefined) {
+    return undefined;
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed < minimum || parsed > maximum) {
+    throw new Error(`${name} must be a number between ${minimum} and ${maximum}.`);
+  }
+  return parsed;
+};
+
+const readBooleanEnv = (name: string, fallback: boolean): boolean => {
+  const raw = readOptionalEnv(name)?.toLowerCase();
+  if (raw === undefined) {
+    return fallback;
+  }
+  if (['1', 'true', 'yes', 'on'].includes(raw)) {
+    return true;
+  }
+  if (['0', 'false', 'no', 'off'].includes(raw)) {
+    return false;
+  }
+  throw new Error(`${name} must be one of: 1, 0, true, false, yes, no, on, off.`);
 };
 
 const numberField = (value: unknown): number | undefined =>
@@ -239,6 +307,187 @@ const collectResponses = async (
   return Object.fromEntries(entries);
 };
 
+const evalScript = async (
+  baseUrl: URL,
+  scriptId: number,
+  code: string,
+  timeoutMs: number
+): Promise<EndpointResult> => {
+  const url = endpoint(
+    baseUrl,
+    `/rpc/Script.Eval?id=${scriptId}&code=${encodeURIComponent(code)}`
+  );
+  return fetchJson(url, timeoutMs);
+};
+
+const numberLiteral = (value: number): string => {
+  if (!Number.isFinite(value)) {
+    throw new Error(`Invalid number literal: ${value}`);
+  }
+  return String(value);
+};
+
+const rounded = (value: number): number => Math.round(value * 100) / 100;
+
+const cycleMarginFor = (
+  metric: RuleMetric,
+  configuredMargin: number | undefined
+): number => configuredMargin ?? (metric === 'humidity' ? 5 : 1);
+
+const cycleThresholdsFor = (
+  parsed: ParsedSample,
+  phase: CyclePhase,
+  options: CycleOptions
+): CycleThresholdPlan | { reason: string } => {
+  if (parsed.script.running === false) {
+    return { reason: 'script-not-running' };
+  }
+
+  const metric = parsed.rule.metric;
+  const direction = parsed.rule.direction;
+  if (metric === undefined || direction === undefined) {
+    return { reason: 'missing-rule-metadata' };
+  }
+
+  const controlValue =
+    parsed.decision.controlValue ??
+    (metric === 'humidity' ? parsed.sensor.humidityPct : parsed.sensor.temperatureC);
+  if (controlValue === undefined) {
+    return { reason: 'missing-control-value' };
+  }
+
+  const margin = cycleMarginFor(metric, options.margin);
+  let onThreshold: number;
+  let offThreshold: number;
+
+  if (direction === 'below') {
+    if (phase === 'on') {
+      onThreshold = controlValue + margin;
+      offThreshold = controlValue + margin * 2;
+    } else {
+      onThreshold = controlValue - margin * 2;
+      offThreshold = controlValue - margin;
+    }
+  } else if (phase === 'on') {
+    onThreshold = controlValue - margin;
+    offThreshold = controlValue - margin * 2;
+  } else {
+    onThreshold = controlValue + margin * 2;
+    offThreshold = controlValue + margin;
+  }
+
+  return {
+    phase,
+    metric,
+    direction,
+    controlValue: rounded(controlValue),
+    margin,
+    onThreshold: rounded(onThreshold),
+    offThreshold: rounded(offThreshold),
+    minChangeMs: options.minChangeMs,
+    consecutiveHits: options.consecutiveHits
+  };
+};
+
+const createCycleEvalCode = (plan: CycleThresholdPlan): string =>
+  [
+    `C.on=${numberLiteral(plan.onThreshold)}`,
+    `C.off=${numberLiteral(plan.offThreshold)}`,
+    `C.c=${numberLiteral(plan.minChangeMs)}`,
+    `C.h=${numberLiteral(plan.consecutiveHits)}`,
+    'R.lc=0',
+    'R.nh=0',
+    'R.fh=0',
+    JSON.stringify(`soak-cycle-${plan.phase}`)
+  ].join(';');
+
+const shouldCycleNow = (
+  state: CycleState,
+  options: CycleOptions,
+  nowMs: number
+): boolean =>
+  options.enabled &&
+  (state.lastAtMs === undefined || nowMs - state.lastAtMs >= options.periodMs);
+
+const oppositePhase = (phase: CyclePhase): CyclePhase => (phase === 'on' ? 'off' : 'on');
+
+const maybeCycleRelayThresholds = async (options: {
+  shellyUrl: URL;
+  scriptId: number;
+  timeoutMs: number;
+  outFile: string;
+  sampledAtMs: number;
+  startedAtMs: number;
+  parsed: ParsedSample;
+  cycleOptions: CycleOptions;
+  cycleState: CycleState;
+  summary: SummaryState;
+}): Promise<void> => {
+  const {
+    shellyUrl,
+    scriptId,
+    timeoutMs,
+    outFile,
+    sampledAtMs,
+    startedAtMs,
+    parsed,
+    cycleOptions,
+    cycleState,
+    summary
+  } = options;
+
+  if (!shouldCycleNow(cycleState, cycleOptions, sampledAtMs)) {
+    return;
+  }
+
+  const plan = cycleThresholdsFor(parsed, cycleState.nextPhase, cycleOptions);
+  if ('reason' in plan) {
+    cycleState.skips += 1;
+    cycleState.lastReason = plan.reason;
+    summary.cycleSkips = cycleState.skips;
+    summary.lastCycleReason = plan.reason;
+    await writeJsonLine(outFile, {
+      type: 'cycle-skip',
+      schemaVersion: 1,
+      sampledAt: new Date(sampledAtMs).toISOString(),
+      elapsedMs: sampledAtMs - startedAtMs,
+      phase: cycleState.nextPhase,
+      reason: plan.reason
+    });
+    return;
+  }
+
+  cycleState.requests += 1;
+  cycleState.lastAtMs = sampledAtMs;
+  cycleState.lastPhase = plan.phase;
+  summary.cycleRequests = cycleState.requests;
+  summary.lastCyclePhase = plan.phase;
+
+  const code = createCycleEvalCode(plan);
+  const result = await evalScript(shellyUrl, scriptId, code, timeoutMs);
+  if (!result.ok) {
+    cycleState.errors += 1;
+    summary.cycleErrors = cycleState.errors;
+    cycleState.lastReason = result.error;
+    summary.lastCycleReason = result.error;
+  } else {
+    cycleState.nextPhase = oppositePhase(plan.phase);
+    cycleState.lastReason = 'thresholds-updated';
+    summary.lastCycleReason = 'thresholds-updated';
+  }
+
+  await writeJsonLine(outFile, {
+    type: 'cycle',
+    schemaVersion: 1,
+    sampledAt: new Date(sampledAtMs).toISOString(),
+    elapsedMs: sampledAtMs - startedAtMs,
+    ok: result.ok,
+    plan,
+    evalCode: code,
+    result
+  });
+};
+
 const parseDiag = (diag: unknown): Partial<ParsedSample> => {
   if (!isRecord(diag)) {
     return {};
@@ -249,6 +498,8 @@ const parseDiag = (diag: unknown): Partial<ParsedSample> => {
   const timeMeta = arrayField(diag, 'y');
   const plugMeta = arrayField(diag, 'p');
   const runtime = arrayField(diag, 'g');
+  const metricCode = numberField(ruleMeta?.[0]);
+  const directionCode = numberField(ruleMeta?.[1]);
 
   return {
     device: {
@@ -273,8 +524,10 @@ const parseDiag = (diag: unknown): Partial<ParsedSample> => {
       rssiDbm: numberField(runtime?.[4])
     },
     rule: {
-      metric: ruleMeta?.[0] === 1 ? 'humidity' : 'temperature',
-      direction: ruleMeta?.[1] === 1 ? 'above' : 'below',
+      metric:
+        metricCode === 1 ? 'humidity' : metricCode === 0 ? 'temperature' : undefined,
+      direction:
+        directionCode === 1 ? 'above' : directionCode === 0 ? 'below' : undefined,
       onThreshold: numberField(ruleMeta?.[2]),
       offThreshold: numberField(ruleMeta?.[3]),
       staleTimeoutSec: numberField(ruleMeta?.[4]),
@@ -517,6 +770,7 @@ const createSummaryMarkdown = (options: {
   outFile: string;
   summaryFile: string;
   intervalMs: number;
+  cycleOptions: CycleOptions;
 }): string => {
   const { summary } = options;
   const startedAtMs = Date.parse(summary.startedAtIso);
@@ -532,6 +786,16 @@ const createSummaryMarkdown = (options: {
     ['Shelly URL', options.shellyUrl],
     ['Script ID', options.scriptId],
     ['Interwał próbkowania', `${options.intervalMs} ms`],
+    ['Cykliczne progi ON/OFF', options.cycleOptions.enabled ? 'włączone' : 'wyłączone'],
+    ['Okres zmiany progów', `${options.cycleOptions.periodMs} ms`],
+    ['Margines progów', options.cycleOptions.margin],
+    ['Testowy minChangeMs', options.cycleOptions.minChangeMs],
+    ['Testowe consecutiveHits', options.cycleOptions.consecutiveHits],
+    ['Próby zmiany progów', summary.cycleRequests],
+    ['Pominięte zmiany progów', summary.cycleSkips],
+    ['Błędy zmiany progów', summary.cycleErrors],
+    ['Ostatnia faza progów', summary.lastCyclePhase],
+    ['Ostatni wynik progów', summary.lastCycleReason],
     ['Próbki', summary.samples],
     ['Próbki OK', summary.okSamples],
     ['Próbki z błędem', summary.failedSamples],
@@ -575,6 +839,13 @@ const main = async (): Promise<void> => {
   const intervalMs = readIntegerEnv('SOAK_INTERVAL_MS', 5000, 1000, 600000);
   const timeoutMs = readIntegerEnv('SOAK_RPC_TIMEOUT_MS', 4000, 500, 60000);
   const durationMs = readIntegerEnv('SOAK_DURATION_MS', 0, 0, 7 * 24 * 60 * 60 * 1000);
+  const cycleOptions: CycleOptions = {
+    enabled: readBooleanEnv('SOAK_CYCLE_RELAY', false),
+    periodMs: readIntegerEnv('SOAK_CYCLE_PERIOD_MS', 120000, 10000, 60 * 60 * 1000),
+    margin: readOptionalNumberEnv('SOAK_CYCLE_MARGIN', 0.01, 100),
+    minChangeMs: readIntegerEnv('SOAK_CYCLE_MIN_CHANGE_MS', 1000, 0, 60 * 60 * 1000),
+    consecutiveHits: readIntegerEnv('SOAK_CYCLE_CONSECUTIVE_HITS', 1, 1, 10)
+  };
   const outFile = resolve(readOptionalEnv('SOAK_OUT_FILE') ?? defaultOutFile());
   const summaryFile = resolve(
     readOptionalEnv('SOAK_SUMMARY_FILE') ?? summaryFileFor(outFile)
@@ -595,7 +866,16 @@ const main = async (): Promise<void> => {
     maxNoMeasurementUpdateMs: 0,
     maxNoPacketUpdateMs: 0,
     reasonCounts: {},
-    errorCounts: {}
+    errorCounts: {},
+    cycleRequests: 0,
+    cycleSkips: 0,
+    cycleErrors: 0
+  };
+  const cycleState: CycleState = {
+    nextPhase: 'on',
+    requests: 0,
+    skips: 0,
+    errors: 0
   };
 
   await mkdir(dirname(outFile), { recursive: true });
@@ -627,12 +907,24 @@ const main = async (): Promise<void> => {
     scriptId,
     intervalMs,
     timeoutMs,
-    durationMs: durationMs || null
+    durationMs: durationMs || null,
+    cycleOptions
   });
 
   console.log(`Shelly soak logger started`);
   console.log(`JSONL: ${outFile}`);
   console.log(`Summary: ${summaryFile}`);
+  if (cycleOptions.enabled) {
+    console.log(
+      [
+        `Cycle: enabled`,
+        `period=${cycleOptions.periodMs}ms`,
+        `margin=${cycleOptions.margin ?? 'auto'}`,
+        `minChange=${cycleOptions.minChangeMs}ms`,
+        `hits=${cycleOptions.consecutiveHits}`
+      ].join(' ')
+    );
+  }
 
   let sequence = 0;
   try {
@@ -656,6 +948,19 @@ const main = async (): Promise<void> => {
         ok: sampleOk,
         parsed,
         responses
+      });
+
+      await maybeCycleRelayThresholds({
+        shellyUrl,
+        scriptId,
+        timeoutMs,
+        outFile,
+        sampledAtMs,
+        startedAtMs,
+        parsed,
+        cycleOptions,
+        cycleState,
+        summary
       });
 
       const reason = parsed.decision.reason ?? 'brak';
@@ -698,7 +1003,8 @@ const main = async (): Promise<void> => {
       scriptId,
       outFile,
       summaryFile,
-      intervalMs
+      intervalMs,
+      cycleOptions
     });
     await writeFile(summaryFile, summaryMarkdown, 'utf8');
     await writeJsonLine(outFile, {

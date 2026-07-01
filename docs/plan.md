@@ -73,7 +73,8 @@ Already present in the codebase:
   installed script, including read-only Shelly clock status, script hash/running
   state, plug telemetry, and readable decision reasons.
 - long-running Shelly soak logger for background hardware stability checks, with
-  JSONL samples and Markdown summaries under `artifacts/hardware/`.
+  JSONL samples, Markdown summaries, and an optional threshold-cycling mode that
+  exercises real relay ON/OFF transitions through the generated runtime rule.
 
 The current MVP path is ready for user hardware testing. The latest dated
 Shelly Plug S Gen3 audit and full runtime matrix are recorded in

@@ -121,6 +121,13 @@ For supervised terminal sessions, use:
 SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-run
 ```
 
+For an active endurance run that should exercise real relay ON/OFF transitions,
+enable threshold cycling:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 SOAK_CYCLE_RELAY=1 make shelly-soak-run
+```
+
 The background logger runs until `make shelly-soak-stop`. Foreground mode runs
 until Ctrl-C. In both modes, `SOAK_DURATION_MS` can stop the logger
 automatically. It writes:
@@ -130,6 +137,15 @@ artifacts/hardware/shelly-soak-<timestamp>.jsonl
 artifacts/hardware/shelly-soak-<timestamp>.summary.md
 artifacts/hardware/shelly-soak-<timestamp>.log
 ```
+
+With `SOAK_CYCLE_RELAY=1`, the logger uses `Script.Eval` to update the running
+script thresholds around the latest real control value. It alternates an ON
+phase and an OFF phase every `SOAK_CYCLE_PERIOD_MS` and sets test-time
+`minChangeMs` / `consecutiveHits` through `SOAK_CYCLE_MIN_CHANGE_MS` and
+`SOAK_CYCLE_CONSECUTIVE_HITS`. The relay still changes through the generated
+runtime rule after a real BLE packet arrives; the logger does not directly call
+`Switch.Set` for the cycle. If the script is not running or no control value is
+available, the JSONL stream records `cycle-skip` entries.
 
 Each JSONL sample includes raw endpoint responses and parsed fields for:
 
@@ -141,8 +157,8 @@ Each JSONL sample includes raw endpoint responses and parsed fields for:
 
 The summary reports sample counts, endpoint failures, script-not-running
 samples, relay changes, RSSI range, memory high/low marks, decision reason
-counts, and the longest observed gap without a new full measurement or target
-BLE packet.
+counts, threshold-cycle attempts, and the longest observed gap without a new
+full measurement or target BLE packet.
 
 ## Latest observed real hardware results
 

@@ -86,7 +86,7 @@ SHELLY_URL=http://<shelly-ip> make shelly-status
 SHELLY_URL=http://<shelly-ip> make shelly-diag
 SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install
 SHELLY_URL=http://<shelly-ip> make shelly-soak-start
-SHELLY_URL=http://<shelly-ip> make shelly-soak-run
+SHELLY_URL=http://<shelly-ip> SOAK_CYCLE_RELAY=1 make shelly-soak-run
 make shelly-soak-status
 make shelly-soak-stop
 ESP32_URL=http://<esp32-ip> make esp32-ble-status
@@ -139,12 +139,25 @@ SOAK_INTERVAL_MS=5000
 SOAK_RPC_TIMEOUT_MS=4000
 SOAK_DURATION_MS=0
 SOAK_OUT_FILE=artifacts/hardware/manual-soak.jsonl
+SOAK_CYCLE_RELAY=1
+SOAK_CYCLE_PERIOD_MS=120000
+SOAK_CYCLE_MARGIN=
+SOAK_CYCLE_MIN_CHANGE_MS=1000
+SOAK_CYCLE_CONSECUTIVE_HITS=1
 ```
 
 `SOAK_DURATION_MS=0` means the background logger runs until
 `make shelly-soak-stop`; foreground mode runs until Ctrl-C.
 Each sample stores raw endpoint responses plus parsed fields for BLE freshness,
 relay state, decision reason, RSSI, Shelly memory, and plug telemetry.
+
+Set `SOAK_CYCLE_RELAY=1` for a real ON/OFF endurance run. The logger then uses
+`Script.Eval` every `SOAK_CYCLE_PERIOD_MS` to move the running script thresholds
+around the latest real sensor value. It does not directly call `Switch.Set` for
+the cycle; the next real BLE measurement still has to pass through the generated
+runtime logic and change the relay by rule. This keeps the long test close to
+the production behavior while making ON and OFF transitions likely during a
+multi-hour run.
 
 ## Demo Mode
 
