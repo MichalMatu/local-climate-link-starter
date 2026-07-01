@@ -110,9 +110,15 @@ Use the soak logger when BLE/Shelly stability matters more than a short smoke
 result:
 
 ```bash
-SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-start
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 SOAK_CYCLE_RELAY=1 make shelly-soak-start
 make shelly-soak-status
 make shelly-soak-stop
+```
+
+For an overnight active soak, use:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-overnight
 ```
 
 For supervised terminal sessions, use:
@@ -128,9 +134,11 @@ enable threshold cycling:
 SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 SOAK_CYCLE_RELAY=1 make shelly-soak-run
 ```
 
-The background logger runs until `make shelly-soak-stop`. Foreground mode runs
-until Ctrl-C. In both modes, `SOAK_DURATION_MS` can stop the logger
-automatically. It writes:
+The background logger runs until `make shelly-soak-stop`, unless
+`SOAK_DURATION_MS` is set. `make shelly-soak-overnight` sets active cycling and
+an 8-hour `SOAK_OVERNIGHT_DURATION_MS` by default. Foreground mode runs until
+Ctrl-C. Background mode uses `screen` when available, which is the preferred
+path for multi-hour tests on macOS. It writes:
 
 ```text
 artifacts/hardware/shelly-soak-<timestamp>.jsonl

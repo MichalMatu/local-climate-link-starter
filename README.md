@@ -121,9 +121,15 @@ final `Switch.Set` OFF command.
 For long stability checks, start a soak logger and stop it later:
 
 ```bash
-SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-start
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 SOAK_CYCLE_RELAY=1 make shelly-soak-start
 make shelly-soak-status
 make shelly-soak-stop
+```
+
+For an overnight active soak, use the 8-hour helper:
+
+```bash
+SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-overnight
 ```
 
 Use foreground mode when a supervising terminal/session should own the long run:
@@ -138,7 +144,9 @@ Useful overrides:
 SOAK_INTERVAL_MS=5000
 SOAK_RPC_TIMEOUT_MS=4000
 SOAK_DURATION_MS=0
+SOAK_OVERNIGHT_DURATION_MS=28800000
 SOAK_OUT_FILE=artifacts/hardware/manual-soak.jsonl
+SOAK_SCREEN_SESSION=lcl-soak
 SOAK_CYCLE_RELAY=1
 SOAK_CYCLE_PERIOD_MS=120000
 SOAK_CYCLE_MARGIN=
@@ -153,6 +161,10 @@ SOAK_STOP_SCRIPT_ON_FINISH=1
 `make shelly-soak-stop`; foreground mode runs until Ctrl-C.
 Each sample stores raw endpoint responses plus parsed fields for BLE freshness,
 relay state, decision reason, RSSI, Shelly memory, and plug telemetry.
+Background mode uses `screen` when available, which is the preferred path for
+multi-hour and overnight tests on macOS. `make shelly-soak-stop` still sends
+SIGINT to the logger so it can write the summary, stop the Shelly script, and
+leave the relay OFF.
 
 Set `SOAK_CYCLE_RELAY=1` for a real ON/OFF endurance run. The logger then uses
 `Script.Eval` every `SOAK_CYCLE_PERIOD_MS` to move the running script thresholds
