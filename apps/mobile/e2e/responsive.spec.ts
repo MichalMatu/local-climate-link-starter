@@ -177,6 +177,19 @@ const requiredBox = async (locator: Locator) => {
   return box!;
 };
 
+const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
+  const row = button.locator(
+    'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " action-row ")][1]'
+  );
+  await expect(row).toHaveCount(1);
+
+  const [buttonBox, rowBox] = await Promise.all([requiredBox(button), requiredBox(row)]);
+  const buttonRight = Math.round(buttonBox.x + buttonBox.width);
+  const rowRight = Math.round(rowBox.x + rowBox.width);
+
+  expect(Math.abs(buttonRight - rowRight)).toBeLessThanOrEqual(2);
+};
+
 const expectShellyCardActionsLayout = async (page: Page) => {
   const settingsToggle = page.getByRole('button', { name: 'Ustawienia gniazdka' });
   await expect(settingsToggle).toBeVisible();
@@ -281,6 +294,13 @@ for (const viewport of viewports) {
         await expect(page.getByRole('dialog', { name: 'Dodaj termometr' })).toBeVisible();
         await expectNoHorizontalOverflow(page);
         await page.getByRole('button', { name: 'Zamknij' }).click();
+      }
+      if (tab === 'Diag') {
+        const refreshDiagnosticsButton = page.getByRole('button', {
+          name: 'Odśwież diagnostykę'
+        });
+        await expect(refreshDiagnosticsButton).toBeVisible();
+        await expectActionButtonAlignedToActionEdge(refreshDiagnosticsButton);
       }
       await expectNoHorizontalOverflow(page);
       await expectNoLegacyInlineFeedback(page);

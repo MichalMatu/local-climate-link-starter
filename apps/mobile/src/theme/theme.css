@@ -149,7 +149,7 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: var(--lcl-spacing-md) var(--lcl-spacing-xl);
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .add-device-action-row {
@@ -810,7 +810,7 @@ select {
 
   .action-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   .primary-action,

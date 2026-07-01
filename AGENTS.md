@@ -514,6 +514,10 @@ Visual direction:
 - Use whitespace deliberately to separate groups; do not create large empty areas because controls are placed in the wrong part of a modal or page.
 - Repeated saved items may be cards. Page sections, modal bodies, and diagnostic summaries should be compact layouts unless framing is genuinely useful.
 - Primary actions for a modal belong in the modal footer. Secondary contextual help belongs in the header or an info tooltip. The modal body is for the actual data or form.
+- Standalone action buttons in toolbars, page headers, cards, and compact
+  panels should either align with the app's action edge, normally the right
+  side, or intentionally stretch full width on mobile. A lone button stuck to
+  the left edge is not an acceptable default.
 - Status badges are only for states that change the user's decision. Do not badge obvious states such as an item being listed, selected, supported, or already saved when the surrounding UI makes that clear.
 
 Required token categories:
@@ -978,6 +982,9 @@ Reject or refactor these patterns:
 - Non-token breakpoint values or fixed two-column layouts that create horizontal overflow.
 - Short-lived success/error/loading messages rendered inside cards or button rows so controls jump around.
 - Primary modal/page actions rendered in the content area when they can live in the footer/header; this wastes space, pushes results down, and leaves awkward empty areas.
+- Standalone action buttons left-aligned in otherwise right-aligned or
+  full-width action patterns, for example a lone `Odśwież diagnostykę` button
+  sitting on the left side of a panel.
 - Small diagnostic payloads expanded into oversized cards, repeated tiles, or modal sections that waste vertical space; compact rows are required for a handful of parameters.
 - Filler subtitles, duplicated descriptions, or obvious explanations added just to occupy space.
 - Badges such as `dodane`, `wybrane`, `wspierane`, `manual`, or `brak` when the state is already obvious from context or does not change the next user action.
