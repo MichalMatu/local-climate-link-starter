@@ -141,11 +141,15 @@ artifacts/hardware/shelly-soak-<timestamp>.log
 With `SOAK_CYCLE_RELAY=1`, the logger uses `Script.Eval` to update the running
 script thresholds around the latest real control value. It alternates an ON
 phase and an OFF phase every `SOAK_CYCLE_PERIOD_MS` and sets test-time
-`minChangeMs` / `consecutiveHits` through `SOAK_CYCLE_MIN_CHANGE_MS` and
+`minChangeMs`, `maxOnMs`, and `consecutiveHits` through
+`SOAK_CYCLE_MIN_CHANGE_MS`, `SOAK_CYCLE_MAX_ON_MS`, and
 `SOAK_CYCLE_CONSECUTIVE_HITS`. The relay still changes through the generated
 runtime rule after a real BLE packet arrives; the logger does not directly call
-`Switch.Set` for the cycle. If the script is not running or no control value is
-available, the JSONL stream records `cycle-skip` entries.
+`Switch.Set` for the cycle. Before the first cycle it captures the original
+runtime thresholds, uses a longer test-time `maxOnMs`, stops the script on
+finish, and leaves the relay OFF by default through `SOAK_FINAL_OFF=1` and
+`SOAK_STOP_SCRIPT_ON_FINISH=1`. If the script is not running or no control value
+is available, the JSONL stream records `cycle-skip` entries.
 
 Each JSONL sample includes raw endpoint responses and parsed fields for:
 

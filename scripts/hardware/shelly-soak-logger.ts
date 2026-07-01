@@ -18,12 +18,16 @@ interface CycleOptions {
   periodMs: number;
   margin?: number | undefined;
   minChangeMs: number;
+  maxOnMs: number;
   consecutiveHits: number;
+  finalOff: boolean;
+  stopScriptOnFinish: boolean;
 }
 
 interface CycleState {
   nextPhase: CyclePhase;
   lastAtMs?: number | undefined;
+  originalConfig?: RuntimeConfigSnapshot | undefined;
   requests: number;
   skips: number;
   errors: number;
@@ -40,7 +44,17 @@ interface CycleThresholdPlan {
   onThreshold: number;
   offThreshold: number;
   minChangeMs: number;
+  maxOnMs: number;
   consecutiveHits: number;
+}
+
+interface RuntimeConfigSnapshot {
+  on: number;
+  off: number;
+  minChangeMs: number;
+  consecutiveHits: number;
+  maxOnMs: number;
+  vpdTargetKpa?: number | undefined;
 }
 
 interface ParsedSample {
@@ -133,6 +147,10 @@ interface SummaryState {
   cycleErrors: number;
   lastCyclePhase?: CyclePhase | undefined;
   lastCycleReason?: string | undefined;
+  cycleOriginalCaptured?: boolean | undefined;
+  cycleCleanupOk?: boolean | undefined;
+  cycleFinalOffOk?: boolean | undefined;
+  cycleScriptStopOk?: boolean | undefined;
 }
 
 const isRecord = (value: unknown): value is JsonRecord =>
@@ -320,6 +338,16 @@ const evalScript = async (
   return fetchJson(url, timeoutMs);
 };
 
+const switchOff = async (baseUrl: URL, timeoutMs: number): Promise<EndpointResult> =>
+  fetchJson(endpoint(baseUrl, '/rpc/Switch.Set?id=0&on=false'), timeoutMs);
+
+const stopScript = async (
+  baseUrl: URL,
+  scriptId: number,
+  timeoutMs: number
+): Promise<EndpointResult> =>
+  fetchJson(endpoint(baseUrl, `/rpc/Script.Stop?id=${scriptId}`), timeoutMs);
+
 const numberLiteral = (value: number): string => {
   if (!Number.isFinite(value)) {
     throw new Error(`Invalid number literal: ${value}`);
@@ -328,6 +356,66 @@ const numberLiteral = (value: number): string => {
 };
 
 const rounded = (value: number): number => Math.round(value * 100) / 100;
+
+const evalResultString = (result: EndpointResult): string | undefined => {
+  if (!result.ok) {
+    return undefined;
+  }
+  return (
+    stringField(isRecord(result.value) ? result.value.result : undefined) ??
+    (typeof result.value === 'string' ? result.value : undefined)
+  );
+};
+
+const parseRuntimeConfigSnapshot = (
+  result: EndpointResult
+): RuntimeConfigSnapshot | undefined => {
+  const raw = evalResultString(result);
+  if (!raw) {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) {
+      return undefined;
+    }
+    const on = numberField(parsed.on);
+    const off = numberField(parsed.off);
+    const minChangeMs = numberField(parsed.c);
+    const consecutiveHits = numberField(parsed.h);
+    const maxOnMs = numberField(parsed.x);
+    const vpdTargetKpa = numberField(parsed.vp);
+    if (
+      on === undefined ||
+      off === undefined ||
+      minChangeMs === undefined ||
+      consecutiveHits === undefined ||
+      maxOnMs === undefined
+    ) {
+      return undefined;
+    }
+    return {
+      on,
+      off,
+      minChangeMs,
+      consecutiveHits,
+      maxOnMs,
+      vpdTargetKpa
+    };
+  } catch {
+    return undefined;
+  }
+};
+
+const captureRuntimeConfig = async (
+  baseUrl: URL,
+  scriptId: number,
+  timeoutMs: number
+): Promise<{ result: EndpointResult; snapshot?: RuntimeConfigSnapshot | undefined }> => {
+  const code = 'JSON.stringify({on:C.on,off:C.off,c:C.c,h:C.h,x:C.x,vp:C.vp})';
+  const result = await evalScript(baseUrl, scriptId, code, timeoutMs);
+  return { result, snapshot: parseRuntimeConfigSnapshot(result) };
+};
 
 const cycleMarginFor = (
   metric: RuleMetric,
@@ -385,6 +473,7 @@ const cycleThresholdsFor = (
     onThreshold: rounded(onThreshold),
     offThreshold: rounded(offThreshold),
     minChangeMs: options.minChangeMs,
+    maxOnMs: options.maxOnMs,
     consecutiveHits: options.consecutiveHits
   };
 };
@@ -395,6 +484,7 @@ const createCycleEvalCode = (plan: CycleThresholdPlan): string =>
     `C.off=${numberLiteral(plan.offThreshold)}`,
     `C.c=${numberLiteral(plan.minChangeMs)}`,
     `C.h=${numberLiteral(plan.consecutiveHits)}`,
+    `C.x=${numberLiteral(plan.maxOnMs)}`,
     'R.lc=0',
     'R.nh=0',
     'R.fh=0',
@@ -457,6 +547,33 @@ const maybeCycleRelayThresholds = async (options: {
     return;
   }
 
+  if (cycleState.originalConfig === undefined) {
+    const capture = await captureRuntimeConfig(shellyUrl, scriptId, timeoutMs);
+    if (capture.snapshot === undefined) {
+      cycleState.errors += 1;
+      cycleState.lastReason = 'original-config-capture-failed';
+      summary.cycleErrors = cycleState.errors;
+      summary.lastCycleReason = cycleState.lastReason;
+      await writeJsonLine(outFile, {
+        type: 'cycle-capture-error',
+        schemaVersion: 1,
+        sampledAt: new Date(sampledAtMs).toISOString(),
+        elapsedMs: sampledAtMs - startedAtMs,
+        result: capture.result
+      });
+      return;
+    }
+    cycleState.originalConfig = capture.snapshot;
+    summary.cycleOriginalCaptured = true;
+    await writeJsonLine(outFile, {
+      type: 'cycle-original-config',
+      schemaVersion: 1,
+      sampledAt: new Date(sampledAtMs).toISOString(),
+      elapsedMs: sampledAtMs - startedAtMs,
+      config: capture.snapshot
+    });
+  }
+
   cycleState.requests += 1;
   cycleState.lastAtMs = sampledAtMs;
   cycleState.lastPhase = plan.phase;
@@ -485,6 +602,105 @@ const maybeCycleRelayThresholds = async (options: {
     plan,
     evalCode: code,
     result
+  });
+};
+
+const createRestoreEvalCode = (
+  snapshot: RuntimeConfigSnapshot,
+  finalOff: boolean
+): string =>
+  [
+    `C.on=${numberLiteral(snapshot.on)}`,
+    `C.off=${numberLiteral(snapshot.off)}`,
+    `C.c=${numberLiteral(snapshot.minChangeMs)}`,
+    `C.h=${numberLiteral(snapshot.consecutiveHits)}`,
+    `C.x=${numberLiteral(snapshot.maxOnMs)}`,
+    snapshot.vpdTargetKpa === undefined
+      ? undefined
+      : `C.vp=${numberLiteral(snapshot.vpdTargetKpa)}`,
+    'R.lc=0',
+    'R.nh=0',
+    'R.fh=0',
+    finalOff ? 'sw(false,"soak-final-off",true)' : undefined,
+    JSON.stringify(finalOff ? 'soak-restored-final-off' : 'soak-restored')
+  ]
+    .filter((part): part is string => part !== undefined)
+    .join(';');
+
+const cleanupCycleRuntime = async (options: {
+  shellyUrl: URL;
+  scriptId: number;
+  timeoutMs: number;
+  outFile: string;
+  cycleOptions: CycleOptions;
+  cycleState: CycleState;
+  summary: SummaryState;
+}): Promise<void> => {
+  const { shellyUrl, scriptId, timeoutMs, outFile, cycleOptions, cycleState, summary } =
+    options;
+  if (!cycleOptions.enabled) {
+    return;
+  }
+
+  const cleanup: JsonRecord = {
+    restored: false,
+    scriptStopped: false,
+    finalOff: false
+  };
+
+  if (cycleOptions.stopScriptOnFinish) {
+    const stop = await stopScript(shellyUrl, scriptId, timeoutMs);
+    cleanup.scriptStop = stop;
+    cleanup.scriptStopped = stop.ok;
+    summary.cycleScriptStopOk = stop.ok;
+    summary.cycleCleanupOk = stop.ok;
+    if (!stop.ok) {
+      increment(summary.errorCounts, `cycle-script-stop: ${stop.error}`);
+      if (cycleState.originalConfig !== undefined) {
+        const restore = await evalScript(
+          shellyUrl,
+          scriptId,
+          createRestoreEvalCode(cycleState.originalConfig, cycleOptions.finalOff),
+          timeoutMs
+        );
+        cleanup.restore = restore;
+        cleanup.restored = restore.ok;
+        summary.cycleCleanupOk = restore.ok;
+      }
+    }
+  } else if (cycleState.originalConfig !== undefined) {
+    const restore = await evalScript(
+      shellyUrl,
+      scriptId,
+      createRestoreEvalCode(cycleState.originalConfig, cycleOptions.finalOff),
+      timeoutMs
+    );
+    cleanup.restore = restore;
+    cleanup.restored = restore.ok;
+    summary.cycleCleanupOk = restore.ok;
+    if (!restore.ok) {
+      increment(summary.errorCounts, `cycle-cleanup: ${restore.error}`);
+    }
+    if (cycleOptions.finalOff) {
+      await delay(500);
+    }
+  }
+
+  if (cycleOptions.finalOff) {
+    const finalOff = await switchOff(shellyUrl, timeoutMs);
+    cleanup.finalOffResult = finalOff;
+    cleanup.finalOff = finalOff.ok;
+    summary.cycleFinalOffOk = finalOff.ok;
+    if (!finalOff.ok) {
+      increment(summary.errorCounts, `cycle-final-off: ${finalOff.error}`);
+    }
+  }
+
+  await writeJsonLine(outFile, {
+    type: 'cycle-cleanup',
+    schemaVersion: 1,
+    finishedAt: new Date().toISOString(),
+    cleanup
   });
 };
 
@@ -790,12 +1006,22 @@ const createSummaryMarkdown = (options: {
     ['Okres zmiany progów', `${options.cycleOptions.periodMs} ms`],
     ['Margines progów', options.cycleOptions.margin],
     ['Testowy minChangeMs', options.cycleOptions.minChangeMs],
+    ['Testowy maxOnMs', options.cycleOptions.maxOnMs],
     ['Testowe consecutiveHits', options.cycleOptions.consecutiveHits],
+    ['Final OFF po cyklu', options.cycleOptions.finalOff ? 'włączone' : 'wyłączone'],
+    [
+      'Stop skryptu po cyklu',
+      options.cycleOptions.stopScriptOnFinish ? 'włączone' : 'wyłączone'
+    ],
     ['Próby zmiany progów', summary.cycleRequests],
     ['Pominięte zmiany progów', summary.cycleSkips],
     ['Błędy zmiany progów', summary.cycleErrors],
     ['Ostatnia faza progów', summary.lastCyclePhase],
     ['Ostatni wynik progów', summary.lastCycleReason],
+    ['Oryginalna konfiguracja zapisana', summary.cycleOriginalCaptured],
+    ['Sprzątanie konfiguracji OK', summary.cycleCleanupOk],
+    ['Stop skryptu OK', summary.cycleScriptStopOk],
+    ['Końcowe OFF OK', summary.cycleFinalOffOk],
     ['Próbki', summary.samples],
     ['Próbki OK', summary.okSamples],
     ['Próbki z błędem', summary.failedSamples],
@@ -839,12 +1065,27 @@ const main = async (): Promise<void> => {
   const intervalMs = readIntegerEnv('SOAK_INTERVAL_MS', 5000, 1000, 600000);
   const timeoutMs = readIntegerEnv('SOAK_RPC_TIMEOUT_MS', 4000, 500, 60000);
   const durationMs = readIntegerEnv('SOAK_DURATION_MS', 0, 0, 7 * 24 * 60 * 60 * 1000);
+  const cycleEnabled = readBooleanEnv('SOAK_CYCLE_RELAY', false);
+  const cyclePeriodMs = readIntegerEnv(
+    'SOAK_CYCLE_PERIOD_MS',
+    120000,
+    10000,
+    60 * 60 * 1000
+  );
   const cycleOptions: CycleOptions = {
-    enabled: readBooleanEnv('SOAK_CYCLE_RELAY', false),
-    periodMs: readIntegerEnv('SOAK_CYCLE_PERIOD_MS', 120000, 10000, 60 * 60 * 1000),
+    enabled: cycleEnabled,
+    periodMs: cyclePeriodMs,
     margin: readOptionalNumberEnv('SOAK_CYCLE_MARGIN', 0.01, 100),
     minChangeMs: readIntegerEnv('SOAK_CYCLE_MIN_CHANGE_MS', 1000, 0, 60 * 60 * 1000),
-    consecutiveHits: readIntegerEnv('SOAK_CYCLE_CONSECUTIVE_HITS', 1, 1, 10)
+    maxOnMs: readIntegerEnv(
+      'SOAK_CYCLE_MAX_ON_MS',
+      cyclePeriodMs + 60000,
+      1000,
+      7 * 24 * 60 * 60 * 1000
+    ),
+    consecutiveHits: readIntegerEnv('SOAK_CYCLE_CONSECUTIVE_HITS', 1, 1, 10),
+    finalOff: readBooleanEnv('SOAK_FINAL_OFF', cycleEnabled),
+    stopScriptOnFinish: readBooleanEnv('SOAK_STOP_SCRIPT_ON_FINISH', cycleEnabled)
   };
   const outFile = resolve(readOptionalEnv('SOAK_OUT_FILE') ?? defaultOutFile());
   const summaryFile = resolve(
@@ -921,6 +1162,9 @@ const main = async (): Promise<void> => {
         `period=${cycleOptions.periodMs}ms`,
         `margin=${cycleOptions.margin ?? 'auto'}`,
         `minChange=${cycleOptions.minChangeMs}ms`,
+        `maxOn=${cycleOptions.maxOnMs}ms`,
+        `finalOff=${String(cycleOptions.finalOff)}`,
+        `stopScript=${String(cycleOptions.stopScriptOnFinish)}`,
         `hits=${cycleOptions.consecutiveHits}`
       ].join(' ')
     );
@@ -997,6 +1241,15 @@ const main = async (): Promise<void> => {
   } finally {
     summary.finishedAtIso = new Date().toISOString();
     summary.stopReason = stopReason;
+    await cleanupCycleRuntime({
+      shellyUrl,
+      scriptId,
+      timeoutMs,
+      outFile,
+      cycleOptions,
+      cycleState,
+      summary
+    });
     const summaryMarkdown = createSummaryMarkdown({
       summary,
       shellyUrl: shellyUrl.toString(),

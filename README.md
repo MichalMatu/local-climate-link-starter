@@ -143,7 +143,10 @@ SOAK_CYCLE_RELAY=1
 SOAK_CYCLE_PERIOD_MS=120000
 SOAK_CYCLE_MARGIN=
 SOAK_CYCLE_MIN_CHANGE_MS=1000
+SOAK_CYCLE_MAX_ON_MS=180000
 SOAK_CYCLE_CONSECUTIVE_HITS=1
+SOAK_FINAL_OFF=1
+SOAK_STOP_SCRIPT_ON_FINISH=1
 ```
 
 `SOAK_DURATION_MS=0` means the background logger runs until
@@ -157,7 +160,11 @@ around the latest real sensor value. It does not directly call `Switch.Set` for
 the cycle; the next real BLE measurement still has to pass through the generated
 runtime logic and change the relay by rule. This keeps the long test close to
 the production behavior while making ON and OFF transitions likely during a
-multi-hour run.
+multi-hour run. Active cycling captures the original runtime thresholds before
+the first cycle, uses a longer test-time `maxOnMs`, stops the script when the
+logger stops, and leaves the relay OFF by default. Use
+`SOAK_STOP_SCRIPT_ON_FINISH=0` only when you intentionally want the installed
+automation to continue after the soak.
 
 ## Demo Mode
 
