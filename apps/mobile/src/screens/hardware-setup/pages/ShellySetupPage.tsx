@@ -14,7 +14,8 @@ import { t } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import {
   SHELLY_SETUP_SCAN_CONCURRENCY,
-  SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS
+  SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS,
+  type ShellySetupScanResult
 } from '../../../flows/hardware-setup/shellyRequests.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
@@ -134,7 +135,7 @@ const formatShellyScanEstimate = (startInput: string, endInput: string): string 
     const addressCount = countIpv4RangeScanAddresses(startInput, endInput);
     const batches = Math.ceil(addressCount / SHELLY_SETUP_SCAN_CONCURRENCY);
     const seconds = Math.ceil((batches * SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS) / 1000);
-    return `Skan zakresu: ${formatAddressCount(addressCount)}, max ok. ${formatDuration(seconds)}.`;
+    return `Wybrany zakres obejmuje ${formatAddressCount(addressCount)}. Skan sprawdza do ${SHELLY_SETUP_SCAN_CONCURRENCY} adresów naraz, limit ok. ${formatDuration(seconds)}.`;
   } catch {
     return 'Czas skanu pokażę po poprawnym zakresie.';
   }
@@ -710,15 +711,18 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
     setIsScanModalOpen(true);
   };
 
-  const closeScanModal = () => {
+  const closeScanModal = (options: { returnToAdd?: boolean } = {}) => {
+    const shouldReturnToAdd = options.returnToAdd ?? returnToAddAfterScan;
     flow.resetShellyScan();
     dismissShellyScanToasts();
     setDidSubmitShellyScan(false);
     setIsScanModalOpen(false);
-    if (returnToAddAfterScan) {
+    if (shouldReturnToAdd) {
       setIsAddShellyModalOpen(true);
       setReturnToAddAfterScan(false);
+      return;
     }
+    setReturnToAddAfterScan(false);
   };
 
   const startShellyScan = () => {
@@ -738,9 +742,17 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
     }
   };
 
-  const selectScannedShellyAddress = (baseUrl: string) => {
-    flow.setShellyUrlInput(baseUrl);
-    closeScanModal();
+  const addScannedShellyDevice = (result: ShellySetupScanResult) => {
+    const name = flow.shellyNameInput.trim() || result.deviceInfo.model;
+    flow.upsertShellyDevice({
+      id: result.baseUrl,
+      name,
+      baseUrl: result.baseUrl,
+      scriptIdInput: '1'
+    });
+    flow.checkShellyMutation.reset();
+    closeScanModal({ returnToAdd: false });
+    pushToast('ok', t('hardware.shelly.added'));
   };
 
   const openBleScanModal = (device: ShellyDraftDevice) => {
@@ -872,9 +884,12 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
         closeOnBackdrop={false}
         closeOnEscape={!isShellyScanActive}
         headerActions={
-          <InfoTooltip label="Informacja o trybie AP Shelly" title="Shelly w trybie AP">
+          <InfoTooltip label="Informacja o skanowaniu Shelly" title="Skanowanie Shelly">
             Jeśli łączysz się bezpośrednio z Wi-Fi Shelly, panel zwykle działa pod{' '}
             {SHELLY_AP_PANEL_URL}.
+            <br />
+            Skan pomija już dodane gniazdka i zatrzymuje się po pierwszym nowym. Jeśli
+            chcesz szukać dalej, popraw zakres ręcznie i uruchom skan ponownie.
             <br />
             {shellyScanEstimate}
           </InfoTooltip>
@@ -951,29 +966,10 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
           <div className="saved-list" aria-label="Znalezione gniazdka Shelly">
             {scanResults.map((result) => (
               <article key={result.baseUrl} className="saved-list__item">
-                <div className="saved-list__row">
+                <div className="saved-list__row shelly-scan-result__row">
                   <div className="saved-list__field">
                     <span>Adres</span>
-                    <div className="copy-field">
-                      <button
-                        aria-label={`Użyj adresu ${result.baseUrl}`}
-                        className="copy-field__value"
-                        type="button"
-                        title="Użyj tego adresu w formularzu dodawania"
-                        onClick={() => selectScannedShellyAddress(result.baseUrl)}
-                      >
-                        {result.baseUrl}
-                      </button>
-                      <button
-                        aria-label={`Wpisz adres ${result.baseUrl} do formularza`}
-                        className="copy-field__button"
-                        title="Wpisz adres do formularza dodawania"
-                        type="button"
-                        onClick={() => selectScannedShellyAddress(result.baseUrl)}
-                      >
-                        ✓
-                      </button>
-                    </div>
+                    <strong>{result.baseUrl}</strong>
                   </div>
                   <div className="saved-list__field">
                     <span>Model</span>
@@ -981,6 +977,15 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
                       {result.deviceInfo.model}, gen {result.deviceInfo.gen}
                     </strong>
                   </div>
+                  <button
+                    aria-label={`Dodaj gniazdko ${result.baseUrl}`}
+                    className="secondary-action shelly-scan-result__add"
+                    title="Dodaj to sprawdzone gniazdko do aplikacji"
+                    type="button"
+                    onClick={() => addScannedShellyDevice(result)}
+                  >
+                    Dodaj
+                  </button>
                 </div>
               </article>
             ))}

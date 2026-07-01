@@ -322,6 +322,17 @@ export const useHardwareSetupFlow = () => {
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
+  const savedShellyScanBaseUrls = useMemo(() => {
+    const baseUrls = new Set<string>();
+    for (const device of shellyDevices) {
+      try {
+        baseUrls.add(normalizeShellyUrl(device.baseUrl));
+      } catch {
+        baseUrls.add(device.baseUrl);
+      }
+    }
+    return baseUrls;
+  }, [shellyDevices]);
 
   const shellyInputState = useMemo((): ShellyInputState => {
     const fieldErrors: { name?: string; url?: string } = {};
@@ -643,8 +654,12 @@ export const useHardwareSetupFlow = () => {
       const controller = new AbortController();
       shellyScanAbortControllerRef.current = controller;
       try {
+        const baseUrls = createIpv4RangeScanUrls(
+          shellyScanStartInput,
+          shellyScanEndInput
+        ).filter((baseUrl) => !savedShellyScanBaseUrls.has(baseUrl));
         return await scanShellySetupUrls({
-          baseUrls: createIpv4RangeScanUrls(shellyScanStartInput, shellyScanEndInput),
+          baseUrls,
           signal: controller.signal
         });
       } finally {
@@ -1197,6 +1212,7 @@ export const useHardwareSetupFlow = () => {
     selectedShelly,
     selectShellyDevice,
     setShellyDeviceName,
+    upsertShellyDevice,
     removeShellyDevice,
     sensorProfileInput,
     setSensorProfileInput,

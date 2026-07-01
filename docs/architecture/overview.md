@@ -111,6 +111,12 @@ discovery. The hardware setup flow is no longer demo-only: it can use local
 Shelly RPC for manual IP checks, LAN scanning, script upload, diagnostics, and a
 temporary Shelly-side BLE discovery script.
 
+Shelly LAN discovery belongs to the hardware setup flow, not directly to React
+components. The flow builds the IPv4 candidate list, removes already saved Shelly
+base URLs, scans the remaining addresses with bounded concurrency, and returns
+only verified `Shelly.GetDeviceInfo` candidates to the UI. The UI presents those
+candidates as direct add actions.
+
 Real platform and Shelly access stay behind interfaces:
 
 ```text

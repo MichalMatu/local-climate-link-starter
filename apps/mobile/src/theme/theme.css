@@ -525,6 +525,15 @@ select {
   );
 }
 
+.shelly-scan-result__row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+}
+
+.shelly-scan-result__add {
+  align-self: end;
+  min-width: var(--lcl-size-action-min-width);
+}
+
 .saved-list__field {
   display: grid;
   font-size: var(--lcl-font-size-md);
@@ -796,6 +805,14 @@ select {
   .control-action-row .secondary-action {
     flex: 1 1 var(--lcl-size-action-min-width);
     width: auto;
+  }
+
+  .shelly-scan-result__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shelly-scan-result__add {
+    width: 100%;
   }
 
   .advanced-settings__readonly {

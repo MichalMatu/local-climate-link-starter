@@ -1175,10 +1175,13 @@ describe('HardwareSetupScreen', () => {
     expect(rpcMethods).not.toContain('Script.Start');
   });
 
-  it('scans the local network from a modal and uses a found Shelly address', async () => {
+  it('scans the local network from a modal and directly adds a found Shelly', async () => {
     renderHardwareSetup();
 
     const addDialog = await openShellyAddDialog();
+    fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
+      target: { value: 'Salon' }
+    });
     fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
     const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
@@ -1188,28 +1191,96 @@ describe('HardwareSetupScreen', () => {
 
     expect(await within(dialog).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(dialog).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
-    expect(
-      within(dialog).queryByRole('button', { name: 'Dodaj' })
-    ).not.toBeInTheDocument();
     fireEvent.click(
       within(dialog).getByRole('button', {
-        name: 'Użyj adresu http://192.168.0.20/'
+        name: 'Dodaj gniazdko http://192.168.0.20/'
       })
     );
 
     expect(
       screen.queryByRole('dialog', { name: 'Skanuj sieć Shelly' })
     ).not.toBeInTheDocument();
-    const reopenedAddDialog = await screen.findByRole('dialog', {
-      name: 'Dodaj gniazdko'
-    });
-    expect(within(reopenedAddDialog).getByLabelText('Adres IP Shelly')).toHaveValue(
-      'http://192.168.0.20/'
-    );
-    expect(screen.getByText('Brak dodanych gniazdek.')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
+    ).not.toBeInTheDocument();
+    expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+    const savedPlugList = screen.getByLabelText('Dodane gniazdka');
+    expect(within(savedPlugList).getByDisplayValue('Salon')).toBeInTheDocument();
   });
 
-  it('shows Shelly AP mode help as a compact tooltip', async () => {
+  it('continues Shelly network scan past already saved plugs', async () => {
+    vi.mocked(fetch).mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = requestUrl(input);
+        const body = requestBody(init);
+        if (
+          url.pathname === '/rpc' &&
+          url.hostname !== '192.168.0.20' &&
+          url.hostname !== '192.168.0.21'
+        ) {
+          return new Response('<!doctype html><html></html>', {
+            status: 200,
+            headers: { 'content-type': 'text/html' }
+          });
+        }
+
+        switch (body.method) {
+          case 'Shelly.GetDeviceInfo':
+            return rpcResult({ model: 'S3PL-00112EU', gen: 3 });
+          case 'Shelly.GetStatus':
+            return rpcResult({
+              ble: {},
+              script: {},
+              'switch:0': { id: 0, output: false }
+            });
+          case 'Script.List':
+            return rpcResult({
+              scripts: [
+                {
+                  id: 1,
+                  name: 'Local Climate Link Thermostat',
+                  enable: true,
+                  running: true
+                }
+              ]
+            });
+          default:
+            return rpcResult({});
+        }
+      }
+    );
+    renderHardwareSetup();
+
+    await addShellyThroughUi('Salon');
+    vi.mocked(fetch).mockClear();
+
+    const addDialog = await openShellyAddDialog();
+    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
+    fireEvent.change(within(dialog).getByLabelText('Od'), {
+      target: { value: '192.168.0.19' }
+    });
+    fireEvent.change(within(dialog).getByLabelText('Do'), {
+      target: { value: '192.168.0.21' }
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
+
+    expect(await within(dialog).findByText('http://192.168.0.21/')).toBeInTheDocument();
+    const scannedHosts = vi
+      .mocked(fetch)
+      .mock.calls.map((call) => ({
+        method: requestBody(call[1]).method,
+        url: requestUrl(call[0])
+      }))
+      .filter(
+        ({ method, url }) => method === 'Shelly.GetDeviceInfo' && url.pathname === '/rpc'
+      )
+      .map(({ url }) => url.hostname);
+    expect(scannedHosts).toContain('192.168.0.21');
+    expect(scannedHosts).not.toContain('192.168.0.20');
+  });
+
+  it('shows Shelly scan help as a compact tooltip', async () => {
     renderHardwareSetup();
 
     const addDialog = await openShellyAddDialog();
@@ -1217,7 +1288,7 @@ describe('HardwareSetupScreen', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
 
     const tooltipButton = within(dialog).getByRole('button', {
-      name: 'Informacja o trybie AP Shelly'
+      name: 'Informacja o skanowaniu Shelly'
     });
     expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
 
@@ -1226,10 +1297,15 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(tooltipButton);
     expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
 
-    expect(within(dialog).getByText('Shelly w trybie AP')).toBeInTheDocument();
+    expect(within(dialog).getByText('Skanowanie Shelly')).toBeInTheDocument();
     expect(within(dialog).getByText(/http:\/\/192\.168\.33\.1\//)).toBeInTheDocument();
     expect(
-      within(dialog).getByText(/Skan zakresu: 99 adresów, max ok\. 39 s\./)
+      within(dialog).getByText(/Skan pomija już dodane gniazdka/i)
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(
+        /Wybrany zakres obejmuje 99 adresów\. Skan sprawdza do 8 adresów naraz, limit ok\. 39 s\./
+      )
     ).toBeInTheDocument();
 
     fireEvent.change(within(dialog).getByLabelText('Do'), {
@@ -1237,14 +1313,16 @@ describe('HardwareSetupScreen', () => {
     });
 
     expect(
-      within(dialog).getByText(/Skan zakresu: 32 adresy, max ok\. 12 s\./)
+      within(dialog).getByText(
+        /Wybrany zakres obejmuje 32 adresy\. Skan sprawdza do 8 adresów naraz, limit ok\. 12 s\./
+      )
     ).toBeInTheDocument();
     expect(
       within(dialog).queryByRole('button', { name: 'Wpisz adres AP' })
     ).not.toBeInTheDocument();
   });
 
-  it('uses the scan result icon to fill the Shelly address form', async () => {
+  it('uses the scan result action to add the Shelly without reopening the form', async () => {
     renderHardwareSetup();
 
     const addDialog = await openShellyAddDialog();
@@ -1255,19 +1333,19 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(
       within(dialog).getByRole('button', {
-        name: 'Wpisz adres http://192.168.0.20/ do formularza'
+        name: 'Dodaj gniazdko http://192.168.0.20/'
       })
     );
 
     expect(
       screen.queryByRole('dialog', { name: 'Skanuj sieć Shelly' })
     ).not.toBeInTheDocument();
-    const reopenedAddDialog = await screen.findByRole('dialog', {
-      name: 'Dodaj gniazdko'
-    });
-    expect(within(reopenedAddDialog).getByLabelText('Adres IP Shelly')).toHaveValue(
-      'http://192.168.0.20/'
-    );
+    expect(
+      screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Ustawienia gniazdka' })
+    ).toBeInTheDocument();
   });
 
   it('stops an active Shelly scan from the modal button', async () => {

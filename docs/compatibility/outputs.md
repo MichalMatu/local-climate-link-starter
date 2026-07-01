@@ -19,6 +19,8 @@ FetchShellyRpcTransport / RpcShellyClient:
   - performs local Shelly RPC through fetch
   - supports manual IP checks, LAN scan candidates, script install, diagnostics,
     script start/stop, and relay OFF commands
+  - skips saved Shelly plug URLs before LAN scanning, then stops at the first
+    new verified plug
 
 Hardware setup UI:
   - can scan a local IP range for Shelly-like RPC devices

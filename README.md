@@ -139,6 +139,12 @@ and `/script/<id>/diag` or `/script/<id>/ble-scan` without
 private/local Shelly targets and the MVP RPC, diagnostics, and BLE discovery
 paths.
 
+The Shelly page can scan a local IPv4 range for plugs. The network scanner skips
+Shelly plugs already saved in the app, checks up to eight addresses in parallel,
+and stops at the first new Shelly response. A scan result is already verified by
+`Shelly.GetDeviceInfo`, so pressing `Dodaj` saves it directly without returning
+to the manual IP form.
+
 The Shelly page can also start a temporary Shelly-side BLE discovery script from
 a saved plug. Pressing `Skanuj BLE` opens the modal and immediately starts the
 scan. During that scan the app sets the relay OFF, stops the main automation

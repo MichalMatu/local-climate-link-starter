@@ -514,7 +514,7 @@
     var(--lcl-size-modal-max-width),
     calc(100vw - (var(--lcl-spacing-lg) * 2))
   );
-  overflow: hidden;
+  overflow: visible;
   padding: var(--lcl-spacing-xl);
   width: 100%;
 }

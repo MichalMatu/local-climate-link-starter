@@ -80,6 +80,7 @@ Use this before merging any Codex-generated change.
 [ ] Persistent diagnostics/status use compact rows or stable panels, not transient toasts.
 [ ] The same message is not duplicated across toast, modal, and inline content.
 [ ] Diagnostic/status modals shrink to content; full-height modal sizing is reserved for `workspace` previews.
+[ ] Info tooltips inside modals are not clipped by modal/card overflow and remain readable on phone and desktop.
 [ ] New z-index and colors use design tokens.
 [ ] Breakpoints and reusable layout dimensions come from design tokens.
 [ ] Phone, tablet, and desktop layouts have no horizontal overflow.
