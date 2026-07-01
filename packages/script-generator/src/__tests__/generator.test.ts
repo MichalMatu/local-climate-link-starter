@@ -59,6 +59,8 @@ const createExecutableRuntime = (script: string) => {
     | ((event: string, result: { addr: string; advData: number[]; rssi: number }) => void)
     | undefined;
   const switchCalls: Array<{ id: number; on: boolean }> = [];
+  const timers: Array<{ durationMs: number; repeat: boolean; callback: () => void }> = [];
+  const startCalls: unknown[] = [];
   const shelly = {
     call: (
       method: string,
@@ -85,10 +87,17 @@ const createExecutableRuntime = (script: string) => {
       ) => {
         scanCallback = callback;
       },
-      start: () => true
+      start: (options: unknown) => {
+        startCalls.push(options);
+        return true;
+      }
     }
   };
-  const timer = { set: () => undefined };
+  const timer = {
+    set: (durationMs: number, repeat: boolean, callback: () => void) => {
+      timers.push({ durationMs, repeat, callback });
+    }
+  };
   const runtime = new Function(
     'Shelly',
     'BLE',
@@ -103,7 +112,9 @@ const createExecutableRuntime = (script: string) => {
   return {
     runtime,
     scan: scanCallback,
-    switchCalls
+    switchCalls,
+    timers,
+    startCalls
   };
 };
 
@@ -214,7 +225,8 @@ describe('generateShellyThermostatScript', () => {
         null,
         null,
         null,
-        null
+        null,
+        0
       ]
     });
   });
@@ -248,7 +260,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('Shelly.call("Switch.Set"');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).toContain('interval_ms:241,window_ms:61,rssi_thr:0');
-    expect(script).toContain('Date.now()-(R.ls||R.sa)>9e4');
+    expect(script).toContain('Date.now()-(R.l||R.sa)>9e4');
     expect(script).toContain('"st"');
     expect(script).toContain('"mx"');
     expect(script).toContain('sw(false,"b",true)');
@@ -265,7 +277,7 @@ describe('generateShellyThermostatScript', () => {
     expect(() => new Function(script)).not.toThrow();
   });
 
-  it('ignores incomplete Xiaomi BTHome advertisements instead of forcing relay OFF', () => {
+  it('tracks incomplete Xiaomi BTHome packets without forcing relay OFF', () => {
     const config = createDefaultShellyThermostatConfig(
       'xiaomi_lywsd03mmc_bthome_v2',
       'humidifying'
@@ -281,6 +293,7 @@ describe('generateShellyThermostatScript', () => {
 
     expect(switchCalls).toEqual([{ id: 0, on: false }]);
 
+    const packetSeenBefore = Date.now();
     scan('scan-result', {
       addr: 'A4:C1:38:4F:24:CD',
       advData: createBthomeAdvertisement([0x40, 0x01, 100]),
@@ -289,7 +302,214 @@ describe('generateShellyThermostatScript', () => {
 
     expect(switchCalls).toEqual([{ id: 0, on: false }]);
     expect(runtime.diag().g[0]).toBeNull();
+    expect(runtime.diag().g[3]).toBe(100);
     expect(runtime.diag().g[6]).toBe('cv');
+    expect(runtime.diag().g[15]).toBeGreaterThanOrEqual(packetSeenBefore);
+  });
+
+  it('keeps consecutive hits when an incomplete BTHome packet arrives', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'humidifying'
+    );
+    const script = generateShellyThermostatScript({
+      ...config,
+      sensor: {
+        ...config.sensor,
+        runtimeAddress: 'A4:C1:38:4F:24:CD'
+      }
+    });
+    const { runtime, scan } = createExecutableRuntime(script);
+
+    scan('scan-result', {
+      addr: 'A4:C1:38:4F:24:CD',
+      advData: createBthomeAdvertisement([0x40, 0x02, 0x2c, 0x0c, 0x03, 0xa0, 0x0f]),
+      rssi: -35
+    });
+    expect(runtime.diag().g[9]).toBe(1);
+
+    scan('scan-result', {
+      addr: 'A4:C1:38:4F:24:CD',
+      advData: createBthomeAdvertisement([0x40, 0x01, 99]),
+      rssi: -35
+    });
+
+    expect(runtime.diag().g[9]).toBe(1);
+    expect(runtime.diag().g[10]).toBe(0);
+    expect(runtime.diag().g[3]).toBe(99);
+  });
+
+  it('allows OFF during min-change cooldown while blocking immediate ON restart', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const config = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'humidifying'
+      );
+      const script = generateShellyThermostatScript({
+        ...config,
+        sensor: {
+          ...config.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        },
+        rule: {
+          ...config.rule,
+          minChangeMs: 120_000
+        }
+      });
+      const { scan, switchCalls, runtime } = createExecutableRuntime(script);
+      const lowHumidity = createBthomeAdvertisement([
+        0x40, 0x02, 0x2c, 0x0c, 0x03, 0xa0, 0x0f
+      ]);
+      const highHumidity = createBthomeAdvertisement([
+        0x40, 0x02, 0x2c, 0x0c, 0x03, 0x70, 0x17
+      ]);
+
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: lowHumidity,
+        rssi: -35
+      });
+      nowMs += 1000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: lowHumidity,
+        rssi: -35
+      });
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: true });
+
+      nowMs += 1000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: highHumidity,
+        rssi: -35
+      });
+      nowMs += 1000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: highHumidity,
+        rssi: -35
+      });
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: false });
+
+      nowMs += 1000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: lowHumidity,
+        rssi: -35
+      });
+      nowMs += 1000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: lowHumidity,
+        rssi: -35
+      });
+
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: false });
+      expect(runtime.diag().g[6]).toBe('mc');
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('uses target packet freshness for the BLE scanner watchdog', () => {
+    let nowMs = 100_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const config = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'humidifying'
+      );
+      const script = generateShellyThermostatScript({
+        ...config,
+        sensor: {
+          ...config.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        }
+      });
+      const { scan, timers, startCalls } = createExecutableRuntime(script);
+      const startTimer = timers.find((timer) => timer.durationMs === 1000);
+      const watchdog = timers.find((timer) => timer.durationMs === 30000);
+      expect(startTimer).toBeDefined();
+      expect(watchdog).toBeDefined();
+      startTimer?.callback();
+      expect(startCalls).toHaveLength(1);
+
+      nowMs += 80_000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: createBthomeAdvertisement([0x40, 0x01, 99]),
+        rssi: -35
+      });
+      nowMs += 80_000;
+      watchdog?.callback();
+      expect(startCalls).toHaveLength(1);
+
+      nowMs += 91_000;
+      watchdog?.callback();
+      expect(startCalls).toHaveLength(2);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('keeps stale safety tied to full control measurements', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const config = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'humidifying'
+      );
+      const script = generateShellyThermostatScript({
+        ...config,
+        sensor: {
+          ...config.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        },
+        rule: {
+          ...config.rule,
+          staleTimeoutSec: 10
+        }
+      });
+      const { scan, switchCalls, runtime, timers } = createExecutableRuntime(script);
+      const maintenanceTimer = timers.find((timer) => timer.durationMs === 30000);
+      const lowHumidity = createBthomeAdvertisement([
+        0x40, 0x02, 0x2c, 0x0c, 0x03, 0xa0, 0x0f
+      ]);
+      const batteryOnly = createBthomeAdvertisement([0x40, 0x01, 98]);
+
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: lowHumidity,
+        rssi: -35
+      });
+      nowMs += 1000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: lowHumidity,
+        rssi: -35
+      });
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: true });
+      const validSeenAt = runtime.diag().g[0];
+
+      nowMs += 11_000;
+      scan('scan-result', {
+        addr: 'A4:C1:38:4F:24:CD',
+        advData: batteryOnly,
+        rssi: -35
+      });
+      maintenanceTimer?.callback();
+
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: false });
+      expect(runtime.diag().g[0]).toBe(validSeenAt);
+      expect(runtime.diag().g[3]).toBe(98);
+      expect(runtime.diag().g[6]).toBe('st');
+      expect(runtime.diag().g[15]).toBeGreaterThan(Number(validSeenAt));
+    } finally {
+      nowSpy.mockRestore();
+    }
   });
 
   it('generates an ultra-minimal TP357 runtime without BTHome code', () => {

@@ -92,6 +92,12 @@ the configured RSSI threshold in JavaScript after receipt. These settings do not
 change radio transmit power because sensor advertisements are received, not
 sent, by the plug.
 
+Generated runtime diagnostics separate radio freshness from control freshness:
+`lastPacketSeen` means Shelly saw any packet from the target runtime address,
+while `lastSeen` means the last full measurement usable by the selected rule.
+Battery-only or incomplete BTHome frames update telemetry only; they do not
+force OFF, reset hit counters, or refresh the stale-sensor timer.
+
 If Shelly reports `out_of_memory`, the discovery script could not stay running
 within the plug's available script memory. Close the BLE scan modal, wait a few
 seconds, and try again. If it repeats, restart Shelly and verify that the main

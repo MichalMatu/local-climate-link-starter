@@ -21,6 +21,15 @@ const formatShellyTime = (time: DiagnosticTime | undefined): string =>
 const formatTimeSyncState = (time: DiagnosticTime | undefined): string =>
   time?.isSynced ? 'OK' : 'brak synchronizacji';
 
+const formatEpochMs = (value: number | null | undefined): string =>
+  value == null
+    ? 'brak'
+    : new Date(value).toLocaleTimeString('pl-PL', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
 const formatEnergy = (value: number | null | undefined): string => {
   if (value == null) {
     return 'brak';
@@ -166,6 +175,14 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             label="Zegar"
             value={formatTimeSyncState(shellyTime)}
             tone={shellyTime?.isSynced ? 'normal' : 'warning'}
+          />
+          <DiagnosticRow
+            label="Ostatni pomiar"
+            value={formatEpochMs(diagnostics.lastSeen)}
+          />
+          <DiagnosticRow
+            label="Ostatni pakiet BLE"
+            value={formatEpochMs(diagnostics.lastPacketSeen)}
           />
           <DiagnosticRow
             label="Temperatura"

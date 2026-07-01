@@ -95,6 +95,10 @@ The helper scripts read the compact Local Climate Link diagnostic payload:
 
 `z` is the generated config hash, `p` is plug telemetry, and `g` is a compact
 runtime diagnostics array. User-facing labels are mapped in the app UI.
+Within `g`, `g[0]` is the last full measurement usable by the control rule, and
+`g[15]` is the last BLE packet received from the target runtime address.
+Battery-only or otherwise incomplete BTHome frames may update battery telemetry
+and `g[15]` without updating `g[0]` or changing relay state.
 
 ## Latest observed real hardware results
 
