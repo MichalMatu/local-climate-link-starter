@@ -122,8 +122,9 @@ https://github.com/theengs/decoder/blob/development/src/devices/TPTH_json.h
 License warning:
 
 ```text
-Theengs Decoder is GPL-3.0. Do not copy its decoder code into an incompatible/proprietary app runtime.
-Use it as reference and validation unless the project license decision explicitly allows GPL-compatible reuse with notices.
+Theengs Decoder is GPL-3.0. Do not copy its decoder code into the Local Climate Link runtime.
+The project license is custom source-available noncommercial and is not GPL-compatible.
+Use Theengs as reference and validation unless a separate written relicensing decision allows GPL-compatible reuse with notices.
 MatrixHub is owned by the same project owner and was explicitly approved as source material for this repository.
 ```
 

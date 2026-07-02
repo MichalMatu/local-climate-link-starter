@@ -93,6 +93,13 @@ Theme modes are `system`, `light`, and `dark`. Runtime errors captured from
 `error` and `unhandledrejection` events stay in memory only and are meant for
 local debugging.
 
+## License
+
+Local Climate Link is source-available under a custom noncommercial license.
+Copyright (c) 2026 Michal Matuszewski. Commercial use, redistribution in app
+stores, paid services, product bundling, and business use require prior written
+permission or a separate commercial license. See [LICENSE](LICENSE).
+
 ## Make Shortcuts
 
 The root `Makefile` wraps the common commands:

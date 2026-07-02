@@ -2,6 +2,7 @@
   "name": "local-climate-link-starter",
   "version": "1.0.0",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
