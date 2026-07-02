@@ -10,40 +10,32 @@ import {
   type ToastMessage,
   type ToastTone
 } from '@lcl/ui';
-import { t } from '../app/i18n.js';
+import { useTranslation, type Translate, type TranslationKey } from '../app/i18n.js';
 import { useDemoSetupFlow } from '../flows/demo/useDemoSetupFlow.js';
 import type { ShellyComponentState } from '@lcl/shelly-client';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
-const sectionTitle: Record<string, string> = {
-  start: 'Start',
-  sensor: 'Czujniki',
-  shelly: 'Gniazdko',
-  rule: 'Reguła',
-  script: 'Skrypt',
-  install: 'Instalacja',
-  relay: 'Test',
-  done: 'Status'
-};
-
-const formatComponentState = (state: ShellyComponentState): string => {
+const formatComponentState = (state: ShellyComponentState, t: Translate): string => {
   switch (state) {
     case 'enabled':
-      return 'włączone';
+      return t('common.enabled');
     case 'disabled':
-      return 'wyłączone';
+      return t('common.disabled');
     case 'missing':
-      return 'brak w statusie';
+      return t('common.missingInStatus');
   }
 };
 
 const formatMaybeNumber = (
   value: number | undefined,
   suffix: string,
+  missingLabel: string,
   fractionDigits = 1
-): string => (value === undefined ? 'brak' : `${value.toFixed(fractionDigits)}${suffix}`);
+): string =>
+  value === undefined ? missingLabel : `${value.toFixed(fractionDigits)}${suffix}`;
 
 export const DemoWizardScreen = () => {
+  const { t } = useTranslation();
   const flow = useDemoSetupFlow();
   const selectedMeasurement = flow.selectedSensor.measurement;
   const thresholdErrorId = useId();
@@ -77,7 +69,7 @@ export const DemoWizardScreen = () => {
     }
     pushToast('warning', t('demo.uploadFailed'));
     flow.installMutation.reset();
-  }, [flow.installMutation, pushToast]);
+  }, [flow.installMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.relayMutation.isError) {
@@ -85,13 +77,15 @@ export const DemoWizardScreen = () => {
     }
     pushToast('warning', t('demo.relayFailed'));
     flow.relayMutation.reset();
-  }, [flow.relayMutation, pushToast]);
+  }, [flow.relayMutation, pushToast, t]);
 
   return (
     <main className="demo-shell">
       <header className="demo-header">
         <div>
-          <p className="demo-kicker">{sectionTitle[flow.step]}</p>
+          <p className="demo-kicker">
+            {t(`demo.section.${flow.step}` as TranslationKey)}
+          </p>
           <h1>{t('app.promise')}</h1>
           <p>{t('app.promiseDetail')}</p>
         </div>
@@ -100,15 +94,13 @@ export const DemoWizardScreen = () => {
 
       {flow.step === 'start' && (
         <section className="demo-panel">
-          <h2>Skonfiguruj lokalny termostat</h2>
+          <h2>{t('demo.startSetup')}</h2>
           <p>{t('hardware.safety.heatingDefaultOff')}</p>
-          <p>
-            Telefon pomaga tylko w konfiguracji. Po instalacji Shelly działa lokalnie.
-          </p>
+          <p>{t('demo.usePhoneSetupOnly')}</p>
           <button
             className="primary-action"
             type="button"
-            title="Rozpocznij konfigurację przykładowego zestawu"
+            title={t('demo.startTitle')}
             onClick={flow.start}
           >
             {t('demo.addKit')}
@@ -130,13 +122,13 @@ export const DemoWizardScreen = () => {
             <button
               className="secondary-action"
               type="button"
-              title="Wczytaj przykładowe odczyty BLE"
+              title={t('demo.scanTitle')}
               onClick={flow.scanSensors}
             >
-              Skanuj demo
+              {t('demo.scan')}
             </button>
           </div>
-          {flow.sensorState === 'loading' && <p>Ładowanie odczytów demo.</p>}
+          {flow.sensorState === 'loading' && <p>{t('demo.loadingReadings')}</p>}
           {flow.sensorState === 'success' && (
             <div className="card-grid">
               {flow.sensors.map((sensor) => (
@@ -145,7 +137,7 @@ export const DemoWizardScreen = () => {
                   type="button"
                   key={sensor.measurement.sensorId}
                   aria-pressed={flow.selectedSensorProfileId === sensor.profileId}
-                  title="Wybierz ten termometr do reguły demo"
+                  title={t('demo.selectSensorTitle')}
                   onClick={() => flow.setSelectedSensorProfileId(sensor.profileId)}
                 >
                   <SensorCard
@@ -156,29 +148,39 @@ export const DemoWizardScreen = () => {
                     }
                     profileLabel={sensor.rawKind}
                     statusLabel={
-                      sensor.profileId === 'tp357_custom_v1' ? 'symulacja' : 'zgodne'
+                      sensor.profileId === 'tp357_custom_v1'
+                        ? 'demo'
+                        : t('common.compatible')
                     }
                     metrics={[
                       {
-                        label: 'Temperatura',
-                        value: formatMaybeNumber(sensor.measurement.temperatureC, '°C')
+                        label: t('hardware.metrics.temperature'),
+                        value: formatMaybeNumber(
+                          sensor.measurement.temperatureC,
+                          '°C',
+                          t('common.missing')
+                        )
                       },
                       {
-                        label: 'Wilgotność',
-                        value: formatMaybeNumber(sensor.measurement.humidityPct, '%')
+                        label: t('hardware.metrics.humidity'),
+                        value: formatMaybeNumber(
+                          sensor.measurement.humidityPct,
+                          '%',
+                          t('common.missing')
+                        )
                       },
                       {
-                        label: 'Bateria',
+                        label: t('hardware.metrics.battery'),
                         value:
                           sensor.measurement.batteryPct === undefined
-                            ? 'brak'
+                            ? t('common.missing')
                             : `${sensor.measurement.batteryPct}%`
                       },
                       {
                         label: 'RSSI',
                         value:
                           sensor.measurement.rssi === undefined
-                            ? 'brak'
+                            ? t('common.missing')
                             : `${sensor.measurement.rssi} dBm`
                       }
                     ]}
@@ -192,7 +194,7 @@ export const DemoWizardScreen = () => {
               className="primary-action"
               type="button"
               disabled={flow.sensorState !== 'success'}
-              title="Przejdź do sprawdzenia gniazdka Shelly"
+              title={t('hardware.shelly.checkTitle')}
               onClick={() => flow.setStep('shelly')}
             >
               {t('hardware.shelly.add')}
@@ -206,15 +208,15 @@ export const DemoWizardScreen = () => {
           <div className="panel-heading">
             <div>
               <h2>{t('hardware.shelly.add')}</h2>
-              <p>Sprawdzam kompatybilność bez połączenia z prawdziwym urządzeniem.</p>
+              <p>{t('demo.usePhoneSetupOnly')}</p>
             </div>
             <button
               className="secondary-action"
               type="button"
-              title="Sprawdź przykładową kompatybilność Shelly"
+              title={t('demo.checkCompatibilityTitle')}
               onClick={flow.checkShelly}
             >
-              Sprawdź demo
+              {t('demo.checkCompatibility')}
             </button>
           </div>
           <label className="toggle-row">
@@ -225,41 +227,53 @@ export const DemoWizardScreen = () => {
                 flow.setMatterBlockedScenario(event.currentTarget.checked)
               }
             />
-            <span>Scenariusz demo: Matter ON</span>
+            <span>{t('demo.matterScenario')}</span>
           </label>
-          {flow.shellyState === 'loading' && <p>Sprawdzam gniazdko demo.</p>}
+          {flow.shellyState === 'loading' && <p>{t('demo.loadingShelly')}</p>}
           {flow.shellyState === 'success' && (
             <>
               <ShellyCard
                 name="Shelly Plug S Gen3"
                 model="Fake Shelly demo"
-                badgeLabel={flow.shellyStatus?.matterEnabled ? 'blokada' : 'zgodne'}
+                badgeLabel={
+                  flow.shellyStatus?.matterEnabled
+                    ? t('hardware.status.blocked')
+                    : t('hardware.status.compatible')
+                }
                 badgeTone={flow.shellyStatus?.matterEnabled ? 'danger' : 'ok'}
                 rows={[
                   {
                     label: 'Scripts',
-                    value: formatComponentState(flow.shellyStatus?.scripts ?? 'missing')
+                    value: formatComponentState(
+                      flow.shellyStatus?.scripts ?? 'missing',
+                      t
+                    )
                   },
                   {
                     label: 'Bluetooth',
-                    value: formatComponentState(flow.shellyStatus?.bluetooth ?? 'missing')
+                    value: formatComponentState(
+                      flow.shellyStatus?.bluetooth ?? 'missing',
+                      t
+                    )
                   },
                   {
                     label: 'Matter',
-                    value: flow.shellyStatus?.matterEnabled ? 'włączony' : 'wyłączony'
+                    value: flow.shellyStatus?.matterEnabled
+                      ? t('common.enabled')
+                      : t('common.disabled')
                   }
                 ]}
               />
             </>
           )}
           <Modal
-            closeLabel="Zamknij"
+            closeLabel={t('common.close')}
             open={isMatterBlockModalOpen && flow.step === 'shelly'}
-            title="Instalacja zablokowana"
+            title={t('demo.blockedInstall')}
             onClose={() => setIsMatterBlockModalOpen(false)}
           >
             <FeedbackPanel tone="danger" title={t('hardware.safety.matterBlocked')}>
-              Wyłącz Matter w Shelly i sprawdź gniazdko ponownie.
+              {t('hardware.safety.turnMatterOff')}
             </FeedbackPanel>
           </Modal>
           <div className="action-row">
@@ -267,7 +281,7 @@ export const DemoWizardScreen = () => {
               className="primary-action"
               type="button"
               disabled={flow.shellyState !== 'success' || flow.matterBlockedVisible}
-              title="Przejdź do ustawienia progów reguły"
+              title={t('hardware.rule.setThreshold')}
               onClick={() => flow.setStep('rule')}
             >
               {t('hardware.rule.setThreshold')}
@@ -280,12 +294,12 @@ export const DemoWizardScreen = () => {
         <section className="demo-panel">
           <h2>{t('hardware.rule.setThreshold')}</h2>
           <div className="reading-strip">
-            <span>Wybrany czujnik</span>
+            <span>{t('hardware.rule.selectedSensor')}</span>
             <strong>{selectedMeasurement.temperatureC?.toFixed(1)}°C</strong>
             <span>{selectedMeasurement.humidityPct?.toFixed(0)}%</span>
           </div>
           <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
-            Włącz poniżej °C
+            {t('hardware.rule.thresholdOnBelowC')}
             <input
               aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
               aria-invalid={!flow.isThresholdValid}
@@ -296,7 +310,7 @@ export const DemoWizardScreen = () => {
             />
           </label>
           <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
-            Wyłącz powyżej °C
+            {t('hardware.rule.thresholdOffAboveC')}
             <input
               aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
               aria-invalid={!flow.isThresholdValid}
@@ -314,17 +328,31 @@ export const DemoWizardScreen = () => {
             )}
           </label>
           <RuleSummaryCard
-            title="Podsumowanie reguły"
-            summary={`Grzanie włączy się poniżej ${flow.onThreshold.toFixed(1)}°C i wyłączy powyżej ${flow.offThreshold.toFixed(1)}°C. Gdy termometr zniknie na 15 min albo Shelly uruchomi się ponownie, przekaźnik wyłączy się bezpiecznie. Po świeżym odczycie automatyka znów zastosuje tę regułę. Maksymalny czas pracy: 4 h.`}
+            title={t('hardware.rule.summaryTitle')}
+            summary={t('hardware.rule.summary', {
+              action: t('hardware.rule.preset.heating'),
+              onComparator: t('hardware.rule.comparator.below'),
+              onThreshold: flow.onThreshold.toFixed(1),
+              offComparator: t('hardware.rule.comparator.above'),
+              offThreshold: flow.offThreshold.toFixed(1),
+              unit: '°C',
+              sensor: t('hardware.rule.summarySensorDefault'),
+              staleTimeoutMin: 15,
+              shelly: t('hardware.rule.summaryShellyDefault'),
+              maxOnHours: 4,
+              minChangeMin: 2,
+              vpd: '',
+              rssi: ''
+            })}
           />
           <button
             className="primary-action"
             type="button"
             disabled={!flow.isThresholdValid}
-            title="Otwórz podgląd wygenerowanego skryptu demo"
+            title={t('hardware.rule.scriptPreviewTitle')}
             onClick={() => flow.setStep('script')}
           >
-            Pokaż skrypt
+            {t('hardware.rule.scriptPreviewAria')}
           </button>
         </section>
       )}
@@ -339,7 +367,7 @@ export const DemoWizardScreen = () => {
           <button
             className="primary-action"
             type="button"
-            title="Przejdź do symulowanej wysyłki skryptu"
+            title={t('demo.installTitle')}
             onClick={() => flow.setStep('install')}
           >
             {t('demo.install')}
@@ -349,17 +377,19 @@ export const DemoWizardScreen = () => {
 
       {flow.step === 'install' && (
         <section className="demo-panel">
-          <h2>Fake upload</h2>
-          <p>Skrypt trafia do symulowanego Shelly. Prawdziwy LAN nie jest używany.</p>
+          <h2>{t('demo.fakeUpload')}</h2>
+          <p>{t('demo.noRealLan')}</p>
           <button
             className="primary-action"
             type="button"
             aria-busy={flow.installMutation.isPending}
             disabled={flow.installMutation.isPending}
-            title="Wyślij skrypt do symulowanego Shelly"
+            title={t('demo.installScriptTitle')}
             onClick={() => flow.installMutation.mutate()}
           >
-            {flow.installMutation.isPending ? 'Wysyłam' : 'Wyślij skrypt demo'}
+            {flow.installMutation.isPending
+              ? t('common.sending')
+              : t('demo.installScript')}
           </button>
         </section>
       )}
@@ -373,7 +403,7 @@ export const DemoWizardScreen = () => {
             type="button"
             aria-busy={flow.relayMutation.isPending}
             disabled={flow.relayMutation.isPending}
-            title="Uruchom krótki test przekaźnika demo"
+            title={t('hardware.rule.relayTestTitleAttr')}
             onClick={() => flow.relayMutation.mutate()}
           >
             {flow.relayMutation.isPending ? t('common.testing') : t('common.test')}
@@ -390,16 +420,29 @@ export const DemoWizardScreen = () => {
               : t('demo.relayFailed')}
           </p>
           <div className="status-stack">
-            <DiagnosticRow label="Tryb" value="demo bez hardware" />
-            <DiagnosticRow label="Czujnik" value={flow.selectedSensorProfileId} />
             <DiagnosticRow
-              label="Adres Shelly runtime"
-              value={`${flow.runtimeAddress} (symulowany)`}
+              label={t('hardware.metrics.mode')}
+              value={t('demo.statusModeDemo')}
             />
-            <DiagnosticRow label="Skrypt" value="uruchomiony demo" />
             <DiagnosticRow
-              label="Przekaźnik"
-              value={flow.relayFinalOff ? 'OFF' : 'niepotwierdzony'}
+              label={t('hardware.metrics.thermometer')}
+              value={flow.selectedSensorProfileId}
+            />
+            <DiagnosticRow
+              label={t('demo.statusRuntimeAddress')}
+              value={`${flow.runtimeAddress} (${t('demo.statusRuntimeSuffix')})`}
+            />
+            <DiagnosticRow
+              label={t('hardware.rule.script')}
+              value={t('demo.statusScriptDemo')}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.relay')}
+              value={
+                flow.relayFinalOff
+                  ? 'OFF'
+                  : t('hardware.diagnostics.scriptMissingConfirm')
+              }
               tone={flow.relayFinalOff ? 'normal' : 'danger'}
             />
           </div>
@@ -407,7 +450,12 @@ export const DemoWizardScreen = () => {
           <pre className="support-summary">{flow.supportSummary}</pre>
         </section>
       )}
-      <ToastViewport toasts={toasts} onDismiss={dismissToast} />
+      <ToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
+      />
     </main>
   );
 };

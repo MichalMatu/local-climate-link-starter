@@ -145,9 +145,6 @@ const createInitialShellyControlState = (): ShellyControlViewState => ({
   updatedAtMs: null
 });
 
-const automationScriptMissingMessage = t('hardware.rule.automationScriptMissing');
-const diagnosticReadFailedMessage = t('hardware.diagnostics.readFailed');
-
 const diagnosticScriptStatusMessage = async (
   baseUrl: string,
   scriptId: number
@@ -481,7 +478,7 @@ export const useHardwareSetupFlow = () => {
     } catch (error) {
       return {
         ok: false,
-        error: error instanceof Error ? error.message : 'Niepoprawna konfiguracja.'
+        error: error instanceof Error ? error.message : t('hardware.flow.configInvalid')
       };
     }
   }, [
@@ -594,7 +591,7 @@ export const useHardwareSetupFlow = () => {
 
   const requireAutomationScript = (status: ShellyControlStatus): number => {
     if (status.automationScriptId === null) {
-      throw new Error(automationScriptMissingMessage);
+      throw new Error(t('hardware.rule.automationScriptMissing'));
     }
     return status.automationScriptId;
   };
@@ -1071,7 +1068,9 @@ export const useHardwareSetupFlow = () => {
 
   const addDiscoveredSensor = (candidate: BleDiscoveryCandidate) => {
     const runtimeAddress = normalizeRuntimeAddress(candidate.runtimeAddress);
-    const name = `Termometr ${runtimeAddress.split(':').slice(-2).join(':')}`;
+    const name = t('hardware.flow.sensorDefaultName', {
+      suffix: runtimeAddress.split(':').slice(-2).join(':')
+    });
     upsertSensorDevice({
       id: runtimeAddress,
       name,
@@ -1099,7 +1098,7 @@ export const useHardwareSetupFlow = () => {
         diagnosticShelly.baseUrl,
         scriptId
       ).catch(() => null);
-      throw new Error(scriptStatusMessage ?? diagnosticReadFailedMessage);
+      throw new Error(scriptStatusMessage ?? t('hardware.diagnostics.readFailed'));
     }
   };
 

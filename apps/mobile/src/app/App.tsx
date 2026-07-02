@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AppRoutes } from '../routes/AppRoutes.js';
+import { I18nProvider } from './i18n.js';
 
 export const App = () => {
   const [queryClient] = useState(
@@ -14,10 +15,12 @@ export const App = () => {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="app-shell">
-        <AppRoutes />
-      </div>
-    </QueryClientProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
+        <div className="app-shell">
+          <AppRoutes />
+        </div>
+      </QueryClientProvider>
+    </I18nProvider>
   );
 };

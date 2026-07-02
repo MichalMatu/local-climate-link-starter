@@ -186,6 +186,14 @@ The app opens on a manual MVP hardware setup split into simple top-menu pages:
 Shelly -> Termometry -> Reguła -> Diag
 ```
 
+The setup UI supports Polish and English from the same typed i18n key tree.
+The app selects the language from the system browser/webview language. Polish is
+used for `pl`/`pl-PL`; every unsupported language falls back to English. There is
+no manual language switch in the MVP UI. New languages should be added by
+creating another locale file under `apps/mobile/src/app/locales/`, registering it
+in `apps/mobile/src/app/i18n.ts`, and running the i18n tests that verify key
+parity and block hardcoded Polish copy outside the locale files.
+
 Xiaomi/PVVX BTHome v2 and TP357 are the MVP sensor profiles. Both have parser
 coverage, generated Shelly runtime variants, and dated Shelly Plug S Gen3 smoke
 results in `docs/testing/hardware-matrix.md`.

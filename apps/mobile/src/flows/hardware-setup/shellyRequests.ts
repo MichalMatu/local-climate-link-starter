@@ -308,7 +308,10 @@ const deleteBleDiscoveryScripts = async (
     if (script.running) {
       const stopResult = await client.stopScript(script.id);
       if (!stopResult.ok) {
-        stopError = `Stop skanera BLE ${script.id}: ${resultErrorMessage(stopResult)}`;
+        stopError = t('hardware.shelly.stopBleScannerDetail', {
+          id: script.id,
+          error: resultErrorMessage(stopResult)
+        });
       }
     }
 
@@ -317,7 +320,10 @@ const deleteBleDiscoveryScripts = async (
       cleanupErrors.push(
         [
           stopError,
-          `Usunięcie skanera BLE ${script.id}: ${resultErrorMessage(deleteResult)}`
+          t('hardware.shelly.deleteBleScannerDetail', {
+            id: script.id,
+            error: resultErrorMessage(deleteResult)
+          })
         ]
           .filter(Boolean)
           .join(' ')
@@ -579,9 +585,9 @@ export const deleteShellyAutomationScript = async (
       }
     } catch (error) {
       throw new ShellyAutomationDeleteError(
-        `Nie mogę potwierdzić stanu OFF przed usunięciem skryptu. ${
-          error instanceof Error ? error.message : ''
-        }`.trim(),
+        t('hardware.shelly.requireOffBeforeDelete', {
+          error: error instanceof Error ? error.message : ''
+        }).trim(),
         false
       );
     }
@@ -598,8 +604,12 @@ export const deleteShellyAutomationScript = async (
     if (!deleteResult.ok) {
       const details = [
         t('hardware.shelly.deleteScriptPartial'),
-        stopError ? `Stop skryptu: ${stopError}` : null,
-        `Usunięcie skryptu: ${resultErrorMessage(deleteResult)}`
+        stopError
+          ? t('hardware.shelly.stopAutomationScriptDetail', { error: stopError })
+          : null,
+        t('hardware.shelly.deleteAutomationScriptDetail', {
+          error: resultErrorMessage(deleteResult)
+        })
       ]
         .filter(Boolean)
         .join(' ');

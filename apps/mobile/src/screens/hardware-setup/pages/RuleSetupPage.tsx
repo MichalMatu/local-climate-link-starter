@@ -15,7 +15,11 @@ import {
   type DecodedShellyThermostatScript
 } from '@lcl/script-generator';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { t } from '../../../app/i18n.js';
+import {
+  useTranslation,
+  type Translate,
+  type TranslationKey
+} from '../../../app/i18n.js';
 import {
   canInstallScript,
   mutationError,
@@ -31,46 +35,46 @@ import {
 } from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
 
 type RuleControlCopy = {
-  label: string;
-  actionLabel: string;
+  labelKey: TranslationKey;
+  actionLabelKey: TranslationKey;
   direction: ThresholdDirection;
   unit: string;
-  onLabel: string;
-  offLabel: string;
+  onLabelKey: TranslationKey;
+  offLabelKey: TranslationKey;
 };
 
 const RULE_PRESET_COPY: Record<RulePresetId, RuleControlCopy> = {
   heating: {
-    label: 'Grzanie',
-    actionLabel: 'grzanie',
+    labelKey: 'hardware.rule.preset.heating',
+    actionLabelKey: 'hardware.rule.preset.heatingAction',
     direction: 'below',
     unit: '°C',
-    onLabel: 'Włącz poniżej °C',
-    offLabel: 'Wyłącz powyżej °C'
+    onLabelKey: 'hardware.rule.thresholdOnBelowC',
+    offLabelKey: 'hardware.rule.thresholdOffAboveC'
   },
   cooling: {
-    label: 'Chłodzenie',
-    actionLabel: 'chłodzenie',
+    labelKey: 'hardware.rule.preset.cooling',
+    actionLabelKey: 'hardware.rule.preset.coolingAction',
     direction: 'above',
     unit: '°C',
-    onLabel: 'Włącz powyżej °C',
-    offLabel: 'Wyłącz poniżej °C'
+    onLabelKey: 'hardware.rule.thresholdOnAboveC',
+    offLabelKey: 'hardware.rule.thresholdOffBelowC'
   },
   humidifying: {
-    label: 'Nawilżanie',
-    actionLabel: 'nawilżanie',
+    labelKey: 'hardware.rule.preset.humidifying',
+    actionLabelKey: 'hardware.rule.preset.humidifyingAction',
     direction: 'below',
     unit: '%',
-    onLabel: 'Włącz poniżej %',
-    offLabel: 'Wyłącz powyżej %'
+    onLabelKey: 'hardware.rule.thresholdOnBelowPct',
+    offLabelKey: 'hardware.rule.thresholdOffAbovePct'
   },
   dehumidifying: {
-    label: 'Osuszanie',
-    actionLabel: 'osuszanie',
+    labelKey: 'hardware.rule.preset.dehumidifying',
+    actionLabelKey: 'hardware.rule.preset.dehumidifyingAction',
     direction: 'above',
     unit: '%',
-    onLabel: 'Włącz powyżej %',
-    offLabel: 'Wyłącz poniżej %'
+    onLabelKey: 'hardware.rule.thresholdOnAbovePct',
+    offLabelKey: 'hardware.rule.thresholdOffBelowPct'
   }
 };
 
@@ -81,12 +85,8 @@ const SELECTABLE_RULE_PRESETS: RulePresetId[] = [
   'dehumidifying'
 ];
 
-const DECODED_MODE_LABELS: Record<RulePresetId, string> = {
-  heating: 'Grzanie',
-  cooling: 'Chłodzenie',
-  humidifying: 'Nawilżanie',
-  dehumidifying: 'Osuszanie'
-};
+const decodedModeLabel = (mode: RulePresetId, t: Translate): string =>
+  t(RULE_PRESET_COPY[mode].labelKey);
 
 const DECODED_PROFILE_LABELS: Record<
   DecodedShellyThermostatScript['settings']['sensorProfileId'],
@@ -131,15 +131,26 @@ const formatDecodedUnit = (
   metric: DecodedShellyThermostatScript['settings']['control']['metric']
 ): string => (metric === 'humidity' ? '%' : '°C');
 
-const formatDecodedComparator = (direction: ThresholdDirection, isOn: boolean): string =>
-  direction === 'below' ? (isOn ? 'poniżej' : 'powyżej') : isOn ? 'powyżej' : 'poniżej';
+const formatDecodedComparator = (
+  direction: ThresholdDirection,
+  isOn: boolean,
+  t: Translate
+): string =>
+  direction === 'below'
+    ? isOn
+      ? t('hardware.rule.comparator.below')
+      : t('hardware.rule.comparator.above')
+    : isOn
+      ? t('hardware.rule.comparator.above')
+      : t('hardware.rule.comparator.below');
 
 const formatDecodedThresholds = (
-  settings: DecodedShellyThermostatScript['settings']
+  settings: DecodedShellyThermostatScript['settings'],
+  t: Translate
 ): string => {
   const unit = formatDecodedUnit(settings.control.metric);
-  const onComparator = formatDecodedComparator(settings.control.direction, true);
-  const offComparator = formatDecodedComparator(settings.control.direction, false);
+  const onComparator = formatDecodedComparator(settings.control.direction, true, t);
+  const offComparator = formatDecodedComparator(settings.control.direction, false, t);
   return `ON ${onComparator} ${settings.control.onThreshold.toFixed(1)}${unit}, OFF ${offComparator} ${settings.control.offThreshold.toFixed(1)}${unit}`;
 };
 
@@ -156,10 +167,13 @@ const formatDecodedMs = (milliseconds: number): string => {
   return `${milliseconds / 1000} s`;
 };
 
-const formatDecodedVpd = (settings: DecodedShellyThermostatScript['settings']): string =>
+const formatDecodedVpd = (
+  settings: DecodedShellyThermostatScript['settings'],
+  t: Translate
+): string =>
   settings.vpdAssist.enabled && settings.vpdAssist.targetKpa !== null
     ? `${settings.vpdAssist.targetKpa.toFixed(2)} kPa`
-    : 'wyłączony';
+    : t('hardware.rule.values.disabled');
 
 const decodedRuntimeConfigMatches = (
   left: DecodedShellyThermostatScript | null,
@@ -183,7 +197,8 @@ const formatRuleSummary = ({
   shellyAddress,
   sensorRuntimeAddress,
   vpdAssist,
-  rssiMinDbm
+  rssiMinDbm,
+  t
 }: {
   actionLabel: string;
   direction: ThresholdDirection;
@@ -197,23 +212,47 @@ const formatRuleSummary = ({
   sensorRuntimeAddress?: string | undefined;
   vpdAssist?: string | undefined;
   rssiMinDbm?: number | undefined;
+  t: Translate;
 }): string => {
-  const onComparator = direction === 'below' ? 'poniżej' : 'powyżej';
-  const offComparator = direction === 'below' ? 'powyżej' : 'poniżej';
+  const onComparator =
+    direction === 'below'
+      ? t('hardware.rule.comparator.below')
+      : t('hardware.rule.comparator.above');
+  const offComparator =
+    direction === 'below'
+      ? t('hardware.rule.comparator.above')
+      : t('hardware.rule.comparator.below');
   const actionName = `${actionLabel.charAt(0).toUpperCase()}${actionLabel.slice(1)}`;
   const sensorLabel = sensorRuntimeAddress
-    ? `termometr ${sensorRuntimeAddress}`
-    : 'termometr';
-  const shellyLabel = shellyAddress ? `Shelly ${shellyAddress}` : 'Shelly';
-  const vpdCopy = vpdAssist ? ` VPD assist uwzględni cel ${vpdAssist}.` : '';
+    ? t('hardware.rule.summarySensorNamed', { address: sensorRuntimeAddress })
+    : t('hardware.rule.summarySensorDefault');
+  const shellyLabel = shellyAddress
+    ? t('hardware.rule.summaryShellyNamed', { address: shellyAddress })
+    : t('hardware.rule.summaryShellyDefault');
+  const vpdCopy = vpdAssist ? t('hardware.rule.summaryVpd', { vpd: vpdAssist }) : '';
   const rssiCopy = Number.isFinite(rssiMinDbm)
-    ? ` Sygnał termometru musi mieć co najmniej ${rssiMinDbm} dBm.`
+    ? t('hardware.rule.summaryRssi', { rssi: rssiMinDbm as number })
     : '';
 
-  return `${actionName} włączy się ${onComparator} ${onThreshold.toFixed(1)}${unit} i wyłączy ${offComparator} ${offThreshold.toFixed(1)}${unit}. Gdy ${sensorLabel} zniknie na ${staleTimeoutMin} min albo ${shellyLabel} uruchomi się ponownie, przekaźnik wyłączy się bezpiecznie. Po świeżym odczycie automatyka znów zastosuje tę regułę. Maksymalny czas pracy: ${maxOnHours} h. Ponowne ON najwcześniej po ${minChangeMin} min.${vpdCopy}${rssiCopy}`;
+  return t('hardware.rule.summary', {
+    action: actionName,
+    onComparator,
+    onThreshold: onThreshold.toFixed(1),
+    offComparator,
+    offThreshold: offThreshold.toFixed(1),
+    unit,
+    sensor: sensorLabel,
+    staleTimeoutMin,
+    shelly: shellyLabel,
+    maxOnHours,
+    minChangeMin,
+    vpd: vpdCopy,
+    rssi: rssiCopy
+  });
 };
 
 export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
   const [isScriptManagerModalOpen, setIsScriptManagerModalOpen] = useState(false);
@@ -237,7 +276,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
   const vpdAssistLabel = flow.vpdAssistEnabled
     ? flow.isVpdAssistValid
       ? `${Number(flow.vpdTargetInput).toFixed(2)} kPa`
-      : 'sprawdź wartość'
+      : t('hardware.rule.values.checkValue')
     : undefined;
   const advancedDraftValidation = validateRuleAdvancedSettings(advancedDraft);
   const staleTimeoutMin = Number(flow.staleTimeoutMinInput);
@@ -265,13 +304,18 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     decodedCurrentScript
   );
   const scriptStatusLabel = selectedScript
-    ? `id ${selectedScript.id}, ${selectedScript.running ? 'działa' : 'zatrzymany'}`
-    : 'brak';
+    ? t('hardware.rule.scriptStatus', {
+        id: selectedScript.id,
+        status: selectedScript.running
+          ? t('hardware.status.running')
+          : t('hardware.status.stopped')
+      })
+    : t('hardware.rule.values.noScript');
   const isScriptManagerBusy =
     flow.fetchAutomationScriptMutation.isPending ||
     flow.deleteAutomationScriptMutation.isPending;
   const ruleSummary = formatRuleSummary({
-    actionLabel: copy.actionLabel,
+    actionLabel: t(copy.actionLabelKey),
     direction,
     onThreshold: Number(flow.onThresholdInput),
     offThreshold: Number(flow.offThresholdInput),
@@ -286,7 +330,8 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       Number.isFinite(rssiMinDbm) &&
       flow.rssiMinInput !== DEFAULT_RULE_ADVANCED_SETTINGS.rssiMinInput
         ? rssiMinDbm
-        : undefined
+        : undefined,
+    t
   });
 
   const dismissToast = useCallback((id: string) => {
@@ -315,7 +360,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           t('hardware.rule.copyScriptFailedDetail')
         )
       );
-  }, [flow.configState, pushToast]);
+  }, [flow.configState, pushToast, t]);
 
   const copyManagedScript = useCallback(() => {
     if (!selectedScriptCode) {
@@ -331,7 +376,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           t('hardware.rule.copyScriptFailedDetail')
         )
       );
-  }, [pushToast, selectedScriptCode]);
+  }, [pushToast, selectedScriptCode, t]);
 
   useEffect(() => {
     setIsDeleteConfirmActive(false);
@@ -347,7 +392,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       mutationError(flow.fetchAutomationScriptMutation.error)
     );
     flow.fetchAutomationScriptMutation.reset();
-  }, [flow.fetchAutomationScriptMutation, pushToast]);
+  }, [flow.fetchAutomationScriptMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.deleteAutomationScriptMutation.isError) {
@@ -359,7 +404,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       mutationError(flow.deleteAutomationScriptMutation.error)
     );
     flow.deleteAutomationScriptMutation.reset();
-  }, [flow.deleteAutomationScriptMutation, pushToast]);
+  }, [flow.deleteAutomationScriptMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.deleteAutomationScriptMutation.isSuccess) {
@@ -368,7 +413,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     setIsDeleteConfirmActive(false);
     pushToast('ok', t('hardware.rule.deleteScriptDone'));
     flow.deleteAutomationScriptMutation.reset();
-  }, [flow.deleteAutomationScriptMutation, pushToast]);
+  }, [flow.deleteAutomationScriptMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.installMutation.isError) {
@@ -395,7 +440,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       mutationError(flow.safeRelayTestMutation.error)
     );
     flow.safeRelayTestMutation.reset();
-  }, [flow.safeRelayTestMutation, pushToast]);
+  }, [flow.safeRelayTestMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.safeRelayTestMutation.isSuccess) {
@@ -404,7 +449,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     setIsRelayTestModalOpen(false);
     pushToast('ok', t('hardware.ready'), t('hardware.rule.relayTestDone'));
     flow.safeRelayTestMutation.reset();
-  }, [flow.safeRelayTestMutation, pushToast]);
+  }, [flow.safeRelayTestMutation, pushToast, t]);
 
   const openScriptManagerModal = () => {
     setIsScriptManagerModalOpen(true);
@@ -471,16 +516,16 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
   };
 
   return (
-    <section className="demo-panel" aria-label="Reguła automatyzacji">
+    <section className="demo-panel" aria-label={t('hardware.nav.ruleTitle')}>
       <label className="field">
-        Gniazdko Shelly
+        {t('hardware.rule.selectedShelly')}
         <span className="select-control">
           <select
             value={flow.selectedShellyId ?? ''}
             onChange={(event) => flow.selectShellyDevice(event.currentTarget.value)}
           >
             <option value="" disabled>
-              Wybierz gniazdko
+              {t('hardware.rule.noShellySelected')}
             </option>
             {flow.shellyDevices.map((device) => (
               <option key={device.id} value={device.id}>
@@ -492,14 +537,14 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       </label>
 
       <label className="field">
-        Termometr
+        {t('hardware.rule.selectedSensor')}
         <span className="select-control">
           <select
             value={flow.selectedSensorId ?? ''}
             onChange={(event) => flow.selectSensorDevice(event.currentTarget.value)}
           >
             <option value="" disabled>
-              Wybierz termometr
+              {t('hardware.flow.noSelectedSensor')}
             </option>
             {flow.sensorDevices.map((device) => (
               <option key={device.id} value={device.id}>
@@ -511,7 +556,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       </label>
 
       <label className="field">
-        Tryb reguły
+        {t('hardware.rule.ruleMode')}
         <span className="select-control">
           <select
             value={flow.rulePreset}
@@ -521,7 +566,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           >
             {SELECTABLE_RULE_PRESETS.map((preset) => (
               <option key={preset} value={preset}>
-                {RULE_PRESET_COPY[preset].label}
+                {t(RULE_PRESET_COPY[preset].labelKey)}
               </option>
             ))}
           </select>
@@ -530,7 +575,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
 
       <div className="field-row">
         <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
-          {copy.onLabel}
+          {t(copy.onLabelKey)}
           <input
             aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
             aria-invalid={!flow.isThresholdValid}
@@ -541,7 +586,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           />
         </label>
         <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
-          {copy.offLabel}
+          {t(copy.offLabelKey)}
           <input
             aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
             aria-invalid={!flow.isThresholdValid}
@@ -561,17 +606,17 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       <RuleSummaryCard
         action={
           <button
-            aria-label="Pokaż skrypt"
+            aria-label={t('hardware.rule.scriptPreviewAria')}
             className="icon-action rule-summary-icon-action"
             type="button"
             disabled={!flow.configState.ok}
-            title="Pokaż wygenerowany Shelly Script"
+            title={t('hardware.rule.scriptPreviewTitle')}
             onClick={() => setIsScriptModalOpen(true)}
           >
             <GeneratedScriptIcon />
           </button>
         }
-        title="Podsumowanie reguły"
+        title={t('hardware.rule.summaryTitle')}
         summary={ruleSummary}
       />
 
@@ -579,19 +624,19 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
         <button
           className="secondary-action"
           type="button"
-          title="Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa"
+          title={t('hardware.rule.advancedTitleAttr')}
           onClick={openAdvancedModal}
         >
-          Zaawansowane
+          {t('hardware.rule.advanced')}
         </button>
         <button
           className="secondary-action"
           type="button"
           disabled={!flow.selectedShelly}
-          title="Odczytaj albo usuń skrypt zapisany w Shelly"
+          title={t('hardware.rule.scriptManagerTitle')}
           onClick={openScriptManagerModal}
         >
-          Skrypt Shelly
+          {t('hardware.rule.scriptManager')}
         </button>
         <button
           className="primary-action"
@@ -602,7 +647,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
             flow.installMutation.isPending ||
             flow.safeRelayTestMutation.isPending
           }
-          title="Wyślij aktualną regułę do Shelly"
+          title={t('hardware.rule.sendTitle')}
           onClick={() => flow.installMutation.mutate()}
         >
           {flow.installMutation.isPending ? t('common.sending') : t('common.send')}
@@ -610,7 +655,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       </div>
 
       <Modal
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         open={isInstallBlockModalOpen && flow.installMutation.isError}
         title={t('hardware.rule.installBlockedTitle')}
         onClose={() => {
@@ -620,7 +665,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       >
         {flow.installMutation.isError && (
           <FeedbackPanel tone="danger" title={mutationError(flow.installMutation.error)}>
-            Jeśli Matter blokuje skrypty, wyłącz Matter w Shelly i spróbuj ponownie.
+            {t('hardware.rule.installMatterHelp')}
           </FeedbackPanel>
         )}
       </Modal>
@@ -631,7 +676,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
             type="button"
             aria-busy={flow.safeRelayTestMutation.isPending}
             disabled={!flow.canRunSafeRelayTest || flow.safeRelayTestMutation.isPending}
-            title="Uruchom krótki test przekaźnika i zakończ stanem OFF"
+            title={t('hardware.rule.relayTestTitleAttr')}
             onClick={runSafeRelayTest}
           >
             {flow.safeRelayTestMutation.isPending
@@ -639,7 +684,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
               : t('common.test')}
           </button>
         }
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         closeOnBackdrop={false}
         closeOnEscape={!flow.safeRelayTestMutation.isPending}
         open={isRelayTestModalOpen && flow.canRunSafeRelayTest}
@@ -651,7 +696,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
         </FeedbackPanel>
       </Modal>
       <Modal
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         open={isScriptModalOpen && flow.configState.ok}
         size="workspace"
         title={t('hardware.rule.scriptPreview')}
@@ -659,10 +704,10 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       >
         {flow.configState.ok && (
           <ScriptPreview
-            label="Wygenerowany skrypt"
+            label={t('hardware.rule.generatedScriptLabel')}
             code={flow.configState.script}
-            copyAriaLabel="Kopiuj skrypt"
-            copyLabel="Kopiuj"
+            copyAriaLabel={t('hardware.rule.copyGeneratedScriptLabel')}
+            copyLabel={t('hardware.rule.copyGeneratedScriptLabel')}
             variant="fill"
             onCopy={copyScript}
           />
@@ -684,83 +729,88 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
             }
             title={
               isDeleteConfirmActive
-                ? 'Potwierdź usunięcie skryptu z Shelly'
-                : 'Usuń skrypt Local Climate Link z Shelly'
+                ? t('hardware.rule.deleteScriptConfirmTitle')
+                : t('hardware.rule.deleteScriptTitle')
             }
             onClick={deleteManagedScript}
           >
             {flow.deleteAutomationScriptMutation.isPending
-              ? 'Usuwam'
+              ? t('hardware.rule.deleting')
               : isDeleteConfirmActive
-                ? 'Potwierdź usuń'
-                : 'Usuń z Shelly'}
+                ? t('common.confirmDelete')
+                : t('hardware.rule.deleteScriptFromShelly')}
           </button>
         }
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         closeOnBackdrop={false}
         closeOnEscape={!isScriptManagerBusy}
         open={isScriptManagerModalOpen}
         size="diagnostic"
-        title="Skrypt Shelly"
+        title={t('hardware.rule.scriptManager')}
         onClose={closeScriptManagerModal}
       >
         {flow.selectedShelly ? (
           <>
-            <DiagnosticRow label="Gniazdko" value={flow.selectedShelly.name} />
+            <DiagnosticRow
+              label={t('hardware.rule.selectedShelly')}
+              value={flow.selectedShelly.name}
+            />
             <DiagnosticRow
               href={flow.selectedShelly.baseUrl}
-              label="Adres"
-              linkLabel={`Otwórz panel Shelly: ${flow.selectedShelly.baseUrl}`}
+              label={t('common.address')}
+              linkLabel={t('hardware.shelly.openPanelLabel', {
+                address: flow.selectedShelly.baseUrl
+              })}
               value={flow.selectedShelly.baseUrl}
             />
             <DiagnosticRow
-              label="Skrypt"
+              label={t('hardware.rule.script')}
               tone={selectedScript ? 'normal' : 'warning'}
               value={scriptStatusLabel}
             />
             {decodedSelectedScript && selectedScriptSettings && (
               <section
-                aria-label="Odczytane ustawienia skryptu"
+                aria-label={t('hardware.rule.decodedSettingsLabel')}
                 className="script-settings"
               >
-                <h3>Odczytane ustawienia</h3>
+                <h3>{t('hardware.rule.decodedSettings')}</h3>
                 {scriptSettingsMatch !== null && (
                   <DiagnosticRow
-                    label="Zgodność"
+                    label={t('hardware.rule.values.compatibility')}
                     tone={scriptSettingsMatch ? 'normal' : 'warning'}
                     value={
                       scriptSettingsMatch
-                        ? 'zgodne z formularzem'
-                        : 'różni się od formularza'
+                        ? t('hardware.rule.values.formMatch')
+                        : t('hardware.rule.values.formDifferent')
                     }
                   />
                 )}
                 <DiagnosticRow
-                  label="Profil"
+                  label={t('hardware.rule.values.profile')}
                   value={DECODED_PROFILE_LABELS[selectedScriptSettings.sensorProfileId]}
                 />
                 <DiagnosticRow
-                  label="Termometr"
+                  label={t('hardware.rule.selectedSensor')}
                   value={selectedScriptSettings.runtimeAddress}
                 />
                 <DiagnosticRow
-                  label="Reguła"
-                  value={DECODED_MODE_LABELS[selectedScriptSettings.mode]}
+                  label={t('hardware.rule.values.rule')}
+                  value={decodedModeLabel(selectedScriptSettings.mode, t)}
                 />
                 <DiagnosticRow
-                  label="Progi"
-                  value={formatDecodedThresholds(selectedScriptSettings)}
+                  label={t('hardware.rule.values.thresholds')}
+                  value={formatDecodedThresholds(selectedScriptSettings, t)}
                 />
                 <DiagnosticRow
-                  label="Brak odczytu"
+                  label={t('hardware.rule.staleTimeoutLabel')}
                   value={formatDecodedSeconds(selectedScriptSettings.staleTimeoutSec)}
                 />
                 <DiagnosticRow
-                  label="Maks. praca"
+                  label={t('hardware.metrics.maxWork')}
                   value={formatDecodedMs(selectedScriptSettings.maxOnMs)}
                 />
                 <DiagnosticRow
-                  label="Min. zmiana"
+                  label={t('hardware.metrics.minChange')}
                   value={formatDecodedMs(selectedScriptSettings.minChangeMs)}
                 />
                 <DiagnosticRow
@@ -769,36 +819,36 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 />
                 <DiagnosticRow
                   label="VPD"
-                  value={formatDecodedVpd(selectedScriptSettings)}
+                  value={formatDecodedVpd(selectedScriptSettings, t)}
                 />
                 <DiagnosticRow
-                  label="Przekaźnik"
+                  label={t('hardware.metrics.relay')}
                   value={`switch:${selectedScriptSettings.relayId}`}
                 />
                 <DiagnosticRow
-                  label="Config hash"
-                  value={decodedSelectedScript.configHash ?? 'brak'}
+                  label={t('hardware.metrics.configHash')}
+                  value={decodedSelectedScript.configHash ?? t('common.missing')}
                 />
               </section>
             )}
             {selectedScriptCode && !decodedSelectedScript && (
-              <p>Nie umiem odczytać ustawień z tego skryptu.</p>
+              <p>{t('hardware.rule.managedScriptUnknown')}</p>
             )}
             {selectedScriptCode ? (
               <ScriptPreview
-                label="Skrypt zapisany w Shelly"
+                label={t('hardware.rule.managedScriptLabel')}
                 code={selectedScriptCode}
-                copyAriaLabel="Kopiuj skrypt z Shelly"
-                copyLabel="Kopiuj"
+                copyAriaLabel={t('hardware.rule.shellyScriptCopyLabel')}
+                copyLabel={t('common.copy')}
                 variant="tall"
                 onCopy={copyManagedScript}
               />
             ) : !flow.fetchAutomationScriptMutation.isPending ? (
-              <p>Nie mam pobranego kodu skryptu z Shelly.</p>
+              <p>{t('hardware.rule.managedScriptMissingCode')}</p>
             ) : null}
           </>
         ) : (
-          <p>Wybierz gniazdko Shelly.</p>
+          <p>{t('hardware.rule.noShellySelected')}</p>
         )}
       </Modal>
       <Modal
@@ -807,25 +857,25 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
             <button
               className="secondary-action"
               type="button"
-              title="Przywróć domyślne opcje zaawansowane"
+              title={t('hardware.rule.advancedDefaultsTitle')}
               onClick={resetAdvancedDraft}
             >
-              Domyślne
+              {t('common.default')}
             </button>
             <button
               className="primary-action"
               type="button"
               disabled={!advancedDraftValidation.isValid}
-              title="Zastosuj opcje zaawansowane do tej reguły"
+              title={t('hardware.rule.advancedApplyTitle')}
               onClick={applyAdvancedDraft}
             >
-              Zastosuj
+              {t('common.apply')}
             </button>
           </>
         }
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         open={isAdvancedModalOpen}
-        title="Opcje zaawansowane"
+        title={t('hardware.rule.advancedTitle')}
         onClose={() => setIsAdvancedModalOpen(false)}
       >
         <div className="advanced-settings">
@@ -845,7 +895,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 advancedDraftValidation.isVpdTargetValid ? '' : 'field--invalid'
               }`}
             >
-              Docelowe VPD kPa
+              {t('hardware.rule.vpdTarget')}
               <input
                 aria-describedby={
                   advancedDraftValidation.isVpdTargetValid
@@ -868,7 +918,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
               </span>
               {!advancedDraftValidation.isVpdTargetValid && (
                 <span className="field__error" id={advancedVpdErrorId}>
-                  Zakres: 0.1 do 5 kPa.
+                  {t('hardware.rule.range.kpa')}
                 </span>
               )}
             </label>
@@ -881,7 +931,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                   advancedDraftValidation.isMinChangeMinValid ? '' : 'field--invalid'
                 }`}
               >
-                Ponowne ON po min
+                {t('hardware.rule.minChangeLabel')}
                 <input
                   aria-describedby={
                     advancedDraftValidation.isMinChangeMinValid
@@ -902,7 +952,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 />
                 {!advancedDraftValidation.isMinChangeMinValid && (
                   <span className="field__error" id="advanced-min-change-error">
-                    Zakres: 0.25 do 60 min.
+                    {t('hardware.rule.range.minChange')}
                   </span>
                 )}
               </label>
@@ -911,7 +961,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                   advancedDraftValidation.isMaxOnHoursValid ? '' : 'field--invalid'
                 }`}
               >
-                Maksymalny czas pracy h
+                {t('hardware.rule.maxOnHoursLabel')}
                 <input
                   aria-describedby={
                     advancedDraftValidation.isMaxOnHoursValid
@@ -930,14 +980,14 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 />
                 {!advancedDraftValidation.isMaxOnHoursValid && (
                   <span className="field__error" id="advanced-max-on-error">
-                    Zakres: 0.25 do 24 h.
+                    {t('hardware.rule.range.maxOn')}
                   </span>
                 )}
               </label>
             </div>
             <div className="advanced-settings__readonly">
-              <span>Po restarcie Shelly</span>
-              <strong>OFF, potem AUTO po pierwszym odczycie</strong>
+              <span>{t('hardware.rule.bootBehavior')}</span>
+              <strong>{t('hardware.rule.bootBehaviorValue')}</strong>
             </div>
           </section>
 
@@ -948,7 +998,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                   advancedDraftValidation.isStaleTimeoutValid ? '' : 'field--invalid'
                 }`}
               >
-                Brak odczytu przez min
+                {t('hardware.rule.staleTimeoutLabel')}
                 <input
                   aria-describedby={
                     advancedDraftValidation.isStaleTimeoutValid
@@ -969,7 +1019,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 />
                 {!advancedDraftValidation.isStaleTimeoutValid && (
                   <span className="field__error" id="advanced-stale-error">
-                    Zakres: 1 do 120 min.
+                    {t('hardware.rule.range.stale')}
                   </span>
                 )}
               </label>
@@ -978,7 +1028,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                   advancedDraftValidation.isRssiMinValid ? '' : 'field--invalid'
                 }`}
               >
-                Minimalny RSSI dBm
+                {t('hardware.rule.rssiMinLabel')}
                 <input
                   aria-describedby={
                     advancedDraftValidation.isRssiMinValid
@@ -997,7 +1047,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 />
                 {!advancedDraftValidation.isRssiMinValid && (
                   <span className="field__error" id="advanced-rssi-error">
-                    Zakres: -100 do -20 dBm.
+                    {t('hardware.rule.range.rssi')}
                   </span>
                 )}
               </label>
@@ -1005,7 +1055,12 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           </section>
         </div>
       </Modal>
-      <ToastViewport toasts={toasts} onDismiss={dismissToast} />
+      <ToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
+      />
     </section>
   );
 };

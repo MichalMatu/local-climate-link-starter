@@ -68,13 +68,23 @@ Domain packages cannot import React, Ionic, Capacitor UI components, or app-spec
 ## UI copy and localization
 
 MVP UI copy uses a lightweight app-level i18n layer in
-`apps/mobile/src/app/i18n.ts`. The default locale is Polish. User-facing copy for
-the main setup path, safety states, validation errors, Shelly errors, and demo
-flow should be added as typed keys and read through `t(...)`.
+`apps/mobile/src/app/i18n.ts`. The locale is resolved from the system
+browser/webview language and applied to `document.documentElement.lang`. Polish
+is used for `pl`/`pl-PL`; every unsupported language falls back to English. The
+MVP UI intentionally has no manual language switch.
 
-Do not add a broad i18n dependency until there is a product requirement for
-multiple runtime locales, language switching, pluralization rules, or external
-translation files.
+User-facing copy for the main setup path, safety states, validation errors,
+Shelly errors, diagnostics, and demo flow must be added as typed keys under
+`apps/mobile/src/app/locales/` and read through `t(...)` or `translate(...)`.
+Locale tests enforce key parity between Polish and English and scan production
+UI code for hardcoded Polish strings.
+
+To add another language, add a locale file with the same key shape, register it
+in `supportedLocales` and `messages`, then run the i18n tests. Keep plural and
+date/time formatting in small helpers near the UI that needs them.
+
+Do not add a broad i18n dependency until external translation files, translator
+workflows, or ICU-level message formatting become a real product requirement.
 
 ## Data flow for MVP setup
 

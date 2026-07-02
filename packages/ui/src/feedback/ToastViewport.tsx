@@ -13,14 +13,16 @@ export interface ToastMessage {
 export interface ToastViewportProps {
   toasts: readonly ToastMessage[];
   autoDismissMs?: number;
-  dismissLabel?: string;
+  dismissLabel: string;
+  label: string;
   onDismiss(id: string): void;
 }
 
 export const ToastViewport = ({
   toasts,
   autoDismissMs = 5000,
-  dismissLabel = 'Zamknij',
+  dismissLabel,
+  label,
   onDismiss
 }: ToastViewportProps) => {
   useEffect(() => {
@@ -41,7 +43,7 @@ export const ToastViewport = ({
 
   return (
     <div
-      aria-label="Powiadomienia"
+      aria-label={label}
       aria-live="polite"
       className="lcl-toast-viewport"
       role="region"

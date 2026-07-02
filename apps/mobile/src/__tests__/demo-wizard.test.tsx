@@ -64,7 +64,7 @@ describe('DemoWizardScreen', () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByText('blokada')).toBeInTheDocument();
-    expect(screen.getAllByText('włączony').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('włączone').length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Ustaw próg' })).toBeDisabled();
   });
 
