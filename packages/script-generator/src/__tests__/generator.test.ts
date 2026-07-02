@@ -228,7 +228,8 @@ describe('generateShellyThermostatScript', () => {
         null,
         null,
         null,
-        0
+        0,
+        'boot'
       ]
     });
   });
@@ -277,7 +278,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('readUint16LE');
     expect(script).not.toContain('function dataLength');
-    expect(byteLength(script)).toBeLessThanOrEqual(4000);
+    expect(byteLength(script)).toBeLessThanOrEqual(4500);
     expect(() => new Function(script)).not.toThrow();
   });
 
@@ -307,7 +308,8 @@ describe('generateShellyThermostatScript', () => {
     expect(switchCalls).toEqual([{ id: 0, on: false }]);
     expect(runtime.diag().g[0]).toBeNull();
     expect(runtime.diag().g[3]).toBe(100);
-    expect(runtime.diag().g[6]).toBe('cv');
+    expect(runtime.diag().g[6]).toBe('b');
+    expect(runtime.diag().g[16]).toBe('cv');
     expect(runtime.diag().g[15]).toBeGreaterThanOrEqual(packetSeenBefore);
   });
 
@@ -331,6 +333,8 @@ describe('generateShellyThermostatScript', () => {
       rssi: -35
     });
     expect(runtime.diag().g[9]).toBe(1);
+    expect(runtime.diag().g[6]).toBe('blh');
+    expect(runtime.diag().g[16]).toBe('ok');
 
     scan('scan-result', {
       addr: 'A4:C1:38:4F:24:CD',
@@ -341,6 +345,8 @@ describe('generateShellyThermostatScript', () => {
     expect(runtime.diag().g[9]).toBe(1);
     expect(runtime.diag().g[10]).toBe(0);
     expect(runtime.diag().g[3]).toBe(99);
+    expect(runtime.diag().g[6]).toBe('blh');
+    expect(runtime.diag().g[16]).toBe('cv');
   });
 
   it('allows OFF during min-change cooldown while blocking immediate ON restart', () => {
@@ -448,7 +454,8 @@ describe('generateShellyThermostatScript', () => {
         advData: tempOnly,
         rssi: -35
       });
-      expect(runtime.diag().g[6]).toBe('cv');
+      expect(runtime.diag().g[6]).toBe('b');
+      expect(runtime.diag().g[16]).toBe('cv');
       expect(runtime.diag().g[0]).toBeNull();
 
       nowMs += 10_000;
@@ -505,14 +512,15 @@ describe('generateShellyThermostatScript', () => {
         advData: createBthomeAdvertisement([0x40, 0x03, 0x4c, 0x1d]),
         rssi: -35
       });
-      nowMs += 31_000;
+      nowMs += 91_000;
       scan('scan-result', {
         addr: 'A4:C1:38:4F:24:CD',
         advData: createBthomeAdvertisement([0x40, 0x02, 0x34, 0x08]),
         rssi: -35
       });
 
-      expect(runtime.diag().g[6]).toBe('cv');
+      expect(runtime.diag().g[6]).toBe('b');
+      expect(runtime.diag().g[16]).toBe('cv');
       expect(runtime.diag().g[0]).toBeNull();
       expect(switchCalls).toEqual([{ id: 0, on: false }]);
     } finally {

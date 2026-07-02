@@ -68,6 +68,25 @@ const formatReason = (reason: string): string => {
   return label ?? reason;
 };
 
+const dataStateLabels: Record<string, string> = {
+  bm: 'Brak danych BTHome',
+  bo: 'Nieobsługiwany obiekt BTHome',
+  boot: 'Start',
+  bs: 'Za krótki pakiet BTHome',
+  cv: 'Czekam na pełny pomiar',
+  ok: 'OK',
+  pt: 'Pakiet pomocniczy',
+  rl: 'Za słaby sygnał BLE',
+  st: 'Nie widzę czujnika',
+  ta: 'Brak danych TP357',
+  tm: 'Brak danych producenta TP357',
+  tr: 'Odczyt TP357 poza zakresem',
+  ts: 'Za krótki pakiet TP357'
+};
+
+const formatDataState = (dataState: string): string =>
+  dataStateLabels[dataState] ?? dataState;
+
 export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
@@ -219,6 +238,10 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             )}
           />
           <DiagnosticRow label="Powód" value={formatReason(diagnostics.lastReason)} />
+          <DiagnosticRow
+            label="Dane BLE"
+            value={formatDataState(diagnostics.dataState)}
+          />
           <DiagnosticRow
             label="Przekaźnik reguły"
             value={diagnostics.relayState ? 'ON' : 'OFF'}

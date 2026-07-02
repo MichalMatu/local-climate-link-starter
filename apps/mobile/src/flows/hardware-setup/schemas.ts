@@ -112,7 +112,8 @@ export const diagnosticSnapshotSchema = z
       z.number().nullable(),
       z.number().nullable(),
       z.number().nullable(),
-      z.number().nullable()
+      z.number().nullable(),
+      z.string()
     ])
   })
   .transform((snapshot) => ({
@@ -168,7 +169,8 @@ export const diagnosticSnapshotSchema = z
       lastVpd: snapshot.g[12],
       lastEffectiveOnThreshold: snapshot.g[13],
       lastEffectiveOffThreshold: snapshot.g[14],
-      lastPacketSeen: snapshot.g[15]
+      lastPacketSeen: snapshot.g[15],
+      dataState: snapshot.g[16]
     }
   }));
 

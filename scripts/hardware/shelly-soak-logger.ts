@@ -104,6 +104,7 @@ interface ParsedSample {
   };
   decision: {
     reason?: string | undefined;
+    dataState?: string | undefined;
     lastChangeMs?: number | undefined;
     onStartedMs?: number | undefined;
     onHits?: number | undefined;
@@ -141,6 +142,7 @@ interface SummaryState {
   lastMeasurementWallMs?: number | undefined;
   lastPacketWallMs?: number | undefined;
   reasonCounts: Record<string, number>;
+  dataStateCounts: Record<string, number>;
   errorCounts: Record<string, number>;
   cycleRequests: number;
   cycleSkips: number;
@@ -752,6 +754,7 @@ const parseDiag = (diag: unknown): Partial<ParsedSample> => {
     },
     decision: {
       reason: stringField(runtime?.[6]),
+      dataState: stringField(runtime?.[16]),
       lastChangeMs: numberField(runtime?.[7]),
       onStartedMs: numberField(runtime?.[8]),
       onHits: numberField(runtime?.[9]),
@@ -899,6 +902,9 @@ const updateSummary = (
 
   if (parsed.decision.reason) {
     increment(summary.reasonCounts, parsed.decision.reason);
+  }
+  if (parsed.decision.dataState) {
+    increment(summary.dataStateCounts, parsed.decision.dataState);
   }
   if (parsed.script.memUsed !== undefined) {
     summary.memUsedMax = updateMax(summary.memUsedMax, parsed.script.memUsed);
@@ -1051,6 +1057,7 @@ const createSummaryMarkdown = (options: {
     markdownTable(rows),
     '',
     countTable('Powody decyzji runtime', summary.reasonCounts),
+    countTable('Stany danych BLE', summary.dataStateCounts),
     countTable('Błędy endpointów', summary.errorCounts)
   ].join('\n');
 };
@@ -1107,6 +1114,7 @@ const main = async (): Promise<void> => {
     maxNoMeasurementUpdateMs: 0,
     maxNoPacketUpdateMs: 0,
     reasonCounts: {},
+    dataStateCounts: {},
     errorCounts: {},
     cycleRequests: 0,
     cycleSkips: 0,
@@ -1208,12 +1216,14 @@ const main = async (): Promise<void> => {
       });
 
       const reason = parsed.decision.reason ?? 'brak';
+      const dataState = parsed.decision.dataState ?? 'brak';
       const relay = parsed.relay.rpcOn ?? parsed.relay.diagOn;
       const age = parsed.sensor.ageSinceMeasurementMs;
       console.log(
         [
           `#${sequence}`,
           `reason=${reason}`,
+          `data=${dataState}`,
           `relay=${relay === undefined ? '?' : relay ? 'ON' : 'OFF'}`,
           `temp=${formatValue(parsed.sensor.temperatureC)}`,
           `hum=${formatValue(parsed.sensor.humidityPct)}`,

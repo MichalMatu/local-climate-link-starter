@@ -341,7 +341,8 @@ describe('HardwareSetupScreen', () => {
               1.45,
               22.2,
               22.6,
-              1782667904992
+              1782667904992,
+              'ok'
             ]
           });
         }
@@ -2661,7 +2662,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('Czas Shelly')).toBeInTheDocument();
     expect(screen.getByText('09:31')).toBeInTheDocument();
     expect(screen.getByText('Zegar')).toBeInTheDocument();
-    expect(screen.getByText('OK')).toBeInTheDocument();
+    expect(screen.getAllByText('OK').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('44.1%')).toBeInTheDocument();
     expect(screen.getByText('1.45 kPa')).toBeInTheDocument();
     expect(screen.getByText('22.2°C')).toBeInTheDocument();
@@ -2669,6 +2670,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.getByText('-37 dBm')).toBeInTheDocument();
     expect(screen.getByText('Powyżej progu')).toBeInTheDocument();
+    expect(screen.getByText('Dane BLE')).toBeInTheDocument();
     expect(screen.getByText('Przekaźnik reguły')).toBeInTheDocument();
     expect(screen.getAllByText('OFF').length).toBeGreaterThanOrEqual(2);
   });

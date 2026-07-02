@@ -48,6 +48,7 @@ interface ParsedDiag {
   measurement?: MeasurementSnapshot | undefined;
   relayState?: boolean | undefined;
   lastReason?: string | undefined;
+  dataState?: string | undefined;
   lastControlValue?: number | undefined;
 }
 
@@ -213,6 +214,7 @@ const parseDiag = (raw: unknown): ParsedDiag => {
       measurement,
       relayState: typeof diagnostics[5] === 'boolean' ? diagnostics[5] : undefined,
       lastReason: typeof diagnostics[6] === 'string' ? diagnostics[6] : undefined,
+      dataState: typeof diagnostics[16] === 'string' ? diagnostics[16] : undefined,
       lastControlValue: numericField(diagnostics[11])
     };
   }
@@ -241,6 +243,7 @@ const parseDiag = (raw: unknown): ParsedDiag => {
     measurement,
     relayState: typeof diagnostics.on === 'boolean' ? diagnostics.on : undefined,
     lastReason: typeof diagnostics.rs === 'string' ? diagnostics.rs : undefined,
+    dataState: typeof diagnostics.ds === 'string' ? diagnostics.ds : undefined,
     lastControlValue: numericField(diagnostics.cv)
   };
 };
