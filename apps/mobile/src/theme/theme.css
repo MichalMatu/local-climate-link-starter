@@ -421,6 +421,13 @@ select {
   line-height: var(--lcl-line-height-normal);
 }
 
+.field__hint {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: 500;
+  line-height: var(--lcl-line-height-normal);
+}
+
 .script-preview,
 .support-summary {
   background: var(--lcl-color-code-background);

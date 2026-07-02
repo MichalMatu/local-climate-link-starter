@@ -94,6 +94,8 @@ export const messages = {
         removed: 'Usunięto termometr z aplikacji.'
       },
       rule: {
+        vpdRangeHint:
+          'Po ustawieniu kPa VPD dobiera punkt pracy w zakresie progów ON/OFF. Nie rozszerza zakresu; przy wąskim zakresie efekt może być mało widoczny.',
         scriptPreview: 'Podgląd Shelly Script',
         setThreshold: 'Ustaw próg',
         thresholdInvalid: 'Próg włączenia musi być niższy niż próg wyłączenia.',

@@ -2141,11 +2141,9 @@ describe('HardwareSetupScreen', () => {
       expect(
         within(advancedDialog).getByRole('button', { name: 'Zastosuj' })
       ).toHaveAttribute('title', 'Zastosuj opcje zaawansowane do tej reguły');
-      expect(
-        within(advancedDialog)
-          .getAllByRole('heading', { level: 3 })
-          .map((heading) => heading.textContent)
-      ).toEqual(['VPD', 'Przekaźnik', 'Odczyt termometru']);
+      expect(within(advancedDialog).queryAllByRole('heading', { level: 3 })).toHaveLength(
+        0
+      );
       expect(within(advancedDialog).getByLabelText('VPD assist')).not.toBeChecked();
       expect(
         within(advancedDialog).getByText('OFF, potem AUTO po pierwszym odczycie')

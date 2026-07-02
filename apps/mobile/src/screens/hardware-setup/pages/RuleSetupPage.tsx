@@ -225,6 +225,8 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     createAdvancedDraft(flow)
   );
   const thresholdErrorId = useId();
+  const advancedVpdHintId = useId();
+  const advancedVpdErrorId = useId();
   const toastIdRef = useRef(0);
   const copy = RULE_PRESET_COPY[flow.rulePreset];
   const currentRule =
@@ -828,7 +830,6 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       >
         <div className="advanced-settings">
           <section className="advanced-settings__section">
-            <h3>VPD</h3>
             <label className="toggle-row">
               <input
                 type="checkbox"
@@ -848,8 +849,8 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
               <input
                 aria-describedby={
                   advancedDraftValidation.isVpdTargetValid
-                    ? undefined
-                    : 'advanced-vpd-error'
+                    ? advancedVpdHintId
+                    : `${advancedVpdHintId} ${advancedVpdErrorId}`
                 }
                 aria-invalid={!advancedDraftValidation.isVpdTargetValid}
                 disabled={!advancedDraft.vpdAssistEnabled}
@@ -862,8 +863,11 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                   updateAdvancedDraft({ vpdTargetInput: event.currentTarget.value })
                 }
               />
+              <span className="field__hint" id={advancedVpdHintId}>
+                {t('hardware.rule.vpdRangeHint')}
+              </span>
               {!advancedDraftValidation.isVpdTargetValid && (
-                <span className="field__error" id="advanced-vpd-error">
+                <span className="field__error" id={advancedVpdErrorId}>
                   Zakres: 0.1 do 5 kPa.
                 </span>
               )}
@@ -871,7 +875,6 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           </section>
 
           <section className="advanced-settings__section">
-            <h3>Przekaźnik</h3>
             <div className="field-row">
               <label
                 className={`field ${
@@ -939,7 +942,6 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
           </section>
 
           <section className="advanced-settings__section">
-            <h3>Odczyt termometru</h3>
             <div className="field-row">
               <label
                 className={`field ${
