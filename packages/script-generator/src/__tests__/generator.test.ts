@@ -313,6 +313,34 @@ describe('generateShellyThermostatScript', () => {
     expect(runtime.diag().g[15]).toBeGreaterThanOrEqual(packetSeenBefore);
   });
 
+  it('parses Xiaomi BTHome short temperature and humidity objects at runtime', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const script = generateShellyThermostatScript({
+      ...config,
+      sensor: {
+        ...config.sensor,
+        runtimeAddress: 'A4:C1:38:4F:24:CD'
+      }
+    });
+    const { runtime, scan } = createExecutableRuntime(script);
+
+    scan('scan-result', {
+      addr: 'A4:C1:38:4F:24:CD',
+      advData: createBthomeAdvertisement([
+        0x40, 0x0c, 0xae, 0x0b, 0x45, 0xe1, 0x00, 0x2e, 58, 0x01, 99
+      ]),
+      rssi: -35
+    });
+
+    expect(runtime.diag().g[1]).toBe(22.5);
+    expect(runtime.diag().g[2]).toBe(58);
+    expect(runtime.diag().g[3]).toBe(99);
+    expect(runtime.diag().g[16]).toBe('ok');
+  });
+
   it('keeps consecutive hits when an incomplete BTHome packet arrives', () => {
     const config = createDefaultShellyThermostatConfig(
       'xiaomi_lywsd03mmc_bthome_v2',

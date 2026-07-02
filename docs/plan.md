@@ -134,8 +134,11 @@ hardware actions.
 - Xiaomi/PVVX and TP357 need repeated dated checks on real Shelly hardware.
 - Stale-sensor and max-ON behavior need hardware confirmation after the latest
   runtime changes.
-- iOS BLE identity behavior must remain documented as setup-only.
-- Native mobile permission behavior needs device testing beyond the web preview.
+- iOS BLE identity behavior must remain documented as setup-only until the
+  native iOS project, `Info.plist` strings, and real iPhone flow are complete.
+- Native mobile permission behavior and store disclosures need release-candidate
+  validation beyond the web preview. Track the final checklist in
+  `docs/release/store-readiness.md`.
 
 ## Checks
 

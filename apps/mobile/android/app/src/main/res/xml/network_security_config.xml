@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Shelly Plug S Gen3 exposes local RPC over HTTP. Android network-security-config
+        cannot express a dynamic private-LAN CIDR allow-list for user-entered IPs, so
+        platform cleartext stays available while @lcl/shelly-client rejects non-local
+        RPC targets before any request is sent.
+    -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

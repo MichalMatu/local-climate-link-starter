@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { useMutation } from '@tanstack/react-query';
 import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { CapacitorBleScanner, type BleScanner } from '@lcl/ble-core';
@@ -1033,7 +1034,7 @@ export const useHardwareSetupFlow = () => {
 
   const phoneBleScanMutation = useMutation({
     mutationFn: async (): Promise<PhoneBleScanOutcome> => {
-      const scanner = new CapacitorBleScanner();
+      const scanner = new CapacitorBleScanner({ platform: Capacitor.getPlatform() });
       phoneBleScannerRef.current = scanner;
       setPhoneBleScanCandidates([]);
 

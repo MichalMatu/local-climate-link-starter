@@ -59,7 +59,7 @@ function sl(d,a,b){return typeof d==="string"?d.slice(a,b):d.slice?d.slice(a,b):
 function ad(d){var l=lb(d),o=0;while(o<l){var n=rb(d,o);if(!n)return null;var s=o+1,e=s+n;if(e>l)return null;if(rb(d,s)===22&&rb(d,s+1)===210&&rb(d,s+2)===252)return sl(d,s+3,e);o=e;}return null;}
 function sd(x){return x.advData?ad(x.advData):null;}
 function r2(d,o,s){var a=rb(d,o),b=rb(d,o+1);if(a===null||b===null)return null;var v=a|(b<<8);return s&&v&32768?v-65536:v;}
-function parse(x){var d=sd(x);if(!d){R.ds="bm";return;}var t=null,h=null,b=null,o=1,l=lb(d);while(o<l){var k=rb(d,o++);if(k===0){o++;}else if(k===1){b=rb(d,o++);}else if(k===2){var tv=r2(d,o,1);if(tv===null){R.ds="bs";return;}t=tv/100;o+=2;}else if(k===3){var hv=r2(d,o,0);if(hv===null){R.ds="bs";return;}h=hv/100;o+=2;}else{R.ds="bo";break;}}meas(t,h,b,x.rssi);}`;
+function parse(x){var d=sd(x);if(!d){R.ds="bm";return;}var t=null,h=null,b=null,o=1,l=lb(d),k,v;while(o<l){k=rb(d,o++);if(k==0)o++;else if(k==1)b=rb(d,o++);else if(k==12)o+=2;else if(k==2){v=r2(d,o,1);if(v==null){R.ds="bs";return;}t=v/100;o+=2;}else if(k==3){v=r2(d,o,0);if(v==null){R.ds="bs";return;}h=v/100;o+=2;}else if(k==46){h=rb(d,o++);if(h==null){R.ds="bs";return;}}else if(k==69){v=r2(d,o,1);if(v==null){R.ds="bs";return;}t=v/10;o+=2;}else{R.ds="bo";break;}}meas(t,h,b,x.rssi);}`;
 
 const renderTp357MinimalParser =
   (): string => `function lb(d){if(!d)return 0;if(typeof d==="string")return d.length;if(d.length!==undefined)return d.length;return 0;}

@@ -1,3 +1,4 @@
+import { isLocalShellyHost } from '@lcl/shelly-client';
 import type { SensorProfileId } from '@lcl/device-profiles';
 import { t } from '../../app/i18n.js';
 
@@ -21,7 +22,7 @@ export const normalizeShellyUrl = (value: string): string => {
       const value = Number(part);
       return Number.isInteger(value) && value >= 0 && value <= 255 && part !== '';
     });
-  if (!isIpv4) {
+  if (!isIpv4 || !isLocalShellyHost(url.hostname)) {
     throw new Error(t('hardware.validation.shellyIpInvalid'));
   }
   url.pathname = '/';

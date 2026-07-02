@@ -13,6 +13,16 @@ import type {
 
 type BleClientLoader = () => Promise<BleClientInterface>;
 type BooleanResultLike = boolean | { value: boolean };
+type ScanPlatform = NormalizedBleAdvertisement['platform'];
+
+export interface CapacitorBleScannerOptions {
+  clientLoader?: () => Promise<BleClientInterface>;
+  platform?: ScanPlatform | string;
+}
+
+export interface NormalizeCapacitorScanOptions {
+  platform?: ScanPlatform | string;
+}
 
 const createError = (
   kind: BleCoreError['kind'],
@@ -65,8 +75,25 @@ const mapDataViews = (
     })
   );
 
+const normalizeScanPlatform = (
+  platform: ScanPlatform | string | undefined,
+  rawAdvertisement?: Uint8Array
+): ScanPlatform => {
+  if (
+    platform === 'android' ||
+    platform === 'ios' ||
+    platform === 'web' ||
+    platform === 'demo'
+  ) {
+    return platform;
+  }
+
+  return rawAdvertisement ? 'android' : 'web';
+};
+
 export const normalizeCapacitorScanResult = (
-  result: ScanResult
+  result: ScanResult,
+  options: NormalizeCapacitorScanOptions = {}
 ): NormalizedBleAdvertisement => {
   const rawAdvertisement = bytesFromDataView(result.rawAdvertisement);
   const serviceUuids = Array.from(
@@ -79,7 +106,7 @@ export const normalizeCapacitorScanResult = (
     serviceData: mapDataViews(result.serviceData),
     manufacturerData: mapDataViews(result.manufacturerData),
     seenAtMs: Date.now(),
-    platform: rawAdvertisement ? 'android' : 'web',
+    platform: normalizeScanPlatform(options.platform, rawAdvertisement),
     ...((result.localName ?? result.device.name)
       ? { name: result.localName ?? result.device.name }
       : {}),
@@ -90,8 +117,13 @@ export const normalizeCapacitorScanResult = (
 
 export class CapacitorBleScanner implements BleScanner {
   private activeStop: (() => Promise<void>) | null = null;
+  private readonly clientLoader: BleClientLoader;
+  private readonly platform: ScanPlatform;
 
-  constructor(private readonly clientLoader: BleClientLoader = loadBleClient) {}
+  constructor(options: CapacitorBleScannerOptions = {}) {
+    this.clientLoader = options.clientLoader ?? loadBleClient;
+    this.platform = normalizeScanPlatform(options.platform);
+  }
 
   async *startScan(options: ScanOptions = {}): AsyncIterable<NormalizedBleAdvertisement> {
     const client = await this.clientLoader();
@@ -139,7 +171,9 @@ export class CapacitorBleScanner implements BleScanner {
       };
 
       await client.requestLEScan(requestOptions, (result) => {
-        const advertisement = normalizeCapacitorScanResult(result);
+        const advertisement = normalizeCapacitorScanResult(result, {
+          platform: this.platform
+        });
         if (
           typeof options.rssiMin === 'number' &&
           typeof advertisement.rssi === 'number' &&

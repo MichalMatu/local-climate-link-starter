@@ -92,6 +92,76 @@ const invalidJsonError = (): ShellyClientError => ({
   retryable: false
 });
 
+const localShellyUrlError = (baseUrl: string): ShellyClientError => ({
+  kind: 'validation-failed',
+  userMessageKey: 'errors.validationFailed',
+  technicalMessage: `Shelly RPC is limited to local network targets, got ${baseUrl}.`,
+  retryable: false
+});
+
+const parseIpv4Octets = (host: string): number[] | null => {
+  const parts = host.split('.');
+  if (parts.length !== 4) {
+    return null;
+  }
+
+  const octets = parts.map((part) => Number(part));
+  return octets.every(
+    (octet, index) =>
+      Number.isInteger(octet) && octet >= 0 && octet <= 255 && parts[index] !== ''
+  )
+    ? octets
+    : null;
+};
+
+export const isLocalShellyHost = (host: string): boolean => {
+  const normalized = host.trim().toLowerCase().replace(/^\[/, '').replace(/\]$/, '');
+
+  if (
+    normalized === 'localhost' ||
+    normalized === '::1' ||
+    normalized.endsWith('.local')
+  ) {
+    return true;
+  }
+
+  if (normalized.startsWith('fe80:')) {
+    return true;
+  }
+
+  const octets = parseIpv4Octets(normalized);
+  if (!octets) {
+    return false;
+  }
+
+  const [first = 0, second = 0] = octets;
+  return (
+    first === 10 ||
+    first === 127 ||
+    (first === 169 && second === 254) ||
+    (first === 172 && second >= 16 && second <= 31) ||
+    (first === 192 && second === 168)
+  );
+};
+
+const createShellyRpcUrl = (baseUrl: string): Result<URL> => {
+  let url: URL;
+  try {
+    url = new URL('/rpc', baseUrl);
+  } catch {
+    return { ok: false, error: localShellyUrlError(baseUrl) };
+  }
+
+  if (
+    (url.protocol !== 'http:' && url.protocol !== 'https:') ||
+    !isLocalShellyHost(url.hostname)
+  ) {
+    return { ok: false, error: localShellyUrlError(baseUrl) };
+  }
+
+  return { ok: true, value: url };
+};
+
 export class FetchShellyRpcTransport implements ShellyRpcTransport {
   private readonly defaultTimeoutMs: number;
   private readonly fetchImpl: typeof fetch;
@@ -107,6 +177,11 @@ export class FetchShellyRpcTransport implements ShellyRpcTransport {
     options?: { timeoutMs?: number; signal?: AbortSignal }
   ): Promise<Result<TResponse>> {
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
+    const rpcUrl = createShellyRpcUrl(this.options.baseUrl);
+    if (!rpcUrl.ok) {
+      return rpcUrl;
+    }
+
     const externalSignal = options?.signal ?? this.options.signal;
     const controller = new AbortController();
     const abortRequest = () => controller.abort();
@@ -120,7 +195,7 @@ export class FetchShellyRpcTransport implements ShellyRpcTransport {
     this.nextRequestId += 1;
 
     try {
-      const response = await this.fetchImpl(new URL('/rpc', this.options.baseUrl), {
+      const response = await this.fetchImpl(rpcUrl.value, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({

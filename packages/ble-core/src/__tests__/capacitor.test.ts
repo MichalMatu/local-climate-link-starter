@@ -36,6 +36,14 @@ describe('CapacitorBleScanner', () => {
     expect(advertisement.rawAdvertisement).toEqual(new Uint8Array([0x02, 0x01, 0x06]));
   });
 
+  it('uses an explicit native platform hint when normalizing scan results', () => {
+    const scanResult = createScanResult();
+    delete scanResult.rawAdvertisement;
+    const advertisement = normalizeCapacitorScanResult(scanResult, { platform: 'ios' });
+
+    expect(advertisement.platform).toBe('ios');
+  });
+
   it('yields scan results and filters weak RSSI values', async () => {
     const scanState: { callback: ((result: ScanResult) => void) | null } = {
       callback: null
@@ -49,7 +57,7 @@ describe('CapacitorBleScanner', () => {
       }),
       stopLEScan: vi.fn().mockResolvedValue(undefined)
     } as unknown as BleClientInterface;
-    const scanner = new CapacitorBleScanner(async () => client);
+    const scanner = new CapacitorBleScanner({ clientLoader: async () => client });
     const iterator = scanner.startScan({ rssiMin: -70 })[Symbol.asyncIterator]();
 
     const firstResult = iterator.next();
@@ -78,7 +86,7 @@ describe('CapacitorBleScanner', () => {
       requestLEScan: vi.fn(async () => undefined),
       stopLEScan: vi.fn().mockResolvedValue(undefined)
     } as unknown as BleClientInterface;
-    const scanner = new CapacitorBleScanner(async () => client);
+    const scanner = new CapacitorBleScanner({ clientLoader: async () => client });
     const iterator = scanner.startScan({ timeoutMs: 1 })[Symbol.asyncIterator]();
 
     await expect(iterator.next()).resolves.toMatchObject({ done: true });
