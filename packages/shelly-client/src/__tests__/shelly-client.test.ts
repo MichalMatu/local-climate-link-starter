@@ -7,6 +7,7 @@ import {
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
   createInstallPlan,
+  isLocalShellyHost,
   withTimeout,
   type ShellyClientError,
   type ShellyRpcRequest,
@@ -339,12 +340,20 @@ describe('RpcShellyClient', () => {
       RPC_METHODS.ShellyGetStatus,
       RPC_METHODS.ScriptList,
       RPC_METHODS.ScriptGetCode,
+      RPC_METHODS.ScriptEval,
       RPC_METHODS.ScriptStop,
       RPC_METHODS.ScriptPutCode,
       RPC_METHODS.ScriptSetConfig,
       RPC_METHODS.ScriptStart,
       RPC_METHODS.ScriptGetStatus
     ]);
+    const cleanupEval = transport.requests.find(
+      (request) => request.method === RPC_METHODS.ScriptEval
+    );
+    expect(cleanupEval?.params).toEqual({
+      id: 7,
+      code: expect.stringContaining('BLE.Scanner.stop||BLE.Scanner.Stop')
+    });
     expect(
       transport.requests.some((request) => request.method === RPC_METHODS.ScriptCreate)
     ).toBe(false);
@@ -585,6 +594,36 @@ describe('withTimeout', () => {
 });
 
 describe('FetchShellyRpcTransport', () => {
+  it('recognizes only local Shelly RPC hosts as local targets', () => {
+    expect(isLocalShellyHost('192.168.0.20')).toBe(true);
+    expect(isLocalShellyHost('10.0.0.20')).toBe(true);
+    expect(isLocalShellyHost('172.16.1.20')).toBe(true);
+    expect(isLocalShellyHost('172.31.1.20')).toBe(true);
+    expect(isLocalShellyHost('127.0.0.1')).toBe(true);
+    expect(isLocalShellyHost('shellyplug-s.local')).toBe(true);
+    expect(isLocalShellyHost('172.32.1.20')).toBe(false);
+    expect(isLocalShellyHost('8.8.8.8')).toBe(false);
+    expect(isLocalShellyHost('example.com')).toBe(false);
+  });
+
+  it('blocks Shelly RPC to non-local hosts before fetch is called', async () => {
+    const fetchImpl = vi.fn<typeof fetch>();
+    const transport = new FetchShellyRpcTransport({
+      baseUrl: 'http://example.com',
+      fetchImpl
+    });
+
+    const result = await transport.call({ method: RPC_METHODS.ShellyGetStatus });
+
+    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      return;
+    }
+    expect(result.error.kind).toBe('validation-failed');
+    expect(result.error.technicalMessage).toContain('local network');
+  });
+
   it('binds the default browser fetch to globalThis', async () => {
     const originalFetch = globalThis.fetch;
     const requestBodies: unknown[] = [];

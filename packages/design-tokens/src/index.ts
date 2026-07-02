@@ -102,6 +102,7 @@ export const tokens = {
     heroTitle: 'clamp(2rem, 6vw, 3.8rem)'
   },
   breakpoint: {
+    marketing: '62rem',
     compact: '44rem',
     narrow: '30rem'
   },
@@ -115,6 +116,7 @@ export const tokens = {
     normal: '180ms'
   },
   zIndex: {
+    content: '1',
     header: '10',
     modal: '40',
     toast: '60'

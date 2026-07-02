@@ -84,6 +84,46 @@ importers:
         specifier: ^3.2.4
         version: 3.2.6(@types/node@24.13.2)(jsdom@26.1.0)(tsx@4.22.4)(yaml@2.9.0)
 
+  apps/landing:
+    dependencies:
+      '@lcl/design-tokens':
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
+      react:
+        specifier: ^19.1.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.2.7(react@19.2.7)
+    devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.6.3
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.0
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.1.6
+        version: 19.2.3(@types/react@19.2.17)
+      '@vitejs/plugin-react':
+        specifier: ^4.6.0
+        version: 4.7.0(vite@7.3.6(@types/node@24.13.2)(tsx@4.22.4)(yaml@2.9.0))
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.0.0
+        version: 7.3.6(@types/node@24.13.2)(tsx@4.22.4)(yaml@2.9.0)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.6(@types/node@24.13.2)(jsdom@26.1.0)(tsx@4.22.4)(yaml@2.9.0)
+
   apps/mobile:
     dependencies:
       '@capacitor-community/bluetooth-le':

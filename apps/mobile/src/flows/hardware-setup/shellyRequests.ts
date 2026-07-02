@@ -7,6 +7,7 @@ import {
   createBleDiscoveryInstallPlan,
   type Result,
   type ShellyClientError,
+  type ShellyDeviceInfo,
   type ShellyInstallResult
 } from '@lcl/shelly-client';
 import {
@@ -208,6 +209,7 @@ export type ShellyControlStatus = {
   relayOn: boolean;
   automationMode: ShellyAutomationMode;
   automationScriptId: number | null;
+  firmwareId: string | null;
   telemetry: HardwareSetupStatus['status']['telemetry'];
   clock: HardwareSetupStatus['status']['clock'];
 };
@@ -306,7 +308,10 @@ const deleteBleDiscoveryScripts = async (
     if (script.running) {
       const stopResult = await client.stopScript(script.id);
       if (!stopResult.ok) {
-        stopError = `Stop skanera BLE ${script.id}: ${resultErrorMessage(stopResult)}`;
+        stopError = t('hardware.shelly.stopBleScannerDetail', {
+          id: script.id,
+          error: resultErrorMessage(stopResult)
+        });
       }
     }
 
@@ -315,7 +320,10 @@ const deleteBleDiscoveryScripts = async (
       cleanupErrors.push(
         [
           stopError,
-          `Usunięcie skanera BLE ${script.id}: ${resultErrorMessage(deleteResult)}`
+          t('hardware.shelly.deleteBleScannerDetail', {
+            id: script.id,
+            error: resultErrorMessage(deleteResult)
+          })
         ]
           .filter(Boolean)
           .join(' ')
@@ -336,6 +344,7 @@ const deleteBleDiscoveryScripts = async (
 };
 
 const toControlStatus = (
+  deviceInfo: ShellyDeviceInfo,
   status: HardwareSetupStatus['status'],
   scripts: ScriptListEntry[]
 ): ShellyControlStatus => {
@@ -348,6 +357,7 @@ const toControlStatus = (
         : 'manual'
       : 'missing',
     automationScriptId: automationScript?.id ?? null,
+    firmwareId: deviceInfo.firmwareId ?? null,
     telemetry: status.telemetry,
     clock: status.clock
   };
@@ -513,12 +523,17 @@ export const readShellyControlStatus = async (
 ): Promise<ShellyControlStatus> => {
   const transport = createShellyTransport(baseUrl);
   const client = new RpcShellyClient(transport);
-  const [status, scripts] = await Promise.all([
+  const [deviceInfo, status, scripts] = await Promise.all([
+    client.getDeviceInfo(),
     client.getStatus(),
     readScriptList(transport)
   ]);
 
-  return toControlStatus(unwrapShellyResult(status), scripts);
+  return toControlStatus(
+    unwrapShellyResult(deviceInfo),
+    unwrapShellyResult(status),
+    scripts
+  );
 };
 
 export const cleanupStaleShellyBleDiscoveryScripts = async (
@@ -535,7 +550,8 @@ export const readShellyAutomationScriptState = async (
 ): Promise<ShellyAutomationScriptState> => {
   const transport = createShellyTransport(baseUrl);
   const client = new RpcShellyClient(transport);
-  const [status, scripts] = await Promise.all([
+  const [deviceInfo, status, scripts] = await Promise.all([
+    client.getDeviceInfo(),
     client.getStatus(),
     readScriptList(transport)
   ]);
@@ -544,7 +560,11 @@ export const readShellyAutomationScriptState = async (
   return {
     script: automationScript,
     code: automationScript ? await readScriptCode(transport, automationScript.id) : null,
-    status: toControlStatus(unwrapShellyResult(status), scripts)
+    status: toControlStatus(
+      unwrapShellyResult(deviceInfo),
+      unwrapShellyResult(status),
+      scripts
+    )
   };
 };
 
@@ -565,9 +585,9 @@ export const deleteShellyAutomationScript = async (
       }
     } catch (error) {
       throw new ShellyAutomationDeleteError(
-        `Nie mogę potwierdzić stanu OFF przed usunięciem skryptu. ${
-          error instanceof Error ? error.message : ''
-        }`.trim(),
+        t('hardware.shelly.requireOffBeforeDelete', {
+          error: error instanceof Error ? error.message : ''
+        }).trim(),
         false
       );
     }
@@ -584,8 +604,12 @@ export const deleteShellyAutomationScript = async (
     if (!deleteResult.ok) {
       const details = [
         t('hardware.shelly.deleteScriptPartial'),
-        stopError ? `Stop skryptu: ${stopError}` : null,
-        `Usunięcie skryptu: ${resultErrorMessage(deleteResult)}`
+        stopError
+          ? t('hardware.shelly.stopAutomationScriptDetail', { error: stopError })
+          : null,
+        t('hardware.shelly.deleteAutomationScriptDetail', {
+          error: resultErrorMessage(deleteResult)
+        })
       ]
         .filter(Boolean)
         .join(' ');

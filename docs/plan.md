@@ -72,6 +72,9 @@ Already present in the codebase:
 - diagnostics view that reads compact `/script/<id>/diag` metadata from the
   installed script, including read-only Shelly clock status, script hash/running
   state, plug telemetry, and readable decision reasons.
+- long-running Shelly soak logger for background hardware stability checks, with
+  JSONL samples, Markdown summaries, and an optional threshold-cycling mode that
+  exercises real relay ON/OFF transitions through the generated runtime rule.
 
 The current MVP path is ready for user hardware testing. The latest dated
 Shelly Plug S Gen3 audit and full runtime matrix are recorded in
@@ -110,9 +113,11 @@ scan failure    -> relay OFF
 manual recovery -> OFF first, then normal auto evaluation
 ```
 
-The app must never leave a relay test ON after failure. Destructive actions need
-confirmation, but Local Climate Link development scripts on local hardware are
-disposable when the user explicitly authorizes hardware actions.
+The app must never leave a relay test ON after failure. The user has granted
+standing authorization for local development smoke tests to toggle the Shelly
+relay without separate approval each time. Local Climate Link development
+scripts on local hardware are disposable when the user explicitly authorizes
+hardware actions.
 
 ## Active priorities
 
@@ -129,8 +134,11 @@ disposable when the user explicitly authorizes hardware actions.
 - Xiaomi/PVVX and TP357 need repeated dated checks on real Shelly hardware.
 - Stale-sensor and max-ON behavior need hardware confirmation after the latest
   runtime changes.
-- iOS BLE identity behavior must remain documented as setup-only.
-- Native mobile permission behavior needs device testing beyond the web preview.
+- iOS BLE identity behavior must remain documented as setup-only until the
+  native iOS project, `Info.plist` strings, and real iPhone flow are complete.
+- Native mobile permission behavior and store disclosures need release-candidate
+  validation beyond the web preview. Track the final checklist in
+  `docs/release/store-readiness.md`.
 
 ## Checks
 

@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { useMutation } from '@tanstack/react-query';
 import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { CapacitorBleScanner, type BleScanner } from '@lcl/ble-core';
@@ -145,9 +146,6 @@ const createInitialShellyControlState = (): ShellyControlViewState => ({
   updatedAtMs: null
 });
 
-const automationScriptMissingMessage = t('hardware.rule.automationScriptMissing');
-const diagnosticReadFailedMessage = t('hardware.diagnostics.readFailed');
-
 const diagnosticScriptStatusMessage = async (
   baseUrl: string,
   scriptId: number
@@ -265,6 +263,12 @@ export const useHardwareSetupFlow = () => {
   const setStaleTimeoutMinInput = useHardwareSetupDraftStore(
     (state) => state.setStaleTimeoutMinInput
   );
+  const minChangeMinInput = useHardwareSetupDraftStore(
+    (state) => state.minChangeMinInput
+  );
+  const setMinChangeMinInput = useHardwareSetupDraftStore(
+    (state) => state.setMinChangeMinInput
+  );
   const maxOnHoursInput = useHardwareSetupDraftStore((state) => state.maxOnHoursInput);
   const setMaxOnHoursInput = useHardwareSetupDraftStore(
     (state) => state.setMaxOnHoursInput
@@ -316,6 +320,17 @@ export const useHardwareSetupFlow = () => {
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
+  const savedShellyScanBaseUrls = useMemo(() => {
+    const baseUrls = new Set<string>();
+    for (const device of shellyDevices) {
+      try {
+        baseUrls.add(normalizeShellyUrl(device.baseUrl));
+      } catch {
+        baseUrls.add(device.baseUrl);
+      }
+    }
+    return baseUrls;
+  }, [shellyDevices]);
 
   const shellyInputState = useMemo((): ShellyInputState => {
     const fieldErrors: { name?: string; url?: string } = {};
@@ -388,10 +403,12 @@ export const useHardwareSetupFlow = () => {
         vpdTargetInput,
         rssiMinInput,
         staleTimeoutMinInput,
+        minChangeMinInput,
         maxOnHoursInput
       }),
     [
       maxOnHoursInput,
+      minChangeMinInput,
       rssiMinInput,
       staleTimeoutMinInput,
       vpdAssistEnabled,
@@ -416,6 +433,7 @@ export const useHardwareSetupFlow = () => {
         vpdTargetInput,
         rssiMinInput,
         staleTimeoutMinInput,
+        minChangeMinInput,
         maxOnHoursInput
       });
       const config: ShellyThermostatConfig = {
@@ -447,6 +465,7 @@ export const useHardwareSetupFlow = () => {
             targetKpa: advancedSettings.vpdTargetKpa
           },
           staleTimeoutSec: advancedSettings.staleTimeoutSec,
+          minChangeMs: advancedSettings.minChangeMs,
           maxOnMs: advancedSettings.maxOnMs,
           rssiMin: advancedSettings.rssiMin
         }
@@ -460,12 +479,13 @@ export const useHardwareSetupFlow = () => {
     } catch (error) {
       return {
         ok: false,
-        error: error instanceof Error ? error.message : 'Niepoprawna konfiguracja.'
+        error: error instanceof Error ? error.message : t('hardware.flow.configInvalid')
       };
     }
   }, [
     advancedSettingsValidation.isValid,
     maxOnHoursInput,
+    minChangeMinInput,
     offThresholdInput,
     onThresholdInput,
     rssiMinInput,
@@ -537,6 +557,7 @@ export const useHardwareSetupFlow = () => {
           : 'manual'
         : 'missing',
       automationScriptId: automationScript?.id ?? null,
+      firmwareId: status.deviceInfo.firmwareId ?? null,
       telemetry: status.status.telemetry,
       clock: status.status.clock
     };
@@ -571,7 +592,7 @@ export const useHardwareSetupFlow = () => {
 
   const requireAutomationScript = (status: ShellyControlStatus): number => {
     if (status.automationScriptId === null) {
-      throw new Error(automationScriptMissingMessage);
+      throw new Error(t('hardware.rule.automationScriptMissing'));
     }
     return status.automationScriptId;
   };
@@ -632,8 +653,12 @@ export const useHardwareSetupFlow = () => {
       const controller = new AbortController();
       shellyScanAbortControllerRef.current = controller;
       try {
+        const baseUrls = createIpv4RangeScanUrls(
+          shellyScanStartInput,
+          shellyScanEndInput
+        ).filter((baseUrl) => !savedShellyScanBaseUrls.has(baseUrl));
         return await scanShellySetupUrls({
-          baseUrls: createIpv4RangeScanUrls(shellyScanStartInput, shellyScanEndInput),
+          baseUrls,
           signal: controller.signal
         });
       } finally {
@@ -1009,7 +1034,7 @@ export const useHardwareSetupFlow = () => {
 
   const phoneBleScanMutation = useMutation({
     mutationFn: async (): Promise<PhoneBleScanOutcome> => {
-      const scanner = new CapacitorBleScanner();
+      const scanner = new CapacitorBleScanner({ platform: Capacitor.getPlatform() });
       phoneBleScannerRef.current = scanner;
       setPhoneBleScanCandidates([]);
 
@@ -1044,7 +1069,9 @@ export const useHardwareSetupFlow = () => {
 
   const addDiscoveredSensor = (candidate: BleDiscoveryCandidate) => {
     const runtimeAddress = normalizeRuntimeAddress(candidate.runtimeAddress);
-    const name = `Termometr ${runtimeAddress.split(':').slice(-2).join(':')}`;
+    const name = t('hardware.flow.sensorDefaultName', {
+      suffix: runtimeAddress.split(':').slice(-2).join(':')
+    });
     upsertSensorDevice({
       id: runtimeAddress,
       name,
@@ -1072,7 +1099,7 @@ export const useHardwareSetupFlow = () => {
         diagnosticShelly.baseUrl,
         scriptId
       ).catch(() => null);
-      throw new Error(scriptStatusMessage ?? diagnosticReadFailedMessage);
+      throw new Error(scriptStatusMessage ?? t('hardware.diagnostics.readFailed'));
     }
   };
 
@@ -1186,6 +1213,7 @@ export const useHardwareSetupFlow = () => {
     selectedShelly,
     selectShellyDevice,
     setShellyDeviceName,
+    upsertShellyDevice,
     removeShellyDevice,
     sensorProfileInput,
     setSensorProfileInput,
@@ -1218,6 +1246,8 @@ export const useHardwareSetupFlow = () => {
     setRssiMinInput,
     staleTimeoutMinInput,
     setStaleTimeoutMinInput,
+    minChangeMinInput,
+    setMinChangeMinInput,
     maxOnHoursInput,
     setMaxOnHoursInput,
     advancedSettingsValidation,

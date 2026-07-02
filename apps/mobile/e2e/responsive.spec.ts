@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
 
 const draft = {
   shellyNameInput: 'Shelly Plug S Gen3',
@@ -30,8 +30,9 @@ const draft = {
   offThresholdInput: '20',
   vpdAssistEnabled: false,
   vpdTargetInput: '1.2',
-  rssiMinInput: '-100',
-  staleTimeoutMinInput: '15',
+  rssiMinInput: '-85',
+  staleTimeoutMinInput: '2',
+  minChangeMinInput: '2',
   maxOnHoursInput: '4'
 };
 
@@ -46,7 +47,7 @@ const tabs = ['Shelly', 'Termometry', 'Reguła', 'Diag'] as const;
 
 const seedDraft = async (page: Page) => {
   await page.addInitScript((value) => {
-    window.localStorage.setItem('lcl.hardwareSetupDraft.v6', JSON.stringify(value));
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(value));
   }, draft);
 };
 
@@ -56,41 +57,53 @@ const mockShellyRpc = async (page: Page) => {
       id?: number | string;
       method?: string;
     };
-    const result =
-      requestBody.method === 'Shelly.GetStatus'
-        ? {
-            matter: { enabled: false },
-            script: { enable: true },
-            ble: { enable: true },
-            'switch:0': {
-              id: 0,
-              output: false,
-              apower: 0,
-              voltage: 230.1,
-              current: 0,
-              aenergy: { total: 1250 },
-              temperature: { tC: 32.4 }
-            },
-            wifi: { rssi: -55 },
-            sys: {
-              time: '14:00',
-              unixtime: 1782820000,
-              uptime: 3600,
-              last_sync_ts: 1782819900
-            }
+    let result: unknown = {};
+    switch (requestBody.method) {
+      case 'Shelly.GetDeviceInfo':
+        result = {
+          model: 'S3PL-00112EU',
+          gen: 3,
+          fw_id: '20260311-095902/1.7.5-g9979d16'
+        };
+        break;
+      case 'Shelly.GetStatus':
+        result = {
+          matter: { enabled: false },
+          script: { enable: true },
+          ble: { enable: true },
+          'switch:0': {
+            id: 0,
+            output: false,
+            apower: 0,
+            voltage: 230.1,
+            current: 0,
+            aenergy: { total: 1250 },
+            temperature: { tC: 32.4 }
+          },
+          wifi: { rssi: -55 },
+          sys: {
+            time: '14:00',
+            unixtime: 1782820000,
+            uptime: 3600,
+            last_sync_ts: 1782819900
           }
-        : requestBody.method === 'Script.List'
-          ? {
-              scripts: [
-                {
-                  id: 1,
-                  name: 'Local Climate Link Thermostat',
-                  enable: true,
-                  running: true
-                }
-              ]
+        };
+        break;
+      case 'Script.List':
+        result = {
+          scripts: [
+            {
+              id: 1,
+              name: 'Local Climate Link Thermostat',
+              enable: true,
+              running: true
             }
-          : {};
+          ]
+        };
+        break;
+      default:
+        result = {};
+    }
 
     await route.fulfill({
       status: 200,
@@ -170,6 +183,50 @@ const expectRelayActionVisible = async (page: Page) => {
   await expect(relayAction).toBeVisible();
 };
 
+const requiredBox = async (locator: Locator) => {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  return box!;
+};
+
+const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
+  const row = button.locator(
+    'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " action-row ")][1]'
+  );
+  await expect(row).toHaveCount(1);
+
+  const [buttonBox, rowBox] = await Promise.all([requiredBox(button), requiredBox(row)]);
+  const buttonRight = Math.round(buttonBox.x + buttonBox.width);
+  const rowRight = Math.round(rowBox.x + rowBox.width);
+
+  expect(Math.abs(buttonRight - rowRight)).toBeLessThanOrEqual(2);
+};
+
+const expectShellyCardActionsLayout = async (page: Page) => {
+  const settingsToggle = page.getByRole('button', { name: 'Ustawienia gniazdka' });
+  await expect(settingsToggle).toBeVisible();
+  await settingsToggle.click();
+  const settingsDialog = page.getByRole('dialog', { name: 'Ustawienia gniazdka' });
+  await expect(settingsDialog).toBeVisible();
+  await expect(settingsDialog.getByText('Adres IP')).toBeVisible();
+  await expect(settingsDialog.getByText('http://192.168.0.20/')).toBeVisible();
+  await expect(settingsDialog.getByText('Firmware')).toBeVisible();
+  await expect(settingsDialog.getByText('20260311-095902/1.7.5-g9979d16')).toBeVisible();
+  await expect(settingsDialog.getByRole('button', { name: 'Skanuj BLE' })).toBeVisible();
+  await expect(settingsDialog.getByRole('button', { name: 'Usuń' })).toBeVisible();
+  await settingsDialog.getByRole('button', { name: 'Zamknij' }).click();
+
+  const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+  const boxes = await Promise.all([
+    requiredBox(shellyControls.getByRole('button', { name: 'Odśwież' })),
+    requiredBox(shellyControls.getByRole('button', { name: 'MANUAL' })),
+    requiredBox(shellyControls.getByRole('button', { name: /^(ON|OFF)$/ }))
+  ]);
+  const topSpread =
+    Math.max(...boxes.map((box) => box.y)) - Math.min(...boxes.map((box) => box.y));
+  expect(topSpread).toBeLessThan(3);
+};
+
 const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
   const metrics = await page.getByLabel(label).evaluate((element) => {
     const modal = element.closest('.lcl-modal');
@@ -226,10 +283,16 @@ for (const viewport of viewports) {
     await expectRelayActionVisible(page);
     await expect(shellyControls.getByRole('button', { name: 'MANUAL' })).toBeVisible();
     await expect(shellyControls.getByRole('button', { name: 'Odśwież' })).toBeVisible();
+    await expectShellyCardActionsLayout(page);
     await expectNoHorizontalOverflow(page);
 
     await page.getByRole('button', { name: 'Dodaj gniazdko' }).click();
-    await expect(page.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBeVisible();
+    const addShellyDialog = page.getByRole('dialog', { name: 'Dodaj gniazdko' });
+    await expect(addShellyDialog).toBeVisible();
+    const shellyNameInputBox = await addShellyDialog
+      .getByLabel('Nazwa gniazdka')
+      .boundingBox();
+    expect(shellyNameInputBox?.height).toBeLessThan(90);
     await expectNoHorizontalOverflow(page);
     await page.getByRole('button', { name: 'Zamknij' }).click();
 
@@ -245,6 +308,13 @@ for (const viewport of viewports) {
         await expect(page.getByRole('dialog', { name: 'Dodaj termometr' })).toBeVisible();
         await expectNoHorizontalOverflow(page);
         await page.getByRole('button', { name: 'Zamknij' }).click();
+      }
+      if (tab === 'Diag') {
+        const refreshDiagnosticsButton = page.getByRole('button', {
+          name: 'Odśwież diagnostykę'
+        });
+        await expect(refreshDiagnosticsButton).toBeVisible();
+        await expectActionButtonAlignedToActionEdge(refreshDiagnosticsButton);
       }
       await expectNoHorizontalOverflow(page);
       await expectNoLegacyInlineFeedback(page);
@@ -302,13 +372,21 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
 
   await page.getByRole('button', { name: 'Zaawansowane' }).click();
   const advancedDialog = page.getByRole('dialog', { name: 'Opcje zaawansowane' });
+  await expect(advancedDialog).toBeVisible();
+  await expect(advancedDialog).toBeFocused();
+  await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).not.toBeFocused();
+  await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
+  await expect(advancedDialog.getByLabel('Brak odczytu przez min')).toHaveValue('2');
+  await expect(advancedDialog.getByLabel('Ponowne ON po min')).toHaveValue('2');
   await advancedDialog.getByLabel('VPD assist').check();
   await advancedDialog.getByLabel('Docelowe VPD kPa').fill('1.25');
   await advancedDialog.getByLabel('Minimalny RSSI dBm').fill('-80');
   await advancedDialog.getByLabel('Brak odczytu przez min').fill('10');
+  await advancedDialog.getByLabel('Ponowne ON po min').fill('3');
   await advancedDialog.getByLabel('Maksymalny czas pracy h').fill('3');
   await advancedDialog.getByRole('button', { name: 'Zastosuj' }).click();
   await expect(page.getByText(/VPD assist uwzględni cel 1\.25 kPa/)).toBeVisible();
+  await expect(page.getByText(/Ponowne ON najwcześniej po 3 min/)).toBeVisible();
   await expect(
     page.getByText(/Sygnał termometru musi mieć co najmniej -80 dBm/)
   ).toBeVisible();
@@ -323,7 +401,16 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
     '"s":600000'
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
+    '"c":180000'
+  );
+  await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
     '"x":10800000'
+  );
+  await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
+    'Shelly.getUptimeMs'
+  );
+  await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).not.toContainText(
+    'Date.now'
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
     'function sv(t)'

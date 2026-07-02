@@ -1,0 +1,114 @@
+.site-header {
+  position: fixed;
+  z-index: var(--lcl-z-index-header);
+  top: 0;
+  left: 50%;
+  display: grid;
+  width: min(calc(100% - 2rem), var(--landing-page-max));
+  min-height: 4rem;
+  grid-template-columns: minmax(13rem, 1fr) auto minmax(8.5rem, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  border: var(--lcl-border-width-sm) solid var(--landing-border);
+  border-radius: var(--landing-radius-xl);
+  background: var(--landing-surface-soft);
+  box-shadow: var(--landing-shadow-soft);
+  transform: translateX(-50%);
+  backdrop-filter: blur(18px);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  min-height: min(47rem, 100svh);
+  align-items: center;
+  padding: 8rem max(var(--landing-gutter), calc((100vw - var(--landing-page-max)) / 2))
+    5rem;
+  background:
+    var(--landing-hero-fade-desktop),
+    url('/assets/local-climate-hero.webp') center / cover no-repeat;
+}
+
+.hero::after {
+  position: absolute;
+  right: 0;
+  bottom: -0.1rem;
+  left: 0;
+  height: 8rem;
+  background: var(--landing-hero-edge-fade);
+  content: '';
+  pointer-events: none;
+}
+
+.hero__content {
+  position: relative;
+  z-index: var(--lcl-z-index-content);
+  max-width: 42rem;
+}
+
+.section {
+  width: min(calc(100% - 2 * var(--landing-gutter)), var(--landing-page-max));
+  margin: 0 auto;
+  padding-block: var(--landing-section-gap);
+}
+
+.section--tight {
+  padding-top: 3rem;
+}
+
+.section--split {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);
+  gap: 3rem;
+  align-items: start;
+}
+
+.section-heading {
+  max-width: 43rem;
+  margin-bottom: 2rem;
+}
+
+.section-heading--sticky {
+  position: sticky;
+  top: 7rem;
+}
+
+.safety-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 27rem);
+  gap: 3rem;
+  align-items: center;
+}
+
+.instruction-section {
+  padding-top: 2rem;
+}
+
+.faq-section {
+  padding-top: 5rem;
+}
+
+.site-footer {
+  display: flex;
+  width: min(calc(100% - 2 * var(--landing-gutter)), var(--landing-page-max));
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+  border-top: var(--lcl-border-width-sm) solid var(--landing-border);
+  color: var(--landing-text-muted);
+  font-size: 0.92rem;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer div {
+  display: flex;
+  gap: 1rem;
+  font-weight: 760;
+}

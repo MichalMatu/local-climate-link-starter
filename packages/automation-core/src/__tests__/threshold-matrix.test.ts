@@ -387,7 +387,7 @@ describe('automation threshold matrix', () => {
     expect(offAgainDecision.reason).toBe('above-threshold');
   });
 
-  it('waits for consecutive OFF hits before switching a running relay off', () => {
+  it('switches a running relay off after the first crossed OFF threshold', () => {
     const firstDecision = evaluateThresholdDecision({
       rule: DEFAULT_HEATING_RULE,
       state: relayOnState(),
@@ -397,23 +397,10 @@ describe('automation threshold matrix', () => {
       ),
       nowMs
     });
-    const secondDecision = evaluateThresholdDecision({
-      rule: DEFAULT_HEATING_RULE,
-      state: firstDecision.nextState,
-      measurement: measurementWithControlValue(
-        DEFAULT_HEATING_RULE,
-        DEFAULT_HEATING_RULE.control.offThreshold + 1
-      ),
-      nowMs: nowMs + 1
-    });
-
-    expect(firstDecision.requestedRelayOn).toBe(true);
-    expect(firstDecision.shouldCallRelay).toBe(false);
-    expect(firstDecision.reason).toBe('inside-band');
+    expect(firstDecision.requestedRelayOn).toBe(false);
+    expect(firstDecision.shouldCallRelay).toBe(true);
+    expect(firstDecision.reason).toBe('above-threshold');
     expect(firstDecision.nextState.offHits).toBe(1);
-    expect(secondDecision.requestedRelayOn).toBe(false);
-    expect(secondDecision.shouldCallRelay).toBe(true);
-    expect(secondDecision.reason).toBe('above-threshold');
   });
 
   it('forceRelayOffState resets a running relay without changing an already-off state', () => {

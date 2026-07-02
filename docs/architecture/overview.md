@@ -68,13 +68,29 @@ Domain packages cannot import React, Ionic, Capacitor UI components, or app-spec
 ## UI copy and localization
 
 MVP UI copy uses a lightweight app-level i18n layer in
-`apps/mobile/src/app/i18n.ts`. The default locale is Polish. User-facing copy for
-the main setup path, safety states, validation errors, Shelly errors, and demo
-flow should be added as typed keys and read through `t(...)`.
+`apps/mobile/src/app/i18n.ts`. The locale is resolved from the system
+browser/webview language and applied to `document.documentElement.lang`.
+Supported locales are Polish, English, German, Spanish, French, Italian, and
+Brazilian Portuguese. Unsupported languages fall back to English, and generic
+Portuguese tags resolve to `pt-BR`. The MVP UI intentionally has no manual
+language switch.
 
-Do not add a broad i18n dependency until there is a product requirement for
-multiple runtime locales, language switching, pluralization rules, or external
-translation files.
+User-facing copy for the main setup path, safety states, validation errors,
+Shelly errors, diagnostics, and demo flow must be added as typed keys under
+`apps/mobile/src/app/locales/` and read through `t(...)` or `translate(...)`.
+Locale tests enforce key parity between every registered locale and the Polish
+source tree, then scan production UI code for hardcoded Polish strings.
+
+To add another language, add a locale file with the same key shape, register it
+in `supportedLocales` and `messages`, then run the i18n tests. Keep plural and
+date/time formatting in small helpers near the UI that needs them.
+
+Do not add a broad i18n dependency until external translation files, translator
+workflows, or ICU-level message formatting become a real product requirement.
+
+Vite/dev builds expose `window.lclDev` and a `/help` developer command menu for
+local testing of locale overrides, theme modes, and runtime error capture. This
+API must not become visible production UI.
 
 ## Data flow for MVP setup
 
@@ -110,6 +126,12 @@ The demo path does not run real LAN scans, real relay commands, or real BLE runt
 discovery. The hardware setup flow is no longer demo-only: it can use local
 Shelly RPC for manual IP checks, LAN scanning, script upload, diagnostics, and a
 temporary Shelly-side BLE discovery script.
+
+Shelly LAN discovery belongs to the hardware setup flow, not directly to React
+components. The flow builds the IPv4 candidate list, removes already saved Shelly
+base URLs, scans the remaining addresses with bounded concurrency, and returns
+only verified `Shelly.GetDeviceInfo` candidates to the UI. The UI presents those
+candidates as direct add actions.
 
 Real platform and Shelly access stay behind interfaces:
 

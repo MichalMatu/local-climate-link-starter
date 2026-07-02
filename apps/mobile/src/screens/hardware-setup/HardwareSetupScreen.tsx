@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { t } from '../../app/i18n.js';
+import { useTranslation } from '../../app/i18n.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import { DiagnosticsSetupPage } from './pages/DiagnosticsSetupPage.js';
 import { RuleSetupPage } from './pages/RuleSetupPage.js';
@@ -7,13 +7,25 @@ import { SensorSetupPage } from './pages/SensorSetupPage.js';
 import { ShellySetupPage } from './pages/ShellySetupPage.js';
 
 const HARDWARE_TABS = [
-  { id: 'shelly', label: t('hardware.nav.shelly'), title: t('hardware.nav.shellyTitle') },
-  { id: 'sensor', label: t('hardware.nav.sensor'), title: t('hardware.nav.sensorTitle') },
-  { id: 'rule', label: t('hardware.nav.rule'), title: t('hardware.nav.ruleTitle') },
+  {
+    id: 'shelly',
+    labelKey: 'hardware.nav.shelly',
+    titleKey: 'hardware.nav.shellyTitle'
+  },
+  {
+    id: 'sensor',
+    labelKey: 'hardware.nav.sensor',
+    titleKey: 'hardware.nav.sensorTitle'
+  },
+  {
+    id: 'rule',
+    labelKey: 'hardware.nav.rule',
+    titleKey: 'hardware.nav.ruleTitle'
+  },
   {
     id: 'diagnostics',
-    label: t('hardware.nav.diagnostics'),
-    title: t('hardware.nav.diagnosticsTitle')
+    labelKey: 'hardware.nav.diagnostics',
+    titleKey: 'hardware.nav.diagnosticsTitle'
   }
 ] as const;
 
@@ -42,6 +54,7 @@ const setHashTab = (tabId: HardwareTabId) => {
 };
 
 export const HardwareSetupScreen = () => {
+  const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
   const [activeTab, setActiveTab] = useState<HardwareTabId>(currentTabFromHash);
   const cleanupBleDiscoveryRef = useRef<() => void>(() => undefined);
@@ -86,10 +99,10 @@ export const HardwareSetupScreen = () => {
             }
             type="button"
             aria-current={activeTab === tab.id ? 'page' : undefined}
-            title={tab.title}
+            title={t(tab.titleKey)}
             onClick={() => selectTab(tab.id)}
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </nav>

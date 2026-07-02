@@ -26,10 +26,10 @@ export const canInstallScript = (flow: HardwareSetupFlow): boolean =>
   flow.isVpdAssistValid;
 
 export const shellyAddressLabel = (flow: HardwareSetupFlow): string =>
-  flow.shellyBaseUrl ?? 'wpisz IP Shelly';
+  flow.shellyBaseUrl ?? t('hardware.flow.inputShellyIp');
 
 export const runtimeAddressLabel = (flow: HardwareSetupFlow): string =>
-  flow.selectedSensor?.runtimeAddress ?? 'wybierz termometr';
+  flow.selectedSensor?.runtimeAddress ?? t('hardware.flow.selectThermometer');
 
 export interface HardwarePageProps {
   flow: HardwareSetupFlow;

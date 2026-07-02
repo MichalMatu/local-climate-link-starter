@@ -1,6 +1,6 @@
 import { Modal, ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { t } from '../../../app/i18n.js';
+import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import { mutationError } from '../helpers.js';
 import type { HardwarePageProps } from '../helpers.js';
@@ -35,11 +35,12 @@ const TrashIcon = () => (
 const formatNullableMetric = (
   value: number | null | undefined,
   suffix = '',
-  fractionDigits = 1
+  fractionDigits = 1,
+  missingLabel: string
 ): string =>
   typeof value === 'number' && Number.isFinite(value)
     ? `${value.toFixed(fractionDigits)}${suffix}`
-    : 'brak';
+    : missingLabel;
 
 type SensorAddFormProps = {
   flow: HardwarePageProps['flow'];
@@ -47,6 +48,7 @@ type SensorAddFormProps = {
 };
 
 const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
+  const { t } = useTranslation();
   const nameInputId = useId();
   const nameErrorId = useId();
   const macInputId = useId();
@@ -63,7 +65,7 @@ const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
   return (
     <>
       <label className="field">
-        Typ termometru
+        {t('hardware.sensor.profileLabel')}
         <span className="select-control">
           <select
             value={flow.sensorProfileInput}
@@ -82,13 +84,13 @@ const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
       </label>
 
       <div className={nameError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={nameInputId}>Nazwa termometru</label>
+        <label htmlFor={nameInputId}>{t('hardware.sensor.nameLabel')}</label>
         <input
           id={nameInputId}
           aria-describedby={nameError ? nameErrorId : undefined}
           aria-invalid={nameError ? true : undefined}
           type="text"
-          placeholder="Salon / Kuchnia / Przedpokój"
+          placeholder={t('hardware.sensor.namePlaceholder')}
           value={flow.sensorNameInput}
           onChange={(event) => flow.setSensorNameInput(event.currentTarget.value)}
         />
@@ -99,7 +101,7 @@ const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
         )}
       </div>
       <div className={macError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={macInputId}>MAC termometru</label>
+        <label htmlFor={macInputId}>{t('hardware.sensor.macLabel')}</label>
         <input
           id={macInputId}
           aria-describedby={macError ? macErrorId : undefined}
@@ -121,6 +123,7 @@ const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
 };
 
 export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
+  const { t } = useTranslation();
   const [isAddSensorModalOpen, setIsAddSensorModalOpen] = useState(false);
   const [isPhoneBleScanModalOpen, setIsPhoneBleScanModalOpen] = useState(false);
   const [sensorPendingRemoval, setSensorPendingRemoval] =
@@ -158,7 +161,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
     shownPhoneBleErrorRef.current = message;
     pushToast('warning', t('hardware.sensor.phoneBleFailedTitle'), message);
     flow.phoneBleScanMutation.reset();
-  }, [flow.phoneBleScanMutation, pushToast]);
+  }, [flow.phoneBleScanMutation, pushToast, t]);
 
   const closeAddSensorModal = () => {
     flow.resetPhoneBleScan();
@@ -220,13 +223,13 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   };
 
   return (
-    <section className="demo-panel" aria-label="Termometry BLE">
-      <div className="action-row">
+    <section className="demo-panel" aria-label={t('hardware.nav.sensorTitle')}>
+      <div className="action-row add-device-action-row">
         <button
           className="secondary-action"
           type="button"
           aria-label={t('hardware.sensor.add')}
-          title="Dodaj termometr BLE"
+          title={t('hardware.sensor.addTitle')}
           onClick={openAddSensorModal}
         >
           <span aria-hidden="true">+ </span>
@@ -235,7 +238,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       </div>
 
       <Modal
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         open={isAddSensorModalOpen}
         title={t('hardware.sensor.add')}
         actions={
@@ -244,18 +247,18 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
               className="secondary-action"
               type="button"
               disabled={isPhoneBleScanPending}
-              title="Skanuj termometry BLE telefonem"
+              title={t('hardware.sensor.scanPhoneTitle')}
               onClick={openPhoneBleScanModal}
             >
-              Skanuj BLE
+              {t('hardware.sensor.scanBle')}
             </button>
             <button
               className="secondary-action"
               type="button"
-              title="Dodaj termometr z wpisanego MAC"
+              title={t('hardware.sensor.addFromMacTitle')}
               onClick={addSensor}
             >
-              Dodaj
+              {t('common.add')}
             </button>
           </>
         }
@@ -265,39 +268,39 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       </Modal>
 
       <Modal
-        closeLabel="Zamknij"
+        closeLabel={t('common.close')}
         closeOnBackdrop={false}
         closeOnEscape={!isPhoneBleScanPending}
         open={isPhoneBleScanModalOpen}
-        title="Skanuj BLE telefonem"
+        title={t('hardware.sensor.phoneBleTitle')}
         actions={
           isPhoneBleScanPending ? (
             <button
               className="secondary-action"
               type="button"
-              title="Zatrzymaj skan BLE w telefonie"
+              title={t('hardware.sensor.scanStopTitle')}
               onClick={flow.stopPhoneBleScan}
             >
-              Stop skanu
+              {t('hardware.shelly.scanStop')}
             </button>
           ) : (
             <button
               className="secondary-action"
               type="button"
-              title="Ponownie uruchom skan BLE w telefonie"
+              title={t('hardware.sensor.scanAgainTitle')}
               onClick={startPhoneBleScan}
             >
-              Skanuj ponownie
+              {t('hardware.shelly.scanBleAgain')}
             </button>
           )
         }
         onClose={closePhoneBleScanModal}
       >
-        {shouldShowPhoneBleEmpty && <p>Nie znalazłem termometrów BLE.</p>}
+        {shouldShowPhoneBleEmpty && <p>{t('hardware.sensor.noBleFound')}</p>}
         {flow.phoneBleScanCandidates.length > 0 && (
           <div
             className="ble-candidate-list"
-            aria-label="Termometry znalezione telefonem"
+            aria-label={t('hardware.sensor.blePhoneFoundLabel')}
           >
             {flow.phoneBleScanCandidates.map((candidate) => {
               const hasTemperature = typeof candidate.temperatureC === 'number';
@@ -317,18 +320,39 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   <dl className="ble-candidate-metrics">
                     <div>
                       <dt>RSSI</dt>
-                      <dd>{formatNullableMetric(candidate.rssi, ' dBm', 0)}</dd>
+                      <dd>
+                        {formatNullableMetric(
+                          candidate.rssi,
+                          ' dBm',
+                          0,
+                          t('common.missing')
+                        )}
+                      </dd>
                     </div>
                     {hasTemperature && (
                       <div>
-                        <dt>Temp.</dt>
-                        <dd>{formatNullableMetric(candidate.temperatureC, '°C')}</dd>
+                        <dt>{t('hardware.metrics.temperatureShort')}</dt>
+                        <dd>
+                          {formatNullableMetric(
+                            candidate.temperatureC,
+                            '°C',
+                            1,
+                            t('common.missing')
+                          )}
+                        </dd>
                       </div>
                     )}
                     {hasHumidity && (
                       <div>
-                        <dt>Wilg.</dt>
-                        <dd>{formatNullableMetric(candidate.humidityPct, '%')}</dd>
+                        <dt>{t('hardware.metrics.humidityShort')}</dt>
+                        <dd>
+                          {formatNullableMetric(
+                            candidate.humidityPct,
+                            '%',
+                            1,
+                            t('common.missing')
+                          )}
+                        </dd>
                       </div>
                     )}
                   </dl>
@@ -338,12 +362,14 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                     disabled={isSavedSensor}
                     title={
                       isSavedSensor
-                        ? 'Ten termometr jest już zapisany w aplikacji'
-                        : 'Zapisz ten termometr w aplikacji'
+                        ? t('hardware.sensor.saveThermometerSavedTitle')
+                        : t('hardware.sensor.saveThermometerTitle')
                     }
                     onClick={() => saveScannedSensor(candidate)}
                   >
-                    {isSavedSensor ? 'Już zapisany' : 'Zapisz termometr'}
+                    {isSavedSensor
+                      ? t('hardware.sensor.saved')
+                      : t('hardware.sensor.saveThermometer')}
                   </button>
                 </article>
               );
@@ -352,36 +378,38 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
         )}
       </Modal>
       <Modal
-        closeLabel="Anuluj"
+        closeLabel={t('common.cancel')}
         description={sensorPendingRemoval?.name ?? ''}
         open={sensorPendingRemoval !== null}
-        title="Usunąć termometr?"
+        title={t('hardware.sensor.deleteConfirmTitle')}
         actions={
           <button
             className="secondary-action secondary-action--danger"
             type="button"
-            title="Usuń termometr tylko z aplikacji"
+            title={t('hardware.sensor.deleteTitle')}
             onClick={confirmRemoveSensor}
           >
-            Usuń
+            {t('common.delete')}
           </button>
         }
         onClose={() => setSensorPendingRemoval(null)}
       >
-        <p>
-          Termometr zostanie usunięty z konfiguracji aplikacji. Jeśli reguła była już
-          wysłana do Shelly, wyślij ją ponownie.
-        </p>
+        <p>{t('hardware.sensor.deleteDescription')}</p>
       </Modal>
-      <ToastViewport toasts={toasts} onDismiss={dismissToast} />
+      <ToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
+      />
 
-      <div className="saved-list" aria-label="Dodane termometry">
-        {flow.sensorDevices.length === 0 && <p>Brak dodanych termometrów.</p>}
+      <div className="saved-list" aria-label={t('hardware.sensor.savedListLabel')}>
+        {flow.sensorDevices.length === 0 && <p>{t('hardware.sensor.empty')}</p>}
         {flow.sensorDevices.map((device) => (
           <article key={device.id} className="saved-list__item">
             <div className="saved-list__row">
               <label className="field">
-                Nazwa
+                {t('hardware.shelly.nameLabel')}
                 <input
                   type="text"
                   value={device.name}
@@ -395,14 +423,14 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                 <strong>{device.runtimeAddress}</strong>
               </div>
               <div className="saved-list__field">
-                <span>Typ</span>
+                <span>{t('hardware.sensor.typeLabel')}</span>
                 <div className="saved-list__field-action-row">
                   <strong>{sensorProfileDisplayLabels[device.profileId]}</strong>
                   <button
                     className="icon-action icon-action--danger"
                     type="button"
-                    aria-label={`Usuń termometr ${device.name}`}
-                    title="Usuń termometr tylko z aplikacji"
+                    aria-label={t('hardware.sensor.removeAria', { name: device.name })}
+                    title={t('hardware.sensor.deleteTitle')}
                     onClick={() => removeSensor(device)}
                   >
                     <TrashIcon />

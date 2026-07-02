@@ -131,7 +131,7 @@ describe('evaluateThresholdDecision', () => {
     expect(decision.reason).toBe('boot-safe-off');
   });
 
-  it('blocks too-fast relay changes with minChangeMs', () => {
+  it('blocks too-fast ON changes with minChangeMs', () => {
     const decision = evaluateThresholdDecision({
       rule: DEFAULT_HEATING_RULE,
       state: {
@@ -147,6 +147,25 @@ describe('evaluateThresholdDecision', () => {
     expect(decision.requestedRelayOn).toBe(false);
     expect(decision.shouldCallRelay).toBe(false);
     expect(decision.reason).toBe('min-change-blocked');
+  });
+
+  it('allows threshold OFF during the minChangeMs cooldown', () => {
+    const decision = evaluateThresholdDecision({
+      rule: immediateRule,
+      state: {
+        relayOn: true,
+        onHits: 0,
+        offHits: 0,
+        lastChangeMs: nowMs - immediateRule.minChangeMs + 1,
+        onStartedMs: nowMs - 1_000
+      },
+      measurement: freshMeasurement(20.5),
+      nowMs
+    });
+
+    expect(decision.requestedRelayOn).toBe(false);
+    expect(decision.shouldCallRelay).toBe(true);
+    expect(decision.reason).toBe('above-threshold');
   });
 
   it('requests OFF when maxOnMs is exceeded', () => {

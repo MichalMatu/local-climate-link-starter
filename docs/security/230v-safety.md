@@ -33,7 +33,7 @@ turn relay OFF on boot/start when configured
 turn relay OFF on stale sensor
 turn relay OFF on max ON timeout
 never default to relay ON
-avoid relay chatter with minChangeSec
+avoid relay chatter with minChangeMs
 log last decision reason
 handle Switch.Set error paths
 ```

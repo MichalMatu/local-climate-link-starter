@@ -84,6 +84,22 @@ sets the relay OFF, stops the main automation while scanning, and polls
 `/script/<id>/ble-scan` automatically. Closing the modal stops the scanner and
 restarts automation only if it was running before discovery. Switching away from
 the Shelly tab or backgrounding/closing the app should trigger the same cleanup.
+Both the temporary discovery script and generated runtime script request a
+passive BLE scan close to Shelly's documented script defaults
+(`interval_ms: 241`, `window_ms: 61`). Scan-level RSSI filtering is disabled
+(`rssi_thr: 0`) so packets reach the script first; Local Climate Link applies
+the configured RSSI threshold in JavaScript after receipt. These settings do not
+change radio transmit power because sensor advertisements are received, not
+sent, by the plug.
+
+Generated runtime diagnostics separate radio freshness from control freshness:
+`lastPacketSeen` means Shelly saw any packet from the target runtime address,
+while `lastSeen` means the last full measurement usable by the selected rule.
+Battery-only or incomplete BTHome frames update telemetry only; they do not
+force OFF, reset ON hit counters, or refresh the stale-sensor timer. Xiaomi
+temperature and humidity may arrive in separate advertisements; when VPD assist
+is enabled, the runtime composes them only if both values are fresh within a
+short window.
 
 If Shelly reports `out_of_memory`, the discovery script could not stay running
 within the plug's available script memory. Close the BLE scan modal, wait a few

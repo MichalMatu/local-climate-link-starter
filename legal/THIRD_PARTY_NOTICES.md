@@ -4,6 +4,10 @@ This file must be updated whenever third-party code, examples, parser definition
 
 ## Current policy
 
+Project-owned code is licensed under the custom source-available
+noncommercial license in `LICENSE`. Commercial use requires prior written
+permission from Michal Matuszewski or a separate commercial license.
+
 Do not copy code from these projects without license review:
 
 ```text
@@ -19,7 +23,11 @@ Reference links are allowed in documentation. Runtime dependency or copied code 
 
 ## Parser reference warning
 
-Theengs Decoder is a useful compatibility database, but it is GPL-3.0. Treat it as reference/validation unless the project license and distribution model are compatible with GPL obligations.
+Theengs Decoder is a useful compatibility database, but it is GPL-3.0. The
+Local Climate Link source-available noncommercial license is not GPL-compatible,
+so do not copy or vendor Theengs GPL code into runtime code. Treat Theengs as a
+reference and validation source only unless the project is relicensed or the GPL
+obligations are handled through a separate written decision.
 
 ## Shelly script examples
 

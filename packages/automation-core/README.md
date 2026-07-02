@@ -15,6 +15,6 @@ Examples:
 import { DEFAULT_HEATING_RULE, evaluateThresholdDecision } from '@lcl/automation-core';
 ```
 
-Tests cover heating, cooling, humidifying, dehumidifying, optional VPD assist threshold adjustment, stale sensor OFF, boot OFF, minimum change guard, and max ON guard.
+Tests cover heating, cooling, humidifying, dehumidifying, optional VPD assist threshold adjustment, stale sensor OFF, boot OFF, minimum ON-change guard, immediate safe OFF, and max ON guard.
 
 Do not import React, Ionic, Capacitor, BLE adapters, Shelly client, browser globals, or app state here.

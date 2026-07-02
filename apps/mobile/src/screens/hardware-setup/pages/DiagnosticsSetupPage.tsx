@@ -1,6 +1,10 @@
 import { DiagnosticRow, ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { t } from '../../../app/i18n.js';
+import {
+  useTranslation,
+  type Translate,
+  type TranslationKey
+} from '../../../app/i18n.js';
 import {
   formatDiagnosticNumber,
   mutationError,
@@ -15,51 +19,72 @@ type DiagnosticPlug = NonNullable<
   HardwarePageProps['flow']['diagnosticSnapshot']
 >['plug'];
 
-const formatShellyTime = (time: DiagnosticTime | undefined): string =>
-  time?.localTime ?? 'brak';
+const formatShellyTime = (
+  time: DiagnosticTime | undefined,
+  missingLabel: string
+): string => time?.localTime ?? missingLabel;
 
-const formatTimeSyncState = (time: DiagnosticTime | undefined): string =>
-  time?.isSynced ? 'OK' : 'brak synchronizacji';
+const formatTimeSyncState = (time: DiagnosticTime | undefined, t: Translate): string =>
+  time?.isSynced ? 'OK' : t('hardware.status.unsynced');
 
-const formatEnergy = (value: number | null | undefined): string => {
+const formatEpochMs = (
+  value: number | null | undefined,
+  locale: string,
+  missingLabel: string
+): string =>
+  value == null
+    ? missingLabel
+    : new Date(value).toLocaleTimeString(locale, {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+const formatEnergy = (value: number | null | undefined, missingLabel: string): string => {
   if (value == null) {
-    return 'brak';
+    return missingLabel;
   }
   return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
-const formatPlugRelay = (plug: DiagnosticPlug | undefined): string =>
-  plug ? (plug.relayState ? 'ON' : 'OFF') : 'brak';
+const formatPlugRelay = (
+  plug: DiagnosticPlug | undefined,
+  missingLabel: string
+): string => (plug ? (plug.relayState ? 'ON' : 'OFF') : missingLabel);
 
-const reasonLabels: Record<string, string> = {
-  ab: 'Powyżej progu',
-  abh: 'Powyżej progu, czekam na potwierdzenie',
-  b: 'Start bezpieczny OFF',
-  bf: 'Nie udało się uruchomić BLE',
-  bl: 'Poniżej progu',
-  blh: 'Poniżej progu, czekam na potwierdzenie',
-  bm: 'Brak danych BTHome',
-  bo: 'Nieobsługiwany obiekt BTHome',
-  bs: 'Za krótki pakiet BTHome',
-  cv: 'Brak wartości do reguły',
-  ib: 'W paśmie histerezy',
-  mc: 'Blokada zbyt częstej zmiany',
-  mx: 'Limit czasu ON',
-  rl: 'Za słaby sygnał BLE',
-  se: 'Błąd sterowania przekaźnikiem',
-  st: 'Nie widzę czujnika',
-  ta: 'Brak danych TP357',
-  tm: 'Brak danych producenta TP357',
-  tr: 'Odczyt TP357 poza zakresem',
-  ts: 'Za krótki pakiet TP357'
-};
+const diagnosticReasonKeys = new Set([
+  'ab',
+  'abh',
+  'b',
+  'bf',
+  'bl',
+  'blh',
+  'bm',
+  'bo',
+  'boot',
+  'bs',
+  'cv',
+  'ib',
+  'mc',
+  'mx',
+  'ok',
+  'pt',
+  'rl',
+  'se',
+  'st',
+  'ta',
+  'tm',
+  'tr',
+  'ts'
+]);
 
-const formatReason = (reason: string): string => {
-  const label = reasonLabels[reason];
-  return label ?? reason;
-};
+const formatReason = (reason: string, t: Translate): string =>
+  diagnosticReasonKeys.has(reason)
+    ? t(`hardware.diagnosticsReason.${reason}` as TranslationKey)
+    : reason;
 
 export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
+  const { locale, t } = useTranslation();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
   const diagnostics = flow.diagnosticSnapshot?.diagnostics;
@@ -71,7 +96,7 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
   const diagnosticSensorLabel =
     flow.diagnosticSnapshot?.sensor?.displayName ??
     flow.diagnosticSnapshot?.sensor?.runtimeAddress ??
-    'brak';
+    t('common.missing');
 
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
@@ -96,19 +121,19 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
       t('hardware.diagnostics.empty')
     );
     flow.diagnosticMutation.reset();
-  }, [flow.diagnosticMutation, pushToast]);
+  }, [flow.diagnosticMutation, pushToast, t]);
 
   return (
     <section className="demo-panel" aria-label={t('common.diagnostics')}>
       <label className="field">
-        Gniazdko Shelly
+        {t('hardware.rule.selectedShelly')}
         <span className="select-control">
           <select
             value={flow.diagnosticShellyId ?? ''}
             onChange={(event) => flow.setDiagnosticShellyId(event.currentTarget.value)}
           >
             <option value="" disabled>
-              Wybierz gniazdko
+              {t('hardware.rule.noShellySelected')}
             </option>
             {flow.shellyDevices.map((device) => (
               <option key={device.id} value={device.id}>
@@ -125,58 +150,90 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
           type="button"
           aria-busy={flow.diagnosticMutation.isPending || undefined}
           disabled={flow.diagnosticShelly === null || flow.diagnosticMutation.isPending}
-          title="Pobierz aktualny stan skryptu i przekaźnika z Shelly"
+          title={t('hardware.diagnostics.actionRefreshTitle')}
           onClick={() => flow.diagnosticMutation.mutate(undefined)}
         >
-          {flow.diagnosticMutation.isPending ? 'Pobieram' : 'Odśwież diagnostykę'}
+          {flow.diagnosticMutation.isPending
+            ? t('hardware.diagnostics.fetching')
+            : t('hardware.diagnostics.actionRefresh')}
         </button>
       </div>
 
       {diagnostics && (
         <div className="status-stack">
-          <DiagnosticRow label="Gniazdko" value={flow.diagnosticShelly?.name ?? 'brak'} />
           <DiagnosticRow
-            label="Skrypt"
-            value={script?.running ? 'działa' : 'brak potwierdzenia'}
+            label={t('hardware.rule.selectedShelly')}
+            value={flow.diagnosticShelly?.name ?? t('common.missing')}
+          />
+          <DiagnosticRow
+            label={t('hardware.rule.script')}
+            value={
+              script?.running
+                ? t('hardware.status.running')
+                : t('hardware.diagnostics.scriptMissingConfirm')
+            }
             tone={script?.running ? 'normal' : 'warning'}
           />
-          <DiagnosticRow label="Hash konfiguracji" value={script?.configHash ?? 'brak'} />
           <DiagnosticRow
-            label="Przekaźnik Shelly"
-            value={formatPlugRelay(plug)}
+            label={t('hardware.metrics.configHash')}
+            value={script?.configHash ?? t('common.missing')}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.shellyRelay')}
+            value={formatPlugRelay(plug, t('common.missing'))}
             tone={plug?.relayState ? 'warning' : 'normal'}
           />
-          <DiagnosticRow label="Moc" value={formatDiagnosticNumber(plug?.powerW, ' W')} />
           <DiagnosticRow
-            label="Napięcie"
+            label={t('hardware.metrics.power')}
+            value={formatDiagnosticNumber(plug?.powerW, ' W')}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.voltage')}
             value={formatDiagnosticNumber(plug?.voltageV, ' V', 0)}
           />
           <DiagnosticRow
-            label="Prąd"
+            label={t('hardware.metrics.current')}
             value={formatDiagnosticNumber(plug?.currentA, ' A', 2)}
           />
-          <DiagnosticRow label="Energia" value={formatEnergy(plug?.energyWh)} />
           <DiagnosticRow
-            label="Temp. gniazdka"
+            label={t('hardware.metrics.energy')}
+            value={formatEnergy(plug?.energyWh, t('common.missing'))}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.plugTemperature')}
             value={formatDiagnosticNumber(plug?.deviceTemperatureC, '°C')}
           />
-          <DiagnosticRow label="Termometr" value={diagnosticSensorLabel} />
-          <DiagnosticRow label="Czas Shelly" value={formatShellyTime(shellyTime)} />
           <DiagnosticRow
-            label="Zegar"
-            value={formatTimeSyncState(shellyTime)}
+            label={t('hardware.metrics.thermometer')}
+            value={diagnosticSensorLabel}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.clockShelly')}
+            value={formatShellyTime(shellyTime, t('common.missing'))}
+          />
+          <DiagnosticRow
+            label={t('hardware.shelly.clockSync')}
+            value={formatTimeSyncState(shellyTime, t)}
             tone={shellyTime?.isSynced ? 'normal' : 'warning'}
           />
           <DiagnosticRow
-            label="Temperatura"
+            label={t('hardware.metrics.lastMeasurement')}
+            value={formatEpochMs(diagnostics.lastSeen, locale, t('common.missing'))}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.lastBlePacket')}
+            value={formatEpochMs(diagnostics.lastPacketSeen, locale, t('common.missing'))}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.temperature')}
             value={formatDiagnosticNumber(diagnostics.lastTemp, '°C')}
           />
           <DiagnosticRow
-            label="Wilgotność"
+            label={t('hardware.metrics.humidity')}
             value={formatDiagnosticNumber(diagnostics.lastHumidity, '%')}
           />
           <DiagnosticRow
-            label="Bateria"
+            label={t('hardware.metrics.battery')}
             value={formatDiagnosticNumber(diagnostics.lastBattery, '%', 0)}
           />
           <DiagnosticRow
@@ -188,28 +245,40 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             value={formatDiagnosticNumber(diagnostics.lastVpd, ' kPa', 2)}
           />
           <DiagnosticRow
-            label="Próg ON"
+            label={t('hardware.metrics.thresholdOn')}
             value={formatDiagnosticNumber(
               diagnostics.lastEffectiveOnThreshold,
               thresholdUnit
             )}
           />
           <DiagnosticRow
-            label="Próg OFF"
+            label={t('hardware.metrics.thresholdOff')}
             value={formatDiagnosticNumber(
               diagnostics.lastEffectiveOffThreshold,
               thresholdUnit
             )}
           />
-          <DiagnosticRow label="Powód" value={formatReason(diagnostics.lastReason)} />
           <DiagnosticRow
-            label="Przekaźnik reguły"
+            label={t('hardware.metrics.reason')}
+            value={formatReason(diagnostics.lastReason, t)}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.dataBle')}
+            value={formatReason(diagnostics.dataState, t)}
+          />
+          <DiagnosticRow
+            label={t('hardware.metrics.relayRule')}
             value={diagnostics.relayState ? 'ON' : 'OFF'}
             tone={diagnostics.relayState ? 'warning' : 'normal'}
           />
         </div>
       )}
-      <ToastViewport toasts={toasts} onDismiss={dismissToast} />
+      <ToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
+      />
     </section>
   );
 };
