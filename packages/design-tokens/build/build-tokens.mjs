@@ -42,17 +42,30 @@ const flatten = (node, path = []) =>
 const cssVariableLines = (tokenGroup) =>
   flatten(tokenGroup).map(([name, value]) => `  --lcl-${name}: ${value};`);
 
+const lightVariableLines = cssVariableLines(baseTokens);
+const darkVariableLines = cssVariableLines(theme?.dark ?? {});
+
 const cssSource = [
   ':root {',
   '  color-scheme: light;',
-  ...cssVariableLines(baseTokens),
+  ...lightVariableLines,
   '}',
   '',
   '@media (prefers-color-scheme: dark) {',
-  '  :root {',
+  "  :root:not([data-lcl-theme='light']) {",
   '    color-scheme: dark;',
-  ...cssVariableLines(theme?.dark ?? {}).map((line) => `  ${line}`),
+  ...darkVariableLines.map((line) => `  ${line}`),
   '  }',
+  '}',
+  '',
+  ":root[data-lcl-theme='light'] {",
+  '  color-scheme: light;',
+  ...lightVariableLines,
+  '}',
+  '',
+  ":root[data-lcl-theme='dark'] {",
+  '  color-scheme: dark;',
+  ...darkVariableLines,
   '}',
   ''
 ].join('\n');

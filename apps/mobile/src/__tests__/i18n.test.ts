@@ -2,8 +2,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  getDevLocaleOverride,
   messages,
+  resolveConfiguredLocale,
   resolveSystemLocale,
+  setDevLocaleOverride,
   supportedLocales,
   t,
   translate,
@@ -49,6 +52,14 @@ const hardcodedPolishPattern =
   /\b(Nazwa|Gniazdko|Gniazdka|Termometr|Termometry|Dodaj|Usuń|Skanuj|Zamknij|Wybierz|Przekaźnik|Wilgotność|Temperatura|Sprawdź|Reguła|Skrypt|Czas|Brak|Pobieram|Odśwież|Ustawienia|Zaawansowane|Zastosuj|Domyślne|Potwierdź|Adres|Progi|Prąd|Energia|Zegar|Powód|poniżej|powyżej|wpisz|wybierz)\b|[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/;
 
 describe('i18n', () => {
+  beforeEach(() => {
+    setDevLocaleOverride(null);
+  });
+
+  afterEach(() => {
+    setDevLocaleOverride(null);
+  });
+
   it('resolves required MVP safety and setup messages in Polish', () => {
     expect(translate('pl', 'hardware.sensor.add')).toBe('Dodaj termometr');
     expect(translate('pl', 'hardware.shelly.add')).toBe('Dodaj gniazdko');
@@ -99,6 +110,20 @@ describe('i18n', () => {
     expect(resolveSystemLocale(['pt-PT'])).toBe('pt-BR');
     expect(resolveSystemLocale(['zh-CN'])).toBe('en');
     expect(resolveSystemLocale([])).toBe('en');
+  });
+
+  it('allows a dev-only locale override without changing system fallback rules', () => {
+    expect(resolveConfiguredLocale(['pl-PL'])).toBe('pl');
+
+    setDevLocaleOverride('de');
+
+    expect(getDevLocaleOverride()).toBe('de');
+    expect(resolveConfiguredLocale(['pl-PL'])).toBe('de');
+
+    setDevLocaleOverride(null);
+
+    expect(getDevLocaleOverride()).toBeNull();
+    expect(resolveConfiguredLocale(['pl-PL'])).toBe('pl');
   });
 
   it('interpolates validation parameters per locale', () => {

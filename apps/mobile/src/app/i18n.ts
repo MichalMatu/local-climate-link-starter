@@ -30,6 +30,8 @@ export const messages: Record<Locale, PlMessages> = {
 
 type MessageTree = PlMessages;
 type MessageParams = Record<string, string | number>;
+const DEV_LOCALE_STORAGE_KEY = 'lcl.dev.localeOverride.v1';
+export const devLocaleChangeEvent = 'lcl:dev-locale-change';
 
 type LeafPaths<T> = {
   [K in keyof T & string]: T[K] extends string
@@ -45,6 +47,34 @@ export type Translate = (key: TranslationKey, params?: MessageParams) => string;
 
 const isSupportedLocale = (value: string): value is Locale =>
   supportedLocales.includes(value as Locale);
+
+const readStorageValue = (key: string): string | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const writeStorageValue = (key: string, value: string | null) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (value === null) {
+      window.localStorage.removeItem(key);
+    } else {
+      window.localStorage.setItem(key, value);
+    }
+  } catch {
+    // Dev-only convenience storage can fail in private/browser-restricted modes.
+  }
+};
 
 const localeAliases: Readonly<Record<string, Locale>> = {
   pt: 'pt-BR'
@@ -91,7 +121,35 @@ export const resolveSystemLocale = (
   return 'en';
 };
 
-let activeLocale: Locale = resolveSystemLocale();
+export const getDevLocaleOverride = (): Locale | null => {
+  if (!import.meta.env.DEV) {
+    return null;
+  }
+
+  const storedLocale = readStorageValue(DEV_LOCALE_STORAGE_KEY);
+  return storedLocale && isSupportedLocale(storedLocale) ? storedLocale : null;
+};
+
+export const setDevLocaleOverride = (locale: Locale | null): Locale | null => {
+  if (!import.meta.env.DEV) {
+    return null;
+  }
+
+  writeStorageValue(DEV_LOCALE_STORAGE_KEY, locale);
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = locale ?? resolveSystemLocale();
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(devLocaleChangeEvent));
+  }
+  return locale;
+};
+
+export const resolveConfiguredLocale = (
+  languageTags: readonly string[] = browserLanguageTags()
+): Locale => getDevLocaleOverride() ?? resolveSystemLocale(languageTags);
+
+let activeLocale: Locale = resolveConfiguredLocale();
 
 const resolveMessage = (locale: Locale, key: TranslationKey): string => {
   const value = key.split('.').reduce<unknown>((node, part) => {
@@ -128,7 +186,7 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
-  const [locale, setLocale] = useState<Locale>(() => resolveSystemLocale());
+  const [locale, setLocale] = useState<Locale>(() => resolveConfiguredLocale());
 
   useEffect(() => {
     activeLocale = locale;
@@ -142,9 +200,13 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
       return undefined;
     }
 
-    const handleLanguageChange = () => setLocale(resolveSystemLocale());
+    const handleLanguageChange = () => setLocale(resolveConfiguredLocale());
     window.addEventListener('languagechange', handleLanguageChange);
-    return () => window.removeEventListener('languagechange', handleLanguageChange);
+    window.addEventListener(devLocaleChangeEvent, handleLanguageChange);
+    return () => {
+      window.removeEventListener('languagechange', handleLanguageChange);
+      window.removeEventListener(devLocaleChangeEvent, handleLanguageChange);
+    };
   }, []);
 
   const value = useMemo<I18nContextValue>(

@@ -88,6 +88,10 @@ date/time formatting in small helpers near the UI that needs them.
 Do not add a broad i18n dependency until external translation files, translator
 workflows, or ICU-level message formatting become a real product requirement.
 
+Vite/dev builds expose `window.lclDev` and a `/help` developer command menu for
+local testing of locale overrides, theme modes, and runtime error capture. This
+API must not become visible production UI.
+
 ## Data flow for MVP setup
 
 ```text

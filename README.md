@@ -65,6 +65,34 @@ pre-push   -> pnpm check
 The responsive smoke test starts the mobile Vite app and checks the hardware setup
 tabs for horizontal overflow on small phone, phone, tablet, and desktop viewports.
 
+## Dev Console
+
+In Vite/dev builds the app exposes a hidden browser-console API under
+`window.lclDev`. It is intentionally not visible in normal navigation and is not
+a product language/theme switcher.
+
+Type `/help` in the app window to open the developer command menu. The same menu
+can be opened from DevTools with `lclDev.menu()`.
+
+Useful commands:
+
+```js
+lclDev.help();
+lclDev.menu();
+lclDev.state();
+lclDev.setLocale('de');
+lclDev.resetLocale();
+lclDev.setTheme('dark');
+lclDev.setTheme('system');
+lclDev.errors();
+lclDev.clearErrors();
+```
+
+Supported dev locales are `pl`, `en`, `de`, `es`, `fr`, `it`, and `pt-BR`.
+Theme modes are `system`, `light`, and `dark`. Runtime errors captured from
+`error` and `unhandledrejection` events stay in memory only and are meant for
+local debugging.
+
 ## Make Shortcuts
 
 The root `Makefile` wraps the common commands:

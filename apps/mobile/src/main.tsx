@@ -14,4 +14,10 @@ if (!root) {
   throw new Error('Root element not found.');
 }
 
+if (import.meta.env.DEV) {
+  void import('./app/devConsole.js').then(({ installDevConsole }) => {
+    installDevConsole();
+  });
+}
+
 createRoot(root).render(<App />);
