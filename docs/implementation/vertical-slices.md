@@ -231,7 +231,7 @@ flow hooks / state machines
 TanStack Query wrappers for Shelly operations
 Zustand setup draft store
 storage repository
-Polish i18n strings
+typed i18n strings for supported locales
 loading/success/error/blocked states
 ```
 

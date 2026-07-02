@@ -69,15 +69,17 @@ Domain packages cannot import React, Ionic, Capacitor UI components, or app-spec
 
 MVP UI copy uses a lightweight app-level i18n layer in
 `apps/mobile/src/app/i18n.ts`. The locale is resolved from the system
-browser/webview language and applied to `document.documentElement.lang`. Polish
-is used for `pl`/`pl-PL`; every unsupported language falls back to English. The
-MVP UI intentionally has no manual language switch.
+browser/webview language and applied to `document.documentElement.lang`.
+Supported locales are Polish, English, German, Spanish, French, Italian, and
+Brazilian Portuguese. Unsupported languages fall back to English, and generic
+Portuguese tags resolve to `pt-BR`. The MVP UI intentionally has no manual
+language switch.
 
 User-facing copy for the main setup path, safety states, validation errors,
 Shelly errors, diagnostics, and demo flow must be added as typed keys under
 `apps/mobile/src/app/locales/` and read through `t(...)` or `translate(...)`.
-Locale tests enforce key parity between Polish and English and scan production
-UI code for hardcoded Polish strings.
+Locale tests enforce key parity between every registered locale and the Polish
+source tree, then scan production UI code for hardcoded Polish strings.
 
 To add another language, add a locale file with the same key shape, register it
 in `supportedLocales` and `messages`, then run the i18n tests. Keep plural and

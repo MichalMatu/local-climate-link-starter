@@ -121,7 +121,7 @@ const formatBleCandidateProfile = (
 const formatAddressCount = (count: number, locale: Locale, t: Translate): string => {
   const pluralCategory = new Intl.PluralRules(locale).select(count);
   const nounKey =
-    pluralCategory === 'one'
+    count === 1
       ? 'hardware.shelly.addressNounOne'
       : pluralCategory === 'few'
         ? 'hardware.shelly.addressNounFew'

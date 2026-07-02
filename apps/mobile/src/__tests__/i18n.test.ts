@@ -70,6 +70,16 @@ describe('i18n', () => {
     );
   });
 
+  it('resolves required MVP messages in every supported locale', () => {
+    for (const locale of supportedLocales) {
+      expect(translate(locale, 'hardware.sensor.add')).not.toBe('');
+      expect(translate(locale, 'hardware.shelly.add')).not.toBe('');
+      expect(translate(locale, 'hardware.rule.setThreshold')).not.toBe('');
+      expect(translate(locale, 'hardware.safety.heatingDefaultOff')).not.toBe('');
+      expect(translate(locale, 'hardware.safety.matterBlocked')).not.toBe('');
+    }
+  });
+
   it('keeps every locale on the same key set', () => {
     const baseKeys = flattenKeys(messages.pl).sort();
 
@@ -81,7 +91,13 @@ describe('i18n', () => {
   it('uses the system language with English fallback', () => {
     expect(resolveSystemLocale(['pl-PL', 'en-US'])).toBe('pl');
     expect(resolveSystemLocale(['en-GB'])).toBe('en');
-    expect(resolveSystemLocale(['de-DE', 'es-ES'])).toBe('en');
+    expect(resolveSystemLocale(['de-DE'])).toBe('de');
+    expect(resolveSystemLocale(['es-MX'])).toBe('es');
+    expect(resolveSystemLocale(['fr-CA'])).toBe('fr');
+    expect(resolveSystemLocale(['it-IT'])).toBe('it');
+    expect(resolveSystemLocale(['pt-BR'])).toBe('pt-BR');
+    expect(resolveSystemLocale(['pt-PT'])).toBe('pt-BR');
+    expect(resolveSystemLocale(['zh-CN'])).toBe('en');
     expect(resolveSystemLocale([])).toBe('en');
   });
 

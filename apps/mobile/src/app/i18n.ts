@@ -7,15 +7,25 @@ import {
   useState,
   type ReactNode
 } from 'react';
+import { de } from './locales/de.js';
 import { en } from './locales/en.js';
+import { es } from './locales/es.js';
+import { fr } from './locales/fr.js';
+import { it } from './locales/it.js';
 import { pl, type PlMessages } from './locales/pl.js';
+import { ptBr } from './locales/ptBr.js';
 
-export const supportedLocales = ['pl', 'en'] as const;
+export const supportedLocales = ['pl', 'en', 'de', 'es', 'fr', 'it', 'pt-BR'] as const;
 export type Locale = (typeof supportedLocales)[number];
 
 export const messages: Record<Locale, PlMessages> = {
   pl,
-  en
+  en,
+  de,
+  es,
+  fr,
+  it,
+  'pt-BR': ptBr
 };
 
 type MessageTree = PlMessages;
@@ -36,8 +46,12 @@ export type Translate = (key: TranslationKey, params?: MessageParams) => string;
 const isSupportedLocale = (value: string): value is Locale =>
   supportedLocales.includes(value as Locale);
 
+const localeAliases: Readonly<Record<string, Locale>> = {
+  pt: 'pt-BR'
+};
+
 const normalizeLanguageTag = (languageTag: string): string =>
-  languageTag.trim().toLowerCase().split('-')[0] ?? '';
+  languageTag.trim().toLowerCase().replace(/_/g, '-');
 
 const browserLanguageTags = (): readonly string[] => {
   if (typeof navigator === 'undefined') {
@@ -55,9 +69,22 @@ export const resolveSystemLocale = (
   languageTags: readonly string[] = browserLanguageTags()
 ): Locale => {
   for (const languageTag of languageTags) {
-    const language = normalizeLanguageTag(languageTag);
+    const normalizedTag = normalizeLanguageTag(languageTag);
+    const exactLocale = supportedLocales.find(
+      (locale) => locale.toLowerCase() === normalizedTag
+    );
+    if (exactLocale) {
+      return exactLocale;
+    }
+
+    const language = normalizedTag.split('-')[0] ?? '';
     if (isSupportedLocale(language)) {
       return language;
+    }
+
+    const aliasedLocale = localeAliases[language];
+    if (aliasedLocale) {
+      return aliasedLocale;
     }
   }
 
