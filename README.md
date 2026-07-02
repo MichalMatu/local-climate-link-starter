@@ -37,9 +37,17 @@ local script and relay ON/OFF
 The project is in MVP/beta. The current priority is one stable path:
 Xiaomi/PVVX or TP357 + Shelly Plug S Gen3.
 
-Ready-to-download installation files are the next step. That will be the most
-important part for visitors who simply want to install the app and test it with
-their own hardware.
+## Downloads
+
+- [Android APK v2.0.0](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.0/local-climate-link-v2.0.0-android-release.apk)
+- [Android App Bundle v2.0.0](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.0/local-climate-link-v2.0.0-android-release.aab)
+- [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.0/local-climate-link-v2.0.0-sha256.txt)
+
+Release page:
+
+```text
+https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.0
+```
 
 ## Project page
 
