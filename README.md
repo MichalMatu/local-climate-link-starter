@@ -38,6 +38,7 @@ pnpm e2e:responsive
 pnpm tokens:build
 pnpm hardware:shelly:install
 pnpm check
+pnpm check:landing
 pnpm check:full
 ```
 
@@ -52,6 +53,7 @@ Playwright responsive smoke tests.
 pnpm quality:ux        # static UX/style guardrails
 pnpm e2e:responsive   # responsive smoke across phone/tablet/desktop viewports
 pnpm check            # fast local gate
+pnpm check:landing    # landing page deploy gate
 pnpm check:full       # check + responsive smoke
 ```
 

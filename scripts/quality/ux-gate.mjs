@@ -3,6 +3,14 @@ import { readFile, readdir } from 'node:fs/promises';
 const repoRoot = new URL('../../', import.meta.url);
 const failures = [];
 const cssPaths = ['apps/mobile/src/theme/theme.css', 'packages/ui/src/styles.css'];
+const landingTokenizedCssPaths = [
+  'apps/landing/src/styles/base.css',
+  'apps/landing/src/styles/layout.css',
+  'apps/landing/src/styles/components.css',
+  'apps/landing/src/styles/responsive.css'
+];
+const tokenizedCssPaths = [...cssPaths, ...landingTokenizedCssPaths];
+const responsiveCssPaths = [...cssPaths, ...landingTokenizedCssPaths];
 const hardwareSetupPagePaths = [
   'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx',
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
@@ -71,7 +79,7 @@ const checkSavedShellyCardFeedback = async () => {
 };
 
 const checkTokenizedCss = async () => {
-  for (const path of cssPaths) {
+  for (const path of tokenizedCssPaths) {
     const source = await readRepoFile(path);
     if (source.includes('.warning-box') || source.includes('.notice-box')) {
       addFailure(
@@ -319,9 +327,11 @@ const checkResponsiveCss = async () => {
   );
   const allowedBreakpoints = new Set(Object.values(tokens.breakpoint ?? {}));
 
-  for (const path of cssPaths) {
+  for (const path of responsiveCssPaths) {
     const source = await readRepoFile(path);
-    const mediaQueries = source.matchAll(/@media\s*\([^)]*:\s*([^)]+)\)/g);
+    const mediaQueries = source.matchAll(
+      /@media\s*\(\s*(?:max-width|min-width):\s*([^)]+)\)/g
+    );
 
     for (const match of mediaQueries) {
       const breakpoint = match[1].trim();
@@ -330,23 +340,25 @@ const checkResponsiveCss = async () => {
       }
     }
 
-    const blockedPatterns = [
-      ['max-width: 920px', 'old fixed shell width'],
-      ['max-width: 920px;', 'old fixed shell width'],
-      ['max-width: 42rem', 'modal width must use --lcl-size-modal-max-width'],
-      ['max-width: 28rem', 'toast width must use --lcl-size-toast-max-width'],
-      ['@media (max-width: 700px)', 'old un-tokenized mobile breakpoint'],
-      [
-        'grid-template-columns: repeat(2, minmax(0, 1fr))',
-        'fixed two-column grid instead of responsive auto-fit'
-      ]
-    ];
+    if (cssPaths.includes(path)) {
+      const blockedPatterns = [
+        ['max-width: 920px', 'old fixed shell width'],
+        ['max-width: 920px;', 'old fixed shell width'],
+        ['max-width: 42rem', 'modal width must use --lcl-size-modal-max-width'],
+        ['max-width: 28rem', 'toast width must use --lcl-size-toast-max-width'],
+        ['@media (max-width: 700px)', 'old un-tokenized mobile breakpoint'],
+        [
+          'grid-template-columns: repeat(2, minmax(0, 1fr))',
+          'fixed two-column grid instead of responsive auto-fit'
+        ]
+      ];
 
-    blockedPatterns.forEach(([pattern, message]) => {
-      if (source.includes(pattern)) {
-        addFailure(path, message);
-      }
-    });
+      blockedPatterns.forEach(([pattern, message]) => {
+        if (source.includes(pattern)) {
+          addFailure(path, message);
+        }
+      });
+    }
   }
 
   const appTheme = await readRepoFile('apps/mobile/src/theme/theme.css');

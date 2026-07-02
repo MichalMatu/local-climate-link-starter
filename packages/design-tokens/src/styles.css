@@ -73,6 +73,7 @@
   --lcl-fluid-shell-padding: clamp(0.75rem, 4vw, 1.5rem);
   --lcl-fluid-panel-padding: clamp(1rem, 3vw, 1.5rem);
   --lcl-fluid-hero-title: clamp(2rem, 6vw, 3.8rem);
+  --lcl-breakpoint-marketing: 62rem;
   --lcl-breakpoint-compact: 44rem;
   --lcl-breakpoint-narrow: 30rem;
   --lcl-shadow-sm: 0 1px 2px rgba(29, 29, 31, 0.08);
@@ -80,6 +81,7 @@
   --lcl-shadow-lg: 0 20px 56px rgba(29, 29, 31, 0.18);
   --lcl-motion-fast: 120ms;
   --lcl-motion-normal: 180ms;
+  --lcl-z-index-content: 1;
   --lcl-z-index-header: 10;
   --lcl-z-index-modal: 40;
   --lcl-z-index-toast: 60;
@@ -193,6 +195,7 @@
   --lcl-fluid-shell-padding: clamp(0.75rem, 4vw, 1.5rem);
   --lcl-fluid-panel-padding: clamp(1rem, 3vw, 1.5rem);
   --lcl-fluid-hero-title: clamp(2rem, 6vw, 3.8rem);
+  --lcl-breakpoint-marketing: 62rem;
   --lcl-breakpoint-compact: 44rem;
   --lcl-breakpoint-narrow: 30rem;
   --lcl-shadow-sm: 0 1px 2px rgba(29, 29, 31, 0.08);
@@ -200,6 +203,7 @@
   --lcl-shadow-lg: 0 20px 56px rgba(29, 29, 31, 0.18);
   --lcl-motion-fast: 120ms;
   --lcl-motion-normal: 180ms;
+  --lcl-z-index-content: 1;
   --lcl-z-index-header: 10;
   --lcl-z-index-modal: 40;
   --lcl-z-index-toast: 60;

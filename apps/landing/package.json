@@ -9,7 +9,10 @@
     "build": "tsc -p tsconfig.build.json --noEmit && vite build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format:check": "prettier --check README.md index.html package.json tsconfig*.json vite.config.ts vitest.config.ts src",
+    "quality:ux": "pnpm --dir ../.. quality:ux",
+    "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
     "@lcl/design-tokens": "workspace:*",

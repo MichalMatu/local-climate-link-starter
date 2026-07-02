@@ -23,6 +23,7 @@
     "quality:ux": "node scripts/quality/ux-gate.mjs",
     "e2e:responsive": "playwright test -c apps/mobile/playwright.config.ts",
     "tokens:build": "pnpm --filter @lcl/design-tokens build",
+    "check:landing": "pnpm --filter @lcl/landing check",
     "hardware:shelly:install": "tsx scripts/hardware/shelly-install-thermostat.ts",
     "hardware:shelly:matrix": "tsx scripts/hardware/shelly-real-matrix.ts",
     "hardware:shelly:soak": "tsx scripts/hardware/shelly-soak-logger.ts",
