@@ -7,7 +7,9 @@
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "dev": "pnpm --filter @lcl/mobile dev",
+    "dev:landing": "pnpm --filter @lcl/landing dev",
     "build": "pnpm -r build",
+    "build:landing": "pnpm --filter @lcl/landing build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
