@@ -50,6 +50,10 @@ describe('LandingPage', () => {
       'href',
       '#beta'
     );
+    expect(screen.getByRole('link', { name: 'Download APK' })).toHaveAttribute(
+      'href',
+      'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.1'
+    );
   });
 
   it.each(landingLocales)('updates document metadata for %s', async (locale) => {
@@ -112,8 +116,9 @@ describe('landingMessages', () => {
   });
 
   it('keeps non-English preview labels localized', () => {
-    expect(landingMessages.de.preview.tabs.thermometers).toBe('Sensoren');
+    expect(landingMessages.de.preview.tabs.sensors).toBe('Sensoren');
     expect(landingMessages.de.preview.tabs.rule).toBe('Regel');
+    expect(landingMessages.de.preview.addThermometer).toBe('Thermometer hinzufügen');
     expect(landingMessages.es.preview.aria).toContain('Vista previa');
     expect(landingMessages.fr.preview.aria).toContain('Aperçu');
     expect(landingMessages.it.preview.aria).toContain('Anteprima');

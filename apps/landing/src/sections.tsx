@@ -2,6 +2,9 @@ import type { LandingLocale, landingMessages } from './content';
 
 type LandingCopy = (typeof landingMessages)[LandingLocale];
 
+const androidReleaseUrl =
+  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.1';
+
 const navItems = (copy: LandingCopy) =>
   [
     { href: '#jak-dziala', label: copy.nav.howItWorks },
@@ -92,34 +95,45 @@ export const HardwareSection = ({ copy }: { copy: LandingCopy }) => (
   </section>
 );
 
+const AppPreviewSparkline = ({ points }: { points: string }) => (
+  <svg
+    className="app-sparkline"
+    viewBox="0 0 100 32"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d={points} />
+  </svg>
+);
+
 export const AppPreview = ({ copy }: { copy: LandingCopy }) => (
   <div className="phone-preview" aria-label={copy.preview.aria}>
     <div className="phone-preview__bar" />
     <div className="phone-preview__screen">
       <div className="app-tabs" aria-hidden="true">
         <span>{copy.preview.tabs.shelly}</span>
-        <span>{copy.preview.tabs.thermometers}</span>
+        <span>{copy.preview.tabs.sensors}</span>
         <span>{copy.preview.tabs.rule}</span>
+        <span>{copy.preview.tabs.diag}</span>
       </div>
-      <div className="app-card">
-        <div>
-          <p className="app-label">{copy.preview.readingLabel}</p>
-          <strong>24.1°C · 55%</strong>
-        </div>
-        <span className="app-state">{copy.preview.localState}</span>
-      </div>
-      <div className="app-rule">
-        <span>{copy.preview.lowHumidity}</span>
-        <strong>ON</strong>
-      </div>
-      <div className="app-rule">
-        <span>{copy.preview.highHumidity}</span>
-        <strong>OFF</strong>
-      </div>
-      <div className="app-log">
-        <span>lastSeen 8 s</span>
-        <span>RSSI -58 dBm</span>
-        <span>script OK</span>
+      <div className="app-sensor-panel">
+        <div className="app-add">{`+${copy.preview.addThermometer}`}</div>
+        <article className="app-sensor-card">
+          <div className="app-sensor-header">
+            <h3>{copy.preview.sensorName}</h3>
+            <span aria-hidden="true">⚙</span>
+          </div>
+          <div className="app-chart-stack">
+            <div className="app-chart-card">
+              <strong>24.7°C</strong>
+              <AppPreviewSparkline points="M2 20 C12 17 18 21 28 18 S43 15 54 18 70 12 86 17 98 10" />
+            </div>
+            <div className="app-chart-card">
+              <strong>44%</strong>
+              <AppPreviewSparkline points="M2 19 C15 18 24 21 34 20 S51 17 61 13 74 16 86 12 98 15" />
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </div>
@@ -161,7 +175,12 @@ export const BetaSection = ({ copy }: { copy: LandingCopy }) => (
       <p>{copy.beta.body}</p>
     </div>
     <div className="beta-actions">
-      <a className="button button--primary" href="mailto:hello@localclimatelink.com">
+      <a
+        className="button button--primary"
+        href={androidReleaseUrl}
+        rel="noreferrer"
+        target="_blank"
+      >
         {copy.beta.joinCta}
       </a>
       <a className="button button--secondary" href="#faq">
