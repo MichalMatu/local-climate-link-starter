@@ -175,12 +175,13 @@ observed gap without a new full measurement or target BLE packet.
 
 ## Latest observed real hardware results
 
-Current conclusion: deterministic script generation and real relay decisions are
-validated on Shelly Plug S Gen3 `1.7.5` with Xiaomi/PVVX BTHome v2 and TP357.
-The latest humidifier soak tests showed stable memory and safe final OFF state,
+Current conclusion: deterministic script generation, Shelly-side BLE reception,
+and real relay decisions are validated on Shelly Plug S Gen3 `1.7.5` with
+Xiaomi/PVVX BTHome v2 and TP357. The latest full hardware matrix passed all
+16 real-runtime combinations and ended with the script stopped and relay OFF.
+Earlier humidifier soak tests showed stable memory and safe final OFF state,
 but also showed that VPD target `1.33 kPa` is too permissive for a hard
-`60% RH` ceiling and that Xiaomi/PVVX BTHome diagnostics must keep BLE data
-state separate from relay decision reason.
+`60% RH` ceiling.
 
 | Test                           | Expected                          | Result | Date       | Firmware       | Notes                                                                                                                                                                                                                                |
 | ------------------------------ | --------------------------------- | ------ | ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -205,6 +206,7 @@ state separate from relay decision reason.
 | Xiaomi smoke after hardening   | `/diag` receives Xiaomi           | ✅     | 2026-07-01 | 1.7.5          | `hardware:shelly:install`, VPD off, script 3970 bytes, `mem_used` 2646, Xiaomi `26.4°C/58.88%/100%`, RSSI `-31 dBm`, final relay OFF. VPD-on and TP357 still need real smoke.                                                        |
 | Humidifier comprehensive soak  | safe local regulation             | ✅     | 2026-07-02 | 1.7.5          | Reboot safe OFF passed; TP357 58/60, TP357 57/59, TP357 VPD 1.33, Xiaomi 58/60, and Xiaomi VPD 1.33 ran with final script stopped and relay OFF. VPD 1.33 produced RH peaks around 65-66%, so it is not a default for a 60% ceiling. |
 | Xiaomi data-state split        | `cv` no longer masks relay reason | ✅     | 2026-07-02 | n/a            | Generated runtime now reports relay decision in `g[6]` and BLE data state in `g[16]`; Xiaomi composes split temp/humidity advertisements for up to `min(90s, staleTimeoutSec)`. Covered by generator and mobile diagnostics tests.   |
+| Full real runtime matrix       | 16/16 combinations pass           | ✅     | 2026-07-04 | 1.7.5          | Xiaomi/PVVX `A4:C1:38:4F:24:CD` and TP357 `F7:5F:8D:0F:76:20`; heating/cooling/humidifying/dehumidifying with VPD off/on; every case saw real BLE, relay ON, relay OFF; final script stopped and relay OFF.                          |
 
 ## Current MVP hardware audit — 2026-06-30
 
