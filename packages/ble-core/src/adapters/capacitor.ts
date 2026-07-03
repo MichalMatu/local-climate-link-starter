@@ -60,6 +60,38 @@ const formatBleStartError = (error: unknown): string => {
   return message || 'BLE scan failed to start.';
 };
 
+const toBleStartError = (error: unknown): BleCoreError => {
+  const message = formatBleStartError(error);
+
+  if (/permission denied|permission/i.test(message)) {
+    return createError(
+      'permission-denied',
+      'Bluetooth scan permission was denied.',
+      false
+    );
+  }
+
+  if (/location.*disabled|location services.*disabled/i.test(message)) {
+    return createError('permission-denied', 'Android Location services are off.', true);
+  }
+
+  return createError('ble-unavailable', message, true);
+};
+
+const isLocationEnabledIfAvailable = async (
+  client: BleClientInterface
+): Promise<boolean> => {
+  if (typeof client.isLocationEnabled !== 'function') {
+    return true;
+  }
+
+  try {
+    return booleanValue(await client.isLocationEnabled());
+  } catch {
+    return true;
+  }
+};
+
 const bytesFromDataView = (value: DataView | undefined): Uint8Array | undefined =>
   value
     ? new Uint8Array(new Uint8Array(value.buffer, value.byteOffset, value.byteLength))
@@ -164,6 +196,13 @@ export class CapacitorBleScanner implements BleScanner {
       if (!booleanValue(await client.isEnabled())) {
         throw createError('ble-unavailable', 'Bluetooth is disabled.', true);
       }
+      if (!(await isLocationEnabledIfAvailable(client))) {
+        throw createError(
+          'permission-denied',
+          'Android Location services are off.',
+          true
+        );
+      }
 
       const requestOptions: RequestBleDeviceOptions = {
         allowDuplicates: true,
@@ -210,7 +249,7 @@ export class CapacitorBleScanner implements BleScanner {
         throw error;
       }
 
-      throw createError('ble-unavailable', formatBleStartError(error), true);
+      throw toBleStartError(error);
     } finally {
       if (timeoutId) {
         clearTimeout(timeoutId);

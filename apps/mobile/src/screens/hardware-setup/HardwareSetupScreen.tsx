@@ -58,7 +58,9 @@ export const HardwareSetupScreen = () => {
   const flow = useHardwareSetupFlow();
   const [activeTab, setActiveTab] = useState<HardwareTabId>(currentTabFromHash);
   const cleanupBleDiscoveryRef = useRef<() => void>(() => undefined);
+  const stopSavedSensorLiveScanRef = useRef<() => void>(() => undefined);
   cleanupBleDiscoveryRef.current = flow.cleanupBleDiscovery;
+  stopSavedSensorLiveScanRef.current = flow.stopSavedSensorLiveScan;
 
   useEffect(() => {
     const handleHashChange = () => setActiveTab(currentTabFromHash());
@@ -67,7 +69,10 @@ export const HardwareSetupScreen = () => {
   }, []);
 
   useEffect(() => {
-    const cleanup = () => cleanupBleDiscoveryRef.current();
+    const cleanup = () => {
+      cleanupBleDiscoveryRef.current();
+      stopSavedSensorLiveScanRef.current();
+    };
     window.addEventListener('pagehide', cleanup);
     return () => {
       cleanup();
@@ -78,6 +83,9 @@ export const HardwareSetupScreen = () => {
   useEffect(() => {
     if (activeTab !== 'shelly') {
       cleanupBleDiscoveryRef.current();
+    }
+    if (activeTab !== 'sensor') {
+      stopSavedSensorLiveScanRef.current();
     }
   }, [activeTab]);
 

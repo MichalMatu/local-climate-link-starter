@@ -47,6 +47,8 @@ const toCandidate = (parsed: ParsedSensorAdvertisement): BleDiscoveryCandidate |
     profileId: parsed.profileId,
     temperatureC: parsed.measurement.temperatureC,
     humidityPct: parsed.measurement.humidityPct,
+    batteryPct: parsed.measurement.batteryPct,
+    voltageV: parsed.measurement.voltageV,
     rssi: parsed.measurement.rssi,
     seenAt: parsed.measurement.seenAtMs
   };
@@ -73,6 +75,8 @@ const upsertCandidate = (
     ...candidate,
     temperatureC: candidate.temperatureC ?? existing.temperatureC,
     humidityPct: candidate.humidityPct ?? existing.humidityPct,
+    batteryPct: candidate.batteryPct ?? existing.batteryPct,
+    voltageV: candidate.voltageV ?? existing.voltageV,
     rssi: candidate.rssi ?? existing.rssi,
     seenAt: candidate.seenAt ?? existing.seenAt
   };
@@ -110,6 +114,13 @@ const phoneBleScanErrorMessage = (error: unknown): string => {
     /disabled/i.test(message)
   ) {
     return t('hardware.sensor.phoneBleDisabled');
+  }
+
+  if (
+    (isBleCoreError(error) && error.kind === 'permission-denied') ||
+    /permission denied|Android Location services are off/i.test(message)
+  ) {
+    return t('hardware.sensor.phoneBlePermissionDenied');
   }
 
   if (

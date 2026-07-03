@@ -484,6 +484,26 @@
   color: var(--lcl-color-status-danger-text);
 }
 
+.lcl-sparkline {
+  color: var(--lcl-color-accent);
+  display: block;
+  height: var(--lcl-size-compact-control-min-height);
+  width: 100%;
+}
+
+.lcl-sparkline path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: var(--lcl-border-width-md);
+}
+
+.lcl-sparkline--empty {
+  color: var(--lcl-color-text-muted);
+  opacity: var(--lcl-opacity-muted);
+}
+
 .lcl-modal-backdrop {
   align-items: center;
   background: var(--lcl-color-overlay);
@@ -599,15 +619,25 @@
   }
 
   .lcl-modal-backdrop {
-    align-items: stretch;
+    align-items: center;
     padding: var(--lcl-spacing-sm);
   }
 
   .lcl-modal {
-    height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
+    height: auto;
     max-height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
     max-width: calc(100vw - (var(--lcl-spacing-sm) * 2));
     padding: var(--lcl-fluid-panel-padding);
+  }
+
+  .lcl-modal-backdrop--diagnostic,
+  .lcl-modal-backdrop--workspace {
+    align-items: stretch;
+  }
+
+  .lcl-modal--diagnostic,
+  .lcl-modal--workspace {
+    height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
   }
 
   .lcl-modal--workspace {
@@ -616,10 +646,7 @@
 
   .lcl-modal__footer {
     display: grid;
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(100%, var(--lcl-size-action-min-width)), 1fr)
-    );
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .lcl-modal__footer > * {
@@ -627,7 +654,6 @@
   }
 
   .lcl-modal__close {
-    grid-column: 1 / -1;
     width: 100%;
   }
 

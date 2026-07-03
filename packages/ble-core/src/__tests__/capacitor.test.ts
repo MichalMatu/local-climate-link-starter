@@ -93,4 +93,43 @@ describe('CapacitorBleScanner', () => {
     expect(client.requestEnable).toHaveBeenCalledTimes(1);
     expect(client.requestLEScan).toHaveBeenCalledTimes(1);
   });
+
+  it('reports permission denial before starting a scan', async () => {
+    const client: BleClientInterface = {
+      initialize: vi.fn().mockRejectedValue(new Error('Permission denied.')),
+      isEnabled: vi.fn().mockResolvedValue({ value: true }),
+      requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestLEScan: vi.fn(async () => undefined),
+      stopLEScan: vi.fn().mockResolvedValue(undefined)
+    } as unknown as BleClientInterface;
+    const scanner = new CapacitorBleScanner({ clientLoader: async () => client });
+    const iterator = scanner.startScan({ timeoutMs: 1 })[Symbol.asyncIterator]();
+
+    await expect(iterator.next()).rejects.toMatchObject({
+      kind: 'permission-denied',
+      message: 'Bluetooth scan permission was denied.',
+      retryable: false
+    });
+    expect(client.requestLEScan).not.toHaveBeenCalled();
+  });
+
+  it('blocks Android scans when location services are disabled', async () => {
+    const client: BleClientInterface = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      isEnabled: vi.fn().mockResolvedValue({ value: true }),
+      isLocationEnabled: vi.fn().mockResolvedValue(false),
+      requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestLEScan: vi.fn(async () => undefined),
+      stopLEScan: vi.fn().mockResolvedValue(undefined)
+    } as unknown as BleClientInterface;
+    const scanner = new CapacitorBleScanner({ clientLoader: async () => client });
+    const iterator = scanner.startScan({ timeoutMs: 1 })[Symbol.asyncIterator]();
+
+    await expect(iterator.next()).rejects.toMatchObject({
+      kind: 'permission-denied',
+      message: 'Android Location services are off.',
+      retryable: true
+    });
+    expect(client.requestLEScan).not.toHaveBeenCalled();
+  });
 });

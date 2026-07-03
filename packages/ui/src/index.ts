@@ -10,3 +10,4 @@ export * from './primitives/RuleSummaryCard.js';
 export * from './primitives/ScriptPreview.js';
 export * from './primitives/DiagnosticRow.js';
 export * from './primitives/Modal.js';
+export * from './primitives/Sparkline.js';

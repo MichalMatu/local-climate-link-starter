@@ -4,3 +4,6 @@ export * from './parsers/bthome.js';
 export * from './parsers/tp357.js';
 export * from './adapters/demo.js';
 export * from './adapters/capacitor.js';
+export * from './adapters/capacitor-gatt.js';
+export * from './pvvx/protocol.js';
+export * from './pvvx/client.js';

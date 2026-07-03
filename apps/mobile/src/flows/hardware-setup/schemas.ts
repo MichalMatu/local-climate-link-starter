@@ -29,6 +29,8 @@ const bleDiscoveryRawCandidateSchema = z.object({
   p: bleDiscoveryProfileCodeSchema,
   t: z.number().nullable().optional(),
   h: z.number().nullable().optional(),
+  b: z.number().nullable().optional(),
+  v: z.number().nullable().optional(),
   r: z.number().nullable().optional(),
   s: z.number().nullable().optional()
 });
@@ -44,6 +46,8 @@ export const bleDiscoveryCandidateSchema = bleDiscoveryRawCandidateSchema.transf
     profileId: bleDiscoveryProfileCodeToId(candidate.p),
     temperatureC: candidate.t,
     humidityPct: candidate.h,
+    batteryPct: candidate.b,
+    voltageV: candidate.v,
     rssi: candidate.r,
     seenAt: candidate.s
   })

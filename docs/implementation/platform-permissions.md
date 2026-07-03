@@ -7,9 +7,10 @@ Android 12+ requires runtime BLE permissions:
 ```text
 BLUETOOTH_SCAN
 BLUETOOTH_CONNECT
+ACCESS_FINE_LOCATION
 ```
 
-Do not blindly set `neverForLocation` until tested with Xiaomi BTHome and TP357. Android documentation/plugin notes warn that some BLE beacons may be filtered when `neverForLocation` is used. For early hardware validation, prefer the safer path that keeps advertisements visible, then decide the production policy with an ADR.
+The current app intentionally does not set `neverForLocation`. Android documentation/plugin notes warn that some BLE beacons may be filtered when `neverForLocation` is used, and Local Climate Link depends on advertisement payloads from Xiaomi/PVVX and TP357 sensors. Because of that, Android may ask for Location permission and Location services must stay enabled for phone-side BLE scans.
 
 Also plan for local HTTP to Shelly:
 
@@ -29,8 +30,9 @@ Before Play Store release, verify the merged release manifest contains:
 ```text
 android.permission.BLUETOOTH_SCAN
 android.permission.BLUETOOTH_CONNECT
+android.permission.ACCESS_FINE_LOCATION
 android.permission.INTERNET
-legacy Bluetooth/location permissions only up to Android 11
+legacy Bluetooth permissions only up to Android 11
 ```
 
 ## iOS

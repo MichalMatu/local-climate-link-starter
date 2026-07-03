@@ -202,6 +202,29 @@ const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
   expect(Math.abs(buttonRight - rowRight)).toBeLessThanOrEqual(2);
 };
 
+const expectModalFooterButtonsFillWidth = async (dialog: Locator) => {
+  const metrics = await dialog.locator('.lcl-modal__footer').evaluate((footer) => {
+    const footerRect = footer.getBoundingClientRect();
+    return Array.from(footer.querySelectorAll<HTMLButtonElement>('button')).map(
+      (button) => {
+        const rect = button.getBoundingClientRect();
+        return {
+          label: button.textContent?.trim() ?? '',
+          widthDelta: Math.round(footerRect.width - rect.width)
+        };
+      }
+    );
+  });
+
+  expect(metrics.length).toBeGreaterThan(0);
+  for (const item of metrics) {
+    expect(
+      item.widthDelta,
+      `${item.label} should fill the modal footer`
+    ).toBeLessThanOrEqual(2);
+  }
+};
+
 const expectShellyCardActionsLayout = async (page: Page) => {
   const settingsToggle = page.getByRole('button', { name: 'Ustawienia gniazdka' });
   await expect(settingsToggle).toBeVisible();
@@ -305,7 +328,11 @@ for (const viewport of viewports) {
         await expect(page.getByRole('region', { name: 'Termometry BLE' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Dodaj termometr' })).toBeVisible();
         await page.getByRole('button', { name: 'Dodaj termometr' }).click();
-        await expect(page.getByRole('dialog', { name: 'Dodaj termometr' })).toBeVisible();
+        const addSensorDialog = page.getByRole('dialog', { name: 'Dodaj termometr' });
+        await expect(addSensorDialog).toBeVisible();
+        if (viewport.width <= 704) {
+          await expectModalFooterButtonsFillWidth(addSensorDialog);
+        }
         await expectNoHorizontalOverflow(page);
         await page.getByRole('button', { name: 'Zamknij' }).click();
       }

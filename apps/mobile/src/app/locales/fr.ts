@@ -290,10 +290,26 @@ export const fr = {
       phoneBleGenericFailed: 'Impossible de démarrer BLE sur le téléphone.',
       phoneBleNoRuntimeAddress:
         'Le téléphone a détecté le thermomètre mais n’a pas exposé la MAC. Utilise l’app Android ou le scan Shelly.',
+      phoneBlePermissionDenied:
+        'Autorise Bluetooth/appareils à proximité et la localisation pour cette app, puis relance le scan.',
       phoneBleTitle: 'Scanner BLE avec le téléphone',
       phoneBleUnavailableInBrowser:
         'Le scan BLE du téléphone nécessite l’app mobile. Le navigateur ne fournit pas la MAC du thermomètre.',
       profileLabel: 'Type de thermomètre',
+      pvvxFailedTitle: 'Impossible de se connecter au thermomètre.',
+      pvvxHistory: 'Charger l’historique',
+      pvvxHistoryLoadedDetail: '{count} relevés ajoutés aux mini graphiques.',
+      pvvxHistoryLoadedTitle: 'Historique chargé.',
+      pvvxHistoryLoading: 'Chargement de l’historique',
+      pvvxHistoryTitle: 'Se connecter à Xiaomi/PVVX et charger les relevés enregistrés',
+      pvvxMobileOnly:
+        'L’historique Xiaomi/PVVX nécessite l’app mobile et une connexion BLE.',
+      pvvxOnlyXiaomi: 'Historique et heure sont disponibles seulement pour Xiaomi/PVVX.',
+      pvvxSetTime: 'Régler l’heure',
+      pvvxSetTimeTitle: 'Régler l’heure Xiaomi/PVVX depuis le téléphone',
+      pvvxTimeSentTitle: 'Commande d’heure envoyée.',
+      pvvxTimeSetTitle: 'Heure du thermomètre réglée.',
+      pvvxTimeSetting: 'Réglage de l’heure',
       removed: 'Thermomètre supprimé de l’app.',
       removeAria: 'Supprimer le thermomètre {name}',
       savedListLabel: 'Thermomètres ajoutés',
@@ -305,6 +321,11 @@ export const fr = {
       scanBle: 'Scanner BLE',
       scanPhoneTitle: 'Scanner les thermomètres BLE avec le téléphone',
       scanStopTitle: 'Arrêter le scan BLE du téléphone',
+      settings: 'Réglages du thermomètre',
+      settingsAria: 'Réglages du thermomètre {name}',
+      settingsTitle: 'Réglages du thermomètre',
+      temperatureChartLabel: 'Graphique de température : {name}',
+      humidityChartLabel: 'Graphique d’humidité : {name}',
       noBleFound: 'Aucun thermomètre BLE trouvé.',
       typeLabel: 'Type'
     },
