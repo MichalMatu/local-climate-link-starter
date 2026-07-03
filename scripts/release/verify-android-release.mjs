@@ -25,6 +25,20 @@ const apkMetadataPath = join(
   'output-metadata.json'
 );
 
+const parseExpectedVersionCode = (value) => {
+  const parts = value.split('.').map((part) => Number.parseInt(part, 10));
+
+  if (parts.length !== 3 || parts.some((part) => !Number.isInteger(part) || part < 0)) {
+    throw new Error(`Expected semantic version in MAJOR.MINOR.PATCH form: ${value}`);
+  }
+
+  const [major, minor, patch] = parts;
+
+  return major * 10000 + minor * 100 + patch;
+};
+
+const expectedVersionCode = parseExpectedVersionCode(version);
+
 const requireFile = (path) => {
   if (!existsSync(path)) {
     throw new Error(`Missing release artifact: ${path}`);
@@ -78,6 +92,17 @@ const verifyZip = (path) => {
   execFileSync('unzip', ['-t', path], { stdio: 'pipe' });
 };
 
+const verifyJarSignature = (path) => {
+  const output = execFileSync('jarsigner', ['-verify', path], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+
+  if (!output.includes('jar verified') || output.includes('jar is unsigned')) {
+    throw new Error(`Android artifact is not signed: ${path}`);
+  }
+};
+
 const verifyAndroidMetadata = () => {
   if (!existsSync(apkMetadataPath)) {
     throw new Error(`Missing Android release metadata: ${apkMetadataPath}`);
@@ -90,7 +115,7 @@ const verifyAndroidMetadata = () => {
     throw new Error(`Unexpected Android applicationId: ${metadata.applicationId}`);
   }
 
-  if (element?.versionName !== version || element?.versionCode !== 20000) {
+  if (element?.versionName !== version || element?.versionCode !== expectedVersionCode) {
     throw new Error(
       `Unexpected Android release version: versionName=${element?.versionName}, versionCode=${element?.versionCode}`
     );
@@ -110,10 +135,10 @@ const aapt = findAndroidTool('aapt');
 if (apksigner) {
   execFileSync(apksigner, ['verify', '--verbose', apkPath], { stdio: 'pipe' });
 } else {
-  execFileSync('jarsigner', ['-verify', apkPath], { stdio: 'pipe' });
+  verifyJarSignature(apkPath);
 }
 
-execFileSync('jarsigner', ['-verify', aabPath], { stdio: 'pipe' });
+verifyJarSignature(aabPath);
 
 if (aapt) {
   const badging = execFileSync(aapt, ['dump', 'badging', apkPath], {
@@ -128,7 +153,7 @@ if (aapt) {
 
   if (
     !packageLine.includes(`versionName='${version}'`) ||
-    !packageLine.includes("versionCode='20000'")
+    !packageLine.includes(`versionCode='${expectedVersionCode}'`)
   ) {
     throw new Error(`Unexpected Android release version: ${packageLine}`);
   }

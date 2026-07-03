@@ -69,6 +69,23 @@ Current public URL:
 https://michalmatu.github.io/local-climate-link-starter/
 ```
 
+## Android release artifacts
+
+Release builds require the local signing environment before running the release
+command:
+
+```bash
+set -a
+source ~/.local-climate-link/android-signing/release-signing.env
+set +a
+LCL_RELEASE_VERSION=2.0.1 pnpm release:android
+```
+
+The release script builds the web app, syncs Capacitor, builds APK/AAB, collects
+artifacts under `artifacts/releases/v<version>/`, verifies checksums, and checks
+Android signatures. Do not upload artifacts if `verify-android-release.mjs`
+fails.
+
 ## Make shortcuts
 
 ```bash

@@ -288,10 +288,26 @@ export const it = {
       phoneBleGenericFailed: 'Impossibile avviare BLE sul telefono.',
       phoneBleNoRuntimeAddress:
         'Il telefono ha rilevato il termometro ma non ha esposto la MAC. Usa l’app Android o la scansione Shelly.',
+      phoneBlePermissionDenied:
+        'Consenti Bluetooth/dispositivi vicini e posizione per questa app, poi ripeti la scansione.',
       phoneBleTitle: 'Scansiona BLE con telefono',
       phoneBleUnavailableInBrowser:
         'La scansione BLE del telefono richiede l’app mobile. Il browser non può fornire la MAC del termometro.',
       profileLabel: 'Tipo termometro',
+      pvvxFailedTitle: 'Impossibile connettersi al termometro.',
+      pvvxHistory: 'Carica storico',
+      pvvxHistoryLoadedDetail: '{count} letture aggiunte ai grafici.',
+      pvvxHistoryLoadedTitle: 'Storico caricato.',
+      pvvxHistoryLoading: 'Caricamento storico',
+      pvvxHistoryTitle: 'Connetti Xiaomi/PVVX e carica le letture salvate',
+      pvvxMobileOnly:
+        'Lo storico Xiaomi/PVVX richiede l’app mobile e una connessione BLE.',
+      pvvxOnlyXiaomi: 'Storico e ora sono disponibili solo per Xiaomi/PVVX.',
+      pvvxSetTime: 'Imposta ora',
+      pvvxSetTimeTitle: 'Imposta ora Xiaomi/PVVX dal telefono',
+      pvvxTimeSentTitle: 'Comando ora inviato.',
+      pvvxTimeSetTitle: 'Ora del termometro impostata.',
+      pvvxTimeSetting: 'Imposto ora',
       removed: 'Termometro rimosso dall’app.',
       removeAria: 'Rimuovi termometro {name}',
       savedListLabel: 'Termometri aggiunti',
@@ -303,6 +319,11 @@ export const it = {
       scanBle: 'Scansiona BLE',
       scanPhoneTitle: 'Scansiona termometri BLE con il telefono',
       scanStopTitle: 'Ferma scansione BLE del telefono',
+      settings: 'Impostazioni termometro',
+      settingsAria: 'Impostazioni termometro {name}',
+      settingsTitle: 'Impostazioni termometro',
+      temperatureChartLabel: 'Grafico temperatura: {name}',
+      humidityChartLabel: 'Grafico umidità: {name}',
       noBleFound: 'Nessun termometro BLE trovato.',
       typeLabel: 'Tipo'
     },

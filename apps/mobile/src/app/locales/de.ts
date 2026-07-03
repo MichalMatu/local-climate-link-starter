@@ -290,10 +290,26 @@ export const de = {
       phoneBleGenericFailed: 'BLE auf dem Telefon konnte nicht gestartet werden.',
       phoneBleNoRuntimeAddress:
         'Das Telefon hat das Thermometer erkannt, aber keine MAC freigegeben. Android-App oder Shelly-Scan verwenden.',
+      phoneBlePermissionDenied:
+        'Bluetooth/Geräte in der Nähe und Standort für diese App erlauben, dann erneut scannen.',
       phoneBleTitle: 'BLE mit Telefon scannen',
       phoneBleUnavailableInBrowser:
         'Der BLE-Scan mit dem Telefon erfordert die mobile App. Der Browser liefert keine Thermometer-MAC.',
       profileLabel: 'Thermometertyp',
+      pvvxFailedTitle: 'Verbindung zum Thermometer fehlgeschlagen.',
+      pvvxHistory: 'Historie laden',
+      pvvxHistoryLoadedDetail: '{count} Messwerte zu den Diagrammen hinzugefügt.',
+      pvvxHistoryLoadedTitle: 'Historie geladen.',
+      pvvxHistoryLoading: 'Historie wird geladen',
+      pvvxHistoryTitle: 'Mit Xiaomi/PVVX verbinden und gespeicherte Messwerte laden',
+      pvvxMobileOnly:
+        'Xiaomi/PVVX-Historie benötigt die mobile App und eine BLE-Verbindung.',
+      pvvxOnlyXiaomi: 'Historie und Zeit sind nur für Xiaomi/PVVX verfügbar.',
+      pvvxSetTime: 'Zeit setzen',
+      pvvxSetTimeTitle: 'Xiaomi/PVVX-Zeit vom Telefon setzen',
+      pvvxTimeSentTitle: 'Zeitbefehl gesendet.',
+      pvvxTimeSetTitle: 'Thermometerzeit gesetzt.',
+      pvvxTimeSetting: 'Zeit wird gesetzt',
       removed: 'Thermometer aus der App entfernt.',
       removeAria: 'Thermometer {name} entfernen',
       savedListLabel: 'Hinzugefügte Thermometer',
@@ -305,6 +321,11 @@ export const de = {
       scanBle: 'BLE scannen',
       scanPhoneTitle: 'BLE-Thermometer mit dem Telefon scannen',
       scanStopTitle: 'BLE-Scan auf dem Telefon stoppen',
+      settings: 'Thermometereinstellungen',
+      settingsAria: 'Thermometereinstellungen für {name}',
+      settingsTitle: 'Thermometereinstellungen',
+      temperatureChartLabel: 'Temperaturdiagramm: {name}',
+      humidityChartLabel: 'Feuchtediagramm: {name}',
       noBleFound: 'Keine BLE-Thermometer gefunden.',
       typeLabel: 'Typ'
     },

@@ -53,13 +53,12 @@ type LandingMessages = {
     aria: string;
     tabs: {
       shelly: string;
-      thermometers: string;
+      sensors: string;
       rule: string;
+      diag: string;
     };
-    readingLabel: string;
-    localState: string;
-    lowHumidity: string;
-    highHumidity: string;
+    addThermometer: string;
+    sensorName: string;
   };
   instructions: {
     title: string;
@@ -182,13 +181,12 @@ const pl: LandingMessages = {
     aria: 'Podgląd aplikacji Local Climate Link',
     tabs: {
       shelly: 'Shelly',
-      thermometers: 'Termometry',
-      rule: 'Reguła'
+      sensors: 'Termometry',
+      rule: 'Reguła',
+      diag: 'Diag'
     },
-    readingLabel: 'Odczyt',
-    localState: 'lokalnie',
-    lowHumidity: 'Wilgotność poniżej 50%',
-    highHumidity: 'Wilgotność powyżej 60%'
+    addThermometer: 'Dodaj termometr',
+    sensorName: 'Termometr 24:CD'
   },
   instructions: {
     title: 'Instrukcja startu',
@@ -201,9 +199,9 @@ const pl: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Beta dla Androida i lista oczekujących',
-    body: 'Najpierw testujemy APK i zestawy sprzętowe. Oficjalne sklepy dołączą, gdy zamkniemy checklistę release candidate.',
-    joinCta: 'Dołącz do bety'
+    title: 'Beta Android do pobrania',
+    body: 'Pobierz podpisany APK z GitHub Releases. Oficjalne sklepy dołączą, gdy zamkniemy checklistę release candidate.',
+    joinCta: 'Pobierz APK'
   },
   faq: {
     title: 'FAQ',
@@ -292,13 +290,12 @@ const en: LandingMessages = {
     aria: 'Local Climate Link app preview',
     tabs: {
       shelly: 'Shelly',
-      thermometers: 'Sensors',
-      rule: 'Rule'
+      sensors: 'Sensors',
+      rule: 'Rule',
+      diag: 'Diag'
     },
-    readingLabel: 'Reading',
-    localState: 'local',
-    lowHumidity: 'Humidity below 50%',
-    highHumidity: 'Humidity above 60%'
+    addThermometer: 'Add thermometer',
+    sensorName: 'Thermometer 24:CD'
   },
   instructions: {
     title: 'Getting started',
@@ -311,9 +308,9 @@ const en: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Android beta and waiting list',
-    body: 'We are testing APK builds and hardware kits first. Official stores come after the release-candidate checklist is closed.',
-    joinCta: 'Join beta'
+    title: 'Android beta download',
+    body: 'Download the signed APK from GitHub Releases. Official stores come after the release-candidate checklist is closed.',
+    joinCta: 'Download APK'
   },
   faq: {
     title: 'FAQ',
@@ -419,11 +416,9 @@ const de: LandingMessages = {
   },
   preview: {
     aria: 'App-Vorschau von Local Climate Link',
-    tabs: { shelly: 'Shelly', thermometers: 'Sensoren', rule: 'Regel' },
-    readingLabel: 'Messwert',
-    localState: 'lokal',
-    lowHumidity: 'Feuchte unter 50%',
-    highHumidity: 'Feuchte über 60%'
+    tabs: { shelly: 'Shelly', sensors: 'Sensoren', rule: 'Regel', diag: 'Diag' },
+    addThermometer: 'Thermometer hinzufügen',
+    sensorName: 'Thermometer 24:CD'
   },
   instructions: {
     title: 'Startanleitung',
@@ -436,9 +431,9 @@ const de: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Android-Beta und Warteliste',
-    body: 'Zuerst testen wir APK-Builds und Hardwarekits. Offizielle Stores folgen nach der Release-Candidate-Checkliste.',
-    joinCta: 'Zur Beta anmelden'
+    title: 'Android-Beta herunterladen',
+    body: 'Lade die signierte APK aus GitHub Releases herunter. Offizielle Stores folgen nach der Release-Candidate-Checkliste.',
+    joinCta: 'APK herunterladen'
   },
   faq: {
     title: 'FAQ',
@@ -544,11 +539,9 @@ const es: LandingMessages = {
   preview: {
     ...en.preview,
     aria: 'Vista previa de la app Local Climate Link',
-    tabs: { shelly: 'Shelly', thermometers: 'Sensores', rule: 'Regla' },
-    readingLabel: 'Lectura',
-    localState: 'local',
-    lowHumidity: 'Humedad por debajo de 50%',
-    highHumidity: 'Humedad por encima de 60%'
+    tabs: { shelly: 'Shelly', sensors: 'Sensores', rule: 'Regla', diag: 'Diag' },
+    addThermometer: 'Añadir termómetro',
+    sensorName: 'Termómetro 24:CD'
   },
   instructions: {
     title: 'Primeros pasos',
@@ -561,9 +554,9 @@ const es: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Beta Android y lista de espera',
-    body: 'Primero probamos APKs y kits de hardware. Las tiendas oficiales llegarán al cerrar la checklist de release candidate.',
-    joinCta: 'Unirme a la beta'
+    title: 'Descarga de beta Android',
+    body: 'Descarga el APK firmado desde GitHub Releases. Las tiendas oficiales llegarán al cerrar la checklist de release candidate.',
+    joinCta: 'Descargar APK'
   },
   faq: {
     title: 'FAQ',
@@ -668,11 +661,9 @@ const fr: LandingMessages = {
   preview: {
     ...en.preview,
     aria: 'Aperçu de l’app Local Climate Link',
-    tabs: { shelly: 'Shelly', thermometers: 'Capteurs', rule: 'Règle' },
-    readingLabel: 'Lecture',
-    localState: 'local',
-    lowHumidity: 'Humidité sous 50%',
-    highHumidity: 'Humidité au-dessus de 60%'
+    tabs: { shelly: 'Shelly', sensors: 'Capteurs', rule: 'Règle', diag: 'Diag' },
+    addThermometer: 'Ajouter un thermomètre',
+    sensorName: 'Thermomètre 24:CD'
   },
   instructions: {
     title: 'Démarrage',
@@ -685,9 +676,9 @@ const fr: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Bêta Android et liste d’attente',
-    body: 'Nous testons d’abord les APK et les kits matériels. Les stores officiels suivront après la checklist release candidate.',
-    joinCta: 'Rejoindre la bêta'
+    title: 'Téléchargement de la bêta Android',
+    body: 'Télécharge l’APK signé depuis GitHub Releases. Les stores officiels suivront après la checklist release candidate.',
+    joinCta: 'Télécharger l’APK'
   },
   faq: {
     title: 'FAQ',
@@ -792,11 +783,9 @@ const it: LandingMessages = {
   preview: {
     ...en.preview,
     aria: 'Anteprima dell’app Local Climate Link',
-    tabs: { shelly: 'Shelly', thermometers: 'Sensori', rule: 'Regola' },
-    readingLabel: 'Lettura',
-    localState: 'locale',
-    lowHumidity: 'Umidità sotto 50%',
-    highHumidity: 'Umidità sopra 60%'
+    tabs: { shelly: 'Shelly', sensors: 'Sensori', rule: 'Regola', diag: 'Diag' },
+    addThermometer: 'Aggiungi termometro',
+    sensorName: 'Termometro 24:CD'
   },
   instructions: {
     title: 'Primi passi',
@@ -809,9 +798,9 @@ const it: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Beta Android e lista d’attesa',
-    body: 'Prima testiamo APK e kit hardware. Gli store ufficiali arriveranno dopo la checklist release candidate.',
-    joinCta: 'Unisciti alla beta'
+    title: 'Download beta Android',
+    body: 'Scarica l’APK firmato da GitHub Releases. Gli store ufficiali arriveranno dopo la checklist release candidate.',
+    joinCta: 'Scarica APK'
   },
   faq: {
     title: 'FAQ',
@@ -915,11 +904,9 @@ const ptBr: LandingMessages = {
   preview: {
     ...en.preview,
     aria: 'Prévia do app Local Climate Link',
-    tabs: { shelly: 'Shelly', thermometers: 'Sensores', rule: 'Regra' },
-    readingLabel: 'Leitura',
-    localState: 'local',
-    lowHumidity: 'Umidade abaixo de 50%',
-    highHumidity: 'Umidade acima de 60%'
+    tabs: { shelly: 'Shelly', sensors: 'Sensores', rule: 'Regra', diag: 'Diag' },
+    addThermometer: 'Adicionar termômetro',
+    sensorName: 'Termômetro 24:CD'
   },
   instructions: {
     title: 'Primeiros passos',
@@ -932,9 +919,9 @@ const ptBr: LandingMessages = {
     ]
   },
   beta: {
-    title: 'Beta Android e lista de espera',
-    body: 'Primeiro testamos APKs e kits de hardware. As lojas oficiais vêm depois da checklist de release candidate.',
-    joinCta: 'Entrar na beta'
+    title: 'Download da beta Android',
+    body: 'Baixe o APK assinado no GitHub Releases. As lojas oficiais vêm depois da checklist de release candidate.',
+    joinCta: 'Baixar APK'
   },
   faq: {
     title: 'FAQ',

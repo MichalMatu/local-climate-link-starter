@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
 
+const e2eOrigin = `http://127.0.0.1:${process.env.LCL_E2E_PORT ?? '5173'}`;
+
 const draft = {
   shellyNameInput: 'Shelly Plug S Gen3',
   shellyUrlInput: '',
@@ -202,6 +204,29 @@ const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
   expect(Math.abs(buttonRight - rowRight)).toBeLessThanOrEqual(2);
 };
 
+const expectModalFooterButtonsFillWidth = async (dialog: Locator) => {
+  const metrics = await dialog.locator('.lcl-modal__footer').evaluate((footer) => {
+    const footerRect = footer.getBoundingClientRect();
+    return Array.from(footer.querySelectorAll<HTMLButtonElement>('button')).map(
+      (button) => {
+        const rect = button.getBoundingClientRect();
+        return {
+          label: button.textContent?.trim() ?? '',
+          widthDelta: Math.round(footerRect.width - rect.width)
+        };
+      }
+    );
+  });
+
+  expect(metrics.length).toBeGreaterThan(0);
+  for (const item of metrics) {
+    expect(
+      item.widthDelta,
+      `${item.label} should fill the modal footer`
+    ).toBeLessThanOrEqual(2);
+  }
+};
+
 const expectShellyCardActionsLayout = async (page: Page) => {
   const settingsToggle = page.getByRole('button', { name: 'Ustawienia gniazdka' });
   await expect(settingsToggle).toBeVisible();
@@ -305,7 +330,11 @@ for (const viewport of viewports) {
         await expect(page.getByRole('region', { name: 'Termometry BLE' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Dodaj termometr' })).toBeVisible();
         await page.getByRole('button', { name: 'Dodaj termometr' }).click();
-        await expect(page.getByRole('dialog', { name: 'Dodaj termometr' })).toBeVisible();
+        const addSensorDialog = page.getByRole('dialog', { name: 'Dodaj termometr' });
+        await expect(addSensorDialog).toBeVisible();
+        if (viewport.width <= 704) {
+          await expectModalFooterButtonsFillWidth(addSensorDialog);
+        }
         await expectNoHorizontalOverflow(page);
         await page.getByRole('button', { name: 'Zamknij' }).click();
       }
@@ -341,7 +370,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   });
   page.on('pageerror', (error) => consoleProblems.push(error.message));
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], {
-    origin: 'http://127.0.0.1:5173'
+    origin: e2eOrigin
   });
 
   await page.setViewportSize({ width: 390, height: 844 });

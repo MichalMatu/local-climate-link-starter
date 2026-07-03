@@ -26,8 +26,8 @@
   --landing-hero-fade-desktop: linear-gradient(
     90deg,
     rgba(247, 250, 248, 0.98) 0%,
-    rgba(247, 250, 248, 0.86) 36%,
-    rgba(247, 250, 248, 0.18) 72%
+    rgba(247, 250, 248, 0.9) 38%,
+    rgba(247, 250, 248, 0.66) 100%
   );
   --landing-hero-edge-fade: linear-gradient(
     180deg,
@@ -38,7 +38,7 @@
     180deg,
     rgba(247, 250, 248, 0.98) 0%,
     rgba(247, 250, 248, 0.9) 42%,
-    rgba(247, 250, 248, 0.18) 100%
+    rgba(247, 250, 248, 0.56) 100%
   );
   --landing-shadow: 0 22px 64px rgba(21, 45, 36, 0.14);
   --landing-shadow-soft: 0 12px 32px rgba(21, 45, 36, 0.1);
@@ -77,8 +77,8 @@
     --landing-hero-fade-desktop: linear-gradient(
       90deg,
       rgba(16, 22, 20, 0.98) 0%,
-      rgba(16, 22, 20, 0.88) 42%,
-      rgba(16, 22, 20, 0.3) 76%
+      rgba(16, 22, 20, 0.9) 42%,
+      rgba(16, 22, 20, 0.68) 100%
     );
     --landing-hero-edge-fade: linear-gradient(
       180deg,
@@ -89,7 +89,7 @@
       180deg,
       rgba(16, 22, 20, 0.98) 0%,
       rgba(16, 22, 20, 0.9) 46%,
-      rgba(16, 22, 20, 0.36) 100%
+      rgba(16, 22, 20, 0.68) 100%
     );
     --landing-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
     --landing-shadow-soft: 0 16px 42px rgba(0, 0, 0, 0.24);

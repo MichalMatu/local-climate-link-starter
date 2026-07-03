@@ -836,7 +836,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
   };
 
   const handleDiscoveredSensor = (candidate: BleDiscoveryCandidate) => {
-    flow.addDiscoveredSensor(candidate);
+    flow.addDiscoveredSensor(candidate, 'shelly-scan');
     pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 

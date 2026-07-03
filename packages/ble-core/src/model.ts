@@ -4,7 +4,11 @@ export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 export interface BleCoreError {
   kind:
-    'validation-failed' | 'sensor-unsupported' | 'ble-unavailable' | 'hardware-required';
+    | 'validation-failed'
+    | 'sensor-unsupported'
+    | 'ble-unavailable'
+    | 'permission-denied'
+    | 'hardware-required';
   message: string;
   retryable: boolean;
 }
@@ -34,7 +38,7 @@ export interface BleScanner {
 
 export interface Measurement {
   sensorId: string;
-  source: 'phone-scan' | 'shelly-scan' | 'demo';
+  source: 'phone-scan' | 'phone-gatt' | 'pvvx-history' | 'shelly-scan' | 'demo';
   temperatureC?: number | undefined;
   humidityPct?: number | undefined;
   batteryPct?: number | undefined;
@@ -55,4 +59,50 @@ export interface BthomeParseContext {
   rssi?: number | undefined;
   seenAtMs: number;
   source: Measurement['source'];
+}
+
+export interface GattRequestOptions {
+  timeoutMs?: number;
+}
+
+export interface BleGattNotification {
+  deviceId: string;
+  serviceUuid: string;
+  characteristicUuid: string;
+  value: Uint8Array;
+}
+
+export interface BleGattSubscription {
+  stop(): Promise<void>;
+}
+
+export interface BleGattClient {
+  initialize(): Promise<void>;
+  connect(
+    deviceId: string,
+    options?: GattRequestOptions & {
+      onDisconnect?(deviceId: string): void;
+    }
+  ): Promise<void>;
+  disconnect(deviceId: string): Promise<void>;
+  read(
+    deviceId: string,
+    serviceUuid: string,
+    characteristicUuid: string,
+    options?: GattRequestOptions
+  ): Promise<Uint8Array>;
+  write(
+    deviceId: string,
+    serviceUuid: string,
+    characteristicUuid: string,
+    value: Uint8Array,
+    options?: GattRequestOptions
+  ): Promise<void>;
+  startNotifications(
+    deviceId: string,
+    serviceUuid: string,
+    characteristicUuid: string,
+    onNotification: (notification: BleGattNotification) => void,
+    options?: GattRequestOptions
+  ): Promise<BleGattSubscription>;
 }

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 
 const version = process.argv[2];
 
@@ -9,19 +9,32 @@ if (!version) {
 }
 
 const releaseDir = join('artifacts', 'releases', `v${version}`);
+const apkMetadataPath = join(
+  'apps',
+  'mobile',
+  'android',
+  'app',
+  'build',
+  'outputs',
+  'apk',
+  'release',
+  'output-metadata.json'
+);
+
+const readReleaseApkPath = () => {
+  const metadata = JSON.parse(readFileSync(apkMetadataPath, 'utf8'));
+  const outputFile = metadata.elements?.[0]?.outputFile;
+
+  if (typeof outputFile !== 'string' || outputFile.length === 0) {
+    throw new Error(`Missing release APK output file in ${apkMetadataPath}`);
+  }
+
+  return join(dirname(apkMetadataPath), outputFile);
+};
+
 const artifacts = [
   {
-    source: join(
-      'apps',
-      'mobile',
-      'android',
-      'app',
-      'build',
-      'outputs',
-      'apk',
-      'release',
-      'app-release.apk'
-    ),
+    source: readReleaseApkPath(),
     target: `local-climate-link-v${version}-android-release.apk`
   },
   {
