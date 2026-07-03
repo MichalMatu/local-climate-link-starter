@@ -23,6 +23,13 @@ const sensorProfileDisplayLabels = {
   tp357_custom_v1: 'TP357'
 } as const;
 
+const temperatureChartDomain = { minimumRange: 5 } as const;
+const humidityChartDomain = {
+  minimumRange: 20,
+  lowerBound: 0,
+  upperBound: 100
+} as const;
+
 type SensorDraftDevice = HardwarePageProps['flow']['sensorDevices'][number];
 
 const SettingsIcon = () => (
@@ -203,6 +210,8 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
   const shownPhoneBleErrorRef = useRef<string | null>(null);
+  const preloadedPvvxHistoryIdsRef = useRef<Set<string>>(new Set());
+  const scheduledPvvxHistoryIdsRef = useRef<Set<string>>(new Set());
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
   const isSensorGattPending =
     flow.fetchPvvxHistoryMutation.isPending || flow.setPvvxTimeMutation.isPending;
@@ -212,7 +221,13 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
     flow.sensorDevices.find((device) => device.id === sensorSettingsId) ?? null;
   const sensorDeviceCount = flow.sensorDevices.length;
   const startSavedSensorLiveScan = flow.startSavedSensorLiveScan;
+  const restartSavedSensorLiveScan = flow.restartSavedSensorLiveScan;
   const stopSavedSensorLiveScan = flow.stopSavedSensorLiveScan;
+  const shouldRunSavedSensorLiveScan =
+    sensorDeviceCount > 0 &&
+    !isAddSensorModalOpen &&
+    !isPhoneBleScanModalOpen &&
+    !isSensorGattPending;
 
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
@@ -242,25 +257,103 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   }, [flow.phoneBleScanMutation, pushToast, t]);
 
   useEffect(() => {
-    if (
-      sensorDeviceCount === 0 ||
-      isAddSensorModalOpen ||
-      isPhoneBleScanModalOpen ||
-      isSensorGattPending
-    ) {
+    if (!shouldRunSavedSensorLiveScan) {
       stopSavedSensorLiveScan();
       return;
     }
 
     startSavedSensorLiveScan();
     return () => stopSavedSensorLiveScan();
+  }, [shouldRunSavedSensorLiveScan, startSavedSensorLiveScan, stopSavedSensorLiveScan]);
+
+  useEffect(() => {
+    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const clearResumeTimer = () => {
+      if (resumeTimer !== null) {
+        clearTimeout(resumeTimer);
+        resumeTimer = null;
+      }
+    };
+
+    const scheduleResume = () => {
+      if (!shouldRunSavedSensorLiveScan) {
+        return;
+      }
+
+      clearResumeTimer();
+      resumeTimer = setTimeout(() => {
+        resumeTimer = null;
+        void restartSavedSensorLiveScan();
+      }, 250);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        clearResumeTimer();
+        stopSavedSensorLiveScan();
+        return;
+      }
+
+      scheduleResume();
+    };
+
+    const handleFocus = () => {
+      if (document.visibilityState !== 'hidden') {
+        scheduleResume();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearResumeTimer();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [restartSavedSensorLiveScan, shouldRunSavedSensorLiveScan, stopSavedSensorLiveScan]);
+
+  useEffect(() => {
+    if (
+      isAddSensorModalOpen ||
+      isPhoneBleScanModalOpen ||
+      sensorSettingsDevice !== null ||
+      flow.fetchPvvxHistoryMutation.status !== 'idle' ||
+      flow.setPvvxTimeMutation.isPending
+    ) {
+      return;
+    }
+
+    const device = flow.sensorDevices.find(
+      (sensorDevice) =>
+        sensorDevice.profileId === 'xiaomi_lywsd03mmc_bthome_v2' &&
+        !preloadedPvvxHistoryIdsRef.current.has(sensorDevice.id) &&
+        !scheduledPvvxHistoryIdsRef.current.has(sensorDevice.id)
+    );
+    if (!device) {
+      return;
+    }
+
+    const scheduledPvvxHistoryIds = scheduledPvvxHistoryIdsRef.current;
+    scheduledPvvxHistoryIds.add(device.id);
+    const preloadTimer = window.setTimeout(() => {
+      scheduledPvvxHistoryIds.delete(device.id);
+      preloadedPvvxHistoryIdsRef.current.add(device.id);
+      flow.fetchPvvxHistoryMutation.mutate({ device, mode: 'preload' });
+    }, 750);
+
+    return () => {
+      scheduledPvvxHistoryIds.delete(device.id);
+      window.clearTimeout(preloadTimer);
+    };
   }, [
+    flow.fetchPvvxHistoryMutation,
+    flow.sensorDevices,
+    flow.setPvvxTimeMutation.isPending,
     isAddSensorModalOpen,
     isPhoneBleScanModalOpen,
-    isSensorGattPending,
-    sensorDeviceCount,
-    startSavedSensorLiveScan,
-    stopSavedSensorLiveScan
+    sensorSettingsDevice
   ]);
 
   useEffect(() => {
@@ -269,11 +362,13 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
     }
 
     const sampleCount = flow.fetchPvvxHistoryMutation.data?.sampleCount ?? 0;
-    pushToast(
-      'ok',
-      t('hardware.sensor.pvvxHistoryLoadedTitle'),
-      t('hardware.sensor.pvvxHistoryLoadedDetail', { count: sampleCount })
-    );
+    if (flow.fetchPvvxHistoryMutation.data?.mode === 'manual') {
+      pushToast(
+        'ok',
+        t('hardware.sensor.pvvxHistoryLoadedTitle'),
+        t('hardware.sensor.pvvxHistoryLoadedDetail', { count: sampleCount })
+      );
+    }
     flow.fetchPvvxHistoryMutation.reset();
   }, [flow.fetchPvvxHistoryMutation, pushToast, t]);
 
@@ -282,11 +377,13 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       return;
     }
 
-    pushToast(
-      'warning',
-      t('hardware.sensor.pvvxFailedTitle'),
-      mutationError(flow.fetchPvvxHistoryMutation.error)
-    );
+    if (flow.fetchPvvxHistoryMutation.variables?.mode === 'manual') {
+      pushToast(
+        'warning',
+        t('hardware.sensor.pvvxFailedTitle'),
+        mutationError(flow.fetchPvvxHistoryMutation.error)
+      );
+    }
     flow.fetchPvvxHistoryMutation.reset();
   }, [flow.fetchPvvxHistoryMutation, pushToast, t]);
 
@@ -392,7 +489,10 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   };
 
   return (
-    <section className="demo-panel" aria-label={t('hardware.nav.sensorTitle')}>
+    <section
+      className="demo-panel sensor-setup-panel"
+      aria-label={t('hardware.nav.sensorTitle')}
+    >
       <div className="action-row add-device-action-row">
         <button
           className="secondary-action"
@@ -548,7 +648,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       </Modal>
       <Modal
         closeLabel={t('common.close')}
-        description={sensorSettingsDevice?.name ?? ''}
         open={sensorSettingsDevice !== null}
         title={t('hardware.sensor.settings')}
         actions={
@@ -567,6 +666,19 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       >
         {sensorSettingsDevice && (
           <div className="settings-modal-layout">
+            <label className="field">
+              {t('hardware.sensor.nameLabel')}
+              <input
+                type="text"
+                value={sensorSettingsDevice.name}
+                onChange={(event) =>
+                  flow.setSensorDeviceName(
+                    sensorSettingsDevice.id,
+                    event.currentTarget.value
+                  )
+                }
+              />
+            </label>
             <div className="status-stack">
               <DiagnosticRow label="MAC" value={sensorSettingsDevice.runtimeAddress} />
               <DiagnosticRow
@@ -581,6 +693,23 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   t('common.missingData')
                 )}
               />
+              <DiagnosticRow
+                label={t('hardware.metrics.battery')}
+                value={formatBattery(
+                  latestBatterySample(readingsForSensor(sensorSettingsDevice)),
+                  t('common.missingData')
+                )}
+              />
+              <DiagnosticRow
+                label={t('common.rssi')}
+                value={formatNullableMetric(
+                  latestNumericSample(readingsForSensor(sensorSettingsDevice), 'rssi')
+                    ?.rssi,
+                  ' dBm',
+                  0,
+                  t('common.missingData')
+                )}
+              />
             </div>
             {sensorSettingsDevice.profileId === 'xiaomi_lywsd03mmc_bthome_v2' && (
               <div className="settings-action-stack">
@@ -590,7 +719,10 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   disabled={flow.fetchPvvxHistoryMutation.isPending}
                   title={t('hardware.sensor.pvvxHistoryTitle')}
                   onClick={() =>
-                    flow.fetchPvvxHistoryMutation.mutate(sensorSettingsDevice)
+                    flow.fetchPvvxHistoryMutation.mutate({
+                      device: sensorSettingsDevice,
+                      mode: 'manual'
+                    })
                   }
                 >
                   {flow.fetchPvvxHistoryMutation.isPending
@@ -645,22 +777,11 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
           const samples = readingsForSensor(device);
           const temperatureSample = latestNumericSample(samples, 'temperatureC');
           const humiditySample = latestNumericSample(samples, 'humidityPct');
-          const batterySample = latestBatterySample(samples);
-          const rssiSample = latestNumericSample(samples, 'rssi');
 
           return (
             <article key={device.id} className="saved-list__item sensor-saved-card">
-              <div className="saved-list__name-input-row">
-                <label className="field saved-list__name-field">
-                  {t('hardware.sensor.nameLabel')}
-                  <input
-                    type="text"
-                    value={device.name}
-                    onChange={(event) =>
-                      flow.setSensorDeviceName(device.id, event.currentTarget.value)
-                    }
-                  />
-                </label>
+              <div className="sensor-card-header">
+                <h3 className="sensor-card-title">{device.name}</h3>
                 <button
                   className="icon-action saved-list__settings-toggle"
                   type="button"
@@ -673,61 +794,38 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   <SettingsIcon />
                 </button>
               </div>
-              <dl className="sensor-runtime-metrics">
-                <div>
-                  <dt>{t('hardware.metrics.temperatureShort')}</dt>
-                  <dd>
+              <div className="sensor-chart-stack">
+                <div className="sensor-data-chart-card">
+                  <strong className="sensor-data-chart-card__value">
                     {formatNullableMetric(
                       temperatureSample?.temperatureC,
                       '°C',
                       1,
                       t('common.missingData')
                     )}
-                  </dd>
+                  </strong>
+                  <Sparkline
+                    label={t('hardware.sensor.temperatureChartLabel', {
+                      name: device.name
+                    })}
+                    domain={temperatureChartDomain}
+                    points={sampleValues(samples, 'temperatureC')}
+                  />
                 </div>
-                <div>
-                  <dt>{t('hardware.metrics.humidityShort')}</dt>
-                  <dd>
+                <div className="sensor-data-chart-card">
+                  <strong className="sensor-data-chart-card__value">
                     {formatNullableMetric(
                       humiditySample?.humidityPct,
                       '%',
                       1,
                       t('common.missingData')
                     )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t('hardware.metrics.battery')}</dt>
-                  <dd>{formatBattery(batterySample, t('common.missingData'))}</dd>
-                </div>
-                <div>
-                  <dt>{t('common.rssi')}</dt>
-                  <dd>
-                    {formatNullableMetric(
-                      rssiSample?.rssi,
-                      ' dBm',
-                      0,
-                      t('common.missingData')
-                    )}
-                  </dd>
-                </div>
-              </dl>
-              <div className="sensor-spark-grid">
-                <div className="sensor-spark-card">
-                  <span>{t('hardware.metrics.temperatureShort')}</span>
-                  <Sparkline
-                    label={t('hardware.sensor.temperatureChartLabel', {
-                      name: device.name
-                    })}
-                    points={sampleValues(samples, 'temperatureC')}
-                  />
-                </div>
-                <div className="sensor-spark-card">
-                  <span>{t('hardware.metrics.humidityShort')}</span>
+                  </strong>
                   <Sparkline
                     label={t('hardware.sensor.humidityChartLabel', {
                       name: device.name
                     })}
+                    domain={humidityChartDomain}
                     points={sampleValues(samples, 'humidityPct')}
                   />
                 </div>

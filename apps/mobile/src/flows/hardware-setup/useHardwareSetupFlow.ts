@@ -167,15 +167,30 @@ type SafeRelayTestMutationResult = {
 
 type SensorRuntimeSource = 'phone-scan' | 'shelly-scan';
 
+type PvvxHistoryMutationMode = 'manual' | 'preload';
+
+type PvvxHistoryMutationRequest = {
+  device: SensorDraftDevice;
+  mode: PvvxHistoryMutationMode;
+};
+
 type PvvxHistoryMutationResult = {
   device: SensorDraftDevice;
   sampleCount: number;
+  mode: PvvxHistoryMutationMode;
 };
 
 type PvvxTimeMutationResult = {
   device: SensorDraftDevice;
   acknowledged: boolean;
 };
+
+const PHONE_GATT_RADIO_SETTLE_MS = 1200;
+
+const waitForPhoneBleRadioIdle = (): Promise<void> =>
+  new Promise((resolve) => {
+    window.setTimeout(resolve, PHONE_GATT_RADIO_SETTLE_MS);
+  });
 
 const createInitialShellyControlState = (): ShellyControlViewState => ({
   status: null,
@@ -1163,6 +1178,24 @@ export const useHardwareSetupFlow = () => {
       });
   }, [appendSensorReading, savedSensorRuntimeAddresses]);
 
+  const restartSavedSensorLiveScan = useCallback(async (): Promise<void> => {
+    await stopSavedSensorLiveScanNow();
+    startSavedSensorLiveScan();
+  }, [startSavedSensorLiveScan, stopSavedSensorLiveScanNow]);
+
+  const preparePhoneGattConnection = useCallback(async (): Promise<void> => {
+    const hadSavedSensorScan = savedSensorLiveScannerRef.current !== null;
+    const phoneScanner = phoneBleScannerRef.current;
+    phoneBleScannerRef.current = null;
+
+    await stopSavedSensorLiveScanNow();
+    await phoneScanner?.stopScan().catch(() => undefined);
+
+    if (hadSavedSensorScan || phoneScanner) {
+      await waitForPhoneBleRadioIdle();
+    }
+  }, [stopSavedSensorLiveScanNow]);
+
   const upsertPhoneBleScanCandidate = (candidate: BleDiscoveryCandidate) => {
     appendSensorReading(sensorReadingFromCandidate(candidate, 'phone-scan'));
     setPhoneBleScanCandidates((current) =>
@@ -1232,7 +1265,10 @@ export const useHardwareSetupFlow = () => {
   };
 
   const fetchPvvxHistoryMutation = useMutation({
-    mutationFn: async (device: SensorDraftDevice): Promise<PvvxHistoryMutationResult> => {
+    mutationFn: async ({
+      device,
+      mode
+    }: PvvxHistoryMutationRequest): Promise<PvvxHistoryMutationResult> => {
       if (device.profileId !== 'xiaomi_lywsd03mmc_bthome_v2') {
         throw new Error(t('hardware.sensor.pvvxOnlyXiaomi'));
       }
@@ -1240,7 +1276,7 @@ export const useHardwareSetupFlow = () => {
         throw new Error(t('hardware.sensor.pvvxMobileOnly'));
       }
 
-      await stopSavedSensorLiveScanNow();
+      await preparePhoneGattConnection();
       const gatt = new CapacitorBleGattClient();
       const history = await readPvvxMemoHistory({
         gatt,
@@ -1252,7 +1288,7 @@ export const useHardwareSetupFlow = () => {
         device.runtimeAddress,
         history.measurements.map(sensorReadingFromMeasurement)
       );
-      return { device, sampleCount: history.samples.length };
+      return { device, sampleCount: history.samples.length, mode };
     }
   });
 
@@ -1265,7 +1301,7 @@ export const useHardwareSetupFlow = () => {
         throw new Error(t('hardware.sensor.pvvxMobileOnly'));
       }
 
-      await stopSavedSensorLiveScanNow();
+      await preparePhoneGattConnection();
       const gatt = new CapacitorBleGattClient();
       const status = await setPvvxDeviceTime({
         gatt,
@@ -1507,6 +1543,7 @@ export const useHardwareSetupFlow = () => {
     resetPhoneBleScan,
     savedSensorLiveScanState,
     startSavedSensorLiveScan,
+    restartSavedSensorLiveScan,
     stopSavedSensorLiveScan,
     addDiscoveredSensor,
     fetchPvvxHistoryMutation,

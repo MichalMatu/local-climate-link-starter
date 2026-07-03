@@ -295,7 +295,7 @@ export const pl = {
       profileLabel: 'Typ termometru',
       pvvxFailedTitle: 'Nie udało się połączyć z termometrem.',
       pvvxHistory: 'Pobierz historię',
-      pvvxHistoryLoadedDetail: 'Dodano {count} odczytów do mini wykresów.',
+      pvvxHistoryLoadedDetail: 'Dodano {count} odczytów do wykresów.',
       pvvxHistoryLoadedTitle: 'Historia pobrana.',
       pvvxHistoryLoading: 'Pobieram historię',
       pvvxHistoryTitle: 'Połącz z Xiaomi/PVVX i pobierz zapisane odczyty',

@@ -292,7 +292,7 @@ export const en = {
       profileLabel: 'Thermometer type',
       pvvxFailedTitle: 'Could not connect to the thermometer.',
       pvvxHistory: 'Load history',
-      pvvxHistoryLoadedDetail: 'Added {count} readings to the mini charts.',
+      pvvxHistoryLoadedDetail: 'Added {count} readings to the charts.',
       pvvxHistoryLoadedTitle: 'History loaded.',
       pvvxHistoryLoading: 'Loading history',
       pvvxHistoryTitle: 'Connect to Xiaomi/PVVX and load saved readings',

@@ -298,7 +298,7 @@ export const fr = {
       profileLabel: 'Type de thermomètre',
       pvvxFailedTitle: 'Impossible de se connecter au thermomètre.',
       pvvxHistory: 'Charger l’historique',
-      pvvxHistoryLoadedDetail: '{count} relevés ajoutés aux mini graphiques.',
+      pvvxHistoryLoadedDetail: '{count} relevés ajoutés aux graphiques.',
       pvvxHistoryLoadedTitle: 'Historique chargé.',
       pvvxHistoryLoading: 'Chargement de l’historique',
       pvvxHistoryTitle: 'Se connecter à Xiaomi/PVVX et charger les relevés enregistrés',

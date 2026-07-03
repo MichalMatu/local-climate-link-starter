@@ -296,7 +296,7 @@ export const it = {
       profileLabel: 'Tipo termometro',
       pvvxFailedTitle: 'Impossibile connettersi al termometro.',
       pvvxHistory: 'Carica storico',
-      pvvxHistoryLoadedDetail: '{count} letture aggiunte ai mini grafici.',
+      pvvxHistoryLoadedDetail: '{count} letture aggiunte ai grafici.',
       pvvxHistoryLoadedTitle: 'Storico caricato.',
       pvvxHistoryLoading: 'Caricamento storico',
       pvvxHistoryTitle: 'Connetti Xiaomi/PVVX e carica le letture salvate',

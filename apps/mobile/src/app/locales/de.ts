@@ -298,7 +298,7 @@ export const de = {
       profileLabel: 'Thermometertyp',
       pvvxFailedTitle: 'Verbindung zum Thermometer fehlgeschlagen.',
       pvvxHistory: 'Historie laden',
-      pvvxHistoryLoadedDetail: '{count} Messwerte zu den Mini-Diagrammen hinzugefügt.',
+      pvvxHistoryLoadedDetail: '{count} Messwerte zu den Diagrammen hinzugefügt.',
       pvvxHistoryLoadedTitle: 'Historie geladen.',
       pvvxHistoryLoading: 'Historie wird geladen',
       pvvxHistoryTitle: 'Mit Xiaomi/PVVX verbinden und gespeicherte Messwerte laden',

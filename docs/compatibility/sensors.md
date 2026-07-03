@@ -25,6 +25,8 @@ TP357:
   - Shelly-side discovery can list TP357 candidates when advData contains the TP357 name
   - generated Shelly Script contains the TP357 runtime parser
   - real Shelly matrix passed heating/cooling/humidifying/dehumidifying with VPD off/on
+  - mobile charts currently use live advertisement samples only
+  - stored TP357 history needs a separate phone GATT reader and is planned as day-history first
 ```
 
 ## Xiaomi / PVVX MVP preset

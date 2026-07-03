@@ -677,61 +677,63 @@ select {
 }
 
 .sensor-saved-card {
+  background: transparent;
+  border: 0;
   gap: var(--lcl-spacing-sm);
+  padding: 0;
 }
 
-.sensor-runtime-metrics {
+.sensor-setup-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.sensor-card-header {
+  align-items: center;
   display: grid;
   gap: var(--lcl-spacing-sm);
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(min(100%, calc((100% - var(--lcl-spacing-sm)) / 2)), 1fr)
-  );
-  margin: 0;
+  grid-template-columns: minmax(0, 1fr) var(--lcl-size-control-min-height);
 }
 
-.sensor-runtime-metrics div {
-  background: var(--lcl-color-surface-muted);
-  border-radius: var(--lcl-radius-sm);
-  display: grid;
-  gap: var(--lcl-spacing-xs);
-  padding: var(--lcl-spacing-sm);
-}
-
-.sensor-runtime-metrics dt {
-  color: var(--lcl-color-text-muted);
-  font-size: var(--lcl-font-size-xs);
-  margin: 0;
-}
-
-.sensor-runtime-metrics dd {
+.sensor-card-title {
   color: var(--lcl-color-text);
-  font-size: var(--lcl-font-size-lg);
+  font-size: var(--lcl-font-size-2xl);
   font-weight: 800;
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.sensor-spark-grid {
+.sensor-chart-stack {
   display: grid;
   gap: var(--lcl-spacing-sm);
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(min(100%, calc((100% - var(--lcl-spacing-sm)) / 2)), 1fr)
-  );
 }
 
-.sensor-spark-card {
+.sensor-data-chart-card {
+  align-content: start;
   background: var(--lcl-color-surface-muted);
-  border-radius: var(--lcl-radius-sm);
+  border-radius: var(--lcl-radius-md);
   display: grid;
   gap: var(--lcl-spacing-xs);
-  padding: var(--lcl-spacing-sm);
+  padding: var(--lcl-spacing-md);
 }
 
-.sensor-spark-card span {
-  color: var(--lcl-color-text-muted);
-  font-size: var(--lcl-font-size-xs);
+.sensor-data-chart-card__value {
+  color: var(--lcl-color-text);
+  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-sm));
   font-weight: 700;
+  line-height: var(--lcl-line-height-tight);
+}
+
+.sensor-data-chart-card .lcl-sparkline {
+  color: var(--lcl-color-status-ok-text);
+  height: calc(var(--lcl-size-compact-control-min-height) + var(--lcl-spacing-lg));
+}
+
+.sensor-data-chart-card .lcl-sparkline path {
+  stroke-width: var(--lcl-border-width-sm);
 }
 
 .icon-action-row {
@@ -991,6 +993,10 @@ select {
 
   .saved-list__item {
     padding: var(--lcl-spacing-sm);
+  }
+
+  .sensor-saved-card {
+    padding: 0;
   }
 
   .ble-candidate-item {

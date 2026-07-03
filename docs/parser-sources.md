@@ -128,6 +128,43 @@ Use Theengs as reference and validation unless a separate written relicensing de
 MatrixHub is owned by the same project owner and was explicitly approved as source material for this repository.
 ```
 
+History / logger references:
+
+```text
+https://github.com/pasky/tp357
+https://pypi.org/project/tpy357/
+https://github.com/Bluetooth-Devices/thermopro-ble
+```
+
+Findings:
+
+```text
+pasky/tp357 is MIT-licensed and documents GATT history modes:
+  now, day, week, year
+  day = minute-by-minute over the last 24 hours
+  week/year = hour-level stored data
+
+tpy357 documents a similar split:
+  passive advertising scan for current values
+  query_tp357(dev, mode) for day/week/year stored data
+
+thermopro-ble and Theengs cover passive advertisement decoding only.
+They are still useful to validate current-value parsing, not stored-history reads.
+```
+
+Implementation plan for TP357 stored history:
+
+```text
+1. Keep current TP357 card as live-advertisement only.
+2. Add TP357 history behind a separate GATT reader after protocol review.
+3. Start with "day" history only because it gives dense 24 h data and is enough for charts.
+4. Do not copy code blindly. If we adapt MIT protocol details from pasky/tp357,
+   preserve attribution in THIRD_PARTY_NOTICES and add fixture tests first.
+5. Reuse the same phone BLE radio lock used by PVVX history so scan and GATT do not overlap.
+6. If the TP357 GATT protocol differs between firmware revisions, keep history disabled
+   and show only live values until real-device captures confirm the command set.
+```
+
 Implemented MatrixHub behavior:
 
 ```text
