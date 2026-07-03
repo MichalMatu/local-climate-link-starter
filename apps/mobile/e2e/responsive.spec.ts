@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
 
+const e2eOrigin = `http://127.0.0.1:${process.env.LCL_E2E_PORT ?? '5173'}`;
+
 const draft = {
   shellyNameInput: 'Shelly Plug S Gen3',
   shellyUrlInput: '',
@@ -368,7 +370,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   });
   page.on('pageerror', (error) => consoleProblems.push(error.message));
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], {
-    origin: 'http://127.0.0.1:5173'
+    origin: e2eOrigin
   });
 
   await page.setViewportSize({ width: 390, height: 844 });

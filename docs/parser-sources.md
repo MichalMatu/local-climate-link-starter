@@ -165,6 +165,15 @@ Implementation plan for TP357 stored history:
    and show only live values until real-device captures confirm the command set.
 ```
 
+Current implementation decision:
+
+```text
+TP357 stored history is not enabled yet. Public references show that it is
+possible, but the sample ordering/time base and Android GATT behavior still need
+real-device validation. The mobile app therefore persists recent live TP357
+samples for charts, while Xiaomi/PVVX can preload its supported memo history.
+```
+
 Implemented MatrixHub behavior:
 
 ```text
