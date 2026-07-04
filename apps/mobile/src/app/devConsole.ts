@@ -1,45 +1,39 @@
 import {
-  getDevLocaleOverride,
-  setDevLocaleOverride,
+  getLocalePreference,
+  setLocalePreference,
   supportedLocales,
   type Locale
 } from './i18n.js';
 import {
-  applyDevThemeMode,
-  devThemeModes,
-  getDevThemeMode,
-  setDevThemeMode,
-  type DevThemeMode
+  clearRuntimeIssues,
+  getRuntimeIssues,
+  reportRuntimeIssue,
+  runtimeIssuesChangeEvent,
+  type RuntimeIssue
+} from './runtimeDiagnostics.js';
+import {
+  applyThemeMode,
+  getThemeMode,
+  setThemeMode,
+  themeModes,
+  type ThemeMode
 } from './themeMode.js';
-
-type RuntimeIssueKind = 'error' | 'unhandledrejection' | 'manual';
-
-export type RuntimeIssue = {
-  id: number;
-  kind: RuntimeIssueKind;
-  message: string;
-  stack?: string;
-  source?: string;
-  line?: number;
-  column?: number;
-  atIso: string;
-};
 
 export type DevConsoleState = {
   locale: {
     active: string;
-    override: Locale | null;
+    preference: 'system' | Locale;
     supported: readonly Locale[];
   };
   theme: {
-    mode: DevThemeMode;
+    mode: ThemeMode;
     htmlAttribute: string | null;
   };
   runtimeErrors: number;
 };
 
 export const devCommandPaletteOpenEvent = 'lcl:dev-command-palette-open';
-export const devRuntimeIssuesChangeEvent = 'lcl:dev-runtime-issues-change';
+export const devRuntimeIssuesChangeEvent = runtimeIssuesChangeEvent;
 
 export type LclDevConsole = {
   help: () => readonly string[];
@@ -47,13 +41,13 @@ export type LclDevConsole = {
   menu: () => DevConsoleState;
   setLocale: (locale: Locale) => DevConsoleState;
   resetLocale: () => DevConsoleState;
-  setTheme: (mode: DevThemeMode) => DevConsoleState;
+  setTheme: (mode: ThemeMode) => DevConsoleState;
   resetTheme: () => DevConsoleState;
   errors: () => readonly RuntimeIssue[];
   clearErrors: () => readonly RuntimeIssue[];
   reportError: (message: string) => RuntimeIssue;
   supportedLocales: readonly Locale[];
-  themeModes: readonly DevThemeMode[];
+  themeModes: readonly ThemeMode[];
 };
 
 declare global {
@@ -61,11 +55,6 @@ declare global {
     lclDev?: LclDevConsole;
   }
 }
-
-const maxRuntimeIssues = 50;
-const runtimeIssues: RuntimeIssue[] = [];
-let issueSequence = 0;
-let cleanupRuntimeCapture: (() => void) | null = null;
 
 const dispatchDevEvent = (eventName: string) => {
   if (typeof window !== 'undefined') {
@@ -83,111 +72,28 @@ const assertLocale = (locale: string): Locale => {
   );
 };
 
-const assertThemeMode = (mode: string): DevThemeMode => {
-  if (devThemeModes.includes(mode as DevThemeMode)) {
-    return mode as DevThemeMode;
+const assertThemeMode = (mode: string): ThemeMode => {
+  if (themeModes.includes(mode as ThemeMode)) {
+    return mode as ThemeMode;
   }
 
-  throw new Error(`Unsupported theme "${mode}". Use one of: ${devThemeModes.join(', ')}`);
-};
-
-const messageFromUnknown = (value: unknown): string => {
-  if (value instanceof Error) {
-    return value.message;
-  }
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (value === null) {
-    return 'null';
-  }
-  if (typeof value === 'undefined') {
-    return 'undefined';
-  }
-  try {
-    return JSON.stringify(value) ?? String(value);
-  } catch {
-    return String(value);
-  }
-};
-
-const stackFromUnknown = (value: unknown): string | undefined =>
-  value instanceof Error ? value.stack : undefined;
-
-const pushIssue = (
-  kind: RuntimeIssueKind,
-  value: unknown,
-  metadata: Partial<Pick<RuntimeIssue, 'source' | 'line' | 'column'>> = {}
-): RuntimeIssue => {
-  const stack = stackFromUnknown(value);
-  const issue: RuntimeIssue = {
-    id: ++issueSequence,
-    kind,
-    message: messageFromUnknown(value),
-    atIso: new Date().toISOString(),
-    ...metadata
-  };
-  if (stack) {
-    issue.stack = stack;
-  }
-
-  runtimeIssues.push(issue);
-  if (runtimeIssues.length > maxRuntimeIssues) {
-    runtimeIssues.splice(0, runtimeIssues.length - maxRuntimeIssues);
-  }
-  dispatchDevEvent(devRuntimeIssuesChangeEvent);
-  return issue;
-};
-
-const installRuntimeCapture = (): (() => void) => {
-  if (cleanupRuntimeCapture || typeof window === 'undefined') {
-    return cleanupRuntimeCapture ?? (() => undefined);
-  }
-
-  const handleError = (event: ErrorEvent) => {
-    const metadata: Partial<Pick<RuntimeIssue, 'source' | 'line' | 'column'>> = {};
-    if (event.filename) {
-      metadata.source = event.filename;
-    }
-    if (event.lineno) {
-      metadata.line = event.lineno;
-    }
-    if (event.colno) {
-      metadata.column = event.colno;
-    }
-
-    pushIssue('error', event.error ?? event.message, metadata);
-  };
-
-  const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    pushIssue('unhandledrejection', event.reason);
-  };
-
-  window.addEventListener('error', handleError);
-  window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-  cleanupRuntimeCapture = () => {
-    window.removeEventListener('error', handleError);
-    window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    cleanupRuntimeCapture = null;
-  };
-  return cleanupRuntimeCapture;
+  throw new Error(`Unsupported theme "${mode}". Use one of: ${themeModes.join(', ')}`);
 };
 
 const devState = (): DevConsoleState => ({
   locale: {
     active: typeof document === 'undefined' ? '' : document.documentElement.lang,
-    override: getDevLocaleOverride(),
+    preference: getLocalePreference(),
     supported: supportedLocales
   },
   theme: {
-    mode: getDevThemeMode(),
+    mode: getThemeMode(),
     htmlAttribute:
       typeof document === 'undefined'
         ? null
         : document.documentElement.getAttribute('data-lcl-theme')
   },
-  runtimeErrors: runtimeIssues.length
+  runtimeErrors: getRuntimeIssues().length
 });
 
 const help = () =>
@@ -204,21 +110,12 @@ const help = () =>
     'lclDev.state()'
   ] as const;
 
-export const getRuntimeIssues = (): readonly RuntimeIssue[] => [...runtimeIssues];
-
-export const clearRuntimeIssues = (): readonly RuntimeIssue[] => {
-  runtimeIssues.splice(0, runtimeIssues.length);
-  dispatchDevEvent(devRuntimeIssuesChangeEvent);
-  return [];
-};
-
 export const installDevConsole = (): (() => void) => {
   if (!import.meta.env.DEV || typeof window === 'undefined') {
     return () => undefined;
   }
 
-  applyDevThemeMode();
-  const cleanupCapture = installRuntimeCapture();
+  applyThemeMode();
 
   const api: LclDevConsole = {
     help,
@@ -228,35 +125,34 @@ export const installDevConsole = (): (() => void) => {
       return devState();
     },
     setLocale(locale) {
-      setDevLocaleOverride(assertLocale(locale));
+      setLocalePreference(assertLocale(locale));
       return devState();
     },
     resetLocale() {
-      setDevLocaleOverride(null);
+      setLocalePreference('system');
       return devState();
     },
     setTheme(mode) {
-      setDevThemeMode(assertThemeMode(mode));
+      setThemeMode(assertThemeMode(mode));
       return devState();
     },
     resetTheme() {
-      setDevThemeMode('system');
+      setThemeMode('system');
       return devState();
     },
     errors: getRuntimeIssues,
     clearErrors: clearRuntimeIssues,
     reportError(message) {
-      return pushIssue('manual', message);
+      return reportRuntimeIssue('manual', message);
     },
     supportedLocales,
-    themeModes: devThemeModes
+    themeModes
   };
 
   window.lclDev = api;
   window.console.info('Local Climate Link dev console ready. Run lclDev.help().');
 
   return () => {
-    cleanupCapture();
     if (window.lclDev === api) {
       delete window.lclDev;
     }

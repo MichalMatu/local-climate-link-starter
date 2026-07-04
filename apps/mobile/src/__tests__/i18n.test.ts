@@ -2,11 +2,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  getDevLocaleOverride,
+  getLocalePreference,
   messages,
   resolveConfiguredLocale,
   resolveSystemLocale,
-  setDevLocaleOverride,
+  setLocalePreference,
   supportedLocales,
   t,
   translate,
@@ -53,11 +53,11 @@ const hardcodedPolishPattern =
 
 describe('i18n', () => {
   beforeEach(() => {
-    setDevLocaleOverride(null);
+    setLocalePreference('system');
   });
 
   afterEach(() => {
-    setDevLocaleOverride(null);
+    setLocalePreference('system');
   });
 
   it('resolves required MVP safety and setup messages in Polish', () => {
@@ -112,17 +112,17 @@ describe('i18n', () => {
     expect(resolveSystemLocale([])).toBe('en');
   });
 
-  it('allows a dev-only locale override without changing system fallback rules', () => {
+  it('allows a production locale preference without changing system fallback rules', () => {
     expect(resolveConfiguredLocale(['pl-PL'])).toBe('pl');
 
-    setDevLocaleOverride('de');
+    setLocalePreference('de');
 
-    expect(getDevLocaleOverride()).toBe('de');
+    expect(getLocalePreference()).toBe('de');
     expect(resolveConfiguredLocale(['pl-PL'])).toBe('de');
 
-    setDevLocaleOverride(null);
+    setLocalePreference('system');
 
-    expect(getDevLocaleOverride()).toBeNull();
+    expect(getLocalePreference()).toBe('system');
     expect(resolveConfiguredLocale(['pl-PL'])).toBe('pl');
   });
 

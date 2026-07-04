@@ -44,6 +44,47 @@ export const ptBr = {
     dismiss: 'Fechar',
     regionLabel: 'Notificações'
   },
+  settings: {
+    title: 'Configurações do app',
+    open: 'Configurações do app',
+    system: 'Sistema',
+    resetToSystem: 'Restaurar sistema',
+    language: {
+      title: 'Idioma',
+      systemHint:
+        'Sistema usa o idioma do telefone quando há suporte. Caso contrário, o app usa inglês. Suportados: {languages}.',
+      pl: 'Polski',
+      en: 'English',
+      de: 'Deutsch',
+      es: 'Español',
+      fr: 'Français',
+      it: 'Italiano',
+      ptBr: 'Português (Brasil)'
+    },
+    appearance: {
+      title: 'Aparência',
+      system: 'Sistema',
+      light: 'Claro',
+      dark: 'Escuro'
+    },
+    support: {
+      title: 'Diagnóstico de suporte',
+      appVersion: 'Versão do app',
+      platform: 'Plataforma',
+      activeLanguage: 'Idioma ativo',
+      languageSetting: 'Configuração de idioma',
+      appearance: 'Aparência',
+      savedShelly: 'Tomadas Shelly salvas',
+      savedThermometers: 'Termômetros salvos',
+      runtimeErrorsLabel: 'Erros runtime',
+      runtimeErrors: '{count} capturados',
+      noRuntimeErrors: 'Nenhum problema runtime capturado.',
+      copyReport: 'Copiar relatório de suporte',
+      clearDiagnostics: 'Limpar diagnóstico',
+      copyDone: 'Relatório de suporte copiado.',
+      copyFailed: 'Não foi possível copiar o relatório de suporte.'
+    }
+  },
   demo: {
     addKit: 'Adicionar kit',
     blockedInstall: 'Instalação bloqueada',

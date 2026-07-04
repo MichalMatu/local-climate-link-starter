@@ -1,13 +1,19 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { DevCommandPalette } from '../app/DevCommandPalette.js';
-import { clearRuntimeIssues, installDevConsole } from '../app/devConsole.js';
+import { installDevConsole } from '../app/devConsole.js';
+import {
+  clearRuntimeIssues,
+  installRuntimeDiagnostics
+} from '../app/runtimeDiagnostics.js';
 
 describe('dev console', () => {
   let cleanup: (() => void) | undefined;
+  let cleanupRuntime: (() => void) | undefined;
 
   beforeEach(() => {
     window.localStorage.clear();
     clearRuntimeIssues();
+    cleanupRuntime = installRuntimeDiagnostics();
     document.documentElement.lang = 'en';
     document.documentElement.removeAttribute('data-lcl-theme');
     vi.spyOn(window.console, 'info').mockImplementation(() => undefined);
@@ -16,7 +22,9 @@ describe('dev console', () => {
 
   afterEach(() => {
     cleanup?.();
+    cleanupRuntime?.();
     cleanup = undefined;
+    cleanupRuntime = undefined;
     vi.restoreAllMocks();
     act(() => {
       clearRuntimeIssues();
@@ -32,7 +40,7 @@ describe('dev console', () => {
     );
 
     const localeState = window.lclDev?.setLocale('de');
-    expect(localeState?.locale.override).toBe('de');
+    expect(localeState?.locale.preference).toBe('de');
 
     const darkState = window.lclDev?.setTheme('dark');
     expect(darkState?.theme.mode).toBe('dark');
@@ -43,7 +51,7 @@ describe('dev console', () => {
     expect(document.documentElement.getAttribute('data-lcl-theme')).toBeNull();
 
     const resetLocaleState = window.lclDev?.resetLocale();
-    expect(resetLocaleState?.locale.override).toBeNull();
+    expect(resetLocaleState?.locale.preference).toBe('system');
   });
 
   it('captures runtime errors and can clear them', () => {

@@ -44,6 +44,47 @@ export const de = {
     dismiss: 'Schließen',
     regionLabel: 'Benachrichtigungen'
   },
+  settings: {
+    title: 'App-Einstellungen',
+    open: 'App-Einstellungen',
+    system: 'System',
+    resetToSystem: 'Auf System zurücksetzen',
+    language: {
+      title: 'Sprache',
+      systemHint:
+        'System nutzt die Telefonsprache, wenn sie unterstützt wird. Sonst nutzt die App Englisch. Unterstützt: {languages}.',
+      pl: 'Polski',
+      en: 'English',
+      de: 'Deutsch',
+      es: 'Español',
+      fr: 'Français',
+      it: 'Italiano',
+      ptBr: 'Português (Brasil)'
+    },
+    appearance: {
+      title: 'Darstellung',
+      system: 'System',
+      light: 'Hell',
+      dark: 'Dunkel'
+    },
+    support: {
+      title: 'Support-Diagnose',
+      appVersion: 'App-Version',
+      platform: 'Plattform',
+      activeLanguage: 'Aktive Sprache',
+      languageSetting: 'Spracheinstellung',
+      appearance: 'Darstellung',
+      savedShelly: 'Gespeicherte Shelly-Steckdosen',
+      savedThermometers: 'Gespeicherte Thermometer',
+      runtimeErrorsLabel: 'Runtime-Fehler',
+      runtimeErrors: '{count} erfasst',
+      noRuntimeErrors: 'Keine Runtime-Probleme erfasst.',
+      copyReport: 'Support-Bericht kopieren',
+      clearDiagnostics: 'Diagnose löschen',
+      copyDone: 'Support-Bericht kopiert.',
+      copyFailed: 'Support-Bericht konnte nicht kopiert werden.'
+    }
+  },
   demo: {
     addKit: 'Set hinzufügen',
     blockedInstall: 'Installation blockiert',

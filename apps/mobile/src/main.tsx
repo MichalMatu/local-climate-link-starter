@@ -7,12 +7,17 @@ import '@lcl/ui/styles.css';
 import './theme/theme.css';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App.js';
+import { installRuntimeDiagnostics } from './app/runtimeDiagnostics.js';
+import { applyThemeMode } from './app/themeMode.js';
 
 const root = document.getElementById('root');
 
 if (!root) {
   throw new Error('Root element not found.');
 }
+
+applyThemeMode();
+installRuntimeDiagnostics();
 
 if (import.meta.env.DEV) {
   void import('./app/devConsole.js').then(({ installDevConsole }) => {
