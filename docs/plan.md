@@ -176,6 +176,38 @@ Planned improvements:
 - Add tests for TP357 chart persistence, deduplication, and stale/live packet
   merging before presenting TP357 charts as a reliable historical feature.
 
+### Setup health checks and reliability testing
+
+The app should give users a clear answer to "is my setup actually working?"
+without requiring them to understand BLE packets, Shelly scripts, RSSI, or
+diagnostic payloads. This should be a user-facing feature, not only an internal
+developer test.
+
+Planned improvements:
+
+- Add a one-tap setup health check after configuration. It should verify that
+  the phone can see the thermometer, Shelly can see the runtime BLE address, the
+  generated script is installed and running, the config hash matches, and relay
+  `OFF -> ON -> OFF` works.
+- Keep the health check safe by always ending with a known relay state and
+  showing the final state explicitly.
+- Show a compact result summary with OK, warning, and blocked rows, for example
+  sensor seen by phone, sensor seen by Shelly, script running, relay test,
+  signal quality, last reading age, and current rule decision.
+- Add a short reliability test mode that observes a sensor for 10-15 minutes and
+  reports packet count, longest packet gap, average RSSI, worst RSSI, stale
+  periods, and whether the placement looks reliable enough.
+- Store reliability test results locally so support can compare "before" and
+  "after" when the user moves the thermometer or Shelly plug.
+- Feed health-check and reliability results into the support report so a user
+  can share actionable diagnostics instead of saying only that the app "does not
+  work".
+- Add demo fixtures for good, weak, stale, and mismatched setups so this flow can
+  be tested without hardware.
+- Add automated tests for result classification and UI states, plus a manual
+  hardware checklist for real Shelly relay transitions and signal-quality
+  scoring.
+
 ## Known validation gaps
 
 - Xiaomi/PVVX and TP357 need repeated dated checks on real Shelly hardware.
