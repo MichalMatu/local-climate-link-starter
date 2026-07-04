@@ -55,10 +55,14 @@ const createBthomeAdvertisement = (payload: number[]): number[] => [
   ...payload
 ];
 
-const createExecutableRuntime = (script: string) => {
+const createExecutableRuntime = (
+  script: string,
+  options: { initialPhysicalRelayOn?: boolean } = {}
+) => {
   let scanCallback:
     | ((event: string, result: { addr: string; advData: number[]; rssi: number }) => void)
     | undefined;
+  let physicalRelayOn = options.initialPhysicalRelayOn ?? false;
   const switchCalls: Array<{ id: number; on: boolean }> = [];
   const timers: Array<{ durationMs: number; repeat: boolean; callback: () => void }> = [];
   const startCalls: unknown[] = [];
@@ -70,10 +74,12 @@ const createExecutableRuntime = (script: string) => {
     ) => {
       if (method === 'Switch.Set') {
         switchCalls.push(params);
+        physicalRelayOn = params.on;
       }
       callback?.({}, 0);
     },
-    getComponentStatus: () => null,
+    getComponentStatus: (component: string) =>
+      component === 'switch:0' ? { output: physicalRelayOn } : null,
     getUptimeMs: () => Date.now()
   };
   const ble = {
@@ -116,7 +122,10 @@ const createExecutableRuntime = (script: string) => {
     scan: scanCallback,
     switchCalls,
     timers,
-    startCalls
+    startCalls,
+    setPhysicalRelayOn: (relayOn: boolean) => {
+      physicalRelayOn = relayOn;
+    }
   };
 };
 
@@ -451,6 +460,33 @@ describe('generateShellyThermostatScript', () => {
     }
   });
 
+  it('corrects manual physical relay drift while AUTO still wants OFF', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'humidifying'
+    );
+    const script = generateShellyThermostatScript({
+      ...config,
+      sensor: {
+        ...config.sensor,
+        runtimeAddress: 'A4:C1:38:4F:24:CD'
+      }
+    });
+    const { scan, setPhysicalRelayOn, switchCalls } = createExecutableRuntime(script);
+
+    expect(switchCalls).toEqual([{ id: 0, on: false }]);
+
+    setPhysicalRelayOn(true);
+    scan('scan-result', {
+      addr: 'A4:C1:38:4F:24:CD',
+      advData: createBthomeAdvertisement([0x40, 0x02, 0x2c, 0x0c, 0x03, 0x70, 0x17]),
+      rssi: -35
+    });
+
+    expect(switchCalls.at(-1)).toEqual({ id: 0, on: false });
+    expect(switchCalls).toHaveLength(2);
+  });
+
   it('composes alternating Xiaomi temperature and humidity packets for VPD assist', () => {
     let nowMs = 1_000_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
@@ -591,7 +627,7 @@ describe('generateShellyThermostatScript', () => {
         rssi: -35
       });
       expect(runtime.diag().g[9]).toBe(1);
-      expect(switchCalls).toEqual([{ id: 0, on: false }]);
+      expect(switchCalls.at(-1)).toEqual({ id: 0, on: false });
 
       for (let index = 0; index < 9; index += 1) {
         nowMs += 3_000;

@@ -3008,29 +3008,42 @@ describe('HardwareSetupScreen', () => {
     );
     await waitFor(() => expect(screen.getAllByText('Salon')).toHaveLength(2));
     expect(screen.getByText('Xiaomi/PVVX BTHome')).toBeInTheDocument();
-    expect(screen.getByText('Runtime')).toBeInTheDocument();
+    expect(screen.getByText('Input -> Processing -> Output')).toBeInTheDocument();
     expect(
-      screen.getByText('Stan skryptu, ostatnia decyzja, progi reguły i zegar Shelly.')
+      screen.getByText('Pomiar, progi, decyzja i oba stany przekaźnika w jednym miejscu.')
     ).toBeInTheDocument();
     const diagnosticGroups = Array.from(
       document.querySelectorAll<HTMLDetailsElement>('.diagnostic-group')
     );
     expect(
       diagnosticGroups.map((group) => group.querySelector('summary strong')?.textContent)
-    ).toEqual(['Runtime', 'Termometr', 'Gniazdko']);
+    ).toEqual([
+      'Input -> Processing -> Output',
+      'BLE i sensor',
+      'Skrypt i czas',
+      'Telemetria Shelly'
+    ]);
     expect(diagnosticGroups[0]).toHaveAttribute('open');
     expect(diagnosticGroups[1]).not.toHaveAttribute('open');
     expect(diagnosticGroups[2]).not.toHaveAttribute('open');
+    expect(diagnosticGroups[3]).not.toHaveAttribute('open');
+    expect(screen.getByText('Input')).toBeInTheDocument();
+    expect(screen.getByText('Processing')).toBeInTheDocument();
+    expect(screen.getByText('Output')).toBeInTheDocument();
     expect(
-      screen.getByText('Ostatni pakiet BLE i dane użyte przez regułę.')
+      screen.getByText('Źródło pomiaru, ostatni pakiet, bateria i RSSI.')
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Przekaźnik, pobór energii i stan fizycznego Shelly.')
+      screen.getByText('Stan skryptu, hash konfiguracji i zegar Shelly.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Moc, napięcie, prąd, energia i temperatura gniazdka.')
     ).toBeInTheDocument();
     expect(screen.getByText('Skrypt')).toBeInTheDocument();
     expect(screen.getByText('działa')).toBeInTheDocument();
     expect(screen.getByText('Hash konfiguracji')).toBeInTheDocument();
     expect(screen.getByText('lcl-12345678')).toBeInTheDocument();
+    expect(screen.getByText('Wartość reguły')).toBeInTheDocument();
     expect(screen.getByText('Przekaźnik Shelly')).toBeInTheDocument();
     expect(screen.getByText('Moc')).toBeInTheDocument();
     expect(screen.getByText('Napięcie')).toBeInTheDocument();
