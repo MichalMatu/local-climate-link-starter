@@ -1,5 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Capacitor } from '@capacitor/core';
 import type { NormalizedBleAdvertisement } from '@lcl/ble-core';
@@ -167,6 +175,8 @@ import {
   resetHardwareSetupDraftStore,
   useHardwareSetupDraftStore
 } from '../flows/hardware-setup/setupDraftStore.js';
+import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+import { setThemeMode } from '../app/themeMode.js';
 import { resetHardwareSetupReadingsStore } from '../flows/hardware-setup/sensorReadingsStore.js';
 import {
   cleanupStaleShellyBleDiscoveryScripts,
@@ -186,7 +196,9 @@ const renderHardwareSetup = () => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <HardwareSetupScreen />
+      <I18nProvider>
+        <HardwareSetupScreen />
+      </I18nProvider>
     </QueryClientProvider>
   );
 };
@@ -351,6 +363,9 @@ describe('HardwareSetupScreen', () => {
     pvvxGattMock.stopCountAtHistoryStart = 0;
     pvvxGattMock.timeCalls = 0;
     pvvxGattMock.stopCountAtTimeStart = 0;
+    setLocalePreference('system');
+    setThemeMode('system');
+    document.documentElement.removeAttribute('data-lcl-theme');
     window.history.replaceState(null, '', '/');
     let relayOn = false;
     let thermostatRunning = true;
@@ -516,6 +531,10 @@ describe('HardwareSetupScreen', () => {
   });
 
   afterEach(() => {
+    cleanup();
+    setLocalePreference('system');
+    setThemeMode('system');
+    document.documentElement.removeAttribute('data-lcl-theme');
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -651,6 +670,34 @@ describe('HardwareSetupScreen', () => {
     );
     expect(getRuleSummary()).not.toHaveTextContent('gniazdko przejdzie w OFF');
     expect(getRuleSummary()).not.toHaveTextContent('Termometr:');
+  });
+
+  it('opens production app settings from diagnostics', async () => {
+    renderHardwareSetup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia aplikacji' }));
+
+    const settingsDialog = await screen.findByRole('dialog', {
+      name: 'Ustawienia aplikacji'
+    });
+    expect(within(settingsDialog).getByText('Język')).toBeInTheDocument();
+    expect(within(settingsDialog).getByText('Wygląd')).toBeInTheDocument();
+    expect(within(settingsDialog).getByText('Diagnostyka wsparcia')).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.click(within(settingsDialog).getByRole('button', { name: 'English' }));
+    });
+    await waitFor(() => expect(document.documentElement.lang).toBe('en'));
+    expect(within(settingsDialog).getByText('Language')).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Dark' }));
+    });
+    expect(document.documentElement.getAttribute('data-lcl-theme')).toBe('dark');
+    expect(
+      within(settingsDialog).getByRole('button', { name: 'Copy support report' })
+    ).toBeInTheDocument();
   });
 
   it('keeps keyboard focus inside setup modals and restores it on close', async () => {

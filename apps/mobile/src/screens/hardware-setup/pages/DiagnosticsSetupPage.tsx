@@ -1,5 +1,14 @@
+import { Capacitor } from '@capacitor/core';
 import { DiagnosticRow, ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import mobilePackage from '../../../../package.json';
+import {
+  AppSettingsModal,
+  type SupportDiagnosticRow
+} from '../../../app/AppSettingsModal.js';
+import { SettingsGearIcon } from '../../../components/icons/SettingsGearIcon.js';
+import { getRuntimeIssues } from '../../../app/runtimeDiagnostics.js';
+import { type SupportReportDevice } from '../../../app/supportReport.js';
 import {
   useTranslation,
   type Translate,
@@ -52,6 +61,14 @@ const formatPlugRelay = (
   missingLabel: string
 ): string => (plug ? (plug.relayState ? 'ON' : 'OFF') : missingLabel);
 
+const createSupportReportDevice = (
+  name: string,
+  detail: string
+): SupportReportDevice => ({
+  name,
+  detail
+});
+
 const diagnosticReasonKeys = new Set([
   'ab',
   'abh',
@@ -85,6 +102,7 @@ const formatReason = (reason: string, t: Translate): string =>
 
 export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
   const { locale, t } = useTranslation();
+  const [isAppSettingsOpen, setIsAppSettingsOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
   const diagnostics = flow.diagnosticSnapshot?.diagnostics;
@@ -97,6 +115,68 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
     flow.diagnosticSnapshot?.sensor?.displayName ??
     flow.diagnosticSnapshot?.sensor?.runtimeAddress ??
     t('common.missing');
+  const runtimeIssues = getRuntimeIssues();
+
+  const supportRows: SupportDiagnosticRow[] = [
+    {
+      label: t('settings.support.appVersion'),
+      value: mobilePackage.version
+    },
+    {
+      label: t('settings.support.platform'),
+      value: Capacitor.getPlatform()
+    },
+    {
+      label: t('settings.support.savedShelly'),
+      value: String(flow.shellyDevices.length)
+    },
+    {
+      label: t('settings.support.savedThermometers'),
+      value: String(flow.sensorDevices.length)
+    },
+    {
+      label: t('settings.support.runtimeErrorsLabel'),
+      value: String(runtimeIssues.length),
+      tone: runtimeIssues.length > 0 ? 'warning' : 'normal'
+    }
+  ];
+
+  const supportShellyDevices = flow.shellyDevices.map((device) =>
+    createSupportReportDevice(device.name, device.baseUrl)
+  );
+
+  const supportSensorDevices = flow.sensorDevices.map((device) =>
+    createSupportReportDevice(device.name, `${device.profileId} ${device.runtimeAddress}`)
+  );
+
+  const lastDiagnostics = [
+    createSupportReportDevice(
+      t('hardware.rule.script'),
+      script?.running
+        ? t('hardware.status.running')
+        : t('hardware.diagnostics.scriptMissingConfirm')
+    ),
+    createSupportReportDevice(
+      t('hardware.metrics.shellyRelay'),
+      formatPlugRelay(plug, t('common.missing'))
+    ),
+    createSupportReportDevice(
+      t('hardware.metrics.lastMeasurement'),
+      formatEpochMs(diagnostics?.lastSeen, locale, t('common.missing'))
+    ),
+    createSupportReportDevice(
+      t('hardware.metrics.temperature'),
+      formatDiagnosticNumber(diagnostics?.lastTemp, '°C')
+    ),
+    createSupportReportDevice(
+      t('hardware.metrics.humidity'),
+      formatDiagnosticNumber(diagnostics?.lastHumidity, '%')
+    ),
+    createSupportReportDevice(
+      t('hardware.metrics.reason'),
+      diagnostics ? formatReason(diagnostics.lastReason, t) : t('common.missing')
+    )
+  ];
 
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
@@ -125,6 +205,19 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
 
   return (
     <section className="demo-panel" aria-label={t('common.diagnostics')}>
+      <div className="panel-toolbar">
+        <div />
+        <button
+          className="icon-action"
+          type="button"
+          aria-label={t('settings.open')}
+          title={t('settings.open')}
+          onClick={() => setIsAppSettingsOpen(true)}
+        >
+          <SettingsGearIcon />
+        </button>
+      </div>
+
       <label className="field">
         {t('hardware.rule.selectedShelly')}
         <span className="select-control">
@@ -278,6 +371,19 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
         label={t('toast.regionLabel')}
         toasts={toasts}
         onDismiss={dismissToast}
+      />
+      <AppSettingsModal
+        open={isAppSettingsOpen}
+        supportReportInput={{
+          platform: Capacitor.getPlatform(),
+          shellyDevices: supportShellyDevices,
+          sensorDevices: supportSensorDevices,
+          selectedShelly: flow.diagnosticShelly?.name ?? t('common.missing'),
+          selectedSensor: flow.selectedSensor?.name ?? t('common.missing'),
+          lastDiagnostics
+        }}
+        supportRows={supportRows}
+        onClose={() => setIsAppSettingsOpen(false)}
       />
     </section>
   );

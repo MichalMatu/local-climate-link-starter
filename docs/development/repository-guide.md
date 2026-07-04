@@ -78,7 +78,7 @@ command:
 set -a
 source ~/.local-climate-link/android-signing/release-signing.env
 set +a
-LCL_RELEASE_VERSION=2.0.1 pnpm release:android
+LCL_RELEASE_VERSION=2.0.2 pnpm release:android
 ```
 
 The release script builds the web app, syncs Capacitor, builds APK/AAB, collects

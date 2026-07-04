@@ -8,6 +8,7 @@ import {
 } from '@lcl/ui';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
+import { SettingsGearIcon } from '../../../components/icons/SettingsGearIcon.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import { mutationError } from '../helpers.js';
@@ -31,18 +32,6 @@ const humidityChartDomain = {
 } as const;
 
 type SensorDraftDevice = HardwarePageProps['flow']['sensorDevices'][number];
-
-const SettingsIcon = () => (
-  <svg
-    aria-hidden="true"
-    className="icon-action__svg"
-    focusable="false"
-    viewBox="0 0 24 24"
-  >
-    <path d="M12 8.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" />
-    <path d="m19.4 15 .6 1.4-1.9 3.2-1.5-.2a8 8 0 0 1-1.5.9l-.6 1.4h-3.8l-.6-1.4a8 8 0 0 1-1.5-.9l-1.5.2-1.9-3.2.6-1.4a8.8 8.8 0 0 1 0-1.9l-.6-1.4 1.9-3.2 1.5.2c.5-.4 1-.7 1.5-.9l.6-1.4h3.8l.6 1.4c.5.2 1 .5 1.5.9l1.5-.2 1.9 3.2-.6 1.4a8.8 8.8 0 0 1 0 1.9Z" />
-  </svg>
-);
 
 const formatNullableMetric = (
   value: number | null | undefined,
@@ -791,7 +780,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   title={t('hardware.sensor.settingsTitle')}
                   onClick={() => openSensorSettings(device)}
                 >
-                  <SettingsIcon />
+                  <SettingsGearIcon />
                 </button>
               </div>
               <div className="sensor-chart-stack">

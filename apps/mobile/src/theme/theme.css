@@ -329,6 +329,84 @@ select {
   padding-left: var(--lcl-spacing-lg);
 }
 
+.app-settings {
+  display: grid;
+  gap: var(--lcl-spacing-lg);
+}
+
+.app-settings__section {
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  padding: var(--lcl-spacing-lg);
+}
+
+.app-settings__section-header {
+  align-items: baseline;
+  display: flex;
+  gap: var(--lcl-spacing-md);
+  justify-content: space-between;
+}
+
+.app-settings__section-header h3 {
+  font-size: var(--lcl-font-size-xl);
+  margin: 0;
+}
+
+.app-settings__section-header span,
+.app-settings__hint,
+.app-settings__issues,
+.app-settings__section p {
+  color: var(--lcl-color-text-muted);
+}
+
+.app-settings__choice-grid {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+}
+
+.app-settings__choice {
+  align-items: center;
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--lcl-font-size-md);
+  font-weight: 800;
+  justify-content: center;
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding: 0 var(--lcl-spacing-md);
+  text-align: center;
+}
+
+.app-settings__choice--active {
+  background: var(--lcl-color-status-ok-bg);
+  border-color: var(--lcl-color-status-ok-border);
+  color: var(--lcl-color-status-ok-text);
+}
+
+.app-settings__issues {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  line-height: var(--lcl-line-height-compact);
+  margin: 0;
+  padding-left: var(--lcl-spacing-lg);
+}
+
+.app-settings__feedback {
+  font-weight: 800;
+  margin: 0;
+}
+
+.app-settings__feedback--warning {
+  color: var(--lcl-color-status-warning-text);
+}
+
 .toggle-row {
   align-items: center;
   color: var(--lcl-color-text);
@@ -743,6 +821,13 @@ select {
   gap: var(--lcl-spacing-xs);
 }
 
+.panel-toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: var(--lcl-size-compact-control-min-height);
+}
+
 .control-action-row {
   align-items: center;
   display: inline-flex;
@@ -824,6 +909,7 @@ select {
 }
 
 .icon-action__svg {
+  display: block;
   fill: none;
   height: var(--lcl-size-control-icon-size);
   stroke: currentColor;

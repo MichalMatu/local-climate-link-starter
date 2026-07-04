@@ -1,32 +1,32 @@
 import { Modal } from '@lcl/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { devCommandPaletteOpenEvent } from './devConsole.js';
 import {
   clearRuntimeIssues,
-  devCommandPaletteOpenEvent,
-  devRuntimeIssuesChangeEvent,
   getRuntimeIssues,
+  runtimeIssuesChangeEvent,
   type RuntimeIssue
-} from './devConsole.js';
+} from './runtimeDiagnostics.js';
 import {
-  devLocaleChangeEvent,
-  getDevLocaleOverride,
+  getLocalePreference,
+  localePreferenceChangeEvent,
+  localePreferences,
   resolveSystemLocale,
-  setDevLocaleOverride,
-  supportedLocales,
-  type Locale
+  setLocalePreference,
+  type LocalePreference
 } from './i18n.js';
 import {
-  devThemeChangeEvent,
-  devThemeModes,
-  getDevThemeMode,
-  setDevThemeMode,
-  type DevThemeMode
+  getThemeMode,
+  setThemeMode,
+  themeModeChangeEvent,
+  themeModes,
+  type ThemeMode
 } from './themeMode.js';
 
 type DevCommandSnapshot = {
-  localeOverride: Locale | null;
-  systemLocale: Locale;
-  themeMode: DevThemeMode;
+  localePreference: LocalePreference;
+  systemLocale: Exclude<LocalePreference, 'system'>;
+  themeMode: ThemeMode;
   runtimeIssues: readonly RuntimeIssue[];
 };
 
@@ -37,9 +37,9 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
   (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
 
 const readSnapshot = (): DevCommandSnapshot => ({
-  localeOverride: getDevLocaleOverride(),
+  localePreference: getLocalePreference(),
   systemLocale: resolveSystemLocale(),
-  themeMode: getDevThemeMode(),
+  themeMode: getThemeMode(),
   runtimeIssues: getRuntimeIssues()
 });
 
@@ -68,14 +68,14 @@ export const DevCommandPalette = () => {
     const handleOpen = () => openMenu();
     const handleRefresh = () => refresh();
     window.addEventListener(devCommandPaletteOpenEvent, handleOpen);
-    window.addEventListener(devLocaleChangeEvent, handleRefresh);
-    window.addEventListener(devThemeChangeEvent, handleRefresh);
-    window.addEventListener(devRuntimeIssuesChangeEvent, handleRefresh);
+    window.addEventListener(localePreferenceChangeEvent, handleRefresh);
+    window.addEventListener(themeModeChangeEvent, handleRefresh);
+    window.addEventListener(runtimeIssuesChangeEvent, handleRefresh);
     return () => {
       window.removeEventListener(devCommandPaletteOpenEvent, handleOpen);
-      window.removeEventListener(devLocaleChangeEvent, handleRefresh);
-      window.removeEventListener(devThemeChangeEvent, handleRefresh);
-      window.removeEventListener(devRuntimeIssuesChangeEvent, handleRefresh);
+      window.removeEventListener(localePreferenceChangeEvent, handleRefresh);
+      window.removeEventListener(themeModeChangeEvent, handleRefresh);
+      window.removeEventListener(runtimeIssuesChangeEvent, handleRefresh);
     };
   }, [openMenu, refresh]);
 
@@ -113,13 +113,13 @@ export const DevCommandPalette = () => {
     [snapshot.runtimeIssues]
   );
 
-  const chooseLocale = (locale: Locale | null) => {
-    setDevLocaleOverride(locale);
+  const chooseLocale = (preference: LocalePreference) => {
+    setLocalePreference(preference);
     refresh();
   };
 
-  const chooseTheme = (mode: DevThemeMode) => {
-    setDevThemeMode(mode);
+  const chooseTheme = (mode: ThemeMode) => {
+    setThemeMode(mode);
     refresh();
   };
 
@@ -129,8 +129,8 @@ export const DevCommandPalette = () => {
   };
 
   const resetAll = () => {
-    setDevLocaleOverride(null);
-    setDevThemeMode('system');
+    setLocalePreference('system');
+    setThemeMode('system');
     clearRuntimeIssues();
     refresh();
   };
@@ -157,32 +157,24 @@ export const DevCommandPalette = () => {
         <section className="dev-command-palette__section">
           <div className="dev-command-palette__section-header">
             <h3>Language</h3>
-            <span>{snapshot.localeOverride ?? `system: ${snapshot.systemLocale}`}</span>
+            <span>
+              {snapshot.localePreference === 'system'
+                ? `system: ${snapshot.systemLocale}`
+                : snapshot.localePreference}
+            </span>
           </div>
           <div className="dev-command-palette__choice-grid">
-            <button
-              className={
-                snapshot.localeOverride === null
-                  ? 'dev-command-palette__choice dev-command-palette__choice--active'
-                  : 'dev-command-palette__choice'
-              }
-              type="button"
-              aria-label="system language"
-              aria-pressed={snapshot.localeOverride === null}
-              onClick={() => chooseLocale(null)}
-            >
-              system
-            </button>
-            {supportedLocales.map((locale) => (
+            {localePreferences.map((locale) => (
               <button
                 key={locale}
                 className={
-                  snapshot.localeOverride === locale
+                  snapshot.localePreference === locale
                     ? 'dev-command-palette__choice dev-command-palette__choice--active'
                     : 'dev-command-palette__choice'
                 }
                 type="button"
-                aria-pressed={snapshot.localeOverride === locale}
+                aria-label={locale === 'system' ? 'system language' : undefined}
+                aria-pressed={snapshot.localePreference === locale}
                 onClick={() => chooseLocale(locale)}
               >
                 {locale}
@@ -197,7 +189,7 @@ export const DevCommandPalette = () => {
             <span>{snapshot.themeMode}</span>
           </div>
           <div className="dev-command-palette__choice-grid">
-            {devThemeModes.map((mode) => (
+            {themeModes.map((mode) => (
               <button
                 key={mode}
                 className={

@@ -41,11 +41,11 @@ Xiaomi/PVVX or TP357 + Shelly Plug S Gen3.
 
 The first public Android build is available in GitHub Releases:
 
-- [Android APK v2.0.1](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.1/local-climate-link-v2.0.1-android-release.apk)
+- [Android APK v2.0.2](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.2/local-climate-link-v2.0.2-android-release.apk)
   for direct installation on Android.
-- [Android App Bundle v2.0.1](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.1/local-climate-link-v2.0.1-android-release.aab)
+- [Android App Bundle v2.0.2](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.2/local-climate-link-v2.0.2-android-release.aab)
   for Play Store/internal testing workflows.
-- [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.1/local-climate-link-v2.0.1-sha256.txt)
+- [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.2/local-climate-link-v2.0.2-sha256.txt)
   for file verification.
 
 iOS installation files are not published yet.
@@ -53,7 +53,7 @@ iOS installation files are not published yet.
 Release page:
 
 ```text
-https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.1
+https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.2
 ```
 
 ## Project page
