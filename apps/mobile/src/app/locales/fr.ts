@@ -383,7 +383,6 @@ export const fr = {
       bootBehaviorValue: 'OFF, puis AUTO après la première mesure',
       copyGeneratedScriptDone: 'Script copié.',
       copyGeneratedScriptLabel: 'Copier le script',
-      copyManagedScriptDone: 'Script Shelly copié.',
       copyScriptFailedTitle: 'Impossible de copier le script.',
       copyScriptFailedDetail:
         'Sélectionne le texte du script manuellement et copie-le depuis le navigateur.',
@@ -391,20 +390,24 @@ export const fr = {
         above: 'au-dessus de',
         below: 'en dessous de'
       },
-      decodedSettings: 'Réglages lus',
-      decodedSettingsLabel: 'Réglages lus du script',
       deleteScriptDone: 'Script Shelly supprimé.',
       deleteScriptFailedTitle: 'Impossible de supprimer le script.',
       deleteScriptFromShelly: 'Supprimer de Shelly',
       deleteScriptTitle: 'Supprimer le script Local Climate Link de Shelly',
       deleteScriptConfirmTitle: 'Confirmer la suppression du script de Shelly',
+      deleteScriptConfirmDetail:
+        'Le relais sera forcé sur OFF avant la suppression du script Local Climate Link de ce Shelly.',
       deleting: 'Suppression',
       installBlockedTitle: 'Impossible d’envoyer la règle',
       installMatterHelp:
         'Si Matter bloque les scripts, désactive Matter dans Shelly et réessaie.',
-      managedScriptMissingCode: 'Je n’ai pas le code du script téléchargé depuis Shelly.',
-      managedScriptUnknown: 'Je ne peux pas lire les réglages de ce script.',
-      managedScriptLabel: 'Script enregistré dans Shelly',
+      loadingScriptFromShelly: 'Chargement depuis Shelly',
+      loadScriptDone: 'Réglages Shelly chargés dans le formulaire.',
+      loadScriptFromShelly: 'Charger depuis Shelly',
+      loadScriptFromShellyTitle:
+        'Lire le script Local Climate Link depuis Shelly et remplir le formulaire',
+      loadScriptMissing: 'Aucun script Local Climate Link trouvé sur ce Shelly.',
+      loadScriptUnknown: 'Je ne peux pas lire les réglages de ce script.',
       maxOnHoursLabel: 'Durée maximale h',
       minChangeLabel: 'Prochain ON après min',
       noShellySelected: 'Sélectionne une prise Shelly.',
@@ -433,17 +436,13 @@ export const fr = {
       rssiMinLabel: 'RSSI minimal dBm',
       ruleMode: 'Mode de règle',
       script: 'Script',
-      scriptManager: 'Script depuis Shelly',
-      scriptManagerTitle: 'Charger ou supprimer le script enregistré dans Shelly',
       scriptPreview: 'Aperçu Shelly Script',
       scriptPreviewAria: 'Afficher le script',
       scriptPreviewTitle: 'Afficher le Shelly Script généré',
-      scriptStatus: 'id {id}, {status}',
       selectedShelly: 'Prise Shelly',
       selectedSensor: 'Thermomètre',
       sendTitle: 'Envoyer la règle actuelle à Shelly',
       setThreshold: 'Définir le seuil',
-      shellyScriptCopyLabel: 'Copier le script depuis Shelly',
       staleTimeoutLabel: 'Aucune mesure depuis min',
       summary:
         '{action} s’active {onComparator} {onThreshold}{unit} et se désactive {offComparator} {offThreshold}{unit}. Si {sensor} disparaît pendant {staleTimeoutMin} min ou si {shelly} redémarre, le relais se coupe en sécurité. Après une nouvelle mesure, l’automatisation applique à nouveau cette règle. Durée maximale : {maxOnHours} h. Prochain ON au plus tôt après {minChangeMin} min.{vpd}{rssi}',
@@ -465,14 +464,8 @@ export const fr = {
       thresholdOnBelowPct: 'Allumer en dessous de %',
       values: {
         checkValue: 'vérifier la valeur',
-        compatibility: 'Correspondance',
         disabled: 'désactivé',
-        formDifferent: 'différent du formulaire',
-        formMatch: 'correspond au formulaire',
-        noScript: 'aucun',
-        profile: 'Profil',
-        rule: 'Règle',
-        thresholds: 'Seuils'
+        noScript: 'aucun'
       },
       vpdRangeHint:
         'Après avoir défini les kPa, VPD choisit le point de travail dans les seuils ON/OFF. Il n’élargit pas la plage ; avec une plage d’humidité étroite, l’effet peut être discret.',

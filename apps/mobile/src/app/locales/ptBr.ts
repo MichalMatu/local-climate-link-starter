@@ -378,7 +378,6 @@ export const ptBr = {
       bootBehaviorValue: 'OFF, depois AUTO após primeira leitura',
       copyGeneratedScriptDone: 'Script copiado.',
       copyGeneratedScriptLabel: 'Copiar script',
-      copyManagedScriptDone: 'Script do Shelly copiado.',
       copyScriptFailedTitle: 'Não foi possível copiar o script.',
       copyScriptFailedDetail:
         'Selecione o texto do script manualmente e copie pelo navegador.',
@@ -386,20 +385,24 @@ export const ptBr = {
         above: 'acima de',
         below: 'abaixo de'
       },
-      decodedSettings: 'Configurações lidas',
-      decodedSettingsLabel: 'Configurações lidas do script',
       deleteScriptDone: 'Script Shelly removido.',
       deleteScriptFailedTitle: 'Não foi possível remover o script.',
       deleteScriptFromShelly: 'Remover do Shelly',
       deleteScriptTitle: 'Remover script Local Climate Link do Shelly',
       deleteScriptConfirmTitle: 'Confirmar remoção do script do Shelly',
+      deleteScriptConfirmDetail:
+        'O relé será forçado para OFF antes de remover o script Local Climate Link deste Shelly.',
       deleting: 'Removendo',
       installBlockedTitle: 'Não é possível enviar regra',
       installMatterHelp:
         'Se Matter bloquear scripts, desative Matter no Shelly e tente de novo.',
-      managedScriptMissingCode: 'Não tenho código de script baixado do Shelly.',
-      managedScriptUnknown: 'Não consigo ler configurações deste script.',
-      managedScriptLabel: 'Script salvo no Shelly',
+      loadingScriptFromShelly: 'Carregando do Shelly',
+      loadScriptDone: 'Configurações do Shelly carregadas no formulário.',
+      loadScriptFromShelly: 'Carregar do Shelly',
+      loadScriptFromShellyTitle:
+        'Ler o script Local Climate Link do Shelly e preencher o formulário',
+      loadScriptMissing: 'Nenhum script Local Climate Link encontrado neste Shelly.',
+      loadScriptUnknown: 'Não consigo ler configurações deste script.',
       maxOnHoursLabel: 'Tempo máximo ligado h',
       minChangeLabel: 'Próximo ON após min',
       noShellySelected: 'Selecione tomada Shelly.',
@@ -428,17 +431,13 @@ export const ptBr = {
       rssiMinLabel: 'RSSI mínimo dBm',
       ruleMode: 'Modo da regra',
       script: 'Script',
-      scriptManager: 'Script do Shelly',
-      scriptManagerTitle: 'Carregar ou remover script salvo no Shelly',
       scriptPreview: 'Prévia do Shelly Script',
       scriptPreviewAria: 'Mostrar script',
       scriptPreviewTitle: 'Mostrar Shelly Script gerado',
-      scriptStatus: 'id {id}, {status}',
       selectedShelly: 'Tomada Shelly',
       selectedSensor: 'Termômetro',
       sendTitle: 'Enviar regra atual para Shelly',
       setThreshold: 'Definir limite',
-      shellyScriptCopyLabel: 'Copiar script do Shelly',
       staleTimeoutLabel: 'Sem leitura por min',
       summary:
         '{action} liga {onComparator} {onThreshold}{unit} e desliga {offComparator} {offThreshold}{unit}. Se {sensor} sumir por {staleTimeoutMin} min ou {shelly} reiniciar, o relé desliga com segurança. Após uma nova leitura, a automação aplica esta regra novamente. Tempo máximo ligado: {maxOnHours} h. Próximo ON não antes de {minChangeMin} min.{vpd}{rssi}',
@@ -460,14 +459,8 @@ export const ptBr = {
       thresholdOnBelowPct: 'Ligar abaixo de %',
       values: {
         checkValue: 'verificar valor',
-        compatibility: 'Correspondência',
         disabled: 'desativado',
-        formDifferent: 'diferente do formulário',
-        formMatch: 'igual ao formulário',
-        noScript: 'nenhum',
-        profile: 'Perfil',
-        rule: 'Regra',
-        thresholds: 'Limites'
+        noScript: 'nenhum'
       },
       vpdRangeHint:
         'Depois de definir kPa, o VPD escolhe o ponto de trabalho dentro dos limites ON/OFF. Ele não amplia o intervalo; com um intervalo estreito de umidade, o efeito pode ser sutil.',

@@ -10,8 +10,10 @@ import {
 } from '@lcl/ble-core';
 import {
   createDefaultShellyThermostatConfig,
+  decodeShellyThermostatScript,
   generateShellyBleDiscoveryScript,
   generateShellyThermostatScript,
+  type DecodedShellyThermostatScript,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
 import {
@@ -75,6 +77,7 @@ import {
   toNumberOrFallback
 } from './validation.js';
 import {
+  DEFAULT_RULE_ADVANCED_SETTINGS,
   parseRuleAdvancedSettings,
   validateRuleAdvancedSettings
 } from './ruleAdvancedSettings.js';
@@ -144,9 +147,18 @@ type ShellyAutomationScriptViewState = ShellyAutomationScriptState & {
   updatedAtMs: number;
 };
 
-type ShellyAutomationScriptMutationResult = {
+type LoadedShellyAutomationScriptState = Omit<
+  ShellyAutomationScriptState,
+  'script' | 'code'
+> & {
+  script: NonNullable<ShellyAutomationScriptState['script']>;
+  code: string;
+};
+
+type ShellyAutomationScriptLoadMutationResult = {
   device: ShellyDraftDevice;
-  state: ShellyAutomationScriptState;
+  state: LoadedShellyAutomationScriptState;
+  decoded: DecodedShellyThermostatScript;
 };
 
 type ShellyAutomationDeleteMutationResult = {
@@ -183,6 +195,8 @@ const waitForPhoneBleRadioIdle = (): Promise<void> =>
   new Promise((resolve) => {
     window.setTimeout(resolve, PHONE_GATT_RADIO_SETTLE_MS);
   });
+
+const numberInput = (value: number): string => String(Number(value.toFixed(4)));
 
 const createInitialShellyControlState = (): ShellyControlViewState => ({
   status: null,
@@ -925,19 +939,54 @@ export const useHardwareSetupFlow = () => {
     []
   );
 
-  const fetchAutomationScriptMutation = useMutation({
+  const loadAutomationScriptMutation = useMutation({
     mutationFn: async (
       device: ShellyDraftDevice
-    ): Promise<ShellyAutomationScriptMutationResult> => ({
-      device,
-      state: await readShellyAutomationScriptState(device.baseUrl)
-    }),
-    onSuccess: ({ device, state }) => {
+    ): Promise<ShellyAutomationScriptLoadMutationResult> => {
+      const state = await readShellyAutomationScriptState(device.baseUrl);
+      if (!state.script || !state.code) {
+        throw new Error(t('hardware.rule.loadScriptMissing'));
+      }
+      const script = state.script;
+      const code = state.code;
+
+      const decoded = decodeShellyThermostatScript(code);
+      if (!decoded) {
+        throw new Error(t('hardware.rule.loadScriptUnknown'));
+      }
+
+      return { device, state: { ...state, script, code }, decoded };
+    },
+    onSuccess: ({ device, state, decoded }) => {
+      const settings = decoded.settings;
       setAutomationScriptState({
         ...state,
         deviceId: device.id,
         updatedAtMs: Date.now()
       });
+      setShellyScriptIdDraft(device.id, String(state.script.id));
+      upsertSensorDevice({
+        id: settings.runtimeAddress,
+        name: settings.sensorDisplayName,
+        runtimeAddress: settings.runtimeAddress,
+        profileId: settings.sensorProfileId
+      });
+      setRulePreset(settings.mode);
+      setOnThresholdInput(numberInput(settings.control.onThreshold));
+      setOffThresholdInput(numberInput(settings.control.offThreshold));
+      setVpdAssistEnabled(settings.vpdAssist.enabled);
+      setVpdTargetInput(
+        settings.vpdAssist.targetKpa === null
+          ? DEFAULT_RULE_ADVANCED_SETTINGS.vpdTargetInput
+          : numberInput(settings.vpdAssist.targetKpa)
+      );
+      setRssiMinInput(String(settings.rssiMin));
+      setStaleTimeoutMinInput(numberInput(settings.staleTimeoutSec / 60));
+      setMinChangeMinInput(numberInput(settings.minChangeMs / 60_000));
+      setMaxOnHoursInput(numberInput(settings.maxOnMs / 3_600_000));
+      setLastInstallState(null);
+      setSafeRelayTestState(null);
+      clearDiagnosticSnapshot();
       applyControlStatus(device, state.status, null);
     },
     onError: (error, device) => applyControlError(device, error)
@@ -964,8 +1013,8 @@ export const useHardwareSetupFlow = () => {
     onError: (error, device) => applyControlError(device, error)
   });
 
-  const fetchAutomationScript = (device: ShellyDraftDevice) => {
-    fetchAutomationScriptMutation.mutate(device);
+  const loadAutomationScript = (device: ShellyDraftDevice) => {
+    loadAutomationScriptMutation.mutate(device);
   };
 
   const deleteAutomationScript = (device: ShellyDraftDevice) => {
@@ -1513,7 +1562,7 @@ export const useHardwareSetupFlow = () => {
     setAutomationAutoMutation,
     setAutomationManualMutation,
     automationScriptState,
-    fetchAutomationScriptMutation,
+    loadAutomationScriptMutation,
     deleteAutomationScriptMutation,
     refreshShellyControl,
     turnRelayOn,
@@ -1521,7 +1570,7 @@ export const useHardwareSetupFlow = () => {
     setAutomationAuto,
     setAutomationManual,
     acknowledgeShellyControlFeedback,
-    fetchAutomationScript,
+    loadAutomationScript,
     deleteAutomationScript,
     bleDiscoverySession,
     bleDiscoverySnapshot,

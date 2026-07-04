@@ -379,7 +379,6 @@ export const pl = {
       bootBehaviorValue: 'OFF, potem AUTO po pierwszym odczycie',
       copyGeneratedScriptDone: 'Skopiowano skrypt.',
       copyGeneratedScriptLabel: 'Kopiuj skrypt',
-      copyManagedScriptDone: 'Skopiowano skrypt z Shelly.',
       copyScriptFailedTitle: 'Nie udało się skopiować skryptu.',
       copyScriptFailedDetail:
         'Zaznacz tekst skryptu ręcznie i skopiuj go z przeglądarki.',
@@ -387,20 +386,24 @@ export const pl = {
         above: 'powyżej',
         below: 'poniżej'
       },
-      decodedSettings: 'Odczytane ustawienia',
-      decodedSettingsLabel: 'Odczytane ustawienia skryptu',
       deleteScriptDone: 'Usunięto skrypt Shelly.',
       deleteScriptFailedTitle: 'Nie udało się usunąć skryptu.',
       deleteScriptFromShelly: 'Usuń z Shelly',
       deleteScriptTitle: 'Usuń skrypt Local Climate Link z Shelly',
       deleteScriptConfirmTitle: 'Potwierdź usunięcie skryptu z Shelly',
+      deleteScriptConfirmDetail:
+        'Przekaźnik zostanie wymuszony na OFF przed usunięciem skryptu Local Climate Link z tego Shelly.',
       deleting: 'Usuwam',
       installBlockedTitle: 'Nie mogę wysłać reguły',
       installMatterHelp:
         'Jeśli Matter blokuje skrypty, wyłącz Matter w Shelly i spróbuj ponownie.',
-      managedScriptMissingCode: 'Nie mam pobranego kodu skryptu z Shelly.',
-      managedScriptUnknown: 'Nie umiem odczytać ustawień z tego skryptu.',
-      managedScriptLabel: 'Skrypt zapisany w Shelly',
+      loadingScriptFromShelly: 'Wczytuję z Shelly',
+      loadScriptDone: 'Wczytano ustawienia z Shelly do formularza.',
+      loadScriptFromShelly: 'Wczytaj z Shelly',
+      loadScriptFromShellyTitle:
+        'Odczytaj skrypt Local Climate Link z Shelly i wypełnij formularz',
+      loadScriptMissing: 'Nie znaleziono skryptu Local Climate Link na tym Shelly.',
+      loadScriptUnknown: 'Nie umiem odczytać ustawień z tego skryptu.',
       maxOnHoursLabel: 'Maksymalny czas pracy h',
       minChangeLabel: 'Ponowne ON po min',
       noShellySelected: 'Wybierz gniazdko Shelly.',
@@ -429,17 +432,13 @@ export const pl = {
       rssiMinLabel: 'Minimalny RSSI dBm',
       ruleMode: 'Tryb reguły',
       script: 'Skrypt',
-      scriptManager: 'Skrypt z Shelly',
-      scriptManagerTitle: 'Pobierz albo usuń skrypt zapisany w Shelly',
       scriptPreview: 'Podgląd Shelly Script',
       scriptPreviewAria: 'Pokaż skrypt',
       scriptPreviewTitle: 'Pokaż wygenerowany Shelly Script',
-      scriptStatus: 'id {id}, {status}',
       selectedShelly: 'Gniazdko Shelly',
       selectedSensor: 'Termometr',
       sendTitle: 'Wyślij aktualną regułę do Shelly',
       setThreshold: 'Ustaw próg',
-      shellyScriptCopyLabel: 'Kopiuj skrypt z Shelly',
       staleTimeoutLabel: 'Brak odczytu przez min',
       summary:
         '{action} włączy się {onComparator} {onThreshold}{unit} i wyłączy {offComparator} {offThreshold}{unit}. Gdy {sensor} zniknie na {staleTimeoutMin} min albo {shelly} uruchomi się ponownie, przekaźnik wyłączy się bezpiecznie. Po świeżym odczycie automatyka znów zastosuje tę regułę. Maksymalny czas pracy: {maxOnHours} h. Ponowne ON najwcześniej po {minChangeMin} min.{vpd}{rssi}',
@@ -461,14 +460,8 @@ export const pl = {
       thresholdOnBelowPct: 'Włącz poniżej %',
       values: {
         checkValue: 'sprawdź wartość',
-        compatibility: 'Zgodność',
         disabled: 'wyłączony',
-        formDifferent: 'różni się od formularza',
-        formMatch: 'zgodne z formularzem',
-        noScript: 'brak',
-        profile: 'Profil',
-        rule: 'Reguła',
-        thresholds: 'Progi'
+        noScript: 'brak'
       },
       vpdRangeHint:
         'Po ustawieniu kPa VPD dobiera punkt pracy w zakresie progów ON/OFF. Nie rozszerza zakresu; przy wąskim zakresie efekt może być mało widoczny.',
