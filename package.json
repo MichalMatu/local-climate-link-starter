@@ -1,6 +1,6 @@
 {
   "name": "local-climate-link-starter",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "type": "module",
@@ -27,8 +27,8 @@
     "hardware:shelly:install": "tsx scripts/hardware/shelly-install-thermostat.ts",
     "hardware:shelly:matrix": "tsx scripts/hardware/shelly-real-matrix.ts",
     "hardware:shelly:soak": "tsx scripts/hardware/shelly-soak-logger.ts",
-    "release:android": "pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android && cd apps/mobile/android && ./gradlew assembleRelease bundleRelease && cd ../../.. && node scripts/release/collect-android-release.mjs ${LCL_RELEASE_VERSION:-2.0.3} && node scripts/release/verify-android-release.mjs ${LCL_RELEASE_VERSION:-2.0.3}",
-    "release:android:verify": "node scripts/release/verify-android-release.mjs ${LCL_RELEASE_VERSION:-2.0.3}",
+    "release:android": "pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android && cd apps/mobile/android && ./gradlew assembleRelease bundleRelease && cd ../../.. && node scripts/release/collect-android-release.mjs ${LCL_RELEASE_VERSION:-2.0.4} && node scripts/release/verify-android-release.mjs ${LCL_RELEASE_VERSION:-2.0.4}",
+    "release:android:verify": "node scripts/release/verify-android-release.mjs ${LCL_RELEASE_VERSION:-2.0.4}",
     "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build",
     "check:full": "pnpm check && pnpm e2e:responsive"
   },
