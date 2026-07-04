@@ -57,7 +57,7 @@ export const pl = {
       es: 'Español',
       fr: 'Français',
       it: 'Italiano',
-      ptBr: 'Português (Brasil)'
+      ptBr: 'Português'
     },
     appearance: {
       title: 'Wygląd',

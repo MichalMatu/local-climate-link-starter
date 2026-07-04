@@ -66,6 +66,11 @@ export const tokens = {
     '2xl': '1.25rem',
     code: '0.78rem'
   },
+  fontWeight: {
+    medium: '500',
+    semibold: '700',
+    bold: '800'
+  },
   lineHeight: {
     tight: '1.2',
     compact: '1.35',

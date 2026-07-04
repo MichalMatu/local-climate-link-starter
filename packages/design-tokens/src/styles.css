@@ -45,6 +45,9 @@
   --lcl-font-size-xl: 1rem;
   --lcl-font-size-2xl: 1.25rem;
   --lcl-font-size-code: 0.78rem;
+  --lcl-font-weight-medium: 500;
+  --lcl-font-weight-semibold: 700;
+  --lcl-font-weight-bold: 800;
   --lcl-line-height-tight: 1.2;
   --lcl-line-height-compact: 1.35;
   --lcl-line-height-normal: 1.45;
@@ -167,6 +170,9 @@
   --lcl-font-size-xl: 1rem;
   --lcl-font-size-2xl: 1.25rem;
   --lcl-font-size-code: 0.78rem;
+  --lcl-font-weight-medium: 500;
+  --lcl-font-weight-semibold: 700;
+  --lcl-font-weight-bold: 800;
   --lcl-line-height-tight: 1.2;
   --lcl-line-height-compact: 1.35;
   --lcl-line-height-normal: 1.45;

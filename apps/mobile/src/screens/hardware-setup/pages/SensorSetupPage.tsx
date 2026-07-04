@@ -714,6 +714,12 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
           const samples = readingsForSensor(device);
           const temperatureSample = latestNumericSample(samples, 'temperatureC');
           const humiditySample = latestNumericSample(samples, 'humidityPct');
+          const hasTemperatureData =
+            typeof temperatureSample?.temperatureC === 'number' &&
+            Number.isFinite(temperatureSample.temperatureC);
+          const hasHumidityData =
+            typeof humiditySample?.humidityPct === 'number' &&
+            Number.isFinite(humiditySample.humidityPct);
 
           return (
             <article key={device.id} className="saved-list__item sensor-saved-card">
@@ -732,8 +738,20 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                 </button>
               </div>
               <div className="sensor-chart-stack">
-                <div className="sensor-data-chart-card">
-                  <strong className="sensor-data-chart-card__value">
+                <div
+                  className={
+                    hasTemperatureData
+                      ? 'sensor-data-chart-card'
+                      : 'sensor-data-chart-card sensor-data-chart-card--empty'
+                  }
+                >
+                  <strong
+                    className={
+                      hasTemperatureData
+                        ? 'sensor-data-chart-card__value'
+                        : 'sensor-data-chart-card__value sensor-data-chart-card__value--empty'
+                    }
+                  >
                     {formatNullableMetric(
                       temperatureSample?.temperatureC,
                       '°C',
@@ -749,8 +767,20 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                     points={sampleValues(samples, 'temperatureC')}
                   />
                 </div>
-                <div className="sensor-data-chart-card">
-                  <strong className="sensor-data-chart-card__value">
+                <div
+                  className={
+                    hasHumidityData
+                      ? 'sensor-data-chart-card'
+                      : 'sensor-data-chart-card sensor-data-chart-card--empty'
+                  }
+                >
+                  <strong
+                    className={
+                      hasHumidityData
+                        ? 'sensor-data-chart-card__value'
+                        : 'sensor-data-chart-card__value sensor-data-chart-card__value--empty'
+                    }
+                  >
                     {formatNullableMetric(
                       humiditySample?.humidityPct,
                       '%',
