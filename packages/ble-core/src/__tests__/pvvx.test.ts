@@ -6,10 +6,11 @@ import type {
 import {
   createPvvxReadMemoCommand,
   createPvvxSetTimeCommand,
+  fromPvvxDeviceTimeSec,
   parsePvvxNotification,
   readPvvxMemoHistory,
   setPvvxDeviceTime,
-  toPvvxLocalTimeSec
+  toPvvxDeviceTimeSec
 } from '../index.js';
 
 const bytes = (values: number[]): Uint8Array => new Uint8Array(values);
@@ -162,11 +163,11 @@ describe('PVVX protocol', () => {
     });
   });
 
-  it('translates JavaScript time to PVVX local timestamp seconds', () => {
+  it('translates JavaScript time to PVVX local clock seconds', () => {
     const date = new Date('2026-07-03T10:00:00.000Z');
-    const expected = Math.floor(date.getTime() / 1000) - date.getTimezoneOffset() * 60;
 
-    expect(toPvvxLocalTimeSec(date)).toBe(expected);
+    expect(toPvvxDeviceTimeSec(date, -120)).toBe(1_783_080_000);
+    expect(fromPvvxDeviceTimeSec(1_783_080_000, -120)).toBe(date.getTime());
   });
 });
 
@@ -179,7 +180,8 @@ describe('PVVX GATT client helpers', () => {
       deviceId: 'A4:C1:38:4F:24:CD',
       sensorId: 'A4:C1:38:4F:24:CD',
       count: 1,
-      timeoutMs: 500
+      timeoutMs: 500,
+      timezoneOffsetMinutes: -120
     });
 
     expect(gatt.writes[0]).toEqual(createPvvxReadMemoCommand(1));
@@ -190,7 +192,7 @@ describe('PVVX GATT client helpers', () => {
       temperatureC: 22.35,
       humidityPct: 45.67,
       voltageV: 3.001,
-      seenAtMs: 1_720_000_120_000
+      seenAtMs: 1_719_992_920_000
     });
   });
 
@@ -201,10 +203,18 @@ describe('PVVX GATT client helpers', () => {
       gatt,
       deviceId: 'A4:C1:38:4F:24:CD',
       now: new Date('2024-07-03T10:00:00.000Z'),
-      timeoutMs: 500
+      timeoutMs: 500,
+      timezoneOffsetMinutes: -120
     });
 
-    expect(gatt.writes[0]?.[0]).toBe(0x23);
+    const write = gatt.writes[0];
+    expect(write?.[0]).toBe(0x23);
+    if (!write) {
+      throw new Error('Expected PVVX time write.');
+    }
+    expect(
+      new DataView(write.buffer, write.byteOffset, write.byteLength).getUint32(1, true)
+    ).toBe(1_720_008_000);
     expect(status).toEqual({
       currentTimeSec: 1_720_000_000,
       previousTimeSec: 1_719_999_000

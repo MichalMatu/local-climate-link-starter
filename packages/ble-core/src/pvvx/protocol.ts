@@ -50,8 +50,15 @@ export const createPvvxSetTimeCommand = (timeSec: number): Uint8Array => {
   return command;
 };
 
-export const toPvvxLocalTimeSec = (date: Date): number =>
-  Math.floor(date.getTime() / 1000) - date.getTimezoneOffset() * 60;
+export const toPvvxDeviceTimeSec = (
+  date: Date,
+  timezoneOffsetMinutes = date.getTimezoneOffset()
+): number => Math.floor(date.getTime() / 1000 - timezoneOffsetMinutes * 60);
+
+export const fromPvvxDeviceTimeSec = (
+  timeSec: number,
+  timezoneOffsetMinutes = new Date(timeSec * 1000).getTimezoneOffset()
+): number => (Math.trunc(timeSec) + timezoneOffsetMinutes * 60) * 1000;
 
 export const parsePvvxNotification = (payload: Uint8Array): PvvxNotification => {
   if (payload.byteLength === 0) {
@@ -96,12 +103,13 @@ export const parsePvvxNotification = (payload: Uint8Array): PvvxNotification => 
 
 export const pvvxMemoSampleToMeasurement = (
   sensorId: string,
-  sample: PvvxMemoSample
+  sample: PvvxMemoSample,
+  timezoneOffsetMinutes?: number
 ): Measurement => ({
   sensorId,
   source: 'pvvx-history',
   temperatureC: sample.temperatureC,
   humidityPct: sample.humidityPct,
   voltageV: sample.voltageV,
-  seenAtMs: sample.timestampSec * 1000
+  seenAtMs: fromPvvxDeviceTimeSec(sample.timestampSec, timezoneOffsetMinutes)
 });

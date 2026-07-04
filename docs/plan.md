@@ -129,6 +129,85 @@ hardware actions.
 6. Avoid adding new device families until Xiaomi/PVVX, TP357, and Shelly are
    stable end to end.
 
+## Planned app extensions
+
+### Sensor history and charts
+
+The current Xiaomi/PVVX chart preload reads the latest saved memo samples by
+count, not by a user-facing time window. The first implementation reads 50
+samples, so the visible time span depends on the thermometer's configured memo
+recording interval.
+
+Planned improvements:
+
+- Make the history window explicit in the app, for example recent readings,
+  24 hours, 7 days, or all available PVVX memo records within a safe limit.
+- Store fetched Xiaomi/PVVX history locally per sensor, keyed by stable sensor
+  identity plus sample timestamp/index, so the app does not download and append
+  the same records repeatedly.
+- Add incremental sync: after the first full preload, fetch only newer records
+  where the PVVX protocol and device state allow it. If index-based incremental
+  reads are unreliable, deduplicate locally and keep the UI honest about the
+  refresh result.
+- Merge downloaded Xiaomi/PVVX history with live phone BLE packets, preserving
+  source metadata and avoiding duplicate chart points.
+- Replace the compact in-card sparklines with a proper chart modal when enough
+  data exists. The modal should support larger time ranges, clear axes/units,
+  temperature, humidity, battery/voltage where available, and later VPD derived
+  from temperature and humidity.
+- Keep the compact sensor cards focused on current readings and a small preview.
+  Detailed analysis belongs in the chart modal.
+
+### TP357 chart path
+
+TP357 support currently relies on live BLE packets and locally stored readings.
+Unlike Xiaomi/PVVX, the app does not yet have a confirmed TP357 history download
+path.
+
+Planned improvements:
+
+- Research and validate whether stock TP357 firmware exposes stored history over
+  BLE GATT in a way compatible with our app and licensing rules.
+- If stock TP357 history is not practical, keep TP357 charts based on phone-captured
+  rolling history from live packets, with clear UX that only readings seen by the
+  app are available.
+- If a custom TP357 firmware path becomes part of the product, document it as a
+  separate profile and keep parser/history logic separate from Xiaomi/PVVX.
+- Add tests for TP357 chart persistence, deduplication, and stale/live packet
+  merging before presenting TP357 charts as a reliable historical feature.
+
+### Setup health checks and reliability testing
+
+The app should give users a clear answer to "is my setup actually working?"
+without requiring them to understand BLE packets, Shelly scripts, RSSI, or
+diagnostic payloads. This should be a user-facing feature, not only an internal
+developer test.
+
+Planned improvements:
+
+- Add a one-tap setup health check after configuration. It should verify that
+  the phone can see the thermometer, Shelly can see the runtime BLE address, the
+  generated script is installed and running, the config hash matches, and relay
+  `OFF -> ON -> OFF` works.
+- Keep the health check safe by always ending with a known relay state and
+  showing the final state explicitly.
+- Show a compact result summary with OK, warning, and blocked rows, for example
+  sensor seen by phone, sensor seen by Shelly, script running, relay test,
+  signal quality, last reading age, and current rule decision.
+- Add a short reliability test mode that observes a sensor for 10-15 minutes and
+  reports packet count, longest packet gap, average RSSI, worst RSSI, stale
+  periods, and whether the placement looks reliable enough.
+- Store reliability test results locally so support can compare "before" and
+  "after" when the user moves the thermometer or Shelly plug.
+- Feed health-check and reliability results into the support report so a user
+  can share actionable diagnostics instead of saying only that the app "does not
+  work".
+- Add demo fixtures for good, weak, stale, and mismatched setups so this flow can
+  be tested without hardware.
+- Add automated tests for result classification and UI states, plus a manual
+  hardware checklist for real Shelly relay transitions and signal-quality
+  scoring.
+
 ## Known validation gaps
 
 - Xiaomi/PVVX and TP357 need repeated dated checks on real Shelly hardware.

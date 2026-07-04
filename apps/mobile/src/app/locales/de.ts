@@ -430,8 +430,8 @@ export const de = {
       rssiMinLabel: 'Minimaler RSSI dBm',
       ruleMode: 'Regelmodus',
       script: 'Skript',
-      scriptManager: 'Shelly-Skript',
-      scriptManagerTitle: 'In Shelly gespeichertes Skript lesen oder entfernen',
+      scriptManager: 'Skript aus Shelly',
+      scriptManagerTitle: 'In Shelly gespeichertes Skript laden oder entfernen',
       scriptPreview: 'Shelly Script Vorschau',
       scriptPreviewAria: 'Skript anzeigen',
       scriptPreviewTitle: 'Generiertes Shelly Script anzeigen',
@@ -504,7 +504,16 @@ export const de = {
       actionRefreshTitle: 'Aktuellen Skript- und Relaisstatus von Shelly abrufen',
       empty: 'Prüfen, ob die ausgewählte Steckdose ein Local Climate Link Skript hat.',
       fetching: 'Lade',
+      groupRuntime: 'Runtime',
+      groupRuntimeHint:
+        'Skriptstatus, letzte Entscheidung, Regelschwellen und Shelly-Uhr.',
+      groupSensor: 'Thermometer',
+      groupSensorHint: 'Letztes BLE-Paket und Daten für die Regel.',
+      groupShelly: 'Steckdose',
+      groupShellyHint: 'Relais, Energieverbrauch und physischer Shelly-Status.',
       readFailed: 'Diagnose aus Shelly-Skript konnte nicht gelesen werden.',
+      refreshRequirement:
+        'Aktualisieren erfordert ein installiertes Local Climate Link Skript im AUTO-Modus.',
       scriptMissingConfirm: 'keine Bestätigung',
       scriptNotRunning:
         'Local Climate Link Skript läuft nicht in Shelly. Status: {status}.',

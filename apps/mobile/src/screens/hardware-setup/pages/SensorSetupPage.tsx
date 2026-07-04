@@ -526,9 +526,8 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       </Modal>
 
       <Modal
+        busy={isPhoneBleScanPending}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!isPhoneBleScanPending}
         open={isPhoneBleScanModalOpen}
         title={t('hardware.sensor.phoneBleTitle')}
         actions={

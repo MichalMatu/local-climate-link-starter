@@ -254,7 +254,6 @@ const ShellyAddForm = ({ flow, showValidationErrors }: ShellyAddFormProps) => {
 type SavedShellyDeviceCardProps = {
   device: ShellyDraftDevice;
   controlState: ShellyControlCardState | undefined;
-  onRename: (deviceId: string, name: string) => void;
   onRelayOn: (device: ShellyDraftDevice) => void;
   onRelayOff: (device: ShellyDraftDevice) => void;
   onAutomationAuto: (device: ShellyDraftDevice) => void;
@@ -313,7 +312,6 @@ const ActionIcon = ({ name }: { name: ActionIconName }) => {
 const SavedShellyDeviceCard = ({
   device,
   controlState,
-  onRename,
   onRelayOn,
   onRelayOff,
   onAutomationAuto,
@@ -359,60 +357,36 @@ const SavedShellyDeviceCard = ({
           : 'secondary-action automation-toggle automation-toggle--unknown';
   const telemetry = controlStatus?.telemetry;
   const clock = controlStatus?.clock;
-  const nameInputId = useId();
 
   return (
     <article className="saved-list__item" aria-busy={isControlBusy || undefined}>
-      <div className="saved-list__card-header">
-        <div className="field saved-list__name-field">
-          <label htmlFor={nameInputId}>{t('hardware.shelly.nameLabel')}</label>
-          <div className="saved-list__name-input-row">
-            <input
-              id={nameInputId}
-              type="text"
-              value={device.name}
-              onChange={(event) => onRename(device.id, event.currentTarget.value)}
-            />
-            <button
-              className="icon-action saved-list__settings-toggle"
-              type="button"
-              aria-label={t('hardware.shelly.settings')}
-              title={t('hardware.shelly.settings')}
-              onClick={() => onSettingsOpen(device)}
-            >
-              <ActionIcon name="settings" />
-            </button>
-          </div>
-        </div>
+      <div className="shelly-card-header">
+        <h3>{device.name}</h3>
+        <button
+          className="icon-action saved-list__settings-toggle"
+          type="button"
+          aria-label={t('hardware.shelly.settings')}
+          title={t('hardware.shelly.settings')}
+          onClick={() => onSettingsOpen(device)}
+        >
+          <ActionIcon name="settings" />
+        </button>
       </div>
 
       <div
-        className="saved-list__row shelly-metrics-row"
+        className="shelly-metrics-strip"
         aria-label={t('hardware.shelly.statusMetricsLabel')}
       >
-        <div className="saved-list__field">
-          <span>{t('hardware.metrics.power')}</span>
-          <strong>{formatPlugPower(telemetry?.powerW, t)}</strong>
-        </div>
-        <div className="saved-list__field">
-          <span>{t('hardware.metrics.voltage')}</span>
-          <strong>{formatPlugVoltage(telemetry?.voltageV, t)}</strong>
-        </div>
-        <div className="saved-list__field">
-          <span>{t('hardware.metrics.energy')}</span>
-          <strong>{formatPlugEnergy(telemetry?.energyWh, t)}</strong>
-        </div>
-        <div className="saved-list__field">
-          <span>{t('hardware.metrics.clock')}</span>
-          <button
-            className="saved-list__field-button"
-            type="button"
-            title={t('hardware.shelly.clockStatusTitle')}
-            onClick={() => onClockOpen(device)}
-          >
-            {formatShellyClock(clock, t)}
-          </button>
-        </div>
+        <span>{formatPlugPower(telemetry?.powerW, t)}</span>
+        <span>{formatPlugVoltage(telemetry?.voltageV, t)}</span>
+        <span>{formatPlugEnergy(telemetry?.energyWh, t)}</span>
+        <button
+          type="button"
+          title={t('hardware.shelly.clockStatusTitle')}
+          onClick={() => onClockOpen(device)}
+        >
+          {formatShellyClock(clock, t)}
+        </button>
       </div>
 
       <div
@@ -484,6 +458,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
   >(null);
   const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
   const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
+  const settingsNameInputId = useId();
   const scanRangeErrorId = useId();
   const activeShellyMutation =
     statusModalSource === 'recheck'
@@ -900,9 +875,8 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
       </div>
 
       <Modal
+        busy={flow.checkShellyMutation.isPending}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!flow.checkShellyMutation.isPending}
         open={isAddShellyModalOpen}
         title={t('hardware.shelly.add')}
         actions={
@@ -936,9 +910,8 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
       </Modal>
 
       <Modal
+        busy={isShellyScanActive}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!isShellyScanActive}
         headerActions={
           <InfoTooltip
             label={t('hardware.shelly.infoScanLabel')}
@@ -1079,6 +1052,17 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
       >
         {settingsShelly && (
           <div className="settings-modal-layout">
+            <label className="field">
+              {t('hardware.shelly.deviceNameLabel')}
+              <input
+                id={settingsNameInputId}
+                type="text"
+                value={settingsShelly.name}
+                onChange={(event) =>
+                  flow.setShellyDeviceName(settingsShelly.id, event.currentTarget.value)
+                }
+              />
+            </label>
             <div className="status-stack">
               <DiagnosticRow
                 href={settingsShelly.baseUrl}
@@ -1235,9 +1219,8 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
       </Modal>
 
       <Modal
+        busy={isCheckingShelly}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!isCheckingShelly}
         open={isStatusModalOpen}
         title={modalTitle}
         onClose={closeStatusModal}
@@ -1302,9 +1285,8 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
       </Modal>
 
       <Modal
+        busy={isBleDiscoveryBusy}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!isBleDiscoveryBusy}
         description={bleScanShelly ? bleScanShelly.name : ''}
         open={isBleScanModalOpen}
         size="diagnostic"
@@ -1429,7 +1411,6 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
             onRefreshControl={flow.refreshShellyControl}
             onRelayOff={flow.turnRelayOff}
             onRelayOn={flow.turnRelayOn}
-            onRename={flow.setShellyDeviceName}
             onSettingsOpen={openSettingsModal}
           />
         ))}
