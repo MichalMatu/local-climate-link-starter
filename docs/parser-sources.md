@@ -171,7 +171,7 @@ Current implementation decision:
 TP357 stored history is not enabled yet. Public references show that it is
 possible, but the sample ordering/time base and Android GATT behavior still need
 real-device validation. The mobile app therefore persists recent live TP357
-samples for charts, while Xiaomi/PVVX can preload its supported memo history.
+samples for charts, while Xiaomi/PVVX can manually fetch its supported memo history.
 ```
 
 Implemented MatrixHub behavior:

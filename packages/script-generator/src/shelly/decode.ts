@@ -12,6 +12,7 @@ export type DecodedShellyThermostatRuntimeMode =
 export interface DecodedShellyThermostatSettings {
   version: number;
   sensorProfileId: SensorProfileId;
+  sensorDisplayName: string;
   runtimeAddress: string;
   compactAddress: string;
   relayId: number;
@@ -48,6 +49,7 @@ const runtimeModeSchema = z.enum(['xiaomi-bthome-minimal', 'tp357-minimal']);
 const runtimeConfigSchema = z.object({
   a: z.string().min(1),
   fa: z.string().min(1),
+  n: z.string().min(1),
   k: z.string().min(1),
   i: z.number().int().min(0),
   r: z.number().int().min(-100).max(-20),
@@ -135,6 +137,7 @@ export const decodeShellyThermostatScript = (
     settings: {
       version: runtimeConfig.v,
       sensorProfileId: sensorProfileForRuntimeMode(runtimeMode),
+      sensorDisplayName: runtimeConfig.n,
       runtimeAddress: runtimeConfig.fa,
       compactAddress: runtimeConfig.a,
       relayId: runtimeConfig.i,

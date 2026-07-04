@@ -158,22 +158,22 @@ export const diagnosticSnapshotSchema = z
         }
       : null,
     diagnostics: {
-      lastSeen: snapshot.g[0],
+      lastSeenUptimeMs: snapshot.g[0],
       lastTemp: snapshot.g[1],
       lastHumidity: snapshot.g[2],
       lastBattery: snapshot.g[3],
       lastRssi: snapshot.g[4],
       relayState: snapshot.g[5],
       lastReason: snapshot.g[6],
-      lastChange: snapshot.g[7],
-      onStarted: snapshot.g[8],
+      lastChangeUptimeMs: snapshot.g[7],
+      onStartedUptimeMs: snapshot.g[8],
       onHits: snapshot.g[9],
       offHits: snapshot.g[10],
       lastControlValue: snapshot.g[11],
       lastVpd: snapshot.g[12],
       lastEffectiveOnThreshold: snapshot.g[13],
       lastEffectiveOffThreshold: snapshot.g[14],
-      lastPacketSeen: snapshot.g[15],
+      lastPacketSeenUptimeMs: snapshot.g[15],
       dataState: snapshot.g[16]
     }
   }));

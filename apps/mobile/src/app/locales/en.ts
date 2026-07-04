@@ -59,7 +59,7 @@ export const en = {
       es: 'Español',
       fr: 'Français',
       it: 'Italiano',
-      ptBr: 'Português (Brasil)'
+      ptBr: 'Português'
     },
     appearance: {
       title: 'Appearance',
@@ -177,6 +177,7 @@ export const en = {
       relay: 'Relay',
       relayRule: 'Rule relay',
       shellyRelay: 'Shelly relay',
+      snapshotAge: 'Snapshot age',
       temperature: 'Temperature',
       temperatureShort: 'Temp.',
       thermometer: 'Thermometer',
@@ -375,7 +376,6 @@ export const en = {
       bootBehaviorValue: 'OFF, then AUTO after first reading',
       copyGeneratedScriptDone: 'Script copied.',
       copyGeneratedScriptLabel: 'Copy script',
-      copyManagedScriptDone: 'Script from Shelly copied.',
       copyScriptFailedTitle: 'Could not copy script.',
       copyScriptFailedDetail:
         'Select the script text manually and copy it from the browser.',
@@ -383,20 +383,24 @@ export const en = {
         above: 'above',
         below: 'below'
       },
-      decodedSettings: 'Read settings',
-      decodedSettingsLabel: 'Read script settings',
       deleteScriptDone: 'Shelly script removed.',
       deleteScriptFailedTitle: 'Could not remove script.',
       deleteScriptFromShelly: 'Remove from Shelly',
       deleteScriptTitle: 'Remove Local Climate Link script from Shelly',
       deleteScriptConfirmTitle: 'Confirm removing the script from Shelly',
+      deleteScriptConfirmDetail:
+        'The relay will be forced OFF before the Local Climate Link script is removed from this Shelly.',
       deleting: 'Removing',
       installBlockedTitle: 'Cannot send rule',
       installMatterHelp:
         'If Matter blocks scripts, turn Matter off in Shelly and try again.',
-      managedScriptMissingCode: 'I do not have downloaded script code from Shelly.',
-      managedScriptUnknown: 'I cannot read settings from this script.',
-      managedScriptLabel: 'Script saved in Shelly',
+      loadingScriptFromShelly: 'Loading from Shelly',
+      loadScriptDone: 'Loaded Shelly settings into the form.',
+      loadScriptFromShelly: 'Load from Shelly',
+      loadScriptFromShellyTitle:
+        'Read the Local Climate Link script from Shelly and fill the form',
+      loadScriptMissing: 'No Local Climate Link script was found on this Shelly.',
+      loadScriptUnknown: 'I cannot read settings from this script.',
       maxOnHoursLabel: 'Maximum run time h',
       minChangeLabel: 'Next ON after min',
       noShellySelected: 'Select Shelly plug.',
@@ -425,17 +429,13 @@ export const en = {
       rssiMinLabel: 'Minimum RSSI dBm',
       ruleMode: 'Rule mode',
       script: 'Script',
-      scriptManager: 'Script from Shelly',
-      scriptManagerTitle: 'Fetch or remove script saved in Shelly',
       scriptPreview: 'Shelly Script preview',
       scriptPreviewAria: 'Show script',
       scriptPreviewTitle: 'Show generated Shelly Script',
-      scriptStatus: 'id {id}, {status}',
       selectedShelly: 'Shelly plug',
       selectedSensor: 'Thermometer',
       sendTitle: 'Send current rule to Shelly',
       setThreshold: 'Set threshold',
-      shellyScriptCopyLabel: 'Copy script from Shelly',
       staleTimeoutLabel: 'No reading for min',
       summary:
         '{action} turns on {onComparator} {onThreshold}{unit} and turns off {offComparator} {offThreshold}{unit}. If {sensor} disappears for {staleTimeoutMin} min or {shelly} restarts, the relay switches off safely. After a fresh reading, automation applies this rule again. Maximum run time: {maxOnHours} h. Next ON no earlier than after {minChangeMin} min.{vpd}{rssi}',
@@ -457,14 +457,8 @@ export const en = {
       thresholdOnBelowPct: 'Turn on below %',
       values: {
         checkValue: 'check value',
-        compatibility: 'Match',
         disabled: 'disabled',
-        formDifferent: 'differs from form',
-        formMatch: 'matches form',
-        noScript: 'none',
-        profile: 'Profile',
-        rule: 'Rule',
-        thresholds: 'Thresholds'
+        noScript: 'none'
       },
       vpdRangeHint:
         'After setting kPa, VPD chooses the working point within the ON/OFF thresholds. It does not widen the range; with a narrow humidity range the effect may be subtle.',
@@ -496,6 +490,7 @@ export const en = {
     diagnostics: {
       actionRefresh: 'Refresh diagnostics',
       actionRefreshTitle: 'Fetch current script and relay state from Shelly',
+      ageAgo: '{duration} ago',
       empty: 'Check whether the selected plug has a Local Climate Link script.',
       fetching: 'Fetching',
       groupDecision: 'Input -> Processing -> Output',
@@ -518,7 +513,8 @@ export const en = {
         'Local Climate Link script is not running in Shelly. Status: {status}.',
       scriptOutOfMemory:
         'Local Climate Link script is not running: Shelly reports out_of_memory. Turn Matter off in Shelly, restart the plug and send the rule again.',
-      title: 'Diagnostics'
+      title: 'Diagnostics',
+      uptimeAt: 'uptime {duration}'
     },
     diagnosticsReason: {
       ab: 'Above threshold',

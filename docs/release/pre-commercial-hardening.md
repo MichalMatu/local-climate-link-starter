@@ -23,7 +23,7 @@ Required release-candidate evidence:
 
 - Xiaomi/PVVX is detected by phone BLE and Shelly-side BLE.
 - TP357 is detected by phone BLE and Shelly-side BLE.
-- Xiaomi/PVVX history preload works after app restart.
+- Xiaomi/PVVX manual history fetch works after app restart.
 - Sensor chart samples survive app force-stop and relaunch.
 - Shelly script upload succeeds from a clean plug state.
 - Safe relay test toggles ON and OFF and ends OFF.

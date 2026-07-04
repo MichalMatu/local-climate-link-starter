@@ -59,7 +59,7 @@ export const it = {
       es: 'Español',
       fr: 'Français',
       it: 'Italiano',
-      ptBr: 'Português (Brasil)'
+      ptBr: 'Português'
     },
     appearance: {
       title: 'Aspetto',
@@ -178,6 +178,7 @@ export const it = {
       relay: 'Relè',
       relayRule: 'Relè regola',
       shellyRelay: 'Relè Shelly',
+      snapshotAge: 'Eta snapshot',
       temperature: 'Temperatura',
       temperatureShort: 'Temp.',
       thermometer: 'Termometro',
@@ -380,7 +381,6 @@ export const it = {
       bootBehaviorValue: 'OFF, poi AUTO dopo prima lettura',
       copyGeneratedScriptDone: 'Script copiato.',
       copyGeneratedScriptLabel: 'Copia script',
-      copyManagedScriptDone: 'Script da Shelly copiato.',
       copyScriptFailedTitle: 'Impossibile copiare lo script.',
       copyScriptFailedDetail:
         'Seleziona manualmente il testo dello script e copialo dal browser.',
@@ -388,20 +388,24 @@ export const it = {
         above: 'sopra',
         below: 'sotto'
       },
-      decodedSettings: 'Impostazioni lette',
-      decodedSettingsLabel: 'Impostazioni script lette',
       deleteScriptDone: 'Script Shelly rimosso.',
       deleteScriptFailedTitle: 'Impossibile rimuovere lo script.',
       deleteScriptFromShelly: 'Rimuovi da Shelly',
       deleteScriptTitle: 'Rimuovi script Local Climate Link da Shelly',
       deleteScriptConfirmTitle: 'Conferma rimozione script da Shelly',
+      deleteScriptConfirmDetail:
+        'Il relè verrà forzato su OFF prima di rimuovere lo script Local Climate Link da questo Shelly.',
       deleting: 'Rimozione',
       installBlockedTitle: 'Impossibile inviare regola',
       installMatterHelp:
         'Se Matter blocca gli script, disattiva Matter in Shelly e riprova.',
-      managedScriptMissingCode: 'Non ho codice script scaricato da Shelly.',
-      managedScriptUnknown: 'Non posso leggere le impostazioni da questo script.',
-      managedScriptLabel: 'Script salvato in Shelly',
+      loadingScriptFromShelly: 'Caricamento da Shelly',
+      loadScriptDone: 'Impostazioni Shelly caricate nel modulo.',
+      loadScriptFromShelly: 'Carica da Shelly',
+      loadScriptFromShellyTitle:
+        'Leggi lo script Local Climate Link da Shelly e compila il modulo',
+      loadScriptMissing: 'Nessuno script Local Climate Link trovato su questo Shelly.',
+      loadScriptUnknown: 'Non posso leggere le impostazioni da questo script.',
       maxOnHoursLabel: 'Tempo massimo attivo h',
       minChangeLabel: 'Prossimo ON dopo min',
       noShellySelected: 'Seleziona presa Shelly.',
@@ -430,17 +434,13 @@ export const it = {
       rssiMinLabel: 'RSSI minimo dBm',
       ruleMode: 'Modalità regola',
       script: 'Script',
-      scriptManager: 'Script da Shelly',
-      scriptManagerTitle: 'Carica o rimuovi lo script salvato in Shelly',
       scriptPreview: 'Anteprima Shelly Script',
       scriptPreviewAria: 'Mostra script',
       scriptPreviewTitle: 'Mostra Shelly Script generato',
-      scriptStatus: 'id {id}, {status}',
       selectedShelly: 'Presa Shelly',
       selectedSensor: 'Termometro',
       sendTitle: 'Invia regola attuale a Shelly',
       setThreshold: 'Imposta soglia',
-      shellyScriptCopyLabel: 'Copia script da Shelly',
       staleTimeoutLabel: 'Nessuna lettura per min',
       summary:
         '{action} si accende {onComparator} {onThreshold}{unit} e si spegne {offComparator} {offThreshold}{unit}. Se {sensor} scompare per {staleTimeoutMin} min o {shelly} si riavvia, il relè si spegne in sicurezza. Dopo una nuova lettura, l’automazione applica di nuovo questa regola. Tempo massimo attivo: {maxOnHours} h. Prossimo ON non prima di {minChangeMin} min.{vpd}{rssi}',
@@ -462,14 +462,8 @@ export const it = {
       thresholdOnBelowPct: 'Accendi sotto %',
       values: {
         checkValue: 'controlla valore',
-        compatibility: 'Corrispondenza',
         disabled: 'disattivato',
-        formDifferent: 'diverso dal modulo',
-        formMatch: 'corrisponde al modulo',
-        noScript: 'nessuno',
-        profile: 'Profilo',
-        rule: 'Regola',
-        thresholds: 'Soglie'
+        noScript: 'nessuno'
       },
       vpdRangeHint:
         'Dopo aver impostato kPa, VPD sceglie il punto di lavoro entro le soglie ON/OFF. Non amplia l’intervallo; con un intervallo umidità stretto l’effetto può essere lieve.',
@@ -501,6 +495,7 @@ export const it = {
     diagnostics: {
       actionRefresh: 'Aggiorna diagnostica',
       actionRefreshTitle: 'Leggi stato attuale di script e relè da Shelly',
+      ageAgo: '{duration} fa',
       empty: 'Controlla se la presa selezionata ha uno script Local Climate Link.',
       fetching: 'Lettura',
       groupDecision: 'Input -> Processing -> Output',
@@ -523,7 +518,8 @@ export const it = {
         'Lo script Local Climate Link non è in esecuzione in Shelly. Stato: {status}.',
       scriptOutOfMemory:
         'Lo script Local Climate Link non è in esecuzione: Shelly segnala out_of_memory. Disattiva Matter in Shelly, riavvia la presa e invia di nuovo la regola.',
-      title: 'Diagnostica'
+      title: 'Diagnostica',
+      uptimeAt: 'uptime {duration}'
     },
     diagnosticsReason: {
       ab: 'Sopra soglia',

@@ -1,5 +1,4 @@
 import {
-  DiagnosticRow,
   FeedbackPanel,
   Modal,
   RuleSummaryCard,
@@ -9,12 +8,7 @@ import {
   type ToastTone
 } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
-import {
-  decodeShellyThermostatScript,
-  stableStringify,
-  type DecodedShellyThermostatScript
-} from '@lcl/script-generator';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import {
   useTranslation,
   type Translate,
@@ -85,17 +79,6 @@ const SELECTABLE_RULE_PRESETS: RulePresetId[] = [
   'dehumidifying'
 ];
 
-const decodedModeLabel = (mode: RulePresetId, t: Translate): string =>
-  t(RULE_PRESET_COPY[mode].labelKey);
-
-const DECODED_PROFILE_LABELS: Record<
-  DecodedShellyThermostatScript['settings']['sensorProfileId'],
-  string
-> = {
-  xiaomi_lywsd03mmc_bthome_v2: 'Xiaomi/PVVX BTHome v2',
-  tp357_custom_v1: 'TP357'
-};
-
 const copyToClipboard = async (value: string): Promise<void> => {
   if (typeof navigator === 'undefined' || !navigator.clipboard) {
     throw new Error('Clipboard API unavailable.');
@@ -116,6 +99,21 @@ const GeneratedScriptIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg
+    aria-hidden="true"
+    className="icon-action__svg"
+    focusable="false"
+    viewBox="0 0 24 24"
+  >
+    <path d="M7 7h10" />
+    <path d="M10 7V5.5h4V7" />
+    <path d="m9 9.5.5 8.5A1.5 1.5 0 0 0 11 19.5h2A1.5 1.5 0 0 0 14.5 18l.5-8.5" />
+    <path d="M11 11.5v5" />
+    <path d="M13 11.5v5" />
+  </svg>
+);
+
 const createAdvancedDraft = (
   flow: HardwarePageProps['flow']
 ): RuleAdvancedSettingsInput => ({
@@ -126,64 +124,6 @@ const createAdvancedDraft = (
   minChangeMinInput: flow.minChangeMinInput,
   maxOnHoursInput: flow.maxOnHoursInput
 });
-
-const formatDecodedUnit = (
-  metric: DecodedShellyThermostatScript['settings']['control']['metric']
-): string => (metric === 'humidity' ? '%' : '°C');
-
-const formatDecodedComparator = (
-  direction: ThresholdDirection,
-  isOn: boolean,
-  t: Translate
-): string =>
-  direction === 'below'
-    ? isOn
-      ? t('hardware.rule.comparator.below')
-      : t('hardware.rule.comparator.above')
-    : isOn
-      ? t('hardware.rule.comparator.above')
-      : t('hardware.rule.comparator.below');
-
-const formatDecodedThresholds = (
-  settings: DecodedShellyThermostatScript['settings'],
-  t: Translate
-): string => {
-  const unit = formatDecodedUnit(settings.control.metric);
-  const onComparator = formatDecodedComparator(settings.control.direction, true, t);
-  const offComparator = formatDecodedComparator(settings.control.direction, false, t);
-  return `ON ${onComparator} ${settings.control.onThreshold.toFixed(1)}${unit}, OFF ${offComparator} ${settings.control.offThreshold.toFixed(1)}${unit}`;
-};
-
-const formatDecodedSeconds = (seconds: number): string =>
-  seconds % 60 === 0 ? `${seconds / 60} min` : `${seconds} s`;
-
-const formatDecodedMs = (milliseconds: number): string => {
-  if (milliseconds % 3_600_000 === 0) {
-    return `${milliseconds / 3_600_000} h`;
-  }
-  if (milliseconds % 60_000 === 0) {
-    return `${milliseconds / 60_000} min`;
-  }
-  return `${milliseconds / 1000} s`;
-};
-
-const formatDecodedVpd = (
-  settings: DecodedShellyThermostatScript['settings'],
-  t: Translate
-): string =>
-  settings.vpdAssist.enabled && settings.vpdAssist.targetKpa !== null
-    ? `${settings.vpdAssist.targetKpa.toFixed(2)} kPa`
-    : t('hardware.rule.values.disabled');
-
-const decodedRuntimeConfigMatches = (
-  left: DecodedShellyThermostatScript | null,
-  right: DecodedShellyThermostatScript | null
-): boolean | null => {
-  if (!left || !right) {
-    return null;
-  }
-  return stableStringify(left.runtimeConfig) === stableStringify(right.runtimeConfig);
-};
 
 const formatRuleSummary = ({
   actionLabel,
@@ -255,9 +195,8 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
-  const [isScriptManagerModalOpen, setIsScriptManagerModalOpen] = useState(false);
   const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
-  const [isDeleteConfirmActive, setIsDeleteConfirmActive] = useState(false);
+  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
   const [isInstallBlockModalOpen, setIsInstallBlockModalOpen] = useState(false);
   const [isRelayTestModalOpen, setIsRelayTestModalOpen] = useState(false);
   const [advancedDraft, setAdvancedDraft] = useState<RuleAdvancedSettingsInput>(() =>
@@ -283,36 +222,8 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
   const minChangeMin = Number(flow.minChangeMinInput);
   const maxOnHours = Number(flow.maxOnHoursInput);
   const rssiMinDbm = Number(flow.rssiMinInput);
-  const selectedScriptState =
-    flow.automationScriptState?.deviceId === flow.selectedShelly?.id
-      ? flow.automationScriptState
-      : null;
-  const selectedScript = selectedScriptState?.script ?? null;
-  const selectedScriptCode = selectedScriptState?.code ?? null;
-  const decodedSelectedScript = useMemo(
-    () => (selectedScriptCode ? decodeShellyThermostatScript(selectedScriptCode) : null),
-    [selectedScriptCode]
-  );
-  const decodedCurrentScript = useMemo(
-    () =>
-      flow.configState.ok ? decodeShellyThermostatScript(flow.configState.script) : null,
-    [flow.configState]
-  );
-  const selectedScriptSettings = decodedSelectedScript?.settings ?? null;
-  const scriptSettingsMatch = decodedRuntimeConfigMatches(
-    decodedSelectedScript,
-    decodedCurrentScript
-  );
-  const scriptStatusLabel = selectedScript
-    ? t('hardware.rule.scriptStatus', {
-        id: selectedScript.id,
-        status: selectedScript.running
-          ? t('hardware.status.running')
-          : t('hardware.status.stopped')
-      })
-    : t('hardware.rule.values.noScript');
-  const isScriptManagerBusy =
-    flow.fetchAutomationScriptMutation.isPending ||
+  const isScriptActionBusy =
+    flow.loadAutomationScriptMutation.isPending ||
     flow.deleteAutomationScriptMutation.isPending;
   const ruleSummary = formatRuleSummary({
     actionLabel: t(copy.actionLabelKey),
@@ -362,37 +273,29 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       );
   }, [flow.configState, pushToast, t]);
 
-  const copyManagedScript = useCallback(() => {
-    if (!selectedScriptCode) {
-      return;
-    }
-
-    void copyToClipboard(selectedScriptCode)
-      .then(() => pushToast('ok', t('hardware.rule.copyManagedScriptDone')))
-      .catch(() =>
-        pushToast(
-          'warning',
-          t('hardware.rule.copyScriptFailedTitle'),
-          t('hardware.rule.copyScriptFailedDetail')
-        )
-      );
-  }, [pushToast, selectedScriptCode, t]);
-
   useEffect(() => {
-    setIsDeleteConfirmActive(false);
+    setIsDeleteConfirmModalOpen(false);
   }, [flow.selectedShellyId]);
 
   useEffect(() => {
-    if (!flow.fetchAutomationScriptMutation.isError) {
+    if (!flow.loadAutomationScriptMutation.isError) {
       return;
     }
     pushToast(
       'warning',
       t('hardware.rule.readScriptFailedTitle'),
-      mutationError(flow.fetchAutomationScriptMutation.error)
+      mutationError(flow.loadAutomationScriptMutation.error)
     );
-    flow.fetchAutomationScriptMutation.reset();
-  }, [flow.fetchAutomationScriptMutation, pushToast, t]);
+    flow.loadAutomationScriptMutation.reset();
+  }, [flow.loadAutomationScriptMutation, pushToast, t]);
+
+  useEffect(() => {
+    if (!flow.loadAutomationScriptMutation.isSuccess) {
+      return;
+    }
+    pushToast('ok', t('hardware.rule.loadScriptDone'));
+    flow.loadAutomationScriptMutation.reset();
+  }, [flow.loadAutomationScriptMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.deleteAutomationScriptMutation.isError) {
@@ -410,7 +313,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     if (!flow.deleteAutomationScriptMutation.isSuccess) {
       return;
     }
-    setIsDeleteConfirmActive(false);
+    setIsDeleteConfirmModalOpen(false);
     pushToast('ok', t('hardware.rule.deleteScriptDone'));
     flow.deleteAutomationScriptMutation.reset();
   }, [flow.deleteAutomationScriptMutation, pushToast, t]);
@@ -451,20 +354,15 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
     flow.safeRelayTestMutation.reset();
   }, [flow.safeRelayTestMutation, pushToast, t]);
 
-  const openScriptManagerModal = () => {
-    setIsScriptManagerModalOpen(true);
-    setIsDeleteConfirmActive(false);
-    if (flow.selectedShelly) {
-      flow.fetchAutomationScript(flow.selectedShelly);
+  const loadScriptFromShelly = () => {
+    if (!flow.selectedShelly) {
+      return;
     }
+    flow.loadAutomationScript(flow.selectedShelly);
   };
 
   const deleteManagedScript = () => {
-    if (!flow.selectedShelly || !selectedScript) {
-      return;
-    }
-    if (!isDeleteConfirmActive) {
-      setIsDeleteConfirmActive(true);
+    if (!flow.selectedShelly) {
       return;
     }
     flow.deleteAutomationScript(flow.selectedShelly);
@@ -506,13 +404,6 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       return;
     }
     setIsRelayTestModalOpen(false);
-  };
-
-  const closeScriptManagerModal = () => {
-    if (isScriptManagerBusy) {
-      return;
-    }
-    setIsScriptManagerModalOpen(false);
   };
 
   return (
@@ -605,16 +496,28 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
 
       <RuleSummaryCard
         action={
-          <button
-            aria-label={t('hardware.rule.scriptPreviewAria')}
-            className="icon-action rule-summary-icon-action"
-            type="button"
-            disabled={!flow.configState.ok}
-            title={t('hardware.rule.scriptPreviewTitle')}
-            onClick={() => setIsScriptModalOpen(true)}
-          >
-            <GeneratedScriptIcon />
-          </button>
+          <div className="rule-summary-actions">
+            <button
+              aria-label={t('hardware.rule.scriptPreviewAria')}
+              className="icon-action rule-summary-icon-action"
+              type="button"
+              disabled={!flow.configState.ok}
+              title={t('hardware.rule.scriptPreviewTitle')}
+              onClick={() => setIsScriptModalOpen(true)}
+            >
+              <GeneratedScriptIcon />
+            </button>
+            <button
+              aria-label={t('hardware.rule.deleteScriptFromShelly')}
+              className="icon-action icon-action--danger rule-summary-icon-action"
+              type="button"
+              disabled={!flow.selectedShelly || isScriptActionBusy}
+              title={t('hardware.rule.deleteScriptTitle')}
+              onClick={() => setIsDeleteConfirmModalOpen(true)}
+            >
+              <TrashIcon />
+            </button>
+          </div>
         }
         title={t('hardware.rule.summaryTitle')}
         summary={ruleSummary}
@@ -632,11 +535,14 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
         <button
           className="secondary-action"
           type="button"
-          disabled={!flow.selectedShelly}
-          title={t('hardware.rule.scriptManagerTitle')}
-          onClick={openScriptManagerModal}
+          aria-busy={flow.loadAutomationScriptMutation.isPending}
+          disabled={!flow.selectedShelly || isScriptActionBusy}
+          title={t('hardware.rule.loadScriptFromShellyTitle')}
+          onClick={loadScriptFromShelly}
         >
-          {t('hardware.rule.scriptManager')}
+          {flow.loadAutomationScriptMutation.isPending
+            ? t('hardware.rule.loadingScriptFromShelly')
+            : t('hardware.rule.loadScriptFromShelly')}
         </button>
         <button
           className="primary-action"
@@ -716,139 +622,32 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
       <Modal
         actions={
           <button
-            className={
-              isDeleteConfirmActive
-                ? 'secondary-action secondary-action--danger'
-                : 'secondary-action'
-            }
+            className="secondary-action secondary-action--danger"
             type="button"
             disabled={
-              !flow.selectedShelly ||
-              !selectedScript ||
-              flow.deleteAutomationScriptMutation.isPending
+              !flow.selectedShelly || flow.deleteAutomationScriptMutation.isPending
             }
-            title={
-              isDeleteConfirmActive
-                ? t('hardware.rule.deleteScriptConfirmTitle')
-                : t('hardware.rule.deleteScriptTitle')
-            }
+            title={t('hardware.rule.deleteScriptConfirmTitle')}
             onClick={deleteManagedScript}
           >
             {flow.deleteAutomationScriptMutation.isPending
               ? t('hardware.rule.deleting')
-              : isDeleteConfirmActive
-                ? t('common.confirmDelete')
-                : t('hardware.rule.deleteScriptFromShelly')}
+              : t('common.confirmDelete')}
           </button>
         }
-        busy={isScriptManagerBusy}
+        busy={flow.deleteAutomationScriptMutation.isPending}
         closeLabel={t('common.close')}
-        open={isScriptManagerModalOpen}
-        size="diagnostic"
-        title={t('hardware.rule.scriptManager')}
-        onClose={closeScriptManagerModal}
+        open={isDeleteConfirmModalOpen}
+        title={t('hardware.rule.deleteScriptConfirmTitle')}
+        onClose={() => {
+          if (!flow.deleteAutomationScriptMutation.isPending) {
+            setIsDeleteConfirmModalOpen(false);
+          }
+        }}
       >
-        {flow.selectedShelly ? (
-          <>
-            <DiagnosticRow
-              label={t('hardware.rule.selectedShelly')}
-              value={flow.selectedShelly.name}
-            />
-            <DiagnosticRow
-              href={flow.selectedShelly.baseUrl}
-              label={t('common.address')}
-              linkLabel={t('hardware.shelly.openPanelLabel', {
-                address: flow.selectedShelly.baseUrl
-              })}
-              value={flow.selectedShelly.baseUrl}
-            />
-            <DiagnosticRow
-              label={t('hardware.rule.script')}
-              tone={selectedScript ? 'normal' : 'warning'}
-              value={scriptStatusLabel}
-            />
-            {decodedSelectedScript && selectedScriptSettings && (
-              <section
-                aria-label={t('hardware.rule.decodedSettingsLabel')}
-                className="script-settings"
-              >
-                <h3>{t('hardware.rule.decodedSettings')}</h3>
-                {scriptSettingsMatch !== null && (
-                  <DiagnosticRow
-                    label={t('hardware.rule.values.compatibility')}
-                    tone={scriptSettingsMatch ? 'normal' : 'warning'}
-                    value={
-                      scriptSettingsMatch
-                        ? t('hardware.rule.values.formMatch')
-                        : t('hardware.rule.values.formDifferent')
-                    }
-                  />
-                )}
-                <DiagnosticRow
-                  label={t('hardware.rule.values.profile')}
-                  value={DECODED_PROFILE_LABELS[selectedScriptSettings.sensorProfileId]}
-                />
-                <DiagnosticRow
-                  label={t('hardware.rule.selectedSensor')}
-                  value={selectedScriptSettings.runtimeAddress}
-                />
-                <DiagnosticRow
-                  label={t('hardware.rule.values.rule')}
-                  value={decodedModeLabel(selectedScriptSettings.mode, t)}
-                />
-                <DiagnosticRow
-                  label={t('hardware.rule.values.thresholds')}
-                  value={formatDecodedThresholds(selectedScriptSettings, t)}
-                />
-                <DiagnosticRow
-                  label={t('hardware.rule.staleTimeoutLabel')}
-                  value={formatDecodedSeconds(selectedScriptSettings.staleTimeoutSec)}
-                />
-                <DiagnosticRow
-                  label={t('hardware.metrics.maxWork')}
-                  value={formatDecodedMs(selectedScriptSettings.maxOnMs)}
-                />
-                <DiagnosticRow
-                  label={t('hardware.metrics.minChange')}
-                  value={formatDecodedMs(selectedScriptSettings.minChangeMs)}
-                />
-                <DiagnosticRow
-                  label="RSSI"
-                  value={`min. ${selectedScriptSettings.rssiMin} dBm`}
-                />
-                <DiagnosticRow
-                  label="VPD"
-                  value={formatDecodedVpd(selectedScriptSettings, t)}
-                />
-                <DiagnosticRow
-                  label={t('hardware.metrics.relay')}
-                  value={`switch:${selectedScriptSettings.relayId}`}
-                />
-                <DiagnosticRow
-                  label={t('hardware.metrics.configHash')}
-                  value={decodedSelectedScript.configHash ?? t('common.missing')}
-                />
-              </section>
-            )}
-            {selectedScriptCode && !decodedSelectedScript && (
-              <p>{t('hardware.rule.managedScriptUnknown')}</p>
-            )}
-            {selectedScriptCode ? (
-              <ScriptPreview
-                label={t('hardware.rule.managedScriptLabel')}
-                code={selectedScriptCode}
-                copyAriaLabel={t('hardware.rule.shellyScriptCopyLabel')}
-                copyLabel={t('common.copy')}
-                variant="tall"
-                onCopy={copyManagedScript}
-              />
-            ) : !flow.fetchAutomationScriptMutation.isPending ? (
-              <p>{t('hardware.rule.managedScriptMissingCode')}</p>
-            ) : null}
-          </>
-        ) : (
-          <p>{t('hardware.rule.noShellySelected')}</p>
-        )}
+        <FeedbackPanel tone="warning" title={t('hardware.rule.deleteScriptTitle')}>
+          {t('hardware.rule.deleteScriptConfirmDetail')}
+        </FeedbackPanel>
       </Modal>
       <Modal
         actions={

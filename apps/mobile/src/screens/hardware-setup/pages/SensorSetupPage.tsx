@@ -199,8 +199,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
   const shownPhoneBleErrorRef = useRef<string | null>(null);
-  const preloadedPvvxHistoryIdsRef = useRef<Set<string>>(new Set());
-  const scheduledPvvxHistoryIdsRef = useRef<Set<string>>(new Set());
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
   const isSensorGattPending =
     flow.fetchPvvxHistoryMutation.isPending || flow.setPvvxTimeMutation.isPending;
@@ -304,60 +302,16 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   }, [restartSavedSensorLiveScan, shouldRunSavedSensorLiveScan, stopSavedSensorLiveScan]);
 
   useEffect(() => {
-    if (
-      isAddSensorModalOpen ||
-      isPhoneBleScanModalOpen ||
-      sensorSettingsDevice !== null ||
-      flow.fetchPvvxHistoryMutation.status !== 'idle' ||
-      flow.setPvvxTimeMutation.isPending
-    ) {
-      return;
-    }
-
-    const device = flow.sensorDevices.find(
-      (sensorDevice) =>
-        sensorDevice.profileId === 'xiaomi_lywsd03mmc_bthome_v2' &&
-        !preloadedPvvxHistoryIdsRef.current.has(sensorDevice.id) &&
-        !scheduledPvvxHistoryIdsRef.current.has(sensorDevice.id)
-    );
-    if (!device) {
-      return;
-    }
-
-    const scheduledPvvxHistoryIds = scheduledPvvxHistoryIdsRef.current;
-    scheduledPvvxHistoryIds.add(device.id);
-    const preloadTimer = window.setTimeout(() => {
-      scheduledPvvxHistoryIds.delete(device.id);
-      preloadedPvvxHistoryIdsRef.current.add(device.id);
-      flow.fetchPvvxHistoryMutation.mutate({ device, mode: 'preload' });
-    }, 750);
-
-    return () => {
-      scheduledPvvxHistoryIds.delete(device.id);
-      window.clearTimeout(preloadTimer);
-    };
-  }, [
-    flow.fetchPvvxHistoryMutation,
-    flow.sensorDevices,
-    flow.setPvvxTimeMutation.isPending,
-    isAddSensorModalOpen,
-    isPhoneBleScanModalOpen,
-    sensorSettingsDevice
-  ]);
-
-  useEffect(() => {
     if (!flow.fetchPvvxHistoryMutation.isSuccess) {
       return;
     }
 
     const sampleCount = flow.fetchPvvxHistoryMutation.data?.sampleCount ?? 0;
-    if (flow.fetchPvvxHistoryMutation.data?.mode === 'manual') {
-      pushToast(
-        'ok',
-        t('hardware.sensor.pvvxHistoryLoadedTitle'),
-        t('hardware.sensor.pvvxHistoryLoadedDetail', { count: sampleCount })
-      );
-    }
+    pushToast(
+      'ok',
+      t('hardware.sensor.pvvxHistoryLoadedTitle'),
+      t('hardware.sensor.pvvxHistoryLoadedDetail', { count: sampleCount })
+    );
     flow.fetchPvvxHistoryMutation.reset();
   }, [flow.fetchPvvxHistoryMutation, pushToast, t]);
 
@@ -366,13 +320,11 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       return;
     }
 
-    if (flow.fetchPvvxHistoryMutation.variables?.mode === 'manual') {
-      pushToast(
-        'warning',
-        t('hardware.sensor.pvvxFailedTitle'),
-        mutationError(flow.fetchPvvxHistoryMutation.error)
-      );
-    }
+    pushToast(
+      'warning',
+      t('hardware.sensor.pvvxFailedTitle'),
+      mutationError(flow.fetchPvvxHistoryMutation.error)
+    );
     flow.fetchPvvxHistoryMutation.reset();
   }, [flow.fetchPvvxHistoryMutation, pushToast, t]);
 
@@ -707,10 +659,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   disabled={flow.fetchPvvxHistoryMutation.isPending}
                   title={t('hardware.sensor.pvvxHistoryTitle')}
                   onClick={() =>
-                    flow.fetchPvvxHistoryMutation.mutate({
-                      device: sensorSettingsDevice,
-                      mode: 'manual'
-                    })
+                    flow.fetchPvvxHistoryMutation.mutate(sensorSettingsDevice)
                   }
                 >
                   {flow.fetchPvvxHistoryMutation.isPending
@@ -765,6 +714,12 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
           const samples = readingsForSensor(device);
           const temperatureSample = latestNumericSample(samples, 'temperatureC');
           const humiditySample = latestNumericSample(samples, 'humidityPct');
+          const hasTemperatureData =
+            typeof temperatureSample?.temperatureC === 'number' &&
+            Number.isFinite(temperatureSample.temperatureC);
+          const hasHumidityData =
+            typeof humiditySample?.humidityPct === 'number' &&
+            Number.isFinite(humiditySample.humidityPct);
 
           return (
             <article key={device.id} className="saved-list__item sensor-saved-card">
@@ -783,8 +738,20 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                 </button>
               </div>
               <div className="sensor-chart-stack">
-                <div className="sensor-data-chart-card">
-                  <strong className="sensor-data-chart-card__value">
+                <div
+                  className={
+                    hasTemperatureData
+                      ? 'sensor-data-chart-card'
+                      : 'sensor-data-chart-card sensor-data-chart-card--empty'
+                  }
+                >
+                  <strong
+                    className={
+                      hasTemperatureData
+                        ? 'sensor-data-chart-card__value'
+                        : 'sensor-data-chart-card__value sensor-data-chart-card__value--empty'
+                    }
+                  >
                     {formatNullableMetric(
                       temperatureSample?.temperatureC,
                       '°C',
@@ -800,8 +767,20 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                     points={sampleValues(samples, 'temperatureC')}
                   />
                 </div>
-                <div className="sensor-data-chart-card">
-                  <strong className="sensor-data-chart-card__value">
+                <div
+                  className={
+                    hasHumidityData
+                      ? 'sensor-data-chart-card'
+                      : 'sensor-data-chart-card sensor-data-chart-card--empty'
+                  }
+                >
+                  <strong
+                    className={
+                      hasHumidityData
+                        ? 'sensor-data-chart-card__value'
+                        : 'sensor-data-chart-card__value sensor-data-chart-card__value--empty'
+                    }
+                  >
                     {formatNullableMetric(
                       humiditySample?.humidityPct,
                       '%',

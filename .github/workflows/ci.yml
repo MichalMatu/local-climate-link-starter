@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - work
 
 jobs:
   checks:
@@ -42,6 +43,9 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: Core coverage
+        run: pnpm test:coverage:core
 
       - name: Build
         run: pnpm build
