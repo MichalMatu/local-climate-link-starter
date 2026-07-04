@@ -23,7 +23,7 @@ Kontekst ostatnich poprawek:
 - UI pokazuje "ile temu" liczone z uptime Shelly oraz osobny "wiek snapshotu" liczony od pobrania diagnostyki przez aplikacje.
 - Ukryty auto-preload historii Xiaomi/PVVX zostal usuniety. Historia PVVX ma byc pobierana tylko jawnie przyciskiem uzytkownika, bo auto-preload mogl konkurowac z live scanem BLE i mieszac mentalny model.
 - CI zostal wlaczony rowniez na branchu work i zawiera test:coverage:core.
-- Publiczne linki Android release powinny wskazywac na v2.0.4.
+- Publiczne linki Android release powinny wskazywac na v2.0.5.
 
 Twoje zadanie:
 Przeprowadz bardzo krytyczny audyt kodu, produktu i procesu. Nie pisz ogolnikow. Porownaj raportowane zalozenia z faktycznym kodem. Szukaj rzeczy, ktore moga realnie zablokowac platna bete, testy u klientow albo bezpieczne uzycie ze sprzetem.
