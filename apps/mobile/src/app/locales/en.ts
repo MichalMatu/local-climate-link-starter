@@ -177,6 +177,7 @@ export const en = {
       relay: 'Relay',
       relayRule: 'Rule relay',
       shellyRelay: 'Shelly relay',
+      snapshotAge: 'Snapshot age',
       temperature: 'Temperature',
       temperatureShort: 'Temp.',
       thermometer: 'Thermometer',
@@ -496,6 +497,7 @@ export const en = {
     diagnostics: {
       actionRefresh: 'Refresh diagnostics',
       actionRefreshTitle: 'Fetch current script and relay state from Shelly',
+      ageAgo: '{duration} ago',
       empty: 'Check whether the selected plug has a Local Climate Link script.',
       fetching: 'Fetching',
       groupDecision: 'Input -> Processing -> Output',
@@ -518,7 +520,8 @@ export const en = {
         'Local Climate Link script is not running in Shelly. Status: {status}.',
       scriptOutOfMemory:
         'Local Climate Link script is not running: Shelly reports out_of_memory. Turn Matter off in Shelly, restart the plug and send the rule again.',
-      title: 'Diagnostics'
+      title: 'Diagnostics',
+      uptimeAt: 'uptime {duration}'
     },
     diagnosticsReason: {
       ab: 'Above threshold',

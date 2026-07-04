@@ -167,17 +167,9 @@ type SafeRelayTestMutationResult = {
 
 type SensorRuntimeSource = 'phone-scan' | 'shelly-scan';
 
-type PvvxHistoryMutationMode = 'manual' | 'preload';
-
-type PvvxHistoryMutationRequest = {
-  device: SensorDraftDevice;
-  mode: PvvxHistoryMutationMode;
-};
-
 type PvvxHistoryMutationResult = {
   device: SensorDraftDevice;
   sampleCount: number;
-  mode: PvvxHistoryMutationMode;
 };
 
 type PvvxTimeMutationResult = {
@@ -342,6 +334,7 @@ export const useHardwareSetupFlow = () => {
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
   const [diagnosticSnapshot, setDiagnosticSnapshot] =
     useState<HardwareDiagnosticSnapshot | null>(null);
+  const [diagnosticFetchedAtMs, setDiagnosticFetchedAtMs] = useState<number | null>(null);
   const [shellyScanStartInput, setShellyScanStartInput] = useState('192.168.0.1');
   const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.99');
   const [shellyScanStopped, setShellyScanStopped] = useState(false);
@@ -372,10 +365,15 @@ export const useHardwareSetupFlow = () => {
   const [safeRelayTestState, setSafeRelayTestState] =
     useState<HardwareInstallState | null>(null);
 
+  const clearDiagnosticSnapshot = () => {
+    setDiagnosticSnapshot(null);
+    setDiagnosticFetchedAtMs(null);
+  };
+
   const updateShellyUrlInput = (value: string) => {
     setShellyUrlInputDraft(value);
     setSetupStatus(null);
-    setDiagnosticSnapshot(null);
+    clearDiagnosticSnapshot();
   };
 
   const selectedShelly = useMemo(
@@ -1265,10 +1263,7 @@ export const useHardwareSetupFlow = () => {
   };
 
   const fetchPvvxHistoryMutation = useMutation({
-    mutationFn: async ({
-      device,
-      mode
-    }: PvvxHistoryMutationRequest): Promise<PvvxHistoryMutationResult> => {
+    mutationFn: async (device: SensorDraftDevice): Promise<PvvxHistoryMutationResult> => {
       if (device.profileId !== 'xiaomi_lywsd03mmc_bthome_v2') {
         throw new Error(t('hardware.sensor.pvvxOnlyXiaomi'));
       }
@@ -1288,7 +1283,7 @@ export const useHardwareSetupFlow = () => {
         device.runtimeAddress,
         history.measurements.map(sensorReadingFromMeasurement)
       );
-      return { device, sampleCount: history.samples.length, mode };
+      return { device, sampleCount: history.samples.length };
     }
   });
 
@@ -1336,7 +1331,10 @@ export const useHardwareSetupFlow = () => {
 
   const diagnosticMutation = useMutation({
     mutationFn: fetchDiagnostics,
-    onSuccess: (snapshot) => setDiagnosticSnapshot(snapshot)
+    onSuccess: (snapshot) => {
+      setDiagnosticSnapshot(snapshot);
+      setDiagnosticFetchedAtMs(Date.now());
+    }
   });
 
   const installMutation = useMutation({
@@ -1398,21 +1396,21 @@ export const useHardwareSetupFlow = () => {
   const selectShellyDevice = (id: string) => {
     selectShellyDeviceDraft(id);
     setSetupStatus(null);
-    setDiagnosticSnapshot(null);
+    clearDiagnosticSnapshot();
     setLastInstallState(null);
     setSafeRelayTestState(null);
   };
 
   const selectSensorDevice = (id: string) => {
     selectSensorDeviceDraft(id);
-    setDiagnosticSnapshot(null);
+    clearDiagnosticSnapshot();
     setLastInstallState(null);
     setSafeRelayTestState(null);
   };
 
   const setDiagnosticShellyId = (id: string) => {
     setDiagnosticShellyIdDraft(id);
-    setDiagnosticSnapshot(null);
+    clearDiagnosticSnapshot();
   };
 
   const removeShellyDevice = (id: string) => {
@@ -1421,7 +1419,7 @@ export const useHardwareSetupFlow = () => {
       Object.fromEntries(Object.entries(current).filter(([deviceId]) => deviceId !== id))
     );
     setSetupStatus(null);
-    setDiagnosticSnapshot(null);
+    clearDiagnosticSnapshot();
     setLastInstallState(null);
     setSafeRelayTestState(null);
   };
@@ -1429,7 +1427,7 @@ export const useHardwareSetupFlow = () => {
   const removeSensorDevice = (id: string) => {
     removeSensorDeviceDraft(id);
     clearSensorReadings(id);
-    setDiagnosticSnapshot(null);
+    clearDiagnosticSnapshot();
     setLastInstallState(null);
     setSafeRelayTestState(null);
   };
@@ -1496,6 +1494,7 @@ export const useHardwareSetupFlow = () => {
     canRunSafeRelayTest,
     setupStatus,
     diagnosticSnapshot,
+    diagnosticFetchedAtMs,
     checkShellyMutation,
     recheckShellyMutation,
     shellyScanStartInput,

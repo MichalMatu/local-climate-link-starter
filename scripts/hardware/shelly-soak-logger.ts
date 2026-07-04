@@ -84,8 +84,8 @@ interface ParsedSample {
   sensor: {
     runtimeAddress?: string | undefined;
     displayName?: string | undefined;
-    lastSeenMs?: number | undefined;
-    lastPacketSeenMs?: number | undefined;
+    lastSeenUptimeMs?: number | undefined;
+    lastPacketSeenUptimeMs?: number | undefined;
     ageSinceMeasurementMs?: number | undefined;
     ageSincePacketMs?: number | undefined;
     temperatureC?: number | undefined;
@@ -105,8 +105,8 @@ interface ParsedSample {
   decision: {
     reason?: string | undefined;
     dataState?: string | undefined;
-    lastChangeMs?: number | undefined;
-    onStartedMs?: number | undefined;
+    lastChangeUptimeMs?: number | undefined;
+    onStartedUptimeMs?: number | undefined;
     onHits?: number | undefined;
     offHits?: number | undefined;
     controlValue?: number | undefined;
@@ -137,8 +137,8 @@ interface SummaryState {
   rssiWeakestDbm?: number | undefined;
   rssiStrongestDbm?: number | undefined;
   lastRelayOn?: boolean | undefined;
-  lastMeasurementSeenMs?: number | undefined;
-  lastPacketSeenMs?: number | undefined;
+  lastMeasurementSeenUptimeMs?: number | undefined;
+  lastPacketSeenUptimeMs?: number | undefined;
   lastMeasurementWallMs?: number | undefined;
   lastPacketWallMs?: number | undefined;
   reasonCounts: Record<string, number>;
@@ -734,8 +734,8 @@ const parseDiag = (diag: unknown): Partial<ParsedSample> => {
     sensor: {
       runtimeAddress: stringField(sensorMeta?.[0]),
       displayName: stringField(sensorMeta?.[1]),
-      lastSeenMs: numberField(runtime?.[0]),
-      lastPacketSeenMs: numberField(runtime?.[15]),
+      lastSeenUptimeMs: numberField(runtime?.[0]),
+      lastPacketSeenUptimeMs: numberField(runtime?.[15]),
       temperatureC: numberField(runtime?.[1]),
       humidityPct: numberField(runtime?.[2]),
       batteryPct: numberField(runtime?.[3]),
@@ -755,8 +755,8 @@ const parseDiag = (diag: unknown): Partial<ParsedSample> => {
     decision: {
       reason: stringField(runtime?.[6]),
       dataState: stringField(runtime?.[16]),
-      lastChangeMs: numberField(runtime?.[7]),
-      onStartedMs: numberField(runtime?.[8]),
+      lastChangeUptimeMs: numberField(runtime?.[7]),
+      onStartedUptimeMs: numberField(runtime?.[8]),
       onHits: numberField(runtime?.[9]),
       offHits: numberField(runtime?.[10]),
       controlValue: numberField(runtime?.[11]),
@@ -843,16 +843,16 @@ const parseSample = (
   };
 
   const uptimeMs = parsed.device.uptimeSec ? parsed.device.uptimeSec * 1000 : undefined;
-  if (uptimeMs !== undefined && parsed.sensor.lastSeenMs !== undefined) {
+  if (uptimeMs !== undefined && parsed.sensor.lastSeenUptimeMs !== undefined) {
     parsed.sensor.ageSinceMeasurementMs = Math.max(
       0,
-      uptimeMs - parsed.sensor.lastSeenMs
+      uptimeMs - parsed.sensor.lastSeenUptimeMs
     );
   }
-  if (uptimeMs !== undefined && parsed.sensor.lastPacketSeenMs !== undefined) {
+  if (uptimeMs !== undefined && parsed.sensor.lastPacketSeenUptimeMs !== undefined) {
     parsed.sensor.ageSincePacketMs = Math.max(
       0,
-      uptimeMs - parsed.sensor.lastPacketSeenMs
+      uptimeMs - parsed.sensor.lastPacketSeenUptimeMs
     );
   }
 
@@ -920,16 +920,16 @@ const updateSummary = (
     summary.rssiStrongestDbm = updateMax(summary.rssiStrongestDbm, parsed.sensor.rssiDbm);
   }
 
-  if (parsed.sensor.lastSeenMs !== undefined) {
+  if (parsed.sensor.lastSeenUptimeMs !== undefined) {
     summary.samplesWithMeasurement += 1;
-    if (parsed.sensor.lastSeenMs !== summary.lastMeasurementSeenMs) {
+    if (parsed.sensor.lastSeenUptimeMs !== summary.lastMeasurementSeenUptimeMs) {
       if (summary.lastMeasurementWallMs !== undefined) {
         summary.maxNoMeasurementUpdateMs = Math.max(
           summary.maxNoMeasurementUpdateMs,
           sampledAtMs - summary.lastMeasurementWallMs
         );
       }
-      summary.lastMeasurementSeenMs = parsed.sensor.lastSeenMs;
+      summary.lastMeasurementSeenUptimeMs = parsed.sensor.lastSeenUptimeMs;
       summary.lastMeasurementWallMs = sampledAtMs;
     } else if (summary.lastMeasurementWallMs !== undefined) {
       summary.maxNoMeasurementUpdateMs = Math.max(
@@ -939,16 +939,16 @@ const updateSummary = (
     }
   }
 
-  if (parsed.sensor.lastPacketSeenMs !== undefined) {
+  if (parsed.sensor.lastPacketSeenUptimeMs !== undefined) {
     summary.samplesWithPacket += 1;
-    if (parsed.sensor.lastPacketSeenMs !== summary.lastPacketSeenMs) {
+    if (parsed.sensor.lastPacketSeenUptimeMs !== summary.lastPacketSeenUptimeMs) {
       if (summary.lastPacketWallMs !== undefined) {
         summary.maxNoPacketUpdateMs = Math.max(
           summary.maxNoPacketUpdateMs,
           sampledAtMs - summary.lastPacketWallMs
         );
       }
-      summary.lastPacketSeenMs = parsed.sensor.lastPacketSeenMs;
+      summary.lastPacketSeenUptimeMs = parsed.sensor.lastPacketSeenUptimeMs;
       summary.lastPacketWallMs = sampledAtMs;
     } else if (summary.lastPacketWallMs !== undefined) {
       summary.maxNoPacketUpdateMs = Math.max(

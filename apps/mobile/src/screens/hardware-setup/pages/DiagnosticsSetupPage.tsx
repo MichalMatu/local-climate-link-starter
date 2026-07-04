@@ -36,17 +36,54 @@ const formatShellyTime = (
 const formatTimeSyncState = (time: DiagnosticTime | undefined, t: Translate): string =>
   time?.isSynced ? 'OK' : t('hardware.status.unsynced');
 
-const formatEpochMs = (
-  value: number | null | undefined,
-  locale: string,
-  missingLabel: string
+const formatDuration = (durationMs: number): string => {
+  const totalSeconds = Math.max(0, Math.trunc(durationMs / 1000));
+  if (totalSeconds < 60) {
+    return `${totalSeconds} s`;
+  }
+
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (totalMinutes < 60) {
+    return seconds === 0 ? `${totalMinutes} min` : `${totalMinutes} min ${seconds} s`;
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
+};
+
+const formatUptimeAge = (
+  valueUptimeMs: number | null | undefined,
+  currentUptimeSec: number | null | undefined,
+  missingLabel: string,
+  t: Translate
+): string => {
+  if (valueUptimeMs == null) {
+    return missingLabel;
+  }
+
+  if (currentUptimeSec == null || !Number.isFinite(currentUptimeSec)) {
+    return t('hardware.diagnostics.uptimeAt', {
+      duration: formatDuration(valueUptimeMs)
+    });
+  }
+
+  return t('hardware.diagnostics.ageAgo', {
+    duration: formatDuration(currentUptimeSec * 1000 - valueUptimeMs)
+  });
+};
+
+const formatSnapshotAge = (
+  fetchedAtMs: number | null,
+  nowMs: number,
+  missingLabel: string,
+  t: Translate
 ): string =>
-  value == null
+  fetchedAtMs === null
     ? missingLabel
-    : new Date(value).toLocaleTimeString(locale, {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+    : t('hardware.diagnostics.ageAgo', {
+        duration: formatDuration(nowMs - fetchedAtMs)
       });
 
 const formatEnergy = (value: number | null | undefined, missingLabel: string): string => {
@@ -135,9 +172,10 @@ const DiagnosticSection = ({ title, children }: DiagnosticSectionProps) => (
 );
 
 export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
-  const { locale, t } = useTranslation();
+  const { t } = useTranslation();
   const [isAppSettingsOpen, setIsAppSettingsOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const toastIdRef = useRef(0);
   const diagnostics = flow.diagnosticSnapshot?.diagnostics;
   const shellyTime = flow.diagnosticSnapshot?.time;
@@ -196,7 +234,12 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
     ),
     createSupportReportDevice(
       t('hardware.metrics.lastMeasurement'),
-      formatEpochMs(diagnostics?.lastSeen, locale, t('common.missing'))
+      formatUptimeAge(
+        diagnostics?.lastSeenUptimeMs,
+        shellyTime?.uptimeSec,
+        t('common.missing'),
+        t
+      )
     ),
     createSupportReportDevice(
       t('hardware.metrics.temperature'),
@@ -236,6 +279,16 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
     );
     flow.diagnosticMutation.reset();
   }, [flow.diagnosticMutation, pushToast, t]);
+
+  useEffect(() => {
+    if (flow.diagnosticFetchedAtMs === null) {
+      return;
+    }
+
+    setNowMs(Date.now());
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [flow.diagnosticFetchedAtMs]);
 
   return (
     <section className="demo-panel" aria-label={t('common.diagnostics')}>
@@ -285,7 +338,16 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             : t('hardware.diagnostics.actionRefresh')}
         </button>
       </div>
-      <p className="field__hint">{t('hardware.diagnostics.refreshRequirement')}</p>
+      <p className="field__hint">
+        {t('hardware.diagnostics.refreshRequirement')}{' '}
+        {flow.diagnosticFetchedAtMs !== null &&
+          `${t('hardware.metrics.snapshotAge')}: ${formatSnapshotAge(
+            flow.diagnosticFetchedAtMs,
+            nowMs,
+            t('common.missing'),
+            t
+          )}.`}
+      </p>
 
       {diagnostics && (
         <div className="diagnostic-groups">
@@ -298,7 +360,12 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
               <DiagnosticSection title={t('hardware.diagnostics.input')}>
                 <DiagnosticRow
                   label={t('hardware.metrics.lastMeasurement')}
-                  value={formatEpochMs(diagnostics.lastSeen, locale, t('common.missing'))}
+                  value={formatUptimeAge(
+                    diagnostics.lastSeenUptimeMs,
+                    shellyTime?.uptimeSec,
+                    t('common.missing'),
+                    t
+                  )}
                 />
                 <DiagnosticRow
                   label={t('hardware.metrics.temperature')}
@@ -371,10 +438,11 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             />
             <DiagnosticRow
               label={t('hardware.metrics.lastBlePacket')}
-              value={formatEpochMs(
-                diagnostics.lastPacketSeen,
-                locale,
-                t('common.missing')
+              value={formatUptimeAge(
+                diagnostics.lastPacketSeenUptimeMs,
+                shellyTime?.uptimeSec,
+                t('common.missing'),
+                t
               )}
             />
             <DiagnosticRow
@@ -407,6 +475,15 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             <DiagnosticRow
               label={t('hardware.metrics.configHash')}
               value={script?.configHash ?? t('common.missing')}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.snapshotAge')}
+              value={formatSnapshotAge(
+                flow.diagnosticFetchedAtMs,
+                nowMs,
+                t('common.missing'),
+                t
+              )}
             />
             <DiagnosticRow
               label={t('hardware.metrics.clockShelly')}

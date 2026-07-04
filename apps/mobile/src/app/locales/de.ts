@@ -179,6 +179,7 @@ export const de = {
       relay: 'Relais',
       relayRule: 'Regel-Relais',
       shellyRelay: 'Shelly-Relais',
+      snapshotAge: 'Snapshot-Alter',
       temperature: 'Temperatur',
       temperatureShort: 'Temp.',
       thermometer: 'Thermometer',
@@ -503,6 +504,7 @@ export const de = {
     diagnostics: {
       actionRefresh: 'Diagnose aktualisieren',
       actionRefreshTitle: 'Aktuellen Skript- und Relaisstatus von Shelly abrufen',
+      ageAgo: 'vor {duration}',
       empty: 'Prüfen, ob die ausgewählte Steckdose ein Local Climate Link Skript hat.',
       fetching: 'Lade',
       groupDecision: 'Input -> Processing -> Output',
@@ -525,7 +527,8 @@ export const de = {
         'Local Climate Link Skript läuft nicht in Shelly. Status: {status}.',
       scriptOutOfMemory:
         'Local Climate Link Skript läuft nicht: Shelly meldet out_of_memory. Matter in Shelly ausschalten, Steckdose neu starten und Regel erneut senden.',
-      title: 'Diagnose'
+      title: 'Diagnose',
+      uptimeAt: 'Uptime {duration}'
     },
     diagnosticsReason: {
       ab: 'Über Schwelle',

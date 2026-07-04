@@ -403,14 +403,14 @@ describe('HardwareSetupScreen', () => {
             y: ['09:31', 1782667904, 12345],
             p: [false, 0, 230.1, 0, 1234, 31.2],
             g: [
-              1782667904992,
+              12300000,
               31.18,
               44.06,
               100,
               -37,
               false,
               'ab',
-              1782667768883,
+              12250000,
               null,
               0,
               13,
@@ -418,7 +418,7 @@ describe('HardwareSetupScreen', () => {
               1.45,
               22.2,
               22.6,
-              1782667904992,
+              12320000,
               'ok'
             ]
           });
@@ -2319,7 +2319,7 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeNull();
   });
 
-  it('preloads Xiaomi PVVX history after the saved thermometer live scan has started', async () => {
+  it('keeps Xiaomi PVVX history manual while saved thermometer live scan is active', async () => {
     vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
     useHardwareSetupDraftStore.setState({
       ...DEFAULT_HARDWARE_SETUP_DRAFT,
@@ -2339,13 +2339,11 @@ describe('HardwareSetupScreen', () => {
     expect(await screen.findByText('21.3°C')).toBeInTheDocument();
     expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1);
 
-    await waitFor(
-      () => {
-        expect(pvvxGattMock.historyCalls).toBe(1);
-      },
-      { timeout: 4000 }
-    );
-    expect(pvvxGattMock.stopCountAtHistoryStart).toBeGreaterThan(0);
+    await act(async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, 1000));
+    });
+    expect(pvvxGattMock.historyCalls).toBe(0);
+    expect(pvvxGattMock.stopCountAtHistoryStart).toBe(0);
     expect(screen.queryByText('Historia pobrana.')).not.toBeInTheDocument();
     expect(screen.getByText('21.3°C')).toBeInTheDocument();
     expect(
@@ -3062,6 +3060,10 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('22.6°C')).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.getByText('-37 dBm')).toBeInTheDocument();
+    expect(screen.getByText('45 s temu')).toBeInTheDocument();
+    expect(screen.getByText('25 s temu')).toBeInTheDocument();
+    expect(screen.getByText('Wiek snapshotu')).toBeInTheDocument();
+    expect(screen.getByText(/Wiek snapshotu:/)).toBeInTheDocument();
     expect(screen.getByText('Powyżej progu')).toBeInTheDocument();
     expect(screen.getByText('Dane BLE')).toBeInTheDocument();
     expect(screen.getByText('Przekaźnik reguły')).toBeInTheDocument();
@@ -3091,7 +3093,7 @@ describe('HardwareSetupScreen', () => {
     {
       label: 'schema mismatch',
       response: () => jsonResponse({ version: 1, diagnostics: { relayState: false } }),
-      hiddenText: /Expected|required|lastSeen/
+      hiddenText: /Expected|required|lastSeenUptimeMs|diagnostics/
     },
     {
       label: 'timeout',

@@ -178,6 +178,7 @@ export const it = {
       relay: 'Relè',
       relayRule: 'Relè regola',
       shellyRelay: 'Relè Shelly',
+      snapshotAge: 'Eta snapshot',
       temperature: 'Temperatura',
       temperatureShort: 'Temp.',
       thermometer: 'Termometro',
@@ -501,6 +502,7 @@ export const it = {
     diagnostics: {
       actionRefresh: 'Aggiorna diagnostica',
       actionRefreshTitle: 'Leggi stato attuale di script e relè da Shelly',
+      ageAgo: '{duration} fa',
       empty: 'Controlla se la presa selezionata ha uno script Local Climate Link.',
       fetching: 'Lettura',
       groupDecision: 'Input -> Processing -> Output',
@@ -523,7 +525,8 @@ export const it = {
         'Lo script Local Climate Link non è in esecuzione in Shelly. Stato: {status}.',
       scriptOutOfMemory:
         'Lo script Local Climate Link non è in esecuzione: Shelly segnala out_of_memory. Disattiva Matter in Shelly, riavvia la presa e invia di nuovo la regola.',
-      title: 'Diagnostica'
+      title: 'Diagnostica',
+      uptimeAt: 'uptime {duration}'
     },
     diagnosticsReason: {
       ab: 'Sopra soglia',

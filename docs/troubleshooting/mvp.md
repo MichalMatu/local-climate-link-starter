@@ -93,8 +93,9 @@ change radio transmit power because sensor advertisements are received, not
 sent, by the plug.
 
 Generated runtime diagnostics separate radio freshness from control freshness:
-`lastPacketSeen` means Shelly saw any packet from the target runtime address,
-while `lastSeen` means the last full measurement usable by the selected rule.
+`lastPacketSeenUptimeMs` means Shelly saw any packet from the target runtime
+address, while `lastSeenUptimeMs` means the last full measurement usable by the
+selected rule. Both values are Shelly uptime milliseconds, not Unix timestamps.
 Battery-only or incomplete BTHome frames update telemetry only; they do not
 force OFF, reset ON hit counters, or refresh the stale-sensor timer. Xiaomi
 temperature and humidity may arrive in separate advertisements; when VPD assist

@@ -133,8 +133,8 @@ hardware actions.
 
 ### Sensor history and charts
 
-The current Xiaomi/PVVX chart preload reads the latest saved memo samples by
-count, not by a user-facing time window. The first implementation reads 50
+The current Xiaomi/PVVX manual history fetch reads the latest saved memo samples
+by count, not by a user-facing time window. The first implementation reads 50
 samples, so the visible time span depends on the thermometer's configured memo
 recording interval.
 
@@ -145,7 +145,7 @@ Planned improvements:
 - Store fetched Xiaomi/PVVX history locally per sensor, keyed by stable sensor
   identity plus sample timestamp/index, so the app does not download and append
   the same records repeatedly.
-- Add incremental sync: after the first full preload, fetch only newer records
+- Add incremental sync: after the first full history fetch, fetch only newer records
   where the PVVX protocol and device state allow it. If index-based incremental
   reads are unreliable, deduplicate locally and keep the UI honest about the
   refresh result.

@@ -176,6 +176,7 @@ export const pl = {
       relay: 'Przekaźnik',
       relayRule: 'Przekaźnik reguły',
       shellyRelay: 'Przekaźnik Shelly',
+      snapshotAge: 'Wiek snapshotu',
       temperature: 'Temperatura',
       temperatureShort: 'Temp.',
       thermometer: 'Termometr',
@@ -499,6 +500,7 @@ export const pl = {
     diagnostics: {
       actionRefresh: 'Odśwież diagnostykę',
       actionRefreshTitle: 'Pobierz aktualny stan skryptu i przekaźnika z Shelly',
+      ageAgo: '{duration} temu',
       empty: 'Sprawdź, czy na wybranym gniazdku jest skrypt Local Climate Link.',
       fetching: 'Pobieram',
       groupDecision: 'Input -> Processing -> Output',
@@ -521,7 +523,8 @@ export const pl = {
         'Skrypt Local Climate Link nie działa w Shelly. Status: {status}.',
       scriptOutOfMemory:
         'Skrypt Local Climate Link nie działa: Shelly zgłasza out_of_memory. Wyłącz Matter w Shelly, zrestartuj gniazdko i wyślij regułę ponownie.',
-      title: 'Diagnostyka'
+      title: 'Diagnostyka',
+      uptimeAt: 'uptime {duration}'
     },
     diagnosticsReason: {
       ab: 'Powyżej progu',
