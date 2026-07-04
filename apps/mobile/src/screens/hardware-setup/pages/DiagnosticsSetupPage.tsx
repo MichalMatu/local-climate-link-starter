@@ -122,6 +122,18 @@ const DiagnosticGroup = ({
   </details>
 );
 
+type DiagnosticSectionProps = {
+  title: string;
+  children: ReactNode;
+};
+
+const DiagnosticSection = ({ title, children }: DiagnosticSectionProps) => (
+  <section className="diagnostic-section" aria-label={title}>
+    <h3 className="diagnostic-section__title">{title}</h3>
+    <div className="diagnostic-section__rows">{children}</div>
+  </section>
+);
+
 export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
   const { locale, t } = useTranslation();
   const [isAppSettingsOpen, setIsAppSettingsOpen] = useState(false);
@@ -279,6 +291,103 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
         <div className="diagnostic-groups">
           <DiagnosticGroup
             defaultOpen
+            title={t('hardware.diagnostics.groupDecision')}
+            description={t('hardware.diagnostics.groupDecisionHint')}
+          >
+            <div className="diagnostic-ipo-grid">
+              <DiagnosticSection title={t('hardware.diagnostics.input')}>
+                <DiagnosticRow
+                  label={t('hardware.metrics.lastMeasurement')}
+                  value={formatEpochMs(diagnostics.lastSeen, locale, t('common.missing'))}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.temperature')}
+                  value={formatDiagnosticNumber(diagnostics.lastTemp, '°C')}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.humidity')}
+                  value={formatDiagnosticNumber(diagnostics.lastHumidity, '%')}
+                />
+                <DiagnosticRow
+                  label="VPD"
+                  value={formatDiagnosticNumber(diagnostics.lastVpd, ' kPa', 2)}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.dataBle')}
+                  value={formatReason(diagnostics.dataState, t)}
+                />
+              </DiagnosticSection>
+
+              <DiagnosticSection title={t('hardware.diagnostics.processing')}>
+                <DiagnosticRow
+                  label={t('hardware.metrics.controlValue')}
+                  value={formatDiagnosticNumber(
+                    diagnostics.lastControlValue,
+                    thresholdUnit
+                  )}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.thresholdOn')}
+                  value={formatDiagnosticNumber(
+                    diagnostics.lastEffectiveOnThreshold,
+                    thresholdUnit
+                  )}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.thresholdOff')}
+                  value={formatDiagnosticNumber(
+                    diagnostics.lastEffectiveOffThreshold,
+                    thresholdUnit
+                  )}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.reason')}
+                  value={formatReason(diagnostics.lastReason, t)}
+                />
+              </DiagnosticSection>
+
+              <DiagnosticSection title={t('hardware.diagnostics.output')}>
+                <DiagnosticRow
+                  label={t('hardware.metrics.relayRule')}
+                  value={diagnostics.relayState ? 'ON' : 'OFF'}
+                  tone={diagnostics.relayState ? 'warning' : 'normal'}
+                />
+                <DiagnosticRow
+                  label={t('hardware.metrics.shellyRelay')}
+                  value={formatPlugRelay(plug, t('common.missing'))}
+                  tone={plug?.relayState ? 'warning' : 'normal'}
+                />
+              </DiagnosticSection>
+            </div>
+          </DiagnosticGroup>
+
+          <DiagnosticGroup
+            title={t('hardware.diagnostics.groupSensor')}
+            description={t('hardware.diagnostics.groupSensorHint')}
+          >
+            <DiagnosticRow
+              label={t('hardware.metrics.thermometer')}
+              value={diagnosticSensorLabel}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.lastBlePacket')}
+              value={formatEpochMs(
+                diagnostics.lastPacketSeen,
+                locale,
+                t('common.missing')
+              )}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.battery')}
+              value={formatDiagnosticNumber(diagnostics.lastBattery, '%', 0)}
+            />
+            <DiagnosticRow
+              label="RSSI"
+              value={formatDiagnosticNumber(diagnostics.lastRssi, ' dBm', 0)}
+            />
+          </DiagnosticGroup>
+
+          <DiagnosticGroup
             title={t('hardware.diagnostics.groupRuntime')}
             description={t('hardware.diagnostics.groupRuntimeHint')}
           >
@@ -300,28 +409,6 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
               value={script?.configHash ?? t('common.missing')}
             />
             <DiagnosticRow
-              label={t('hardware.metrics.reason')}
-              value={formatReason(diagnostics.lastReason, t)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.dataBle')}
-              value={formatReason(diagnostics.dataState, t)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.thresholdOn')}
-              value={formatDiagnosticNumber(
-                diagnostics.lastEffectiveOnThreshold,
-                thresholdUnit
-              )}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.thresholdOff')}
-              value={formatDiagnosticNumber(
-                diagnostics.lastEffectiveOffThreshold,
-                thresholdUnit
-              )}
-            />
-            <DiagnosticRow
               label={t('hardware.metrics.clockShelly')}
               value={formatShellyTime(shellyTime, t('common.missing'))}
             />
@@ -333,61 +420,9 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
           </DiagnosticGroup>
 
           <DiagnosticGroup
-            title={t('hardware.diagnostics.groupSensor')}
-            description={t('hardware.diagnostics.groupSensorHint')}
-          >
-            <DiagnosticRow
-              label={t('hardware.metrics.thermometer')}
-              value={diagnosticSensorLabel}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.lastMeasurement')}
-              value={formatEpochMs(diagnostics.lastSeen, locale, t('common.missing'))}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.lastBlePacket')}
-              value={formatEpochMs(
-                diagnostics.lastPacketSeen,
-                locale,
-                t('common.missing')
-              )}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.temperature')}
-              value={formatDiagnosticNumber(diagnostics.lastTemp, '°C')}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.humidity')}
-              value={formatDiagnosticNumber(diagnostics.lastHumidity, '%')}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.battery')}
-              value={formatDiagnosticNumber(diagnostics.lastBattery, '%', 0)}
-            />
-            <DiagnosticRow
-              label="RSSI"
-              value={formatDiagnosticNumber(diagnostics.lastRssi, ' dBm', 0)}
-            />
-            <DiagnosticRow
-              label="VPD"
-              value={formatDiagnosticNumber(diagnostics.lastVpd, ' kPa', 2)}
-            />
-          </DiagnosticGroup>
-
-          <DiagnosticGroup
             title={t('hardware.diagnostics.groupShelly')}
             description={t('hardware.diagnostics.groupShellyHint')}
           >
-            <DiagnosticRow
-              label={t('hardware.metrics.shellyRelay')}
-              value={formatPlugRelay(plug, t('common.missing'))}
-              tone={plug?.relayState ? 'warning' : 'normal'}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.relayRule')}
-              value={diagnostics.relayState ? 'ON' : 'OFF'}
-              tone={diagnostics.relayState ? 'warning' : 'normal'}
-            />
             <DiagnosticRow
               label={t('hardware.metrics.power')}
               value={formatDiagnosticNumber(plug?.powerW, ' W')}

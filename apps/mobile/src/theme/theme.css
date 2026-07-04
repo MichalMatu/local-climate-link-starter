@@ -960,6 +960,36 @@ select {
   border-radius: 0;
 }
 
+.diagnostic-ipo-grid {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+}
+
+.diagnostic-section {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.diagnostic-section__title {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+  line-height: var(--lcl-line-height-compact);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.diagnostic-section__rows {
+  display: grid;
+}
+
+@media (min-width: 44rem) {
+  .diagnostic-ipo-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .control-action-row {
   align-items: center;
   display: inline-flex;
