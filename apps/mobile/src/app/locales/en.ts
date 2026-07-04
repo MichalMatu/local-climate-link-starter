@@ -424,8 +424,8 @@ export const en = {
       rssiMinLabel: 'Minimum RSSI dBm',
       ruleMode: 'Rule mode',
       script: 'Script',
-      scriptManager: 'Shelly script',
-      scriptManagerTitle: 'Read or remove script saved in Shelly',
+      scriptManager: 'Script from Shelly',
+      scriptManagerTitle: 'Fetch or remove script saved in Shelly',
       scriptPreview: 'Shelly Script preview',
       scriptPreviewAria: 'Show script',
       scriptPreviewTitle: 'Show generated Shelly Script',
@@ -497,7 +497,16 @@ export const en = {
       actionRefreshTitle: 'Fetch current script and relay state from Shelly',
       empty: 'Check whether the selected plug has a Local Climate Link script.',
       fetching: 'Fetching',
+      groupRuntime: 'Runtime',
+      groupRuntimeHint:
+        'Script status, last decision, rule thresholds, and Shelly clock.',
+      groupSensor: 'Thermometer',
+      groupSensorHint: 'Last BLE packet and data used by the rule.',
+      groupShelly: 'Plug',
+      groupShellyHint: 'Relay, energy draw, and physical Shelly state.',
       readFailed: 'Could not read diagnostics from Shelly script.',
+      refreshRequirement:
+        'Refresh requires the Local Climate Link script installed and running in AUTO.',
       scriptMissingConfirm: 'no confirmation',
       scriptNotRunning:
         'Local Climate Link script is not running in Shelly. Status: {status}.',

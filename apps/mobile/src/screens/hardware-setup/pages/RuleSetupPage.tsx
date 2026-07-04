@@ -684,9 +684,9 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
               : t('common.test')}
           </button>
         }
+        busy={flow.safeRelayTestMutation.isPending}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!flow.safeRelayTestMutation.isPending}
+        dismissible={false}
         open={isRelayTestModalOpen && flow.canRunSafeRelayTest}
         title={t('hardware.rule.relayTestTitle')}
         onClose={closeRelayTestModal}
@@ -741,9 +741,8 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
                 : t('hardware.rule.deleteScriptFromShelly')}
           </button>
         }
+        busy={isScriptManagerBusy}
         closeLabel={t('common.close')}
-        closeOnBackdrop={false}
-        closeOnEscape={!isScriptManagerBusy}
         open={isScriptManagerModalOpen}
         size="diagnostic"
         title={t('hardware.rule.scriptManager')}

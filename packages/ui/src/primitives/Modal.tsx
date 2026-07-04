@@ -7,8 +7,8 @@ export interface ModalProps {
   title: string;
   description?: string;
   closeLabel: string;
-  closeOnBackdrop?: boolean;
-  closeOnEscape?: boolean;
+  busy?: boolean;
+  dismissible?: boolean;
   initialFocus?: ModalInitialFocus;
   size?: 'default' | 'diagnostic' | 'workspace';
   children: ReactNode;
@@ -39,8 +39,8 @@ export const Modal = ({
   title,
   description,
   closeLabel,
-  closeOnBackdrop = true,
-  closeOnEscape = true,
+  busy = false,
+  dismissible = true,
   initialFocus = 'dialog',
   size = 'default',
   children,
@@ -53,6 +53,7 @@ export const Modal = ({
   const modalRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const canDismiss = dismissible && !busy;
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -68,7 +69,7 @@ export const Modal = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (closeOnEscape) {
+        if (canDismiss) {
           onCloseRef.current();
         }
         return;
@@ -138,7 +139,7 @@ export const Modal = ({
       }
       previouslyFocusedElementRef.current = null;
     };
-  }, [closeOnEscape, initialFocus, open]);
+  }, [canDismiss, initialFocus, open]);
 
   if (!open) {
     return null;
@@ -148,7 +149,7 @@ export const Modal = ({
     <div
       className={`lcl-modal-backdrop lcl-modal-backdrop--${size}`}
       role="presentation"
-      onClick={closeOnBackdrop ? onClose : undefined}
+      onClick={canDismiss ? onClose : undefined}
     >
       <section
         aria-describedby={description ? descriptionId : undefined}

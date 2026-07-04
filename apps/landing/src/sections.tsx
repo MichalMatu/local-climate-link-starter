@@ -3,7 +3,7 @@ import type { LandingLocale, landingMessages } from './content';
 type LandingCopy = (typeof landingMessages)[LandingLocale];
 
 const androidReleaseUrl =
-  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.2';
+  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.3';
 
 const navItems = (copy: LandingCopy) =>
   [

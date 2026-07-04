@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { DiagnosticRow, ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import mobilePackage from '../../../../package.json';
 import {
   AppSettingsModal,
@@ -99,6 +99,28 @@ const formatReason = (reason: string, t: Translate): string =>
   diagnosticReasonKeys.has(reason)
     ? t(`hardware.diagnosticsReason.${reason}` as TranslationKey)
     : reason;
+
+type DiagnosticGroupProps = {
+  title: string;
+  description: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+};
+
+const DiagnosticGroup = ({
+  title,
+  description,
+  defaultOpen = false,
+  children
+}: DiagnosticGroupProps) => (
+  <details className="diagnostic-group" open={defaultOpen || undefined}>
+    <summary>
+      <strong>{title}</strong>
+      <span>{description}</span>
+    </summary>
+    <div className="status-stack diagnostic-group__rows">{children}</div>
+  </details>
+);
 
 export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
   const { locale, t } = useTranslation();
@@ -205,16 +227,16 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
 
   return (
     <section className="demo-panel" aria-label={t('common.diagnostics')}>
-      <div className="panel-toolbar">
-        <div />
+      <div className="action-row diagnostics-settings-row">
         <button
-          className="icon-action"
+          className="secondary-action diagnostics-settings-button"
           type="button"
           aria-label={t('settings.open')}
           title={t('settings.open')}
           onClick={() => setIsAppSettingsOpen(true)}
         >
           <SettingsGearIcon />
+          {t('settings.open')}
         </button>
       </div>
 
@@ -239,7 +261,7 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
 
       <div className="action-row">
         <button
-          className="secondary-action"
+          className="secondary-action diagnostics-refresh-button"
           type="button"
           aria-busy={flow.diagnosticMutation.isPending || undefined}
           disabled={flow.diagnosticShelly === null || flow.diagnosticMutation.isPending}
@@ -251,119 +273,142 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             : t('hardware.diagnostics.actionRefresh')}
         </button>
       </div>
+      <p className="field__hint">{t('hardware.diagnostics.refreshRequirement')}</p>
 
       {diagnostics && (
-        <div className="status-stack">
-          <DiagnosticRow
-            label={t('hardware.rule.selectedShelly')}
-            value={flow.diagnosticShelly?.name ?? t('common.missing')}
-          />
-          <DiagnosticRow
-            label={t('hardware.rule.script')}
-            value={
-              script?.running
-                ? t('hardware.status.running')
-                : t('hardware.diagnostics.scriptMissingConfirm')
-            }
-            tone={script?.running ? 'normal' : 'warning'}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.configHash')}
-            value={script?.configHash ?? t('common.missing')}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.shellyRelay')}
-            value={formatPlugRelay(plug, t('common.missing'))}
-            tone={plug?.relayState ? 'warning' : 'normal'}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.power')}
-            value={formatDiagnosticNumber(plug?.powerW, ' W')}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.voltage')}
-            value={formatDiagnosticNumber(plug?.voltageV, ' V', 0)}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.current')}
-            value={formatDiagnosticNumber(plug?.currentA, ' A', 2)}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.energy')}
-            value={formatEnergy(plug?.energyWh, t('common.missing'))}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.plugTemperature')}
-            value={formatDiagnosticNumber(plug?.deviceTemperatureC, '°C')}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.thermometer')}
-            value={diagnosticSensorLabel}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.clockShelly')}
-            value={formatShellyTime(shellyTime, t('common.missing'))}
-          />
-          <DiagnosticRow
-            label={t('hardware.shelly.clockSync')}
-            value={formatTimeSyncState(shellyTime, t)}
-            tone={shellyTime?.isSynced ? 'normal' : 'warning'}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.lastMeasurement')}
-            value={formatEpochMs(diagnostics.lastSeen, locale, t('common.missing'))}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.lastBlePacket')}
-            value={formatEpochMs(diagnostics.lastPacketSeen, locale, t('common.missing'))}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.temperature')}
-            value={formatDiagnosticNumber(diagnostics.lastTemp, '°C')}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.humidity')}
-            value={formatDiagnosticNumber(diagnostics.lastHumidity, '%')}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.battery')}
-            value={formatDiagnosticNumber(diagnostics.lastBattery, '%', 0)}
-          />
-          <DiagnosticRow
-            label="RSSI"
-            value={formatDiagnosticNumber(diagnostics.lastRssi, ' dBm', 0)}
-          />
-          <DiagnosticRow
-            label="VPD"
-            value={formatDiagnosticNumber(diagnostics.lastVpd, ' kPa', 2)}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.thresholdOn')}
-            value={formatDiagnosticNumber(
-              diagnostics.lastEffectiveOnThreshold,
-              thresholdUnit
-            )}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.thresholdOff')}
-            value={formatDiagnosticNumber(
-              diagnostics.lastEffectiveOffThreshold,
-              thresholdUnit
-            )}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.reason')}
-            value={formatReason(diagnostics.lastReason, t)}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.dataBle')}
-            value={formatReason(diagnostics.dataState, t)}
-          />
-          <DiagnosticRow
-            label={t('hardware.metrics.relayRule')}
-            value={diagnostics.relayState ? 'ON' : 'OFF'}
-            tone={diagnostics.relayState ? 'warning' : 'normal'}
-          />
+        <div className="diagnostic-groups">
+          <DiagnosticGroup
+            defaultOpen
+            title={t('hardware.diagnostics.groupRuntime')}
+            description={t('hardware.diagnostics.groupRuntimeHint')}
+          >
+            <DiagnosticRow
+              label={t('hardware.rule.selectedShelly')}
+              value={flow.diagnosticShelly?.name ?? t('common.missing')}
+            />
+            <DiagnosticRow
+              label={t('hardware.rule.script')}
+              value={
+                script?.running
+                  ? t('hardware.status.running')
+                  : t('hardware.diagnostics.scriptMissingConfirm')
+              }
+              tone={script?.running ? 'normal' : 'warning'}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.configHash')}
+              value={script?.configHash ?? t('common.missing')}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.reason')}
+              value={formatReason(diagnostics.lastReason, t)}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.dataBle')}
+              value={formatReason(diagnostics.dataState, t)}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.thresholdOn')}
+              value={formatDiagnosticNumber(
+                diagnostics.lastEffectiveOnThreshold,
+                thresholdUnit
+              )}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.thresholdOff')}
+              value={formatDiagnosticNumber(
+                diagnostics.lastEffectiveOffThreshold,
+                thresholdUnit
+              )}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.clockShelly')}
+              value={formatShellyTime(shellyTime, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.shelly.clockSync')}
+              value={formatTimeSyncState(shellyTime, t)}
+              tone={shellyTime?.isSynced ? 'normal' : 'warning'}
+            />
+          </DiagnosticGroup>
+
+          <DiagnosticGroup
+            title={t('hardware.diagnostics.groupSensor')}
+            description={t('hardware.diagnostics.groupSensorHint')}
+          >
+            <DiagnosticRow
+              label={t('hardware.metrics.thermometer')}
+              value={diagnosticSensorLabel}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.lastMeasurement')}
+              value={formatEpochMs(diagnostics.lastSeen, locale, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.lastBlePacket')}
+              value={formatEpochMs(
+                diagnostics.lastPacketSeen,
+                locale,
+                t('common.missing')
+              )}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.temperature')}
+              value={formatDiagnosticNumber(diagnostics.lastTemp, '°C')}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.humidity')}
+              value={formatDiagnosticNumber(diagnostics.lastHumidity, '%')}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.battery')}
+              value={formatDiagnosticNumber(diagnostics.lastBattery, '%', 0)}
+            />
+            <DiagnosticRow
+              label="RSSI"
+              value={formatDiagnosticNumber(diagnostics.lastRssi, ' dBm', 0)}
+            />
+            <DiagnosticRow
+              label="VPD"
+              value={formatDiagnosticNumber(diagnostics.lastVpd, ' kPa', 2)}
+            />
+          </DiagnosticGroup>
+
+          <DiagnosticGroup
+            title={t('hardware.diagnostics.groupShelly')}
+            description={t('hardware.diagnostics.groupShellyHint')}
+          >
+            <DiagnosticRow
+              label={t('hardware.metrics.shellyRelay')}
+              value={formatPlugRelay(plug, t('common.missing'))}
+              tone={plug?.relayState ? 'warning' : 'normal'}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.relayRule')}
+              value={diagnostics.relayState ? 'ON' : 'OFF'}
+              tone={diagnostics.relayState ? 'warning' : 'normal'}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.power')}
+              value={formatDiagnosticNumber(plug?.powerW, ' W')}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.voltage')}
+              value={formatDiagnosticNumber(plug?.voltageV, ' V', 0)}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.current')}
+              value={formatDiagnosticNumber(plug?.currentA, ' A', 2)}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.energy')}
+              value={formatEnergy(plug?.energyWh, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.plugTemperature')}
+              value={formatDiagnosticNumber(plug?.deviceTemperatureC, '°C')}
+            />
+          </DiagnosticGroup>
         </div>
       )}
       <ToastViewport

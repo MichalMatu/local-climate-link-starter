@@ -6,7 +6,7 @@ import {
   pvvxMemoSampleToMeasurement,
   PVVX_CHARACTERISTIC_UUID,
   PVVX_SERVICE_UUID,
-  toPvvxLocalTimeSec,
+  toPvvxDeviceTimeSec,
   type PvvxMemoSample,
   type PvvxTimeStatus
 } from './protocol.js';
@@ -17,6 +17,7 @@ export interface ReadPvvxMemoOptions {
   sensorId: string;
   count?: number;
   timeoutMs?: number;
+  timezoneOffsetMinutes?: number;
 }
 
 export interface SetPvvxTimeOptions {
@@ -24,6 +25,7 @@ export interface SetPvvxTimeOptions {
   deviceId: string;
   now?: Date;
   timeoutMs?: number;
+  timezoneOffsetMinutes?: number;
 }
 
 export interface PvvxMemoResult {
@@ -46,7 +48,8 @@ export const readPvvxMemoHistory = async ({
   deviceId,
   sensorId,
   count = DEFAULT_MEMO_COUNT,
-  timeoutMs = DEFAULT_MEMO_TIMEOUT_MS
+  timeoutMs = DEFAULT_MEMO_TIMEOUT_MS,
+  timezoneOffsetMinutes
 }: ReadPvvxMemoOptions): Promise<PvvxMemoResult> => {
   const samples: PvvxMemoSample[] = [];
   let subscription: BleGattSubscription | null = null;
@@ -99,7 +102,7 @@ export const readPvvxMemoHistory = async ({
     return {
       samples: sortedSamples,
       measurements: sortedSamples.map((sample) =>
-        pvvxMemoSampleToMeasurement(sensorId, sample)
+        pvvxMemoSampleToMeasurement(sensorId, sample, timezoneOffsetMinutes)
       )
     };
   } finally {
@@ -115,7 +118,8 @@ export const setPvvxDeviceTime = async ({
   gatt,
   deviceId,
   now = new Date(),
-  timeoutMs = DEFAULT_TIME_TIMEOUT_MS
+  timeoutMs = DEFAULT_TIME_TIMEOUT_MS,
+  timezoneOffsetMinutes
 }: SetPvvxTimeOptions): Promise<PvvxTimeStatus | null> => {
   let subscription: BleGattSubscription | null = null;
   let resolveStatus: ((status: PvvxTimeStatus | null) => void) | null = null;
@@ -144,7 +148,7 @@ export const setPvvxDeviceTime = async ({
       deviceId,
       PVVX_SERVICE_UUID,
       PVVX_CHARACTERISTIC_UUID,
-      createPvvxSetTimeCommand(toPvvxLocalTimeSec(now)),
+      createPvvxSetTimeCommand(toPvvxDeviceTimeSec(now, timezoneOffsetMinutes)),
       { timeoutMs }
     );
     return await completion;
