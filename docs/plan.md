@@ -208,6 +208,30 @@ Planned improvements:
   hardware checklist for real Shelly relay transitions and signal-quality
   scoring.
 
+### Shelly LED indication setup
+
+Shelly Plug S Gen3 can keep the LED lit green while the relay is OFF when
+`PLUGS_UI` is configured in `power` mode. In that mode green means low or zero
+power draw, not that the Local Climate Link automation is ON. Treat LED behavior
+as device UI configuration, not as part of the thermostat runtime script.
+
+Planned improvements:
+
+- Read `PLUGS_UI.GetConfig` during Shelly setup and diagnostics when the method
+  is available.
+- Show a short, plain-language explanation when LED mode is `power`, so the user
+  does not confuse a green LED with relay ON or script health.
+- Add an install-time app option to set LED indication to `switch` mode, with
+  relay ON shown as green and relay OFF set to brightness `0`, or to set LED
+  indication completely `off`.
+- Keep generated thermostat scripts free of LED control. The script should own
+  only automation safety, relay decisions, and diagnostics; LED configuration
+  should be applied once by the app through `PLUGS_UI.SetConfig`.
+- Include the LED mode in support diagnostics when available, but do not present
+  LED state as proof that automation is running.
+- Add Shelly client validation and tests for `PLUGS_UI.GetConfig` and
+  `PLUGS_UI.SetConfig` before exposing this in the setup flow.
+
 ## Known validation gaps
 
 - Xiaomi/PVVX and TP357 need repeated dated checks on real Shelly hardware.
