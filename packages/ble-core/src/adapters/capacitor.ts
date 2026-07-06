@@ -18,6 +18,7 @@ type ScanPlatform = NormalizedBleAdvertisement['platform'];
 export interface CapacitorBleScannerOptions {
   clientLoader?: () => Promise<BleClientInterface>;
   platform?: ScanPlatform | string;
+  requireLocationServices?: boolean;
 }
 
 export interface NormalizeCapacitorScanOptions {
@@ -151,10 +152,12 @@ export class CapacitorBleScanner implements BleScanner {
   private activeStop: (() => Promise<void>) | null = null;
   private readonly clientLoader: BleClientLoader;
   private readonly platform: ScanPlatform;
+  private readonly requireLocationServices: boolean;
 
   constructor(options: CapacitorBleScannerOptions = {}) {
     this.clientLoader = options.clientLoader ?? loadBleClient;
     this.platform = normalizeScanPlatform(options.platform);
+    this.requireLocationServices = options.requireLocationServices ?? false;
   }
 
   async *startScan(options: ScanOptions = {}): AsyncIterable<NormalizedBleAdvertisement> {
@@ -196,7 +199,7 @@ export class CapacitorBleScanner implements BleScanner {
       if (!booleanValue(await client.isEnabled())) {
         throw createError('ble-unavailable', 'Bluetooth is disabled.', true);
       }
-      if (!(await isLocationEnabledIfAvailable(client))) {
+      if (this.requireLocationServices && !(await isLocationEnabledIfAvailable(client))) {
         throw createError(
           'permission-denied',
           'Android Location services are off.',

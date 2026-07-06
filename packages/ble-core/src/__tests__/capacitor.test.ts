@@ -113,7 +113,7 @@ describe('CapacitorBleScanner', () => {
     expect(client.requestLEScan).not.toHaveBeenCalled();
   });
 
-  it('blocks Android scans when location services are disabled', async () => {
+  it('does not require the location-services precheck by default', async () => {
     const client: BleClientInterface = {
       initialize: vi.fn().mockResolvedValue(undefined),
       isEnabled: vi.fn().mockResolvedValue({ value: true }),
@@ -123,6 +123,25 @@ describe('CapacitorBleScanner', () => {
       stopLEScan: vi.fn().mockResolvedValue(undefined)
     } as unknown as BleClientInterface;
     const scanner = new CapacitorBleScanner({ clientLoader: async () => client });
+    const iterator = scanner.startScan({ timeoutMs: 1 })[Symbol.asyncIterator]();
+
+    await expect(iterator.next()).resolves.toMatchObject({ done: true });
+    expect(client.requestLEScan).toHaveBeenCalledTimes(1);
+  });
+
+  it('can block Android scans when location services are required', async () => {
+    const client: BleClientInterface = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      isEnabled: vi.fn().mockResolvedValue({ value: true }),
+      isLocationEnabled: vi.fn().mockResolvedValue(false),
+      requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestLEScan: vi.fn(async () => undefined),
+      stopLEScan: vi.fn().mockResolvedValue(undefined)
+    } as unknown as BleClientInterface;
+    const scanner = new CapacitorBleScanner({
+      clientLoader: async () => client,
+      requireLocationServices: true
+    });
     const iterator = scanner.startScan({ timeoutMs: 1 })[Symbol.asyncIterator]();
 
     await expect(iterator.next()).rejects.toMatchObject({

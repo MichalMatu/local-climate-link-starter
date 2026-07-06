@@ -3,7 +3,9 @@ import type { LandingLocale, landingMessages } from './content';
 type LandingCopy = (typeof landingMessages)[LandingLocale];
 
 const androidReleaseUrl =
-  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.4';
+  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.5';
+const contactEmail = 'meehow939@gmail.com';
+const privacyUrl = `${import.meta.env.BASE_URL}privacy.html`;
 
 const navItems = (copy: LandingCopy) =>
   [
@@ -126,11 +128,11 @@ export const AppPreview = ({ copy }: { copy: LandingCopy }) => (
           <div className="app-chart-stack">
             <div className="app-chart-card">
               <strong>24.7°C</strong>
-              <AppPreviewSparkline points="M2 20 C12 17 18 21 28 18 S43 15 54 18 70 12 86 17 98 10" />
+              <AppPreviewSparkline points="M2 20 C12 17 18 21 28 18 S43 15 54 18 S70 12 86 17 S94 12 98 10" />
             </div>
             <div className="app-chart-card">
               <strong>44%</strong>
-              <AppPreviewSparkline points="M2 19 C15 18 24 21 34 20 S51 17 61 13 74 16 86 12 98 15" />
+              <AppPreviewSparkline points="M2 19 C15 18 24 21 34 20 S51 17 61 13 S74 16 86 12 S94 13 98 15" />
             </div>
           </div>
         </article>
@@ -218,6 +220,8 @@ export const Footer = ({ copy }: { copy: LandingCopy }) => (
       <a href="https://www.shelly.com/" rel="noreferrer" target="_blank">
         Shelly
       </a>
+      <a href={privacyUrl}>{copy.footer.privacy}</a>
+      <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
     </div>
   </footer>
 );

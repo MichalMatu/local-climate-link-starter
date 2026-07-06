@@ -52,7 +52,15 @@ describe('LandingPage', () => {
     );
     expect(screen.getByRole('link', { name: 'Download APK' })).toHaveAttribute(
       'href',
-      'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.4'
+      'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.5'
+    );
+    expect(screen.getByRole('link', { name: 'meehow939@gmail.com' })).toHaveAttribute(
+      'href',
+      'mailto:meehow939@gmail.com'
+    );
+    expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute(
+      'href',
+      '/privacy.html'
     );
   });
 

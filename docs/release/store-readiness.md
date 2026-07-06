@@ -10,9 +10,14 @@ Android:
 
 - Build the release variant.
 - Inspect the merged manifest.
+- Confirm the public privacy policy is live at
+  `https://michalmatu.github.io/local-climate-link-starter/privacy.html`.
 - Confirm BLE permissions match the platform notes.
+- Confirm location permissions are capped to Android 11 and lower and no
+  background location is requested.
 - Confirm local Shelly HTTP still works through `CapacitorHttp`.
 - Confirm `@lcl/shelly-client` rejects non-local RPC hosts before fetch.
+- Use `docs/release/google-play.md` for Play Console app creation values.
 
 iOS:
 

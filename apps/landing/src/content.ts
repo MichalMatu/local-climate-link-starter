@@ -79,6 +79,7 @@ type LandingMessages = {
   };
   footer: {
     tagline: string;
+    privacy: string;
   };
 };
 
@@ -224,7 +225,8 @@ const pl: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — lokalny klimat bez huba.'
+    tagline: 'Local Climate Link — lokalny klimat bez huba.',
+    privacy: 'Prywatność'
   }
 };
 
@@ -333,7 +335,8 @@ const en: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — local climate without a hub.'
+    tagline: 'Local Climate Link — local climate without a hub.',
+    privacy: 'Privacy'
   }
 };
 
@@ -456,7 +459,8 @@ const de: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — lokales Klima ohne Hub.'
+    tagline: 'Local Climate Link — lokales Klima ohne Hub.',
+    privacy: 'Datenschutz'
   }
 };
 
@@ -578,7 +582,8 @@ const es: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — clima local sin hub.'
+    tagline: 'Local Climate Link — clima local sin hub.',
+    privacy: 'Privacidad'
   }
 };
 
@@ -701,7 +706,8 @@ const fr: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — climat local sans hub.'
+    tagline: 'Local Climate Link — climat local sans hub.',
+    privacy: 'Confidentialité'
   }
 };
 
@@ -822,7 +828,8 @@ const it: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — clima locale senza hub.'
+    tagline: 'Local Climate Link — clima locale senza hub.',
+    privacy: 'Privacy'
   }
 };
 
@@ -943,7 +950,8 @@ const ptBr: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — clima local sem hub.'
+    tagline: 'Local Climate Link — clima local sem hub.',
+    privacy: 'Privacidade'
   }
 };
 
