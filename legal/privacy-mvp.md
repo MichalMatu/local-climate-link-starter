@@ -42,3 +42,17 @@ Do not include by default:
 ## Future changes
 
 Any analytics, crash reporting, cloud backup, remote support, or marketplace profile sync requires a separate product decision, opt-in UX, and documentation update.
+
+## Public policy and contact
+
+Public URL for Google Play:
+
+```text
+https://michalmatu.github.io/local-climate-link-starter/privacy.html
+```
+
+Contact:
+
+```text
+meehow939@gmail.com
+```
