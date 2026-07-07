@@ -3,7 +3,7 @@ import type { LandingLocale, landingMessages } from './content';
 type LandingCopy = (typeof landingMessages)[LandingLocale];
 
 const androidReleaseUrl =
-  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.5';
+  'https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.6';
 const contactEmail = 'meehow939@gmail.com';
 const privacyUrl = `${import.meta.env.BASE_URL}privacy.html`;
 
