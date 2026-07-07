@@ -28,6 +28,10 @@ type DiagnosticPlug = NonNullable<
   HardwarePageProps['flow']['diagnosticSnapshot']
 >['plug'];
 
+type DiagnosticDetails = NonNullable<
+  HardwarePageProps['flow']['diagnosticSnapshot']
+>['diagnostics'];
+
 const formatShellyTime = (
   time: DiagnosticTime | undefined,
   missingLabel: string
@@ -136,6 +140,20 @@ const formatReason = (reason: string, t: Translate): string =>
   diagnosticReasonKeys.has(reason)
     ? t(`hardware.diagnosticsReason.${reason}` as TranslationKey)
     : reason;
+
+const formatBleDataState = (diagnostics: DiagnosticDetails, t: Translate): string => {
+  const hasRuleValue =
+    typeof diagnostics.lastControlValue === 'number' &&
+    Number.isFinite(diagnostics.lastControlValue) &&
+    typeof diagnostics.lastSeenUptimeMs === 'number' &&
+    Number.isFinite(diagnostics.lastSeenUptimeMs);
+
+  if (diagnostics.dataState === 'cv' && diagnostics.lastReason !== 'cv' && hasRuleValue) {
+    return '-';
+  }
+
+  return formatReason(diagnostics.dataState, t);
+};
 
 type DiagnosticGroupProps = {
   title: string;
@@ -381,7 +399,7 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
                 />
                 <DiagnosticRow
                   label={t('hardware.metrics.dataBle')}
-                  value={formatReason(diagnostics.dataState, t)}
+                  value={formatBleDataState(diagnostics, t)}
                 />
               </DiagnosticSection>
 
