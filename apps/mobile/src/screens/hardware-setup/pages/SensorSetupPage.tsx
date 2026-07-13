@@ -442,7 +442,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
           title={t('hardware.sensor.addTitle')}
           onClick={openAddSensorModal}
         >
-          <span aria-hidden="true">+ </span>
           {t('hardware.sensor.add')}
         </button>
       </div>
@@ -451,26 +450,27 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
         closeLabel={t('common.close')}
         open={isAddSensorModalOpen}
         title={t('hardware.sensor.add')}
+        headerActions={
+          <button
+            className="secondary-action"
+            type="button"
+            disabled={isPhoneBleScanPending}
+            title={t('hardware.sensor.scanPhoneTitle')}
+            onClick={openPhoneBleScanModal}
+            style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}
+          >
+            Skanuj
+          </button>
+        }
         actions={
-          <>
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={isPhoneBleScanPending}
-              title={t('hardware.sensor.scanPhoneTitle')}
-              onClick={openPhoneBleScanModal}
-            >
-              {t('hardware.sensor.scanBle')}
-            </button>
-            <button
-              className="secondary-action"
-              type="button"
-              title={t('hardware.sensor.addFromMacTitle')}
-              onClick={addSensor}
-            >
-              {t('common.add')}
-            </button>
-          </>
+          <button
+            className="primary-action"
+            type="button"
+            title={t('hardware.sensor.addFromMacTitle')}
+            onClick={addSensor}
+          >
+            {t('common.add')}
+          </button>
         }
         onClose={closeAddSensorModal}
       >

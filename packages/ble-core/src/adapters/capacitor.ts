@@ -192,7 +192,11 @@ export class CapacitorBleScanner implements BleScanner {
         : null;
 
     try {
-      await client.initialize();
+      await client.initialize({
+        // Assert that we don't use scan results for location (avoids needing location permission on Android 12+)
+        androidNeverForLocation: true
+      });
+
       if (!booleanValue(await client.isEnabled())) {
         await client.requestEnable();
       }

@@ -52,6 +52,7 @@ describe('CapacitorBleScanner', () => {
       initialize: vi.fn().mockResolvedValue(undefined),
       isEnabled: vi.fn().mockResolvedValue({ value: true }),
       requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestPermissions: vi.fn().mockResolvedValue({ granted: true }),
       requestLEScan: vi.fn(async (_options, callback) => {
         scanState.callback = callback;
       }),
@@ -99,6 +100,7 @@ describe('CapacitorBleScanner', () => {
       initialize: vi.fn().mockRejectedValue(new Error('Permission denied.')),
       isEnabled: vi.fn().mockResolvedValue({ value: true }),
       requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestPermissions: vi.fn().mockResolvedValue({ granted: true }),
       requestLEScan: vi.fn(async () => undefined),
       stopLEScan: vi.fn().mockResolvedValue(undefined)
     } as unknown as BleClientInterface;
@@ -119,6 +121,7 @@ describe('CapacitorBleScanner', () => {
       isEnabled: vi.fn().mockResolvedValue({ value: true }),
       isLocationEnabled: vi.fn().mockResolvedValue(false),
       requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestPermissions: vi.fn().mockResolvedValue({ granted: true }),
       requestLEScan: vi.fn(async () => undefined),
       stopLEScan: vi.fn().mockResolvedValue(undefined)
     } as unknown as BleClientInterface;
@@ -135,6 +138,7 @@ describe('CapacitorBleScanner', () => {
       isEnabled: vi.fn().mockResolvedValue({ value: true }),
       isLocationEnabled: vi.fn().mockResolvedValue(false),
       requestEnable: vi.fn().mockResolvedValue(undefined),
+      requestPermissions: vi.fn().mockResolvedValue({ granted: true }),
       requestLEScan: vi.fn(async () => undefined),
       stopLEScan: vi.fn().mockResolvedValue(undefined)
     } as unknown as BleClientInterface;

@@ -869,7 +869,6 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
           title={t('hardware.shelly.addTitle')}
           onClick={openAddShellyModal}
         >
-          <span aria-hidden="true">+ </span>
           {t('hardware.shelly.add')}
         </button>
       </div>
@@ -879,30 +878,31 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
         closeLabel={t('common.close')}
         open={isAddShellyModalOpen}
         title={t('hardware.shelly.add')}
+        headerActions={
+          <button
+            className="secondary-action"
+            type="button"
+            disabled={isAnyShellyCheckPending}
+            title={t('hardware.shelly.networkScanTitle')}
+            onClick={openScanModalFromAdd}
+            style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}
+          >
+            Skanuj
+          </button>
+        }
         actions={
-          <>
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={isAnyShellyCheckPending}
-              title={t('hardware.shelly.networkScanTitle')}
-              onClick={openScanModalFromAdd}
-            >
-              {t('hardware.shelly.scanNetwork')}
-            </button>
-            <button
-              className="secondary-action"
-              type="button"
-              aria-busy={flow.checkShellyMutation.isPending || undefined}
-              disabled={isAnyShellyCheckPending}
-              title={t('hardware.shelly.checkTitle')}
-              onClick={checkShelly}
-            >
-              {flow.checkShellyMutation.isPending
-                ? t('hardware.shelly.checking')
-                : t('hardware.shelly.checkAdd')}
-            </button>
-          </>
+          <button
+            className="primary-action"
+            type="button"
+            aria-busy={flow.checkShellyMutation.isPending || undefined}
+            disabled={isAnyShellyCheckPending}
+            title={t('hardware.shelly.addCheckedTitle')}
+            onClick={checkShelly}
+          >
+            {flow.checkShellyMutation.isPending
+              ? t('hardware.shelly.checking')
+              : t('common.add')}
+          </button>
         }
         onClose={closeAddShellyModal}
       >

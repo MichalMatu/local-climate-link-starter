@@ -131,7 +131,11 @@ const phoneBleScanErrorMessage = (error: unknown): string => {
     return t('hardware.sensor.phoneBleUnavailableInBrowser');
   }
 
-  return t('hardware.sensor.phoneBleGenericFailed');
+  // Fallback with original message for debugging
+  const original = errorMessage(error);
+  return original
+    ? `${t('hardware.sensor.phoneBleGenericFailed')} (${original})`
+    : t('hardware.sensor.phoneBleGenericFailed');
 };
 
 export const scanPhoneBleSensors = async ({
