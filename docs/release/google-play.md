@@ -10,8 +10,8 @@ Default language: English (United States)
 App or game: App
 Free or paid: Free
 Package name / applicationId: link.localclimate.app
-Current versionName: 2.0.5
-Current versionCode: 20005
+Current versionName: 2.0.7
+Current versionCode: 20007
 Privacy policy URL: https://michalmatu.github.io/local-climate-link-starter/privacy.html
 Support email: meehow939@gmail.com
 ```
