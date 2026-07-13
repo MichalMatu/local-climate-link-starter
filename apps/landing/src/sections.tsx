@@ -9,6 +9,7 @@ const androidReleaseUrl =
   'https://github.com/MichalMatu/local-climate-link-starter/releases/latest';
 const contactEmail = 'meehow939@gmail.com';
 const privacyUrl = `${import.meta.env.BASE_URL}privacy.html`;
+const brandIconUrl = `${import.meta.env.BASE_URL}assets/brand-icon.png`;
 
 const navItems = (copy: LandingCopy) =>
   [
@@ -21,9 +22,14 @@ const navItems = (copy: LandingCopy) =>
 export const Header = ({ copy }: { copy: LandingCopy }) => (
   <header className="site-header">
     <a className="brand" href="#top" aria-label={copy.common.brand}>
-      <span className="brand__mark" aria-hidden="true">
-        L
-      </span>
+      <img
+        className="brand__mark"
+        src={brandIconUrl}
+        alt=""
+        width={32}
+        height={32}
+        decoding="async"
+      />
       <span>{copy.common.brand}</span>
     </a>
     <nav className="site-nav" aria-label={copy.nav.sectionsAria}>

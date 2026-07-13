@@ -11,15 +11,12 @@
 }
 
 .brand__mark {
-  display: inline-grid;
+  display: block;
   width: 2rem;
   height: 2rem;
-  place-items: center;
+  flex-shrink: 0;
   border-radius: 0.65rem;
-  background: var(--landing-ink);
-  color: var(--landing-ink-text);
-  font-size: 0.95rem;
-  font-weight: 900;
+  object-fit: cover;
 }
 
 .site-nav {
@@ -27,6 +24,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
+  margin-inline-start: auto;
 }
 
 .site-nav a,
@@ -45,7 +43,8 @@
 }
 
 .header-cta {
-  justify-self: end;
+  flex-shrink: 0;
+  margin-inline-end: var(--lcl-spacing-sm);
   background: var(--landing-accent);
   color: var(--landing-accent-text);
 }

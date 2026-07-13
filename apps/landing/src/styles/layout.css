@@ -3,14 +3,14 @@
   z-index: var(--lcl-z-index-header);
   top: 0;
   left: 50%;
-  display: grid;
+  display: flex;
   width: min(calc(100% - 2rem), var(--landing-page-max));
   min-height: 4rem;
-  grid-template-columns: minmax(13rem, 1fr) auto minmax(8.5rem, 1fr);
   align-items: center;
-  gap: 1rem;
+  gap: 0.65rem;
   margin-top: 0.75rem;
-  padding: 0.5rem;
+  padding-block: var(--lcl-spacing-sm);
+  padding-inline: var(--lcl-spacing-sm) var(--lcl-spacing-md);
   border: var(--lcl-border-width-sm) solid var(--landing-border);
   border-radius: var(--landing-radius-xl);
   background: var(--landing-surface-soft);

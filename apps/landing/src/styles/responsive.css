@@ -1,10 +1,11 @@
 @media (max-width: 62rem) {
   .site-header {
-    grid-template-columns: 1fr auto;
+    justify-content: space-between;
   }
 
   .site-nav {
     display: none;
+    margin-inline-start: 0;
   }
 
   .hero {
@@ -51,7 +52,6 @@
   .site-header {
     width: calc(100% - 1rem);
     min-height: 3.6rem;
-    grid-template-columns: 1fr auto;
     margin-top: 0.5rem;
   }
 
@@ -62,7 +62,6 @@
   .brand__mark {
     width: 2.15rem;
     height: 2.15rem;
-    font-size: 1rem;
   }
 
   .header-cta {

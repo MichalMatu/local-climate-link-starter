@@ -31,6 +31,9 @@ describe('LandingPage', () => {
   it('shows the Polish product promise and primary beta action', () => {
     render(<LandingPage initialLocale="pl" />);
 
+    expect(screen.getByRole('link', { name: 'Local Climate Link' })).toContainElement(
+      screen.getByRole('presentation')
+    );
     expect(
       screen.getByRole('heading', { level: 1, name: 'Termostat bez huba' })
     ).toBeInTheDocument();
