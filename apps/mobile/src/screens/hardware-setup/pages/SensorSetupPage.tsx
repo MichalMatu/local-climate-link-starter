@@ -459,7 +459,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
             onClick={openPhoneBleScanModal}
             style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}
           >
-            Skanuj
+            {t('hardware.sensor.scanBle')}
           </button>
         }
         actions={

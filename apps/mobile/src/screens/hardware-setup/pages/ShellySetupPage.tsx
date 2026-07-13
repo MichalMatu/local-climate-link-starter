@@ -887,7 +887,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
             onClick={openScanModalFromAdd}
             style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}
           >
-            Skanuj
+            {t('hardware.shelly.scanNetwork')}
           </button>
         }
         actions={
