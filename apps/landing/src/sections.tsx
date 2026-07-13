@@ -128,7 +128,7 @@ export const AppPreview = ({ copy }: { copy: LandingCopy }) => (
         <span>{copy.preview.tabs.diag}</span>
       </div>
       <div className="app-sensor-panel">
-        <div className="app-add">{`+${copy.preview.addThermometer}`}</div>
+        <div className="app-add">{copy.preview.addThermometer}</div>
         <article className="app-sensor-card">
           <div className="app-sensor-header">
             <h3>{copy.preview.sensorName}</h3>

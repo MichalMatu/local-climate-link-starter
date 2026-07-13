@@ -187,7 +187,7 @@ const pl: LandingMessages = {
       diag: 'Diag'
     },
     addThermometer: 'Dodaj termometr',
-    sensorName: 'Termometr 24:CD'
+    sensorName: 'Salon'
   },
   instructions: {
     title: 'Instrukcja startu',
@@ -297,7 +297,7 @@ const en: LandingMessages = {
       diag: 'Diag'
     },
     addThermometer: 'Add thermometer',
-    sensorName: 'Thermometer 24:CD'
+    sensorName: 'Living room'
   },
   instructions: {
     title: 'Getting started',
@@ -421,7 +421,7 @@ const de: LandingMessages = {
     aria: 'App-Vorschau von Local Climate Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensoren', rule: 'Regel', diag: 'Diag' },
     addThermometer: 'Thermometer hinzufügen',
-    sensorName: 'Thermometer 24:CD'
+    sensorName: 'Wohnzimmer'
   },
   instructions: {
     title: 'Startanleitung',
@@ -545,7 +545,7 @@ const es: LandingMessages = {
     aria: 'Vista previa de la app Local Climate Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensores', rule: 'Regla', diag: 'Diag' },
     addThermometer: 'Añadir termómetro',
-    sensorName: 'Termómetro 24:CD'
+    sensorName: 'Salón'
   },
   instructions: {
     title: 'Primeros pasos',
@@ -668,7 +668,7 @@ const fr: LandingMessages = {
     aria: 'Aperçu de l’app Local Climate Link',
     tabs: { shelly: 'Shelly', sensors: 'Capteurs', rule: 'Règle', diag: 'Diag' },
     addThermometer: 'Ajouter un thermomètre',
-    sensorName: 'Thermomètre 24:CD'
+    sensorName: 'Salon'
   },
   instructions: {
     title: 'Démarrage',
@@ -791,7 +791,7 @@ const it: LandingMessages = {
     aria: 'Anteprima dell’app Local Climate Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensori', rule: 'Regola', diag: 'Diag' },
     addThermometer: 'Aggiungi termometro',
-    sensorName: 'Termometro 24:CD'
+    sensorName: 'Soggiorno'
   },
   instructions: {
     title: 'Primi passi',
@@ -913,7 +913,7 @@ const ptBr: LandingMessages = {
     aria: 'Prévia do app Local Climate Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensores', rule: 'Regra', diag: 'Diag' },
     addThermometer: 'Adicionar termômetro',
-    sensorName: 'Termômetro 24:CD'
+    sensorName: 'Sala'
   },
   instructions: {
     title: 'Primeiros passos',
