@@ -54,25 +54,24 @@ pre-push   -> pnpm check
 
 ## Git branch model
 
-The repository uses two intentionally separate branch roles:
+`main` is the primary branch:
 
-```text
-work -> day-to-day development branch with normal commit history
-main -> release-only branch with one snapshot commit per public version
-```
+- All day-to-day development happens on `main`.
+- Releases are prepared and tagged directly on `main` (normal semver tags like `v2.0.7`).
+- GitHub Pages deployment and official GitHub Releases are built from `main`.
 
-Do not use a normal merge from `work` into `main`. A public release should be
-prepared on `work`, verified, tagged, uploaded to GitHub Releases, and then
-copied to `main` as a versioned snapshot commit. This keeps `main` readable as a
-release ledger while preserving full implementation history on `work`.
+The `work` branch was a previous development branch. The old "release-only snapshot on main, full history only on work" model has been retired.
 
-The release flow is:
+As of the v2.0.7 release, `main` contains the complete latest code (the content of the former `work` branch was merged in). From now on, treat `main` as the single source of truth for both development and releases.
 
-1. Work on `work` and run `pnpm check`.
-2. Build and verify Android artifacts with `LCL_RELEASE_VERSION=<version> pnpm release:android`.
-3. Upload APK/AAB/checksums to the matching GitHub Release.
-4. Create the version snapshot on `main` from the verified `work` tree and tag it.
-5. Push `work`, `main`, and the tag.
+Recommended workflow:
+
+1. Work on `main` and run `pnpm check`.
+2. For a release: bump versions, run `LCL_RELEASE_VERSION=<version> pnpm release:android`, verify artifacts.
+3. Push `main`, create GitHub Release + tag.
+4. (optional) The `work` branch can be kept for reference or deleted if no longer needed.
+
+CI runs on pushes and PRs targeting `main`. Pages deploy only from `main`.
 
 ## Landing page
 
@@ -100,7 +99,7 @@ command:
 set -a
 source ~/.local-climate-link/android-signing/release-signing.env
 set +a
-LCL_RELEASE_VERSION=2.0.5 pnpm release:android
+LCL_RELEASE_VERSION=2.0.7 pnpm release:android
 ```
 
 The release script builds the web app, syncs Capacitor, builds APK/AAB, collects

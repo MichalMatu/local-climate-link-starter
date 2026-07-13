@@ -7,8 +7,8 @@ Jestes senior staff engineerem, reviewerem produktu embedded/mobile i krytycznym
 
 Projekt:
 - Repo: https://github.com/MichalMatu/local-climate-link-starter
-- Glowny branch roboczy: work
-- main ma byc release-only: jeden snapshot commit na publiczna wersje, bez zwyklego merge z work.
+- Glowny (i jedyny) branch: main — tu dzieje się cały development i tagi release'ów.
+- Branch `work` był używany wcześniej; model "release-only snapshots na main" został porzucony. Od v2.0.7 main zawiera pełną historię i najnowszy kod.
 - Aktualny produkt: aplikacja Android/Ionic/React jako konfigurator Shelly Plug S Gen3 + termometr BLE Xiaomi/PVVX BTHome v2 albo TP357. Telefon sluzy do konfiguracji i diagnostyki, runtime automatyzacji dziala na Shelly.
 - Wartosc produktu: uzytkownik kupuje tanie, dostepne komponenty BLE + Shelly i w kilka klikniec dostaje lokalny termostat/higrostat/VPD automation bez Home Assistant, MQTT, cloud, Docker, YAML i bez stale dzialajacego telefonu.
 
@@ -23,7 +23,7 @@ Kontekst ostatnich poprawek:
 - UI pokazuje "ile temu" liczone z uptime Shelly oraz osobny "wiek snapshotu" liczony od pobrania diagnostyki przez aplikacje.
 - Ukryty auto-preload historii Xiaomi/PVVX zostal usuniety. Historia PVVX ma byc pobierana tylko jawnie przyciskiem uzytkownika, bo auto-preload mogl konkurowac z live scanem BLE i mieszac mentalny model.
 - CI zostal wlaczony rowniez na branchu work i zawiera test:coverage:core.
-- Publiczne linki Android release powinny wskazywac na v2.0.5.
+- Publiczne linki Android release powinny wskazywać na najnowszą wersję (używaj /releases/latest lub aktualny tag).
 
 Twoje zadanie:
 Przeprowadz bardzo krytyczny audyt kodu, produktu i procesu. Nie pisz ogolnikow. Porownaj raportowane zalozenia z faktycznym kodem. Szukaj rzeczy, ktore moga realnie zablokowac platna bete, testy u klientow albo bezpieczne uzycie ze sprzetem.
@@ -60,7 +60,7 @@ Zakres audytu:
 5. Testy i tooling:
    - Czy unit/integration/e2e testy lapia realne regresje sprzetowe?
    - Czy testy sa za bardzo mockowane i przez to daja falszywe poczucie bezpieczenstwa?
-   - Czy CI na work i release-only main jest wystarczajacy?
+   - Czy CI tylko na main (z ewentualnym legacy support dla work) jest wystarczający?
    - Czy release Android ma kompletna walidacje artefaktow, checksum i podpisow?
    - Czy brakuje testu na konkretne bugi: reczny ON Shelly w AUTO, stale snapshot, BLE/GATT conflict, zly chain danych VPD?
 

@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - work
+      # `work` is legacy (see docs/development/repository-guide.md). CI kept temporarily for transition.
 
 jobs:
   checks:
