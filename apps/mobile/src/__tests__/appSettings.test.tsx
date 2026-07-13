@@ -56,7 +56,7 @@ describe('app settings modal', () => {
             lastDiagnostics: [{ name: 'Relay', detail: 'OFF' }]
           }}
           supportRows={[
-            { label: 'App version', value: '2.0.4' },
+            { label: 'App version', value: '2.0.7' },
             { label: 'Platform', value: 'android' }
           ]}
           onClose={vi.fn()}
