@@ -41,6 +41,14 @@ Xiaomi/PVVX or TP357 + Shelly Plug S Gen3.
 
 The latest Android beta build is available in GitHub Releases:
 
+Release page (always points to the newest published version):
+
+```text
+https://github.com/MichalMatu/local-climate-link-starter/releases/latest
+```
+
+Direct assets for the current published release (v2.0.5):
+
 - [Android APK v2.0.5](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.5/local-climate-link-v2.0.5-android-release.apk)
   for direct installation on Android.
 - [Android App Bundle v2.0.5](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.5/local-climate-link-v2.0.5-android-release.aab)
@@ -49,12 +57,6 @@ The latest Android beta build is available in GitHub Releases:
   for file verification.
 
 iOS installation files are not published yet.
-
-Release page:
-
-```text
-https://github.com/MichalMatu/local-climate-link-starter/releases/tag/v2.0.5
-```
 
 ## Project page
 
