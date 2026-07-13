@@ -31,7 +31,7 @@ closed test as soon as the first signed AAB uploads cleanly.
 Google Play expects the Android App Bundle:
 
 ```text
-artifacts/releases/v2.0.5/local-climate-link-v2.0.5-android-release.aab
+artifacts/releases/v2.0.7/local-climate-link-v2.0.7-android-release.aab
 ```
 
 The bundle must be signed with the upload key configured for this app. Do not
