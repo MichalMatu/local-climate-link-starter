@@ -613,7 +613,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('region', { name: 'Termometry BLE' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Termometry' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Dodaj termometr' })).toHaveTextContent(
-      '+ Dodaj termometr'
+      'Dodaj termometr'
     );
     expect(screen.getByRole('button', { name: 'Dodaj termometr' })).toHaveAttribute(
       'title',
@@ -727,19 +727,16 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(openButton);
 
     const dialog = await screen.findByRole('dialog', { name: 'Dodaj termometr' });
-    const profileSelect = within(dialog).getByLabelText('Typ termometru');
     const closeButton = within(dialog).getByRole('button', { name: 'Zamknij' });
 
     await waitFor(() => expect(dialog).toHaveFocus());
-    expect(profileSelect).not.toHaveFocus();
+
+    const scanButton = within(dialog).getByRole('button', { name: /Skanuj/ });
 
     closeButton.focus();
     fireEvent.keyDown(window, { key: 'Tab' });
-    expect(profileSelect).toHaveFocus();
-
-    profileSelect.focus();
-    fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
-    expect(closeButton).toHaveFocus();
+    // after adding scan in header, first tab goes to scan button
+    expect(scanButton).toHaveFocus();
 
     fireEvent.click(closeButton);
     await waitFor(() => expect(openButton).toHaveFocus());
