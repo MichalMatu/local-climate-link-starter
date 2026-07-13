@@ -594,7 +594,7 @@ describe('HardwareSetupScreen', () => {
     ).toHaveAttribute('title', 'Szukaj gniazdek Shelly w lokalnej sieci');
     expect(
       within(shellyAddDialog).getByRole('button', { name: 'Dodaj' })
-    ).toHaveAttribute('title', 'Sprawdź adres i zapisz gniazdko w aplikacji');
+    ).toHaveAttribute('title', 'Dodaj to sprawdzone gniazdko do aplikacji');
     const shellyAddBackdrop = document.querySelector('.lcl-modal-backdrop');
     expect(shellyAddBackdrop).not.toBeNull();
     fireEvent.click(shellyAddBackdrop!);
