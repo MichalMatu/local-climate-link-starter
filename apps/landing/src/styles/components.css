@@ -16,8 +16,8 @@
   height: 2rem;
   place-items: center;
   border-radius: 0.65rem;
-  background: var(--landing-text);
-  color: var(--landing-surface);
+  background: var(--landing-ink);
+  color: var(--landing-ink-text);
   font-size: 0.95rem;
   font-weight: 900;
 }
@@ -47,7 +47,7 @@
 .header-cta {
   justify-self: end;
   background: var(--landing-accent);
-  color: var(--landing-surface);
+  color: var(--landing-accent-text);
 }
 
 .button {
@@ -72,7 +72,7 @@
 
 .button--primary {
   background: var(--landing-accent);
-  color: var(--landing-surface);
+  color: var(--landing-accent-text);
 }
 
 .button--primary:hover {
@@ -175,7 +175,7 @@
   place-items: center;
   border-radius: var(--landing-radius-md);
   background: var(--landing-accent-soft);
-  color: var(--landing-accent-strong);
+  color: var(--landing-accent-on-soft);
   font-weight: 850;
 }
 
@@ -262,7 +262,7 @@
   place-items: center;
   border-radius: var(--landing-radius-sm);
   background: var(--landing-accent);
-  color: var(--landing-surface);
+  color: var(--landing-accent-text);
   content: '✓';
   font-size: 0.78rem;
   font-weight: 850;
@@ -278,7 +278,8 @@
 }
 
 .instruction-list li::before {
-  background: var(--landing-text);
+  background: var(--landing-ink);
+  color: var(--landing-ink-text);
   content: counter(instructions);
 }
 
@@ -437,10 +438,10 @@
   justify-content: space-between;
   gap: 2rem;
   padding: 2rem;
-  border: var(--lcl-border-width-sm) solid var(--landing-border);
+  border: var(--lcl-border-width-sm) solid var(--landing-ink-border);
   border-radius: var(--landing-radius-xl);
-  background: var(--landing-text);
-  color: var(--landing-surface);
+  background: var(--landing-ink);
+  color: var(--landing-ink-text);
   box-shadow: var(--landing-shadow);
 }
 
@@ -451,7 +452,7 @@
 
 .beta-section p {
   max-width: 42rem;
-  opacity: var(--lcl-opacity-muted);
+  color: var(--landing-ink-muted);
 }
 
 .beta-actions {
@@ -459,9 +460,9 @@
 }
 
 .beta-section .button--secondary {
-  border-color: var(--landing-phone-rail);
-  background: var(--landing-phone-surface);
-  color: var(--landing-surface);
+  border-color: var(--landing-ink-border);
+  background: var(--landing-ink-surface);
+  color: var(--landing-ink-text);
 }
 
 .faq-item {

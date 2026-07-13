@@ -1,98 +1,100 @@
 :root {
   color-scheme: light;
-  --landing-bg: #f7faf8;
-  --landing-bg-strong: #eef5f0;
-  --landing-surface: #ffffff;
-  --landing-surface-soft: rgba(255, 255, 255, 0.78);
-  --landing-text: #12201b;
-  --landing-text-soft: #4d6258;
-  --landing-text-muted: #6f8078;
-  --landing-border: rgba(18, 32, 27, 0.12);
-  --landing-border-strong: rgba(18, 32, 27, 0.22);
-  --landing-accent: #0f8f68;
-  --landing-accent-strong: #087653;
-  --landing-accent-soft: #dff5eb;
-  --landing-phone-bg: #111815;
-  --landing-phone-text: #ffffff;
-  --landing-phone-dim: rgba(255, 255, 255, 0.58);
-  --landing-phone-muted: rgba(255, 255, 255, 0.66);
-  --landing-phone-border: rgba(255, 255, 255, 0.1);
-  --landing-phone-rail: rgba(255, 255, 255, 0.32);
-  --landing-phone-surface: rgba(255, 255, 255, 0.06);
-  --landing-phone-surface-strong: rgba(255, 255, 255, 0.12);
-  --landing-phone-success: #7ee2a8;
-  --landing-phone-success-bg: rgba(126, 226, 168, 0.13);
-  --landing-phone-success-border: rgba(126, 226, 168, 0.3);
+
+  --landing-bg: var(--lcl-color-background);
+  --landing-bg-strong: var(--lcl-color-surface-muted);
+  --landing-surface: var(--lcl-color-surface);
+  --landing-surface-soft: color-mix(in srgb, var(--lcl-color-surface) 82%, transparent);
+  --landing-text: var(--lcl-color-text);
+  --landing-text-soft: var(--lcl-color-text-muted);
+  --landing-text-muted: var(--lcl-color-text-muted);
+  --landing-border: color-mix(in srgb, var(--lcl-color-text) 14%, transparent);
+  --landing-border-strong: color-mix(in srgb, var(--lcl-color-text) 24%, transparent);
+
+  --landing-accent: var(--lcl-color-accent);
+  --landing-accent-strong: var(--lcl-color-accent-strong);
+  --landing-accent-soft: color-mix(
+    in srgb,
+    var(--lcl-color-accent) 14%,
+    var(--lcl-color-surface)
+  );
+  --landing-accent-on-soft: var(--lcl-color-accent-strong);
+  --landing-accent-text: var(--lcl-color-accent-contrast);
+
+  --landing-ink: var(--lcl-color-code-background);
+  --landing-ink-text: var(--lcl-color-code-text);
+  --landing-ink-muted: color-mix(in srgb, var(--lcl-color-code-text) 62%, transparent);
+  --landing-ink-border: color-mix(in srgb, var(--lcl-color-code-text) 22%, transparent);
+  --landing-ink-surface: color-mix(in srgb, var(--lcl-color-code-text) 10%, transparent);
+
+  --landing-phone-bg: var(--landing-ink);
+  --landing-phone-text: var(--landing-ink-text);
+  --landing-phone-dim: var(--landing-ink-muted);
+  --landing-phone-muted: color-mix(in srgb, var(--landing-ink-text) 66%, transparent);
+  --landing-phone-border: color-mix(in srgb, var(--landing-ink-text) 12%, transparent);
+  --landing-phone-rail: color-mix(in srgb, var(--landing-ink-text) 32%, transparent);
+  --landing-phone-surface: color-mix(in srgb, var(--landing-ink-text) 6%, transparent);
+  --landing-phone-surface-strong: color-mix(
+    in srgb,
+    var(--landing-ink-text) 12%,
+    transparent
+  );
+  --landing-phone-success: var(--lcl-color-status-ok-text);
+  --landing-phone-success-bg: color-mix(
+    in srgb,
+    var(--lcl-color-status-ok-text) 13%,
+    transparent
+  );
+  --landing-phone-success-border: color-mix(
+    in srgb,
+    var(--lcl-color-status-ok-text) 30%,
+    transparent
+  );
+
   --landing-hero-fade-desktop: linear-gradient(
     90deg,
-    rgba(247, 250, 248, 0.98) 0%,
-    rgba(247, 250, 248, 0.9) 38%,
-    rgba(247, 250, 248, 0.66) 100%
+    color-mix(in srgb, var(--landing-bg) 98%, transparent) 0%,
+    color-mix(in srgb, var(--landing-bg) 90%, transparent) 38%,
+    color-mix(in srgb, var(--landing-bg) 66%, transparent) 100%
   );
   --landing-hero-edge-fade: linear-gradient(
     180deg,
-    rgba(247, 250, 248, 0),
+    color-mix(in srgb, var(--landing-bg) 0%, transparent),
     var(--landing-bg)
   );
   --landing-hero-fade-mobile: linear-gradient(
     180deg,
-    rgba(247, 250, 248, 0.98) 0%,
-    rgba(247, 250, 248, 0.9) 42%,
-    rgba(247, 250, 248, 0.56) 100%
+    color-mix(in srgb, var(--landing-bg) 98%, transparent) 0%,
+    color-mix(in srgb, var(--landing-bg) 90%, transparent) 42%,
+    color-mix(in srgb, var(--landing-bg) 56%, transparent) 100%
   );
-  --landing-shadow: 0 22px 64px rgba(21, 45, 36, 0.14);
-  --landing-shadow-soft: 0 12px 32px rgba(21, 45, 36, 0.1);
-  --landing-focus-ring: 0 0 0 0.2rem rgba(15, 143, 104, 0.22);
-  --landing-radius-sm: 0.5rem;
-  --landing-radius-md: 0.75rem;
-  --landing-radius-lg: 1.25rem;
+
+  --landing-shadow: var(--lcl-shadow-lg);
+  --landing-shadow-soft: var(--lcl-shadow-md);
+  --landing-focus-ring: 0 0 0 var(--lcl-border-width-md)
+    color-mix(in srgb, var(--landing-accent) 22%, transparent);
+
+  --landing-radius-sm: var(--lcl-radius-sm);
+  --landing-radius-md: var(--lcl-radius-md);
+  --landing-radius-lg: var(--lcl-radius-lg);
   --landing-radius-xl: 1.75rem;
-  --landing-radius-round: 999px;
+  --landing-radius-round: var(--lcl-radius-round);
   --landing-page-max: 72rem;
   --landing-section-gap: 6rem;
   --landing-gutter: 1.25rem;
+
   font-family: var(--lcl-font-family);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --landing-bg: #101614;
-    --landing-bg-strong: #17211e;
-    --landing-surface: #18231f;
-    --landing-surface-soft: rgba(20, 30, 26, 0.82);
-    --landing-text: #edf7f2;
-    --landing-text-soft: #b8c9c1;
-    --landing-text-muted: #8fa39a;
-    --landing-border: rgba(237, 247, 242, 0.14);
-    --landing-border-strong: rgba(237, 247, 242, 0.24);
-    --landing-accent: #3ad39a;
-    --landing-accent-strong: #72e5b8;
-    --landing-accent-soft: rgba(58, 211, 154, 0.16);
-    --landing-phone-bg: #070d0b;
-    --landing-phone-text: #f7fffb;
-    --landing-phone-success: #85f0ba;
-    --landing-phone-success-bg: rgba(133, 240, 186, 0.15);
-    --landing-phone-success-border: rgba(133, 240, 186, 0.34);
-    --landing-hero-fade-desktop: linear-gradient(
-      90deg,
-      rgba(16, 22, 20, 0.98) 0%,
-      rgba(16, 22, 20, 0.9) 42%,
-      rgba(16, 22, 20, 0.68) 100%
+
+    --landing-accent-soft: color-mix(
+      in srgb,
+      var(--lcl-color-accent) 18%,
+      var(--lcl-color-surface)
     );
-    --landing-hero-edge-fade: linear-gradient(
-      180deg,
-      rgba(16, 22, 20, 0),
-      var(--landing-bg)
-    );
-    --landing-hero-fade-mobile: linear-gradient(
-      180deg,
-      rgba(16, 22, 20, 0.98) 0%,
-      rgba(16, 22, 20, 0.9) 46%,
-      rgba(16, 22, 20, 0.68) 100%
-    );
-    --landing-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
-    --landing-shadow-soft: 0 16px 42px rgba(0, 0, 0, 0.24);
-    --landing-focus-ring: 0 0 0 0.2rem rgba(58, 211, 154, 0.28);
+    --landing-accent-on-soft: var(--lcl-color-accent);
   }
 }
