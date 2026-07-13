@@ -92,20 +92,25 @@ https://michalmatu.github.io/local-climate-link-starter/
 
 ## Android release artifacts
 
-Release builds require the local signing environment before running the release
-command:
+Release builds require the local signing environment for the **upload key**
+(registered with Google Play App Signing) before running the release command:
 
 ```bash
 set -a
-source ~/.local-climate-link/android-signing/release-signing.env
+source ~/.local-climate-link/android/release-signing.env
 set +a
 LCL_RELEASE_VERSION=2.0.8 pnpm release:android
 ```
+
+This loads the correct upload keystore (typically `local-climate-link-upload.jks`).
 
 The release script builds the web app, syncs Capacitor, builds APK/AAB, collects
 artifacts under `artifacts/releases/v<version>/`, verifies checksums, and checks
 Android signatures. Do not upload artifacts if `verify-android-release.mjs`
 fails.
+
+> **Important:** Always use the upload key registered in the Play Console.
+> The keystore in `android-signing/` is not the one used for Google Play uploads.
 
 ## Make shortcuts
 
