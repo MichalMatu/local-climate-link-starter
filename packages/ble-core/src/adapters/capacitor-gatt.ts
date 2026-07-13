@@ -1,7 +1,4 @@
-import type {
-  BleClientInterface,
-  InitializeOptions
-} from '@capacitor-community/bluetooth-le';
+import type { BleClientInterface } from '@capacitor-community/bluetooth-le';
 import type {
   BleCoreError,
   BleGattClient,
@@ -12,7 +9,6 @@ import type {
 
 type BleClientLoader = () => Promise<BleClientInterface>;
 type BooleanResultLike = boolean | { value: boolean };
-const BLE_INITIALIZE_OPTIONS: InitializeOptions = { androidNeverForLocation: false };
 
 export interface CapacitorBleGattClientOptions {
   clientLoader?: BleClientLoader;
@@ -100,7 +96,7 @@ export class CapacitorBleGattClient implements BleGattClient {
 
   async initialize(): Promise<void> {
     const client = await this.clientLoader();
-    await client.initialize(BLE_INITIALIZE_OPTIONS);
+    await client.initialize();
     if (!booleanValue(await client.isEnabled())) {
       await client.requestEnable();
     }

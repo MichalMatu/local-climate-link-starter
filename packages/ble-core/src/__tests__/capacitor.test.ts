@@ -75,21 +75,6 @@ describe('CapacitorBleScanner', () => {
     expect(client.stopLEScan).toHaveBeenCalledTimes(1);
   });
 
-  it('initializes Android BLE scans without neverForLocation filtering', async () => {
-    const client: BleClientInterface = {
-      initialize: vi.fn().mockResolvedValue(undefined),
-      isEnabled: vi.fn().mockResolvedValue({ value: true }),
-      requestEnable: vi.fn().mockResolvedValue(undefined),
-      requestLEScan: vi.fn(async () => undefined),
-      stopLEScan: vi.fn().mockResolvedValue(undefined)
-    } as unknown as BleClientInterface;
-    const scanner = new CapacitorBleScanner({ clientLoader: async () => client });
-    const iterator = scanner.startScan({ timeoutMs: 1 })[Symbol.asyncIterator]();
-
-    await expect(iterator.next()).resolves.toMatchObject({ done: true });
-    expect(client.initialize).toHaveBeenCalledWith({ androidNeverForLocation: false });
-  });
-
   it('requests enabling Bluetooth when Capacitor reports it disabled', async () => {
     let enabled = false;
     const client: BleClientInterface = {

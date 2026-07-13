@@ -7,13 +7,12 @@ Android 12+ requires runtime BLE permissions:
 ```text
 BLUETOOTH_SCAN
 BLUETOOTH_CONNECT
-ACCESS_FINE_LOCATION
 ```
 
 Android 11 and lower may require location permission for BLE scanning:
 
 ```text
-ACCESS_FINE_LOCATION
+ACCESS_FINE_LOCATION up to Android 11 / API 30
 ACCESS_COARSE_LOCATION up to Android 9 / API 28
 ```
 
@@ -21,9 +20,7 @@ The app intentionally does not set `neverForLocation` on `BLUETOOTH_SCAN`.
 Android documentation warns that some BLE beacons may be filtered when
 `neverForLocation` is used, and Local Climate Link depends on advertisement
 payloads from Xiaomi/PVVX and TP357 sensors. The app does not use BLE scan data
-to derive physical location, but the Android BLE plugin requests fine location
-when `androidNeverForLocation` is false. Do not cap `ACCESS_FINE_LOCATION` at
-API 30 unless the app also switches to `neverForLocation`.
+to derive physical location and does not request background location.
 
 Also plan for local HTTP to Shelly:
 
@@ -43,7 +40,7 @@ Before Play Store release, verify the merged release manifest contains:
 ```text
 android.permission.BLUETOOTH_SCAN
 android.permission.BLUETOOTH_CONNECT
-android.permission.ACCESS_FINE_LOCATION without maxSdkVersion
+android.permission.ACCESS_FINE_LOCATION with maxSdkVersion 30
 android.permission.INTERNET
 legacy Bluetooth permissions only up to Android 11
 ```

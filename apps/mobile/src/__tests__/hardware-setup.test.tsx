@@ -3109,6 +3109,71 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getAllByText('OFF').length).toBeGreaterThanOrEqual(2);
   });
 
+  it('shows a neutral BLE data state when a helper packet follows a valid rule value', async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = requestUrl(input);
+      if (url.pathname === '/script/1/diag') {
+        return jsonResponse({
+          v: 1,
+          z: 'lcl-12345678',
+          s: ['A4:C1:38:4F:24:CD', 'Xiaomi/PVVX BTHome'],
+          q: [1, 0, 65, 70, 120, -85],
+          y: ['09:31', 1782667904, 12345],
+          p: [true, 0, 230.1, 0, 1234, 31.2],
+          g: [
+            12300000,
+            23.83,
+            69.56,
+            100,
+            -59,
+            true,
+            'ib',
+            12250000,
+            12310000,
+            0,
+            0,
+            69.56,
+            null,
+            65,
+            70,
+            12320000,
+            'cv'
+          ]
+        });
+      }
+      return rpcResult({});
+    });
+
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      shellyDevices: [
+        {
+          id: 'http://192.168.0.20/',
+          name: 'Salon',
+          baseUrl: 'http://192.168.0.20/',
+          scriptIdInput: '1'
+        }
+      ],
+      selectedShellyId: 'http://192.168.0.20/',
+      diagnosticShellyId: 'http://192.168.0.20/'
+    });
+
+    renderHardwareSetup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
+
+    await waitFor(() => expect(screen.getAllByText('69.6%')).toHaveLength(2));
+    expect(screen.getByText('W paśmie histerezy')).toBeInTheDocument();
+
+    const dataBleRow = screen
+      .getByText('Dane BLE')
+      .closest('.lcl-diagnostic-row') as HTMLElement | null;
+    expect(dataBleRow).not.toBeNull();
+    expect(within(dataBleRow!).getByText('-')).toBeInTheDocument();
+    expect(dataBleRow).not.toHaveTextContent('Brak wartości do reguły');
+  });
+
   it.each([
     {
       label: '404',

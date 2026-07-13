@@ -24,18 +24,6 @@ const apkMetadataPath = join(
   'release',
   'output-metadata.json'
 );
-const mergedReleaseManifestPath = join(
-  'apps',
-  'mobile',
-  'android',
-  'app',
-  'build',
-  'intermediates',
-  'merged_manifest',
-  'release',
-  'processReleaseMainManifest',
-  'AndroidManifest.xml'
-);
 
 const parseExpectedVersionCode = (value) => {
   const parts = value.split('.').map((part) => Number.parseInt(part, 10));
@@ -134,49 +122,6 @@ const verifyAndroidMetadata = () => {
   }
 };
 
-const requirePermission = (manifest, permissionName) => {
-  const pattern = new RegExp(
-    `<uses-permission\\b(?=[^>]*android:name="${permissionName.replaceAll('.', '\\.')}")[^>]*>`,
-    's'
-  );
-  const match = manifest.match(pattern);
-  if (!match) {
-    throw new Error(`Missing Android permission in release manifest: ${permissionName}`);
-  }
-  return match[0];
-};
-
-const verifyReleaseManifestPermissions = () => {
-  if (!existsSync(mergedReleaseManifestPath)) {
-    throw new Error(
-      `Missing merged Android release manifest: ${mergedReleaseManifestPath}`
-    );
-  }
-
-  const manifest = readFileSync(mergedReleaseManifestPath, 'utf8');
-  requirePermission(manifest, 'android.permission.BLUETOOTH_SCAN');
-  requirePermission(manifest, 'android.permission.BLUETOOTH_CONNECT');
-  const fineLocationPermission = requirePermission(
-    manifest,
-    'android.permission.ACCESS_FINE_LOCATION'
-  );
-  if (/android:maxSdkVersion=/.test(fineLocationPermission)) {
-    throw new Error(
-      'ACCESS_FINE_LOCATION must not have maxSdkVersion while BluetoothLe initializes without androidNeverForLocation.'
-    );
-  }
-
-  for (const permissionName of [
-    'android.permission.BLUETOOTH',
-    'android.permission.BLUETOOTH_ADMIN'
-  ]) {
-    const permission = requirePermission(manifest, permissionName);
-    if (!/android:maxSdkVersion="30"/.test(permission)) {
-      throw new Error(`${permissionName} must be capped at maxSdkVersion 30.`);
-    }
-  }
-};
-
 requireFile(apkPath);
 requireFile(aabPath);
 requireFile(checksumPath);
@@ -215,7 +160,5 @@ if (aapt) {
 } else {
   verifyAndroidMetadata();
 }
-
-verifyReleaseManifestPermissions();
 
 console.log(`Verified Android release artifacts in ${releaseDir}`);

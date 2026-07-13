@@ -1,7 +1,6 @@
 import {
   ScanMode,
   type BleClientInterface,
-  type InitializeOptions,
   type RequestBleDeviceOptions,
   type ScanResult
 } from '@capacitor-community/bluetooth-le';
@@ -15,7 +14,6 @@ import type {
 type BleClientLoader = () => Promise<BleClientInterface>;
 type BooleanResultLike = boolean | { value: boolean };
 type ScanPlatform = NormalizedBleAdvertisement['platform'];
-const BLE_INITIALIZE_OPTIONS: InitializeOptions = { androidNeverForLocation: false };
 
 export interface CapacitorBleScannerOptions {
   clientLoader?: () => Promise<BleClientInterface>;
@@ -194,7 +192,7 @@ export class CapacitorBleScanner implements BleScanner {
         : null;
 
     try {
-      await client.initialize(BLE_INITIALIZE_OPTIONS);
+      await client.initialize();
       if (!booleanValue(await client.isEnabled())) {
         await client.requestEnable();
       }
