@@ -28,7 +28,7 @@
     5rem;
   background:
     var(--landing-hero-fade-desktop),
-    url('/assets/local-climate-hero.webp') center / cover no-repeat;
+    var(--landing-hero-image) center / cover no-repeat;
 }
 
 .hero::after {

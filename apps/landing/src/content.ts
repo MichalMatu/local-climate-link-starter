@@ -16,7 +16,6 @@ type LandingMessages = {
   common: {
     brand: string;
     betaCta: string;
-    androidBetaCta: string;
     compatibilityCta: string;
   };
   hero: {
@@ -116,8 +115,7 @@ const pl: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Pobierz betę',
-    androidBetaCta: 'Pobierz betę Android',
+    betaCta: 'Pobierz betę Android',
     compatibilityCta: 'Zobacz kompatybilność'
   },
   hero: {
@@ -241,8 +239,7 @@ const en: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Get beta',
-    androidBetaCta: 'Get Android beta',
+    betaCta: 'Get Android beta',
     compatibilityCta: 'See compatibility'
   },
   hero: {
@@ -349,8 +346,7 @@ const de: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Beta laden',
-    androidBetaCta: 'Android-Beta laden',
+    betaCta: 'Android-Beta laden',
     compatibilityCta: 'Kompatibilität ansehen'
   },
   hero: {
@@ -471,8 +467,7 @@ const es: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Descargar beta',
-    androidBetaCta: 'Descargar beta Android',
+    betaCta: 'Descargar beta Android',
     compatibilityCta: 'Ver compatibilidad'
   },
   hero: {
@@ -592,8 +587,7 @@ const fr: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Télécharger la bêta',
-    androidBetaCta: 'Télécharger la bêta Android',
+    betaCta: 'Télécharger la bêta Android',
     compatibilityCta: 'Voir la compatibilité'
   },
   hero: {
@@ -714,8 +708,7 @@ const it: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Scarica beta',
-    androidBetaCta: 'Scarica beta Android',
+    betaCta: 'Scarica beta Android',
     compatibilityCta: 'Vedi compatibilità'
   },
   hero: {
@@ -834,8 +827,7 @@ const ptBr: LandingMessages = {
   },
   common: {
     brand: 'Local Climate Link',
-    betaCta: 'Baixar beta',
-    androidBetaCta: 'Baixar beta Android',
+    betaCta: 'Baixar beta Android',
     compatibilityCta: 'Ver compatibilidade'
   },
   hero: {

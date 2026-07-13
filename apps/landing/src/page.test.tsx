@@ -28,6 +28,14 @@ const collectStrings = (value: unknown): string[] => {
 };
 
 describe('LandingPage', () => {
+  it('sets the hero background image from the Vite base path', () => {
+    render(<LandingPage initialLocale="en" />);
+
+    expect(document.documentElement.style.getPropertyValue('--landing-hero-image')).toBe(
+      'url("/assets/local-climate-hero.webp")'
+    );
+  });
+
   it('shows the Polish product promise and primary beta action', () => {
     render(<LandingPage initialLocale="pl" />);
 
@@ -37,10 +45,10 @@ describe('LandingPage', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Termostat bez huba' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Pobierz betę Android' })).toHaveAttribute(
-      'href',
-      '#beta'
-    );
+    expect(screen.getAllByRole('link', { name: 'Pobierz betę Android' })).toHaveLength(2);
+    screen.getAllByRole('link', { name: 'Pobierz betę Android' }).forEach((link) => {
+      expect(link).toHaveAttribute('href', '#beta');
+    });
   });
 
   it('shows English when the resolved locale is English', () => {
@@ -49,10 +57,10 @@ describe('LandingPage', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Thermostat without a hub' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Get Android beta' })).toHaveAttribute(
-      'href',
-      '#beta'
-    );
+    expect(screen.getAllByRole('link', { name: 'Get Android beta' })).toHaveLength(2);
+    screen.getAllByRole('link', { name: 'Get Android beta' }).forEach((link) => {
+      expect(link).toHaveAttribute('href', '#beta');
+    });
     expect(screen.getByRole('link', { name: 'Download APK' })).toHaveAttribute(
       'href',
       'https://github.com/MichalMatu/local-climate-link-starter/releases/latest'

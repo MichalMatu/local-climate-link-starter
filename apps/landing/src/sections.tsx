@@ -51,7 +51,7 @@ export const HeroSection = ({ copy }: { copy: LandingCopy }) => (
       <p>{copy.hero.body}</p>
       <div className="hero__actions" aria-label={copy.hero.actionsAria}>
         <a className="button button--primary" href="#beta">
-          {copy.common.androidBetaCta}
+          {copy.common.betaCta}
         </a>
         <a className="button button--secondary" href="#sprzet">
           {copy.common.compatibilityCta}

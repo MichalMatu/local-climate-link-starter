@@ -75,7 +75,7 @@
     padding-bottom: 4rem;
     background:
       var(--landing-hero-fade-mobile),
-      url('/assets/local-climate-hero.webp') 58% bottom / cover no-repeat;
+      var(--landing-hero-image) 58% bottom / cover no-repeat;
   }
 
   .hero h1 {

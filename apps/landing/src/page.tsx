@@ -44,6 +44,13 @@ export const LandingPage = ({
   }, [locale]);
 
   useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--landing-hero-image',
+      `url("${import.meta.env.BASE_URL}assets/local-climate-hero.webp")`
+    );
+  }, []);
+
+  useEffect(() => {
     const updateFromSystem = () => setLocale(resolveLandingLocale());
     window.addEventListener('languagechange', updateFromSystem);
     return () => window.removeEventListener('languagechange', updateFromSystem);
