@@ -318,7 +318,7 @@ const addShellyThroughUi = async (name = 'Przedpokój') => {
   fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
     target: { value: '192.168.0.20' }
   });
-  fireEvent.click(within(addDialog).getByRole('button', { name: 'Sprawdź i dodaj' }));
+  fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
   expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
   expect(
     screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
@@ -574,7 +574,7 @@ describe('HardwareSetupScreen', () => {
       screen.queryByRole('heading', { name: 'Gniazdka Shelly' })
     ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Dodaj gniazdko' })).toHaveTextContent(
-      '+ Dodaj gniazdko'
+      'Dodaj gniazdko'
     );
     expect(screen.getByRole('button', { name: 'Dodaj gniazdko' })).toHaveAttribute(
       'title',
@@ -593,7 +593,7 @@ describe('HardwareSetupScreen', () => {
       within(shellyAddDialog).getByRole('button', { name: 'Skanuj sieć' })
     ).toHaveAttribute('title', 'Szukaj gniazdek Shelly w lokalnej sieci');
     expect(
-      within(shellyAddDialog).getByRole('button', { name: 'Sprawdź i dodaj' })
+      within(shellyAddDialog).getByRole('button', { name: 'Dodaj' })
     ).toHaveAttribute('title', 'Sprawdź adres i zapisz gniazdko w aplikacji');
     const shellyAddBackdrop = document.querySelector('.lcl-modal-backdrop');
     expect(shellyAddBackdrop).not.toBeNull();
@@ -829,7 +829,7 @@ describe('HardwareSetupScreen', () => {
     fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
       target: { value: '192.168.0.20' }
     });
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Sprawdź i dodaj' }));
+    fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
 
     expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
     expect(
@@ -977,7 +977,7 @@ describe('HardwareSetupScreen', () => {
     fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
       target: { value: 'shelly.local' }
     });
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Sprawdź i dodaj' }));
+    fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
 
     expect(
       within(addDialog).getByText('Adres IP Shelly musi wyglądać jak 192.168.0.20.')
@@ -1559,7 +1559,7 @@ describe('HardwareSetupScreen', () => {
       within(reopenedAddDialog).getByRole('button', { name: 'Skanuj sieć' })
     ).toBeEnabled();
     expect(
-      within(reopenedAddDialog).getByRole('button', { name: 'Sprawdź i dodaj' })
+      within(reopenedAddDialog).getByRole('button', { name: 'Dodaj' })
     ).toBeEnabled();
   });
 
@@ -1577,7 +1577,7 @@ describe('HardwareSetupScreen', () => {
     fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
       target: { value: '192.168.0.1' }
     });
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Sprawdź i dodaj' }));
+    fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
 
     expect(
       screen.queryByRole('dialog', { name: 'Nie udało się sprawdzić Shelly' })
