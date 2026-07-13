@@ -11,7 +11,6 @@ type LandingMessages = {
     howItWorks: string;
     hardware: string;
     safety: string;
-    beta: string;
     sectionsAria: string;
   };
   common: {
@@ -19,7 +18,6 @@ type LandingMessages = {
     betaCta: string;
     androidBetaCta: string;
     compatibilityCta: string;
-    faqCta: string;
   };
   hero: {
     title: string;
@@ -114,15 +112,13 @@ const pl: LandingMessages = {
     howItWorks: 'Jak działa',
     hardware: 'Sprzęt',
     safety: 'Bezpieczeństwo',
-    beta: 'Beta',
     sectionsAria: 'Sekcje strony'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Pobierz betę',
     androidBetaCta: 'Pobierz betę Android',
-    compatibilityCta: 'Zobacz kompatybilność',
-    faqCta: 'Pytania i odpowiedzi'
+    compatibilityCta: 'Zobacz kompatybilność'
   },
   hero: {
     title: 'Termostat bez huba',
@@ -241,15 +237,13 @@ const en: LandingMessages = {
     howItWorks: 'How it works',
     hardware: 'Hardware',
     safety: 'Safety',
-    beta: 'Beta',
     sectionsAria: 'Page sections'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Get beta',
     androidBetaCta: 'Get Android beta',
-    compatibilityCta: 'See compatibility',
-    faqCta: 'Questions and answers'
+    compatibilityCta: 'See compatibility'
   },
   hero: {
     title: 'Thermostat without a hub',
@@ -351,15 +345,13 @@ const de: LandingMessages = {
     howItWorks: 'So funktioniert es',
     hardware: 'Hardware',
     safety: 'Sicherheit',
-    beta: 'Beta',
     sectionsAria: 'Seitenbereiche'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Beta laden',
     androidBetaCta: 'Android-Beta laden',
-    compatibilityCta: 'Kompatibilität ansehen',
-    faqCta: 'Fragen und Antworten'
+    compatibilityCta: 'Kompatibilität ansehen'
   },
   hero: {
     title: 'Thermostat ohne Hub',
@@ -475,15 +467,13 @@ const es: LandingMessages = {
     howItWorks: 'Cómo funciona',
     hardware: 'Hardware',
     safety: 'Seguridad',
-    beta: 'Beta',
     sectionsAria: 'Secciones de la página'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Descargar beta',
     androidBetaCta: 'Descargar beta Android',
-    compatibilityCta: 'Ver compatibilidad',
-    faqCta: 'Preguntas y respuestas'
+    compatibilityCta: 'Ver compatibilidad'
   },
   hero: {
     title: 'Termostato sin hub',
@@ -598,15 +588,13 @@ const fr: LandingMessages = {
     howItWorks: 'Fonctionnement',
     hardware: 'Matériel',
     safety: 'Sécurité',
-    beta: 'Bêta',
     sectionsAria: 'Sections de la page'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Télécharger la bêta',
     androidBetaCta: 'Télécharger la bêta Android',
-    compatibilityCta: 'Voir la compatibilité',
-    faqCta: 'Questions et réponses'
+    compatibilityCta: 'Voir la compatibilité'
   },
   hero: {
     title: 'Thermostat sans hub',
@@ -722,15 +710,13 @@ const it: LandingMessages = {
     howItWorks: 'Come funziona',
     hardware: 'Hardware',
     safety: 'Sicurezza',
-    beta: 'Beta',
     sectionsAria: 'Sezioni della pagina'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Scarica beta',
     androidBetaCta: 'Scarica beta Android',
-    compatibilityCta: 'Vedi compatibilità',
-    faqCta: 'Domande e risposte'
+    compatibilityCta: 'Vedi compatibilità'
   },
   hero: {
     title: 'Termostato senza hub',
@@ -844,15 +830,13 @@ const ptBr: LandingMessages = {
     howItWorks: 'Como funciona',
     hardware: 'Hardware',
     safety: 'Segurança',
-    beta: 'Beta',
     sectionsAria: 'Seções da página'
   },
   common: {
     brand: 'Local Climate Link',
     betaCta: 'Baixar beta',
     androidBetaCta: 'Baixar beta Android',
-    compatibilityCta: 'Ver compatibilidade',
-    faqCta: 'Perguntas e respostas'
+    compatibilityCta: 'Ver compatibilidade'
   },
   hero: {
     title: 'Termostato sem hub',

@@ -54,10 +54,6 @@
   padding-block: var(--landing-section-gap);
 }
 
-.section--tight {
-  padding-top: 3rem;
-}
-
 .section--split {
   display: grid;
   grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);

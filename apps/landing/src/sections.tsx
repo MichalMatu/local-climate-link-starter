@@ -15,8 +15,7 @@ const navItems = (copy: LandingCopy) =>
   [
     { href: '#jak-dziala', label: copy.nav.howItWorks },
     { href: '#sprzet', label: copy.nav.hardware },
-    { href: '#bezpieczenstwo', label: copy.nav.safety },
-    { href: '#beta', label: copy.nav.beta }
+    { href: '#bezpieczenstwo', label: copy.nav.safety }
   ] as const;
 
 export const Header = ({ copy }: { copy: LandingCopy }) => (
@@ -63,7 +62,7 @@ export const HeroSection = ({ copy }: { copy: LandingCopy }) => (
 );
 
 export const WorkflowSection = ({ copy }: { copy: LandingCopy }) => (
-  <section id="jak-dziala" className="section section--tight">
+  <section id="jak-dziala" className="section">
     <div className="section-heading">
       <h2>{copy.workflow.title}</h2>
       <p>{copy.workflow.body}</p>
@@ -193,9 +192,6 @@ export const BetaSection = ({ copy }: { copy: LandingCopy }) => (
         target="_blank"
       >
         {copy.beta.joinCta}
-      </a>
-      <a className="button button--secondary" href="#faq">
-        {copy.common.faqCta}
       </a>
     </div>
   </section>
