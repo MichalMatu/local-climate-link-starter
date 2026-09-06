@@ -1,0 +1,242 @@
+name: Sandbox Pack
+
+on:
+  push:
+    branches:
+      - main
+      - "work/**"
+  workflow_dispatch:
+    inputs:
+      include_offline_dependencies:
+        description: "Build and upload the pnpm/Playwright offline pack"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sandbox-pack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Record source and dependency identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .sandbox-pack/meta
+          printf '%s\n' "$GITHUB_SHA" > .sandbox-pack/meta/git-sha.txt
+          {
+            sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml
+            find apps packages -type f -name package.json -print0 | sort -z | xargs -0 sha256sum
+            sha256sum \
+              tools/sandbox/bootstrap-sandbox.sh \
+              tools/sandbox/sandbox-doctor.sh \
+              tools/sandbox/run-sandbox-check.sh
+            printf '%s\n' 'node=22'
+            printf '%s\n' 'pnpm=10.12.4'
+            printf '%s\n' 'playwright-browser=chromium'
+          } > .sandbox-pack/meta/dependency-inputs.sha256
+          sha256sum .sandbox-pack/meta/dependency-inputs.sha256 | awk '{print $1}' > .sandbox-pack/meta/dependency-key.txt
+
+      - name: Create exact source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=.sandbox-pack/source-root
+          mkdir -p "$ROOT/.sandbox-snapshot"
+          git archive --format=tar HEAD | tar -xf - -C "$ROOT"
+          cp .sandbox-pack/meta/git-sha.txt "$ROOT/.sandbox-snapshot/git-sha.txt"
+          cp .sandbox-pack/meta/dependency-key.txt "$ROOT/.sandbox-snapshot/dependency-key.txt"
+          tar -C "$ROOT" -cf - . | zstd -T0 -10 -o "lcl-source-${GITHUB_SHA}.tar.zst"
+          sha256sum "lcl-source-${GITHUB_SHA}.tar.zst" > "lcl-source-${GITHUB_SHA}.tar.zst.sha256"
+
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-source-${{ github.sha }}
+          path: |
+            lcl-source-${{ github.sha }}.tar.zst
+            lcl-source-${{ github.sha }}.tar.zst.sha256
+            .sandbox-pack/meta/git-sha.txt
+            .sandbox-pack/meta/dependency-key.txt
+            .sandbox-pack/meta/dependency-inputs.sha256
+          retention-days: 30
+          compression-level: 0
+
+      - name: Decide whether offline pack is needed
+        id: offline
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.include_offline_dependencies }}" == "true" ]] || \
+             [[ "${{ github.event_name }}" == "push" && "${{ contains(github.event.head_commit.message, '[sandbox-offline]') }}" == "true" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node 22
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Build pinned pnpm runtime
+        if: steps.offline.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .sandbox-pack/offline/pnpm-runtime
+          npm install \
+            --prefix .sandbox-pack/offline/pnpm-runtime \
+            --ignore-scripts \
+            --no-audit \
+            --no-fund \
+            pnpm@10.12.4
+          .sandbox-pack/offline/pnpm-runtime/node_modules/.bin/pnpm --version
+
+      - name: Warm pnpm store and validate offline install
+        if: steps.offline.outputs.enabled == 'true'
+        shell: bash
+        env:
+          HUSKY: 0
+        run: |
+          set -euo pipefail
+          PNPM="$GITHUB_WORKSPACE/.sandbox-pack/offline/pnpm-runtime/node_modules/.bin/pnpm"
+          STORE="$GITHUB_WORKSPACE/.sandbox-pack/offline/pnpm-store"
+          "$PNPM" fetch --frozen-lockfile --store-dir "$STORE"
+          "$PNPM" install --offline --frozen-lockfile --store-dir "$STORE"
+
+      - name: Download Playwright Chromium
+        if: steps.offline.outputs.enabled == 'true'
+        shell: bash
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.sandbox-pack/offline/ms-playwright
+        run: |
+          set -euo pipefail
+          .sandbox-pack/offline/pnpm-runtime/node_modules/.bin/pnpm exec playwright install chromium
+
+      - name: Finalize offline metadata
+        if: steps.offline.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x .sandbox-pack/offline/pnpm-runtime/node_modules/.bin/pnpm
+          test -n "$(find .sandbox-pack/offline/pnpm-store -type f -print -quit)"
+          test -n "$(find .sandbox-pack/offline/ms-playwright -type f \( -name chrome -o -name headless_shell \) -print -quit)"
+          mkdir -p .sandbox-pack/offline/meta
+          cp .sandbox-pack/meta/git-sha.txt .sandbox-pack/offline/meta/
+          cp .sandbox-pack/meta/dependency-key.txt .sandbox-pack/offline/meta/
+          cp .sandbox-pack/meta/dependency-inputs.sha256 .sandbox-pack/offline/meta/
+
+      - name: Reproduce sandbox install and check offline
+        if: steps.offline.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SANDBOX_ROOT="$RUNNER_TEMP/local-climate-link-sandbox"
+          SOURCE_ROOT="$GITHUB_WORKSPACE/.sandbox-pack/source-root"
+          OFFLINE_ROOT="$GITHUB_WORKSPACE/.sandbox-pack/offline"
+          bash "$SOURCE_ROOT/tools/sandbox/bootstrap-sandbox.sh" "$SANDBOX_ROOT" "$OFFLINE_ROOT"
+          # shellcheck disable=SC1090
+          source "$SANDBOX_ROOT/env.sh"
+          bash "$SOURCE_ROOT/tools/sandbox/sandbox-doctor.sh"
+          bash "$SOURCE_ROOT/tools/sandbox/run-sandbox-check.sh" check
+
+      - name: Build and split offline pack
+        if: steps.offline.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEY=$(cat .sandbox-pack/meta/dependency-key.txt)
+          mkdir -p .sandbox-pack/chunks
+          PACK="lcl-offline-${KEY}.tar.zst"
+          tar -C .sandbox-pack -cf - offline | zstd -T0 -10 -o "$PACK"
+          sha256sum "$PACK" > .sandbox-pack/chunks/full-pack.sha256
+          printf '%s\n' "$PACK" > .sandbox-pack/chunks/full-pack.name
+          split -b 180M -d -a 2 "$PACK" .sandbox-pack/chunks/part-
+          sha256sum .sandbox-pack/chunks/part-* > .sandbox-pack/chunks/parts.sha256
+          ls -lh .sandbox-pack/chunks
+
+      - name: Upload offline manifest
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-manifest
+          path: |
+            .sandbox-pack/chunks/full-pack.name
+            .sandbox-pack/chunks/full-pack.sha256
+            .sandbox-pack/chunks/parts.sha256
+            .sandbox-pack/meta/dependency-key.txt
+            .sandbox-pack/meta/dependency-inputs.sha256
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload offline part 00
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-part-00
+          path: .sandbox-pack/chunks/part-00
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload offline part 01
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-part-01
+          path: .sandbox-pack/chunks/part-01
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload offline part 02
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-part-02
+          path: .sandbox-pack/chunks/part-02
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload offline part 03
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-part-03
+          path: .sandbox-pack/chunks/part-03
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload offline part 04
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-part-04
+          path: .sandbox-pack/chunks/part-04
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload offline part 05
+        if: steps.offline.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcl-offline-part-05
+          path: .sandbox-pack/chunks/part-05
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
