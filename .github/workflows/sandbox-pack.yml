@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - "work/**"
+      - 'work/**'
   workflow_dispatch:
     inputs:
       include_offline_dependencies:
-        description: "Build and upload the pnpm/Playwright offline pack"
+        description: 'Build and upload the pnpm/Playwright offline pack'
         required: true
         default: false
         type: boolean
@@ -116,15 +116,6 @@ jobs:
           STORE="$GITHUB_WORKSPACE/.sandbox-pack/offline/pnpm-store"
           "$PNPM" fetch --frozen-lockfile --store-dir "$STORE"
           "$PNPM" install --offline --frozen-lockfile --store-dir "$STORE"
-
-      - name: Show Prettier patch
-        if: steps.offline.outputs.enabled == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          PNPM="$GITHUB_WORKSPACE/.sandbox-pack/offline/pnpm-runtime/node_modules/.bin/pnpm"
-          "$PNPM" exec prettier --write .github/workflows/sandbox-pack.yml
-          git diff -- .github/workflows/sandbox-pack.yml
 
       - name: Download Playwright Chromium
         if: steps.offline.outputs.enabled == 'true'
