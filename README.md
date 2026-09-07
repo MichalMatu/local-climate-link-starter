@@ -70,7 +70,7 @@ Technical notes, commands, tests, and repository structure are kept outside the
 main README:
 
 - [docs/development/repository-guide.md](docs/development/repository-guide.md)
-- [docs/development/sandbox-execution-flow.md](docs/development/sandbox-execution-flow.md)
+- [docs/SANDBOX_EXECUTION_FLOW.md](docs/SANDBOX_EXECUTION_FLOW.md)
 - [docs/testing/hardware-matrix.md](docs/testing/hardware-matrix.md)
 - [docs/product/next-functional-steps.md](docs/product/next-functional-steps.md)
 
