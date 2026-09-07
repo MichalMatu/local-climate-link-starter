@@ -165,7 +165,10 @@ jobs:
           sha256sum "$PACK" > .sandbox-pack/chunks/full-pack.sha256
           printf '%s\n' "$PACK" > .sandbox-pack/chunks/full-pack.name
           split -b 180M -d -a 2 "$PACK" .sandbox-pack/chunks/part-
-          sha256sum .sandbox-pack/chunks/part-* > .sandbox-pack/chunks/parts.sha256
+          (
+            cd .sandbox-pack/chunks
+            sha256sum part-* > parts.sha256
+          )
           ls -lh .sandbox-pack/chunks
 
       - name: Upload offline manifest
