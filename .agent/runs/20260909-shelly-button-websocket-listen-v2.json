@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-shelly-button-websocket-listen-v2",
+  "task_digest": "e3450ac1de22eaebd5eaf8e92450ef5b2481d9e7d86aebede9f1f9e0fe7f664e",
+  "idle_timeout": 150,
+  "task_timeout": 300,
+  "memory_limit_mb": 512,
+  "started_at": "2026-09-08T23:50:46.064758+00:00",
+  "attempt_id": "cb8d74765c08ea73dedf5854",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 18687,
+  "updated_at": "2026-09-08T23:50:46.064820+00:00",
+  "pid": 18687
+}
