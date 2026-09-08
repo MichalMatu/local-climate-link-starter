@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 5,
   "total": 12,
-  "command": "git checkout work/shelly-led-settings",
-  "pid": 72859,
+  "command": "pnpm --filter @lcl/shelly-client test",
+  "pid": 73107,
   "timeout": 600,
   "idle_timeout": 180,
   "memory_limit_mb": 3072,
-  "started_at": "2026-09-08T22:03:05.248960+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-08T22:03:07.353946+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 12,
   "stage_phase": "commands",
   "task_id": "20260908-shelly-led-focused-v4",
@@ -18,5 +18,5 @@
   "task_digest": "1286c852498634a66823bcdbf025f77cd7ff97ea12e4d5fcbde1a73dfada813b",
   "daemon_version": "4.18.19",
   "daemon_pid": 71496,
-  "updated_at": "2026-09-08T22:03:05.327966+00:00"
+  "updated_at": "2026-09-08T22:03:07.436111+00:00"
 }
