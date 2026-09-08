@@ -478,6 +478,8 @@ export const it = {
       fixShellyData: 'Correggi dati presa.',
       inputShellyIp: 'inserisci IP Shelly',
       installFirst: 'Invia prima la regola attuale.',
+      shellyIdentityMissing:
+        'Shelly non ha fornito un identificatore stabile del dispositivo. Aggiorna il firmware e riprova.',
       noSelectedSensor: 'Aggiungi e seleziona un termometro.',
       noSelectedShelly: 'Seleziona presa Shelly.',
       noSelectedDiagnosticShelly: 'Seleziona presa Shelly per diagnostica.',

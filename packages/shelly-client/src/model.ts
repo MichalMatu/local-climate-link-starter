@@ -30,6 +30,7 @@ export interface ShellyRpcTransport {
 }
 
 export interface ShellyDeviceInfo {
+  id?: string | undefined;
   model: string;
   gen: number;
   firmwareId?: string | undefined;

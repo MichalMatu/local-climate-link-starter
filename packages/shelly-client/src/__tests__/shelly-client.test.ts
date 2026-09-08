@@ -94,6 +94,7 @@ class RecordingTransport implements ShellyRpcTransport {
       return {
         ok: true,
         value: {
+          id: 'shellyplugsg3-test',
           model: 'S3PL-00112EU',
           gen: 3,
           matter: this.options.matterEnabled ?? false
@@ -887,6 +888,7 @@ describe('FetchShellyRpcTransport', () => {
 
       const paramsByMethod: Record<string, unknown> = {
         [RPC_METHODS.ShellyGetDeviceInfo]: {
+          id: 'shellyplugsg3-test',
           model: 'S3PL-00112EU',
           gen: 3,
           matter: false

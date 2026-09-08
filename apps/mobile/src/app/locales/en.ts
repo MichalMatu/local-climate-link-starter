@@ -473,6 +473,8 @@ export const en = {
       fixShellyData: 'Fix plug data.',
       inputShellyIp: 'enter Shelly IP',
       installFirst: 'Send the current rule first.',
+      shellyIdentityMissing:
+        'Shelly did not provide a stable device identifier. Update the firmware and try again.',
       noSelectedSensor: 'Add and select a thermometer.',
       noSelectedShelly: 'Select Shelly plug.',
       noSelectedDiagnosticShelly: 'Select Shelly plug for diagnostics.',
