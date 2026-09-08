@@ -1,0 +1,197 @@
++            </div>
++            <div>
++              <span>{t('dashboard.humidity')}</span>
++              <strong>
++                {formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')}
++              </strong>
++            </div>
++            <div>
++              <span>{t('dashboard.vpd')}</span>
++              <strong>
++                {formatInstallationMetric(snapshot?.diagnostics.lastVpd, ' kPa', 2)}
++              </strong>
++            </div>
++          </div>
++
++          <dl className="automation-summary installation-detail-summary">
++            <div>
++              <dt>{t('dashboard.output')}</dt>
++              <dd>{relayState == null ? '—' : relayState ? 'ON' : 'OFF'}</dd>
++            </div>
++            <div>
++              <dt>{t('detail.activeThresholds')}</dt>
++              <dd>
++                {installationThresholdSummary(
++                  installation,
++                  snapshot?.diagnostics.lastEffectiveOnThreshold,
++                  snapshot?.diagnostics.lastEffectiveOffThreshold
++                )}
++              </dd>
++            </div>
++            <div>
++              <dt>{t('detail.source')}</dt>
++              <dd>{t('dashboard.liveFromShelly')}</dd>
++            </div>
++          </dl>
++        </article>
++
++        <article className="automation-card installation-detail-config">
++          <div className="installation-section-heading">
++            <div>
++              <p className="automation-card__eyebrow">{t('detail.configuration')}</p>
++              <h2>{t('detail.automation')}</h2>
++            </div>
++          </div>
++
++          <dl className="automation-summary installation-detail-summary">
++            <div>
++              <dt>{t('hardware.metrics.mode')}</dt>
++              <dd>{t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}</dd>
++            </div>
++            <div>
++              <dt>{t('dashboard.thresholds')}</dt>
++              <dd>{configuredThresholdSummary(installation)}</dd>
++            </div>
++            <div>
++              <dt>{t('dashboard.sensor')}</dt>
++              <dd>{installation.config.sensor.displayName}</dd>
++            </div>
++          </dl>
++
++          <div className="installation-detail-actions">
++            <button
++              className={isPaused ? 'primary-action' : 'secondary-action'}
++              type="button"
++              disabled={!canToggleAutomation || automationMutation.isPending}
++              onClick={() => automationMutation.mutate()}
++            >
++              {automationMutation.isPending
++                ? t('detail.changingState')
++                : isPaused
++                  ? t('detail.resume')
++                  : t('detail.pause')}
++            </button>
++          </div>
++
++          {control && scriptMatch !== 'matched' && (
++            <p className="installation-detail-note">{t('detail.scriptNeedsAttention')}</p>
++          )}
++        </article>
++      </section>
++
++      <ToastViewport
++        dismissLabel={t('toast.dismiss')}
++        label={t('toast.regionLabel')}
++        toasts={toasts}
++        onDismiss={dismissToast}
++      />
++    </main>
++  );
++};
+diff --git a/apps/mobile/src/theme/theme.css b/apps/mobile/src/theme/theme.css
+index 974e9f0..c41cbe9 100644
+--- a/apps/mobile/src/theme/theme.css
++++ b/apps/mobile/src/theme/theme.css
+@@ -1546,3 +1546,102 @@ select {
+     grid-column: 1 / -1;
+   }
+ }
++
++.automation-card__actions,
++.installation-detail-actions {
++  display: flex;
++  flex-wrap: wrap;
++  gap: var(--lcl-spacing-sm);
++  justify-content: flex-end;
++}
++
++.automation-health--paused {
++  background: var(--lcl-color-surface-muted);
++  border-color: var(--lcl-color-border-strong);
++  color: var(--lcl-color-text);
++}
++
++.automation-health--attention {
++  background: var(--lcl-color-status-warning-bg);
++  border-color: var(--lcl-color-status-warning-border);
++  color: var(--lcl-color-status-warning-text);
++}
++
++.installation-detail-shell {
++  align-content: start;
++}
++
++.installation-detail-header {
++  align-items: flex-start;
++}
++
++.detail-back-link {
++  background: transparent;
++  border: 0;
++  color: var(--lcl-color-accent);
++  cursor: pointer;
++  font: inherit;
++  font-weight: 800;
++  margin: 0 0 var(--lcl-spacing-md);
++  padding: 0;
++}
++
++.detail-back-link:hover,
++.detail-back-link:focus-visible {
++  text-decoration: underline;
++}
++
++.installation-detail-grid {
++  display: grid;
++  gap: var(--lcl-spacing-lg);
++  grid-template-columns: repeat(
++    auto-fit,
++    minmax(min(100%, var(--lcl-size-card-column-min)), 1fr)
++  );
++}
++
++.installation-section-heading {
++  align-items: center;
++  display: flex;
++  gap: var(--lcl-spacing-md);
++  justify-content: space-between;
++}
++
++.installation-section-heading h2 {
++  margin: 0;
++}
++
++.installation-detail-summary {
++  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  padding-top: var(--lcl-spacing-md);
++}
++
++.installation-detail-actions {
++  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  padding-top: var(--lcl-spacing-md);
++}
++
++.installation-detail-note {
++  background: var(--lcl-color-status-warning-bg);
++  border: var(--lcl-border-width-sm) solid var(--lcl-color-status-warning-border);
++  border-radius: var(--lcl-radius-md);
++  color: var(--lcl-color-status-warning-text);
++  margin: 0;
++  padding: var(--lcl-spacing-md);
++}
++
++@media (max-width: 30rem) {
++  .automation-card__actions,
++  .installation-detail-actions,
++  .installation-section-heading {
++    align-items: stretch;
++    flex-direction: column;
++  }
++
++  .automation-card__actions .secondary-action,
++  .installation-detail-actions .primary-action,
++  .installation-detail-actions .secondary-action,
++  .installation-section-heading .secondary-action {
++    width: 100%;
++  }
++}
