@@ -1,0 +1,182 @@
+diff --git a/apps/mobile/src/flows/installations/runtimeDiagnostics.test.ts b/apps/mobile/src/flows/installations/runtimeDiagnostics.test.ts
+new file mode 100644
+index 0000000..065d766
+--- /dev/null
++++ b/apps/mobile/src/flows/installations/runtimeDiagnostics.test.ts
+@@ -0,0 +1,65 @@
++import { describe, expect, it } from 'vitest';
++import { diagnosticSnapshotSchema } from '../hardware-setup/schemas.js';
++import { installedAutomationHealth } from './runtimeDiagnostics.js';
++
++const snapshot = (
++  overrides: {
++    lastSeenUptimeMs?: number | null;
++    uptimeSec?: number | null;
++    staleTimeoutSec?: number;
++    dataState?: string;
++  } = {}
++) =>
++  diagnosticSnapshotSchema.parse({
++    v: 1,
++    z: 'hash',
++    s: ['AA:BB:CC:DD:EE:FF', 'Sensor'],
++    q: [0, 0, 19, 20, overrides.staleTimeoutSec ?? 120, -85],
++    y: [
++      '12:00',
++      1_782_000_000,
++      'uptimeSec' in overrides ? (overrides.uptimeSec ?? null) : 1000
++    ],
++    p: [false, 0, 230, 0, 100, 30],
++    g: [
++      overrides.lastSeenUptimeMs === undefined ? 950_000 : overrides.lastSeenUptimeMs,
++      21.5,
++      55,
++      88,
++      -60,
++      false,
++      'ok',
++      900_000,
++      null,
++      0,
++      0,
++      21.5,
++      1.2,
++      19,
++      20,
++      960_000,
++      overrides.dataState ?? 'ok'
++    ]
++  });
++
++describe('installedAutomationHealth', () => {
++  it('marks a fresh runtime snapshot as healthy', () => {
++    expect(installedAutomationHealth(snapshot())).toBe('ok');
++  });
++
++  it('marks data older than the configured stale timeout as stale', () => {
++    expect(
++      installedAutomationHealth(
++        snapshot({ lastSeenUptimeMs: 700_000, staleTimeoutSec: 120 })
++      )
++    ).toBe('stale');
++  });
++
++  it('respects an explicit stale runtime state', () => {
++    expect(installedAutomationHealth(snapshot({ dataState: 'st' }))).toBe('stale');
++  });
++
++  it('keeps health neutral when uptime data is unavailable', () => {
++    expect(installedAutomationHealth(snapshot({ uptimeSec: null }))).toBe('unknown');
++  });
++});
+diff --git a/apps/mobile/src/flows/installations/runtimeDiagnostics.ts b/apps/mobile/src/flows/installations/runtimeDiagnostics.ts
+new file mode 100644
+index 0000000..c55ddf4
+--- /dev/null
++++ b/apps/mobile/src/flows/installations/runtimeDiagnostics.ts
+@@ -0,0 +1,48 @@
++import {
++  diagnosticSnapshotSchema,
++  type HardwareDiagnosticSnapshot
++} from '../hardware-setup/schemas.js';
++import { fetchShellyJson } from '../hardware-setup/shellyRequests.js';
++import type { InstalledAutomation } from './model.js';
++
++export type InstalledAutomationHealth = 'ok' | 'stale' | 'unknown';
++
++const DIAGNOSTIC_TIMEOUT_MS = 5000;
++
++export const fetchInstalledAutomationDiagnostics = async (
++  installation: InstalledAutomation
++): Promise<HardwareDiagnosticSnapshot> => {
++  const endpoint = new URL(
++    `/script/${installation.script.id}/diag`,
++    installation.shelly.baseUrl
++  );
++  const payload = await fetchShellyJson(endpoint, DIAGNOSTIC_TIMEOUT_MS);
++  const parsed = diagnosticSnapshotSchema.safeParse(payload);
++  if (!parsed.success) {
++    throw new Error(parsed.error.message);
++  }
++  return parsed.data;
++};
++
++export const installedAutomationHealth = (
++  snapshot: HardwareDiagnosticSnapshot
++): InstalledAutomationHealth => {
++  const lastSeenUptimeMs = snapshot.diagnostics.lastSeenUptimeMs;
++  const currentUptimeSec = snapshot.time.uptimeSec;
++
++  if (snapshot.diagnostics.dataState === 'st') {
++    return 'stale';
++  }
++
++  if (
++    lastSeenUptimeMs == null ||
++    !Number.isFinite(lastSeenUptimeMs) ||
++    currentUptimeSec == null ||
++    !Number.isFinite(currentUptimeSec)
++  ) {
++    return 'unknown';
++  }
++
++  const ageSec = Math.max(0, currentUptimeSec - lastSeenUptimeMs / 1000);
++  return ageSec > snapshot.rule.staleTimeoutSec ? 'stale' : 'ok';
++};
+diff --git a/apps/mobile/src/routes/AppRoutes.tsx b/apps/mobile/src/routes/AppRoutes.tsx
+index b9ee004..13dbda8 100644
+--- a/apps/mobile/src/routes/AppRoutes.tsx
++++ b/apps/mobile/src/routes/AppRoutes.tsx
+@@ -1,6 +1,8 @@
+ import { Suspense, lazy, useState } from 'react';
+ import { useTranslation } from '../app/i18n.js';
++import { useInstalledAutomationStore } from '../flows/installations/store.js';
+ import type { SetupIntent } from '../flows/setup-intent.js';
++import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
+ import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
+ 
+ const HardwareSetupScreen = lazy(async () => {
+@@ -20,19 +22,29 @@ const RouteFallback = () => {
+   );
+ };
+ 
++type AppView = 'intent' | 'dashboard' | Exclude<SetupIntent, 'manage'>;
++
+ export const AppRoutes = () => {
+-  const [setupIntent, setSetupIntent] = useState<SetupIntent | null>(null);
++  const installations = useInstalledAutomationStore((state) => state.installations);
++  const [view, setView] = useState<AppView>(() =>
++    installations.length > 0 ? 'dashboard' : 'intent'
++  );
++
++  if (view === 'intent') {
++    return (
++      <SetupIntentScreen
++        onSelect={(intent) => setView(intent === 'manage' ? 'dashboard' : intent)}
++      />
++    );
++  }
+ 
+-  if (!setupIntent) {
+-    return <SetupIntentScreen onSelect={setSetupIntent} />;
++  if (view === 'dashboard') {
++    return <AutomationDashboardScreen onAddAutomation={() => setView('intent')} />;
+   }
+ 
+   return (
+     <Suspense fallback={<RouteFallback />}>
+-      <HardwareSetupScreen
+-        setupIntent={setupIntent}
+-        onBackToIntent={() => setSetupIntent(null)}
+-      />
++      <HardwareSetupScreen setupIntent={view} onBackToIntent={() => setView('intent')} />
+     </Suspense>
+   );
+ };
+diff --git a/apps/mobile/src/screens/AutomationDashboardScreen.tsx b/apps/mobile/src/screens/AutomationDashboardScreen.tsx
+new file mode 100644
+index 0000000..1a09bf4
+--- /dev/null
++++ b/apps/mobile/src/screens/AutomationDashboardScreen.tsx
+@@ -0,0 +1,203 @@
++import { useQuery } from '@tanstack/react-query';
