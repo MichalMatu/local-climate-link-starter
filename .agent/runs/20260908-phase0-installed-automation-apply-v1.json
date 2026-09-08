@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260908-phase0-installed-automation-apply-v1",
+  "task_digest": "c5c152c7c418bb297fa727a1b4add259e43d6dc48e49f8dbc2b7af9caa757a7e",
+  "idle_timeout": 90,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-08T14:35:12.101304+00:00",
+  "attempt_id": "cfc3931b3ba54fa884b2cd01",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 16591,
+  "updated_at": "2026-09-08T14:35:12.101535+00:00",
+  "pid": 16591
+}
