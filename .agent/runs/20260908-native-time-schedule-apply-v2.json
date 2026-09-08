@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260908-native-time-schedule-apply-v2",
+  "task_digest": "27982150060641f325513e9239ee5cf7e43da28515906cf2a5e27f711af0bf73",
+  "idle_timeout": 90,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-08T19:17:05.318034+00:00",
+  "attempt_id": "19d4ea5d7882aabe5e3908e1",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 50782,
+  "updated_at": "2026-09-08T19:17:05.318135+00:00",
+  "pid": 50782
+}
