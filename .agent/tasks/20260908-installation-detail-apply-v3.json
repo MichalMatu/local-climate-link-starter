@@ -1,0 +1,27 @@
+{
+  "id": "20260908-installation-detail-apply-v3",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/installation-detail",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 180,
+  "idle_timeout": 90,
+  "task_timeout": 600,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse origin/work/installation-detail)\" = \"6835cfc08b7f369dc6072ec45bf6637cef9e2987\"",
+    "git checkout -B work/installation-detail origin/work/installation-detail",
+    "git reset --hard origin/work/installation-detail && git clean -fd",
+    "rm -f /tmp/lcl-detail.patch && git show origin/agent-control:.agent/patches/20260908-detail-exact-00-fixed.patchpart > /tmp/lcl-detail.patch && for i in 01 02 03 04 05 06 07 08; do git show origin/agent-control:.agent/patches/20260908-detail-exact-${i}.patchpart >> /tmp/lcl-detail.patch; done",
+    "test \"$(sha256sum /tmp/lcl-detail.patch | awk '{print $1}')\" = \"ed4dcf7cff96eec9e8508a21b95d0f987589a6ee3c5413bb77ebe0b5b2fb4682\"",
+    "git apply --check /tmp/lcl-detail.patch && git apply /tmp/lcl-detail.patch",
+    "git diff --check",
+    "git add apps/mobile",
+    "test \"$(git diff --cached --binary | sha256sum | awk '{print $1}')\" = \"ed4dcf7cff96eec9e8508a21b95d0f987589a6ee3c5413bb77ebe0b5b2fb4682\"",
+    "git commit -m 'Add per-installation detail screen'",
+    "git push origin work/installation-detail",
+    "git status --short"
+  ]
+}
