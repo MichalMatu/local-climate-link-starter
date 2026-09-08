@@ -1,155 +1,336 @@
-# Local Climate Link — Functional Next Steps
+# Local Climate Link — post-v2.0.9 product roadmap
 
-This file tracks product extensions after the current Shelly + Xiaomi/PVVX +
-TP357 MVP. It is intentionally separate from `docs/plan.md`, which describes
-the current MVP boundary.
+Status: audited implementation plan after `v2.0.9` / **Stable Core v1**.
 
-## Rules for future expansion
+Baseline commit:
 
-- Keep Shelly as the runtime controller. The phone remains a configurator and
-  diagnostic tool.
-- Do not add cloud, Home Assistant, MQTT, telemetry, or background phone
-  automation as a default requirement.
-- Add one vertical slice at a time: domain model, script generation, UI,
-  diagnostics, docs, and tests.
-- Prefer bounded local data over unbounded logs. Shelly runtime memory is a
-  product constraint, not an implementation detail.
-- Every new user-facing feature needs i18n coverage for all supported app
-  locales.
+```text
+b44899ba66b202ca05f48a8856a9871daee97832
+```
 
-## 1. Climate history and charts
+This document is the canonical roadmap for the next product phase. It narrows the
+older broad extension list to the work that should happen before commercial
+packaging. `docs/plan.md` remains the MVP/history document.
 
-Goal: show users what the thermometer and relay did over time without requiring
-a separate datalogger.
+## Product direction
 
-Recommended order:
+Local Climate Link is no longer best described as only a thermostat. The stable
+core already supports four climate-control modes:
 
-1. Add a pure `ClimateSample` model with timestamp, temperature, humidity, VPD,
-   RSSI, relay state, sensor profile, and source.
-2. Add deterministic demo sample fixtures for landing page screenshots and app
-   previews.
-3. Build a lightweight SVG chart component with no new runtime dependency:
-   temperature, humidity, VPD, and relay ON/OFF markers.
-4. Add local app-side history while the diagnostics screen is open.
-5. Add optional export to JSON/CSV for support and marketing screenshots.
-6. Consider a tiny Shelly ring buffer only after memory testing confirms it is
-   safe. The buffer must be bounded and disabled when memory gets tight.
+- heating,
+- cooling,
+- humidifying,
+- dehumidifying,
 
-Required tests:
+plus VPD-assisted threshold adjustment and safety guards such as stale-sensor
+OFF, boot OFF, minimum-change protection, maximum ON time, RSSI filtering, and
+consecutive-hit confirmation.
 
-- VPD calculation and chart range helpers,
-- downsampling and empty-history behavior,
-- i18n labels,
-- responsive chart rendering,
-- no unbounded arrays in runtime or diagnostics paths.
+The next product direction is therefore:
 
-## 2. PVVX/Xiaomi setup assistant
+> a simple local climate automation configurator that uses Shelly as the runtime
+> controller and the phone as setup, status, and diagnostics UI.
 
-Goal: reduce setup mistakes for Xiaomi LYWSD03MMC with PVVX/BTHome v2 firmware.
+The architectural promise does not change: once configured, automation must keep
+working without the phone, cloud, Home Assistant, MQTT broker, or server.
 
-Scope:
+## Non-negotiable rules for this roadmap
 
-- Add a read-only guide for recommended PVVX settings first.
-- Later, evaluate a Web Bluetooth configuration helper as an optional tool, not
-  as a required setup path.
-- Do not copy upstream flasher code without license review and notices.
-- Keep encrypted BTHome/bind key support out of the default MVP unless it gets a
-  separate decision record.
+- `v2.0.9` is the rollback/reference point. Do not rewrite Stable Core v1 just to
+  support the new UI.
+- Keep the generated climate script small and safety-focused.
+- Generated JavaScript is never the source of truth; typed configuration is.
+- Keep phone BLE as setup/diagnostic input, not the runtime controller.
+- Prefer native Shelly capabilities over adding unrelated logic to the climate
+  script.
+- Add one vertical slice at a time and keep the existing hardware matrix as the
+  regression gate for runtime changes.
+- No licensing, payments, Play Store work, phone-to-Shelly BLE RPC, new device
+  families, or cloud features in this roadmap.
 
-Recommended PVVX guidance fields:
+## Phase 0 — installation model before UX work
 
-- BTHome v2 advertising type,
-- unencrypted beacon for MVP,
-- advertising interval tuned for reliability and battery,
-- measurement interval,
-- transmit power,
-- visible battery reporting.
+This is the main architectural issue found in the re-audit.
 
-Required tests/docs:
+Today the app can remember multiple Shelly devices and sensors, but the active
+rule fields are one global setup draft and some installation state is only held
+in the current React flow. That is sufficient for the current configurator but
+not for a dashboard or a reliable per-Shelly detail screen.
 
-- compatibility guide update,
-- troubleshooting for missing Xiaomi advertisements,
-- legal notice review before embedding any upstream behavior.
+Before changing navigation, introduce one small persistent domain model for an
+installed automation. It should bind at least:
 
-## 3. Reliability cockpit
+```text
+app installation id
+Shelly identity + current connection address
+Shelly script id/hash
+sensor identity + runtime BLE address/profile
+climate rule config
+installation state/version
+```
 
-Goal: make support and field testing faster.
+Use this model as the app-side source of truth for installed systems. Do not use
+IP address, generated script text, current tab state, or the last setup draft as
+installation identity.
 
-Scope:
+Development data may be reset instead of adding migration complexity, consistent
+with `AGENTS.md`.
 
-- Add a compact reliability summary: last seen, stale count, RSSI range, relay
-  changes, last OFF reason, firmware, script hash, and Matter/Scripts status.
-- Add a support export that redacts IP/MAC unless the user explicitly includes
-  them.
-- Keep the UI compact. Avoid large cards for a handful of diagnostic values.
+### Gate
 
-Required tests:
+Do not build the new dashboard or per-Shelly screen until two independently
+configured Shelly entries can retain different sensor/rule configurations in
+app storage.
 
-- diagnostics redaction,
-- stale-state copy,
-- script hash drift detection,
-- no raw secrets in exported payloads.
+## 1. Better UX — start from user intent
 
-## 4. Rule presets and guardrails
+Replace the technical top-level mental model:
 
-Goal: make common climate automations safer to configure.
+```text
+Shelly -> Sensor -> Rule -> Diagnostics
+```
 
-Candidate presets:
+with a task-oriented entry point such as:
 
-- humidifier between humidity min/max,
-- dehumidifier between humidity min/max,
-- heater with max continuous ON time,
-- cooling with compressor-safe minimum change interval,
-- VPD assist operating inside the configured humidity range.
+```text
+What do you want to do?
+- control temperature
+- control humidity
+- manage an existing automation
+```
 
-Required tests:
+Heating/cooling and humidifying/dehumidifying remain presets inside the relevant
+flow rather than primary navigation concepts.
 
-- exact threshold behavior,
-- min-change guard,
-- stale OFF,
-- max-ON guard,
-- generated script snapshots for each preset.
+Do not force an already configured user through the setup wizard on every app
+launch. New users should enter setup; existing users should land on their
+systems/dashboard.
 
-## 5. Additional hardware paths
+Keep the current working setup operations and adapters. This phase is an
+information-architecture and composition change, not a rewrite of BLE, Shelly
+RPC, or script generation.
 
-Only expand after the current Xiaomi/PVVX, TP357, and Shelly Plug S Gen3 path is
-stable in dated hardware tests.
+### Re-audit warning
 
-Possible order:
+The current setup pages are already large. Avoid replacing them with one new
+large wizard component. Extract small presentational steps and keep orchestration
+in the flow layer.
 
-1. More Shelly Gen3 plug variants with the same Scripts/BLE runtime capability.
-2. Additional BTHome v2 unencrypted sensors.
-3. Optional NOUS/Tasmota path only after a separate architecture decision.
+## 2. Simple dashboard after configuration
 
-Every new hardware path needs:
+The dashboard should answer only the questions a normal user has after setup:
 
-- profile schema,
-- parser fixtures,
-- generated script support,
-- compatibility docs,
-- troubleshooting docs,
-- manual hardware matrix entry.
+```text
+What is the climate now?
+Is the automation working?
+Is the output ON or OFF?
+What is the configured target/range?
+Is the sensor fresh and reachable?
+```
 
-## 6. Commercial packaging
+Primary values:
 
-Goal: turn the MVP into something sellable without weakening privacy or safety.
+- temperature,
+- humidity,
+- VPD when both measurements are available,
+- relay state,
+- automation mode,
+- target/range,
+- simple health/freshness state.
 
-Next steps:
+For an installed system, prefer the Shelly runtime diagnostic snapshot as the
+live source for temperature/humidity/VPD/relay decision. Do not silently mix a
+phone BLE reading with a Shelly runtime reading and present them as one state.
+Phone BLE remains useful during setup and sensor-specific history work, but the
+runtime dashboard should describe what the controller itself currently sees.
 
-- Android beta distribution page and APK release notes.
-- Play Store developer account and store listing assets.
-- Privacy policy and support contact flow.
-- Landing page beta signup flow.
-- Clear licensing and third-party notices.
-- Hardware compatibility landing section with tested firmware versions.
+Show offline/stale states explicitly instead of displaying old values as if they
+were live.
 
-Do not add analytics SDKs or telemetry before an explicit product decision and
-opt-in UX.
+## 3. Hide advanced options without hiding safety
 
-## Suggested immediate sequence
+Use progressive disclosure with three levels:
 
-1. Finish and publish the GitHub Pages landing page.
-2. Add a demo climate chart to the landing/app preview using generated samples.
-3. Add app-side diagnostics history while the diagnostics screen is open.
-4. Export diagnostics/history to JSON/CSV.
-5. Re-run overnight Shelly soak tests with the exported history format.
+```text
+Normal
+Advanced
+Developer diagnostics
+```
+
+Normal should contain the mode, target/range, current status, and the controls a
+normal user changes.
+
+Advanced can contain safety tuning such as RSSI threshold, stale timeout,
+minimum change interval, maximum ON time, and VPD target. Keep safe defaults and
+plain-language descriptions; these settings must remain accessible because they
+change runtime behavior.
+
+Developer diagnostics can contain script ID/hash, raw decision reason, firmware,
+runtime memory, RPC details, and low-level diagnostic fields.
+
+Do not equate "hide" with "delete". The goal is a calm default UI while keeping
+support/recovery information available.
+
+## 4. Expand from climate preset to local automation configurator
+
+Keep the existing four climate modes and VPD support as the first automation
+family. Do not generalize Stable Core v1 into a large generic rule engine before
+there is a concrete use case.
+
+The next automation family may be simple time control, for example a lamp that
+is ON from 08:00 to 20:00. Prefer native Shelly schedules for pure time-based
+ON/OFF automation so the climate script does not grow.
+
+### Relay ownership rule
+
+A single relay must have one clear owner. Do not create a climate script and an
+independent schedule that both call `Switch.Set` on the same relay without an
+explicit combined-control design.
+
+Therefore distinguish:
+
+```text
+climate automation -> generated local climate script
+pure time automation -> native Shelly Schedule
+combined time + climate -> separate future design/gate
+```
+
+This avoids nondeterministic fights between two controllers and protects the
+Stable Core v1 safety model.
+
+VPD must also remain described accurately: current VPD assist adjusts the active
+control thresholds using temperature/humidity; it is not a separate multi-output
+VPD controller.
+
+## 5. Shelly LED and physical button
+
+Treat LED and button work as two separate capabilities.
+
+### LED — safe first step
+
+Shelly Plug S Gen3 officially exposes `PLUGS_UI` configuration with `power`,
+`switch`, and `off` LED modes plus configurable RGB/brightness for relay ON/OFF.
+Start with app-side device configuration, not additional thermostat runtime
+logic.
+
+Useful first version:
+
+- configure a predictable relay ON/OFF indication,
+- optionally disable the LED,
+- expose current LED mode in device settings/diagnostics.
+
+Do not promise dynamic flashing for low sensor battery, weak RSSI, or arbitrary
+runtime errors until a real-device test proves that repeated runtime LED control
+is practical and does not harm script size, memory, or reliability.
+
+### Button — hardware validation gate
+
+Keep the native short-press relay behavior unchanged until the exact Plug S Gen3
+button event behavior is proven on real hardware. The device documentation
+exposes button mode through `PLUGS_UI`, but Plug S Gen3 does not advertise a
+normal `Input` component in its documented component list, so `long_push` must
+not be assumed to be script-visible.
+
+If a long-press pause is proven feasible, its safety semantics must be:
+
+```text
+physical long press
+-> force relay OFF
+-> pause/stop automation
+-> visibly report paused state
+```
+
+Never implement "long press -> Script.Stop" while leaving the relay's previous
+state ambiguous.
+
+The Shelly used by the project was unreachable during the 2026-09-08 roadmap
+re-audit, so this capability remains explicitly unverified until a later local
+hardware test.
+
+## 6. Dedicated screen for every Shelly / installed system
+
+After Phase 0, add a stable detail route for each installed system rather than
+making the old setup tabs the permanent management UI.
+
+The detail screen should contain:
+
+```text
+current climate + VPD
+relay/output state
+assigned sensor
+active automation and target/range
+automation pause/resume or edit entry point
+simple health state
+advanced settings
+diagnostics
+later: supported schedules
+```
+
+Use an app-side stable installation/device ID for routing. IP address is a
+connection property and may change.
+
+The dashboard should be a summary/list; this detail screen is where device-level
+management belongs.
+
+## Implementation order
+
+Use this sequence:
+
+1. Phase 0: persistent per-installation model.
+2. Intent-first UX shell and navigation.
+3. Dashboard backed by installed-system/runtime state.
+4. Per-Shelly / per-installation detail screen.
+5. Progressive disclosure of advanced and developer diagnostics.
+6. First automation expansion using native Shelly capabilities where possible.
+7. LED configuration.
+8. Physical-button experiment only after real-hardware proof.
+
+The numbered product goals remain the six goals above; Phase 0 is an enabling
+architecture change, not an additional product feature.
+
+## Main risks caught before implementation
+
+### 1. Global setup draft is not a multi-installation model
+
+Fix this first or settings from one Shelly can become the apparent settings of
+another device in the new UI.
+
+### 2. Multiple relay controllers can conflict
+
+A native schedule and climate script must not independently own the same relay.
+Define ownership before adding schedules.
+
+### 3. Dashboard can accidentally have two truths
+
+Phone BLE and Shelly runtime may see different packet ages/RSSI/readings. Use the
+Shelly runtime as the primary installed-system status source.
+
+### 4. LED capability is narrower than the original idea
+
+Static relay-based RGB indication is documented. Arbitrary dynamic error flashes
+are a separate experiment, not a guaranteed feature.
+
+### 5. Long-press support is not yet proven on Plug S Gen3
+
+Do not spend script budget or redesign manual control until hardware evidence
+exists.
+
+### 6. UI refactor can become a big-bang rewrite
+
+The current setup pages already contain substantial behavior. Preserve tested
+flows and move one vertical slice at a time.
+
+### 7. Script budget remains a hard boundary
+
+UI, schedules, LED configuration, and management features should live outside
+the generated climate script unless runtime-local climate logic truly requires
+otherwise.
+
+## Definition of success for this roadmap
+
+At the end of this phase, a user should be able to open Local Climate Link and
+understand the system without knowing what a Shelly Script, RSSI threshold, or
+script ID is; configure or inspect more than one independent Shelly system
+without settings leaking between them; see the state that the Shelly controller
+itself is using; and still retain the offline, local, fail-safe behavior frozen
+in `v2.0.9`.
