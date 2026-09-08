@@ -1,0 +1,224 @@
++      case 'Script.List':
++        result = {
++          scripts: [
++            {
++              id: 1,
++              name: 'Local Climate Link Thermostat',
++              enable: true,
++              running: scriptRunning
++            }
++          ]
++        };
++        break;
++      case 'Script.Stop':
++        scriptRunning = false;
++        result = null;
++        break;
++      case 'Script.Start':
++        scriptRunning = true;
++        result = null;
++        break;
++      case 'Switch.Set':
++        relayOn = body.params?.on ?? false;
++        result = null;
++        break;
++      default:
++        result = {};
++    }
++
++    return jsonResponse({ id: body.id ?? 1, result });
++  });
++
++  vi.stubGlobal('fetch', fetchMock);
++  return { rpcMethods };
++};
++
++const renderDetail = (installationId: string, onBack = vi.fn()) => {
++  const queryClient = new QueryClient({
++    defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
++  });
++  return {
++    onBack,
++    ...render(
++      <I18nProvider>
++        <QueryClientProvider client={queryClient}>
++          <InstallationDetailScreen installationId={installationId} onBack={onBack} />
++        </QueryClientProvider>
++      </I18nProvider>
++    )
++  };
++};
++
++describe('InstallationDetailScreen', () => {
++  beforeEach(() => {
++    setLocalePreference('pl');
++    resetInstalledAutomationStore();
++    vi.restoreAllMocks();
++  });
++
++  afterEach(() => {
++    cleanup();
++    resetInstalledAutomationStore();
++    vi.unstubAllGlobals();
++  });
++
++  it('shows a stable not-found route instead of falling back to another installation', () => {
++    renderDetail('missing-installation');
++    expect(
++      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
++    ).toBeVisible();
++  });
++
++  it('shows Shelly runtime and safely pauses and resumes the exact installed script', async () => {
++    const saved = installation();
++    useInstalledAutomationStore.getState().upsertInstallation(saved);
++    const { rpcMethods } = installShellyFetchMock();
++
++    renderDetail(saved.id);
++
++    expect(await screen.findByText('Działa')).toBeVisible();
++    expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
++    expect(screen.getByText('21.4°C')).toBeVisible();
++    expect(screen.getByText('55.2%')).toBeVisible();
++    expect(screen.getByText('1.31 kPa')).toBeVisible();
++    expect(screen.getAllByText('19°C / 20°C').length).toBeGreaterThanOrEqual(1);
++    expect(screen.getByText('Przedpokój')).toBeVisible();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Wstrzymaj automatykę' }));
++
++    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
++    expect(
++      await within(toastRegion).findByText(
++        'Automatyka zatrzymana, wyjście potwierdzone jako OFF.'
++      )
++    ).toBeVisible();
++    expect(await screen.findByText('Wstrzymana')).toBeVisible();
++    expect(screen.getByRole('button', { name: 'Wznów automatykę' })).toBeVisible();
++    expect(rpcMethods).toContain('Script.Stop');
++    expect(rpcMethods).toContain('Switch.Set');
++
++    fireEvent.click(screen.getByRole('button', { name: 'Wznów automatykę' }));
++
++    expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
++    expect(await screen.findByText('Działa')).toBeVisible();
++    expect(rpcMethods).toContain('Script.Start');
++  });
++});
+diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts
+index 894e387..fb00343 100644
+--- a/apps/mobile/src/app/locales/de.ts
++++ b/apps/mobile/src/app/locales/de.ts
+@@ -47,15 +47,38 @@ export const de = {
+     sensor: 'Sensor',
+     readFailed: 'Shelly nicht erreichbar.',
+     refreshing: 'Daten werden von Shelly aktualisiert…',
++    openSystem: 'Details',
+     liveFromShelly: 'Runtime-Daten direkt vom Shelly.',
+     health: {
+       ok: 'Läuft',
+       stale: 'Daten veraltet',
+       unknown: 'Unbekannt',
+       offline: 'Offline',
++      paused: 'Pausiert',
++      attention: 'Prüfen',
+       loading: 'Verbinde…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Automation nicht gefunden',
++    notFoundDescription: 'Diese Automation ist nicht mehr in der App gespeichert.',
++    backToDashboard: 'Zurück zu Automationen',
++    description: 'Live-Status und Steuerung für dieses lokale System.',
++    currentState: 'Aktueller Zustand',
++    climateNow: 'Klima jetzt',
++    activeThresholds: 'Aktive EIN-/AUS-Schwellen',
++    source: 'Datenquelle',
++    configuration: 'Konfiguration',
++    automation: 'Automation',
++    pause: 'Automation pausieren',
++    resume: 'Automation fortsetzen',
++    changingState: 'Status wird geändert…',
++    pauseSuccess: 'Automation pausiert und Ausgang als AUS bestätigt.',
++    resumeSuccess: 'Automation fortgesetzt.',
++    actionFailed: 'Der Automationsstatus konnte nicht sicher geändert werden.',
++    scriptNeedsAttention:
++      'Das für diese Automation gespeicherte Skript stimmt nicht mit dem Shelly-Status überein. Prüfe das Gerät vor der Steuerung.'
++  },
+   common: {
+     add: 'Hinzufügen',
+     address: 'Adresse',
+diff --git a/apps/mobile/src/app/locales/en.ts b/apps/mobile/src/app/locales/en.ts
+index 2edaaaf..422d50a 100644
+--- a/apps/mobile/src/app/locales/en.ts
++++ b/apps/mobile/src/app/locales/en.ts
+@@ -47,15 +47,38 @@ export const en = {
+     sensor: 'Sensor',
+     readFailed: 'Cannot reach Shelly.',
+     refreshing: 'Refreshing from Shelly…',
++    openSystem: 'Details',
+     liveFromShelly: 'Runtime data directly from Shelly.',
+     health: {
+       ok: 'Working',
+       stale: 'Data stale',
+       unknown: 'Unknown',
+       offline: 'Offline',
++      paused: 'Paused',
++      attention: 'Needs attention',
+       loading: 'Connecting…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Automation not found',
++    notFoundDescription: 'This automation is no longer saved in the app.',
++    backToDashboard: 'Back to automations',
++    description: 'Live status and control for this local system.',
++    currentState: 'Current state',
++    climateNow: 'Climate now',
++    activeThresholds: 'Active ON / OFF thresholds',
++    source: 'Data source',
++    configuration: 'Configuration',
++    automation: 'Automation',
++    pause: 'Pause automation',
++    resume: 'Resume automation',
++    changingState: 'Changing state…',
++    pauseSuccess: 'Automation paused and output confirmed OFF.',
++    resumeSuccess: 'Automation resumed.',
++    actionFailed: 'Could not safely change automation state.',
++    scriptNeedsAttention:
++      'The script saved for this automation does not match the Shelly state. Check the device before controlling it.'
++  },
+   common: {
+     add: 'Add',
+     address: 'Address',
+diff --git a/apps/mobile/src/app/locales/es.ts b/apps/mobile/src/app/locales/es.ts
+index 4f1d49a..b292dc3 100644
+--- a/apps/mobile/src/app/locales/es.ts
++++ b/apps/mobile/src/app/locales/es.ts
+@@ -47,15 +47,38 @@ export const es = {
+     sensor: 'Sensor',
+     readFailed: 'No se puede conectar con Shelly.',
+     refreshing: 'Actualizando desde Shelly…',
++    openSystem: 'Detalles',
+     liveFromShelly: 'Datos de ejecución directamente desde Shelly.',
+     health: {
+       ok: 'Funcionando',
+       stale: 'Datos desactualizados',
+       unknown: 'Desconocido',
+       offline: 'Sin conexión',
++      paused: 'Pausada',
++      attention: 'Requiere atención',
+       loading: 'Conectando…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Automatización no encontrada',
++    notFoundDescription: 'Esta automatización ya no está guardada en la aplicación.',
++    backToDashboard: 'Volver a automatizaciones',
++    description: 'Estado en vivo y control de este sistema local.',
++    currentState: 'Estado actual',
++    climateNow: 'Clima actual',
++    activeThresholds: 'Umbrales ON / OFF activos',
++    source: 'Fuente de datos',
++    configuration: 'Configuración',
++    automation: 'Automatización',
++    pause: 'Pausar automatización',
