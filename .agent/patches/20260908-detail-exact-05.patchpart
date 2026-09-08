@@ -1,0 +1,208 @@
++    throw new Error('Shelly relay did not confirm OFF.');
++  }
++};
++
++export const pauseInstalledAutomation = async (
++  installation: InstalledAutomation
++): Promise<ShellyControlStatus> => {
++  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
++  const relayId = installation.config.output.relayId;
++
++  // Never stop the controller while its output is still ON: if a later OFF RPC
++  // failed, stopping first could leave an energized relay without automation.
++  await forceRelayOffAndConfirm(client, relayId);
++  const stopResult = await client.stopScript(installation.script.id);
++
++  // Close the race where the script could reassert the relay between the first
++  // OFF confirmation and Script.Stop. This also runs when Script.Stop reports
++  // an RPC failure because Result errors are unwrapped only after the second OFF.
++  await forceRelayOffAndConfirm(client, relayId);
++  unwrapShellyResult(stopResult);
++
++  const controlStatus = await readShellyControlStatus(installation.shelly.baseUrl);
++  if (
++    installedAutomationScriptMatch(installation, controlStatus) !== 'matched' ||
++    controlStatus.automationMode !== 'manual' ||
++    controlStatus.relayOn
++  ) {
++    throw new Error('Shelly did not confirm a safely paused automation.');
++  }
++  return controlStatus;
++};
++
++export const resumeInstalledAutomation = async (
++  installation: InstalledAutomation
++): Promise<ShellyControlStatus> => {
++  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
++  unwrapShellyResult(
++    await client.setRelayOff({ relayId: installation.config.output.relayId })
++  );
++  unwrapShellyResult(await client.startScript(installation.script.id));
++
++  const controlStatus = await readShellyControlStatus(installation.shelly.baseUrl);
++  if (
++    installedAutomationScriptMatch(installation, controlStatus) !== 'matched' ||
++    controlStatus.automationMode !== 'auto'
++  ) {
++    throw new Error('Shelly did not confirm a running automation.');
++  }
++  return controlStatus;
++};
+diff --git a/apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts b/apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts
+new file mode 100644
+index 0000000..b1f70d1
+--- /dev/null
++++ b/apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts
+@@ -0,0 +1,50 @@
++import { useQuery } from '@tanstack/react-query';
++import type { InstalledAutomation } from './model.js';
++import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
++import { readInstalledAutomationControlStatus } from './runtimeControl.js';
++
++const installationQueryIdentity = (installation: InstalledAutomation) =>
++  [
++    installation.id,
++    installation.shelly.baseUrl,
++    installation.script.id,
++    installation.script.hash,
++    installation.updatedAtMs
++  ] as const;
++
++export const installedAutomationDiagnosticsQueryKey = (
++  installation: InstalledAutomation
++) =>
++  [
++    'installed-automation-diagnostics',
++    ...installationQueryIdentity(installation)
++  ] as const;
++
++export const installedAutomationControlQueryKey = (installation: InstalledAutomation) =>
++  ['installed-automation-control', ...installationQueryIdentity(installation)] as const;
++
++export const useInstalledAutomationDiagnostics = (
++  installation: InstalledAutomation,
++  options: { enabled?: boolean } = {}
++) =>
++  useQuery({
++    queryKey: installedAutomationDiagnosticsQueryKey(installation),
++    queryFn: () => fetchInstalledAutomationDiagnostics(installation),
++    enabled: options.enabled ?? true,
++    retry: false,
++    refetchInterval: 30_000,
++    refetchOnWindowFocus: false
++  });
++
++export const useInstalledAutomationControl = (
++  installation: InstalledAutomation,
++  options: { enabled?: boolean } = {}
++) =>
++  useQuery({
++    queryKey: installedAutomationControlQueryKey(installation),
++    queryFn: () => readInstalledAutomationControlStatus(installation),
++    enabled: options.enabled ?? true,
++    retry: false,
++    refetchInterval: 30_000,
++    refetchOnWindowFocus: false
++  });
+diff --git a/apps/mobile/src/routes/AppRoutes.tsx b/apps/mobile/src/routes/AppRoutes.tsx
+index 13dbda8..75fa73f 100644
+--- a/apps/mobile/src/routes/AppRoutes.tsx
++++ b/apps/mobile/src/routes/AppRoutes.tsx
+@@ -3,6 +3,7 @@ import { useTranslation } from '../app/i18n.js';
+ import { useInstalledAutomationStore } from '../flows/installations/store.js';
+ import type { SetupIntent } from '../flows/setup-intent.js';
+ import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
++import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
+ import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
+ 
+ const HardwareSetupScreen = lazy(async () => {
+@@ -22,29 +23,57 @@ const RouteFallback = () => {
+   );
+ };
+ 
+-type AppView = 'intent' | 'dashboard' | Exclude<SetupIntent, 'manage'>;
++type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
++type AppRoute =
++  | { type: 'intent' }
++  | { type: 'dashboard' }
++  | { type: 'setup'; intent: SetupRouteIntent }
++  | { type: 'installation'; installationId: string };
+ 
+ export const AppRoutes = () => {
+   const installations = useInstalledAutomationStore((state) => state.installations);
+-  const [view, setView] = useState<AppView>(() =>
+-    installations.length > 0 ? 'dashboard' : 'intent'
++  const [route, setRoute] = useState<AppRoute>(() =>
++    installations.length > 0 ? { type: 'dashboard' } : { type: 'intent' }
+   );
+ 
+-  if (view === 'intent') {
++  if (route.type === 'intent') {
+     return (
+       <SetupIntentScreen
+-        onSelect={(intent) => setView(intent === 'manage' ? 'dashboard' : intent)}
++        onSelect={(intent) =>
++          setRoute(
++            intent === 'manage' ? { type: 'dashboard' } : { type: 'setup', intent }
++          )
++        }
+       />
+     );
+   }
+ 
+-  if (view === 'dashboard') {
+-    return <AutomationDashboardScreen onAddAutomation={() => setView('intent')} />;
++  if (route.type === 'dashboard') {
++    return (
++      <AutomationDashboardScreen
++        onAddAutomation={() => setRoute({ type: 'intent' })}
++        onOpenInstallation={(installationId) =>
++          setRoute({ type: 'installation', installationId })
++        }
++      />
++    );
++  }
++
++  if (route.type === 'installation') {
++    return (
++      <InstallationDetailScreen
++        installationId={route.installationId}
++        onBack={() => setRoute({ type: 'dashboard' })}
++      />
++    );
+   }
+ 
+   return (
+     <Suspense fallback={<RouteFallback />}>
+-      <HardwareSetupScreen setupIntent={view} onBackToIntent={() => setView('intent')} />
++      <HardwareSetupScreen
++        setupIntent={route.intent}
++        onBackToIntent={() => setRoute({ type: 'intent' })}
++      />
+     </Suspense>
+   );
+ };
+diff --git a/apps/mobile/src/screens/AutomationDashboardScreen.tsx b/apps/mobile/src/screens/AutomationDashboardScreen.tsx
+index 1a09bf4..89e2e94 100644
+--- a/apps/mobile/src/screens/AutomationDashboardScreen.tsx
++++ b/apps/mobile/src/screens/AutomationDashboardScreen.tsx
+@@ -1,76 +1,29 @@
+-import { useQuery } from '@tanstack/react-query';
+-import type { RulePresetId } from '@lcl/automation-core';
+ import type { InstalledAutomation } from '../flows/installations/model.js';
+ import { useInstalledAutomationStore } from '../flows/installations/store.js';
++import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
+ import {
+-  fetchInstalledAutomationDiagnostics,
+-  installedAutomationHealth,
+-  type InstalledAutomationHealth
+-} from '../flows/installations/runtimeDiagnostics.js';
+-import { useTranslation, type Translate, type TranslationKey } from '../app/i18n.js';
+-
+-const MODE_KEYS: Record<RulePresetId, TranslationKey> = {
+-  heating: 'hardware.rule.preset.heating',
+-  cooling: 'hardware.rule.preset.cooling',
+-  humidifying: 'hardware.rule.preset.humidifying',
+-  dehumidifying: 'hardware.rule.preset.dehumidifying'
+-};
+-
