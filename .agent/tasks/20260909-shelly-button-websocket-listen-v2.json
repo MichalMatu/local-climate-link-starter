@@ -1,0 +1,16 @@
+{
+  "id": "20260909-shelly-button-websocket-listen-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 512,
+  "command_timeout": 150,
+  "idle_timeout": 150,
+  "task_timeout": 300,
+  "commands": [
+    "git fetch origin main && git checkout --detach origin/main && test \"$(git rev-parse HEAD)\" = \"3e98ed7a28221ef820aca7a814cb1ac03d951b2c\"",
+    "node - <<'NODE'\nconst url = 'ws://192.168.0.16/rpc';\nconst src = 'lcl_button_probe';\nif (typeof WebSocket === 'undefined') {\n  console.error('NO_GLOBAL_WEBSOCKET');\n  process.exit(2);\n}\nconst ws = new WebSocket(url);\nlet done = false;\nconst finish = (reason) => {\n  if (done) return;\n  done = true;\n  console.log('=== LISTENER_END ===', reason);\n  try { ws.close(); } catch {}\n  setTimeout(() => process.exit(0), 250);\n};\nconst timer = setTimeout(() => finish('120s timeout'), 120000);\nws.onopen = () => {\n  console.log('=== WS_OPEN ===');\n  ws.send(JSON.stringify({id: 1, src, method: 'Shelly.GetDeviceInfo'}));\n};\nws.onmessage = (event) => {\n  const text = typeof event.data === 'string' ? event.data : String(event.data);\n  console.log(new Date().toISOString(), text);\n};\nws.onerror = (event) => {\n  console.error('=== WS_ERROR ===', event?.message || event?.type || String(event));\n};\nws.onclose = (event) => {\n  clearTimeout(timer);\n  if (!done) {\n    done = true;\n    console.log('=== WS_CLOSE ===', event.code, event.reason || '');\n    process.exit(0);\n  }\n};\nNODE"
+  ]
+}
