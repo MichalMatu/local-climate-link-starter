@@ -1,0 +1,165 @@
++    expect(screen.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
++    fireEvent.click(screen.getByRole('button', { name: 'Skonfiguruj pierwszy system' }));
++    expect(onAddAutomation).toHaveBeenCalledTimes(1);
++  });
++
++  it('shows live runtime values from Shelly for a saved installation', async () => {
++    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
++    vi.stubGlobal(
++      'fetch',
++      vi.fn(async () => jsonResponse(diagnosticPayload()))
++    );
++
++    renderDashboard();
++
++    expect(await screen.findByText('21.4°C')).toBeVisible();
++    expect(screen.getByText('55.2%')).toBeVisible();
++    expect(screen.getByText('1.31 kPa')).toBeVisible();
++    expect(screen.getByText('Salon')).toBeVisible();
++    expect(screen.getByText('Xiaomi salon')).toBeVisible();
++    expect(screen.getByText('Działa')).toBeVisible();
++    expect(screen.getByText('ON')).toBeVisible();
++    expect(screen.getByText('19°C / 20°C')).toBeVisible();
++  });
++
++  it('marks an old Shelly sensor reading as stale', async () => {
++    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
++    vi.stubGlobal(
++      'fetch',
++      vi.fn(async () =>
++        jsonResponse(
++          diagnosticPayload({ lastSeenUptimeMs: 12_000_000, uptimeSec: 12_345 })
++        )
++      )
++    );
++
++    renderDashboard();
++
++    expect(await screen.findByText('Dane nieaktualne')).toBeVisible();
++  });
++
++  it('uses effective runtime thresholds and recovers after a manual refresh', async () => {
++    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
++    const fetchMock = vi
++      .fn()
++      .mockRejectedValueOnce(new Error('offline'))
++      .mockResolvedValue(
++        jsonResponse(
++          diagnosticPayload({ effectiveOnThreshold: 19.25, effectiveOffThreshold: 19.75 })
++        )
++      );
++    vi.stubGlobal('fetch', fetchMock);
++
++    renderDashboard();
++
++    expect(await screen.findByText('Offline')).toBeVisible();
++    fireEvent.click(screen.getByRole('button', { name: 'Odśwież' }));
++
++    expect(await screen.findByText('Działa')).toBeVisible();
++    expect(screen.getByText('19.25°C / 19.75°C')).toBeVisible();
++    expect(fetchMock).toHaveBeenCalledTimes(2);
++  });
++
++  it('shows offline without replacing runtime values with phone BLE data', async () => {
++    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
++    vi.stubGlobal(
++      'fetch',
++      vi.fn(async () => Promise.reject(new Error('offline')))
++    );
++
++    renderDashboard();
++
++    expect(await screen.findByText('Offline')).toBeVisible();
++    expect(screen.getByText('Brak połączenia z Shelly.')).toBeVisible();
++    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3);
++  });
++});
+diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts
+index 7840713..894e387 100644
+--- a/apps/mobile/src/app/locales/de.ts
++++ b/apps/mobile/src/app/locales/de.ts
+@@ -30,6 +30,32 @@ export const de = {
+       context: 'Automationsverwaltung'
+     }
+   },
++  dashboard: {
++    title: 'Deine Automationen',
++    description: 'Sieh, was jedes Shelly aktuell misst und tut.',
++    addAutomation: 'Automation hinzufügen',
++    emptyTitle: 'Noch keine Automation gespeichert',
++    emptyDescription: 'Richte dein erstes System ein, um hier den Live-Status zu sehen.',
++    configureFirst: 'Erstes System einrichten',
++    systemsLabel: 'Gespeicherte Automationen',
++    currentValues: 'Aktuelle Werte',
++    temperature: 'Temperatur',
++    humidity: 'Luftfeuchte',
++    vpd: 'VPD',
++    output: 'Ausgang',
++    thresholds: 'EIN-/AUS-Schwellen',
++    sensor: 'Sensor',
++    readFailed: 'Shelly nicht erreichbar.',
++    refreshing: 'Daten werden von Shelly aktualisiert…',
++    liveFromShelly: 'Runtime-Daten direkt vom Shelly.',
++    health: {
++      ok: 'Läuft',
++      stale: 'Daten veraltet',
++      unknown: 'Unbekannt',
++      offline: 'Offline',
++      loading: 'Verbinde…'
++    }
++  },
+   common: {
+     add: 'Hinzufügen',
+     address: 'Adresse',
+diff --git a/apps/mobile/src/app/locales/en.ts b/apps/mobile/src/app/locales/en.ts
+index 4ca87cb..2edaaaf 100644
+--- a/apps/mobile/src/app/locales/en.ts
++++ b/apps/mobile/src/app/locales/en.ts
+@@ -30,6 +30,32 @@ export const en = {
+       context: 'Automation management'
+     }
+   },
++  dashboard: {
++    title: 'Your automations',
++    description: 'See what each Shelly currently sees and does.',
++    addAutomation: 'Add automation',
++    emptyTitle: 'No saved automation yet',
++    emptyDescription: 'Configure your first system to see its live state here.',
++    configureFirst: 'Configure first system',
++    systemsLabel: 'Saved automations',
++    currentValues: 'Current values',
++    temperature: 'Temperature',
++    humidity: 'Humidity',
++    vpd: 'VPD',
++    output: 'Output',
++    thresholds: 'ON / OFF thresholds',
++    sensor: 'Sensor',
++    readFailed: 'Cannot reach Shelly.',
++    refreshing: 'Refreshing from Shelly…',
++    liveFromShelly: 'Runtime data directly from Shelly.',
++    health: {
++      ok: 'Working',
++      stale: 'Data stale',
++      unknown: 'Unknown',
++      offline: 'Offline',
++      loading: 'Connecting…'
++    }
++  },
+   common: {
+     add: 'Add',
+     address: 'Address',
+diff --git a/apps/mobile/src/app/locales/es.ts b/apps/mobile/src/app/locales/es.ts
+index 0f91a63..4f1d49a 100644
+--- a/apps/mobile/src/app/locales/es.ts
++++ b/apps/mobile/src/app/locales/es.ts
+@@ -30,6 +30,32 @@ export const es = {
+       context: 'Gestión de automatización'
+     }
+   },
++  dashboard: {
++    title: 'Tus automatizaciones',
++    description: 'Consulta lo que cada Shelly ve y hace ahora.',
++    addAutomation: 'Añadir automatización',
++    emptyTitle: 'Aún no hay automatizaciones guardadas',
++    emptyDescription: 'Configura el primer sistema para ver aquí su estado en vivo.',
++    configureFirst: 'Configurar primer sistema',
