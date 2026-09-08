@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 8,
+  "index": 9,
   "total": 14,
-  "command": "git diff --check",
-  "pid": 47378,
+  "command": "pnpm check:full",
+  "pid": 47409,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-08T23:03:54.228164+00:00",
-  "stage_name": "command-8",
-  "stage_index": 8,
+  "started_at": "2026-09-08T23:03:54.660251+00:00",
+  "stage_name": "command-9",
+  "stage_index": 9,
   "stage_total": 14,
   "stage_phase": "commands",
   "task_id": "20260909-plugs-ui-led-finalize-v4",
@@ -18,5 +18,5 @@
   "task_digest": "be8728fe7109b5f92833faca812d454f7c77942cf6b9bf7dd700711daa5d7e70",
   "daemon_version": "4.18.19",
   "daemon_pid": 46333,
-  "updated_at": "2026-09-08T23:03:54.310579+00:00"
+  "updated_at": "2026-09-08T23:03:54.786816+00:00"
 }
