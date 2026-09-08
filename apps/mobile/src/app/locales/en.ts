@@ -8,6 +8,28 @@ export const en = {
       'BLE thermometer + Shelly plug. Configure once in the app, then it runs locally.',
     loadingConfigurator: 'Loading configurator.'
   },
+  intent: {
+    title: 'What do you want to do?',
+    description: 'Choose the goal first. Technical details come in the next step.',
+    choiceLabel: 'Automation goal',
+    open: 'Open',
+    back: 'Change goal',
+    temperature: {
+      title: 'Control temperature',
+      description: 'Heating or cooling based on a BLE thermometer.',
+      context: 'Temperature control'
+    },
+    humidity: {
+      title: 'Control humidity',
+      description: 'Humidifying or dehumidifying based on a BLE sensor.',
+      context: 'Humidity control'
+    },
+    manage: {
+      title: 'Manage existing automation',
+      description: 'Open saved devices, rules, and diagnostics.',
+      context: 'Automation management'
+    }
+  },
   common: {
     add: 'Add',
     address: 'Address',

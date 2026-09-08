@@ -8,6 +8,28 @@ export const it = {
       'Termometro BLE + presa Shelly. Configuri una volta nell’app, poi funziona in locale.',
     loadingConfigurator: 'Caricamento configuratore.'
   },
+  intent: {
+    title: 'Cosa vuoi fare?',
+    description: 'Scegli prima l’obiettivo. I dettagli tecnici vengono dopo.',
+    choiceLabel: 'Obiettivo dell’automazione',
+    open: 'Apri',
+    back: 'Cambia obiettivo',
+    temperature: {
+      title: 'Controllare la temperatura',
+      description: 'Riscaldamento o raffreddamento con un termometro BLE.',
+      context: 'Controllo temperatura'
+    },
+    humidity: {
+      title: 'Controllare l’umidità',
+      description: 'Umidificazione o deumidificazione con un sensore BLE.',
+      context: 'Controllo umidità'
+    },
+    manage: {
+      title: 'Gestire un’automazione esistente',
+      description: 'Apri dispositivi, regole e diagnostica salvati.',
+      context: 'Gestione automazione'
+    }
+  },
   common: {
     add: 'Aggiungi',
     address: 'Indirizzo',

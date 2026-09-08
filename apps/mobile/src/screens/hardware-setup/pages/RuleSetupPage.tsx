@@ -72,7 +72,7 @@ const RULE_PRESET_COPY: Record<RulePresetId, RuleControlCopy> = {
   }
 };
 
-const SELECTABLE_RULE_PRESETS: RulePresetId[] = [
+const ALL_RULE_PRESETS: RulePresetId[] = [
   'heating',
   'cooling',
   'humidifying',
@@ -191,7 +191,14 @@ const formatRuleSummary = ({
   });
 };
 
-export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
+type RuleSetupPageProps = HardwarePageProps & {
+  selectablePresets?: readonly RulePresetId[];
+};
+
+export const RuleSetupPage = ({
+  flow,
+  selectablePresets = ALL_RULE_PRESETS
+}: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
@@ -455,7 +462,7 @@ export const RuleSetupPage = ({ flow }: HardwarePageProps) => {
               flow.setRulePreset(event.currentTarget.value as RulePresetId)
             }
           >
-            {SELECTABLE_RULE_PRESETS.map((preset) => (
+            {selectablePresets.map((preset) => (
               <option key={preset} value={preset}>
                 {t(RULE_PRESET_COPY[preset].labelKey)}
               </option>

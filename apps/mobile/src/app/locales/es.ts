@@ -8,6 +8,28 @@ export const es = {
       'Termómetro BLE + enchufe Shelly. Configuras una vez en la app y luego funciona localmente.',
     loadingConfigurator: 'Cargando configurador.'
   },
+  intent: {
+    title: '¿Qué quieres hacer?',
+    description: 'Elige primero el objetivo. Los detalles técnicos vienen después.',
+    choiceLabel: 'Objetivo de automatización',
+    open: 'Abrir',
+    back: 'Cambiar objetivo',
+    temperature: {
+      title: 'Controlar la temperatura',
+      description: 'Calefacción o refrigeración con un termómetro BLE.',
+      context: 'Control de temperatura'
+    },
+    humidity: {
+      title: 'Controlar la humedad',
+      description: 'Humidificar o deshumidificar con un sensor BLE.',
+      context: 'Control de humedad'
+    },
+    manage: {
+      title: 'Gestionar una automatización existente',
+      description: 'Abre dispositivos, reglas y diagnósticos guardados.',
+      context: 'Gestión de automatización'
+    }
+  },
   common: {
     add: 'Añadir',
     address: 'Dirección',

@@ -8,6 +8,28 @@ export const ptBr = {
       'Termômetro BLE + tomada Shelly. Configure uma vez no app e depois tudo funciona localmente.',
     loadingConfigurator: 'Carregando configurador.'
   },
+  intent: {
+    title: 'O que você quer fazer?',
+    description: 'Escolha primeiro o objetivo. Os detalhes técnicos vêm depois.',
+    choiceLabel: 'Objetivo da automação',
+    open: 'Abrir',
+    back: 'Mudar objetivo',
+    temperature: {
+      title: 'Controlar a temperatura',
+      description: 'Aquecimento ou resfriamento com um termômetro BLE.',
+      context: 'Controle de temperatura'
+    },
+    humidity: {
+      title: 'Controlar a umidade',
+      description: 'Umidificação ou desumidificação com um sensor BLE.',
+      context: 'Controle de umidade'
+    },
+    manage: {
+      title: 'Gerenciar uma automação existente',
+      description: 'Abra dispositivos, regras e diagnósticos salvos.',
+      context: 'Gerenciamento da automação'
+    }
+  },
   common: {
     add: 'Adicionar',
     address: 'Endereço',

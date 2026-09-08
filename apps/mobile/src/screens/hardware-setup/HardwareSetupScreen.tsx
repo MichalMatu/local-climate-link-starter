@@ -1,6 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
+import {
+  defaultRulePresetForSetupIntent,
+  rulePresetsForSetupIntent,
+  type SetupIntent
+} from '../../flows/setup-intent.js';
 import { DiagnosticsSetupPage } from './pages/DiagnosticsSetupPage.js';
 import { RuleSetupPage } from './pages/RuleSetupPage.js';
 import { SensorSetupPage } from './pages/SensorSetupPage.js';
@@ -53,14 +58,38 @@ const setHashTab = (tabId: HardwareTabId) => {
   window.history.replaceState(null, '', url);
 };
 
-export const HardwareSetupScreen = () => {
+type HardwareSetupScreenProps = {
+  setupIntent?: SetupIntent;
+  onBackToIntent?: () => void;
+};
+
+export const HardwareSetupScreen = ({
+  setupIntent,
+  onBackToIntent
+}: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
+  const { rulePreset, setRulePreset } = flow;
   const [activeTab, setActiveTab] = useState<HardwareTabId>(currentTabFromHash);
+  const selectableRulePresets = useMemo(
+    () => rulePresetsForSetupIntent(setupIntent),
+    [setupIntent]
+  );
   const cleanupBleDiscoveryRef = useRef<() => void>(() => undefined);
   const stopSavedSensorLiveScanRef = useRef<() => void>(() => undefined);
   cleanupBleDiscoveryRef.current = flow.cleanupBleDiscovery;
   stopSavedSensorLiveScanRef.current = flow.stopSavedSensorLiveScan;
+
+  useEffect(() => {
+    if (!setupIntent) {
+      return;
+    }
+
+    const defaultPreset = defaultRulePresetForSetupIntent(setupIntent);
+    if (defaultPreset && !selectableRulePresets.includes(rulePreset)) {
+      setRulePreset(defaultPreset);
+    }
+  }, [rulePreset, selectableRulePresets, setRulePreset, setupIntent]);
 
   useEffect(() => {
     const handleHashChange = () => setActiveTab(currentTabFromHash());
@@ -96,6 +125,15 @@ export const HardwareSetupScreen = () => {
 
   return (
     <main className="demo-shell hardware-shell">
+      {setupIntent && onBackToIntent && (
+        <div className="setup-context">
+          <button className="setup-context__back" type="button" onClick={onBackToIntent}>
+            {t('intent.back')}
+          </button>
+          <strong>{t(`intent.${setupIntent}.context`)}</strong>
+        </div>
+      )}
+
       <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
         {HARDWARE_TABS.map((tab) => (
           <button
@@ -117,7 +155,9 @@ export const HardwareSetupScreen = () => {
 
       {activeTab === 'shelly' && <ShellySetupPage flow={flow} />}
       {activeTab === 'sensor' && <SensorSetupPage flow={flow} />}
-      {activeTab === 'rule' && <RuleSetupPage flow={flow} />}
+      {activeTab === 'rule' && (
+        <RuleSetupPage flow={flow} selectablePresets={selectableRulePresets} />
+      )}
       {activeTab === 'diagnostics' && <DiagnosticsSetupPage flow={flow} />}
     </main>
   );

@@ -6,6 +6,28 @@ export const pl = {
       'Termometr BLE + gniazdko Shelly. Konfigurujesz raz w aplikacji, działa lokalnie.',
     loadingConfigurator: 'Ładuję konfigurator.'
   },
+  intent: {
+    title: 'Co chcesz zrobić?',
+    description: 'Wybierz cel. Szczegóły techniczne ustawimy dopiero w kolejnym kroku.',
+    choiceLabel: 'Cel automatyki',
+    open: 'Otwórz',
+    back: 'Zmień cel',
+    temperature: {
+      title: 'Sterować temperaturą',
+      description: 'Grzanie albo chłodzenie na podstawie termometru BLE.',
+      context: 'Sterowanie temperaturą'
+    },
+    humidity: {
+      title: 'Sterować wilgotnością',
+      description: 'Nawilżanie albo osuszanie na podstawie czujnika BLE.',
+      context: 'Sterowanie wilgotnością'
+    },
+    manage: {
+      title: 'Zarządzać istniejącą automatyką',
+      description: 'Otwórz zapisane urządzenia, reguły i diagnostykę.',
+      context: 'Zarządzanie automatyką'
+    }
+  },
   common: {
     add: 'Dodaj',
     address: 'Adres',
