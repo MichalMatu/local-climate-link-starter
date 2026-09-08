@@ -2,7 +2,7 @@ import { ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import type { InstalledAutomation } from '../flows/installations/model.js';
+import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import {
   formatInstallationMetric,
   installationHealthLabel,
@@ -16,6 +16,7 @@ import {
   resumeInstalledAutomation
 } from '../flows/installations/runtimeControl.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
   installedAutomationControlQueryKey,
   installedAutomationDiagnosticsQueryKey,
@@ -31,7 +32,7 @@ type InstallationDetailScreenProps = {
 const healthClass = (tone: 'ok' | 'warning' | 'offline') =>
   `automation-health automation-health--${tone === 'warning' ? 'attention' : tone}`;
 
-const configuredThresholdSummary = (installation: InstalledAutomation) =>
+const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
   installationThresholdSummary(installation);
 
 export const InstallationDetailScreen = ({
@@ -75,6 +76,10 @@ export const InstallationDetailScreen = ({
     );
   }
 
+  if (installation.kind === 'time') {
+    return <TimeInstallationDetail installation={installation} onBack={onBack} />;
+  }
+
   return (
     <InstalledAutomationDetail
       installation={installation}
@@ -88,7 +93,7 @@ export const InstallationDetailScreen = ({
 };
 
 type InstalledAutomationDetailProps = {
-  installation: InstalledAutomation;
+  installation: ClimateInstalledAutomation;
   onBack(): void;
   pushToast(tone: ToastTone, title: string): void;
   dismissToast(id: string): void;

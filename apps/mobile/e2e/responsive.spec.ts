@@ -180,6 +180,137 @@ const mockShellyRpc = async (page: Page) => {
   await page.route('http://192.168.0.20/rpc', handleRpc);
 };
 
+const mockTimeShellyRpc = async (page: Page) => {
+  let relayOn = false;
+  let rev = 0;
+  let nextJobId = 7;
+  let jobs: Array<{
+    id: number;
+    enable: boolean;
+    timespec: string;
+    calls: Array<{ method: string; params?: Record<string, unknown> }>;
+  }> = [];
+  const state = { createCount: 0, updateCount: 0, deleteCount: 0 };
+
+  const handleRpc = async (route: Route) => {
+    const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
+      id?: number | string;
+      method?: string;
+      params?: {
+        id?: number;
+        on?: boolean;
+        enable?: boolean;
+        timespec?: string;
+        calls?: Array<{ method: string; params?: Record<string, unknown> }>;
+      };
+    };
+
+    let result: unknown = {};
+    switch (requestBody.method) {
+      case 'Shelly.GetDeviceInfo':
+        result = {
+          id: 'shellyplugsg3-time-e2e',
+          model: 'S3PL-00112EU',
+          gen: 3,
+          fw_id: '20260311-095902/1.7.5-g9979d16'
+        };
+        break;
+      case 'Shelly.GetStatus':
+        result = {
+          matter: { enabled: false },
+          script: { enable: true },
+          ble: { enable: true },
+          'switch:0': {
+            id: 0,
+            output: relayOn,
+            apower: relayOn ? 42.3 : 0,
+            voltage: 230.1,
+            current: relayOn ? 0.2 : 0,
+            aenergy: { total: 1250 },
+            temperature: { tC: 32.4 }
+          },
+          wifi: { rssi: -55 },
+          sys: {
+            time: '14:00',
+            unixtime: 1782820000,
+            uptime: 3600,
+            last_sync_ts: 1782819900
+          }
+        };
+        break;
+      case 'Script.List':
+        result = { scripts: [] };
+        break;
+      case 'Schedule.List':
+        result = { jobs: structuredClone(jobs), rev };
+        break;
+      case 'Schedule.Create': {
+        const params = requestBody.params;
+        if (!params?.timespec || !params.calls) {
+          throw new Error('Invalid Schedule.Create fixture.');
+        }
+        const id = nextJobId++;
+        state.createCount += 1;
+        rev += 1;
+        jobs.push({
+          id,
+          enable: params.enable ?? true,
+          timespec: params.timespec,
+          calls: structuredClone(params.calls)
+        });
+        result = { id, rev };
+        break;
+      }
+      case 'Schedule.Update': {
+        const id = requestBody.params?.id;
+        const index = jobs.findIndex((job) => job.id === id);
+        if (index < 0) {
+          throw new Error(`Unknown Schedule.Update id ${String(id)}.`);
+        }
+        const current = jobs[index]!;
+        jobs[index] = {
+          ...current,
+          ...(requestBody.params?.enable === undefined
+            ? {}
+            : { enable: requestBody.params.enable }),
+          ...(requestBody.params?.timespec === undefined
+            ? {}
+            : { timespec: requestBody.params.timespec }),
+          ...(requestBody.params?.calls === undefined
+            ? {}
+            : { calls: structuredClone(requestBody.params.calls) })
+        };
+        state.updateCount += 1;
+        rev += 1;
+        result = { rev };
+        break;
+      }
+      case 'Schedule.Delete':
+        jobs = jobs.filter((job) => job.id !== requestBody.params?.id);
+        state.deleteCount += 1;
+        rev += 1;
+        result = { rev };
+        break;
+      case 'Switch.Set':
+        relayOn = requestBody.params?.on ?? false;
+        result = null;
+        break;
+      default:
+        result = {};
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: requestBody.id ?? 1, result })
+    });
+  };
+
+  await page.route('**/__lcl_shelly_proxy?**', handleRpc);
+  await page.route('http://192.168.0.20/rpc', handleRpc);
+  return state;
+};
+
 const expectNoHorizontalOverflow = async (page: Page) => {
   const overflow = await page.evaluate(() => {
     const viewportWidth = document.documentElement.clientWidth;
@@ -470,6 +601,108 @@ test('installed automation detail safely pauses and resumes on phone', async ({
 
   await expectNoHorizontalOverflow(page);
   await expectNoLegacyInlineFeedback(page);
+  expect(consoleProblems).toEqual([]);
+});
+
+for (const viewport of viewports) {
+  test(`daily time automation installs and renders on ${viewport.name}`, async ({
+    page
+  }) => {
+    const consoleProblems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' || message.type() === 'warning') {
+        consoleProblems.push(`${message.type()}: ${message.text()}`);
+      }
+    });
+    page.on('pageerror', (error) => consoleProblems.push(error.message));
+
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await seedDraft(page);
+    const rpcState = await mockTimeShellyRpc(page);
+    await page.goto('/');
+
+    await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+    await expect(
+      page.getByRole('navigation', { name: 'Menu konfiguracji' })
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Termometry' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Reguła' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Ustaw godziny ON i OFF' })
+    ).toBeVisible();
+    await expect(page.getByLabel('Włącz o')).toHaveValue('08:00');
+    await expect(page.getByLabel('Wyłącz o')).toHaveValue('20:00');
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
+    await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    await expect(page.getByText('Harmonogram dzienny')).toBeVisible();
+    await expect(page.getByText('08:00')).toBeVisible();
+    await expect(page.getByText('20:00')).toBeVisible();
+    await expect(page.getByText('Działa')).toBeVisible();
+    expect(rpcState.createCount).toBe(2);
+
+    await page.getByRole('button', { name: 'Szczegóły' }).click();
+    await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
+    await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    expect(consoleProblems).toEqual([]);
+  });
+}
+
+test('daily time automation completes pause, resume, edit and delete lifecycle', async ({
+  page
+}) => {
+  const consoleProblems: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error' || message.type() === 'warning') {
+      consoleProblems.push(`${message.type()}: ${message.text()}`);
+    }
+  });
+  page.on('pageerror', (error) => consoleProblems.push(error.message));
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedDraft(page);
+  const rpcState = await mockTimeShellyRpc(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+  await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
+  await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
+  await page.getByRole('button', { name: 'Szczegóły' }).click();
+
+  await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
+  await expect(
+    page.getByText('Harmonogram wstrzymany, wyjście potwierdzone jako OFF.')
+  ).toBeVisible();
+  await expect(page.getByText('Wstrzymana')).toBeVisible();
+  await expect(page.getByText('OFF', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Wznów automatykę' }).click();
+  await expect(
+    page.getByText('Harmonogram wznowiony i stan wyjścia dopasowany do bieżącej godziny.')
+  ).toBeVisible();
+  await expect(page.getByText('Działa')).toBeVisible();
+
+  await page.getByLabel('Włącz o').fill('06:30');
+  await page.getByLabel('Wyłącz o').fill('22:15');
+  await page.getByRole('button', { name: 'Zapisz zmiany' }).click();
+  await expect(page.getByText('Harmonogram zaktualizowany.')).toBeVisible();
+  await expect(page.getByText('06:30')).toBeVisible();
+  await expect(page.getByText('22:15')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Usuń automatykę czasową' }).click();
+  const deleteDialog = page.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
+  await expect(deleteDialog).toBeVisible();
+  await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();
+  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+  await expect(page.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
+
+  expect(rpcState.createCount).toBe(2);
+  expect(rpcState.updateCount).toBeGreaterThanOrEqual(8);
+  expect(rpcState.deleteCount).toBe(2);
+  await expectNoHorizontalOverflow(page);
   expect(consoleProblems).toEqual([]);
 });
 

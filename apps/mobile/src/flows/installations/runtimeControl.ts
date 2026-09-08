@@ -5,12 +5,12 @@ import {
   unwrapShellyResult,
   type ShellyControlStatus
 } from '../hardware-setup/shellyRequests.js';
-import type { InstalledAutomation } from './model.js';
+import type { ClimateInstalledAutomation } from './model.js';
 
 export type InstalledAutomationScriptMatch = 'matched' | 'missing' | 'mismatch';
 
 export const installedAutomationScriptMatch = (
-  installation: InstalledAutomation,
+  installation: ClimateInstalledAutomation,
   status: ShellyControlStatus
 ): InstalledAutomationScriptMatch => {
   if (status.automationScriptId === null) {
@@ -20,7 +20,7 @@ export const installedAutomationScriptMatch = (
 };
 
 export const readInstalledAutomationControlStatus = (
-  installation: InstalledAutomation
+  installation: ClimateInstalledAutomation
 ): Promise<ShellyControlStatus> => readShellyControlStatus(installation.shelly.baseUrl);
 
 const forceRelayOffAndConfirm = async (
@@ -35,7 +35,7 @@ const forceRelayOffAndConfirm = async (
 };
 
 export const pauseInstalledAutomation = async (
-  installation: InstalledAutomation
+  installation: ClimateInstalledAutomation
 ): Promise<ShellyControlStatus> => {
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
   const relayId = installation.config.output.relayId;
@@ -63,7 +63,7 @@ export const pauseInstalledAutomation = async (
 };
 
 export const resumeInstalledAutomation = async (
-  installation: InstalledAutomation
+  installation: ClimateInstalledAutomation
 ): Promise<ShellyControlStatus> => {
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
   unwrapShellyResult(

@@ -22,10 +22,75 @@ export const pl = {
       description: 'Nawilżanie albo osuszanie na podstawie czujnika BLE.',
       context: 'Sterowanie wilgotnością'
     },
+    time: {
+      title: 'Sterować według czasu',
+      description: 'Włączaj i wyłączaj urządzenie o wybranych godzinach, bez czujnika.',
+      context: 'Sterowanie według czasu'
+    },
     manage: {
       title: 'Zarządzać istniejącą automatyką',
       description: 'Otwórz zapisane urządzenia, reguły i diagnostykę.',
       context: 'Zarządzanie automatyką'
+    }
+  },
+  time: {
+    family: 'Harmonogram dzienny',
+    eyebrow: 'Automatyka czasowa',
+    title: 'Ustaw godziny ON i OFF',
+    description: 'Shelly wykona harmonogram lokalnie, bez telefonu i bez chmury.',
+    device: 'Urządzenie',
+    noDevice: 'Najpierw wybierz Shelly',
+    onTime: 'Włącz o',
+    offTime: 'Wyłącz o',
+    localClockHint:
+      'Godziny używają lokalnego zegara Shelly. Instalacja wymaga zsynchronizowanego czasu urządzenia.',
+    ownershipHint:
+      'Ten harmonogram będzie jedynym właścicielem przekaźnika. Nie można łączyć go z automatyką klimatu na tym samym wyjściu.',
+    install: 'Zapisz harmonogram w Shelly',
+    installing: 'Zapisuję harmonogram…',
+    updating: 'Aktualizuję…',
+    deleting: 'Usuwam…',
+    scheduleSummary: 'Harmonogram',
+    clock: 'Zegar Shelly',
+    owner: 'Sterowanie wyjściem',
+    nativeSchedule: 'Natywny Shelly Schedule',
+    liveFromShelly: 'Stan harmonogramu bezpośrednio z Shelly.',
+    nav: {
+      schedule: 'Harmonogram',
+      scheduleTitle: 'Ustaw godziny włączenia i wyłączenia'
+    },
+    validation: {
+      invalidTimes: 'Podaj dwie różne, poprawne godziny ON i OFF.'
+    },
+    errors: {
+      alreadyInstalled:
+        'To Shelly ma już zapisaną automatykę czasową dla tego wyjścia. Otwórz ją z dashboardu, aby ją edytować.',
+      relayOwnedByClimate:
+        'To wyjście jest już sterowane automatyką klimatu. Usuń ją przed utworzeniem harmonogramu czasowego.',
+      climateScriptPresent:
+        'Na Shelly wykryto skrypt Local Climate Link sterujący tym urządzeniem. Usuń lub przenieś tę automatykę przed dodaniem harmonogramu.',
+      clockUnsynced:
+        'Zegar Shelly nie jest zsynchronizowany. Połącz urządzenie z siecią/czasem i spróbuj ponownie.',
+      scheduleSlots: 'Shelly nie ma dwóch wolnych miejsc na harmonogram.',
+      nativeScheduleConflict: 'Inny natywny harmonogram Shelly już steruje tym wyjściem.'
+    },
+    detail: {
+      description: 'Lokalny harmonogram czasu wykonywany bezpośrednio przez Shelly.',
+      pauseSuccess: 'Harmonogram wstrzymany, wyjście potwierdzone jako OFF.',
+      resumeSuccess:
+        'Harmonogram wznowiony i stan wyjścia dopasowany do bieżącej godziny.',
+      actionFailed: 'Nie udało się bezpiecznie zmienić stanu harmonogramu.',
+      editTitle: 'Edytuj godziny',
+      save: 'Zapisz zmiany',
+      delete: 'Usuń automatykę czasową',
+      needsAttention:
+        'Harmonogram zapisany w aplikacji nie odpowiada aktualnym zadaniom Shelly. Sprawdź urządzenie przed sterowaniem.',
+      updateSuccess: 'Harmonogram zaktualizowany.',
+      updateFailed: 'Nie udało się bezpiecznie zaktualizować harmonogramu.',
+      deleteFailed: 'Nie udało się bezpiecznie usunąć całego harmonogramu.',
+      deleteConfirmTitle: 'Usunąć automatykę czasową?',
+      deleteConfirmDetail:
+        'Oba zadania Schedule zostaną usunięte z Shelly, a przekaźnik zostanie pozostawiony w stanie OFF.'
     }
   },
   dashboard: {
@@ -562,6 +627,10 @@ export const pl = {
       fixShellyData: 'Popraw dane gniazdka.',
       inputShellyIp: 'wpisz IP Shelly',
       installFirst: 'Najpierw wyślij aktualną regułę.',
+      relayOwnedByTimeAutomation:
+        'To wyjście jest już sterowane automatyką czasową. Usuń harmonogram przed instalacją automatyki klimatu.',
+      relayOwnedByNativeSchedule:
+        'Natywny harmonogram Shelly już steruje tym wyjściem. Usuń go przed instalacją automatyki klimatu.',
       shellyIdentityMissing:
         'Shelly nie podał stabilnego identyfikatora urządzenia. Zaktualizuj firmware i spróbuj ponownie.',
       noSelectedSensor: 'Dodaj i wybierz termometr.',

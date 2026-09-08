@@ -802,7 +802,8 @@ select {
   box-shadow: var(--lcl-shadow-md);
   display: grid;
   gap: var(--lcl-spacing-xs);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
   overflow: hidden;
   padding: var(--lcl-spacing-sm);
   position: sticky;
@@ -1498,6 +1499,65 @@ select {
   }
 
   .ble-candidate-action {
+    width: 100%;
+  }
+}
+
+.time-schedule-panel {
+  align-content: start;
+}
+
+.time-schedule-device {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+  padding: var(--lcl-spacing-md);
+}
+
+.time-schedule-device span,
+.time-schedule-device small,
+.time-schedule-note {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+}
+
+.time-schedule-device strong,
+.time-schedule-device small {
+  overflow-wrap: anywhere;
+}
+
+.time-schedule-grid {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--lcl-size-action-min-width)), 1fr)
+  );
+}
+
+.time-schedule-note {
+  line-height: var(--lcl-line-height-relaxed);
+  margin: 0;
+}
+
+.time-schedule-note--ownership {
+  background: var(--lcl-color-status-warning-bg);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-status-warning-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-status-warning-text);
+  padding: var(--lcl-spacing-md);
+}
+
+.time-schedule-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 30rem) {
+  .time-schedule-actions .primary-action {
     width: 100%;
   }
 }

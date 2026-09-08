@@ -1,9 +1,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
+import type { ShellyScheduleJob } from '@lcl/shelly-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
-import { createInstalledAutomation } from '../flows/installations/model.js';
+import {
+  createInstalledAutomation,
+  createTimeInstalledAutomation
+} from '../flows/installations/model.js';
+import { dailyScheduleTimespec } from '../flows/time-automation/config.js';
 import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
@@ -156,6 +161,118 @@ const installShellyFetchMock = () => {
   return { rpcMethods };
 };
 
+const timeInstallation = () =>
+  createTimeInstalledAutomation({
+    shelly: { id: 'shellyplugsg3-time-detail', model: 'S3PL-00112EU', gen: 3 },
+    shellyName: 'Lampa',
+    baseUrl: 'http://192.168.0.21/',
+    onJobId: 7,
+    offJobId: 8,
+    config: { relayId: 0, onTime: '08:00', offTime: '20:00' },
+    nowMs: 1000
+  });
+
+const installTimeShellyFetchMock = () => {
+  let relayOn = true;
+  let rev = 1;
+  let jobs: ShellyScheduleJob[] = [
+    {
+      id: 7,
+      enable: true,
+      timespec: dailyScheduleTimespec('08:00'),
+      calls: [{ method: 'Switch.Set', params: { id: 0, on: true } }]
+    },
+    {
+      id: 8,
+      enable: true,
+      timespec: dailyScheduleTimespec('20:00'),
+      calls: [{ method: 'Switch.Set', params: { id: 0, on: false } }]
+    }
+  ];
+  const rpcMethods: string[] = [];
+
+  const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body ?? '{}')) as {
+      id?: number | string;
+      method?: string;
+      params?: {
+        id?: number;
+        on?: boolean;
+        enable?: boolean;
+        timespec?: string;
+        calls?: Array<{ method: string; params?: Record<string, unknown> }>;
+      };
+    };
+    if (body.method) {
+      rpcMethods.push(body.method);
+    }
+
+    let result: unknown = {};
+    switch (body.method) {
+      case 'Shelly.GetStatus':
+        result = {
+          matter: { enabled: false },
+          script: { enable: true },
+          ble: { enable: true },
+          'switch:0': { id: 0, output: relayOn },
+          wifi: { rssi: -55 },
+          sys: {
+            time: '12:00',
+            unixtime: 1_800_000_000,
+            uptime: 3600,
+            last_sync_ts: 1_799_999_900
+          }
+        };
+        break;
+      case 'Schedule.List':
+        result = { jobs: structuredClone(jobs), rev };
+        break;
+      case 'Schedule.Update': {
+        const jobId = body.params?.id;
+        const index = jobs.findIndex((job) => job.id === jobId);
+        if (index >= 0) {
+          const current = jobs[index]!;
+          jobs[index] = {
+            ...current,
+            ...(body.params?.enable === undefined ? {} : { enable: body.params.enable }),
+            ...(body.params?.timespec === undefined
+              ? {}
+              : { timespec: body.params.timespec }),
+            ...(body.params?.calls === undefined ? {} : { calls: body.params.calls })
+          };
+          rev += 1;
+        }
+        result = { rev };
+        break;
+      }
+      case 'Schedule.Delete':
+        jobs = jobs.filter((job) => job.id !== body.params?.id);
+        rev += 1;
+        result = { rev };
+        break;
+      case 'Switch.Set':
+        relayOn = body.params?.on ?? false;
+        result = null;
+        break;
+      default:
+        result = {};
+    }
+
+    return jsonResponse({ id: body.id ?? 1, result });
+  });
+
+  vi.stubGlobal('fetch', fetchMock);
+  return {
+    get jobs() {
+      return jobs;
+    },
+    get relayOn() {
+      return relayOn;
+    },
+    rpcMethods
+  };
+};
+
 const renderDetail = (installationId: string, onBack = vi.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
@@ -225,5 +342,68 @@ describe('InstallationDetailScreen', () => {
     expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(rpcMethods).toContain('Script.Start');
+  });
+
+  it('manages a native daily schedule end to end without a climate script owner', async () => {
+    const saved = timeInstallation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    const shelly = installTimeShellyFetchMock();
+    const onBack = vi.fn();
+
+    renderDetail(saved.id, onBack);
+
+    expect(await screen.findByText('Działa')).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Lampa' })).toBeVisible();
+    expect(screen.getAllByText('08:00').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('20:00').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
+    expect(screen.getByText('ON', { exact: true })).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Wstrzymaj automatykę' }));
+    expect(await screen.findByText('Wstrzymana')).toBeVisible();
+    expect(shelly.relayOn).toBe(false);
+    expect(shelly.jobs.every((job) => !job.enable)).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Wznów automatykę' }));
+    expect(await screen.findByText('Działa')).toBeVisible();
+    expect(shelly.relayOn).toBe(true);
+    expect(shelly.jobs.every((job) => job.enable)).toBe(true);
+
+    fireEvent.change(screen.getByLabelText('Włącz o'), { target: { value: '18:00' } });
+    fireEvent.change(screen.getByLabelText('Wyłącz o'), { target: { value: '23:00' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+
+    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
+    expect(
+      await within(toastRegion).findByText('Harmonogram zaktualizowany.')
+    ).toBeVisible();
+    expect(shelly.jobs.find((job) => job.id === 7)?.timespec).toBe(
+      dailyScheduleTimespec('18:00')
+    );
+    expect(shelly.jobs.find((job) => job.id === 8)?.timespec).toBe(
+      dailyScheduleTimespec('23:00')
+    );
+    expect(shelly.relayOn).toBe(false);
+    const stored = useInstalledAutomationStore
+      .getState()
+      .installations.find((item) => item.id === saved.id);
+    expect(stored).toMatchObject({
+      kind: 'time',
+      config: { onTime: '18:00', offTime: '23:00' }
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
+    const dialog = screen.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Potwierdź usuń' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Nie znaleziono automatyki' })
+    ).toBeVisible();
+    expect(shelly.jobs).toEqual([]);
+    expect(shelly.relayOn).toBe(false);
+    expect(useInstalledAutomationStore.getState().installations).toEqual([]);
+    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(shelly.rpcMethods).toContain('Schedule.Update');
+    expect(shelly.rpcMethods).toContain('Schedule.Delete');
   });
 });

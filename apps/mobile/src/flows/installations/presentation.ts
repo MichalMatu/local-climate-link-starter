@@ -1,6 +1,6 @@
 import type { RulePresetId } from '@lcl/automation-core';
 import type { Translate, TranslationKey } from '../../app/i18n.js';
-import type { InstalledAutomation } from './model.js';
+import type { ClimateInstalledAutomation } from './model.js';
 import type { InstalledAutomationHealth } from './runtimeDiagnostics.js';
 
 export const INSTALLATION_MODE_KEYS: Record<RulePresetId, TranslationKey> = {
@@ -32,7 +32,7 @@ export const formatInstallationMetric = (
   value == null || !Number.isFinite(value) ? '—' : `${value.toFixed(digits)}${unit}`;
 
 export const installationThresholdSummary = (
-  installation: InstalledAutomation,
+  installation: ClimateInstalledAutomation,
   effectiveOnThreshold?: number | null,
   effectiveOffThreshold?: number | null
 ): string => {

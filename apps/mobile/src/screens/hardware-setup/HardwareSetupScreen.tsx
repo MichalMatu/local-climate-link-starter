@@ -10,8 +10,9 @@ import { DiagnosticsSetupPage } from './pages/DiagnosticsSetupPage.js';
 import { RuleSetupPage } from './pages/RuleSetupPage.js';
 import { SensorSetupPage } from './pages/SensorSetupPage.js';
 import { ShellySetupPage } from './pages/ShellySetupPage.js';
+import { TimeScheduleSetupPage } from './pages/TimeScheduleSetupPage.js';
 
-const PRIMARY_HARDWARE_TABS = [
+const CLIMATE_HARDWARE_TABS = [
   {
     id: 'shelly',
     labelKey: 'hardware.nav.shelly',
@@ -29,19 +30,37 @@ const PRIMARY_HARDWARE_TABS = [
   }
 ] as const;
 
-type PrimaryHardwareTabId = (typeof PRIMARY_HARDWARE_TABS)[number]['id'];
+const TIME_HARDWARE_TABS = [
+  {
+    id: 'shelly',
+    labelKey: 'hardware.nav.shelly',
+    titleKey: 'hardware.nav.shellyTitle'
+  },
+  {
+    id: 'schedule',
+    labelKey: 'time.nav.schedule',
+    titleKey: 'time.nav.scheduleTitle'
+  }
+] as const;
+
+type PrimaryHardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
 type HardwareTabId = PrimaryHardwareTabId | 'diagnostics';
 
-const isHardwareTabId = (value: string): value is HardwareTabId =>
-  value === 'diagnostics' || PRIMARY_HARDWARE_TABS.some((tab) => tab.id === value);
+const availableTabsForIntent = (setupIntent?: SetupIntent) =>
+  setupIntent === 'time' ? TIME_HARDWARE_TABS : CLIMATE_HARDWARE_TABS;
 
-const currentTabFromHash = (): HardwareTabId => {
+const currentTabFromHash = (availableTabs: readonly { id: string }[]): HardwareTabId => {
   if (typeof window === 'undefined') {
     return 'shelly';
   }
 
   const hashValue = window.location.hash.replace(/^#/, '');
-  return isHardwareTabId(hashValue) ? hashValue : 'shelly';
+  if (hashValue === 'diagnostics' && availableTabs === CLIMATE_HARDWARE_TABS) {
+    return 'diagnostics';
+  }
+  return availableTabs.some((tab) => tab.id === hashValue)
+    ? (hashValue as PrimaryHardwareTabId)
+    : 'shelly';
 };
 
 const setHashTab = (tabId: HardwareTabId) => {
@@ -57,16 +76,21 @@ const setHashTab = (tabId: HardwareTabId) => {
 type HardwareSetupScreenProps = {
   setupIntent?: SetupIntent;
   onBackToIntent?: () => void;
+  onSetupComplete?: () => void;
 };
 
 export const HardwareSetupScreen = ({
   setupIntent,
-  onBackToIntent
+  onBackToIntent,
+  onSetupComplete
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
   const { rulePreset, setRulePreset } = flow;
-  const [activeTab, setActiveTab] = useState<HardwareTabId>(currentTabFromHash);
+  const availableTabs = useMemo(() => availableTabsForIntent(setupIntent), [setupIntent]);
+  const [activeTab, setActiveTab] = useState<HardwareTabId>(() =>
+    currentTabFromHash(availableTabs)
+  );
   const selectableRulePresets = useMemo(
     () => rulePresetsForSetupIntent(setupIntent),
     [setupIntent]
@@ -88,10 +112,22 @@ export const HardwareSetupScreen = ({
   }, [rulePreset, selectableRulePresets, setRulePreset, setupIntent]);
 
   useEffect(() => {
-    const handleHashChange = () => setActiveTab(currentTabFromHash());
+    const handleHashChange = () => setActiveTab(currentTabFromHash(availableTabs));
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [availableTabs]);
+
+  useEffect(() => {
+    if (activeTab === 'diagnostics') {
+      if (setupIntent === 'time') {
+        selectTab('shelly');
+      }
+      return;
+    }
+    if (!availableTabs.some((tab) => tab.id === activeTab)) {
+      selectTab('shelly');
+    }
+  }, [activeTab, availableTabs, setupIntent]);
 
   useEffect(() => {
     const cleanup = () => {
@@ -131,7 +167,7 @@ export const HardwareSetupScreen = ({
       )}
 
       <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
-        {PRIMARY_HARDWARE_TABS.map((tab) => (
+        {availableTabs.map((tab) => (
           <button
             key={tab.id}
             className={
@@ -150,15 +186,23 @@ export const HardwareSetupScreen = ({
       </nav>
 
       {activeTab === 'shelly' && <ShellySetupPage flow={flow} />}
-      {activeTab === 'sensor' && <SensorSetupPage flow={flow} />}
-      {activeTab === 'rule' && (
+      {setupIntent !== 'time' && activeTab === 'sensor' && (
+        <SensorSetupPage flow={flow} />
+      )}
+      {setupIntent !== 'time' && activeTab === 'rule' && (
         <RuleSetupPage
           flow={flow}
           selectablePresets={selectableRulePresets}
           onOpenDiagnostics={() => selectTab('diagnostics')}
         />
       )}
-      {activeTab === 'diagnostics' && (
+      {setupIntent === 'time' && activeTab === 'schedule' && (
+        <TimeScheduleSetupPage
+          flow={flow}
+          {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
+        />
+      )}
+      {setupIntent !== 'time' && activeTab === 'diagnostics' && (
         <>
           <div className="developer-context">
             <button

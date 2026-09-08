@@ -73,6 +73,7 @@ export const AppRoutes = () => {
       <HardwareSetupScreen
         setupIntent={route.intent}
         onBackToIntent={() => setRoute({ type: 'intent' })}
+        onSetupComplete={() => setRoute({ type: 'dashboard' })}
       />
     </Suspense>
   );

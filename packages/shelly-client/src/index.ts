@@ -5,3 +5,4 @@ export * from './rpc/fetch.js';
 export * from './scripts/hash.js';
 export * from './scripts/install.js';
 export * from './scripts/fake.js';
+export * from './schedules.js';

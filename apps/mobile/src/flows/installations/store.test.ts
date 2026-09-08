@@ -77,10 +77,17 @@ describe('installed automation store', () => {
       'shelly-b',
       'shelly-a'
     ]);
-    expect(installations[0]?.config.sensor.runtimeAddress).toBe('AA:BB:CC:DD:EE:02');
-    expect(installations[0]?.config.rule.mode).toBe('cooling');
-    expect(installations[1]?.config.sensor.runtimeAddress).toBe('AA:BB:CC:DD:EE:01');
-    expect(installations[1]?.config.rule.mode).toBe('heating');
+    const newest = installations[0];
+    const oldest = installations[1];
+    expect(newest?.kind).toBe('climate');
+    expect(oldest?.kind).toBe('climate');
+    if (!newest || newest.kind !== 'climate' || !oldest || oldest.kind !== 'climate') {
+      throw new Error('Expected climate installations.');
+    }
+    expect(newest.config.sensor.runtimeAddress).toBe('AA:BB:CC:DD:EE:02');
+    expect(newest.config.rule.mode).toBe('cooling');
+    expect(oldest.config.sensor.runtimeAddress).toBe('AA:BB:CC:DD:EE:01');
+    expect(oldest.config.rule.mode).toBe('heating');
   });
 
   it('updates one Shelly installation without changing its installation identity', async () => {
@@ -117,6 +124,11 @@ describe('installed automation store', () => {
       shelly: { deviceId: 'shelly-a', baseUrl: 'http://192.168.0.99/' },
       script: { id: 7, hash: 'hash-b' }
     });
-    expect(installations[0]?.config.sensor.runtimeAddress).toBe('AA:BB:CC:DD:EE:03');
+    const stored = installations[0];
+    expect(stored?.kind).toBe('climate');
+    if (!stored || stored.kind !== 'climate') {
+      throw new Error('Expected a climate installation.');
+    }
+    expect(stored.config.sensor.runtimeAddress).toBe('AA:BB:CC:DD:EE:03');
   });
 });
