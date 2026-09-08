@@ -29,11 +29,7 @@ describe('RpcShellyPlugsUiClient', () => {
       {
         ok: true,
         value: {
-          methods: [
-            'Shelly.GetStatus',
-            'PLUGS_UI.GetConfig',
-            'PLUGS_UI.SetConfig'
-          ]
+          methods: ['Shelly.GetStatus', 'PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig']
         }
       },
       {
