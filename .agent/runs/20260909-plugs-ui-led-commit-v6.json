@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 14,
+  "index": 15,
   "total": 15,
-  "command": "git push origin work/plugs-ui-led-audit",
-  "pid": 69727,
+  "command": "printf 'COMMIT_SHA=%s\\n' \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\"",
+  "pid": 74223,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-08T23:10:56.851234+00:00",
-  "stage_name": "command-14",
-  "stage_index": 14,
+  "started_at": "2026-09-08T23:12:18.076311+00:00",
+  "stage_name": "command-15",
+  "stage_index": 15,
   "stage_total": 15,
   "stage_phase": "commands",
   "task_id": "20260909-plugs-ui-led-commit-v6",
@@ -18,5 +18,5 @@
   "task_digest": "620fac03e7cc54900d8e9b027bb7d189ab5661946b84933c6857204e131af17c",
   "daemon_version": "4.18.19",
   "daemon_pid": 66624,
-  "updated_at": "2026-09-08T23:10:56.936576+00:00"
+  "updated_at": "2026-09-08T23:12:18.142626+00:00"
 }
