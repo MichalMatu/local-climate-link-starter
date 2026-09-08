@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.19",
   "state": "idle",
-  "pid": 3185,
-  "updated_at": "2026-09-08T23:41:56.340845+00:00",
+  "pid": 15339,
+  "updated_at": "2026-09-08T23:47:04.385502+00:00",
   "self_revision": "8e04f75287630cb1db363f1b53c3c0b770e10dcc",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 3185,
+  "worker_pid": 15339,
   "supervisor_pid": 35264,
-  "last_task_id": "20260909-shelly-button-capability-readonly-v4",
   "execution_variant": "parallel"
 }
