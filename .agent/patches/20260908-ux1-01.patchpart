@@ -1,0 +1,117 @@
++      title: 'Luftfeuchtigkeit steuern',
++      description: 'Befeuchten oder Entfeuchten anhand eines BLE-Sensors.',
++      context: 'Feuchtigkeitssteuerung'
++    },
++    manage: {
++      title: 'Bestehende Automation verwalten',
++      description: 'Gespeicherte Geräte, Regeln und Diagnose öffnen.',
++      context: 'Automationsverwaltung'
++    }
++  },
+   common: {
+     add: 'Hinzufügen',
+     address: 'Adresse',
+diff --git a/apps/mobile/src/app/locales/en.ts b/apps/mobile/src/app/locales/en.ts
+index 06b782e..4ca87cb 100644
+--- a/apps/mobile/src/app/locales/en.ts
++++ b/apps/mobile/src/app/locales/en.ts
+@@ -8,6 +8,28 @@ export const en = {
+       'BLE thermometer + Shelly plug. Configure once in the app, then it runs locally.',
+     loadingConfigurator: 'Loading configurator.'
+   },
++  intent: {
++    title: 'What do you want to do?',
++    description: 'Choose the goal first. Technical details come in the next step.',
++    choiceLabel: 'Automation goal',
++    open: 'Open',
++    back: 'Change goal',
++    temperature: {
++      title: 'Control temperature',
++      description: 'Heating or cooling based on a BLE thermometer.',
++      context: 'Temperature control'
++    },
++    humidity: {
++      title: 'Control humidity',
++      description: 'Humidifying or dehumidifying based on a BLE sensor.',
++      context: 'Humidity control'
++    },
++    manage: {
++      title: 'Manage existing automation',
++      description: 'Open saved devices, rules, and diagnostics.',
++      context: 'Automation management'
++    }
++  },
+   common: {
+     add: 'Add',
+     address: 'Address',
+diff --git a/apps/mobile/src/app/locales/es.ts b/apps/mobile/src/app/locales/es.ts
+index 0f7e5c7..0f91a63 100644
+--- a/apps/mobile/src/app/locales/es.ts
++++ b/apps/mobile/src/app/locales/es.ts
+@@ -8,6 +8,28 @@ export const es = {
+       'Termómetro BLE + enchufe Shelly. Configuras una vez en la app y luego funciona localmente.',
+     loadingConfigurator: 'Cargando configurador.'
+   },
++  intent: {
++    title: '¿Qué quieres hacer?',
++    description: 'Elige primero el objetivo. Los detalles técnicos vienen después.',
++    choiceLabel: 'Objetivo de automatización',
++    open: 'Abrir',
++    back: 'Cambiar objetivo',
++    temperature: {
++      title: 'Controlar la temperatura',
++      description: 'Calefacción o refrigeración con un termómetro BLE.',
++      context: 'Control de temperatura'
++    },
++    humidity: {
++      title: 'Controlar la humedad',
++      description: 'Humidificar o deshumidificar con un sensor BLE.',
++      context: 'Control de humedad'
++    },
++    manage: {
++      title: 'Gestionar una automatización existente',
++      description: 'Abre dispositivos, reglas y diagnósticos guardados.',
++      context: 'Gestión de automatización'
++    }
++  },
+   common: {
+     add: 'Añadir',
+     address: 'Dirección',
+diff --git a/apps/mobile/src/app/locales/fr.ts b/apps/mobile/src/app/locales/fr.ts
+index e5256cc..f90e3ab 100644
+--- a/apps/mobile/src/app/locales/fr.ts
++++ b/apps/mobile/src/app/locales/fr.ts
+@@ -8,6 +8,29 @@ export const fr = {
+       'Thermomètre BLE + prise Shelly. Configuration une seule fois dans l’app, puis fonctionnement local.',
+     loadingConfigurator: 'Chargement du configurateur.'
+   },
++  intent: {
++    title: 'Que voulez-vous faire ?',
++    description:
++      'Choisissez d’abord l’objectif. Les détails techniques viennent ensuite.',
++    choiceLabel: 'Objectif de l’automatisation',
++    open: 'Ouvrir',
++    back: 'Changer d’objectif',
++    temperature: {
++      title: 'Contrôler la température',
++      description: 'Chauffage ou refroidissement avec un thermomètre BLE.',
++      context: 'Contrôle de température'
++    },
++    humidity: {
++      title: 'Contrôler l’humidité',
++      description: 'Humidification ou déshumidification avec un capteur BLE.',
++      context: 'Contrôle de l’humidité'
++    },
++    manage: {
++      title: 'Gérer une automatisation existante',
++      description: 'Ouvrez les appareils, règles et diagnostics enregistrés.',
++      context: 'Gestion de l’automatisation'
++    }
++  },
+   common: {
+     add: 'Ajouter',
+     address: 'Adresse',
+diff --git a/apps/mobile/src/app/locales/it.ts b/apps/mobile/src/app/locales/it.ts
+index 5345d19..6049340 100644
+--- a/apps/mobile/src/app/locales/it.ts
++++ b/apps/mobile/src/app/locales/it.ts
