@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 12,
-  "command": "pnpm --filter @lcl/mobile exec vitest run src/flows/device-settings/leds.test.ts src/__tests__/shelly-led-settings.test.tsx",
-  "pid": 74561,
+  "command": "pnpm format:check",
+  "pid": 74665,
   "timeout": 600,
   "idle_timeout": 180,
   "memory_limit_mb": 3072,
-  "started_at": "2026-09-08T22:03:20.007463+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-08T22:03:23.571009+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 12,
   "stage_phase": "commands",
   "task_id": "20260908-shelly-led-focused-v4",
@@ -18,5 +18,5 @@
   "task_digest": "1286c852498634a66823bcdbf025f77cd7ff97ea12e4d5fcbde1a73dfada813b",
   "daemon_version": "4.18.19",
   "daemon_pid": 71496,
-  "updated_at": "2026-09-08T22:03:20.081810+00:00"
+  "updated_at": "2026-09-08T22:03:23.647006+00:00"
 }
