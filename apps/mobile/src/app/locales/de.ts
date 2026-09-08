@@ -481,6 +481,8 @@ export const de = {
       fixShellyData: 'Steckdosendaten korrigieren.',
       inputShellyIp: 'Shelly-IP eingeben',
       installFirst: 'Zuerst die aktuelle Regel senden.',
+      shellyIdentityMissing:
+        'Shelly hat keine stabile Gerätekennung geliefert. Aktualisiere die Firmware und versuche es erneut.',
       noSelectedSensor: 'Thermometer hinzufügen und auswählen.',
       noSelectedShelly: 'Shelly-Steckdose auswählen.',
       noSelectedDiagnosticShelly: 'Shelly-Steckdose für Diagnose auswählen.',

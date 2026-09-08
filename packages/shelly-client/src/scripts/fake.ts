@@ -31,6 +31,7 @@ export class FakeShellyClient implements ShellyClient {
     return {
       ok: true,
       value: {
+        id: 'shellyplugsg3-demo',
         model: 'Shelly Plug S Gen3',
         gen: 3,
         firmwareId: 'demo'

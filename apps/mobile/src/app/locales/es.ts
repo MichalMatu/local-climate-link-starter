@@ -477,6 +477,8 @@ export const es = {
       fixShellyData: 'Corrige los datos del enchufe.',
       inputShellyIp: 'introduce IP de Shelly',
       installFirst: 'Envía primero la regla actual.',
+      shellyIdentityMissing:
+        'Shelly no proporcionó un identificador estable del dispositivo. Actualiza el firmware y vuelve a intentarlo.',
       noSelectedSensor: 'Añade y selecciona un termómetro.',
       noSelectedShelly: 'Selecciona enchufe Shelly.',
       noSelectedDiagnosticShelly: 'Selecciona enchufe Shelly para diagnóstico.',

@@ -475,6 +475,8 @@ export const ptBr = {
       fixShellyData: 'Corrija os dados da tomada.',
       inputShellyIp: 'informe IP Shelly',
       installFirst: 'Envie primeiro a regra atual.',
+      shellyIdentityMissing:
+        'O Shelly não forneceu um identificador estável do dispositivo. Atualize o firmware e tente novamente.',
       noSelectedSensor: 'Adicione e selecione um termômetro.',
       noSelectedShelly: 'Selecione tomada Shelly.',
       noSelectedDiagnosticShelly: 'Selecione tomada Shelly para diagnóstico.',

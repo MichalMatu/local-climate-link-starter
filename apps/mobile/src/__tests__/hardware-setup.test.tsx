@@ -179,6 +179,10 @@ import { I18nProvider, setLocalePreference } from '../app/i18n.js';
 import { setThemeMode } from '../app/themeMode.js';
 import { resetHardwareSetupReadingsStore } from '../flows/hardware-setup/sensorReadingsStore.js';
 import {
+  resetInstalledAutomationStore,
+  useInstalledAutomationStore
+} from '../flows/installations/store.js';
+import {
   cleanupStaleShellyBleDiscoveryScripts,
   fetchShellyJson,
   SHELLY_OUT_OF_MEMORY_MESSAGE
@@ -369,6 +373,7 @@ describe('HardwareSetupScreen', () => {
   beforeEach(() => {
     resetHardwareSetupDraftStore();
     resetHardwareSetupReadingsStore();
+    resetInstalledAutomationStore();
     phoneBleScannerMock.failureMessage = null;
     phoneBleScannerMock.startCount = 0;
     phoneBleScannerMock.stopCount = 0;
@@ -448,6 +453,7 @@ describe('HardwareSetupScreen', () => {
         switch (body.method) {
           case 'Shelly.GetDeviceInfo':
             return rpcResult({
+              id: 'shellyplugsg3-test',
               model: 'S3PL-00112EU',
               gen: 3,
               fw_id: '20260311-095902/1.7.5-g9979d16'
@@ -929,6 +935,24 @@ describe('HardwareSetupScreen', () => {
         'Nie widzę Shelly Scripts w statusie gniazdka. Sprawdź firmware albo wyłącz Matter.'
       )
     ).not.toBeInTheDocument();
+
+    const installations = useInstalledAutomationStore.getState().installations;
+    expect(installations).toHaveLength(1);
+    expect(installations[0]).toMatchObject({
+      shelly: {
+        deviceId: 'shellyplugsg3-test',
+        name: 'Salon',
+        baseUrl: 'http://192.168.0.20/'
+      },
+      config: {
+        sensor: {
+          runtimeAddress: 'A4:C1:38:4F:24:CD'
+        },
+        rule: {
+          mode: 'heating'
+        }
+      }
+    });
   });
 
   it('blocks rule install when Shelly status does not expose BLE', async () => {

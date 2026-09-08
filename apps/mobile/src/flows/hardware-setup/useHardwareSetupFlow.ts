@@ -29,6 +29,11 @@ import {
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
+  createInstalledAutomation,
+  type InstalledAutomation
+} from '../installations/model.js';
+import { useInstalledAutomationStore } from '../installations/store.js';
+import {
   type BleDiscoveryCandidate,
   type BleDiscoverySnapshot,
   diagnosticSnapshotSchema,
@@ -170,6 +175,12 @@ type HardwareInstallState = {
   shellyId: string;
   scriptId: number;
   scriptHash: string;
+};
+
+type HardwareInstallMutationResult = {
+  install: ShellyInstallResult;
+  installation: InstalledAutomation;
+  shellyDraftId: string;
 };
 
 type SafeRelayTestMutationResult = {
@@ -344,6 +355,9 @@ export const useHardwareSetupFlow = () => {
   );
   const clearSensorReadings = useHardwareSetupReadingsStore(
     (state) => state.clearSensorReadings
+  );
+  const upsertInstalledAutomation = useInstalledAutomationStore(
+    (state) => state.upsertInstallation
   );
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
   const [diagnosticSnapshot, setDiagnosticSnapshot] =
@@ -1387,7 +1401,7 @@ export const useHardwareSetupFlow = () => {
   });
 
   const installMutation = useMutation({
-    mutationFn: async (): Promise<ShellyInstallResult> => {
+    mutationFn: async (): Promise<HardwareInstallMutationResult> => {
       if (!configState.ok) {
         throw new Error(configState.error);
       }
@@ -1400,21 +1414,40 @@ export const useHardwareSetupFlow = () => {
       if (!selectedShelly) {
         throw new Error(t('hardware.flow.noSelectedShelly'));
       }
-      await cleanupStaleShellyBleDiscoveryScripts(selectedShelly.baseUrl);
-      const client = new RpcShellyClient(createShellyTransport(selectedShelly.baseUrl));
-      const result = await client.installScript(createInstallPlan(configState.script));
-      return unwrapShellyResult(result);
-    },
-    onSuccess: (result) => {
-      if (selectedShelly) {
-        setShellyScriptIdDraft(selectedShelly.id, String(result.scriptId));
-        setLastInstallState({
-          shellyId: selectedShelly.id,
-          scriptId: result.scriptId,
-          scriptHash: result.scriptHash
-        });
-        setSafeRelayTestState(null);
+
+      const shelly = selectedShelly;
+      const config = configState.config;
+      await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
+      const client = new RpcShellyClient(createShellyTransport(shelly.baseUrl));
+      const deviceInfo = unwrapShellyResult(await client.getDeviceInfo());
+      if (!deviceInfo.id?.trim()) {
+        throw new Error(t('hardware.flow.shellyIdentityMissing'));
       }
+      const install = unwrapShellyResult(
+        await client.installScript(createInstallPlan(configState.script))
+      );
+      return {
+        install,
+        installation: createInstalledAutomation({
+          shelly: deviceInfo,
+          shellyName: shelly.name,
+          baseUrl: shelly.baseUrl,
+          scriptId: install.scriptId,
+          scriptHash: install.scriptHash,
+          config
+        }),
+        shellyDraftId: shelly.id
+      };
+    },
+    onSuccess: ({ install, installation, shellyDraftId }) => {
+      setShellyScriptIdDraft(shellyDraftId, String(install.scriptId));
+      upsertInstalledAutomation(installation);
+      setLastInstallState({
+        shellyId: shellyDraftId,
+        scriptId: install.scriptId,
+        scriptHash: install.scriptHash
+      });
+      setSafeRelayTestState(null);
     }
   });
 

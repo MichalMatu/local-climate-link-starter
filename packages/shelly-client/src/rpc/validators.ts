@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const shellyDeviceInfoSchema = z
   .object({
+    id: z.string().min(1).optional(),
     model: z.string(),
     gen: z.number(),
     firmwareId: z.string().optional(),
@@ -10,6 +11,7 @@ export const shellyDeviceInfoSchema = z
     matter: z.boolean().optional()
   })
   .transform((deviceInfo) => ({
+    id: deviceInfo.id,
     model: deviceInfo.model,
     gen: deviceInfo.gen,
     firmwareId: deviceInfo.firmwareId ?? deviceInfo.fw_id ?? deviceInfo.ver,

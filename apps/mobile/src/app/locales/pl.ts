@@ -476,6 +476,8 @@ export const pl = {
       fixShellyData: 'Popraw dane gniazdka.',
       inputShellyIp: 'wpisz IP Shelly',
       installFirst: 'Najpierw wyślij aktualną regułę.',
+      shellyIdentityMissing:
+        'Shelly nie podał stabilnego identyfikatora urządzenia. Zaktualizuj firmware i spróbuj ponownie.',
       noSelectedSensor: 'Dodaj i wybierz termometr.',
       noSelectedShelly: 'Wybierz gniazdko Shelly.',
       noSelectedDiagnosticShelly: 'Wybierz gniazdko Shelly do diagnostyki.',
