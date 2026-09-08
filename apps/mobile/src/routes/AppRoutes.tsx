@@ -3,6 +3,7 @@ import { useTranslation } from '../app/i18n.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
+import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
@@ -22,29 +23,57 @@ const RouteFallback = () => {
   );
 };
 
-type AppView = 'intent' | 'dashboard' | Exclude<SetupIntent, 'manage'>;
+type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
+type AppRoute =
+  | { type: 'intent' }
+  | { type: 'dashboard' }
+  | { type: 'setup'; intent: SetupRouteIntent }
+  | { type: 'installation'; installationId: string };
 
 export const AppRoutes = () => {
   const installations = useInstalledAutomationStore((state) => state.installations);
-  const [view, setView] = useState<AppView>(() =>
-    installations.length > 0 ? 'dashboard' : 'intent'
+  const [route, setRoute] = useState<AppRoute>(() =>
+    installations.length > 0 ? { type: 'dashboard' } : { type: 'intent' }
   );
 
-  if (view === 'intent') {
+  if (route.type === 'intent') {
     return (
       <SetupIntentScreen
-        onSelect={(intent) => setView(intent === 'manage' ? 'dashboard' : intent)}
+        onSelect={(intent) =>
+          setRoute(
+            intent === 'manage' ? { type: 'dashboard' } : { type: 'setup', intent }
+          )
+        }
       />
     );
   }
 
-  if (view === 'dashboard') {
-    return <AutomationDashboardScreen onAddAutomation={() => setView('intent')} />;
+  if (route.type === 'dashboard') {
+    return (
+      <AutomationDashboardScreen
+        onAddAutomation={() => setRoute({ type: 'intent' })}
+        onOpenInstallation={(installationId) =>
+          setRoute({ type: 'installation', installationId })
+        }
+      />
+    );
+  }
+
+  if (route.type === 'installation') {
+    return (
+      <InstallationDetailScreen
+        installationId={route.installationId}
+        onBack={() => setRoute({ type: 'dashboard' })}
+      />
+    );
   }
 
   return (
     <Suspense fallback={<RouteFallback />}>
-      <HardwareSetupScreen setupIntent={view} onBackToIntent={() => setView('intent')} />
+      <HardwareSetupScreen
+        setupIntent={route.intent}
+        onBackToIntent={() => setRoute({ type: 'intent' })}
+      />
     </Suspense>
   );
 };

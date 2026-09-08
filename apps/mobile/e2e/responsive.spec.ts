@@ -54,10 +54,21 @@ const seedDraft = async (page: Page) => {
 };
 
 const mockShellyRpc = async (page: Page) => {
+  let scriptRunning = true;
+  let relayOn = true;
+
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
     const proxyTarget = requestUrl.searchParams.get('target');
     if (proxyTarget?.includes('/script/1/diag')) {
+      if (!scriptRunning) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ stopped: true })
+        });
+        return;
+      }
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -67,14 +78,14 @@ const mockShellyRpc = async (page: Page) => {
           s: ['A4:C1:38:4F:24:CD', 'Przedpokój'],
           q: [0, 0, 19, 20, 120, -85],
           y: ['14:00', 1782820000, 3600],
-          p: [true, 42.3, 230.1, 0.2, 1250, 32.4],
+          p: [relayOn, relayOn ? 42.3 : 0, 230.1, relayOn ? 0.2 : 0, 1250, 32.4],
           g: [
             3550000,
             21.4,
             55.2,
             91,
             -51,
-            true,
+            relayOn,
             'ok',
             3500000,
             3540000,
@@ -95,6 +106,7 @@ const mockShellyRpc = async (page: Page) => {
     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
       id?: number | string;
       method?: string;
+      params?: { id?: number; on?: boolean };
     };
     let result: unknown = {};
     switch (requestBody.method) {
@@ -113,10 +125,10 @@ const mockShellyRpc = async (page: Page) => {
           ble: { enable: true },
           'switch:0': {
             id: 0,
-            output: false,
-            apower: 0,
+            output: relayOn,
+            apower: relayOn ? 42.3 : 0,
             voltage: 230.1,
-            current: 0,
+            current: relayOn ? 0.2 : 0,
             aenergy: { total: 1250 },
             temperature: { tC: 32.4 }
           },
@@ -136,10 +148,22 @@ const mockShellyRpc = async (page: Page) => {
               id: 1,
               name: 'Local Climate Link Thermostat',
               enable: true,
-              running: true
+              running: scriptRunning
             }
           ]
         };
+        break;
+      case 'Script.Stop':
+        scriptRunning = false;
+        result = null;
+        break;
+      case 'Script.Start':
+        scriptRunning = true;
+        result = null;
+        break;
+      case 'Switch.Set':
+        relayOn = requestBody.params?.on ?? false;
+        result = null;
         break;
       default:
         result = {};
@@ -395,11 +419,59 @@ for (const viewport of viewports) {
     await expect(page.getByText('19°C / 20°C')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Odśwież' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    await page.getByRole('button', { name: 'Szczegóły' }).click();
+    await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Klimat teraz' })).toBeVisible();
+    await expect(page.getByText('21.4°C')).toBeVisible();
+    await expect(page.getByText('55.2%')).toBeVisible();
+    await expect(page.getByText('1.31 kPa')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Wstrzymaj automatykę' })
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: /Wróć do automatyk/ })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
     expect(consoleProblems).toEqual([]);
   });
 }
+
+test('installed automation detail safely pauses and resumes on phone', async ({
+  page
+}) => {
+  const consoleProblems: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error' || message.type() === 'warning') {
+      consoleProblems.push(`${message.type()}: ${message.text()}`);
+    }
+  });
+  page.on('pageerror', (error) => consoleProblems.push(error.message));
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedInstalledAutomation(page);
+  await mockShellyRpc(page);
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Szczegóły' }).click();
+  await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
+  await expect(page.getByText('Działa')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
+  await expect(
+    page.getByText('Automatyka zatrzymana, wyjście potwierdzone jako OFF.')
+  ).toBeVisible();
+  await expect(page.getByText('Wstrzymana')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Wznów automatykę' })).toBeVisible();
+  await expect(page.getByText('OFF', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Wznów automatykę' }).click();
+  await expect(page.getByText('Automatyka uruchomiona.')).toBeVisible();
+  await expect(page.getByText('Działa')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Wstrzymaj automatykę' })).toBeVisible();
+
+  await expectNoHorizontalOverflow(page);
+  await expectNoLegacyInlineFeedback(page);
+  expect(consoleProblems).toEqual([]);
+});
 
 for (const viewport of viewports) {
   test(`hardware setup has no horizontal overflow on ${viewport.name}`, async ({

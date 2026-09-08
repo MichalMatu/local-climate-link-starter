@@ -46,14 +46,37 @@ export const pl = {
     sensor: 'Czujnik',
     readFailed: 'Brak połączenia z Shelly.',
     refreshing: 'Odświeżam dane z Shelly…',
+    openSystem: 'Szczegóły',
     liveFromShelly: 'Dane runtime bezpośrednio z Shelly.',
     health: {
       ok: 'Działa',
       stale: 'Dane nieaktualne',
       unknown: 'Stan nieznany',
       offline: 'Offline',
+      paused: 'Wstrzymana',
+      attention: 'Wymaga uwagi',
       loading: 'Łączę…'
     }
+  },
+  detail: {
+    notFoundTitle: 'Nie znaleziono automatyki',
+    notFoundDescription: 'Ta automatyka nie jest już zapisana w aplikacji.',
+    backToDashboard: 'Wróć do automatyki',
+    description: 'Bieżący stan i sterowanie tym lokalnym systemem.',
+    currentState: 'Stan bieżący',
+    climateNow: 'Klimat teraz',
+    activeThresholds: 'Aktywne progi ON / OFF',
+    source: 'Źródło danych',
+    configuration: 'Konfiguracja',
+    automation: 'Automatyka',
+    pause: 'Wstrzymaj automatykę',
+    resume: 'Wznów automatykę',
+    changingState: 'Zmieniam stan…',
+    pauseSuccess: 'Automatyka zatrzymana, wyjście potwierdzone jako OFF.',
+    resumeSuccess: 'Automatyka uruchomiona.',
+    actionFailed: 'Nie udało się bezpiecznie zmienić stanu automatyki.',
+    scriptNeedsAttention:
+      'Skrypt zapisany dla tej automatyki nie odpowiada stanowi Shelly. Sprawdź urządzenie przed sterowaniem.'
   },
   common: {
     add: 'Dodaj',

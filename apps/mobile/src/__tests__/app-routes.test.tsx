@@ -10,6 +10,23 @@ import {
 } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
+vi.mock('../screens/InstallationDetailScreen.js', () => ({
+  InstallationDetailScreen: ({
+    installationId,
+    onBack
+  }: {
+    installationId: string;
+    onBack: () => void;
+  }) => (
+    <section>
+      <p>{`mock-installation-${installationId}`}</p>
+      <button type="button" onClick={onBack}>
+        mock-dashboard-back
+      </button>
+    </section>
+  )
+}));
+
 vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
   HardwareSetupScreen: ({
     setupIntent,
@@ -69,6 +86,31 @@ describe('AppRoutes user intent entry', () => {
 
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
+  });
+
+  it('opens an installed system by stable installation id and returns to the dashboard', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-route-detail', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptId: 1,
+      scriptHash: 'lcl-route-detail',
+      config,
+      nowMs: 1000
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
+
+    renderRoutes();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   });
 
   it('starts from the user goal instead of technical setup tabs', () => {

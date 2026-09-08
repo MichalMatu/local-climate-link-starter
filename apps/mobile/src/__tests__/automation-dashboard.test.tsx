@@ -16,6 +16,35 @@ const jsonResponse = (payload: unknown) =>
     headers: { 'content-type': 'application/json' }
   });
 
+const controlRpcResult = (method: string | undefined): unknown => {
+  switch (method) {
+    case 'Shelly.GetDeviceInfo':
+      return { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 };
+    case 'Shelly.GetStatus':
+      return {
+        matter: { enabled: false },
+        script: { enable: true },
+        ble: { enable: true },
+        'switch:0': { id: 0, output: false },
+        wifi: { rssi: -55 },
+        sys: { time: '12:00', unixtime: 1_782_667_904, uptime: 12_345 }
+      };
+    case 'Script.List':
+      return {
+        scripts: [
+          {
+            id: 1,
+            name: 'Local Climate Link Thermostat',
+            enable: true,
+            running: true
+          }
+        ]
+      };
+    default:
+      return {};
+  }
+};
+
 const diagnosticPayload = ({
   lastSeenUptimeMs = 12_300_000,
   uptimeSec = 12_345,
@@ -79,16 +108,20 @@ const installedAutomation = () => {
   });
 };
 
-const renderDashboard = (onAddAutomation = vi.fn()) => {
+const renderDashboard = (onAddAutomation = vi.fn(), onOpenInstallation = vi.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
   });
   return {
     onAddAutomation,
+    onOpenInstallation,
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <AutomationDashboardScreen onAddAutomation={onAddAutomation} />
+          <AutomationDashboardScreen
+            onAddAutomation={onAddAutomation}
+            onOpenInstallation={onOpenInstallation}
+          />
         </QueryClientProvider>
       </I18nProvider>
     )
@@ -134,6 +167,7 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
   });
 
   it('marks an old Shelly sensor reading as stale', async () => {
@@ -154,24 +188,36 @@ describe('AutomationDashboardScreen', () => {
 
   it('uses effective runtime thresholds and recovers after a manual refresh', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
-    const fetchMock = vi
-      .fn()
-      .mockRejectedValueOnce(new Error('offline'))
-      .mockResolvedValue(
-        jsonResponse(
+    let diagnosticAttempts = 0;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof URL ? input.toString() : String(input);
+      const target = new URL(url, 'http://localhost').searchParams.get('target');
+      if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
+        diagnosticAttempts += 1;
+        if (diagnosticAttempts === 1) {
+          throw new Error('offline');
+        }
+        return jsonResponse(
           diagnosticPayload({ effectiveOnThreshold: 19.25, effectiveOffThreshold: 19.75 })
-        )
-      );
+        );
+      }
+
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        id?: number | string;
+        method?: string;
+      };
+      return jsonResponse({ id: body.id ?? 1, result: controlRpcResult(body.method) });
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     renderDashboard();
 
-    expect(await screen.findByText('Offline')).toBeVisible();
+    expect(await screen.findByText('Wymaga uwagi')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Odśwież' }));
 
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('19.25°C / 19.75°C')).toBeVisible();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(diagnosticAttempts).toBe(2);
   });
 
   it('shows offline without replacing runtime values with phone BLE data', async () => {

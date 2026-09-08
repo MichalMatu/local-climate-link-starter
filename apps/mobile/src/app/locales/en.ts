@@ -47,14 +47,37 @@ export const en = {
     sensor: 'Sensor',
     readFailed: 'Cannot reach Shelly.',
     refreshing: 'Refreshing from Shelly…',
+    openSystem: 'Details',
     liveFromShelly: 'Runtime data directly from Shelly.',
     health: {
       ok: 'Working',
       stale: 'Data stale',
       unknown: 'Unknown',
       offline: 'Offline',
+      paused: 'Paused',
+      attention: 'Needs attention',
       loading: 'Connecting…'
     }
+  },
+  detail: {
+    notFoundTitle: 'Automation not found',
+    notFoundDescription: 'This automation is no longer saved in the app.',
+    backToDashboard: 'Back to automations',
+    description: 'Live status and control for this local system.',
+    currentState: 'Current state',
+    climateNow: 'Climate now',
+    activeThresholds: 'Active ON / OFF thresholds',
+    source: 'Data source',
+    configuration: 'Configuration',
+    automation: 'Automation',
+    pause: 'Pause automation',
+    resume: 'Resume automation',
+    changingState: 'Changing state…',
+    pauseSuccess: 'Automation paused and output confirmed OFF.',
+    resumeSuccess: 'Automation resumed.',
+    actionFailed: 'Could not safely change automation state.',
+    scriptNeedsAttention:
+      'The script saved for this automation does not match the Shelly state. Check the device before controlling it.'
   },
   common: {
     add: 'Add',

@@ -47,14 +47,37 @@ export const es = {
     sensor: 'Sensor',
     readFailed: 'No se puede conectar con Shelly.',
     refreshing: 'Actualizando desde Shelly…',
+    openSystem: 'Detalles',
     liveFromShelly: 'Datos de ejecución directamente desde Shelly.',
     health: {
       ok: 'Funcionando',
       stale: 'Datos desactualizados',
       unknown: 'Desconocido',
       offline: 'Sin conexión',
+      paused: 'Pausada',
+      attention: 'Requiere atención',
       loading: 'Conectando…'
     }
+  },
+  detail: {
+    notFoundTitle: 'Automatización no encontrada',
+    notFoundDescription: 'Esta automatización ya no está guardada en la aplicación.',
+    backToDashboard: 'Volver a automatizaciones',
+    description: 'Estado en vivo y control de este sistema local.',
+    currentState: 'Estado actual',
+    climateNow: 'Clima actual',
+    activeThresholds: 'Umbrales ON / OFF activos',
+    source: 'Fuente de datos',
+    configuration: 'Configuración',
+    automation: 'Automatización',
+    pause: 'Pausar automatización',
+    resume: 'Reanudar automatización',
+    changingState: 'Cambiando estado…',
+    pauseSuccess: 'Automatización pausada y salida confirmada en OFF.',
+    resumeSuccess: 'Automatización reanudada.',
+    actionFailed: 'No se pudo cambiar el estado de la automatización de forma segura.',
+    scriptNeedsAttention:
+      'El script guardado para esta automatización no coincide con el estado de Shelly. Revisa el dispositivo antes de controlarlo.'
   },
   common: {
     add: 'Añadir',
