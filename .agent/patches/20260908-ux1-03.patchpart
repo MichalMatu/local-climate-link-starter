@@ -1,0 +1,141 @@
++  it('selects a safe default only when a new goal needs one', () => {
++    expect(defaultRulePresetForSetupIntent('temperature')).toBe('heating');
++    expect(defaultRulePresetForSetupIntent('humidity')).toBe('humidifying');
++    expect(defaultRulePresetForSetupIntent('manage')).toBeNull();
++  });
++});
+diff --git a/apps/mobile/src/flows/setup-intent.ts b/apps/mobile/src/flows/setup-intent.ts
+new file mode 100644
+index 0000000..4cc4bee
+--- /dev/null
++++ b/apps/mobile/src/flows/setup-intent.ts
+@@ -0,0 +1,38 @@
++import type { RulePresetId } from '@lcl/automation-core';
++
++export type SetupIntent = 'temperature' | 'humidity' | 'manage';
++
++const TEMPERATURE_PRESETS: readonly RulePresetId[] = ['heating', 'cooling'];
++const HUMIDITY_PRESETS: readonly RulePresetId[] = ['humidifying', 'dehumidifying'];
++const ALL_PRESETS: readonly RulePresetId[] = [
++  ...TEMPERATURE_PRESETS,
++  ...HUMIDITY_PRESETS
++];
++
++export const rulePresetsForSetupIntent = (
++  intent: SetupIntent | null | undefined
++): readonly RulePresetId[] => {
++  switch (intent) {
++    case 'temperature':
++      return TEMPERATURE_PRESETS;
++    case 'humidity':
++      return HUMIDITY_PRESETS;
++    case 'manage':
++    case null:
++    case undefined:
++      return ALL_PRESETS;
++  }
++};
++
++export const defaultRulePresetForSetupIntent = (
++  intent: SetupIntent
++): RulePresetId | null => {
++  switch (intent) {
++    case 'temperature':
++      return 'heating';
++    case 'humidity':
++      return 'humidifying';
++    case 'manage':
++      return null;
++  }
++};
+diff --git a/apps/mobile/src/routes/AppRoutes.tsx b/apps/mobile/src/routes/AppRoutes.tsx
+index d8eab86..b9ee004 100644
+--- a/apps/mobile/src/routes/AppRoutes.tsx
++++ b/apps/mobile/src/routes/AppRoutes.tsx
+@@ -1,5 +1,7 @@
+-import { Suspense, lazy } from 'react';
++import { Suspense, lazy, useState } from 'react';
+ import { useTranslation } from '../app/i18n.js';
++import type { SetupIntent } from '../flows/setup-intent.js';
++import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
+ 
+ const HardwareSetupScreen = lazy(async () => {
+   const module = await import('../screens/hardware-setup/HardwareSetupScreen.js');
+@@ -18,8 +20,19 @@ const RouteFallback = () => {
+   );
+ };
+ 
+-export const AppRoutes = () => (
+-  <Suspense fallback={<RouteFallback />}>
+-    <HardwareSetupScreen />
+-  </Suspense>
+-);
++export const AppRoutes = () => {
++  const [setupIntent, setSetupIntent] = useState<SetupIntent | null>(null);
++
++  if (!setupIntent) {
++    return <SetupIntentScreen onSelect={setSetupIntent} />;
++  }
++
++  return (
++    <Suspense fallback={<RouteFallback />}>
++      <HardwareSetupScreen
++        setupIntent={setupIntent}
++        onBackToIntent={() => setSetupIntent(null)}
++      />
++    </Suspense>
++  );
++};
+diff --git a/apps/mobile/src/screens/SetupIntentScreen.tsx b/apps/mobile/src/screens/SetupIntentScreen.tsx
+new file mode 100644
+index 0000000..8348bc6
+--- /dev/null
++++ b/apps/mobile/src/screens/SetupIntentScreen.tsx
+@@ -0,0 +1,57 @@
++import { useTranslation } from '../app/i18n.js';
++import type { SetupIntent } from '../flows/setup-intent.js';
++
++type SetupIntentScreenProps = {
++  onSelect(intent: SetupIntent): void;
++};
++
++const INTENT_CHOICES = [
++  {
++    id: 'temperature',
++    titleKey: 'intent.temperature.title',
++    descriptionKey: 'intent.temperature.description'
++  },
++  {
++    id: 'humidity',
++    titleKey: 'intent.humidity.title',
++    descriptionKey: 'intent.humidity.description'
++  },
++  {
++    id: 'manage',
++    titleKey: 'intent.manage.title',
++    descriptionKey: 'intent.manage.description'
++  }
++] as const;
++
++export const SetupIntentScreen = ({ onSelect }: SetupIntentScreenProps) => {
++  const { t } = useTranslation();
++
++  return (
++    <main className="demo-shell intent-shell">
++      <header className="demo-header intent-header">
++        <div>
++          <p className="demo-kicker">Local Climate Link</p>
++          <h1>{t('intent.title')}</h1>
++          <p>{t('intent.description')}</p>
++        </div>
++      </header>
++
++      <section className="intent-choice-grid" aria-label={t('intent.choiceLabel')}>
++        {INTENT_CHOICES.map((choice) => (
++          <button
++            key={choice.id}
++            className="intent-choice"
++            type="button"
++            onClick={() => onSelect(choice.id)}
++          >
++            <strong>{t(choice.titleKey)}</strong>
