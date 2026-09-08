@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260908-shelly-led-focused-v3",
+  "task_digest": "94e1122f578628a8eb5c846387eadfc6023b2c2092cf81b8ba0c41344d48d110",
+  "idle_timeout": 180,
+  "task_timeout": 2400,
+  "memory_limit_mb": 3072,
+  "started_at": "2026-09-08T22:01:10.095310+00:00",
+  "attempt_id": "171ef437854811f570d90e8d",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 65915,
+  "updated_at": "2026-09-08T22:01:10.095472+00:00",
+  "pid": 65915
+}
