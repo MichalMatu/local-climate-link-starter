@@ -1,0 +1,19 @@
+{
+  "id": "20260909-shelly-button-components-readonly-v4",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 512,
+  "command_timeout": 60,
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "commands": [
+    "git fetch origin main && git checkout --detach origin/main && test \"$(git rev-parse HEAD)\" = \"3e98ed7a28221ef820aca7a814cb1ac03d951b2c\"",
+    "printf '%s\\n' '=== Shelly.GetComponents config+status ==='; curl -fsS --max-time 5 -H 'Content-Type: application/json' -d '{\"id\":1,\"method\":\"Shelly.GetComponents\",\"params\":{\"include\":[\"config\",\"status\"]}}' 'http://192.168.0.16/rpc'",
+    "printf '%s\\n' '=== Shelly.GetStatus ==='; curl -fsS --max-time 5 'http://192.168.0.16/rpc/Shelly.GetStatus'",
+    "printf '%s\\n' '=== PLUGS_UI.GetConfig ==='; curl -fsS --max-time 5 'http://192.168.0.16/rpc/PLUGS_UI.GetConfig'",
+    "printf '%s\\n' '=== Script.List ==='; curl -fsS --max-time 5 'http://192.168.0.16/rpc/Script.List'"
+  ]
+}
