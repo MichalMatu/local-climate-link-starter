@@ -1,0 +1,114 @@
+diff --git a/apps/mobile/e2e/responsive.spec.ts b/apps/mobile/e2e/responsive.spec.ts
+index 17a6ccb..ec8f8b4 100644
+--- a/apps/mobile/e2e/responsive.spec.ts
++++ b/apps/mobile/e2e/responsive.spec.ts
+@@ -63,6 +63,7 @@ const mockShellyRpc = async (page: Page) => {
+     switch (requestBody.method) {
+       case 'Shelly.GetDeviceInfo':
+         result = {
++          id: 'shellyplugsg3-e2e',
+           model: 'S3PL-00112EU',
+           gen: 3,
+           fw_id: '20260311-095902/1.7.5-g9979d16'
+@@ -292,6 +293,9 @@ for (const viewport of viewports) {
+     await page.goto('/admin#shelly');
+ 
+     await expect(page).toHaveTitle('Local Climate Link');
++    await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
++    await expectNoHorizontalOverflow(page);
++    await page.getByRole('button', { name: /Zarządzać istniejącą automatyką/ }).click();
+     await expect(
+       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+     ).toBeVisible();
+@@ -377,6 +381,8 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
+   await seedDraft(page);
+   await mockShellyRpc(page);
+   await page.goto('/admin#rule');
++  await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
++  await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
+ 
+   await page.getByLabel('Tryb reguły').selectOption('humidifying');
+ 
+diff --git a/apps/mobile/src/__tests__/app-routes.test.tsx b/apps/mobile/src/__tests__/app-routes.test.tsx
+new file mode 100644
+index 0000000..97455e5
+--- /dev/null
++++ b/apps/mobile/src/__tests__/app-routes.test.tsx
+@@ -0,0 +1,57 @@
++import { fireEvent, render, screen } from '@testing-library/react';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++import { I18nProvider, setLocalePreference } from '../app/i18n.js';
++import type { SetupIntent } from '../flows/setup-intent.js';
++
++vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
++  HardwareSetupScreen: ({
++    setupIntent,
++    onBackToIntent
++  }: {
++    setupIntent?: SetupIntent;
++    onBackToIntent?: () => void;
++  }) => (
++    <section>
++      <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
++      <button type="button" onClick={onBackToIntent}>
++        mock-back
++      </button>
++    </section>
++  )
++}));
++
++import { AppRoutes } from '../routes/AppRoutes.js';
++
++const renderRoutes = () =>
++  render(
++    <I18nProvider>
++      <AppRoutes />
++    </I18nProvider>
++  );
++
++describe('AppRoutes user intent entry', () => {
++  beforeEach(() => {
++    setLocalePreference('pl');
++  });
++
++  it('starts from the user goal instead of technical setup tabs', () => {
++    renderRoutes();
++
++    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
++    expect(screen.getByRole('button', { name: /Sterować temperaturą/ })).toBeVisible();
++    expect(screen.getByRole('button', { name: /Sterować wilgotnością/ })).toBeVisible();
++    expect(
++      screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
++    ).toBeVisible();
++  });
++
++  it('opens the selected goal and can return to goal selection', async () => {
++    renderRoutes();
++
++    fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
++    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
++
++    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
++    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
++  });
++});
+diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts
+index d975193..7840713 100644
+--- a/apps/mobile/src/app/locales/de.ts
++++ b/apps/mobile/src/app/locales/de.ts
+@@ -8,6 +8,28 @@ export const de = {
+       'BLE-Thermometer + Shelly-Steckdose. Einmal in der App einrichten, danach lokal betreiben.',
+     loadingConfigurator: 'Konfigurator wird geladen.'
+   },
++  intent: {
++    title: 'Was möchtest du tun?',
++    description: 'Wähle zuerst das Ziel. Technische Details folgen im nächsten Schritt.',
++    choiceLabel: 'Automationsziel',
++    open: 'Öffnen',
++    back: 'Ziel ändern',
++    temperature: {
++      title: 'Temperatur steuern',
++      description: 'Heizen oder Kühlen anhand eines BLE-Thermometers.',
++      context: 'Temperatursteuerung'
++    },
++    humidity: {
