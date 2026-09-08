@@ -1,0 +1,173 @@
++    systemsLabel: 'Automatizaciones guardadas',
++    currentValues: 'Valores actuales',
++    temperature: 'Temperatura',
++    humidity: 'Humedad',
++    vpd: 'VPD',
++    output: 'Salida',
++    thresholds: 'Umbrales ON / OFF',
++    sensor: 'Sensor',
++    readFailed: 'No se puede conectar con Shelly.',
++    refreshing: 'Actualizando desde Shelly…',
++    liveFromShelly: 'Datos de ejecución directamente desde Shelly.',
++    health: {
++      ok: 'Funcionando',
++      stale: 'Datos desactualizados',
++      unknown: 'Desconocido',
++      offline: 'Sin conexión',
++      loading: 'Conectando…'
++    }
++  },
+   common: {
+     add: 'Añadir',
+     address: 'Dirección',
+diff --git a/apps/mobile/src/app/locales/fr.ts b/apps/mobile/src/app/locales/fr.ts
+index f90e3ab..6d9977a 100644
+--- a/apps/mobile/src/app/locales/fr.ts
++++ b/apps/mobile/src/app/locales/fr.ts
+@@ -31,6 +31,33 @@ export const fr = {
+       context: 'Gestion de l’automatisation'
+     }
+   },
++  dashboard: {
++    title: 'Vos automatisations',
++    description: 'Voyez ce que chaque Shelly mesure et fait actuellement.',
++    addAutomation: 'Ajouter une automatisation',
++    emptyTitle: 'Aucune automatisation enregistrée',
++    emptyDescription:
++      'Configurez votre premier système pour voir ici son état en direct.',
++    configureFirst: 'Configurer le premier système',
++    systemsLabel: 'Automatisations enregistrées',
++    currentValues: 'Valeurs actuelles',
++    temperature: 'Température',
++    humidity: 'Humidité',
++    vpd: 'VPD',
++    output: 'Sortie',
++    thresholds: 'Seuils ON / OFF',
++    sensor: 'Capteur',
++    readFailed: 'Impossible de joindre Shelly.',
++    refreshing: 'Actualisation depuis Shelly…',
++    liveFromShelly: 'Données runtime directement depuis Shelly.',
++    health: {
++      ok: 'Actif',
++      stale: 'Données périmées',
++      unknown: 'Inconnu',
++      offline: 'Hors ligne',
++      loading: 'Connexion…'
++    }
++  },
+   common: {
+     add: 'Ajouter',
+     address: 'Adresse',
+diff --git a/apps/mobile/src/app/locales/it.ts b/apps/mobile/src/app/locales/it.ts
+index 6049340..71604fb 100644
+--- a/apps/mobile/src/app/locales/it.ts
++++ b/apps/mobile/src/app/locales/it.ts
+@@ -30,6 +30,33 @@ export const it = {
+       context: 'Gestione automazione'
+     }
+   },
++  dashboard: {
++    title: 'Le tue automazioni',
++    description: 'Guarda cosa vede e fa attualmente ogni Shelly.',
++    addAutomation: 'Aggiungi automazione',
++    emptyTitle: 'Nessuna automazione salvata',
++    emptyDescription:
++      'Configura il primo sistema per vedere qui lo stato in tempo reale.',
++    configureFirst: 'Configura il primo sistema',
++    systemsLabel: 'Automazioni salvate',
++    currentValues: 'Valori attuali',
++    temperature: 'Temperatura',
++    humidity: 'Umidità',
++    vpd: 'VPD',
++    output: 'Uscita',
++    thresholds: 'Soglie ON / OFF',
++    sensor: 'Sensore',
++    readFailed: 'Shelly non raggiungibile.',
++    refreshing: 'Aggiornamento da Shelly…',
++    liveFromShelly: 'Dati runtime direttamente da Shelly.',
++    health: {
++      ok: 'Attivo',
++      stale: 'Dati obsoleti',
++      unknown: 'Sconosciuto',
++      offline: 'Offline',
++      loading: 'Connessione…'
++    }
++  },
+   common: {
+     add: 'Aggiungi',
+     address: 'Indirizzo',
+diff --git a/apps/mobile/src/app/locales/pl.ts b/apps/mobile/src/app/locales/pl.ts
+index b81004c..095a6c9 100644
+--- a/apps/mobile/src/app/locales/pl.ts
++++ b/apps/mobile/src/app/locales/pl.ts
+@@ -28,6 +28,33 @@ export const pl = {
+       context: 'Zarządzanie automatyką'
+     }
+   },
++  dashboard: {
++    title: 'Twoje automatyki',
++    description: 'Podgląd tego, co aktualnie widzi i robi każde Shelly.',
++    addAutomation: 'Dodaj automatykę',
++    emptyTitle: 'Nie masz jeszcze zapisanej automatyki',
++    emptyDescription:
++      'Skonfiguruj pierwszy system, aby zobaczyć tutaj jego bieżący stan.',
++    configureFirst: 'Skonfiguruj pierwszy system',
++    systemsLabel: 'Zapisane automatyki',
++    currentValues: 'Bieżące wartości',
++    temperature: 'Temperatura',
++    humidity: 'Wilgotność',
++    vpd: 'VPD',
++    output: 'Wyjście',
++    thresholds: 'Progi ON / OFF',
++    sensor: 'Czujnik',
++    readFailed: 'Brak połączenia z Shelly.',
++    refreshing: 'Odświeżam dane z Shelly…',
++    liveFromShelly: 'Dane runtime bezpośrednio z Shelly.',
++    health: {
++      ok: 'Działa',
++      stale: 'Dane nieaktualne',
++      unknown: 'Stan nieznany',
++      offline: 'Offline',
++      loading: 'Łączę…'
++    }
++  },
+   common: {
+     add: 'Dodaj',
+     address: 'Adres',
+diff --git a/apps/mobile/src/app/locales/ptBr.ts b/apps/mobile/src/app/locales/ptBr.ts
+index b7dc362..43bdde6 100644
+--- a/apps/mobile/src/app/locales/ptBr.ts
++++ b/apps/mobile/src/app/locales/ptBr.ts
+@@ -30,6 +30,32 @@ export const ptBr = {
+       context: 'Gerenciamento da automação'
+     }
+   },
++  dashboard: {
++    title: 'Suas automações',
++    description: 'Veja o que cada Shelly está lendo e fazendo agora.',
++    addAutomation: 'Adicionar automação',
++    emptyTitle: 'Nenhuma automação salva ainda',
++    emptyDescription: 'Configure o primeiro sistema para ver aqui o estado ao vivo.',
++    configureFirst: 'Configurar primeiro sistema',
++    systemsLabel: 'Automações salvas',
++    currentValues: 'Valores atuais',
++    temperature: 'Temperatura',
++    humidity: 'Umidade',
++    vpd: 'VPD',
++    output: 'Saída',
++    thresholds: 'Limites ON / OFF',
++    sensor: 'Sensor',
++    readFailed: 'Não foi possível acessar o Shelly.',
++    refreshing: 'Atualizando a partir do Shelly…',
++    liveFromShelly: 'Dados de runtime diretamente do Shelly.',
++    health: {
++      ok: 'Funcionando',
++      stale: 'Dados desatualizados',
++      unknown: 'Desconhecido',
++      offline: 'Offline',
++      loading: 'Conectando…'
++    }
++  },
+   common: {
+     add: 'Adicionar',
+     address: 'Endereço',
