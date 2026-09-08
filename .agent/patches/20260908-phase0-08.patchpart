@@ -1,0 +1,28 @@
+@@ -2,6 +2,7 @@ import { z } from 'zod';
+ 
+ export const shellyDeviceInfoSchema = z
+   .object({
++    id: z.string().min(1).optional(),
+     model: z.string(),
+     gen: z.number(),
+     firmwareId: z.string().optional(),
+@@ -10,6 +11,7 @@ export const shellyDeviceInfoSchema = z
+     matter: z.boolean().optional()
+   })
+   .transform((deviceInfo) => ({
++    id: deviceInfo.id,
+     model: deviceInfo.model,
+     gen: deviceInfo.gen,
+     firmwareId: deviceInfo.firmwareId ?? deviceInfo.fw_id ?? deviceInfo.ver,
+diff --git a/packages/shelly-client/src/scripts/fake.ts b/packages/shelly-client/src/scripts/fake.ts
+index 6a3c792..c67ef56 100644
+--- a/packages/shelly-client/src/scripts/fake.ts
++++ b/packages/shelly-client/src/scripts/fake.ts
+@@ -31,6 +31,7 @@ export class FakeShellyClient implements ShellyClient {
+     return {
+       ok: true,
+       value: {
++        id: 'shellyplugsg3-demo',
+         model: 'Shelly Plug S Gen3',
+         gen: 3,
+         firmwareId: 'demo'
