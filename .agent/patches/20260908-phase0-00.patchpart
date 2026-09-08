@@ -1,0 +1,80 @@
+diff --git a/apps/mobile/src/__tests__/hardware-setup.test.tsx b/apps/mobile/src/__tests__/hardware-setup.test.tsx
+index 368a01a..96ad754 100644
+--- a/apps/mobile/src/__tests__/hardware-setup.test.tsx
++++ b/apps/mobile/src/__tests__/hardware-setup.test.tsx
+@@ -178,6 +178,10 @@ import {
+ import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+ import { setThemeMode } from '../app/themeMode.js';
+ import { resetHardwareSetupReadingsStore } from '../flows/hardware-setup/sensorReadingsStore.js';
++import {
++  resetInstalledAutomationStore,
++  useInstalledAutomationStore
++} from '../flows/installations/store.js';
+ import {
+   cleanupStaleShellyBleDiscoveryScripts,
+   fetchShellyJson,
+@@ -369,6 +373,7 @@ describe('HardwareSetupScreen', () => {
+   beforeEach(() => {
+     resetHardwareSetupDraftStore();
+     resetHardwareSetupReadingsStore();
++    resetInstalledAutomationStore();
+     phoneBleScannerMock.failureMessage = null;
+     phoneBleScannerMock.startCount = 0;
+     phoneBleScannerMock.stopCount = 0;
+@@ -448,6 +453,7 @@ describe('HardwareSetupScreen', () => {
+         switch (body.method) {
+           case 'Shelly.GetDeviceInfo':
+             return rpcResult({
++              id: 'shellyplugsg3-test',
+               model: 'S3PL-00112EU',
+               gen: 3,
+               fw_id: '20260311-095902/1.7.5-g9979d16'
+@@ -929,6 +935,24 @@ describe('HardwareSetupScreen', () => {
+         'Nie widzę Shelly Scripts w statusie gniazdka. Sprawdź firmware albo wyłącz Matter.'
+       )
+     ).not.toBeInTheDocument();
++
++    const installations = useInstalledAutomationStore.getState().installations;
++    expect(installations).toHaveLength(1);
++    expect(installations[0]).toMatchObject({
++      shelly: {
++        deviceId: 'shellyplugsg3-test',
++        name: 'Salon',
++        baseUrl: 'http://192.168.0.20/'
++      },
++      config: {
++        sensor: {
++          runtimeAddress: 'A4:C1:38:4F:24:CD'
++        },
++        rule: {
++          mode: 'heating'
++        }
++      }
++    });
+   });
+ 
+   it('blocks rule install when Shelly status does not expose BLE', async () => {
+diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts
+index aea037c..d975193 100644
+--- a/apps/mobile/src/app/locales/de.ts
++++ b/apps/mobile/src/app/locales/de.ts
+@@ -481,6 +481,8 @@ export const de = {
+       fixShellyData: 'Steckdosendaten korrigieren.',
+       inputShellyIp: 'Shelly-IP eingeben',
+       installFirst: 'Zuerst die aktuelle Regel senden.',
++      shellyIdentityMissing:
++        'Shelly hat keine stabile Gerätekennung geliefert. Aktualisiere die Firmware und versuche es erneut.',
+       noSelectedSensor: 'Thermometer hinzufügen und auswählen.',
+       noSelectedShelly: 'Shelly-Steckdose auswählen.',
+       noSelectedDiagnosticShelly: 'Shelly-Steckdose für Diagnose auswählen.',
+diff --git a/apps/mobile/src/app/locales/en.ts b/apps/mobile/src/app/locales/en.ts
+index ff172e0..06b782e 100644
+--- a/apps/mobile/src/app/locales/en.ts
++++ b/apps/mobile/src/app/locales/en.ts
+@@ -473,6 +473,8 @@ export const en = {
+       fixShellyData: 'Fix plug data.',
+       inputShellyIp: 'enter Shelly IP',
+       installFirst: 'Send the current rule first.',
++      shellyIdentityMissing:
++        'Shelly did not provide a stable device identifier. Update the firmware and try again.',
+       noSelectedSensor: 'Add and select a thermometer.',
