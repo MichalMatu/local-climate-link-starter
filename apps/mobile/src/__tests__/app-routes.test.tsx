@@ -1,6 +1,13 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+import { createInstalledAutomation } from '../flows/installations/model.js';
+import {
+  resetInstalledAutomationStore,
+  useInstalledAutomationStore
+} from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
 vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
@@ -22,16 +29,46 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
 
 import { AppRoutes } from '../routes/AppRoutes.js';
 
-const renderRoutes = () =>
-  render(
+const renderRoutes = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } }
+  });
+  return render(
     <I18nProvider>
-      <AppRoutes />
+      <QueryClientProvider client={queryClient}>
+        <AppRoutes />
+      </QueryClientProvider>
     </I18nProvider>
   );
+};
 
 describe('AppRoutes user intent entry', () => {
   beforeEach(() => {
     setLocalePreference('pl');
+    resetInstalledAutomationStore();
+  });
+
+  it('opens the dashboard immediately when an installed automation already exists', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    useInstalledAutomationStore.getState().upsertInstallation(
+      createInstalledAutomation({
+        shelly: { id: 'shellyplugsg3-route', model: 'S3PL-00112EU', gen: 3 },
+        shellyName: 'Salon',
+        baseUrl: 'http://192.168.0.20/',
+        scriptId: 1,
+        scriptHash: 'lcl-route',
+        config,
+        nowMs: 1000
+      })
+    );
+
+    renderRoutes();
+
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
   });
 
   it('starts from the user goal instead of technical setup tabs', () => {
@@ -43,6 +80,17 @@ describe('AppRoutes user intent entry', () => {
     expect(
       screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     ).toBeVisible();
+  });
+
+  it('opens the management dashboard from the user goal', () => {
+    renderRoutes();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
+    );
+
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
   });
 
   it('opens the selected goal and can return to goal selection', async () => {

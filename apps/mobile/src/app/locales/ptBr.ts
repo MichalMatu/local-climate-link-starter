@@ -30,6 +30,32 @@ export const ptBr = {
       context: 'Gerenciamento da automação'
     }
   },
+  dashboard: {
+    title: 'Suas automações',
+    description: 'Veja o que cada Shelly está lendo e fazendo agora.',
+    addAutomation: 'Adicionar automação',
+    emptyTitle: 'Nenhuma automação salva ainda',
+    emptyDescription: 'Configure o primeiro sistema para ver aqui o estado ao vivo.',
+    configureFirst: 'Configurar primeiro sistema',
+    systemsLabel: 'Automações salvas',
+    currentValues: 'Valores atuais',
+    temperature: 'Temperatura',
+    humidity: 'Umidade',
+    vpd: 'VPD',
+    output: 'Saída',
+    thresholds: 'Limites ON / OFF',
+    sensor: 'Sensor',
+    readFailed: 'Não foi possível acessar o Shelly.',
+    refreshing: 'Atualizando a partir do Shelly…',
+    liveFromShelly: 'Dados de runtime diretamente do Shelly.',
+    health: {
+      ok: 'Funcionando',
+      stale: 'Dados desatualizados',
+      unknown: 'Desconhecido',
+      offline: 'Offline',
+      loading: 'Conectando…'
+    }
+  },
   common: {
     add: 'Adicionar',
     address: 'Endereço',

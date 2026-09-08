@@ -28,6 +28,33 @@ export const pl = {
       context: 'Zarządzanie automatyką'
     }
   },
+  dashboard: {
+    title: 'Twoje automatyki',
+    description: 'Podgląd tego, co aktualnie widzi i robi każde Shelly.',
+    addAutomation: 'Dodaj automatykę',
+    emptyTitle: 'Nie masz jeszcze zapisanej automatyki',
+    emptyDescription:
+      'Skonfiguruj pierwszy system, aby zobaczyć tutaj jego bieżący stan.',
+    configureFirst: 'Skonfiguruj pierwszy system',
+    systemsLabel: 'Zapisane automatyki',
+    currentValues: 'Bieżące wartości',
+    temperature: 'Temperatura',
+    humidity: 'Wilgotność',
+    vpd: 'VPD',
+    output: 'Wyjście',
+    thresholds: 'Progi ON / OFF',
+    sensor: 'Czujnik',
+    readFailed: 'Brak połączenia z Shelly.',
+    refreshing: 'Odświeżam dane z Shelly…',
+    liveFromShelly: 'Dane runtime bezpośrednio z Shelly.',
+    health: {
+      ok: 'Działa',
+      stale: 'Dane nieaktualne',
+      unknown: 'Stan nieznany',
+      offline: 'Offline',
+      loading: 'Łączę…'
+    }
+  },
   common: {
     add: 'Dodaj',
     address: 'Adres',
