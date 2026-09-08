@@ -1,0 +1,3 @@
+Exact sandbox-tested patch SHA-256: ed4dcf7cff96eec9e8508a21b95d0f987589a6ee3c5413bb77ebe0b5b2fb4682
+Local Agent apply task: 20260908-installation-detail-apply-v3
+Result: done; 19 files; 1391 insertions; 108 deletions; branch work/installation-detail; clean working tree.
