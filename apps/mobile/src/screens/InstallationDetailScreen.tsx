@@ -16,6 +16,7 @@ import {
   resumeInstalledAutomation
 } from '../flows/installations/runtimeControl.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
   installedAutomationControlQueryKey,
@@ -291,6 +292,8 @@ const InstalledAutomationDetail = ({
             <p className="installation-detail-note">{t('detail.scriptNeedsAttention')}</p>
           )}
         </article>
+
+        <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
 
       <ToastViewport
