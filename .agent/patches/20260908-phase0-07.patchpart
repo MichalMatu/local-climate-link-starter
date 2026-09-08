@@ -1,0 +1,80 @@
++  type InstalledAutomationRepository
++} from './repository.js';
++
++type InstalledAutomationState = {
++  installations: InstalledAutomation[];
++  upsertInstallation(installation: InstalledAutomation): void;
++  removeInstallation(id: string): void;
++};
++
++const repository: InstalledAutomationRepository = createInstalledAutomationRepository();
++
++const sortInstallations = (installations: InstalledAutomation[]): InstalledAutomation[] =>
++  [...installations].sort((first, second) => second.updatedAtMs - first.updatedAtMs);
++
++export const useInstalledAutomationStore = create<InstalledAutomationState>((set) => ({
++  installations: sortInstallations(repository.load()),
++  upsertInstallation: (installation) =>
++    set((state) => {
++      const existing = state.installations.find((item) => item.id === installation.id);
++      const nextInstallation = existing
++        ? {
++            ...installation,
++            installedAtMs: existing.installedAtMs
++          }
++        : installation;
++      const installations = sortInstallations([
++        nextInstallation,
++        ...state.installations.filter((item) => item.id !== installation.id)
++      ]);
++      repository.save(installations);
++      return { installations };
++    }),
++  removeInstallation: (id) =>
++    set((state) => {
++      const installations = state.installations.filter((item) => item.id !== id);
++      repository.save(installations);
++      return { installations };
++    })
++}));
++
++export const resetInstalledAutomationStore = (): void => {
++  repository.clear();
++  useInstalledAutomationStore.setState({ installations: [] });
++};
+diff --git a/packages/shelly-client/src/__tests__/shelly-client.test.ts b/packages/shelly-client/src/__tests__/shelly-client.test.ts
+index a1d920f..541e7b5 100644
+--- a/packages/shelly-client/src/__tests__/shelly-client.test.ts
++++ b/packages/shelly-client/src/__tests__/shelly-client.test.ts
+@@ -94,6 +94,7 @@ class RecordingTransport implements ShellyRpcTransport {
+       return {
+         ok: true,
+         value: {
++          id: 'shellyplugsg3-test',
+           model: 'S3PL-00112EU',
+           gen: 3,
+           matter: this.options.matterEnabled ?? false
+@@ -887,6 +888,7 @@ describe('FetchShellyRpcTransport', () => {
+ 
+       const paramsByMethod: Record<string, unknown> = {
+         [RPC_METHODS.ShellyGetDeviceInfo]: {
++          id: 'shellyplugsg3-test',
+           model: 'S3PL-00112EU',
+           gen: 3,
+           matter: false
+diff --git a/packages/shelly-client/src/model.ts b/packages/shelly-client/src/model.ts
+index d19957a..6e9cd09 100644
+--- a/packages/shelly-client/src/model.ts
++++ b/packages/shelly-client/src/model.ts
+@@ -30,6 +30,7 @@ export interface ShellyRpcTransport {
+ }
+ 
+ export interface ShellyDeviceInfo {
++  id?: string | undefined;
+   model: string;
+   gen: number;
+   firmwareId?: string | undefined;
+diff --git a/packages/shelly-client/src/rpc/validators.ts b/packages/shelly-client/src/rpc/validators.ts
+index 38aee59..ba5c55b 100644
+--- a/packages/shelly-client/src/rpc/validators.ts
++++ b/packages/shelly-client/src/rpc/validators.ts
