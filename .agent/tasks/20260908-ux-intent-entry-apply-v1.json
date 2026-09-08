@@ -1,0 +1,28 @@
+{
+  "id": "20260908-ux-intent-entry-apply-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/ux-intent-entry",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 180,
+  "idle_timeout": 90,
+  "task_timeout": 600,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse origin/work/ux-intent-entry)\" = \"df6a72235c9d189d73d5dfcac17d60ea056d4069\"",
+    "git checkout -B work/ux-intent-entry origin/work/ux-intent-entry",
+    "git reset --hard origin/work/ux-intent-entry && git clean -fd",
+    "rm -f /tmp/lcl-ux1.patch && for i in 00 01 02 03 04 05; do git show origin/agent-control:.agent/patches/20260908-ux1-${i}.patchpart >> /tmp/lcl-ux1.patch; done",
+    "printf 'PATCH_SHA256=%s\\n' \"$(sha256sum /tmp/lcl-ux1.patch | awk '{print $1}')\" && test \"$(sha256sum /tmp/lcl-ux1.patch | awk '{print $1}')\" = \"c2be2cd3750846144de4f59e7c62511b69207547ff1c6f65bf4aaa96bdc68e54\"",
+    "git apply --check /tmp/lcl-ux1.patch && git apply /tmp/lcl-ux1.patch",
+    "git diff --check",
+    "git add apps/mobile",
+    "printf 'STAGED_DIFF_SHA256=%s\\n' \"$(git diff --cached --binary | sha256sum | awk '{print $1}')\" && test \"$(git diff --cached --binary | sha256sum | awk '{print $1}')\" = \"c2be2cd3750846144de4f59e7c62511b69207547ff1c6f65bf4aaa96bdc68e54\"",
+    "git status --short",
+    "git commit -m 'Start setup from user intent'",
+    "git push origin work/ux-intent-entry",
+    "printf 'COMMIT_SHA=%s\\n' \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\""
+  ]
+}
