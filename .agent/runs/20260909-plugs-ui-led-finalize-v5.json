@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 9,
   "total": 16,
-  "command": "git checkout -B work/plugs-ui-led-audit origin/work/plugs-ui-led-audit && git reset --hard origin/work/plugs-ui-led-audit && git clean -fd",
-  "pid": 62154,
+  "command": "test -z \"$(git diff --name-only origin/main...HEAD -- packages/automation-core packages/script-generator)\"",
+  "pid": 62313,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-08T23:07:24.467786+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-08T23:07:27.967751+00:00",
+  "stage_name": "command-9",
+  "stage_index": 9,
   "stage_total": 16,
   "stage_phase": "commands",
   "task_id": "20260909-plugs-ui-led-finalize-v5",
@@ -18,5 +18,5 @@
   "task_digest": "a1f7062dee0a6960b9c3e35907e583a4fb2585d3fa44a70ad5769b0de57b0c3b",
   "daemon_version": "4.18.19",
   "daemon_pid": 61900,
-  "updated_at": "2026-09-08T23:07:24.537867+00:00"
+  "updated_at": "2026-09-08T23:07:27.986542+00:00"
 }
