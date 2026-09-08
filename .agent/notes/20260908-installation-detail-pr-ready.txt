@@ -1,0 +1,1 @@
+PR-ready verification: work/installation-detail was produced from exact patch SHA-256 ed4dcf7cff96eec9e8508a21b95d0f987589a6ee3c5413bb77ebe0b5b2fb4682 on base 6835cfc08b7f369dc6072ec45bf6637cef9e2987.
