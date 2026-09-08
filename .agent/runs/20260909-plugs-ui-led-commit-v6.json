@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 11,
+  "index": 13,
   "total": 15,
-  "command": "git add -A -- .github/workflows/ci.yml apps/mobile/e2e/led-settings.spec.ts apps/mobile/src/__tests__/shelly-led-settings.test.tsx apps/mobile/src/flows/installations/deviceLed.ts apps/mobile/src/screens/ShellyLedSettingsCard.tsx apps/mobile/src/app/locales/deviceLed.ts apps/mobile/src/screens/deviceLedCopy.ts packages/shelly-client/src/__tests__/plugsUi.test.ts packages/shelly-client/src/plugsUi.ts packages/shelly-client/src/index.ts packages/shelly-client/src/model.ts apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/TimeInstallationDetail.tsx",
-  "pid": 69348,
+  "command": "git commit -m 'Finalize native Shelly LED settings'",
+  "pid": 69386,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-08T23:10:52.813557+00:00",
-  "stage_name": "command-11",
-  "stage_index": 11,
+  "started_at": "2026-09-08T23:10:53.549703+00:00",
+  "stage_name": "command-13",
+  "stage_index": 13,
   "stage_total": 15,
   "stage_phase": "commands",
   "task_id": "20260909-plugs-ui-led-commit-v6",
@@ -18,5 +18,5 @@
   "task_digest": "620fac03e7cc54900d8e9b027bb7d189ab5661946b84933c6857204e131af17c",
   "daemon_version": "4.18.19",
   "daemon_pid": 66624,
-  "updated_at": "2026-09-08T23:10:52.884397+00:00"
+  "updated_at": "2026-09-08T23:10:53.789739+00:00"
 }
