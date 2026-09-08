@@ -18,7 +18,7 @@ for part in 00a 00b 00c0 00c1 00c2 00c3 00c4 00c5 00c6 01 02 03; do
 done
 
 test "$(sha256sum "${prefix}.b64" | awk '{print $1}')" = "$expected_b64"
-base64 -d "${prefix}.b64" > "${prefix}.zst"
+base64 -D -i "${prefix}.b64" -o "${prefix}.zst"
 test "$(sha256sum "${prefix}.zst" | awk '{print $1}')" = "$expected_zst"
 zstd -d -f "${prefix}.zst" -o "${prefix}.patch"
 test "$(sha256sum "${prefix}.patch" | awk '{print $1}')" = "$expected_patch"
