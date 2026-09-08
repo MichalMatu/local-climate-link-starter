@@ -1,0 +1,195 @@
++    resume: 'Reanudar automatización',
++    changingState: 'Cambiando estado…',
++    pauseSuccess: 'Automatización pausada y salida confirmada en OFF.',
++    resumeSuccess: 'Automatización reanudada.',
++    actionFailed: 'No se pudo cambiar el estado de la automatización de forma segura.',
++    scriptNeedsAttention:
++      'El script guardado para esta automatización no coincide con el estado de Shelly. Revisa el dispositivo antes de controlarlo.'
++  },
+   common: {
+     add: 'Añadir',
+     address: 'Dirección',
+diff --git a/apps/mobile/src/app/locales/fr.ts b/apps/mobile/src/app/locales/fr.ts
+index 6d9977a..c9e7885 100644
+--- a/apps/mobile/src/app/locales/fr.ts
++++ b/apps/mobile/src/app/locales/fr.ts
+@@ -49,15 +49,39 @@ export const fr = {
+     sensor: 'Capteur',
+     readFailed: 'Impossible de joindre Shelly.',
+     refreshing: 'Actualisation depuis Shelly…',
++    openSystem: 'Détails',
+     liveFromShelly: 'Données runtime directement depuis Shelly.',
+     health: {
+       ok: 'Actif',
+       stale: 'Données périmées',
+       unknown: 'Inconnu',
+       offline: 'Hors ligne',
++      paused: 'En pause',
++      attention: 'À vérifier',
+       loading: 'Connexion…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Automatisation introuvable',
++    notFoundDescription:
++      'Cette automatisation n’est plus enregistrée dans l’application.',
++    backToDashboard: 'Retour aux automatisations',
++    description: 'État en direct et contrôle de ce système local.',
++    currentState: 'État actuel',
++    climateNow: 'Climat actuel',
++    activeThresholds: 'Seuils ON / OFF actifs',
++    source: 'Source des données',
++    configuration: 'Configuration',
++    automation: 'Automatisation',
++    pause: 'Mettre en pause',
++    resume: 'Reprendre l’automatisation',
++    changingState: 'Changement d’état…',
++    pauseSuccess: 'Automatisation en pause et sortie confirmée sur OFF.',
++    resumeSuccess: 'Automatisation reprise.',
++    actionFailed: 'Impossible de modifier l’état de l’automatisation en toute sécurité.',
++    scriptNeedsAttention:
++      'Le script enregistré pour cette automatisation ne correspond pas à l’état du Shelly. Vérifiez l’appareil avant de le contrôler.'
++  },
+   common: {
+     add: 'Ajouter',
+     address: 'Adresse',
+diff --git a/apps/mobile/src/app/locales/it.ts b/apps/mobile/src/app/locales/it.ts
+index 71604fb..0148091 100644
+--- a/apps/mobile/src/app/locales/it.ts
++++ b/apps/mobile/src/app/locales/it.ts
+@@ -48,15 +48,38 @@ export const it = {
+     sensor: 'Sensore',
+     readFailed: 'Shelly non raggiungibile.',
+     refreshing: 'Aggiornamento da Shelly…',
++    openSystem: 'Dettagli',
+     liveFromShelly: 'Dati runtime direttamente da Shelly.',
+     health: {
+       ok: 'Attivo',
+       stale: 'Dati obsoleti',
+       unknown: 'Sconosciuto',
+       offline: 'Offline',
++      paused: 'In pausa',
++      attention: 'Richiede attenzione',
+       loading: 'Connessione…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Automazione non trovata',
++    notFoundDescription: 'Questa automazione non è più salvata nell’app.',
++    backToDashboard: 'Torna alle automazioni',
++    description: 'Stato in tempo reale e controllo di questo sistema locale.',
++    currentState: 'Stato attuale',
++    climateNow: 'Clima attuale',
++    activeThresholds: 'Soglie ON / OFF attive',
++    source: 'Fonte dati',
++    configuration: 'Configurazione',
++    automation: 'Automazione',
++    pause: 'Metti in pausa',
++    resume: 'Riprendi automazione',
++    changingState: 'Cambio stato…',
++    pauseSuccess: 'Automazione in pausa e uscita confermata OFF.',
++    resumeSuccess: 'Automazione ripresa.',
++    actionFailed: 'Impossibile cambiare in sicurezza lo stato dell’automazione.',
++    scriptNeedsAttention:
++      'Lo script salvato per questa automazione non corrisponde allo stato Shelly. Controlla il dispositivo prima di comandarlo.'
++  },
+   common: {
+     add: 'Aggiungi',
+     address: 'Indirizzo',
+diff --git a/apps/mobile/src/app/locales/pl.ts b/apps/mobile/src/app/locales/pl.ts
+index 095a6c9..f6066e4 100644
+--- a/apps/mobile/src/app/locales/pl.ts
++++ b/apps/mobile/src/app/locales/pl.ts
+@@ -46,15 +46,38 @@ export const pl = {
+     sensor: 'Czujnik',
+     readFailed: 'Brak połączenia z Shelly.',
+     refreshing: 'Odświeżam dane z Shelly…',
++    openSystem: 'Szczegóły',
+     liveFromShelly: 'Dane runtime bezpośrednio z Shelly.',
+     health: {
+       ok: 'Działa',
+       stale: 'Dane nieaktualne',
+       unknown: 'Stan nieznany',
+       offline: 'Offline',
++      paused: 'Wstrzymana',
++      attention: 'Wymaga uwagi',
+       loading: 'Łączę…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Nie znaleziono automatyki',
++    notFoundDescription: 'Ta automatyka nie jest już zapisana w aplikacji.',
++    backToDashboard: 'Wróć do automatyki',
++    description: 'Bieżący stan i sterowanie tym lokalnym systemem.',
++    currentState: 'Stan bieżący',
++    climateNow: 'Klimat teraz',
++    activeThresholds: 'Aktywne progi ON / OFF',
++    source: 'Źródło danych',
++    configuration: 'Konfiguracja',
++    automation: 'Automatyka',
++    pause: 'Wstrzymaj automatykę',
++    resume: 'Wznów automatykę',
++    changingState: 'Zmieniam stan…',
++    pauseSuccess: 'Automatyka zatrzymana, wyjście potwierdzone jako OFF.',
++    resumeSuccess: 'Automatyka uruchomiona.',
++    actionFailed: 'Nie udało się bezpiecznie zmienić stanu automatyki.',
++    scriptNeedsAttention:
++      'Skrypt zapisany dla tej automatyki nie odpowiada stanowi Shelly. Sprawdź urządzenie przed sterowaniem.'
++  },
+   common: {
+     add: 'Dodaj',
+     address: 'Adres',
+diff --git a/apps/mobile/src/app/locales/ptBr.ts b/apps/mobile/src/app/locales/ptBr.ts
+index 43bdde6..2ad2419 100644
+--- a/apps/mobile/src/app/locales/ptBr.ts
++++ b/apps/mobile/src/app/locales/ptBr.ts
+@@ -47,15 +47,38 @@ export const ptBr = {
+     sensor: 'Sensor',
+     readFailed: 'Não foi possível acessar o Shelly.',
+     refreshing: 'Atualizando a partir do Shelly…',
++    openSystem: 'Detalhes',
+     liveFromShelly: 'Dados de runtime diretamente do Shelly.',
+     health: {
+       ok: 'Funcionando',
+       stale: 'Dados desatualizados',
+       unknown: 'Desconhecido',
+       offline: 'Offline',
++      paused: 'Pausada',
++      attention: 'Requer atenção',
+       loading: 'Conectando…'
+     }
+   },
++  detail: {
++    notFoundTitle: 'Automação não encontrada',
++    notFoundDescription: 'Esta automação não está mais salva no aplicativo.',
++    backToDashboard: 'Voltar às automações',
++    description: 'Status ao vivo e controle deste sistema local.',
++    currentState: 'Estado atual',
++    climateNow: 'Clima agora',
++    activeThresholds: 'Limites ON / OFF ativos',
++    source: 'Fonte dos dados',
++    configuration: 'Configuração',
++    automation: 'Automação',
++    pause: 'Pausar automação',
++    resume: 'Retomar automação',
++    changingState: 'Alterando estado…',
++    pauseSuccess: 'Automação pausada e saída confirmada como OFF.',
++    resumeSuccess: 'Automação retomada.',
++    actionFailed: 'Não foi possível alterar o estado da automação com segurança.',
++    scriptNeedsAttention:
++      'O script salvo para esta automação não corresponde ao estado do Shelly. Verifique o dispositivo antes de controlá-lo.'
++  },
+   common: {
+     add: 'Adicionar',
+     address: 'Endereço',
+diff --git a/apps/mobile/src/flows/installations/presentation.ts b/apps/mobile/src/flows/installations/presentation.ts
+new file mode 100644
+index 0000000..75a8a67
+--- /dev/null
++++ b/apps/mobile/src/flows/installations/presentation.ts
+@@ -0,0 +1,50 @@
++import type { RulePresetId } from '@lcl/automation-core';
++import type { Translate, TranslationKey } from '../../app/i18n.js';
++import type { InstalledAutomation } from './model.js';
++import type { InstalledAutomationHealth } from './runtimeDiagnostics.js';
++
