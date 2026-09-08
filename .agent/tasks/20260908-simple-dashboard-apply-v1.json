@@ -1,0 +1,28 @@
+{
+  "id": "20260908-simple-dashboard-apply-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/simple-dashboard",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 180,
+  "idle_timeout": 90,
+  "task_timeout": 600,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse origin/work/simple-dashboard)\" = \"7f092c8e8f24e7b42581235045790cc64d51eb59\"",
+    "git checkout -B work/simple-dashboard origin/work/simple-dashboard",
+    "git reset --hard origin/work/simple-dashboard && git clean -fd",
+    "rm -f /tmp/lcl-dashboard.patch && for i in 00 01 02 03 04 05 06; do git show origin/agent-control:.agent/patches/20260908-dashboard-${i}.patchpart >> /tmp/lcl-dashboard.patch; done",
+    "printf 'PATCH_SHA256=%s\\n' \"$(sha256sum /tmp/lcl-dashboard.patch | awk '{print $1}')\" && test \"$(sha256sum /tmp/lcl-dashboard.patch | awk '{print $1}')\" = \"7207888d83ec1be3d220a4fab5318664315f769d0a5f9c5cb9cc9d04a59f7e47\"",
+    "git apply --check /tmp/lcl-dashboard.patch && git apply /tmp/lcl-dashboard.patch",
+    "git diff --check",
+    "git add apps/mobile/e2e/responsive.spec.ts apps/mobile/src/__tests__/app-routes.test.tsx apps/mobile/src/__tests__/automation-dashboard.test.tsx apps/mobile/src/app/locales/de.ts apps/mobile/src/app/locales/en.ts apps/mobile/src/app/locales/es.ts apps/mobile/src/app/locales/fr.ts apps/mobile/src/app/locales/it.ts apps/mobile/src/app/locales/pl.ts apps/mobile/src/app/locales/ptBr.ts apps/mobile/src/flows/installations/runtimeDiagnostics.test.ts apps/mobile/src/flows/installations/runtimeDiagnostics.ts apps/mobile/src/routes/AppRoutes.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css",
+    "printf 'STAGED_DIFF_SHA256=%s\\n' \"$(git diff --cached --binary | sha256sum | awk '{print $1}')\" && test \"$(git diff --cached --binary | sha256sum | awk '{print $1}')\" = \"7207888d83ec1be3d220a4fab5318664315f769d0a5f9c5cb9cc9d04a59f7e47\"",
+    "test -z \"$(git status --porcelain | grep '^??' || true)\" && git status --short",
+    "git commit -m 'Add live automation dashboard'",
+    "git push origin work/simple-dashboard",
+    "printf 'COMMIT_SHA=%s\\n' \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\""
+  ]
+}
