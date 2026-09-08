@@ -24,10 +24,75 @@ export const en = {
       description: 'Humidifying or dehumidifying based on a BLE sensor.',
       context: 'Humidity control'
     },
+    time: {
+      title: 'Control by time',
+      description: 'Turn a device on and off at chosen times without a sensor.',
+      context: 'Time control'
+    },
     manage: {
       title: 'Manage existing automation',
       description: 'Open saved devices, rules, and diagnostics.',
       context: 'Automation management'
+    }
+  },
+  time: {
+    family: 'Daily schedule',
+    eyebrow: 'Time automation',
+    title: 'Set ON and OFF times',
+    description: 'Shelly runs the schedule locally without the phone or cloud.',
+    device: 'Device',
+    noDevice: 'Select a Shelly first',
+    onTime: 'Turn ON at',
+    offTime: 'Turn OFF at',
+    localClockHint:
+      'Times use the Shelly local clock. Installation requires the device clock to be synchronized.',
+    ownershipHint:
+      'This schedule becomes the only owner of the relay. It cannot be combined with climate automation on the same output.',
+    install: 'Save schedule to Shelly',
+    installing: 'Saving schedule…',
+    updating: 'Updating…',
+    deleting: 'Deleting…',
+    scheduleSummary: 'Schedule',
+    clock: 'Shelly clock',
+    owner: 'Output control',
+    nativeSchedule: 'Native Shelly Schedule',
+    liveFromShelly: 'Schedule state directly from Shelly.',
+    nav: {
+      schedule: 'Schedule',
+      scheduleTitle: 'Set daily ON and OFF times'
+    },
+    validation: {
+      invalidTimes: 'Enter two different valid ON and OFF times.'
+    },
+    errors: {
+      alreadyInstalled:
+        'This Shelly already has a saved time automation for this output. Open it from the dashboard to edit it.',
+      relayOwnedByClimate:
+        'This output is already owned by climate automation. Remove it before creating a time schedule.',
+      climateScriptPresent:
+        'A Local Climate Link control script is present on this Shelly. Remove or move that automation before adding a schedule.',
+      clockUnsynced:
+        'The Shelly clock is not synchronized. Synchronize device time and try again.',
+      scheduleSlots: 'Shelly does not have two free schedule slots.',
+      nativeScheduleConflict:
+        'Another native Shelly schedule already controls this output.'
+    },
+    detail: {
+      description: 'A local time schedule executed directly by Shelly.',
+      pauseSuccess: 'Schedule paused and output confirmed OFF.',
+      resumeSuccess: 'Schedule resumed and output synchronized with the current time.',
+      actionFailed: 'Could not safely change schedule state.',
+      editTitle: 'Edit times',
+      save: 'Save changes',
+      delete: 'Delete time automation',
+      needsAttention:
+        'The schedule saved in the app does not match the current Shelly jobs. Check the device before controlling it.',
+      updateSuccess: 'Schedule updated.',
+      updateFailed: 'Could not safely update the schedule.',
+      deleteFailed: 'Could not safely delete the complete schedule.',
+      deleteConfirmTitle: 'Delete time automation?',
+      deleteConfirmDetail:
+        'Both Schedule jobs will be removed from Shelly and the relay will be left OFF.'
     }
   },
   dashboard: {
@@ -558,6 +623,10 @@ export const en = {
       fixShellyData: 'Fix plug data.',
       inputShellyIp: 'enter Shelly IP',
       installFirst: 'Send the current rule first.',
+      relayOwnedByTimeAutomation:
+        'This output is already controlled by a time automation. Remove the schedule before installing climate automation.',
+      relayOwnedByNativeSchedule:
+        'A native Shelly schedule already controls this output. Remove it before installing climate automation.',
       shellyIdentityMissing:
         'Shelly did not provide a stable device identifier. Update the firmware and try again.',
       noSelectedSensor: 'Add and select a thermometer.',

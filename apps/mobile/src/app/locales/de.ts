@@ -24,10 +24,76 @@ export const de = {
       description: 'Befeuchten oder Entfeuchten anhand eines BLE-Sensors.',
       context: 'Feuchtigkeitssteuerung'
     },
+    time: {
+      title: 'Nach Zeit steuern',
+      description: 'Ein Gerät zu gewählten Zeiten ohne Sensor ein- und ausschalten.',
+      context: 'Zeitsteuerung'
+    },
     manage: {
       title: 'Bestehende Automation verwalten',
       description: 'Gespeicherte Geräte, Regeln und Diagnose öffnen.',
       context: 'Automationsverwaltung'
+    }
+  },
+  time: {
+    family: 'Tageszeitplan',
+    eyebrow: 'Zeitautomatik',
+    title: 'EIN- und AUS-Zeiten festlegen',
+    description: 'Shelly führt den Zeitplan lokal aus – ohne Telefon und ohne Cloud.',
+    device: 'Gerät',
+    noDevice: 'Zuerst einen Shelly auswählen',
+    onTime: 'Einschalten um',
+    offTime: 'Ausschalten um',
+    localClockHint:
+      'Die Zeiten verwenden die lokale Uhr des Shelly. Für die Installation muss die Gerätezeit synchronisiert sein.',
+    ownershipHint:
+      'Dieser Zeitplan wird der einzige Besitzer des Relais. Er kann nicht mit einer Klimaautomatik am selben Ausgang kombiniert werden.',
+    install: 'Zeitplan auf Shelly speichern',
+    installing: 'Zeitplan wird gespeichert…',
+    updating: 'Wird aktualisiert…',
+    deleting: 'Wird gelöscht…',
+    scheduleSummary: 'Zeitplan',
+    clock: 'Shelly-Uhr',
+    owner: 'Ausgangssteuerung',
+    nativeSchedule: 'Nativer Shelly Schedule',
+    liveFromShelly: 'Zeitplanstatus direkt vom Shelly.',
+    nav: {
+      schedule: 'Zeitplan',
+      scheduleTitle: 'Tägliche EIN- und AUS-Zeiten festlegen'
+    },
+    validation: {
+      invalidTimes: 'Gib zwei unterschiedliche gültige EIN- und AUS-Zeiten ein.'
+    },
+    errors: {
+      alreadyInstalled:
+        'Für diesen Ausgang ist auf diesem Shelly bereits eine Zeitautomatik gespeichert. Öffne sie im Dashboard, um sie zu bearbeiten.',
+      relayOwnedByClimate:
+        'Dieser Ausgang wird bereits von einer Klimaautomatik gesteuert. Entferne sie, bevor du einen Zeitplan anlegst.',
+      climateScriptPresent:
+        'Auf diesem Shelly wurde ein Local-Climate-Link-Steuerskript erkannt. Entferne oder verschiebe diese Automatik, bevor du einen Zeitplan hinzufügst.',
+      clockUnsynced:
+        'Die Shelly-Uhr ist nicht synchronisiert. Synchronisiere die Gerätezeit und versuche es erneut.',
+      scheduleSlots: 'Shelly hat keine zwei freien Zeitplanplätze.',
+      nativeScheduleConflict:
+        'Ein anderer nativer Shelly-Zeitplan steuert diesen Ausgang bereits.'
+    },
+    detail: {
+      description: 'Ein lokaler Zeitplan, der direkt vom Shelly ausgeführt wird.',
+      pauseSuccess: 'Zeitplan pausiert und Ausgang als AUS bestätigt.',
+      resumeSuccess:
+        'Zeitplan fortgesetzt und Ausgang an die aktuelle Uhrzeit angepasst.',
+      actionFailed: 'Der Zustand des Zeitplans konnte nicht sicher geändert werden.',
+      editTitle: 'Zeiten bearbeiten',
+      save: 'Änderungen speichern',
+      delete: 'Zeitautomatik löschen',
+      needsAttention:
+        'Der in der App gespeicherte Zeitplan stimmt nicht mit den aktuellen Shelly-Jobs überein. Prüfe das Gerät vor der Steuerung.',
+      updateSuccess: 'Zeitplan aktualisiert.',
+      updateFailed: 'Der Zeitplan konnte nicht sicher aktualisiert werden.',
+      deleteFailed: 'Der vollständige Zeitplan konnte nicht sicher gelöscht werden.',
+      deleteConfirmTitle: 'Zeitautomatik löschen?',
+      deleteConfirmDetail:
+        'Beide Schedule-Jobs werden vom Shelly gelöscht und das Relais bleibt AUS.'
     }
   },
   dashboard: {
@@ -566,6 +632,10 @@ export const de = {
       fixShellyData: 'Steckdosendaten korrigieren.',
       inputShellyIp: 'Shelly-IP eingeben',
       installFirst: 'Zuerst die aktuelle Regel senden.',
+      relayOwnedByTimeAutomation:
+        'This output is already controlled by a time automation. Remove the schedule before installing climate automation.',
+      relayOwnedByNativeSchedule:
+        'A native Shelly schedule already controls this output. Remove it before installing climate automation.',
       shellyIdentityMissing:
         'Shelly hat keine stabile Gerätekennung geliefert. Aktualisiere die Firmware und versuche es erneut.',
       noSelectedSensor: 'Thermometer hinzufügen und auswählen.',

@@ -30,15 +30,20 @@ vi.mock('../screens/InstallationDetailScreen.js', () => ({
 vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
   HardwareSetupScreen: ({
     setupIntent,
-    onBackToIntent
+    onBackToIntent,
+    onSetupComplete
   }: {
     setupIntent?: SetupIntent;
     onBackToIntent?: () => void;
+    onSetupComplete?: () => void;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
       <button type="button" onClick={onBackToIntent}>
         mock-back
+      </button>
+      <button type="button" onClick={onSetupComplete}>
+        mock-complete
       </button>
     </section>
   )
@@ -119,9 +124,20 @@ describe('AppRoutes user intent entry', () => {
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować temperaturą/ })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować wilgotnością/ })).toBeVisible();
+    expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
     expect(
       screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     ).toBeVisible();
+  });
+
+  it('opens time setup and returns to the dashboard after setup completion', async () => {
+    renderRoutes();
+
+    fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
+    expect(await screen.findByText('mock-setup-time')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   });
 
   it('opens the management dashboard from the user goal', () => {

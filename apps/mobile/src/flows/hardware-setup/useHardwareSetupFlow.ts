@@ -22,6 +22,7 @@ import {
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RPC_METHODS,
   RpcShellyClient,
+  RpcShellyScheduleClient,
   scriptStatusSchema,
   type RelayTestResult,
   type ShellyInstallResult
@@ -30,9 +31,11 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
   createInstalledAutomation,
+  findRelayOwnerConflict,
   type InstalledAutomation
 } from '../installations/model.js';
 import { useInstalledAutomationStore } from '../installations/store.js';
+import { findScheduleRelayConflict } from '../time-automation/runtime.js';
 import {
   type BleDiscoveryCandidate,
   type BleDiscoverySnapshot,
@@ -355,6 +358,9 @@ export const useHardwareSetupFlow = () => {
   );
   const clearSensorReadings = useHardwareSetupReadingsStore(
     (state) => state.clearSensorReadings
+  );
+  const installedAutomations = useInstalledAutomationStore(
+    (state) => state.installations
   );
   const upsertInstalledAutomation = useInstalledAutomationStore(
     (state) => state.upsertInstallation
@@ -1418,10 +1424,27 @@ export const useHardwareSetupFlow = () => {
       const shelly = selectedShelly;
       const config = configState.config;
       await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
-      const client = new RpcShellyClient(createShellyTransport(shelly.baseUrl));
+      const transport = createShellyTransport(shelly.baseUrl);
+      const client = new RpcShellyClient(transport);
+      const scheduleClient = new RpcShellyScheduleClient(transport);
       const deviceInfo = unwrapShellyResult(await client.getDeviceInfo());
-      if (!deviceInfo.id?.trim()) {
+      const deviceId = deviceInfo.id?.trim();
+      if (!deviceId) {
         throw new Error(t('hardware.flow.shellyIdentityMissing'));
+      }
+      if (
+        findRelayOwnerConflict({
+          installations: installedAutomations,
+          deviceId,
+          relayId: config.output.relayId,
+          requestedKind: 'climate'
+        })
+      ) {
+        throw new Error(t('hardware.flow.relayOwnedByTimeAutomation'));
+      }
+      const schedules = unwrapShellyResult(await scheduleClient.list());
+      if (findScheduleRelayConflict(schedules.jobs, config.output.relayId)) {
+        throw new Error(t('hardware.flow.relayOwnedByNativeSchedule'));
       }
       const install = unwrapShellyResult(
         await client.installScript(createInstallPlan(configState.script))

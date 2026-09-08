@@ -1,4 +1,7 @@
-import type { InstalledAutomation } from '../flows/installations/model.js';
+import type {
+  ClimateInstalledAutomation,
+  InstalledAutomation
+} from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
@@ -13,13 +16,20 @@ import {
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
+import { TimeAutomationCard } from './TimeAutomationCard.js';
 
 type AutomationCardProps = {
   installation: InstalledAutomation;
   onOpen(installationId: string): void;
 };
 
-const AutomationCard = ({ installation, onOpen }: AutomationCardProps) => {
+const ClimateAutomationCard = ({
+  installation,
+  onOpen
+}: {
+  installation: ClimateInstalledAutomation;
+  onOpen(installationId: string): void;
+}) => {
   const { t } = useTranslation();
   const query = useInstalledAutomationDiagnostics(installation);
   const controlFallback = useInstalledAutomationControl(installation, {
@@ -142,6 +152,13 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) => {
     </article>
   );
 };
+
+const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
+  installation.kind === 'time' ? (
+    <TimeAutomationCard installation={installation} onOpen={onOpen} />
+  ) : (
+    <ClimateAutomationCard installation={installation} onOpen={onOpen} />
+  );
 
 type AutomationDashboardScreenProps = {
   onAddAutomation(): void;

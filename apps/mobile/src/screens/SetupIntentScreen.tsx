@@ -17,6 +17,11 @@ const INTENT_CHOICES = [
     descriptionKey: 'intent.humidity.description'
   },
   {
+    id: 'time',
+    titleKey: 'intent.time.title',
+    descriptionKey: 'intent.time.description'
+  },
+  {
     id: 'manage',
     titleKey: 'intent.manage.title',
     descriptionKey: 'intent.manage.description'

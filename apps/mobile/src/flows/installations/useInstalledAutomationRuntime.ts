@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import type { InstalledAutomation } from './model.js';
+import type { ClimateInstalledAutomation } from './model.js';
 import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
 import { readInstalledAutomationControlStatus } from './runtimeControl.js';
 
-const installationQueryIdentity = (installation: InstalledAutomation) =>
+const installationQueryIdentity = (installation: ClimateInstalledAutomation) =>
   [
     installation.id,
     installation.shelly.baseUrl,
@@ -13,18 +13,20 @@ const installationQueryIdentity = (installation: InstalledAutomation) =>
   ] as const;
 
 export const installedAutomationDiagnosticsQueryKey = (
-  installation: InstalledAutomation
+  installation: ClimateInstalledAutomation
 ) =>
   [
     'installed-automation-diagnostics',
     ...installationQueryIdentity(installation)
   ] as const;
 
-export const installedAutomationControlQueryKey = (installation: InstalledAutomation) =>
+export const installedAutomationControlQueryKey = (
+  installation: ClimateInstalledAutomation
+) =>
   ['installed-automation-control', ...installationQueryIdentity(installation)] as const;
 
 export const useInstalledAutomationDiagnostics = (
-  installation: InstalledAutomation,
+  installation: ClimateInstalledAutomation,
   options: { enabled?: boolean } = {}
 ) =>
   useQuery({
@@ -37,7 +39,7 @@ export const useInstalledAutomationDiagnostics = (
   });
 
 export const useInstalledAutomationControl = (
-  installation: InstalledAutomation,
+  installation: ClimateInstalledAutomation,
   options: { enabled?: boolean } = {}
 ) =>
   useQuery({

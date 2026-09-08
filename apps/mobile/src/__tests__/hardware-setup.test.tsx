@@ -499,6 +499,8 @@ describe('HardwareSetupScreen', () => {
                 aenergy: { total: 1234 }
               }
             });
+          case 'Schedule.List':
+            return rpcResult({ jobs: [], rev: 0 });
           case 'Script.List':
             return rpcResult({
               scripts: thermostatDeleted

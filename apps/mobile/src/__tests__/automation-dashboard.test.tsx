@@ -3,7 +3,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
-import { createInstalledAutomation } from '../flows/installations/model.js';
+import {
+  createInstalledAutomation,
+  createTimeInstalledAutomation
+} from '../flows/installations/model.js';
+import { dailyScheduleTimespec } from '../flows/time-automation/config.js';
 import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
@@ -108,6 +112,63 @@ const installedAutomation = () => {
   });
 };
 
+const timeInstalledAutomation = () =>
+  createTimeInstalledAutomation({
+    shelly: { id: 'shellyplugsg3-time-test', model: 'S3PL-00112EU', gen: 3 },
+    shellyName: 'Lampa',
+    baseUrl: 'http://192.168.0.21/',
+    onJobId: 7,
+    offJobId: 8,
+    config: { relayId: 0, onTime: '08:00', offTime: '20:00' },
+    nowMs: 1000
+  });
+
+const installTimeShellyFetchMock = () => {
+  const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body ?? '{}')) as {
+      id?: number | string;
+      method?: string;
+    };
+    let result: unknown = {};
+    if (body.method === 'Shelly.GetStatus') {
+      result = {
+        matter: { enabled: false },
+        script: { enable: true },
+        ble: { enable: true },
+        'switch:0': { id: 0, output: true },
+        wifi: { rssi: -55 },
+        sys: {
+          time: '12:00',
+          unixtime: 1_800_000_000,
+          uptime: 3600,
+          last_sync_ts: 1_799_999_900
+        }
+      };
+    } else if (body.method === 'Schedule.List') {
+      result = {
+        jobs: [
+          {
+            id: 7,
+            enable: true,
+            timespec: dailyScheduleTimespec('08:00'),
+            calls: [{ method: 'Switch.Set', params: { id: 0, on: true } }]
+          },
+          {
+            id: 8,
+            enable: true,
+            timespec: dailyScheduleTimespec('20:00'),
+            calls: [{ method: 'Switch.Set', params: { id: 0, on: false } }]
+          }
+        ],
+        rev: 1
+      };
+    }
+    return jsonResponse({ id: body.id ?? 1, result });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+};
+
 const renderDashboard = (onAddAutomation = vi.fn(), onOpenInstallation = vi.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
@@ -164,10 +225,30 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('1.31 kPa')).toBeVisible();
     expect(screen.getByText('Salon')).toBeVisible();
     expect(screen.getByText('Xiaomi salon')).toBeVisible();
-    expect(screen.getByText('Działa')).toBeVisible();
+    expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
+  });
+
+  it('shows a native time schedule and opens it by stable installation id', async () => {
+    const installation = timeInstalledAutomation();
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
+    installTimeShellyFetchMock();
+    const onOpenInstallation = vi.fn();
+
+    renderDashboard(vi.fn(), onOpenInstallation);
+
+    expect(await screen.findByText('Harmonogram dzienny')).toBeVisible();
+    expect(screen.getByText('Lampa')).toBeVisible();
+    expect(screen.getByText('08:00')).toBeVisible();
+    expect(screen.getByText('20:00')).toBeVisible();
+    expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
+    expect(await screen.findByText('Działa')).toBeVisible();
+    expect(screen.getByText('ON')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);
   });
 
   it('marks an old Shelly sensor reading as stale', async () => {

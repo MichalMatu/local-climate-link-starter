@@ -124,7 +124,11 @@ export const RPC_METHODS = {
   ScriptStart: 'Script.Start',
   ScriptGetStatus: 'Script.GetStatus',
   SwitchGetStatus: 'Switch.GetStatus',
-  SwitchSet: 'Switch.Set'
+  SwitchSet: 'Switch.Set',
+  ScheduleList: 'Schedule.List',
+  ScheduleCreate: 'Schedule.Create',
+  ScheduleUpdate: 'Schedule.Update',
+  ScheduleDelete: 'Schedule.Delete'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];

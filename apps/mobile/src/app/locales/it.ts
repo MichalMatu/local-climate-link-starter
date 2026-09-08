@@ -24,10 +24,75 @@ export const it = {
       description: 'Umidificazione o deumidificazione con un sensore BLE.',
       context: 'Controllo umidità'
     },
+    time: {
+      title: 'Controllare in base all’orario',
+      description: 'Accendi e spegni un dispositivo agli orari scelti, senza sensore.',
+      context: 'Controllo orario'
+    },
     manage: {
       title: 'Gestire un’automazione esistente',
       description: 'Apri dispositivi, regole e diagnostica salvati.',
       context: 'Gestione automazione'
+    }
+  },
+  time: {
+    family: 'Programma giornaliero',
+    eyebrow: 'Automazione oraria',
+    title: 'Imposta gli orari ON e OFF',
+    description: 'Shelly esegue il programma localmente, senza telefono né cloud.',
+    device: 'Dispositivo',
+    noDevice: 'Seleziona prima uno Shelly',
+    onTime: 'Accendi alle',
+    offTime: 'Spegni alle',
+    localClockHint:
+      'Gli orari usano l’orologio locale di Shelly. Per l’installazione l’ora del dispositivo deve essere sincronizzata.',
+    ownershipHint:
+      'Questo programma diventa l’unico controllore del relè. Non può essere combinato con l’automazione climatica sulla stessa uscita.',
+    install: 'Salva il programma su Shelly',
+    installing: 'Salvataggio programma…',
+    updating: 'Aggiornamento…',
+    deleting: 'Eliminazione…',
+    scheduleSummary: 'Programma',
+    clock: 'Orologio Shelly',
+    owner: 'Controllo uscita',
+    nativeSchedule: 'Schedule nativo Shelly',
+    liveFromShelly: 'Stato del programma direttamente da Shelly.',
+    nav: {
+      schedule: 'Programma',
+      scheduleTitle: 'Imposta gli orari giornalieri ON e OFF'
+    },
+    validation: {
+      invalidTimes: 'Inserisci due orari ON e OFF validi e diversi.'
+    },
+    errors: {
+      alreadyInstalled:
+        'Questo Shelly ha già un’automazione oraria salvata per questa uscita. Aprila dalla dashboard per modificarla.',
+      relayOwnedByClimate:
+        'Questa uscita è già controllata da un’automazione climatica. Rimuovila prima di creare un programma orario.',
+      climateScriptPresent:
+        'Su questo Shelly è stato rilevato uno script di controllo Local Climate Link. Rimuovi o sposta quell’automazione prima di aggiungere un programma.',
+      clockUnsynced:
+        'L’orologio Shelly non è sincronizzato. Sincronizza l’ora del dispositivo e riprova.',
+      scheduleSlots: 'Shelly non ha due slot liberi per i programmi.',
+      nativeScheduleConflict:
+        'Un altro programma nativo Shelly controlla già questa uscita.'
+    },
+    detail: {
+      description: 'Un programma orario locale eseguito direttamente da Shelly.',
+      pauseSuccess: 'Programma in pausa e uscita confermata su OFF.',
+      resumeSuccess: 'Programma ripreso e uscita allineata all’ora corrente.',
+      actionFailed: 'Impossibile modificare in sicurezza lo stato del programma.',
+      editTitle: 'Modifica orari',
+      save: 'Salva modifiche',
+      delete: 'Elimina automazione oraria',
+      needsAttention:
+        'Il programma salvato nell’app non corrisponde ai job attuali di Shelly. Controlla il dispositivo prima di comandarlo.',
+      updateSuccess: 'Programma aggiornato.',
+      updateFailed: 'Impossibile aggiornare in sicurezza il programma.',
+      deleteFailed: 'Impossibile eliminare in sicurezza l’intero programma.',
+      deleteConfirmTitle: 'Eliminare l’automazione oraria?',
+      deleteConfirmDetail:
+        'Entrambi i job Schedule verranno rimossi da Shelly e il relè resterà su OFF.'
     }
   },
   dashboard: {
@@ -564,6 +629,10 @@ export const it = {
       fixShellyData: 'Correggi dati presa.',
       inputShellyIp: 'inserisci IP Shelly',
       installFirst: 'Invia prima la regola attuale.',
+      relayOwnedByTimeAutomation:
+        'This output is already controlled by a time automation. Remove the schedule before installing climate automation.',
+      relayOwnedByNativeSchedule:
+        'A native Shelly schedule already controls this output. Remove it before installing climate automation.',
       shellyIdentityMissing:
         'Shelly non ha fornito un identificatore stabile del dispositivo. Aggiorna il firmware e riprova.',
       noSelectedSensor: 'Aggiungi e seleziona un termometro.',

@@ -3,14 +3,14 @@ import {
   type HardwareDiagnosticSnapshot
 } from '../hardware-setup/schemas.js';
 import { fetchShellyJson } from '../hardware-setup/shellyRequests.js';
-import type { InstalledAutomation } from './model.js';
+import type { ClimateInstalledAutomation } from './model.js';
 
 export type InstalledAutomationHealth = 'ok' | 'stale' | 'unknown';
 
 const DIAGNOSTIC_TIMEOUT_MS = 5000;
 
 export const fetchInstalledAutomationDiagnostics = async (
-  installation: InstalledAutomation
+  installation: ClimateInstalledAutomation
 ): Promise<HardwareDiagnosticSnapshot> => {
   const endpoint = new URL(
     `/script/${installation.script.id}/diag`,
