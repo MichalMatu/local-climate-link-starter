@@ -30,23 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Format
-        run: |
-          pnpm format
-          git diff
-          git diff --quiet
-
-      - name: Upload formatted LED sources
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: formatted-led-sources
-          path: |
-            apps/mobile/e2e/led-settings.spec.ts
-            apps/mobile/src/__tests__/shelly-led-settings.test.tsx
-            apps/mobile/src/flows/installations/deviceLed.ts
-            apps/mobile/src/screens/deviceLedCopy.ts
-            packages/shelly-client/src/__tests__/plugsUi.test.ts
-            packages/shelly-client/src/plugsUi.ts
+        run: pnpm format:check
 
       - name: Lint
         run: pnpm lint

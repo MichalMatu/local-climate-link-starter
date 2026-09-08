@@ -45,8 +45,7 @@ export type ShellyPlugsUiLedsPatch = z.input<typeof ledsPatchSchema>;
 export type ShellyPlugsUiConfig = z.infer<typeof plugsUiConfigSchema>;
 export type ShellyPlugsUiSetResult = z.infer<typeof setConfigResponseSchema>;
 export type ShellyPlugsUiReadResult =
-  | { supported: false }
-  | { supported: true; config: ShellyPlugsUiConfig };
+  { supported: false } | { supported: true; config: ShellyPlugsUiConfig };
 
 const validationError = (message: string) => ({
   kind: 'validation-failed' as const,
@@ -104,9 +103,7 @@ export class RpcShellyPlugsUiClient {
       : { ok: false, error: validationError(parsedConfig.error.message) };
   }
 
-  async setLeds(
-    patch: ShellyPlugsUiLedsPatch
-  ): Promise<Result<ShellyPlugsUiSetResult>> {
+  async setLeds(patch: ShellyPlugsUiLedsPatch): Promise<Result<ShellyPlugsUiSetResult>> {
     const parsedPatch = ledsPatchSchema.safeParse(patch);
     if (!parsedPatch.success) {
       return { ok: false, error: validationError(parsedPatch.error.message) };

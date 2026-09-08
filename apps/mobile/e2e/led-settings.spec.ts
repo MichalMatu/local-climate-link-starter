@@ -72,12 +72,15 @@ const timeInstallation = {
 };
 
 const seedInstallation = async (page: Page, kind: InstallationKind) => {
-  await page.addInitScript((installation) => {
-    window.localStorage.setItem(
-      'lcl.installedAutomations.v1',
-      JSON.stringify({ version: 1, installations: [installation] })
-    );
-  }, kind === 'climate' ? climateInstallation : timeInstallation);
+  await page.addInitScript(
+    (installation) => {
+      window.localStorage.setItem(
+        'lcl.installedAutomations.v1',
+        JSON.stringify({ version: 1, installations: [installation] })
+      );
+    },
+    kind === 'climate' ? climateInstallation : timeInstallation
+  );
 };
 
 const diagnosticPayload = () => ({
@@ -347,9 +350,7 @@ test('unsupported PLUGS_UI is a stable non-error device state', async ({ page })
       'To urządzenie lub firmware nie udostępnia ustawień PLUGS_UI. Pozostałe funkcje działają normalnie.'
     )
   ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Sygnalizuj ON/OFF' })
-  ).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Sygnalizuj ON/OFF' })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });

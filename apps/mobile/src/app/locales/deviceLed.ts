@@ -1,4 +1,4 @@
-import type { Locale } from '../app/i18n.js';
+import type { Locale } from '../i18n.js';
 
 type DeviceLedCopy = {
   eyebrow: string;
@@ -69,9 +69,59 @@ export const deviceLedCopy: Record<Locale, DeviceLedCopy> = {
     offSuccess: 'LED został wyłączony.',
     actionFailed: 'Nie udało się zmienić ustawień LED.'
   },
-  de: { ...en, eyebrow: 'Geräteeinstellungen', title: 'Steckdosen-LED', currentMode: 'LED-Modus', power: 'Leistungsverbrauch', switch: 'Relaiszustand', off: 'Aus', relayPreset: 'ON/OFF anzeigen', turnOff: 'LED ausschalten' },
-  es: { ...en, eyebrow: 'Ajustes del dispositivo', title: 'LED del enchufe', currentMode: 'Modo LED', power: 'Consumo de energía', switch: 'Estado del relé', off: 'Apagado', relayPreset: 'Mostrar ON/OFF', turnOff: 'Apagar LED' },
-  fr: { ...en, eyebrow: 'Réglages de l’appareil', title: 'LED de la prise', currentMode: 'Mode LED', power: 'Consommation électrique', switch: 'État du relais', off: 'Éteinte', relayPreset: 'Afficher ON/OFF', turnOff: 'Éteindre la LED' },
-  it: { ...en, eyebrow: 'Impostazioni dispositivo', title: 'LED della presa', currentMode: 'Modalità LED', power: 'Consumo energetico', switch: 'Stato relè', off: 'Spento', relayPreset: 'Mostra ON/OFF', turnOff: 'Spegni LED' },
-  'pt-BR': { ...en, eyebrow: 'Configurações do dispositivo', title: 'LED da tomada', currentMode: 'Modo do LED', power: 'Consumo de energia', switch: 'Estado do relé', off: 'Desligado', relayPreset: 'Mostrar ON/OFF', turnOff: 'Desligar LED' }
+  de: {
+    ...en,
+    eyebrow: 'Geräteeinstellungen',
+    title: 'Steckdosen-LED',
+    currentMode: 'LED-Modus',
+    power: 'Leistungsverbrauch',
+    switch: 'Relaiszustand',
+    off: 'Aus',
+    relayPreset: 'ON/OFF anzeigen',
+    turnOff: 'LED ausschalten'
+  },
+  es: {
+    ...en,
+    eyebrow: 'Ajustes del dispositivo',
+    title: 'LED del enchufe',
+    currentMode: 'Modo LED',
+    power: 'Consumo de energía',
+    switch: 'Estado del relé',
+    off: 'Apagado',
+    relayPreset: 'Mostrar ON/OFF',
+    turnOff: 'Apagar LED'
+  },
+  fr: {
+    ...en,
+    eyebrow: 'Réglages de l’appareil',
+    title: 'LED de la prise',
+    currentMode: 'Mode LED',
+    power: 'Consommation électrique',
+    switch: 'État du relais',
+    off: 'Éteinte',
+    relayPreset: 'Afficher ON/OFF',
+    turnOff: 'Éteindre la LED'
+  },
+  it: {
+    ...en,
+    eyebrow: 'Impostazioni dispositivo',
+    title: 'LED della presa',
+    currentMode: 'Modalità LED',
+    power: 'Consumo energetico',
+    switch: 'Stato relè',
+    off: 'Spento',
+    relayPreset: 'Mostra ON/OFF',
+    turnOff: 'Spegni LED'
+  },
+  'pt-BR': {
+    ...en,
+    eyebrow: 'Configurações do dispositivo',
+    title: 'LED da tomada',
+    currentMode: 'Modo do LED',
+    power: 'Consumo de energia',
+    switch: 'Estado do relé',
+    off: 'Desligado',
+    relayPreset: 'Mostrar ON/OFF',
+    turnOff: 'Desligar LED'
+  }
 };

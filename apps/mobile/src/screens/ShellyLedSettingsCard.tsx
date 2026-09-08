@@ -8,7 +8,7 @@ import {
   type InstalledShellyLedPreset
 } from '../flows/installations/deviceLed.js';
 import type { InstalledAutomation } from '../flows/installations/model.js';
-import { deviceLedCopy } from './deviceLedCopy.js';
+import { deviceLedCopy } from '../app/locales/deviceLed.js';
 
 type ShellyLedSettingsCardProps = {
   installation: InstalledAutomation;
