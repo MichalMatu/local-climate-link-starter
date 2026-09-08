@@ -1,0 +1,80 @@
++    id: createInstalledAutomationId(deviceId, config.output.relayId),
++    kind: 'climate',
++    shelly: {
++      deviceId,
++      name: shellyName,
++      baseUrl,
++      model: shelly.model,
++      gen: shelly.gen
++    },
++    script: {
++      id: scriptId,
++      hash: scriptHash
++    },
++    config,
++    installedAtMs: nowMs,
++    updatedAtMs: nowMs
++  });
++};
+diff --git a/apps/mobile/src/flows/installations/repository.ts b/apps/mobile/src/flows/installations/repository.ts
+new file mode 100644
+index 0000000..fe7020b
+--- /dev/null
++++ b/apps/mobile/src/flows/installations/repository.ts
+@@ -0,0 +1,78 @@
++import { z } from 'zod';
++import {
++  INSTALLED_AUTOMATION_VERSION,
++  installedAutomationSchema,
++  type InstalledAutomation
++} from './model.js';
++
++export const INSTALLED_AUTOMATIONS_STORAGE_KEY = 'lcl.installedAutomations.v1';
++
++const persistedInstalledAutomationsSchema = z.object({
++  version: z.literal(INSTALLED_AUTOMATION_VERSION),
++  installations: z.array(installedAutomationSchema)
++});
++
++export interface InstalledAutomationRepository {
++  load(): InstalledAutomation[];
++  save(installations: InstalledAutomation[]): void;
++  clear(): void;
++}
++
++type StorageAdapter = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
++
++const resolveBrowserStorage = (): StorageAdapter | null =>
++  typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
++
++const warnStorageFailure = (operation: string, error: unknown): void => {
++  if (typeof console !== 'undefined') {
++    console.warn(`Installed automations storage ${operation} failed.`, error);
++  }
++};
++
++export const createInstalledAutomationRepository = (
++  storage: StorageAdapter | null = resolveBrowserStorage()
++): InstalledAutomationRepository => ({
++  load: () => {
++    if (!storage) {
++      return [];
++    }
++
++    try {
++      const stored = storage.getItem(INSTALLED_AUTOMATIONS_STORAGE_KEY);
++      if (!stored) {
++        return [];
++      }
++      const parsed = persistedInstalledAutomationsSchema.safeParse(JSON.parse(stored));
++      return parsed.success ? parsed.data.installations : [];
++    } catch (error) {
++      warnStorageFailure('read', error);
++      return [];
++    }
++  },
++  save: (installations) => {
++    if (!storage) {
++      return;
++    }
++
