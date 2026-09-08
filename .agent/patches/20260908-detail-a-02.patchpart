@@ -1,0 +1,222 @@
++    21.4,
++    55.2,
++    91,
++    -51,
++    true,
++    'ok',
++    3_500_000,
++    3_540_000,
++    0,
++    0,
++    21.4,
++    1.31,
++    19,
++    20,
++    3_560_000,
++    'ok'
++  ]
++});
++
++const installShellyFetchMock = () => {
++  let scriptRunning = true;
++  let relayOn = true;
++  const rpcMethods: string[] = [];
++
++  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
++    const url = input instanceof URL ? input.toString() : String(input);
++    const target = new URL(url, 'http://localhost').searchParams.get('target');
++    if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
++      return scriptRunning ? jsonResponse(diagnosticPayload()) : jsonResponse({}, 503);
++    }
++
++    const body = JSON.parse(String(init?.body ?? '{}')) as {
++      id?: number | string;
++      method?: string;
++      params?: { id?: number; on?: boolean };
++    };
++    if (body.method) {
++      rpcMethods.push(body.method);
++    }
++
++    let result: unknown = {};
++    switch (body.method) {
++      case 'Shelly.GetDeviceInfo':
++        result = {
++          id: 'shellyplugsg3-detail',
++          model: 'S3PL-00112EU',
++          gen: 3,
++          fw_id: '20260311-095902/1.7.5-g9979d16'
++        };
++        break;
++      case 'Shelly.GetStatus':
++        result = {
++          matter: { enabled: false },
++          script: { enable: true },
++          ble: { enable: true },
++          'switch:0': {
++            id: 0,
++            output: relayOn,
++            apower: relayOn ? 42.3 : 0,
++            voltage: 230.1,
++            current: relayOn ? 0.2 : 0,
++            aenergy: { total: 1250 },
++            temperature: { tC: 32.4 }
++          },
++          wifi: { rssi: -55 },
++          sys: {
++            time: '14:00',
++            unixtime: 1_782_820_000,
++            uptime: 3600,
++            last_sync_ts: 1_782_819_900
++          }
++        };
++        break;
++      case 'Script.List':
++        result = {
++          scripts: [
++            {
++              id: 1,
++              name: 'Local Climate Link Thermostat',
++              enable: true,
++              running: scriptRunning
++            }
++          ]
++        };
++        break;
++      case 'Script.Stop':
++        scriptRunning = false;
++        result = null;
++        break;
++      case 'Script.Start':
++        scriptRunning = true;
++        result = null;
++        break;
++      case 'Switch.Set':
++        relayOn = body.params?.on ?? false;
++        result = null;
++        break;
++      default:
++        result = {};
++    }
++
++    return jsonResponse({ id: body.id ?? 1, result });
++  });
++
++  vi.stubGlobal('fetch', fetchMock);
++  return { rpcMethods };
++};
++
++const renderDetail = (installationId: string, onBack = vi.fn()) => {
++  const queryClient = new QueryClient({
++    defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
++  });
++  return {
++    onBack,
++    ...render(
++      <I18nProvider>
++        <QueryClientProvider client={queryClient}>
++          <InstallationDetailScreen installationId={installationId} onBack={onBack} />
++        </QueryClientProvider>
++      </I18nProvider>
++    )
++  };
++};
++
++describe('InstallationDetailScreen', () => {
++  beforeEach(() => {
++    setLocalePreference('pl');
++    resetInstalledAutomationStore();
++    vi.restoreAllMocks();
++  });
++
++  afterEach(() => {
++    cleanup();
++    resetInstalledAutomationStore();
++    vi.unstubAllGlobals();
++  });
++
++  it('shows a stable not-found route instead of falling back to another installation', () => {
++    renderDetail('missing-installation');
++    expect(
++      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
++    ).toBeVisible();
++  });
++
++  it('shows Shelly runtime and safely pauses and resumes the exact installed script', async () => {
++    const saved = installation();
++    useInstalledAutomationStore.getState().upsertInstallation(saved);
++    const { rpcMethods } = installShellyFetchMock();
++
++    renderDetail(saved.id);
++
++    expect(await screen.findByText('Działa')).toBeVisible();
++    expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
++    expect(screen.getByText('21.4°C')).toBeVisible();
++    expect(screen.getByText('55.2%')).toBeVisible();
++    expect(screen.getByText('1.31 kPa')).toBeVisible();
++    expect(screen.getAllByText('19°C / 20°C').length).toBeGreaterThanOrEqual(1);
++    expect(screen.getByText('Przedpokój')).toBeVisible();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Wstrzymaj automatykę' }));
++
++    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
++    expect(
++      await within(toastRegion).findByText(
++        'Automatyka zatrzymana, wyjście potwierdzone jako OFF.'
++      )
++    ).toBeVisible();
++    expect(await screen.findByText('Wstrzymana')).toBeVisible();
++    expect(screen.getByRole('button', { name: 'Wznów automatykę' })).toBeVisible();
++    expect(rpcMethods).toContain('Script.Stop');
++    expect(rpcMethods).toContain('Switch.Set');
++
++    fireEvent.click(screen.getByRole('button', { name: 'Wznów automatykę' }));
++
++    expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
++    expect(await screen.findByText('Działa')).toBeVisible();
++    expect(rpcMethods).toContain('Script.Start');
++  });
++});
++diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts
++index 894e387..fb00343 100644
++--- a/apps/mobile/src/app/locales/de.ts
+++++ b/apps/mobile/src/app/locales/de.ts
++@@ -47,15 +47,38 @@ export const de = {
++     sensor: 'Sensor',
++     readFailed: 'Shelly nicht erreichbar.',
++     refreshing: 'Daten werden von Shelly aktualisiert…',
+++    openSystem: 'Details',
++     liveFromShelly: 'Runtime-Daten direkt vom Shelly.',
++     health: {
++       ok: 'Läuft',
++       stale: 'Daten veraltet',
++       unknown: 'Unbekannt',
++       offline: 'Offline',
+++      paused: 'Pausiert',
+++      attention: 'Prüfen',
++       loading: 'Verbinde…'
++     }
++   },
+++  detail: {
+++    notFoundTitle: 'Automation nicht gefunden',
+++    notFoundDescription: 'Diese Automation ist nicht mehr in der App gespeichert.',
+++    backToDashboard: 'Zurück zu Automationen',
+++    description: 'Live-Status und Steuerung für dieses lokale System.',
+++    currentState: 'Aktueller Zustand',
+++    climateNow: 'Klima jetzt',
+++    activeThresholds: 'Aktive EIN-/AUS-Schwellen',
+++    source: 'Datenquelle',
+++    configuration: 'Konfiguration',
+++    automation: 'Automation',
+++    pause: 'Automation pausieren',
+++    resume: 'Automation fortsetzen',
+++    changingState: 'Status wird geändert…',
+++    pauseSuccess: 'Automation pausiert und Ausgang als AUS bestätigt.',
+++    resumeSuccess: 'Automation fortgesetzt.',
+++    actionFailed: 'Der Automationsstatus konnte nicht sicher geändert werden.',
+++    scriptNeedsAttention:
+++      'Das für diese Automation gespeicherte Skript stimmt nicht mit dem Shelly-Status überein. Prüfe das Gerät vor der Steuerung.'
+++  },
++   common: {
++     add: 'Hinzufügen',
++     address: 'Adresse',
