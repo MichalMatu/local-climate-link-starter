@@ -1,76 +1,29 @@
-import { useQuery } from '@tanstack/react-query';
-import type { RulePresetId } from '@lcl/automation-core';
 import type { InstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
-  fetchInstalledAutomationDiagnostics,
-  installedAutomationHealth,
-  type InstalledAutomationHealth
-} from '../flows/installations/runtimeDiagnostics.js';
-import { useTranslation, type Translate, type TranslationKey } from '../app/i18n.js';
-
-const MODE_KEYS: Record<RulePresetId, TranslationKey> = {
-  heating: 'hardware.rule.preset.heating',
-  cooling: 'hardware.rule.preset.cooling',
-  humidifying: 'hardware.rule.preset.humidifying',
-  dehumidifying: 'hardware.rule.preset.dehumidifying'
-};
-
-const healthLabel = (health: InstalledAutomationHealth, t: Translate): string => {
-  switch (health) {
-    case 'ok':
-      return t('dashboard.health.ok');
-    case 'stale':
-      return t('dashboard.health.stale');
-    case 'unknown':
-      return t('dashboard.health.unknown');
-  }
-};
-
-const metricValue = (
-  value: number | null | undefined,
-  unit: string,
-  digits = 1
-): string =>
-  value == null || !Number.isFinite(value) ? '—' : `${value.toFixed(digits)}${unit}`;
-
-const thresholdSummary = (
-  installation: InstalledAutomation,
-  effectiveOnThreshold?: number | null,
-  effectiveOffThreshold?: number | null
-): string => {
-  const { metric, onThreshold, offThreshold } = installation.config.rule.control;
-  const unit = metric === 'humidity' ? '%' : '°C';
-  const activeOnThreshold =
-    effectiveOnThreshold != null && Number.isFinite(effectiveOnThreshold)
-      ? effectiveOnThreshold
-      : onThreshold;
-  const activeOffThreshold =
-    effectiveOffThreshold != null && Number.isFinite(effectiveOffThreshold)
-      ? effectiveOffThreshold
-      : offThreshold;
-  return `${activeOnThreshold}${unit} / ${activeOffThreshold}${unit}`;
-};
+  formatInstallationMetric,
+  installationHealthLabel,
+  INSTALLATION_MODE_KEYS,
+  installationThresholdSummary
+} from '../flows/installations/presentation.js';
+import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
+import {
+  useInstalledAutomationControl,
+  useInstalledAutomationDiagnostics
+} from '../flows/installations/useInstalledAutomationRuntime.js';
+import { useTranslation } from '../app/i18n.js';
 
 type AutomationCardProps = {
   installation: InstalledAutomation;
+  onOpen(installationId: string): void;
 };
 
-const AutomationCard = ({ installation }: AutomationCardProps) => {
+const AutomationCard = ({ installation, onOpen }: AutomationCardProps) => {
   const { t } = useTranslation();
-  const query = useQuery({
-    queryKey: [
-      'installed-automation-diagnostics',
-      installation.id,
-      installation.shelly.baseUrl,
-      installation.script.id,
-      installation.script.hash,
-      installation.updatedAtMs
-    ],
-    queryFn: () => fetchInstalledAutomationDiagnostics(installation),
-    retry: false,
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: false
+  const query = useInstalledAutomationDiagnostics(installation);
+  const controlFallback = useInstalledAutomationControl(installation, {
+    enabled: query.isError
   });
 
   const snapshot = query.data;
@@ -82,21 +35,38 @@ const AutomationCard = ({ installation }: AutomationCardProps) => {
       <header className="automation-card__header">
         <div>
           <p className="automation-card__eyebrow">
-            {t(MODE_KEYS[installation.config.rule.mode])}
+            {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
           </p>
           <h2>{installation.shelly.name}</h2>
         </div>
         {query.isError ? (
-          <span className="automation-health automation-health--offline">
-            {t('dashboard.health.offline')}
-          </span>
+          controlFallback.data &&
+          installedAutomationScriptMatch(installation, controlFallback.data) ===
+            'matched' &&
+          controlFallback.data.automationMode === 'manual' ? (
+            <span className="automation-health automation-health--paused">
+              {t('dashboard.health.paused')}
+            </span>
+          ) : controlFallback.data ? (
+            <span className="automation-health automation-health--attention">
+              {t('dashboard.health.attention')}
+            </span>
+          ) : controlFallback.isPending ? (
+            <span className="automation-health automation-health--unknown">
+              {t('dashboard.health.loading')}
+            </span>
+          ) : (
+            <span className="automation-health automation-health--offline">
+              {t('dashboard.health.offline')}
+            </span>
+          )
         ) : query.isPending ? (
           <span className="automation-health automation-health--unknown">
             {t('dashboard.health.loading')}
           </span>
         ) : (
           <span className={`automation-health automation-health--${health ?? 'unknown'}`}>
-            {healthLabel(health ?? 'unknown', t)}
+            {installationHealthLabel(health ?? 'unknown', t)}
           </span>
         )}
       </header>
@@ -104,15 +74,21 @@ const AutomationCard = ({ installation }: AutomationCardProps) => {
       <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>
         <div>
           <span>{t('dashboard.temperature')}</span>
-          <strong>{metricValue(snapshot?.diagnostics.lastTemp, '°C')}</strong>
+          <strong>
+            {formatInstallationMetric(snapshot?.diagnostics.lastTemp, '°C')}
+          </strong>
         </div>
         <div>
           <span>{t('dashboard.humidity')}</span>
-          <strong>{metricValue(snapshot?.diagnostics.lastHumidity, '%')}</strong>
+          <strong>
+            {formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')}
+          </strong>
         </div>
         <div>
           <span>{t('dashboard.vpd')}</span>
-          <strong>{metricValue(snapshot?.diagnostics.lastVpd, ' kPa', 2)}</strong>
+          <strong>
+            {formatInstallationMetric(snapshot?.diagnostics.lastVpd, ' kPa', 2)}
+          </strong>
         </div>
       </div>
 
@@ -124,7 +100,7 @@ const AutomationCard = ({ installation }: AutomationCardProps) => {
         <div>
           <dt>{t('dashboard.thresholds')}</dt>
           <dd>
-            {thresholdSummary(
+            {installationThresholdSummary(
               installation,
               snapshot?.diagnostics.lastEffectiveOnThreshold,
               snapshot?.diagnostics.lastEffectiveOffThreshold
@@ -145,14 +121,23 @@ const AutomationCard = ({ installation }: AutomationCardProps) => {
               ? t('dashboard.refreshing')
               : t('dashboard.liveFromShelly')}
         </span>
-        <button
-          className="secondary-action"
-          type="button"
-          disabled={query.isFetching}
-          onClick={() => void query.refetch()}
-        >
-          {t('common.refresh')}
-        </button>
+        <div className="automation-card__actions">
+          <button
+            className="secondary-action"
+            type="button"
+            onClick={() => onOpen(installation.id)}
+          >
+            {t('dashboard.openSystem')}
+          </button>
+          <button
+            className="secondary-action"
+            type="button"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
+          >
+            {t('common.refresh')}
+          </button>
+        </div>
       </footer>
     </article>
   );
@@ -160,10 +145,12 @@ const AutomationCard = ({ installation }: AutomationCardProps) => {
 
 type AutomationDashboardScreenProps = {
   onAddAutomation(): void;
+  onOpenInstallation(installationId: string): void;
 };
 
 export const AutomationDashboardScreen = ({
-  onAddAutomation
+  onAddAutomation,
+  onOpenInstallation
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
@@ -194,7 +181,11 @@ export const AutomationDashboardScreen = ({
       ) : (
         <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
           {installations.map((installation) => (
-            <AutomationCard key={installation.id} installation={installation} />
+            <AutomationCard
+              key={installation.id}
+              installation={installation}
+              onOpen={onOpenInstallation}
+            />
           ))}
         </section>
       )}

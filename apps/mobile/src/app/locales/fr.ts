@@ -49,14 +49,38 @@ export const fr = {
     sensor: 'Capteur',
     readFailed: 'Impossible de joindre Shelly.',
     refreshing: 'Actualisation depuis Shelly…',
+    openSystem: 'Détails',
     liveFromShelly: 'Données runtime directement depuis Shelly.',
     health: {
       ok: 'Actif',
       stale: 'Données périmées',
       unknown: 'Inconnu',
       offline: 'Hors ligne',
+      paused: 'En pause',
+      attention: 'À vérifier',
       loading: 'Connexion…'
     }
+  },
+  detail: {
+    notFoundTitle: 'Automatisation introuvable',
+    notFoundDescription:
+      'Cette automatisation n’est plus enregistrée dans l’application.',
+    backToDashboard: 'Retour aux automatisations',
+    description: 'État en direct et contrôle de ce système local.',
+    currentState: 'État actuel',
+    climateNow: 'Climat actuel',
+    activeThresholds: 'Seuils ON / OFF actifs',
+    source: 'Source des données',
+    configuration: 'Configuration',
+    automation: 'Automatisation',
+    pause: 'Mettre en pause',
+    resume: 'Reprendre l’automatisation',
+    changingState: 'Changement d’état…',
+    pauseSuccess: 'Automatisation en pause et sortie confirmée sur OFF.',
+    resumeSuccess: 'Automatisation reprise.',
+    actionFailed: 'Impossible de modifier l’état de l’automatisation en toute sécurité.',
+    scriptNeedsAttention:
+      'Le script enregistré pour cette automatisation ne correspond pas à l’état du Shelly. Vérifiez l’appareil avant de le contrôler.'
   },
   common: {
     add: 'Ajouter',

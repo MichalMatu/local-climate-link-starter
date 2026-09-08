@@ -47,14 +47,37 @@ export const ptBr = {
     sensor: 'Sensor',
     readFailed: 'Não foi possível acessar o Shelly.',
     refreshing: 'Atualizando a partir do Shelly…',
+    openSystem: 'Detalhes',
     liveFromShelly: 'Dados de runtime diretamente do Shelly.',
     health: {
       ok: 'Funcionando',
       stale: 'Dados desatualizados',
       unknown: 'Desconhecido',
       offline: 'Offline',
+      paused: 'Pausada',
+      attention: 'Requer atenção',
       loading: 'Conectando…'
     }
+  },
+  detail: {
+    notFoundTitle: 'Automação não encontrada',
+    notFoundDescription: 'Esta automação não está mais salva no aplicativo.',
+    backToDashboard: 'Voltar às automações',
+    description: 'Status ao vivo e controle deste sistema local.',
+    currentState: 'Estado atual',
+    climateNow: 'Clima agora',
+    activeThresholds: 'Limites ON / OFF ativos',
+    source: 'Fonte dos dados',
+    configuration: 'Configuração',
+    automation: 'Automação',
+    pause: 'Pausar automação',
+    resume: 'Retomar automação',
+    changingState: 'Alterando estado…',
+    pauseSuccess: 'Automação pausada e saída confirmada como OFF.',
+    resumeSuccess: 'Automação retomada.',
+    actionFailed: 'Não foi possível alterar o estado da automação com segurança.',
+    scriptNeedsAttention:
+      'O script salvo para esta automação não corresponde ao estado do Shelly. Verifique o dispositivo antes de controlá-lo.'
   },
   common: {
     add: 'Adicionar',
