@@ -55,6 +55,43 @@ const seedDraft = async (page: Page) => {
 
 const mockShellyRpc = async (page: Page) => {
   const handleRpc = async (route: Route) => {
+    const requestUrl = new URL(route.request().url());
+    const proxyTarget = requestUrl.searchParams.get('target');
+    if (proxyTarget?.includes('/script/1/diag')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          v: 1,
+          z: 'lcl-e2e',
+          s: ['A4:C1:38:4F:24:CD', 'Przedpokój'],
+          q: [0, 0, 19, 20, 120, -85],
+          y: ['14:00', 1782820000, 3600],
+          p: [true, 42.3, 230.1, 0.2, 1250, 32.4],
+          g: [
+            3550000,
+            21.4,
+            55.2,
+            91,
+            -51,
+            true,
+            'ok',
+            3500000,
+            3540000,
+            0,
+            0,
+            21.4,
+            1.31,
+            19,
+            20,
+            3560000,
+            'ok'
+          ]
+        })
+      });
+      return;
+    }
+
     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
       id?: number | string;
       method?: string;
@@ -275,6 +312,95 @@ const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
   expect(metrics.codeHeight).toBeGreaterThan(metrics.bodyHeight * 0.7);
 };
 
+const seedInstalledAutomation = async (page: Page) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      'lcl.installedAutomations.v1',
+      JSON.stringify({
+        version: 1,
+        installations: [
+          {
+            version: 1,
+            id: 'climate:shellyplugsg3-e2e:0',
+            kind: 'climate',
+            shelly: {
+              deviceId: 'shellyplugsg3-e2e',
+              name: 'Salon',
+              baseUrl: 'http://192.168.0.20/',
+              model: 'S3PL-00112EU',
+              gen: 3
+            },
+            script: { id: 1, hash: 'lcl-e2e' },
+            config: {
+              version: 1,
+              sensor: {
+                profileId: 'xiaomi_lywsd03mmc_bthome_v2',
+                sensorId: 'sensor-a4c1384f24cd',
+                runtimeAddress: 'A4:C1:38:4F:24:CD',
+                displayName: 'Przedpokój',
+                parserValidated: true
+              },
+              output: { profileId: 'shelly_plug_s_gen3', relayId: 0 },
+              rule: {
+                mode: 'heating',
+                control: {
+                  metric: 'temperature',
+                  direction: 'below',
+                  onThreshold: 19,
+                  offThreshold: 20
+                },
+                vpdAssist: { enabled: false, targetKpa: 1.2 },
+                staleTimeoutSec: 120,
+                minChangeMs: 120000,
+                maxOnMs: 14400000,
+                rssiMin: -85,
+                consecutiveHits: 2,
+                failSafe: 'off',
+                bootState: 'off'
+              },
+              diagnostics: { enabled: true }
+            },
+            installedAtMs: 1782820000000,
+            updatedAtMs: 1782820000000
+          }
+        ]
+      })
+    );
+  });
+};
+
+for (const viewport of viewports) {
+  test(`installed automation dashboard shows Shelly runtime on ${viewport.name}`, async ({
+    page
+  }) => {
+    const consoleProblems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' || message.type() === 'warning') {
+        consoleProblems.push(`${message.type()}: ${message.text()}`);
+      }
+    });
+    page.on('pageerror', (error) => consoleProblems.push(error.message));
+
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await seedInstalledAutomation(page);
+    await mockShellyRpc(page);
+    await page.goto('/');
+
+    await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    await expect(page.getByText('Salon')).toBeVisible();
+    await expect(page.getByText('21.4°C')).toBeVisible();
+    await expect(page.getByText('55.2%')).toBeVisible();
+    await expect(page.getByText('1.31 kPa')).toBeVisible();
+    await expect(page.getByText('Działa')).toBeVisible();
+    await expect(page.getByText('19°C / 20°C')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Odśwież' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expectNoLegacyInlineFeedback(page);
+    expect(consoleProblems).toEqual([]);
+  });
+}
+
 for (const viewport of viewports) {
   test(`hardware setup has no horizontal overflow on ${viewport.name}`, async ({
     page
@@ -295,7 +421,7 @@ for (const viewport of viewports) {
     await expect(page).toHaveTitle('Local Climate Link');
     await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await page.getByRole('button', { name: /Zarządzać istniejącą automatyką/ }).click();
+    await page.getByRole('button', { name: /Sterować temperaturą/ }).click();
     await expect(
       page.getByRole('navigation', { name: 'Menu konfiguracji' })
     ).toBeVisible();

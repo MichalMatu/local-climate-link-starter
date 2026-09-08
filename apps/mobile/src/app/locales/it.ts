@@ -30,6 +30,33 @@ export const it = {
       context: 'Gestione automazione'
     }
   },
+  dashboard: {
+    title: 'Le tue automazioni',
+    description: 'Guarda cosa vede e fa attualmente ogni Shelly.',
+    addAutomation: 'Aggiungi automazione',
+    emptyTitle: 'Nessuna automazione salvata',
+    emptyDescription:
+      'Configura il primo sistema per vedere qui lo stato in tempo reale.',
+    configureFirst: 'Configura il primo sistema',
+    systemsLabel: 'Automazioni salvate',
+    currentValues: 'Valori attuali',
+    temperature: 'Temperatura',
+    humidity: 'Umidità',
+    vpd: 'VPD',
+    output: 'Uscita',
+    thresholds: 'Soglie ON / OFF',
+    sensor: 'Sensore',
+    readFailed: 'Shelly non raggiungibile.',
+    refreshing: 'Aggiornamento da Shelly…',
+    liveFromShelly: 'Dati runtime direttamente da Shelly.',
+    health: {
+      ok: 'Attivo',
+      stale: 'Dati obsoleti',
+      unknown: 'Sconosciuto',
+      offline: 'Offline',
+      loading: 'Connessione…'
+    }
+  },
   common: {
     add: 'Aggiungi',
     address: 'Indirizzo',
