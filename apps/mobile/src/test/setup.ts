@@ -1,4 +1,24 @@
 import '@testing-library/jest-dom/vitest';
+import { timeoutManager } from '@tanstack/react-query';
+
+const unrefTimeout = (callback: () => void, delay: number) => {
+  const handle = setTimeout(callback, delay);
+  handle.unref();
+  return handle;
+};
+
+const unrefInterval = (callback: () => void, delay: number) => {
+  const handle = setInterval(callback, delay);
+  handle.unref();
+  return handle;
+};
+
+timeoutManager.setTimeoutProvider({
+  setTimeout: unrefTimeout,
+  clearTimeout,
+  setInterval: unrefInterval,
+  clearInterval
+});
 
 const createMemoryStorage = (): Storage => {
   const values = new Map<string, string>();
