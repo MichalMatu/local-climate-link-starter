@@ -19,10 +19,7 @@ const installation = () =>
     baseUrl: 'http://192.168.0.20/',
     scriptId: 1,
     scriptHash: 'lcl-led-test',
-    config: createDefaultShellyThermostatConfig(
-      'xiaomi_lywsd03mmc_bthome_v2',
-      'heating'
-    ),
+    config: createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2', 'heating'),
     nowMs: 1000
   });
 
@@ -38,10 +35,7 @@ const renderCard = (onFeedback = vi.fn()) => {
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <ShellyLedSettingsCard
-            installation={installation()}
-            onFeedback={onFeedback}
-          />
+          <ShellyLedSettingsCard installation={installation()} onFeedback={onFeedback} />
         </QueryClientProvider>
       </I18nProvider>
     )
@@ -81,11 +75,7 @@ describe('ShellyLedSettingsCard', () => {
         switch (body.method) {
           case 'Shelly.ListMethods':
             result = {
-              methods: [
-                'Shelly.GetStatus',
-                'PLUGS_UI.GetConfig',
-                'PLUGS_UI.SetConfig'
-              ]
+              methods: ['Shelly.GetStatus', 'PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig']
             };
             break;
           case 'PLUGS_UI.GetConfig':
@@ -126,10 +116,7 @@ describe('ShellyLedSettingsCard', () => {
     expect(await screen.findByText('Stan przekaźnika')).toBeVisible();
     expect(screen.getByText('RGB 0/100/0 · 100%')).toBeVisible();
     expect(screen.getByText('RGB 100/0/0 · 100%')).toBeVisible();
-    expect(onFeedback).toHaveBeenCalledWith(
-      'ok',
-      'LED pokazuje teraz stan przekaźnika.'
-    );
+    expect(onFeedback).toHaveBeenCalledWith('ok', 'LED pokazuje teraz stan przekaźnika.');
 
     const relaySet = requests.find(
       (request) =>
@@ -187,9 +174,7 @@ describe('ShellyLedSettingsCard', () => {
         'To urządzenie lub firmware nie udostępnia ustawień PLUGS_UI. Pozostałe funkcje działają normalnie.'
       )
     ).toBeVisible();
-    expect(
-      screen.queryByRole('button', { name: 'Sygnalizuj ON/OFF' })
-    ).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Sygnalizuj ON/OFF' })).toBeNull();
     expect(methods).toEqual(['Shelly.ListMethods']);
   });
 });
