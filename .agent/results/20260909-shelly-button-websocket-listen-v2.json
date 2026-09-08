@@ -1,0 +1,88 @@
+{
+  "id": "20260909-shelly-button-websocket-listen-v2",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "started_at": "2026-09-08T23:50:46.064789+00:00",
+  "command_timeout": 150,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin main && git checkout --detach origin/main && test \"$(git rev-parse HEAD)\" = \"3e98ed7a28221ef820aca7a814cb1ac03d951b2c\"",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch            main       -> FETCH_HEAD\nHEAD is now at 3e98ed7 Add native Shelly Plug S Gen3 LED settings\n",
+      "elapsed_seconds": 0.843,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 512,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 7.59,
+      "output_policy": "stream",
+      "captured_output_chars": 174,
+      "output_truncated": false,
+      "current_rss_mb": 7.59,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "node - <<'NODE'\nconst url = 'ws://192.168.0.16/rpc';\nconst src = 'lcl_button_probe';\nif (typeof WebSocket === 'undefined') {\n  console.error('NO_GLOBAL_WEBSOCKET');\n  process.exit(2);\n}\nconst ws = new WebSocket(url);\nlet done = false;\nconst finish = (reason) => {\n  if (done) return;\n  done = true;\n  console.log('=== LISTENER_END ===', reason);\n  try { ws.close(); } catch {}\n  setTimeout(() => process.exit(0), 250);\n};\nconst timer = setTimeout(() => finish('120s timeout'), 120000);\nws.onopen = () => {\n  console.log('=== WS_OPEN ===');\n  ws.send(JSON.stringify({id: 1, src, method: 'Shelly.GetDeviceInfo'}));\n};\nws.onmessage = (event) => {\n  const text = typeof event.data === 'string' ? event.data : String(event.data);\n  console.log(new Date().toISOString(), text);\n};\nws.onerror = (event) => {\n  console.error('=== WS_ERROR ===', event?.message || event?.type || String(event));\n};\nws.onclose = (event) => {\n  clearTimeout(timer);\n  if (!done) {\n    done = true;\n    console.log('=== WS_CLOSE ===', event.code, event.reason || '');\n    process.exit(0);\n  }\n};\nNODE",
+      "exit_code": 0,
+      "output": "=== WS_OPEN ===\n2026-09-08T23:50:48.589Z {\"id\":1,\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"result\":{\"name\":null,\"id\":\"shellyplugsg3-e4b063d7f530\",\"mac\":\"E4B063D7F530\",\"slot\":0,\"model\":\"S3PL-00112EU\",\"gen\":3,\"fw_id\":\"20260311-095902/1.7.5-g9979d16\",\"ver\":\"1.7.5\",\"app\":\"PlugSG3\",\"auth_en\":false,\"auth_domain\":null,\"matter\":false,\"provision\":\"complete\"}}\n2026-09-08T23:51:00.055Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911460.05,\"switch:0\":{\"aenergy\":{\"by_minute\":[0.000,0.000,0.000],\"minute_ts\":1788911460,\"total\":24074.845},\"apower\":0.0,\"current\":0.000,\"freq\":49.93,\"ret_aenergy\":{\"by_minute\":[0.000,0.000,0.000],\"minute_ts\":1788911460,\"total\":0.000},\"voltage\":247.2}}}\n2026-09-08T23:52:00.010Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911520.00,\"switch:0\":{\"aenergy\":{\"by_minute\":[0.000,0.000,0.000],\"minute_ts\":1788911520,\"total\":24074.845},\"apower\":0.0,\"current\":0.000,\"freq\":49.93,\"ret_aenergy\":{\"by_minute\":[0.000,0.000,0.000],\"minute_ts\":1788911520,\"total\":0.000},\"voltage\":247.4}}}\n2026-09-08T23:52:36.943Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911556.93,\"switch:0\":{\"output\":true,\"source\":\"button\"}}}\n2026-09-08T23:52:38.271Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911558.25,\"switch:0\":{\"apower\":4.0}}}\n2026-09-08T23:52:39.091Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911558.25,\"switch:0\":{\"current\":0.099}}}\n2026-09-08T23:52:39.305Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911559.32,\"switch:0\":{\"apower\":15.7}}}\n2026-09-08T23:52:39.362Z {\"src\":\"shellyplugsg3-e4b063d7f530\",\"dst\":\"lcl_button_probe\",\"method\":\"NotifyStatus\",\"params\":{\"ts\":1788911559.36,\"switch:0\":{\"apower\":0,\"current\":0,\"output\":false,\"source\":\"button\"}}}\n=== LISTENER_END === 120s timeout\n=== WS_ERROR === error\n",
+      "elapsed_seconds": 120.877,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 512,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 62.25,
+      "output_policy": "stream",
+      "captured_output_chars": 2094,
+      "output_truncated": false,
+      "current_rss_mb": 21.44,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.843
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 120.877
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.083
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.066
+  },
+  "finished_at": "2026-09-08T23:52:49.249159+00:00",
+  "task_digest": "e3450ac1de22eaebd5eaf8e92450ef5b2481d9e7d86aebede9f1f9e0fe7f664e",
+  "idle_timeout": 150,
+  "task_timeout": 300,
+  "memory_limit_mb": 512,
+  "attempt_id": "cb8d74765c08ea73dedf5854",
+  "daemon_version": "4.18.19"
+}
