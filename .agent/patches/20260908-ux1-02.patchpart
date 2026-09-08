@@ -1,0 +1,122 @@
+@@ -8,6 +8,28 @@ export const it = {
+       'Termometro BLE + presa Shelly. Configuri una volta nell’app, poi funziona in locale.',
+     loadingConfigurator: 'Caricamento configuratore.'
+   },
++  intent: {
++    title: 'Cosa vuoi fare?',
++    description: 'Scegli prima l’obiettivo. I dettagli tecnici vengono dopo.',
++    choiceLabel: 'Obiettivo dell’automazione',
++    open: 'Apri',
++    back: 'Cambia obiettivo',
++    temperature: {
++      title: 'Controllare la temperatura',
++      description: 'Riscaldamento o raffreddamento con un termometro BLE.',
++      context: 'Controllo temperatura'
++    },
++    humidity: {
++      title: 'Controllare l’umidità',
++      description: 'Umidificazione o deumidificazione con un sensore BLE.',
++      context: 'Controllo umidità'
++    },
++    manage: {
++      title: 'Gestire un’automazione esistente',
++      description: 'Apri dispositivi, regole e diagnostica salvati.',
++      context: 'Gestione automazione'
++    }
++  },
+   common: {
+     add: 'Aggiungi',
+     address: 'Indirizzo',
+diff --git a/apps/mobile/src/app/locales/pl.ts b/apps/mobile/src/app/locales/pl.ts
+index 74661df..b81004c 100644
+--- a/apps/mobile/src/app/locales/pl.ts
++++ b/apps/mobile/src/app/locales/pl.ts
+@@ -6,6 +6,28 @@ export const pl = {
+       'Termometr BLE + gniazdko Shelly. Konfigurujesz raz w aplikacji, działa lokalnie.',
+     loadingConfigurator: 'Ładuję konfigurator.'
+   },
++  intent: {
++    title: 'Co chcesz zrobić?',
++    description: 'Wybierz cel. Szczegóły techniczne ustawimy dopiero w kolejnym kroku.',
++    choiceLabel: 'Cel automatyki',
++    open: 'Otwórz',
++    back: 'Zmień cel',
++    temperature: {
++      title: 'Sterować temperaturą',
++      description: 'Grzanie albo chłodzenie na podstawie termometru BLE.',
++      context: 'Sterowanie temperaturą'
++    },
++    humidity: {
++      title: 'Sterować wilgotnością',
++      description: 'Nawilżanie albo osuszanie na podstawie czujnika BLE.',
++      context: 'Sterowanie wilgotnością'
++    },
++    manage: {
++      title: 'Zarządzać istniejącą automatyką',
++      description: 'Otwórz zapisane urządzenia, reguły i diagnostykę.',
++      context: 'Zarządzanie automatyką'
++    }
++  },
+   common: {
+     add: 'Dodaj',
+     address: 'Adres',
+diff --git a/apps/mobile/src/app/locales/ptBr.ts b/apps/mobile/src/app/locales/ptBr.ts
+index f6f8e54..b7dc362 100644
+--- a/apps/mobile/src/app/locales/ptBr.ts
++++ b/apps/mobile/src/app/locales/ptBr.ts
+@@ -8,6 +8,28 @@ export const ptBr = {
+       'Termômetro BLE + tomada Shelly. Configure uma vez no app e depois tudo funciona localmente.',
+     loadingConfigurator: 'Carregando configurador.'
+   },
++  intent: {
++    title: 'O que você quer fazer?',
++    description: 'Escolha primeiro o objetivo. Os detalhes técnicos vêm depois.',
++    choiceLabel: 'Objetivo da automação',
++    open: 'Abrir',
++    back: 'Mudar objetivo',
++    temperature: {
++      title: 'Controlar a temperatura',
++      description: 'Aquecimento ou resfriamento com um termômetro BLE.',
++      context: 'Controle de temperatura'
++    },
++    humidity: {
++      title: 'Controlar a umidade',
++      description: 'Umidificação ou desumidificação com um sensor BLE.',
++      context: 'Controle de umidade'
++    },
++    manage: {
++      title: 'Gerenciar uma automação existente',
++      description: 'Abra dispositivos, regras e diagnósticos salvos.',
++      context: 'Gerenciamento da automação'
++    }
++  },
+   common: {
+     add: 'Adicionar',
+     address: 'Endereço',
+diff --git a/apps/mobile/src/flows/setup-intent.test.ts b/apps/mobile/src/flows/setup-intent.test.ts
+new file mode 100644
+index 0000000..f7772be
+--- /dev/null
++++ b/apps/mobile/src/flows/setup-intent.test.ts
+@@ -0,0 +1,27 @@
++import { describe, expect, it } from 'vitest';
++import {
++  defaultRulePresetForSetupIntent,
++  rulePresetsForSetupIntent
++} from './setup-intent.js';
++
++describe('setup intent', () => {
++  it('keeps temperature and humidity modes inside their matching user goal', () => {
++    expect(rulePresetsForSetupIntent('temperature')).toEqual(['heating', 'cooling']);
++    expect(rulePresetsForSetupIntent('humidity')).toEqual([
++      'humidifying',
++      'dehumidifying'
++    ]);
++    expect(rulePresetsForSetupIntent('manage')).toEqual([
++      'heating',
++      'cooling',
++      'humidifying',
++      'dehumidifying'
++    ]);
++  });
++
