@@ -14,7 +14,7 @@ test -z "$(git status --porcelain)"
 
 : > "${prefix}.b64"
 for part in 00a 00b 00c0 00c1 00c2 00c3 00c4 00c5 00c6 01 02 03; do
-  git show "origin/agent-control:.agent/patches/20260908-native-schedule-zst-b64-${part}.part" >> "${prefix}.b64"
+  cat ".agent/patches/20260908-native-schedule-zst-b64-${part}.part" >> "${prefix}.b64"
 done
 
 test "$(sha256sum "${prefix}.b64" | awk '{print $1}')" = "$expected_b64"
