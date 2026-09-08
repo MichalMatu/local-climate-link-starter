@@ -209,7 +209,11 @@ export const pl = {
       rule: 'Reguła',
       ruleTitle: 'Progi i wysyłka reguły do Shelly',
       diagnostics: 'Diag',
-      diagnosticsTitle: 'Diagnostyka skryptu Shelly'
+      diagnosticsTitle: 'Diagnostyka skryptu Shelly',
+      backToRule: 'Wróć do reguły',
+      developerDiagnostics: 'Diagnostyka deweloperska',
+      developerDiagnosticsHint:
+        'Surowy stan skryptu, BLE i Shelly. Używaj tylko do diagnostyki i serwisu.'
     },
     safety: {
       heatingDefaultOff: 'Dla grzania domyślny tryb bezpieczeństwa to OFF.',
@@ -446,6 +450,16 @@ export const pl = {
       advancedDefaultsTitle: 'Przywróć domyślne opcje zaawansowane',
       advancedTitle: 'Opcje zaawansowane',
       advancedTitleAttr: 'Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa',
+      advancedDisclosureHint:
+        'Limity bezpieczeństwa i odporność na słaby lub brakujący sygnał. Domyślne wartości są odpowiednie dla większości instalacji.',
+      openAdvanced: 'Otwórz opcje zaawansowane',
+      developerTools: 'Narzędzia deweloperskie',
+      developerToolsHint:
+        'Podgląd i operacje na skrypcie oraz pełna diagnostyka Shelly. Nie są potrzebne do normalnej konfiguracji.',
+      openDeveloperDiagnostics: 'Otwórz diagnostykę techniczną',
+      vpdAssistTitle: 'VPD assist',
+      vpdAssistHint:
+        'Opcjonalnie koryguje punkt pracy w obrębie ustawionych progów. Nie zmienia limitów bezpieczeństwa.',
       automationScriptMissing: 'Najpierw zapisz regułę dla tego gniazdka.',
       bootBehavior: 'Po restarcie Shelly',
       bootBehaviorValue: 'OFF, potem AUTO po pierwszym odczycie',

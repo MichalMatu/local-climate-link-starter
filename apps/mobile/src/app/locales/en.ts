@@ -210,7 +210,11 @@ export const en = {
       rule: 'Rule',
       ruleTitle: 'Thresholds and rule upload to Shelly',
       diagnostics: 'Diag',
-      diagnosticsTitle: 'Shelly script diagnostics'
+      diagnosticsTitle: 'Shelly script diagnostics',
+      backToRule: 'Back to rule',
+      developerDiagnostics: 'Developer diagnostics',
+      developerDiagnosticsHint:
+        'Raw script, BLE and Shelly state. Use only for diagnostics and service.'
     },
     safety: {
       heatingDefaultOff: 'For heating, the default safety state is OFF.',
@@ -442,6 +446,16 @@ export const en = {
       advancedDefaultsTitle: 'Restore default advanced options',
       advancedTitle: 'Advanced options',
       advancedTitleAttr: 'Change VPD, relay, RSSI and safety limits',
+      advancedDisclosureHint:
+        'Safety limits and resilience to weak or missing sensor data. Defaults are suitable for most installations.',
+      openAdvanced: 'Open advanced options',
+      developerTools: 'Developer tools',
+      developerToolsHint:
+        'Script inspection, script operations and full Shelly diagnostics. Not required for normal setup.',
+      openDeveloperDiagnostics: 'Open technical diagnostics',
+      vpdAssistTitle: 'VPD assist',
+      vpdAssistHint:
+        'Optionally adjusts the operating point within the configured thresholds. It does not change safety limits.',
       automationScriptMissing: 'Save the rule for this plug first.',
       bootBehavior: 'After Shelly restart',
       bootBehaviorValue: 'OFF, then AUTO after first reading',
