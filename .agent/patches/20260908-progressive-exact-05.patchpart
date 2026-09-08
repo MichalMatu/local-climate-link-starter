@@ -1,0 +1,103 @@
++        'Limiti di sicurezza e tolleranza a segnale debole o assente. I valori predefiniti vanno bene per la maggior parte delle installazioni.',
++      openAdvanced: 'Apri opzioni avanzate',
++      developerTools: 'Strumenti sviluppatore',
++      developerToolsHint:
++        'Anteprima e operazioni dello script e diagnostica Shelly completa. Non servono per la configurazione normale.',
++      openDeveloperDiagnostics: 'Apri diagnostica tecnica',
++      vpdAssistTitle: 'Assistenza VPD',
++      vpdAssistHint:
++        'Regola opzionalmente il punto di lavoro entro le soglie configurate. Non modifica i limiti di sicurezza.',
+       automationScriptMissing: 'Salva prima la regola per questa presa.',
+       bootBehavior: 'Dopo riavvio Shelly',
+       bootBehaviorValue: 'OFF, poi AUTO dopo prima lettura',
+diff --git a/apps/mobile/src/app/locales/pl.ts b/apps/mobile/src/app/locales/pl.ts
+index f6066e4..7fcb2e0 100644
+--- a/apps/mobile/src/app/locales/pl.ts
++++ b/apps/mobile/src/app/locales/pl.ts
+@@ -209,7 +209,11 @@ export const pl = {
+       rule: 'Reguła',
+       ruleTitle: 'Progi i wysyłka reguły do Shelly',
+       diagnostics: 'Diag',
+-      diagnosticsTitle: 'Diagnostyka skryptu Shelly'
++      diagnosticsTitle: 'Diagnostyka skryptu Shelly',
++      backToRule: 'Wróć do reguły',
++      developerDiagnostics: 'Diagnostyka deweloperska',
++      developerDiagnosticsHint:
++        'Surowy stan skryptu, BLE i Shelly. Używaj tylko do diagnostyki i serwisu.'
+     },
+     safety: {
+       heatingDefaultOff: 'Dla grzania domyślny tryb bezpieczeństwa to OFF.',
+@@ -446,6 +450,16 @@ export const pl = {
+       advancedDefaultsTitle: 'Przywróć domyślne opcje zaawansowane',
+       advancedTitle: 'Opcje zaawansowane',
+       advancedTitleAttr: 'Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa',
++      advancedDisclosureHint:
++        'Limity bezpieczeństwa i odporność na słaby lub brakujący sygnał. Domyślne wartości są odpowiednie dla większości instalacji.',
++      openAdvanced: 'Otwórz opcje zaawansowane',
++      developerTools: 'Narzędzia deweloperskie',
++      developerToolsHint:
++        'Podgląd i operacje na skrypcie oraz pełna diagnostyka Shelly. Nie są potrzebne do normalnej konfiguracji.',
++      openDeveloperDiagnostics: 'Otwórz diagnostykę techniczną',
++      vpdAssistTitle: 'VPD assist',
++      vpdAssistHint:
++        'Opcjonalnie koryguje punkt pracy w obrębie ustawionych progów. Nie zmienia limitów bezpieczeństwa.',
+       automationScriptMissing: 'Najpierw zapisz regułę dla tego gniazdka.',
+       bootBehavior: 'Po restarcie Shelly',
+       bootBehaviorValue: 'OFF, potem AUTO po pierwszym odczycie',
+diff --git a/apps/mobile/src/app/locales/ptBr.ts b/apps/mobile/src/app/locales/ptBr.ts
+index 2ad2419..4baf6a4 100644
+--- a/apps/mobile/src/app/locales/ptBr.ts
++++ b/apps/mobile/src/app/locales/ptBr.ts
+@@ -210,7 +210,11 @@ export const ptBr = {
+       rule: 'Regra',
+       ruleTitle: 'Limites e envio da regra para Shelly',
+       diagnostics: 'Diag',
+-      diagnosticsTitle: 'Diagnóstico do script Shelly'
++      diagnosticsTitle: 'Diagnóstico do script Shelly',
++      backToRule: 'Voltar para a regra',
++      developerDiagnostics: 'Diagnóstico de desenvolvedor',
++      developerDiagnosticsHint:
++        'Estado bruto do script, BLE e Shelly. Use apenas para diagnóstico e manutenção.'
+     },
+     safety: {
+       heatingDefaultOff: 'Para aquecimento, o estado seguro padrão é OFF.',
+@@ -444,6 +448,16 @@ export const ptBr = {
+       advancedDefaultsTitle: 'Restaurar opções avançadas padrão',
+       advancedTitle: 'Opções avançadas',
+       advancedTitleAttr: 'Alterar VPD, relé, RSSI e limites de segurança',
++      advancedDisclosureHint:
++        'Limites de segurança e tolerância a sinal fraco ou ausente. Os valores padrão atendem à maioria das instalações.',
++      openAdvanced: 'Abrir opções avançadas',
++      developerTools: 'Ferramentas de desenvolvedor',
++      developerToolsHint:
++        'Visualização e operações do script e diagnóstico completo do Shelly. Não são necessários na configuração normal.',
++      openDeveloperDiagnostics: 'Abrir diagnóstico técnico',
++      vpdAssistTitle: 'Assistente VPD',
++      vpdAssistHint:
++        'Ajusta opcionalmente o ponto de operação dentro dos limites configurados. Não altera os limites de segurança.',
+       automationScriptMissing: 'Salve primeiro a regra para esta tomada.',
+       bootBehavior: 'Após reiniciar Shelly',
+       bootBehaviorValue: 'OFF, depois AUTO após primeira leitura',
+diff --git a/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx b/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx
+index 393ff1a..d6b2626 100644
+--- a/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx
++++ b/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx
+@@ -11,7 +11,7 @@ import { RuleSetupPage } from './pages/RuleSetupPage.js';
+ import { SensorSetupPage } from './pages/SensorSetupPage.js';
+ import { ShellySetupPage } from './pages/ShellySetupPage.js';
+ 
+-const HARDWARE_TABS = [
++const PRIMARY_HARDWARE_TABS = [
+   {
+     id: 'shelly',
+     labelKey: 'hardware.nav.shelly',
+@@ -26,18 +26,14 @@ const HARDWARE_TABS = [
+     id: 'rule',
+     labelKey: 'hardware.nav.rule',
+     titleKey: 'hardware.nav.ruleTitle'
+-  },
+-  {
+-    id: 'diagnostics',
+-    labelKey: 'hardware.nav.diagnostics',
+-    titleKey: 'hardware.nav.diagnosticsTitle'
+   }

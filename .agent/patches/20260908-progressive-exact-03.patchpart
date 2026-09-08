@@ -1,0 +1,111 @@
+-      ).toBeDisabled();
+-      expect(
+-        within(advancedDialog).getByText('Zakres: 0.1 do 5 kPa.')
+-      ).toBeInTheDocument();
+-      fireEvent.change(within(advancedDialog).getByLabelText(/Docelowe VPD kPa/), {
++      expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
++      expect(screen.getByText('Zakres: 0.1 do 5 kPa.')).toBeInTheDocument();
++      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
+         target: { value: '1.25' }
+       });
++
++      advancedDialog = await openRuleAdvancedDialog();
+       fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+         target: { value: '0' }
+       });
+@@ -3051,7 +3083,7 @@ describe('HardwareSetupScreen', () => {
+     await addShellyThroughUi('Salon');
+     await addSensorThroughUi({ name: 'Xiaomi salon' });
+ 
+-    fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
++    openDeveloperDiagnostics();
+     expect(screen.getByLabelText('Gniazdko Shelly')).toHaveValue('http://192.168.0.20/');
+     expect(screen.queryByLabelText('Termometr')).not.toBeInTheDocument();
+     expect(screen.queryByText('Numer skryptu Shelly')).not.toBeInTheDocument();
+@@ -3181,7 +3213,7 @@ describe('HardwareSetupScreen', () => {
+ 
+     renderHardwareSetup();
+ 
+-    fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
++    openDeveloperDiagnostics();
+     fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
+ 
+     await waitFor(() => expect(screen.getAllByText('69.6%')).toHaveLength(2));
+@@ -3252,7 +3284,7 @@ describe('HardwareSetupScreen', () => {
+ 
+       renderHardwareSetup();
+ 
+-      fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
++      openDeveloperDiagnostics();
+       fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
+ 
+       const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
+@@ -3301,7 +3333,7 @@ describe('HardwareSetupScreen', () => {
+ 
+     renderHardwareSetup();
+ 
+-    fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
++    openDeveloperDiagnostics();
+     fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
+ 
+     const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
+diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts
+index fb00343..e1ce78e 100644
+--- a/apps/mobile/src/app/locales/de.ts
++++ b/apps/mobile/src/app/locales/de.ts
+@@ -211,7 +211,11 @@ export const de = {
+       rule: 'Regel',
+       ruleTitle: 'Schwellwerte und Regel an Shelly senden',
+       diagnostics: 'Diag',
+-      diagnosticsTitle: 'Shelly-Skriptdiagnose'
++      diagnosticsTitle: 'Shelly-Skriptdiagnose',
++      backToRule: 'Zurück zur Regel',
++      developerDiagnostics: 'Entwicklerdiagnose',
++      developerDiagnosticsHint:
++        'Rohstatus von Skript, BLE und Shelly. Nur für Diagnose und Service verwenden.'
+     },
+     safety: {
+       heatingDefaultOff: 'Beim Heizen ist der sichere Standardzustand OFF.',
+@@ -449,6 +453,16 @@ export const de = {
+       advancedDefaultsTitle: 'Erweiterte Optionen auf Standard zurücksetzen',
+       advancedTitle: 'Erweiterte Optionen',
+       advancedTitleAttr: 'VPD, Relais, RSSI und Sicherheitslimits ändern',
++      advancedDisclosureHint:
++        'Sicherheitsgrenzen und Verhalten bei schwachem oder fehlendem Sensorsignal. Die Standardwerte passen für die meisten Installationen.',
++      openAdvanced: 'Erweiterte Optionen öffnen',
++      developerTools: 'Entwicklerwerkzeuge',
++      developerToolsHint:
++        'Skriptansicht, Skriptaktionen und vollständige Shelly-Diagnose. Für die normale Einrichtung nicht erforderlich.',
++      openDeveloperDiagnostics: 'Technische Diagnose öffnen',
++      vpdAssistTitle: 'VPD Assist',
++      vpdAssistHint:
++        'Passt optional den Arbeitspunkt innerhalb der festgelegten Schwellen an. Sicherheitsgrenzen bleiben unverändert.',
+       automationScriptMissing: 'Regel zuerst für diese Steckdose speichern.',
+       bootBehavior: 'Nach Shelly-Neustart',
+       bootBehaviorValue: 'OFF, danach AUTO nach erster Messung',
+diff --git a/apps/mobile/src/app/locales/en.ts b/apps/mobile/src/app/locales/en.ts
+index 422d50a..8292056 100644
+--- a/apps/mobile/src/app/locales/en.ts
++++ b/apps/mobile/src/app/locales/en.ts
+@@ -210,7 +210,11 @@ export const en = {
+       rule: 'Rule',
+       ruleTitle: 'Thresholds and rule upload to Shelly',
+       diagnostics: 'Diag',
+-      diagnosticsTitle: 'Shelly script diagnostics'
++      diagnosticsTitle: 'Shelly script diagnostics',
++      backToRule: 'Back to rule',
++      developerDiagnostics: 'Developer diagnostics',
++      developerDiagnosticsHint:
++        'Raw script, BLE and Shelly state. Use only for diagnostics and service.'
+     },
+     safety: {
+       heatingDefaultOff: 'For heating, the default safety state is OFF.',
+@@ -442,6 +446,16 @@ export const en = {
+       advancedDefaultsTitle: 'Restore default advanced options',
+       advancedTitle: 'Advanced options',
+       advancedTitleAttr: 'Change VPD, relay, RSSI and safety limits',
++      advancedDisclosureHint:
++        'Safety limits and resilience to weak or missing sensor data. Defaults are suitable for most installations.',
++      openAdvanced: 'Open advanced options',
++      developerTools: 'Developer tools',
++      developerToolsHint:

@@ -1,0 +1,3 @@
+   .setup-top-nav {
+     gap: 0;
+     padding: var(--lcl-spacing-xs);

@@ -1,0 +1,194 @@
+         open={isInstallBlockModalOpen && flow.installMutation.isError}
+@@ -684,51 +753,6 @@ export const RuleSetupPage = ({
+         onClose={() => setIsAdvancedModalOpen(false)}
+       >
+         <div className="advanced-settings">
+-          <section className="advanced-settings__section">
+-            <label className="toggle-row">
+-              <input
+-                type="checkbox"
+-                checked={advancedDraft.vpdAssistEnabled}
+-                onChange={(event) =>
+-                  updateAdvancedDraft({ vpdAssistEnabled: event.currentTarget.checked })
+-                }
+-              />
+-              <span>VPD assist</span>
+-            </label>
+-            <label
+-              className={`field ${
+-                advancedDraftValidation.isVpdTargetValid ? '' : 'field--invalid'
+-              }`}
+-            >
+-              {t('hardware.rule.vpdTarget')}
+-              <input
+-                aria-describedby={
+-                  advancedDraftValidation.isVpdTargetValid
+-                    ? advancedVpdHintId
+-                    : `${advancedVpdHintId} ${advancedVpdErrorId}`
+-                }
+-                aria-invalid={!advancedDraftValidation.isVpdTargetValid}
+-                disabled={!advancedDraft.vpdAssistEnabled}
+-                max={RULE_ADVANCED_LIMITS.vpdTargetMax}
+-                min={RULE_ADVANCED_LIMITS.vpdTargetMin}
+-                step="0.05"
+-                type="number"
+-                value={advancedDraft.vpdTargetInput}
+-                onChange={(event) =>
+-                  updateAdvancedDraft({ vpdTargetInput: event.currentTarget.value })
+-                }
+-              />
+-              <span className="field__hint" id={advancedVpdHintId}>
+-                {t('hardware.rule.vpdRangeHint')}
+-              </span>
+-              {!advancedDraftValidation.isVpdTargetValid && (
+-                <span className="field__error" id={advancedVpdErrorId}>
+-                  {t('hardware.rule.range.kpa')}
+-                </span>
+-              )}
+-            </label>
+-          </section>
+-
+           <section className="advanced-settings__section">
+             <div className="field-row">
+               <label
+diff --git a/apps/mobile/src/theme/theme.css b/apps/mobile/src/theme/theme.css
+index c41cbe9..ef7bd68 100644
+--- a/apps/mobile/src/theme/theme.css
++++ b/apps/mobile/src/theme/theme.css
+@@ -159,6 +159,29 @@ select {
+   text-align: right;
+ }
+ 
++.developer-context {
++  align-items: flex-start;
++  background: var(--lcl-color-surface-muted);
++  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  border-radius: var(--lcl-radius-md);
++  display: flex;
++  gap: var(--lcl-spacing-md);
++  padding: var(--lcl-spacing-md);
++}
++
++.developer-context > div {
++  display: grid;
++  gap: var(--lcl-spacing-xs);
++  min-width: 0;
++}
++
++.developer-context p {
++  color: var(--lcl-color-text-muted);
++  font-size: var(--lcl-font-size-sm);
++  line-height: var(--lcl-line-height-normal);
++  margin: 0;
++}
++
+ .demo-panel {
+   background: var(--lcl-color-surface);
+   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+@@ -238,6 +261,88 @@ select {
+   justify-content: flex-end;
+ }
+ 
++.rule-vpd-assist {
++  background: var(--lcl-color-surface-muted);
++  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  border-radius: var(--lcl-radius-md);
++  display: grid;
++  gap: var(--lcl-spacing-md);
++  padding: var(--lcl-spacing-md);
++}
++
++.rule-vpd-assist__header {
++  align-items: flex-start;
++  display: flex;
++  gap: var(--lcl-spacing-md);
++  justify-content: space-between;
++}
++
++.rule-vpd-assist__header > div {
++  display: grid;
++  gap: var(--lcl-spacing-xs);
++  min-width: 0;
++}
++
++.rule-vpd-assist__header p,
++.rule-progressive-disclosure__body > p {
++  color: var(--lcl-color-text-muted);
++  font-size: var(--lcl-font-size-sm);
++  line-height: var(--lcl-line-height-normal);
++  margin: 0;
++}
++
++.rule-vpd-assist__toggle {
++  flex: 0 0 auto;
++}
++
++.rule-progressive-disclosure-stack {
++  display: grid;
++  gap: var(--lcl-spacing-sm);
++}
++
++.rule-progressive-disclosure {
++  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  border-radius: var(--lcl-radius-md);
++  overflow: hidden;
++}
++
++.rule-progressive-disclosure > summary {
++  cursor: pointer;
++  font-weight: 800;
++  list-style-position: inside;
++  min-height: var(--lcl-size-control-min-height);
++  padding: var(--lcl-spacing-md);
++}
++
++.rule-progressive-disclosure[open] > summary {
++  border-bottom: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++}
++
++.rule-progressive-disclosure__body {
++  display: grid;
++  gap: var(--lcl-spacing-md);
++  padding: var(--lcl-spacing-md);
++}
++
++.rule-progressive-disclosure--developer {
++  background: var(--lcl-color-surface-muted);
++}
++
++.rule-developer-actions {
++  justify-content: flex-start;
++}
++
++.rule-developer-actions .secondary-action {
++  align-items: center;
++  display: inline-flex;
++  gap: var(--lcl-spacing-xs);
++}
++
++.rule-developer-actions .icon-action__svg {
++  height: var(--lcl-size-icon-sm);
++  width: var(--lcl-size-icon-sm);
++}
++
+ .relay-toggle {
+   min-width: var(--lcl-size-action-min-width);
+ }
+@@ -1355,6 +1460,20 @@ select {
+ }
+ 
+ @media (max-width: 30rem) {
++  .developer-context,
++  .rule-vpd-assist__header {
++    align-items: stretch;
++    display: grid;
++  }
++
++  .developer-context .setup-context__back {
++    justify-self: start;
++  }
++
++  .rule-vpd-assist__toggle {
++    justify-self: start;
++  }
++

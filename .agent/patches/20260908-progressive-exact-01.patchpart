@@ -1,0 +1,109 @@
+   await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
+   await expect(advancedDialog.getByLabel('Brak odczytu przez min')).toHaveValue('2');
+   await expect(advancedDialog.getByLabel('Ponowne ON po min')).toHaveValue('2');
+-  await advancedDialog.getByLabel('VPD assist').check();
+-  await advancedDialog.getByLabel('Docelowe VPD kPa').fill('1.25');
++  await expect(advancedDialog.getByLabel('VPD assist')).toHaveCount(0);
+   await advancedDialog.getByLabel('Minimalny RSSI dBm').fill('-80');
+   await advancedDialog.getByLabel('Brak odczytu przez min').fill('10');
+   await advancedDialog.getByLabel('Ponowne ON po min').fill('3');
+@@ -625,7 +644,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
+   ).toBeVisible();
+ 
+   await expectNoHorizontalOverflow(page);
+-  await page.getByRole('button', { name: 'Pokaż skrypt' }).click();
++  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
+   scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
+   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"vp":1.25');
+   await expectScriptPreviewFillsModalBody(page, 'Wygenerowany skrypt');
+diff --git a/apps/mobile/src/__tests__/hardware-setup.test.tsx b/apps/mobile/src/__tests__/hardware-setup.test.tsx
+index 96ad754..27cb164 100644
+--- a/apps/mobile/src/__tests__/hardware-setup.test.tsx
++++ b/apps/mobile/src/__tests__/hardware-setup.test.tsx
+@@ -285,22 +285,43 @@ const openSensorAddDialog = async () => {
+ };
+ 
+ const openRuleScriptDialog = async () => {
+-  fireEvent.click(screen.getByRole('button', { name: 'Pokaż skrypt' }));
++  openRuleDeveloperTools();
++  fireEvent.click(screen.getByRole('button', { name: 'Podgląd Shelly Script' }));
+   return screen.findByRole('dialog', { name: 'Podgląd Shelly Script' });
+ };
+ 
++const openRuleDisclosure = (label: string): HTMLDetailsElement => {
++  const summary = screen.getByText(label, { selector: 'summary' });
++  const details = summary.closest('details') as HTMLDetailsElement | null;
++  expect(details).not.toBeNull();
++  if (!details!.open) {
++    fireEvent.click(summary);
++  }
++  return details!;
++};
++
++const openRuleDeveloperTools = () => openRuleDisclosure('Narzędzia deweloperskie');
++
+ const openRuleAdvancedDialog = async () => {
+-  fireEvent.click(screen.getByRole('button', { name: 'Zaawansowane' }));
++  openRuleDisclosure('Zaawansowane');
++  fireEvent.click(screen.getByRole('button', { name: 'Otwórz opcje zaawansowane' }));
+   return screen.findByRole('dialog', { name: 'Opcje zaawansowane' });
+ };
+ 
+ const openRuleDeleteScriptDialog = async () => {
++  openRuleDeveloperTools();
+   fireEvent.click(screen.getByRole('button', { name: 'Usuń z Shelly' }));
+   return screen.findByRole('dialog', {
+     name: 'Potwierdź usunięcie skryptu z Shelly'
+   });
+ };
+ 
++const openDeveloperDiagnostics = () => {
++  fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
++  openRuleDeveloperTools();
++  fireEvent.click(screen.getByRole('button', { name: 'Otwórz diagnostykę techniczną' }));
++};
++
+ const confirmRuleScriptDelete = async () => {
+   const dialog = await openRuleDeleteScriptDialog();
+   fireEvent.click(within(dialog).getByRole('button', { name: 'Potwierdź usuń' }));
+@@ -566,10 +587,7 @@ describe('HardwareSetupScreen', () => {
+     expect(screen.getByRole('button', { name: 'Shelly' })).toBeInTheDocument();
+     expect(screen.getByRole('button', { name: 'Termometry' })).toBeInTheDocument();
+     expect(screen.getByRole('button', { name: 'Reguła' })).toBeInTheDocument();
+-    expect(screen.getByRole('button', { name: 'Diag' })).toHaveAttribute(
+-      'title',
+-      'Diagnostyka skryptu Shelly'
+-    );
++    expect(screen.queryByRole('button', { name: 'Diag' })).not.toBeInTheDocument();
+     expect(screen.queryByRole('button', { name: 'Skrypt' })).not.toBeInTheDocument();
+     expect(screen.getByRole('button', { name: 'Shelly' })).toHaveAttribute(
+       'aria-current',
+@@ -682,10 +700,15 @@ describe('HardwareSetupScreen', () => {
+     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+     expect(screen.getByLabelText('Gniazdko Shelly')).toBeInTheDocument();
+     expect(screen.getByLabelText('Termometr')).toBeInTheDocument();
++    expect(screen.getByText('Zaawansowane', { selector: 'summary' })).toBeVisible();
++    expect(
++      screen.getByText('Narzędzia deweloperskie', { selector: 'summary' })
++    ).toBeVisible();
+     expect(
+-      within(getRuleSummary()).getByRole('button', { name: 'Pokaż skrypt' })
+-    ).toBeDisabled();
+-    expect(screen.queryByText('Pokaż skrypt')).not.toBeInTheDocument();
++      screen
++        .getByText('Narzędzia deweloperskie', { selector: 'summary' })
++        .closest('details')
++    ).not.toHaveAttribute('open');
+     expect(getRuleSummary()).toHaveTextContent(
+       'Gdy termometr zniknie na 2 min albo Shelly uruchomi się ponownie'
+     );
+@@ -699,7 +722,7 @@ describe('HardwareSetupScreen', () => {
+   it('opens production app settings from diagnostics', async () => {
+     renderHardwareSetup();
+ 
+-    fireEvent.click(screen.getByRole('button', { name: 'Diag' }));
++    openDeveloperDiagnostics();
+     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia aplikacji' }));
+ 
+     const settingsDialog = await screen.findByRole('dialog', {
+@@ -1676,7 +1699,11 @@ describe('HardwareSetupScreen', () => {

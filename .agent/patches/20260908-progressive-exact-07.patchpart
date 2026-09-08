@@ -1,0 +1,136 @@
++              aria-label={t('hardware.rule.vpdAssistTitle')}
++              type="checkbox"
++              checked={flow.vpdAssistEnabled}
++              onChange={(event) => flow.setVpdAssistEnabled(event.currentTarget.checked)}
++            />
++            <span>
++              {flow.vpdAssistEnabled ? t('common.enabled') : t('common.disabled')}
++            </span>
++          </label>
++        </div>
++        {flow.vpdAssistEnabled && (
++          <label className={`field ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}>
++            {t('hardware.rule.vpdTarget')}
++            <input
++              aria-describedby={
++                flow.isVpdAssistValid ? vpdHintId : `${vpdHintId} ${vpdErrorId}`
++              }
++              aria-invalid={!flow.isVpdAssistValid}
++              max={RULE_ADVANCED_LIMITS.vpdTargetMax}
++              min={RULE_ADVANCED_LIMITS.vpdTargetMin}
++              step="0.05"
++              type="number"
++              value={flow.vpdTargetInput}
++              onChange={(event) => flow.setVpdTargetInput(event.currentTarget.value)}
++            />
++            <span className="field__hint" id={vpdHintId}>
++              {t('hardware.rule.vpdRangeHint')}
++            </span>
++            {!flow.isVpdAssistValid && (
++              <span className="field__error" id={vpdErrorId}>
++                {t('hardware.rule.range.kpa')}
++              </span>
++            )}
++          </label>
++        )}
++      </section>
++
++      <RuleSummaryCard title={t('hardware.rule.summaryTitle')} summary={ruleSummary} />
+ 
+       <div className="action-row rule-action-row">
+-        <button
+-          className="secondary-action"
+-          type="button"
+-          title={t('hardware.rule.advancedTitleAttr')}
+-          onClick={openAdvancedModal}
+-        >
+-          {t('hardware.rule.advanced')}
+-        </button>
+-        <button
+-          className="secondary-action"
+-          type="button"
+-          aria-busy={flow.loadAutomationScriptMutation.isPending}
+-          disabled={!flow.selectedShelly || isScriptActionBusy}
+-          title={t('hardware.rule.loadScriptFromShellyTitle')}
+-          onClick={loadScriptFromShelly}
+-        >
+-          {flow.loadAutomationScriptMutation.isPending
+-            ? t('hardware.rule.loadingScriptFromShelly')
+-            : t('hardware.rule.loadScriptFromShelly')}
+-        </button>
+         <button
+           className="primary-action"
+           type="button"
+@@ -567,6 +569,73 @@ export const RuleSetupPage = ({
+         </button>
+       </div>
+ 
++      <div className="rule-progressive-disclosure-stack">
++        <details className="rule-progressive-disclosure">
++          <summary>{t('hardware.rule.advanced')}</summary>
++          <div className="rule-progressive-disclosure__body">
++            <p>{t('hardware.rule.advancedDisclosureHint')}</p>
++            <button
++              className="secondary-action"
++              type="button"
++              title={t('hardware.rule.advancedTitleAttr')}
++              onClick={openAdvancedModal}
++            >
++              {t('hardware.rule.openAdvanced')}
++            </button>
++          </div>
++        </details>
++
++        <details className="rule-progressive-disclosure rule-progressive-disclosure--developer">
++          <summary>{t('hardware.rule.developerTools')}</summary>
++          <div className="rule-progressive-disclosure__body">
++            <p>{t('hardware.rule.developerToolsHint')}</p>
++            <div className="action-row rule-developer-actions">
++              <button
++                className="secondary-action"
++                type="button"
++                disabled={!flow.configState.ok}
++                title={t('hardware.rule.scriptPreviewTitle')}
++                onClick={() => setIsScriptModalOpen(true)}
++              >
++                <GeneratedScriptIcon />
++                {t('hardware.rule.scriptPreview')}
++              </button>
++              <button
++                className="secondary-action"
++                type="button"
++                aria-busy={flow.loadAutomationScriptMutation.isPending}
++                disabled={!flow.selectedShelly || isScriptActionBusy}
++                title={t('hardware.rule.loadScriptFromShellyTitle')}
++                onClick={loadScriptFromShelly}
++              >
++                {flow.loadAutomationScriptMutation.isPending
++                  ? t('hardware.rule.loadingScriptFromShelly')
++                  : t('hardware.rule.loadScriptFromShelly')}
++              </button>
++              <button
++                className="secondary-action secondary-action--danger"
++                type="button"
++                disabled={!flow.selectedShelly || isScriptActionBusy}
++                title={t('hardware.rule.deleteScriptTitle')}
++                onClick={() => setIsDeleteConfirmModalOpen(true)}
++              >
++                <TrashIcon />
++                {t('hardware.rule.deleteScriptFromShelly')}
++              </button>
++              {onOpenDiagnostics && (
++                <button
++                  className="secondary-action"
++                  type="button"
++                  onClick={onOpenDiagnostics}
++                >
++                  {t('hardware.rule.openDeveloperDiagnostics')}
++                </button>
++              )}
++            </div>
++          </div>
++        </details>
++      </div>
++
+       <Modal
+         closeLabel={t('common.close')}
