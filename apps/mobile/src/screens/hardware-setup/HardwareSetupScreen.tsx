@@ -11,7 +11,7 @@ import { RuleSetupPage } from './pages/RuleSetupPage.js';
 import { SensorSetupPage } from './pages/SensorSetupPage.js';
 import { ShellySetupPage } from './pages/ShellySetupPage.js';
 
-const HARDWARE_TABS = [
+const PRIMARY_HARDWARE_TABS = [
   {
     id: 'shelly',
     labelKey: 'hardware.nav.shelly',
@@ -26,18 +26,14 @@ const HARDWARE_TABS = [
     id: 'rule',
     labelKey: 'hardware.nav.rule',
     titleKey: 'hardware.nav.ruleTitle'
-  },
-  {
-    id: 'diagnostics',
-    labelKey: 'hardware.nav.diagnostics',
-    titleKey: 'hardware.nav.diagnosticsTitle'
   }
 ] as const;
 
-type HardwareTabId = (typeof HARDWARE_TABS)[number]['id'];
+type PrimaryHardwareTabId = (typeof PRIMARY_HARDWARE_TABS)[number]['id'];
+type HardwareTabId = PrimaryHardwareTabId | 'diagnostics';
 
 const isHardwareTabId = (value: string): value is HardwareTabId =>
-  HARDWARE_TABS.some((tab) => tab.id === value);
+  value === 'diagnostics' || PRIMARY_HARDWARE_TABS.some((tab) => tab.id === value);
 
 const currentTabFromHash = (): HardwareTabId => {
   if (typeof window === 'undefined') {
@@ -135,7 +131,7 @@ export const HardwareSetupScreen = ({
       )}
 
       <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
-        {HARDWARE_TABS.map((tab) => (
+        {PRIMARY_HARDWARE_TABS.map((tab) => (
           <button
             key={tab.id}
             className={
@@ -156,9 +152,30 @@ export const HardwareSetupScreen = ({
       {activeTab === 'shelly' && <ShellySetupPage flow={flow} />}
       {activeTab === 'sensor' && <SensorSetupPage flow={flow} />}
       {activeTab === 'rule' && (
-        <RuleSetupPage flow={flow} selectablePresets={selectableRulePresets} />
+        <RuleSetupPage
+          flow={flow}
+          selectablePresets={selectableRulePresets}
+          onOpenDiagnostics={() => selectTab('diagnostics')}
+        />
       )}
-      {activeTab === 'diagnostics' && <DiagnosticsSetupPage flow={flow} />}
+      {activeTab === 'diagnostics' && (
+        <>
+          <div className="developer-context">
+            <button
+              className="setup-context__back"
+              type="button"
+              onClick={() => selectTab('rule')}
+            >
+              {t('hardware.nav.backToRule')}
+            </button>
+            <div>
+              <strong>{t('hardware.nav.developerDiagnostics')}</strong>
+              <p>{t('hardware.nav.developerDiagnosticsHint')}</p>
+            </div>
+          </div>
+          <DiagnosticsSetupPage flow={flow} />
+        </>
+      )}
     </main>
   );
 };

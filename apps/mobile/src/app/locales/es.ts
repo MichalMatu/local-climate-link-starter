@@ -210,7 +210,11 @@ export const es = {
       rule: 'Regla',
       ruleTitle: 'Umbrales y envío de regla a Shelly',
       diagnostics: 'Diag',
-      diagnosticsTitle: 'Diagnóstico del script Shelly'
+      diagnosticsTitle: 'Diagnóstico del script Shelly',
+      backToRule: 'Volver a la regla',
+      developerDiagnostics: 'Diagnóstico de desarrollador',
+      developerDiagnosticsHint:
+        'Estado sin procesar del script, BLE y Shelly. Úsalo solo para diagnóstico y servicio.'
     },
     safety: {
       heatingDefaultOff: 'Para calefacción, el estado seguro predeterminado es OFF.',
@@ -446,6 +450,16 @@ export const es = {
       advancedDefaultsTitle: 'Restaurar opciones avanzadas predeterminadas',
       advancedTitle: 'Opciones avanzadas',
       advancedTitleAttr: 'Cambiar VPD, relé, RSSI y límites de seguridad',
+      advancedDisclosureHint:
+        'Límites de seguridad y tolerancia a una señal débil o ausente. Los valores predeterminados sirven para la mayoría de instalaciones.',
+      openAdvanced: 'Abrir opciones avanzadas',
+      developerTools: 'Herramientas de desarrollador',
+      developerToolsHint:
+        'Vista y operaciones del script y diagnóstico completo de Shelly. No son necesarias para la configuración normal.',
+      openDeveloperDiagnostics: 'Abrir diagnóstico técnico',
+      vpdAssistTitle: 'Asistente VPD',
+      vpdAssistHint:
+        'Ajusta opcionalmente el punto de trabajo dentro de los umbrales configurados. No cambia los límites de seguridad.',
       automationScriptMissing: 'Guarda primero la regla para este enchufe.',
       bootBehavior: 'Tras reinicio de Shelly',
       bootBehaviorValue: 'OFF, luego AUTO tras la primera lectura',

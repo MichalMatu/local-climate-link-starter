@@ -211,7 +211,11 @@ export const de = {
       rule: 'Regel',
       ruleTitle: 'Schwellwerte und Regel an Shelly senden',
       diagnostics: 'Diag',
-      diagnosticsTitle: 'Shelly-Skriptdiagnose'
+      diagnosticsTitle: 'Shelly-Skriptdiagnose',
+      backToRule: 'Zurück zur Regel',
+      developerDiagnostics: 'Entwicklerdiagnose',
+      developerDiagnosticsHint:
+        'Rohstatus von Skript, BLE und Shelly. Nur für Diagnose und Service verwenden.'
     },
     safety: {
       heatingDefaultOff: 'Beim Heizen ist der sichere Standardzustand OFF.',
@@ -449,6 +453,16 @@ export const de = {
       advancedDefaultsTitle: 'Erweiterte Optionen auf Standard zurücksetzen',
       advancedTitle: 'Erweiterte Optionen',
       advancedTitleAttr: 'VPD, Relais, RSSI und Sicherheitslimits ändern',
+      advancedDisclosureHint:
+        'Sicherheitsgrenzen und Verhalten bei schwachem oder fehlendem Sensorsignal. Die Standardwerte passen für die meisten Installationen.',
+      openAdvanced: 'Erweiterte Optionen öffnen',
+      developerTools: 'Entwicklerwerkzeuge',
+      developerToolsHint:
+        'Skriptansicht, Skriptaktionen und vollständige Shelly-Diagnose. Für die normale Einrichtung nicht erforderlich.',
+      openDeveloperDiagnostics: 'Technische Diagnose öffnen',
+      vpdAssistTitle: 'VPD Assist',
+      vpdAssistHint:
+        'Passt optional den Arbeitspunkt innerhalb der festgelegten Schwellen an. Sicherheitsgrenzen bleiben unverändert.',
       automationScriptMissing: 'Regel zuerst für diese Steckdose speichern.',
       bootBehavior: 'Nach Shelly-Neustart',
       bootBehaviorValue: 'OFF, danach AUTO nach erster Messung',

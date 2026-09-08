@@ -213,7 +213,11 @@ export const fr = {
       rule: 'Règle',
       ruleTitle: 'Seuils et envoi de la règle à Shelly',
       diagnostics: 'Diag',
-      diagnosticsTitle: 'Diagnostic du script Shelly'
+      diagnosticsTitle: 'Diagnostic du script Shelly',
+      backToRule: 'Retour à la règle',
+      developerDiagnostics: 'Diagnostic développeur',
+      developerDiagnosticsHint:
+        'État brut du script, du BLE et de Shelly. À utiliser uniquement pour le diagnostic et la maintenance.'
     },
     safety: {
       heatingDefaultOff: 'Pour le chauffage, l’état sûr par défaut est OFF.',
@@ -452,6 +456,16 @@ export const fr = {
       advancedDefaultsTitle: 'Restaurer les options avancées par défaut',
       advancedTitle: 'Options avancées',
       advancedTitleAttr: 'Modifier VPD, relais, RSSI et limites de sécurité',
+      advancedDisclosureHint:
+        'Limites de sécurité et tolérance à un signal faible ou absent. Les valeurs par défaut conviennent à la plupart des installations.',
+      openAdvanced: 'Ouvrir les options avancées',
+      developerTools: 'Outils développeur',
+      developerToolsHint:
+        'Aperçu et opérations du script, plus diagnostic Shelly complet. Inutile pour la configuration normale.',
+      openDeveloperDiagnostics: 'Ouvrir le diagnostic technique',
+      vpdAssistTitle: 'Assistance VPD',
+      vpdAssistHint:
+        'Ajuste éventuellement le point de fonctionnement dans les seuils configurés. Ne modifie pas les limites de sécurité.',
       automationScriptMissing: 'Enregistre d’abord la règle pour cette prise.',
       bootBehavior: 'Après redémarrage Shelly',
       bootBehaviorValue: 'OFF, puis AUTO après la première mesure',

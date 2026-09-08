@@ -45,7 +45,7 @@ const viewports = [
   { name: 'desktop', width: 1440, height: 900 }
 ] as const;
 
-const tabs = ['Shelly', 'Termometry', 'Reguła', 'Diag'] as const;
+const tabs = ['Shelly', 'Termometry', 'Reguła'] as const;
 
 const seedDraft = async (page: Page) => {
   await page.addInitScript((value) => {
@@ -540,23 +540,39 @@ for (const viewport of viewports) {
         await expectNoHorizontalOverflow(page);
         await page.getByRole('button', { name: 'Zamknij' }).click();
       }
-      if (tab === 'Diag') {
-        const refreshDiagnosticsButton = page.getByRole('button', {
-          name: 'Odśwież diagnostykę'
-        });
-        await expect(refreshDiagnosticsButton).toBeVisible();
-        await expectActionButtonAlignedToActionEdge(refreshDiagnosticsButton);
-      }
       await expectNoHorizontalOverflow(page);
       await expectNoLegacyInlineFeedback(page);
     }
 
     await page.getByRole('button', { name: 'Reguła' }).click();
-    await page.getByRole('button', { name: 'Zaawansowane' }).click();
+    await expect(page.getByRole('button', { name: 'Diag' })).toHaveCount(0);
+    await expect(page.getByLabel('VPD assist')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Wczytaj z Shelly' })).toBeHidden();
+    await page.locator('summary').filter({ hasText: 'Zaawansowane' }).click();
+    await page.getByRole('button', { name: 'Otwórz opcje zaawansowane' }).click();
     await expect(page.getByRole('dialog', { name: 'Opcje zaawansowane' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
     await page.getByRole('button', { name: 'Zamknij' }).click();
+
+    await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
+    await expect(page.getByRole('button', { name: 'Wczytaj z Shelly' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Otwórz diagnostykę techniczną' })
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Otwórz diagnostykę techniczną' }).click();
+    const refreshDiagnosticsButton = page.getByRole('button', {
+      name: 'Odśwież diagnostykę'
+    });
+    await expect(refreshDiagnosticsButton).toBeVisible();
+    await expectActionButtonAlignedToActionEdge(refreshDiagnosticsButton);
+    await expect(page.getByText('Diagnostyka deweloperska')).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole('button', { name: 'Wróć do reguły' }).click();
+    await expect(page.getByRole('button', { name: 'Reguła' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
     expect(consoleProblems).toEqual([]);
   });
 }
@@ -581,13 +597,14 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await page.goto('/admin#rule');
   await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
   await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
+  await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
 
   await page.getByLabel('Tryb reguły').selectOption('humidifying');
 
   await expect(page.getByLabel('Włącz poniżej %')).toHaveValue('45');
   await expect(page.getByLabel('Wyłącz powyżej %')).toHaveValue('55');
   await expect(page.getByText(/Nawilżanie włączy się poniżej 45\.0%/)).toBeVisible();
-  await page.getByRole('button', { name: 'Pokaż skrypt' }).click();
+  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
   let scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"m":1');
   await scriptDialog.getByRole('button', { name: 'Zamknij' }).click();
@@ -597,13 +614,16 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await expect(page.getByLabel('Włącz powyżej %')).toHaveValue('65');
   await expect(page.getByLabel('Wyłącz poniżej %')).toHaveValue('55');
   await expect(page.getByText(/Osuszanie włączy się powyżej 65\.0%/)).toBeVisible();
-  await page.getByRole('button', { name: 'Pokaż skrypt' }).click();
+  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
   scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"m":1');
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"d":1');
   await scriptDialog.getByRole('button', { name: 'Zamknij' }).click();
 
-  await page.getByRole('button', { name: 'Zaawansowane' }).click();
+  await page.getByLabel('VPD assist').check();
+  await page.getByLabel('Docelowe VPD kPa').fill('1.25');
+  await page.locator('summary').filter({ hasText: 'Zaawansowane' }).click();
+  await page.getByRole('button', { name: 'Otwórz opcje zaawansowane' }).click();
   const advancedDialog = page.getByRole('dialog', { name: 'Opcje zaawansowane' });
   await expect(advancedDialog).toBeVisible();
   await expect(advancedDialog).toBeFocused();
@@ -611,8 +631,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
   await expect(advancedDialog.getByLabel('Brak odczytu przez min')).toHaveValue('2');
   await expect(advancedDialog.getByLabel('Ponowne ON po min')).toHaveValue('2');
-  await advancedDialog.getByLabel('VPD assist').check();
-  await advancedDialog.getByLabel('Docelowe VPD kPa').fill('1.25');
+  await expect(advancedDialog.getByLabel('VPD assist')).toHaveCount(0);
   await advancedDialog.getByLabel('Minimalny RSSI dBm').fill('-80');
   await advancedDialog.getByLabel('Brak odczytu przez min').fill('10');
   await advancedDialog.getByLabel('Ponowne ON po min').fill('3');
@@ -625,7 +644,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   ).toBeVisible();
 
   await expectNoHorizontalOverflow(page);
-  await page.getByRole('button', { name: 'Pokaż skrypt' }).click();
+  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
   scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"vp":1.25');
   await expectScriptPreviewFillsModalBody(page, 'Wygenerowany skrypt');

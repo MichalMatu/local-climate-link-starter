@@ -193,11 +193,13 @@ const formatRuleSummary = ({
 
 type RuleSetupPageProps = HardwarePageProps & {
   selectablePresets?: readonly RulePresetId[];
+  onOpenDiagnostics?: () => void;
 };
 
 export const RuleSetupPage = ({
   flow,
-  selectablePresets = ALL_RULE_PRESETS
+  selectablePresets = ALL_RULE_PRESETS,
+  onOpenDiagnostics
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -210,8 +212,8 @@ export const RuleSetupPage = ({
     createAdvancedDraft(flow)
   );
   const thresholdErrorId = useId();
-  const advancedVpdHintId = useId();
-  const advancedVpdErrorId = useId();
+  const vpdHintId = useId();
+  const vpdErrorId = useId();
   const toastIdRef = useRef(0);
   const copy = RULE_PRESET_COPY[flow.rulePreset];
   const currentRule =
@@ -381,7 +383,11 @@ export const RuleSetupPage = ({
   };
 
   const resetAdvancedDraft = () => {
-    setAdvancedDraft(DEFAULT_RULE_ADVANCED_SETTINGS);
+    setAdvancedDraft({
+      ...DEFAULT_RULE_ADVANCED_SETTINGS,
+      vpdAssistEnabled: flow.vpdAssistEnabled,
+      vpdTargetInput: flow.vpdTargetInput
+    });
   };
 
   const updateAdvancedDraft = (patch: Partial<RuleAdvancedSettingsInput>) => {
@@ -393,8 +399,6 @@ export const RuleSetupPage = ({
       return;
     }
 
-    flow.setVpdAssistEnabled(advancedDraft.vpdAssistEnabled);
-    flow.setVpdTargetInput(advancedDraft.vpdTargetInput);
     flow.setRssiMinInput(advancedDraft.rssiMinInput);
     flow.setStaleTimeoutMinInput(advancedDraft.staleTimeoutMinInput);
     flow.setMinChangeMinInput(advancedDraft.minChangeMinInput);
@@ -501,56 +505,54 @@ export const RuleSetupPage = ({
         </label>
       </div>
 
-      <RuleSummaryCard
-        action={
-          <div className="rule-summary-actions">
-            <button
-              aria-label={t('hardware.rule.scriptPreviewAria')}
-              className="icon-action rule-summary-icon-action"
-              type="button"
-              disabled={!flow.configState.ok}
-              title={t('hardware.rule.scriptPreviewTitle')}
-              onClick={() => setIsScriptModalOpen(true)}
-            >
-              <GeneratedScriptIcon />
-            </button>
-            <button
-              aria-label={t('hardware.rule.deleteScriptFromShelly')}
-              className="icon-action icon-action--danger rule-summary-icon-action"
-              type="button"
-              disabled={!flow.selectedShelly || isScriptActionBusy}
-              title={t('hardware.rule.deleteScriptTitle')}
-              onClick={() => setIsDeleteConfirmModalOpen(true)}
-            >
-              <TrashIcon />
-            </button>
+      <section className="rule-vpd-assist">
+        <div className="rule-vpd-assist__header">
+          <div>
+            <strong>{t('hardware.rule.vpdAssistTitle')}</strong>
+            <p>{t('hardware.rule.vpdAssistHint')}</p>
           </div>
-        }
-        title={t('hardware.rule.summaryTitle')}
-        summary={ruleSummary}
-      />
+          <label className="toggle-row rule-vpd-assist__toggle">
+            <input
+              aria-label={t('hardware.rule.vpdAssistTitle')}
+              type="checkbox"
+              checked={flow.vpdAssistEnabled}
+              onChange={(event) => flow.setVpdAssistEnabled(event.currentTarget.checked)}
+            />
+            <span>
+              {flow.vpdAssistEnabled ? t('common.enabled') : t('common.disabled')}
+            </span>
+          </label>
+        </div>
+        {flow.vpdAssistEnabled && (
+          <label className={`field ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}>
+            {t('hardware.rule.vpdTarget')}
+            <input
+              aria-describedby={
+                flow.isVpdAssistValid ? vpdHintId : `${vpdHintId} ${vpdErrorId}`
+              }
+              aria-invalid={!flow.isVpdAssistValid}
+              max={RULE_ADVANCED_LIMITS.vpdTargetMax}
+              min={RULE_ADVANCED_LIMITS.vpdTargetMin}
+              step="0.05"
+              type="number"
+              value={flow.vpdTargetInput}
+              onChange={(event) => flow.setVpdTargetInput(event.currentTarget.value)}
+            />
+            <span className="field__hint" id={vpdHintId}>
+              {t('hardware.rule.vpdRangeHint')}
+            </span>
+            {!flow.isVpdAssistValid && (
+              <span className="field__error" id={vpdErrorId}>
+                {t('hardware.rule.range.kpa')}
+              </span>
+            )}
+          </label>
+        )}
+      </section>
+
+      <RuleSummaryCard title={t('hardware.rule.summaryTitle')} summary={ruleSummary} />
 
       <div className="action-row rule-action-row">
-        <button
-          className="secondary-action"
-          type="button"
-          title={t('hardware.rule.advancedTitleAttr')}
-          onClick={openAdvancedModal}
-        >
-          {t('hardware.rule.advanced')}
-        </button>
-        <button
-          className="secondary-action"
-          type="button"
-          aria-busy={flow.loadAutomationScriptMutation.isPending}
-          disabled={!flow.selectedShelly || isScriptActionBusy}
-          title={t('hardware.rule.loadScriptFromShellyTitle')}
-          onClick={loadScriptFromShelly}
-        >
-          {flow.loadAutomationScriptMutation.isPending
-            ? t('hardware.rule.loadingScriptFromShelly')
-            : t('hardware.rule.loadScriptFromShelly')}
-        </button>
         <button
           className="primary-action"
           type="button"
@@ -565,6 +567,73 @@ export const RuleSetupPage = ({
         >
           {flow.installMutation.isPending ? t('common.sending') : t('common.send')}
         </button>
+      </div>
+
+      <div className="rule-progressive-disclosure-stack">
+        <details className="rule-progressive-disclosure">
+          <summary>{t('hardware.rule.advanced')}</summary>
+          <div className="rule-progressive-disclosure__body">
+            <p>{t('hardware.rule.advancedDisclosureHint')}</p>
+            <button
+              className="secondary-action"
+              type="button"
+              title={t('hardware.rule.advancedTitleAttr')}
+              onClick={openAdvancedModal}
+            >
+              {t('hardware.rule.openAdvanced')}
+            </button>
+          </div>
+        </details>
+
+        <details className="rule-progressive-disclosure rule-progressive-disclosure--developer">
+          <summary>{t('hardware.rule.developerTools')}</summary>
+          <div className="rule-progressive-disclosure__body">
+            <p>{t('hardware.rule.developerToolsHint')}</p>
+            <div className="action-row rule-developer-actions">
+              <button
+                className="secondary-action"
+                type="button"
+                disabled={!flow.configState.ok}
+                title={t('hardware.rule.scriptPreviewTitle')}
+                onClick={() => setIsScriptModalOpen(true)}
+              >
+                <GeneratedScriptIcon />
+                {t('hardware.rule.scriptPreview')}
+              </button>
+              <button
+                className="secondary-action"
+                type="button"
+                aria-busy={flow.loadAutomationScriptMutation.isPending}
+                disabled={!flow.selectedShelly || isScriptActionBusy}
+                title={t('hardware.rule.loadScriptFromShellyTitle')}
+                onClick={loadScriptFromShelly}
+              >
+                {flow.loadAutomationScriptMutation.isPending
+                  ? t('hardware.rule.loadingScriptFromShelly')
+                  : t('hardware.rule.loadScriptFromShelly')}
+              </button>
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={!flow.selectedShelly || isScriptActionBusy}
+                title={t('hardware.rule.deleteScriptTitle')}
+                onClick={() => setIsDeleteConfirmModalOpen(true)}
+              >
+                <TrashIcon />
+                {t('hardware.rule.deleteScriptFromShelly')}
+              </button>
+              {onOpenDiagnostics && (
+                <button
+                  className="secondary-action"
+                  type="button"
+                  onClick={onOpenDiagnostics}
+                >
+                  {t('hardware.rule.openDeveloperDiagnostics')}
+                </button>
+              )}
+            </div>
+          </div>
+        </details>
       </div>
 
       <Modal
@@ -684,51 +753,6 @@ export const RuleSetupPage = ({
         onClose={() => setIsAdvancedModalOpen(false)}
       >
         <div className="advanced-settings">
-          <section className="advanced-settings__section">
-            <label className="toggle-row">
-              <input
-                type="checkbox"
-                checked={advancedDraft.vpdAssistEnabled}
-                onChange={(event) =>
-                  updateAdvancedDraft({ vpdAssistEnabled: event.currentTarget.checked })
-                }
-              />
-              <span>VPD assist</span>
-            </label>
-            <label
-              className={`field ${
-                advancedDraftValidation.isVpdTargetValid ? '' : 'field--invalid'
-              }`}
-            >
-              {t('hardware.rule.vpdTarget')}
-              <input
-                aria-describedby={
-                  advancedDraftValidation.isVpdTargetValid
-                    ? advancedVpdHintId
-                    : `${advancedVpdHintId} ${advancedVpdErrorId}`
-                }
-                aria-invalid={!advancedDraftValidation.isVpdTargetValid}
-                disabled={!advancedDraft.vpdAssistEnabled}
-                max={RULE_ADVANCED_LIMITS.vpdTargetMax}
-                min={RULE_ADVANCED_LIMITS.vpdTargetMin}
-                step="0.05"
-                type="number"
-                value={advancedDraft.vpdTargetInput}
-                onChange={(event) =>
-                  updateAdvancedDraft({ vpdTargetInput: event.currentTarget.value })
-                }
-              />
-              <span className="field__hint" id={advancedVpdHintId}>
-                {t('hardware.rule.vpdRangeHint')}
-              </span>
-              {!advancedDraftValidation.isVpdTargetValid && (
-                <span className="field__error" id={advancedVpdErrorId}>
-                  {t('hardware.rule.range.kpa')}
-                </span>
-              )}
-            </label>
-          </section>
-
           <section className="advanced-settings__section">
             <div className="field-row">
               <label
