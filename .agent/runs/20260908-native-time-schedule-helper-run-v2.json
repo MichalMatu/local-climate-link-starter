@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260908-native-time-schedule-helper-run-v2",
   "task_digest": "f746af5289a1c9ab71d9591f6aaa48155aafe6142ce5fdbcb21dc64679780be4",
-  "idle_timeout": 90,
-  "task_timeout": 600,
-  "memory_limit_mb": 1024,
-  "started_at": "2026-09-08T19:35:56.850539+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-08T19:35:59.630557+00:00",
   "attempt_id": "19bcc39a02864cc37154b198",
   "daemon_version": "4.18.19",
   "daemon_pid": 60659,
-  "updated_at": "2026-09-08T19:35:56.850696+00:00",
+  "updated_at": "2026-09-08T19:35:59.868603+00:00",
   "pid": 60659
 }
