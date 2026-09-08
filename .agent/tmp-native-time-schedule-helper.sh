@@ -28,5 +28,5 @@ git diff --check
 git add apps/mobile packages/shelly-client
 test "$(git diff --cached --binary | sha256sum | awk '{print $1}')" = "$expected_patch"
 git commit -m 'Add native time schedules'
-git push origin work/native-time-schedule
+git push origin HEAD:work/native-time-schedule
 printf 'commit_sha=%s\n' "$(git rev-parse HEAD)"
