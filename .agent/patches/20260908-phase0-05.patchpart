@@ -1,0 +1,80 @@
++    try {
++      const payload = persistedInstalledAutomationsSchema.parse({
++        version: INSTALLED_AUTOMATION_VERSION,
++        installations
++      });
++      storage.setItem(INSTALLED_AUTOMATIONS_STORAGE_KEY, JSON.stringify(payload));
++    } catch (error) {
++      warnStorageFailure('write', error);
++    }
++  },
++  clear: () => {
++    if (!storage) {
++      return;
++    }
++
++    try {
++      storage.removeItem(INSTALLED_AUTOMATIONS_STORAGE_KEY);
++    } catch (error) {
++      warnStorageFailure('clear', error);
++    }
++  }
++});
+diff --git a/apps/mobile/src/flows/installations/store.test.ts b/apps/mobile/src/flows/installations/store.test.ts
+new file mode 100644
+index 0000000..849ae55
+--- /dev/null
++++ b/apps/mobile/src/flows/installations/store.test.ts
+@@ -0,0 +1,122 @@
++import {
++  createDefaultShellyThermostatConfig,
++  type ShellyThermostatConfig
++} from '@lcl/script-generator';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { createInstalledAutomation } from './model.js';
++
++const configFor = (
++  runtimeAddress: string,
++  mode: ShellyThermostatConfig['rule']['mode'],
++  onThreshold: number,
++  offThreshold: number
++): ShellyThermostatConfig => {
++  const config = createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2', mode);
++  return {
++    ...config,
++    sensor: {
++      ...config.sensor,
++      sensorId: `sensor-${runtimeAddress.replaceAll(':', '').toLowerCase()}`,
++      runtimeAddress,
++      displayName: `Sensor ${runtimeAddress}`
++    },
++    rule: {
++      ...config.rule,
++      control: {
++        ...config.rule.control,
++        onThreshold,
++        offThreshold
++      }
++    }
++  };
++};
++
++describe('installed automation store', () => {
++  beforeEach(() => {
++    window.localStorage.clear();
++    vi.resetModules();
++  });
++
++  afterEach(() => {
++    window.localStorage.clear();
++    vi.resetModules();
++  });
++
++  it('persists two independent Shelly installations with different sensors and rules', async () => {
++    const storeModule = await import('./store.js');
++
++    const first = createInstalledAutomation({
++      shelly: { id: 'shelly-a', model: 'S3PL-00112EU', gen: 3 },
++      shellyName: 'Salon',
++      baseUrl: 'http://192.168.0.20/',
++      scriptId: 1,
