@@ -1,11 +1,11 @@
 import {
   createLedOffPatch,
   createRelayStateLedPatch,
-  FetchShellyRpcTransport,
   RpcShellyPlugsUiClient,
   type Result,
   type ShellyPlugsUiReadResult
 } from '@lcl/shelly-client';
+import { createShellyTransport } from '../hardware-setup/shellyRequests.js';
 import type { InstalledAutomation } from './model.js';
 
 export type InstalledShellyLedPreset = 'relay-state' | 'off';
@@ -20,12 +20,7 @@ export const installedShellyLedSettingsQueryKey = (
   ] as const;
 
 const createClient = (installation: InstalledAutomation) =>
-  new RpcShellyPlugsUiClient(
-    new FetchShellyRpcTransport({
-      baseUrl: installation.shelly.baseUrl,
-      defaultTimeoutMs: 5000
-    })
-  );
+  new RpcShellyPlugsUiClient(createShellyTransport(installation.shelly.baseUrl));
 
 const unwrap = <T>(result: Result<T>): T => {
   if (result.ok) {
