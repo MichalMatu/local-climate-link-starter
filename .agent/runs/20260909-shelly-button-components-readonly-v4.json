@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-shelly-button-components-readonly-v4",
+  "task_digest": "a6ce7d051c869d4cfe33e26265d533831b39b9108620c14909e28802e849cec4",
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "memory_limit_mb": 512,
+  "started_at": "2026-09-08T23:33:58.486919+00:00",
+  "attempt_id": "1307264b3ae26279a950833b",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 94559,
+  "updated_at": "2026-09-08T23:33:58.487066+00:00",
+  "pid": 94559
+}
