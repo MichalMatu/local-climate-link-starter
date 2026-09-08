@@ -1,0 +1,17 @@
+{
+  "id": "20260908-native-time-schedule-parts-audit-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/native-time-schedule",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 512,
+  "command_timeout": 120,
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "commands": [
+    "git fetch --prune origin",
+    "for i in 00 01 02 03; do printf '%s=' \"$i\"; git show origin/agent-control:.agent/patches/20260908-native-schedule-zst-b64-${i}.part | sha256sum | awk '{print $1}'; done",
+    "printf 'FULL='; for i in 00 01 02 03; do git show origin/agent-control:.agent/patches/20260908-native-schedule-zst-b64-${i}.part; done | sha256sum | awk '{print $1}'"
+  ]
+}
