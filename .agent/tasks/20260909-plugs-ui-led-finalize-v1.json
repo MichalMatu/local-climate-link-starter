@@ -1,0 +1,31 @@
+{
+  "id": "20260909-plugs-ui-led-finalize-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plugs-ui-led-audit",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse origin/work/plugs-ui-led-audit)\" = \"d731343753215f5348a5bc4b8e32861e0a4d960f\"",
+    "git checkout -B work/plugs-ui-led-audit origin/work/plugs-ui-led-audit",
+    "git reset --hard origin/work/plugs-ui-led-audit && git clean -fd",
+    "test \"$(git rev-parse v2.0.9)\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"",
+    "python3 - <<'PY'\nfrom pathlib import Path\np = Path('.github/workflows/ci.yml')\ns = p.read_text()\nold = '''      - name: Format\n        run: |\n          pnpm format\n          git diff\n          git diff --quiet\n\n      - name: Upload formatted LED sources\n        if: failure()\n        uses: actions/upload-artifact@v4\n        with:\n          name: formatted-led-sources\n          path: |\n            apps/mobile/e2e/led-settings.spec.ts\n            apps/mobile/src/__tests__/shelly-led-settings.test.tsx\n            apps/mobile/src/flows/installations/deviceLed.ts\n            apps/mobile/src/screens/deviceLedCopy.ts\n            packages/shelly-client/src/__tests__/plugsUi.test.ts\n            packages/shelly-client/src/plugsUi.ts\n'''\nnew = '''      - name: Format\n        run: pnpm format:check\n'''\nif old not in s:\n    raise SystemExit('expected temporary format workaround not found')\np.write_text(s.replace(old, new))\nPY",
+    "pnpm exec prettier --write .github/workflows/ci.yml apps/mobile/e2e/led-settings.spec.ts apps/mobile/src/__tests__/shelly-led-settings.test.tsx apps/mobile/src/flows/installations/deviceLed.ts apps/mobile/src/screens/ShellyLedSettingsCard.tsx apps/mobile/src/screens/deviceLedCopy.ts packages/shelly-client/src/__tests__/plugsUi.test.ts packages/shelly-client/src/plugsUi.ts packages/shelly-client/src/index.ts packages/shelly-client/src/model.ts apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/TimeInstallationDetail.tsx",
+    "grep -q 'run: pnpm format:check' .github/workflows/ci.yml && ! grep -q 'Upload formatted LED sources' .github/workflows/ci.yml && grep -q 'responsive-visual-audit' .github/workflows/ci.yml",
+    "test -z \"$(git diff --name-only origin/main...HEAD -- packages/automation-core packages/script-generator)\"",
+    "git diff --check",
+    "pnpm check:full",
+    "git status --short",
+    "git add .github/workflows/ci.yml apps/mobile/e2e/led-settings.spec.ts apps/mobile/src/__tests__/shelly-led-settings.test.tsx apps/mobile/src/flows/installations/deviceLed.ts apps/mobile/src/screens/ShellyLedSettingsCard.tsx apps/mobile/src/screens/deviceLedCopy.ts packages/shelly-client/src/__tests__/plugsUi.test.ts packages/shelly-client/src/plugsUi.ts packages/shelly-client/src/index.ts packages/shelly-client/src/model.ts apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/TimeInstallationDetail.tsx",
+    "git diff --cached --check",
+    "git commit -m 'Finalize native Shelly LED settings'",
+    "git push origin work/plugs-ui-led-audit",
+    "printf 'COMMIT_SHA=%s\\n' \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\""
+  ]
+}
