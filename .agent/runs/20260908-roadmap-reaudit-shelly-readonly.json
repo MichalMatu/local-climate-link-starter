@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260908-roadmap-reaudit-shelly-readonly",
+  "task_digest": "e5998c512f38c4c087bd6264d49ddda2ec0194be75d7e751d4338b4f1bc2aeb1",
+  "idle_timeout": 30,
+  "task_timeout": 120,
+  "memory_limit_mb": 256,
+  "started_at": "2026-09-08T12:56:12.870355+00:00",
+  "attempt_id": "c64d4576f3f707797e116469",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 93510,
+  "updated_at": "2026-09-08T12:56:12.870512+00:00",
+  "pid": 93510
+}
