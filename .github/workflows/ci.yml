@@ -55,3 +55,11 @@ jobs:
 
       - name: Responsive smoke
         run: pnpm e2e:responsive
+
+      - name: Upload responsive visual audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-visual-audit
+          path: test-results/visual-audit
+          if-no-files-found: ignore

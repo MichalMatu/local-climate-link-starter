@@ -21,6 +21,7 @@ import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime
 } from '../flows/time-automation/useTimeAutomationRuntime.js';
+import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 
 const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'loading') =>
   `automation-health automation-health--${
@@ -301,6 +302,8 @@ export const TimeInstallationDetail = ({
             <p className="installation-detail-note">{t('time.detail.needsAttention')}</p>
           )}
         </article>
+
+        <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
 
       <Modal
