@@ -1,0 +1,80 @@
+       noSelectedShelly: 'Select Shelly plug.',
+       noSelectedDiagnosticShelly: 'Select Shelly plug for diagnostics.',
+diff --git a/apps/mobile/src/app/locales/es.ts b/apps/mobile/src/app/locales/es.ts
+index e9601a2..0f7e5c7 100644
+--- a/apps/mobile/src/app/locales/es.ts
++++ b/apps/mobile/src/app/locales/es.ts
+@@ -477,6 +477,8 @@ export const es = {
+       fixShellyData: 'Corrige los datos del enchufe.',
+       inputShellyIp: 'introduce IP de Shelly',
+       installFirst: 'Envía primero la regla actual.',
++      shellyIdentityMissing:
++        'Shelly no proporcionó un identificador estable del dispositivo. Actualiza el firmware y vuelve a intentarlo.',
+       noSelectedSensor: 'Añade y selecciona un termómetro.',
+       noSelectedShelly: 'Selecciona enchufe Shelly.',
+       noSelectedDiagnosticShelly: 'Selecciona enchufe Shelly para diagnóstico.',
+diff --git a/apps/mobile/src/app/locales/fr.ts b/apps/mobile/src/app/locales/fr.ts
+index 85b47a6..e5256cc 100644
+--- a/apps/mobile/src/app/locales/fr.ts
++++ b/apps/mobile/src/app/locales/fr.ts
+@@ -480,6 +480,8 @@ export const fr = {
+       fixShellyData: 'Corrige les données de la prise.',
+       inputShellyIp: 'saisir l’IP Shelly',
+       installFirst: 'Envoie d’abord la règle actuelle.',
++      shellyIdentityMissing:
++        'Shelly n’a pas fourni d’identifiant stable de l’appareil. Mets à jour le firmware puis réessaie.',
+       noSelectedSensor: 'Ajoute et sélectionne un thermomètre.',
+       noSelectedShelly: 'Sélectionne une prise Shelly.',
+       noSelectedDiagnosticShelly: 'Sélectionne une prise Shelly pour le diagnostic.',
+diff --git a/apps/mobile/src/app/locales/it.ts b/apps/mobile/src/app/locales/it.ts
+index 20fbe2e..5345d19 100644
+--- a/apps/mobile/src/app/locales/it.ts
++++ b/apps/mobile/src/app/locales/it.ts
+@@ -478,6 +478,8 @@ export const it = {
+       fixShellyData: 'Correggi dati presa.',
+       inputShellyIp: 'inserisci IP Shelly',
+       installFirst: 'Invia prima la regola attuale.',
++      shellyIdentityMissing:
++        'Shelly non ha fornito un identificatore stabile del dispositivo. Aggiorna il firmware e riprova.',
+       noSelectedSensor: 'Aggiungi e seleziona un termometro.',
+       noSelectedShelly: 'Seleziona presa Shelly.',
+       noSelectedDiagnosticShelly: 'Seleziona presa Shelly per diagnostica.',
+diff --git a/apps/mobile/src/app/locales/pl.ts b/apps/mobile/src/app/locales/pl.ts
+index e02985e..74661df 100644
+--- a/apps/mobile/src/app/locales/pl.ts
++++ b/apps/mobile/src/app/locales/pl.ts
+@@ -476,6 +476,8 @@ export const pl = {
+       fixShellyData: 'Popraw dane gniazdka.',
+       inputShellyIp: 'wpisz IP Shelly',
+       installFirst: 'Najpierw wyślij aktualną regułę.',
++      shellyIdentityMissing:
++        'Shelly nie podał stabilnego identyfikatora urządzenia. Zaktualizuj firmware i spróbuj ponownie.',
+       noSelectedSensor: 'Dodaj i wybierz termometr.',
+       noSelectedShelly: 'Wybierz gniazdko Shelly.',
+       noSelectedDiagnosticShelly: 'Wybierz gniazdko Shelly do diagnostyki.',
+diff --git a/apps/mobile/src/app/locales/ptBr.ts b/apps/mobile/src/app/locales/ptBr.ts
+index 434ea74..f6f8e54 100644
+--- a/apps/mobile/src/app/locales/ptBr.ts
++++ b/apps/mobile/src/app/locales/ptBr.ts
+@@ -475,6 +475,8 @@ export const ptBr = {
+       fixShellyData: 'Corrija os dados da tomada.',
+       inputShellyIp: 'informe IP Shelly',
+       installFirst: 'Envie primeiro a regra atual.',
++      shellyIdentityMissing:
++        'O Shelly não forneceu um identificador estável do dispositivo. Atualize o firmware e tente novamente.',
+       noSelectedSensor: 'Adicione e selecione um termômetro.',
+       noSelectedShelly: 'Selecione tomada Shelly.',
+       noSelectedDiagnosticShelly: 'Selecione tomada Shelly para diagnóstico.',
+diff --git a/apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts b/apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
+index 4fcd856..8e00fce 100644
+--- a/apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
++++ b/apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
+@@ -28,6 +28,11 @@ import {
+ } from '@lcl/shelly-client';
+ import { useCallback, useMemo, useRef, useState } from 'react';
+ import { t } from '../../app/i18n.js';
++import {
++  createInstalledAutomation,
++  type InstalledAutomation
++} from '../installations/model.js';
++import { useInstalledAutomationStore } from '../installations/store.js';
