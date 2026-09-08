@@ -63,6 +63,7 @@ const mockShellyRpc = async (page: Page) => {
     switch (requestBody.method) {
       case 'Shelly.GetDeviceInfo':
         result = {
+          id: 'shellyplugsg3-e2e',
           model: 'S3PL-00112EU',
           gen: 3,
           fw_id: '20260311-095902/1.7.5-g9979d16'
@@ -292,6 +293,9 @@ for (const viewport of viewports) {
     await page.goto('/admin#shelly');
 
     await expect(page).toHaveTitle('Local Climate Link');
+    await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole('button', { name: /Zarządzać istniejącą automatyką/ }).click();
     await expect(
       page.getByRole('navigation', { name: 'Menu konfiguracji' })
     ).toBeVisible();
@@ -377,6 +381,8 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await seedDraft(page);
   await mockShellyRpc(page);
   await page.goto('/admin#rule');
+  await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
+  await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
 
   await page.getByLabel('Tryb reguły').selectOption('humidifying');
 

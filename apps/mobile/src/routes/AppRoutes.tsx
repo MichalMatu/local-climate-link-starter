@@ -1,5 +1,7 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import type { SetupIntent } from '../flows/setup-intent.js';
+import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
   const module = await import('../screens/hardware-setup/HardwareSetupScreen.js');
@@ -18,8 +20,19 @@ const RouteFallback = () => {
   );
 };
 
-export const AppRoutes = () => (
-  <Suspense fallback={<RouteFallback />}>
-    <HardwareSetupScreen />
-  </Suspense>
-);
+export const AppRoutes = () => {
+  const [setupIntent, setSetupIntent] = useState<SetupIntent | null>(null);
+
+  if (!setupIntent) {
+    return <SetupIntentScreen onSelect={setSetupIntent} />;
+  }
+
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <HardwareSetupScreen
+        setupIntent={setupIntent}
+        onBackToIntent={() => setSetupIntent(null)}
+      />
+    </Suspense>
+  );
+};

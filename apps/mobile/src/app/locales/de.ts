@@ -8,6 +8,28 @@ export const de = {
       'BLE-Thermometer + Shelly-Steckdose. Einmal in der App einrichten, danach lokal betreiben.',
     loadingConfigurator: 'Konfigurator wird geladen.'
   },
+  intent: {
+    title: 'Was möchtest du tun?',
+    description: 'Wähle zuerst das Ziel. Technische Details folgen im nächsten Schritt.',
+    choiceLabel: 'Automationsziel',
+    open: 'Öffnen',
+    back: 'Ziel ändern',
+    temperature: {
+      title: 'Temperatur steuern',
+      description: 'Heizen oder Kühlen anhand eines BLE-Thermometers.',
+      context: 'Temperatursteuerung'
+    },
+    humidity: {
+      title: 'Luftfeuchtigkeit steuern',
+      description: 'Befeuchten oder Entfeuchten anhand eines BLE-Sensors.',
+      context: 'Feuchtigkeitssteuerung'
+    },
+    manage: {
+      title: 'Bestehende Automation verwalten',
+      description: 'Gespeicherte Geräte, Regeln und Diagnose öffnen.',
+      context: 'Automationsverwaltung'
+    }
+  },
   common: {
     add: 'Hinzufügen',
     address: 'Adresse',

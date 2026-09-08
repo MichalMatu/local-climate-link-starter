@@ -8,6 +8,29 @@ export const fr = {
       'Thermomètre BLE + prise Shelly. Configuration une seule fois dans l’app, puis fonctionnement local.',
     loadingConfigurator: 'Chargement du configurateur.'
   },
+  intent: {
+    title: 'Que voulez-vous faire ?',
+    description:
+      'Choisissez d’abord l’objectif. Les détails techniques viennent ensuite.',
+    choiceLabel: 'Objectif de l’automatisation',
+    open: 'Ouvrir',
+    back: 'Changer d’objectif',
+    temperature: {
+      title: 'Contrôler la température',
+      description: 'Chauffage ou refroidissement avec un thermomètre BLE.',
+      context: 'Contrôle de température'
+    },
+    humidity: {
+      title: 'Contrôler l’humidité',
+      description: 'Humidification ou déshumidification avec un capteur BLE.',
+      context: 'Contrôle de l’humidité'
+    },
+    manage: {
+      title: 'Gérer une automatisation existante',
+      description: 'Ouvrez les appareils, règles et diagnostics enregistrés.',
+      context: 'Gestion de l’automatisation'
+    }
+  },
   common: {
     add: 'Ajouter',
     address: 'Adresse',
