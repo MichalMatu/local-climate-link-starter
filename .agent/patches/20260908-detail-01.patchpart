@@ -1,0 +1,195 @@
++      shelly: { id: 'shellyplugsg3-route-detail', model: 'S3PL-00112EU', gen: 3 },
++      shellyName: 'Salon',
++      baseUrl: 'http://192.168.0.20/',
++      scriptId: 1,
++      scriptHash: 'lcl-route-detail',
++      config,
++      nowMs: 1000
++    });
++    useInstalledAutomationStore.getState().upsertInstallation(installation);
++
++    renderRoutes();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
++    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
++
++    fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
++    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
++  });
++
+   it('starts from the user goal instead of technical setup tabs', () => {
+     renderRoutes();
+ 
+diff --git a/apps/mobile/src/__tests__/automation-dashboard.test.tsx b/apps/mobile/src/__tests__/automation-dashboard.test.tsx
+index 25964b1..2b24551 100644
+--- a/apps/mobile/src/__tests__/automation-dashboard.test.tsx
++++ b/apps/mobile/src/__tests__/automation-dashboard.test.tsx
+@@ -16,6 +16,35 @@ const jsonResponse = (payload: unknown) =>
+     headers: { 'content-type': 'application/json' }
+   });
+ 
++const controlRpcResult = (method: string | undefined): unknown => {
++  switch (method) {
++    case 'Shelly.GetDeviceInfo':
++      return { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 };
++    case 'Shelly.GetStatus':
++      return {
++        matter: { enabled: false },
++        script: { enable: true },
++        ble: { enable: true },
++        'switch:0': { id: 0, output: false },
++        wifi: { rssi: -55 },
++        sys: { time: '12:00', unixtime: 1_782_667_904, uptime: 12_345 }
++      };
++    case 'Script.List':
++      return {
++        scripts: [
++          {
++            id: 1,
++            name: 'Local Climate Link Thermostat',
++            enable: true,
++            running: true
++          }
++        ]
++      };
++    default:
++      return {};
++  }
++};
++
+ const diagnosticPayload = ({
+   lastSeenUptimeMs = 12_300_000,
+   uptimeSec = 12_345,
+@@ -79,16 +108,20 @@ const installedAutomation = () => {
+   });
+ };
+ 
+-const renderDashboard = (onAddAutomation = vi.fn()) => {
++const renderDashboard = (onAddAutomation = vi.fn(), onOpenInstallation = vi.fn()) => {
+   const queryClient = new QueryClient({
+     defaultOptions: { queries: { retry: false } }
+   });
+   return {
+     onAddAutomation,
++    onOpenInstallation,
+     ...render(
+       <I18nProvider>
+         <QueryClientProvider client={queryClient}>
+-          <AutomationDashboardScreen onAddAutomation={onAddAutomation} />
++          <AutomationDashboardScreen
++            onAddAutomation={onAddAutomation}
++            onOpenInstallation={onOpenInstallation}
++          />
+         </QueryClientProvider>
+       </I18nProvider>
+     )
+@@ -134,6 +167,7 @@ describe('AutomationDashboardScreen', () => {
+     expect(screen.getByText('Działa')).toBeVisible();
+     expect(screen.getByText('ON')).toBeVisible();
+     expect(screen.getByText('19°C / 20°C')).toBeVisible();
++    expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
+   });
+ 
+   it('marks an old Shelly sensor reading as stale', async () => {
+@@ -154,24 +188,36 @@ describe('AutomationDashboardScreen', () => {
+ 
+   it('uses effective runtime thresholds and recovers after a manual refresh', async () => {
+     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
+-    const fetchMock = vi
+-      .fn()
+-      .mockRejectedValueOnce(new Error('offline'))
+-      .mockResolvedValue(
+-        jsonResponse(
++    let diagnosticAttempts = 0;
++    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
++      const url = input instanceof URL ? input.toString() : String(input);
++      const target = new URL(url, 'http://localhost').searchParams.get('target');
++      if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
++        diagnosticAttempts += 1;
++        if (diagnosticAttempts === 1) {
++          throw new Error('offline');
++        }
++        return jsonResponse(
+           diagnosticPayload({ effectiveOnThreshold: 19.25, effectiveOffThreshold: 19.75 })
+-        )
+-      );
++        );
++      }
++
++      const body = JSON.parse(String(init?.body ?? '{}')) as {
++        id?: number | string;
++        method?: string;
++      };
++      return jsonResponse({ id: body.id ?? 1, result: controlRpcResult(body.method) });
++    });
+     vi.stubGlobal('fetch', fetchMock);
+ 
+     renderDashboard();
+ 
+-    expect(await screen.findByText('Offline')).toBeVisible();
++    expect(await screen.findByText('Wymaga uwagi')).toBeVisible();
+     fireEvent.click(screen.getByRole('button', { name: 'Odśwież' }));
+ 
+     expect(await screen.findByText('Działa')).toBeVisible();
+     expect(screen.getByText('19.25°C / 19.75°C')).toBeVisible();
+-    expect(fetchMock).toHaveBeenCalledTimes(2);
++    expect(diagnosticAttempts).toBe(2);
+   });
+ 
+   it('shows offline without replacing runtime values with phone BLE data', async () => {
+diff --git a/apps/mobile/src/__tests__/automation-detail.test.tsx b/apps/mobile/src/__tests__/automation-detail.test.tsx
+new file mode 100644
+index 0000000..13567fa
+--- /dev/null
++++ b/apps/mobile/src/__tests__/automation-detail.test.tsx
+@@ -0,0 +1,229 @@
++import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
++import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
++import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { I18nProvider, setLocalePreference } from '../app/i18n.js';
++import { createInstalledAutomation } from '../flows/installations/model.js';
++import {
++  resetInstalledAutomationStore,
++  useInstalledAutomationStore
++} from '../flows/installations/store.js';
++import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
++
++const jsonResponse = (payload: unknown, status = 200) =>
++  new Response(JSON.stringify(payload), {
++    status,
++    headers: { 'content-type': 'application/json' }
++  });
++
++const installation = () => {
++  const base = createDefaultShellyThermostatConfig(
++    'xiaomi_lywsd03mmc_bthome_v2',
++    'heating'
++  );
++  return createInstalledAutomation({
++    shelly: { id: 'shellyplugsg3-detail', model: 'S3PL-00112EU', gen: 3 },
++    shellyName: 'Salon',
++    baseUrl: 'http://192.168.0.20/',
++    scriptId: 1,
++    scriptHash: 'lcl-detail',
++    config: {
++      ...base,
++      sensor: {
++        ...base.sensor,
++        runtimeAddress: 'A4:C1:38:4F:24:CD',
++        displayName: 'Przedpokój'
++      }
++    },
++    nowMs: 1000
++  });
++};
++
++const diagnosticPayload = () => ({
++  v: 1,
++  z: 'lcl-detail',
++  s: ['A4:C1:38:4F:24:CD', 'Przedpokój'],
++  q: [0, 0, 19, 20, 120, -85],
++  y: ['14:00', 1_782_820_000, 3600],
++  p: [true, 42.3, 230.1, 0.2, 1250, 32.4],
++  g: [
++    3_550_000,
