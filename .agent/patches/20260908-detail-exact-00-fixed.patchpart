@@ -1,0 +1,213 @@
+diff --git a/apps/mobile/e2e/responsive.spec.ts b/apps/mobile/e2e/responsive.spec.ts
+index 721ff68..a0ad812 100644
+--- a/apps/mobile/e2e/responsive.spec.ts
++++ b/apps/mobile/e2e/responsive.spec.ts
+@@ -54,10 +54,21 @@ const seedDraft = async (page: Page) => {
+ };
+ 
+ const mockShellyRpc = async (page: Page) => {
++  let scriptRunning = true;
++  let relayOn = true;
++
+   const handleRpc = async (route: Route) => {
+     const requestUrl = new URL(route.request().url());
+     const proxyTarget = requestUrl.searchParams.get('target');
+     if (proxyTarget?.includes('/script/1/diag')) {
++      if (!scriptRunning) {
++        await route.fulfill({
++          status: 200,
++          contentType: 'application/json',
++          body: JSON.stringify({ stopped: true })
++        });
++        return;
++      }
+       await route.fulfill({
+         status: 200,
+         contentType: 'application/json',
+@@ -67,14 +78,14 @@ const mockShellyRpc = async (page: Page) => {
+           s: ['A4:C1:38:4F:24:CD', 'Przedpokój'],
+           q: [0, 0, 19, 20, 120, -85],
+           y: ['14:00', 1782820000, 3600],
+-          p: [true, 42.3, 230.1, 0.2, 1250, 32.4],
++          p: [relayOn, relayOn ? 42.3 : 0, 230.1, relayOn ? 0.2 : 0, 1250, 32.4],
+           g: [
+             3550000,
+             21.4,
+             55.2,
+             91,
+             -51,
+-            true,
++            relayOn,
+             'ok',
+             3500000,
+             3540000,
+@@ -95,6 +106,7 @@ const mockShellyRpc = async (page: Page) => {
+     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
+       id?: number | string;
+       method?: string;
++      params?: { id?: number; on?: boolean };
+     };
+     let result: unknown = {};
+     switch (requestBody.method) {
+@@ -113,10 +125,10 @@ const mockShellyRpc = async (page: Page) => {
+           ble: { enable: true },
+           'switch:0': {
+             id: 0,
+-            output: false,
+-            apower: 0,
++            output: relayOn,
++            apower: relayOn ? 42.3 : 0,
+             voltage: 230.1,
+-            current: 0,
++            current: relayOn ? 0.2 : 0,
+             aenergy: { total: 1250 },
+             temperature: { tC: 32.4 }
+           },
+@@ -136,11 +148,23 @@ const mockShellyRpc = async (page: Page) => {
+               id: 1,
+               name: 'Local Climate Link Thermostat',
+               enable: true,
+-              running: true
++              running: scriptRunning
+             }
+           ]
+         };
+         break;
++      case 'Script.Stop':
++        scriptRunning = false;
++        result = null;
++        break;
++      case 'Script.Start':
++        scriptRunning = true;
++        result = null;
++        break;
++      case 'Switch.Set':
++        relayOn = requestBody.params?.on ?? false;
++        result = null;
++        break;
+       default:
+         result = {};
+     }
+@@ -395,12 +419,60 @@ for (const viewport of viewports) {
+     await expect(page.getByText('19°C / 20°C')).toBeVisible();
+     await expect(page.getByRole('button', { name: 'Odśwież' })).toBeVisible();
+     await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
++    await page.getByRole('button', { name: 'Szczegóły' }).click();
++    await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Klimat teraz' })).toBeVisible();
++    await expect(page.getByText('21.4°C')).toBeVisible();
++    await expect(page.getByText('55.2%')).toBeVisible();
++    await expect(page.getByText('1.31 kPa')).toBeVisible();
++    await expect(
++      page.getByRole('button', { name: 'Wstrzymaj automatykę' })
++    ).toBeVisible();
++    await expect(page.getByRole('button', { name: /Wróć do automatyk/ })).toBeVisible();
+     await expectNoHorizontalOverflow(page);
+     await expectNoLegacyInlineFeedback(page);
+     expect(consoleProblems).toEqual([]);
+   });
+ }
+ 
++test('installed automation detail safely pauses and resumes on phone', async ({
++  page
++}) => {
++  const consoleProblems: string[] = [];
++  page.on('console', (message) => {
++    if (message.type() === 'error' || message.type() === 'warning') {
++      consoleProblems.push(`${message.type()}: ${message.text()}`);
++    }
++  });
++  page.on('pageerror', (error) => consoleProblems.push(error.message));
++
++  await page.setViewportSize({ width: 390, height: 844 });
++  await seedInstalledAutomation(page);
++  await mockShellyRpc(page);
++  await page.goto('/');
++
++  await page.getByRole('button', { name: 'Szczegóły' }).click();
++  await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
++  await expect(page.getByText('Działa')).toBeVisible();
++
++  await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
++  await expect(
++    page.getByText('Automatyka zatrzymana, wyjście potwierdzone jako OFF.')
++  ).toBeVisible();
++  await expect(page.getByText('Wstrzymana')).toBeVisible();
++  await expect(page.getByRole('button', { name: 'Wznów automatykę' })).toBeVisible();
++  await expect(page.getByText('OFF', { exact: true })).toBeVisible();
++
++  await page.getByRole('button', { name: 'Wznów automatykę' }).click();
++  await expect(page.getByText('Automatyka uruchomiona.')).toBeVisible();
++  await expect(page.getByText('Działa')).toBeVisible();
++  await expect(page.getByRole('button', { name: 'Wstrzymaj automatykę' })).toBeVisible();
++
++  await expectNoHorizontalOverflow(page);
++  await expectNoLegacyInlineFeedback(page);
++  expect(consoleProblems).toEqual([]);
++});
++
+ for (const viewport of viewports) {
+   test(`hardware setup has no horizontal overflow on ${viewport.name}`, async ({
+     page
+diff --git a/apps/mobile/src/__tests__/app-routes.test.tsx b/apps/mobile/src/__tests__/app-routes.test.tsx
+index bf5c0b2..6a66cc6 100644
+--- a/apps/mobile/src/__tests__/app-routes.test.tsx
++++ b/apps/mobile/src/__tests__/app-routes.test.tsx
+@@ -10,6 +10,23 @@ import {
+ } from '../flows/installations/store.js';
+ import type { SetupIntent } from '../flows/setup-intent.js';
+ 
++vi.mock('../screens/InstallationDetailScreen.js', () => ({
++  InstallationDetailScreen: ({
++    installationId,
++    onBack
++  }: {
++    installationId: string;
++    onBack: () => void;
++  }) => (
++    <section>
++      <p>{`mock-installation-${installationId}`}</p>
++      <button type="button" onClick={onBack}>
++        mock-dashboard-back
++      </button>
++    </section>
++  )
++}));
++
+ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
+   HardwareSetupScreen: ({
+     setupIntent,
+@@ -71,6 +88,31 @@ describe('AppRoutes user intent entry', () => {
+     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
+   });
+ 
++  it('opens an installed system by stable installation id and returns to the dashboard', () => {
++    const config = createDefaultShellyThermostatConfig(
++      'xiaomi_lywsd03mmc_bthome_v2',
++      'heating'
++    );
++    const installation = createInstalledAutomation({
++      shelly: { id: 'shellyplugsg3-route-detail', model: 'S3PL-00112EU', gen: 3 },
++      shellyName: 'Salon',
++      baseUrl: 'http://192.168.0.20/',
++      scriptId: 1,
++      scriptHash: 'lcl-route-detail',
++      config,
++      nowMs: 1000
++    });
++    useInstalledAutomationStore.getState().upsertInstallation(installation);
++
++    renderRoutes();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
++    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
++
++    fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
++    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
++  });
++
+   it('starts from the user goal instead of technical setup tabs', () => {
+     renderRoutes();
+ 
+diff --git a/apps/mobile/src/__tests__/automation-dashboard.test.tsx b/apps/mobile/src/__tests__/automation-dashboard.test.tsx
+index 25964b1..2b24551 100644
