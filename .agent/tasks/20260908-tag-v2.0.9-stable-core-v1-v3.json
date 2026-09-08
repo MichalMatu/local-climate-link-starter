@@ -1,0 +1,26 @@
+{
+  "id": "20260908-tag-v2.0.9-stable-core-v1-v3",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 256,
+  "command_timeout": 120,
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "commands": [
+    "git fetch --prune --tags origin",
+    "printf 'LOCAL_MAIN_BEFORE=%s\\n' \"$(git rev-parse main)\"",
+    "printf 'ORIGIN_MAIN=%s\\n' \"$(git rev-parse origin/main)\" && test \"$(git rev-parse origin/main)\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"",
+    "test -z \"$(git status --porcelain)\"",
+    "git merge-base --is-ancestor main origin/main",
+    "git checkout main && git merge --ff-only origin/main",
+    "printf 'LOCAL_MAIN_AFTER=%s\\n' \"$(git rev-parse main)\" && test \"$(git rev-parse main)\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"",
+    "test -z \"$(git show-ref --verify refs/tags/v2.0.9 2>/dev/null || true)\" && test -z \"$(git ls-remote --tags origin refs/tags/v2.0.9)\"",
+    "git tag -a v2.0.9 b44899ba66b202ca05f48a8856a9871daee97832 -m 'Stable Core v1'",
+    "git push origin refs/tags/v2.0.9",
+    "printf 'TAG_TYPE=%s\\n' \"$(git cat-file -t refs/tags/v2.0.9)\" && printf 'TAG_PEELED=%s\\n' \"$(git rev-parse 'refs/tags/v2.0.9^{}')\"",
+    "git ls-remote --tags origin refs/tags/v2.0.9 refs/tags/v2.0.9^{}"
+  ]
+}
