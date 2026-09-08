@@ -1,0 +1,61 @@
+{
+  "id": "20260908-native-time-schedule-helper-run-v4",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/native-time-schedule",
+  "allow_write": true,
+  "started_at": "2026-09-08T19:39:17.175013+00:00",
+  "command_timeout": 180,
+  "edits": {},
+  "commands": [
+    {
+      "command": "bash .agent/tmp-native-time-schedule-helper.sh",
+      "exit_code": 1,
+      "output": "/tmp/lcl-native-schedule-final.zst: 153689 bytes \n[agent-work 1d66ac4] Add native time schedules\n 40 files changed, 3234 insertions(+), 70 deletions(-)\n create mode 100644 apps/mobile/src/flows/installations/model.test.ts\n create mode 100644 apps/mobile/src/flows/time-automation/config.test.ts\n create mode 100644 apps/mobile/src/flows/time-automation/config.ts\n create mode 100644 apps/mobile/src/flows/time-automation/runtime.test.ts\n create mode 100644 apps/mobile/src/flows/time-automation/runtime.ts\n create mode 100644 apps/mobile/src/flows/time-automation/useTimeAutomationRuntime.ts\n create mode 100644 apps/mobile/src/flows/time-automation/useTimeAutomationSetupFlow.ts\n create mode 100644 apps/mobile/src/screens/TimeAutomationCard.tsx\n create mode 100644 apps/mobile/src/screens/TimeInstallationDetail.tsx\n create mode 100644 apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\n create mode 100644 packages/shelly-client/src/__tests__/schedules.test.ts\n create mode 100644 packages/shelly-client/src/schedules.ts\nTo https://github.com/MichalMatu/local-climate-link-starter.git\n ! [rejected]        work/native-time-schedule -> work/native-time-schedule (non-fast-forward)\nerror: failed to push some refs to 'https://github.com/MichalMatu/local-climate-link-starter.git'\nhint: Updates were rejected because a pushed branch tip is behind its remote\nhint: counterpart. If you want to integrate the remote changes, use 'git pull'\nhint: before pushing again.\nhint: See the 'Note about fast-forwards' in 'git push --help' for details.\n",
+      "elapsed_seconds": 2.587,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 18.11,
+      "output_policy": "stream",
+      "captured_output_chars": 1560,
+      "output_truncated": false,
+      "current_rss_mb": 18.11,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 2.587
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.105
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.072
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-08T19:39:21.817836+00:00",
+  "task_digest": "cdff3518020835fce1b2f0d3b7c9c18be9fa9e620b4bde81bcd5dcf03007d666",
+  "idle_timeout": 90,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "attempt_id": "0cb4fd8938066cc8604abf6d",
+  "daemon_version": "4.18.19"
+}
