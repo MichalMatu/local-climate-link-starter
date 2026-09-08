@@ -55,7 +55,7 @@ describe('ShellyLedSettingsCard', () => {
 
   it('reads and applies native PLUGS_UI LED presets without touching controls', async () => {
     let mode: 'power' | 'switch' | 'off' = 'power';
-    const requests: Array<{ method?: string; params?: unknown }> = [];
+    const requests: Array<{ method: string | undefined; params: unknown }> = [];
 
     vi.stubGlobal(
       'fetch',
