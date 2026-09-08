@@ -1,9 +1,0 @@
-{
-  "event": "invalid_task_rejected",
-  "status": "failed",
-  "failure_reason": "invalid_task_file",
-  "updated_at": "2026-09-08T12:32:16.695451+00:00",
-  "task_id": "tag-v2.0.9-stable-core-v1",
-  "daemon_version": "4.18.19",
-  "pid": 70317
-}
