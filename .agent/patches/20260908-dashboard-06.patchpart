@@ -1,0 +1,197 @@
++        <button className="primary-action" type="button" onClick={onAddAutomation}>
++          {t('dashboard.addAutomation')}
++        </button>
++      </header>
++
++      {installations.length === 0 ? (
++        <section className="demo-panel dashboard-empty">
++          <h2>{t('dashboard.emptyTitle')}</h2>
++          <p>{t('dashboard.emptyDescription')}</p>
++          <div className="action-row">
++            <button className="primary-action" type="button" onClick={onAddAutomation}>
++              {t('dashboard.configureFirst')}
++            </button>
++          </div>
++        </section>
++      ) : (
++        <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
++          {installations.map((installation) => (
++            <AutomationCard key={installation.id} installation={installation} />
++          ))}
++        </section>
++      )}
++    </main>
++  );
++};
+diff --git a/apps/mobile/src/theme/theme.css b/apps/mobile/src/theme/theme.css
+index 1794f6a..974e9f0 100644
+--- a/apps/mobile/src/theme/theme.css
++++ b/apps/mobile/src/theme/theme.css
+@@ -1382,3 +1382,167 @@ select {
+     width: 100%;
+   }
+ }
++
++.dashboard-shell {
++  align-content: start;
++}
++
++.dashboard-header {
++  align-items: center;
++}
++
++.dashboard-grid {
++  display: grid;
++  gap: var(--lcl-spacing-lg);
++  grid-template-columns: repeat(
++    auto-fit,
++    minmax(min(100%, var(--lcl-size-card-column-min)), 1fr)
++  );
++}
++
++.dashboard-empty {
++  max-width: var(--lcl-size-prose-max-width);
++}
++
++.automation-card {
++  background: var(--lcl-color-surface);
++  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  border-radius: var(--lcl-radius-lg);
++  box-shadow: var(--lcl-shadow-md);
++  display: grid;
++  gap: var(--lcl-spacing-lg);
++  min-width: 0;
++  padding: var(--lcl-fluid-panel-padding);
++}
++
++.automation-card__header,
++.automation-card__footer {
++  align-items: center;
++  display: flex;
++  gap: var(--lcl-spacing-md);
++  justify-content: space-between;
++}
++
++.automation-card__header h2 {
++  line-height: var(--lcl-line-height-tight);
++  margin: 0;
++  overflow-wrap: anywhere;
++}
++
++.automation-card__eyebrow {
++  color: var(--lcl-color-text-muted);
++  font-size: var(--lcl-font-size-sm);
++  font-weight: 800;
++  margin: 0 0 var(--lcl-spacing-xs);
++}
++
++.automation-health {
++  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  border-radius: var(--lcl-radius-pill);
++  flex: 0 0 auto;
++  font-size: var(--lcl-font-size-sm);
++  font-weight: 800;
++  padding: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
++}
++
++.automation-health--ok {
++  background: var(--lcl-color-status-ok-bg);
++  border-color: var(--lcl-color-status-ok-border);
++  color: var(--lcl-color-status-ok-text);
++}
++
++.automation-health--stale,
++.automation-health--unknown {
++  background: var(--lcl-color-status-warning-bg);
++  border-color: var(--lcl-color-status-warning-border);
++  color: var(--lcl-color-status-warning-text);
++}
++
++.automation-health--offline {
++  background: var(--lcl-color-status-danger-bg);
++  border-color: var(--lcl-color-status-danger-border);
++  color: var(--lcl-color-status-danger-text);
++}
++
++.automation-metrics {
++  display: grid;
++  gap: var(--lcl-spacing-sm);
++  grid-template-columns: repeat(
++    auto-fit,
++    minmax(min(100%, var(--lcl-size-action-min-width)), 1fr)
++  );
++}
++
++.automation-metrics > div {
++  background: var(--lcl-color-surface-muted);
++  border-radius: var(--lcl-radius-md);
++  display: grid;
++  gap: var(--lcl-spacing-xs);
++  min-width: 0;
++  padding: var(--lcl-spacing-md);
++}
++
++.automation-metrics span,
++.automation-summary dt,
++.automation-card__footer > span {
++  color: var(--lcl-color-text-muted);
++  font-size: var(--lcl-font-size-sm);
++}
++
++.automation-metrics strong {
++  font-size: var(--lcl-font-size-xl);
++  line-height: var(--lcl-line-height-tight);
++  overflow-wrap: anywhere;
++}
++
++.automation-summary {
++  display: grid;
++  gap: var(--lcl-spacing-sm);
++  margin: 0;
++}
++
++.automation-summary > div {
++  align-items: baseline;
++  display: flex;
++  gap: var(--lcl-spacing-md);
++  justify-content: space-between;
++}
++
++.automation-summary dt,
++.automation-summary dd {
++  margin: 0;
++}
++
++.automation-summary dd {
++  font-weight: 700;
++  max-width: 65%;
++  overflow-wrap: anywhere;
++  text-align: right;
++}
++
++.automation-card__footer {
++  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
++  padding-top: var(--lcl-spacing-md);
++}
++
++@media (max-width: 30rem) {
++  .dashboard-header,
++  .automation-card__header,
++  .automation-card__footer {
++    align-items: stretch;
++    flex-direction: column;
++  }
++
++  .dashboard-header .primary-action,
++  .automation-card__footer .secondary-action {
++    width: 100%;
++  }
++
++  .automation-health {
++    align-self: flex-start;
++  }
++
++  .automation-metrics > div:last-child {
++    grid-column: 1 / -1;
++  }
++}
