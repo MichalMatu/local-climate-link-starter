@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-plugs-ui-led-finalize-v4",
+  "task_digest": "be8728fe7109b5f92833faca812d454f7c77942cf6b9bf7dd700711daa5d7e70",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-08T23:03:47.804305+00:00",
+  "attempt_id": "af0ce9d881156d857745696a",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 46333,
+  "updated_at": "2026-09-08T23:03:47.804414+00:00",
+  "pid": 46333
+}
