@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260908-tag-v2.0.9-stable-core-v1-v2",
+  "task_digest": "a51309c9b9598238c238320625514b1b99adb282878a8e33e423906031e4e160",
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "memory_limit_mb": 256,
+  "started_at": "2026-09-08T12:35:52.584685+00:00",
+  "attempt_id": "7f4967955518d2983a802768",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 72522,
+  "updated_at": "2026-09-08T12:35:52.584868+00:00",
+  "pid": 72522
+}
