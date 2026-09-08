@@ -113,6 +113,7 @@ export interface ShellyClient {
 export const RPC_METHODS = {
   ShellyGetDeviceInfo: 'Shelly.GetDeviceInfo',
   ShellyGetStatus: 'Shelly.GetStatus',
+  ShellyListMethods: 'Shelly.ListMethods',
   ScriptList: 'Script.List',
   ScriptCreate: 'Script.Create',
   ScriptGetCode: 'Script.GetCode',
@@ -128,7 +129,9 @@ export const RPC_METHODS = {
   ScheduleList: 'Schedule.List',
   ScheduleCreate: 'Schedule.Create',
   ScheduleUpdate: 'Schedule.Update',
-  ScheduleDelete: 'Schedule.Delete'
+  ScheduleDelete: 'Schedule.Delete',
+  PlugsUiGetConfig: 'PLUGS_UI.GetConfig',
+  PlugsUiSetConfig: 'PLUGS_UI.SetConfig'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
