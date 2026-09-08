@@ -10,9 +10,7 @@ import type { InstalledAutomation } from './model.js';
 
 export type InstalledShellyLedPreset = 'relay-state' | 'off';
 
-export const installedShellyLedSettingsQueryKey = (
-  installation: InstalledAutomation
-) =>
+export const installedShellyLedSettingsQueryKey = (installation: InstalledAutomation) =>
   [
     'installed-shelly-led-settings',
     installation.shelly.deviceId,
