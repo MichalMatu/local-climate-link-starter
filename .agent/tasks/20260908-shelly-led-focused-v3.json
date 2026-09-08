@@ -1,0 +1,26 @@
+{
+  "id": "20260908-shelly-led-focused-v3",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-led-settings",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 3072,
+  "command_timeout": 600,
+  "idle_timeout": 180,
+  "task_timeout": 2400,
+  "commands": [
+    "git fetch --prune origin",
+    "git checkout work/shelly-led-settings",
+    "git pull --ff-only origin work/shelly-led-settings",
+    "test \"$(git rev-parse HEAD)\" = \"737d829bbba3855668efc9de2a81380f073355f6\"",
+    "pnpm install --frozen-lockfile",
+    "pnpm --filter @lcl/shelly-client test",
+    "pnpm --filter @lcl/mobile exec vitest run src/flows/device-settings/leds.test.ts src/__tests__/shelly-led-settings.test.tsx",
+    "pnpm typecheck",
+    "pnpm lint",
+    "pnpm quality:ux",
+    "pnpm --filter @lcl/mobile exec playwright test e2e/led-settings.spec.ts -c playwright.config.ts",
+    "git status --short"
+  ]
+}
