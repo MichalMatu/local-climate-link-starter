@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 5,
-  "command": "pnpm install --frozen-lockfile && pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android",
-  "pid": 55273,
+  "command": "set -e; SDK=\"$HOME/Library/Android/sdk\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; cd apps/mobile/android; ./gradlew --no-daemon assembleDebug lintDebug",
+  "pid": 55454,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T07:04:52.274614+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-09T07:04:59.730708+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260909-android-emulator-smoke-v4",
@@ -18,5 +18,5 @@
   "task_digest": "d0e0fa46bd99210a58b2b5971ece5c894f0d7b04565b7dca312302d64155b569",
   "daemon_version": "4.18.19",
   "daemon_pid": 55113,
-  "updated_at": "2026-09-09T07:04:52.358870+00:00"
+  "updated_at": "2026-09-09T07:04:59.802299+00:00"
 }
