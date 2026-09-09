@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 5,
   "total": 6,
-  "command": "set -e; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; SERIAL=RFCT70L7E8J; PACKAGE=link.localclimate.app; DUMP=\"$(\"$ADB\" -s \"$SERIAL\" shell dumpsys package \"$PACKAGE\" | tr -d '\\r')\"; printf '%s\\n' \"$DUMP\" | grep -E 'versionCode=|versionName=|firstInstallTime=|lastUpdateTime=' | head -10; printf '%s\\n' \"$DUMP\" | grep -q 'versionName=2.0.10'; printf '%s\\n' \"$DUMP\" | grep -q 'versionCode=20010'; \"$ADB\" -s \"$SERIAL\" shell am force-stop \"$PACKAGE\"; \"$ADB\" -s \"$SERIAL\" logcat -c; START=\"$(\"$ADB\" -s \"$SERIAL\" shell am start -W -n \"$PACKAGE/.MainActivity\" | tr -d '\\r')\"; printf '%s\\n' \"$START\"; printf '%s\\n' \"$START\" | grep -q 'Status: ok'; sleep 3; PID=\"$(\"$ADB\" -s \"$SERIAL\" shell pidof \"$PACKAGE\" | tr -d '\\r')\"; test -n \"$PID\"; echo POSTCHECK_PID=$PID; echo ACTIVITY_MATCHES; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity|ResumedActivity|link.localclimate.app' | head -30 || true; echo WINDOW_FOCUS; \"$ADB\" -s \"$SERIAL\" shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp' | head -10 || true; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -q \"$PACKAGE/.MainActivity\"; if \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief | grep -E 'FATAL EXCEPTION|AndroidRuntime:.*FATAL|Process: link.localclimate.app.*has died'; then echo 'fresh-install smoke found fatal process error' >&2; exit 1; fi; echo FRESH_INSTALL_SMOKE=pass",
-  "pid": 40521,
+  "command": "set -e; BASE=http://192.168.0.16; sleep 5; ST=\"$(curl -fsS --max-time 8 \"$BASE/rpc/Script.GetStatus?id=1\")\"; SW=\"$(curl -fsS --max-time 8 \"$BASE/rpc/Switch.GetStatus?id=0\")\"; DG=\"$(curl -fsS --max-time 8 \"$BASE/script/1/diag\")\"; python3 -c 'import json,sys; st=json.loads(sys.argv[1]); sw=json.loads(sys.argv[2]); dg=json.loads(sys.argv[3]); assert st.get(\"running\") is True,st; assert sw.get(\"output\") is False,sw; assert isinstance(dg,dict) and dg,dg' \"$ST\" \"$SW\" \"$DG\"; echo POST_WIPE_SHELLY_RECHECK=pass; echo FINAL_RELAY=false",
+  "pid": 40713,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:35:02.357159+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T22:35:07.819924+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-final-phone-postcheck-v1",
@@ -18,5 +18,5 @@
   "task_digest": "ff29bf5ef27ea7370978319321eb7c25963f14dcc273c680cfed030640d1f7e6",
   "daemon_version": "4.18.19",
   "daemon_pid": 40242,
-  "updated_at": "2026-09-09T22:35:02.427340+00:00"
+  "updated_at": "2026-09-09T22:35:07.891176+00:00"
 }
