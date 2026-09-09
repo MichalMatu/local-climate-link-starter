@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 4,
-  "command": "du -sh \"$HOME/Library/Android/sdk/system-images\"/*/*/* \"$HOME/Library/Android/sdk/emulator\" \"$HOME/Library/Android/sdk/platforms\" \"$HOME/Library/Android/sdk/build-tools\" 2>/dev/null | sort -h || true",
-  "pid": 5856,
+  "command": "du -sh \"$HOME/.gradle/caches\"/* \"$HOME/.gradle/wrapper\"/* 2>/dev/null | sort -h | tail -30 || true",
+  "pid": 5899,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T06:09:42.289174+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T06:09:43.171926+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260909-disk-diagnose-v1",
@@ -18,5 +18,5 @@
   "task_digest": "004a50b738e11ff6fb341e66258e9086bb2702e8a8bbf20b400255d6845be7d0",
   "daemon_version": "4.18.19",
   "daemon_pid": 5241,
-  "updated_at": "2026-09-09T06:09:42.358862+00:00"
+  "updated_at": "2026-09-09T06:09:43.250635+00:00"
 }
