@@ -1,4 +1,6 @@
-import { Suspense, lazy, useState } from 'react';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
@@ -30,17 +32,80 @@ type AppRoute =
   | { type: 'setup'; intent: SetupRouteIntent }
   | { type: 'installation'; installationId: string };
 
+const resolveAndroidBackRoute = (
+  route: AppRoute,
+  hasInstallations: boolean
+): AppRoute | null => {
+  if (route.type === 'installation') {
+    return { type: 'dashboard' };
+  }
+  if (route.type === 'setup') {
+    return { type: 'intent' };
+  }
+  if (route.type === 'intent' && hasInstallations) {
+    return { type: 'dashboard' };
+  }
+  if (route.type === 'dashboard' && !hasInstallations) {
+    return { type: 'intent' };
+  }
+  return null;
+};
+
 export const AppRoutes = () => {
   const installations = useInstalledAutomationStore((state) => state.installations);
   const [route, setRoute] = useState<AppRoute>(() =>
     installations.length > 0 ? { type: 'dashboard' } : { type: 'intent' }
   );
+  const routeRef = useRef(route);
+  const hasInstallationsRef = useRef(installations.length > 0);
+  const navigate = useCallback((nextRoute: AppRoute) => {
+    routeRef.current = nextRoute;
+    setRoute(nextRoute);
+  }, []);
+
+  useEffect(() => {
+    hasInstallationsRef.current = installations.length > 0;
+  }, [installations.length]);
+
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== 'android') {
+      return;
+    }
+
+    let active = true;
+    let removeListener: (() => Promise<void>) | undefined;
+
+    void App.addListener('backButton', () => {
+      const nextRoute = resolveAndroidBackRoute(
+        routeRef.current,
+        hasInstallationsRef.current
+      );
+      if (nextRoute === null) {
+        void App.exitApp();
+        return;
+      }
+      navigate(nextRoute);
+    }).then((handle) => {
+      if (!active) {
+        void handle.remove();
+        return;
+      }
+      removeListener = () => handle.remove();
+    });
+
+    return () => {
+      active = false;
+      if (removeListener !== undefined) {
+        void removeListener();
+      }
+    };
+  }, [navigate]);
 
   if (route.type === 'intent') {
     return (
       <SetupIntentScreen
         onSelect={(intent) =>
-          setRoute(
+          navigate(
             intent === 'manage' ? { type: 'dashboard' } : { type: 'setup', intent }
           )
         }
@@ -51,9 +116,9 @@ export const AppRoutes = () => {
   if (route.type === 'dashboard') {
     return (
       <AutomationDashboardScreen
-        onAddAutomation={() => setRoute({ type: 'intent' })}
+        onAddAutomation={() => navigate({ type: 'intent' })}
         onOpenInstallation={(installationId) =>
-          setRoute({ type: 'installation', installationId })
+          navigate({ type: 'installation', installationId })
         }
       />
     );
@@ -63,7 +128,7 @@ export const AppRoutes = () => {
     return (
       <InstallationDetailScreen
         installationId={route.installationId}
-        onBack={() => setRoute({ type: 'dashboard' })}
+        onBack={() => navigate({ type: 'dashboard' })}
       />
     );
   }
@@ -72,8 +137,8 @@ export const AppRoutes = () => {
     <Suspense fallback={<RouteFallback />}>
       <HardwareSetupScreen
         setupIntent={route.intent}
-        onBackToIntent={() => setRoute({ type: 'intent' })}
-        onSetupComplete={() => setRoute({ type: 'dashboard' })}
+        onBackToIntent={() => navigate({ type: 'intent' })}
+        onSetupComplete={() => navigate({ type: 'dashboard' })}
       />
     </Suspense>
   );
