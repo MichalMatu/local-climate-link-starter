@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 7,
   "total": 9,
-  "command": "test \"$(git rev-parse origin/work/installation-health-recovery-v1)\" = \"d424d6ca25e1197d47103c68b06746a71b6c4547\"",
-  "pid": 16212,
+  "command": "pnpm check:full",
+  "pid": 16302,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T04:39:48.026590+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T04:39:49.712458+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-installation-health-recovery-verify-v1",
@@ -18,5 +18,5 @@
   "task_digest": "a180b916bad5de1ed1b36c46688af42d443e01e60f5de815c21fbebd7b980d23",
   "daemon_version": "4.18.19",
   "daemon_pid": 15933,
-  "updated_at": "2026-09-09T04:39:48.045643+00:00"
+  "updated_at": "2026-09-09T04:39:49.727451+00:00"
 }
