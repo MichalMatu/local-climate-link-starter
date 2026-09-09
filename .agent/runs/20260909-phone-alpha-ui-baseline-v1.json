@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-ui-baseline-v1",
+  "task_digest": "5363225285d154bb9db1e853a3f16ba4c9a28d6b2930e56946d19718e9a740ab",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T20:20:11.030989+00:00",
+  "attempt_id": "3c6616bc35be60dff943cdf1",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 5589,
+  "updated_at": "2026-09-09T20:20:11.031136+00:00",
+  "pid": 5589
+}
