@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
@@ -9,6 +9,43 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
+
+const nativeAppMocks = vi.hoisted(() => {
+  let backListener: (() => void) | undefined;
+  const removeListener = vi.fn(async () => undefined);
+  const addListener = vi.fn(async (_eventName: string, listener: () => void) => {
+    backListener = listener;
+    return { remove: removeListener };
+  });
+  return {
+    addListener,
+    exitApp: vi.fn(async () => undefined),
+    getPlatform: vi.fn(() => 'web'),
+    removeListener,
+    fireBack: () => backListener?.(),
+    resetListener: () => {
+      backListener = undefined;
+    }
+  };
+});
+
+vi.mock('@capacitor/app', () => ({
+  App: {
+    addListener: nativeAppMocks.addListener,
+    exitApp: nativeAppMocks.exitApp
+  }
+}));
+
+vi.mock('@capacitor/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@capacitor/core')>();
+  return {
+    ...actual,
+    Capacitor: {
+      ...actual.Capacitor,
+      getPlatform: nativeAppMocks.getPlatform
+    }
+  };
+});
 
 vi.mock('../screens/InstallationDetailScreen.js', () => ({
   InstallationDetailScreen: ({
@@ -68,6 +105,79 @@ describe('AppRoutes user intent entry', () => {
   beforeEach(() => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
+    nativeAppMocks.resetListener();
+    nativeAppMocks.getPlatform.mockReturnValue('web');
+    nativeAppMocks.addListener.mockClear();
+    nativeAppMocks.exitApp.mockClear();
+    nativeAppMocks.removeListener.mockClear();
+  });
+
+  it('keeps native back handling disabled in the web preview', () => {
+    renderRoutes();
+
+    expect(nativeAppMocks.addListener).not.toHaveBeenCalled();
+  });
+
+  it('returns from Android setup to the goal and exits only at the root', async () => {
+    nativeAppMocks.getPlatform.mockReturnValue('android');
+    const view = renderRoutes();
+    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
+    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
+
+    act(() => nativeAppMocks.fireBack());
+    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+
+    act(() => nativeAppMocks.fireBack());
+    await waitFor(() => expect(nativeAppMocks.exitApp).toHaveBeenCalledTimes(1));
+
+    view.unmount();
+    await waitFor(() => expect(nativeAppMocks.removeListener).toHaveBeenCalledTimes(1));
+  });
+
+  it('returns from an installed detail to the dashboard before exiting Android', async () => {
+    nativeAppMocks.getPlatform.mockReturnValue('android');
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-native-back', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptId: 1,
+      scriptHash: 'lcl-native-back',
+      config,
+      nowMs: 1000
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
+
+    renderRoutes();
+    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+
+    act(() => nativeAppMocks.fireBack());
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+
+    act(() => nativeAppMocks.fireBack());
+    await waitFor(() => expect(nativeAppMocks.exitApp).toHaveBeenCalledTimes(1));
+  });
+
+  it('returns from an empty Android management dashboard to the goal', async () => {
+    nativeAppMocks.getPlatform.mockReturnValue('android');
+    renderRoutes();
+    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
+    );
+    expect(screen.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
+
+    act(() => nativeAppMocks.fireBack());
+    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    expect(nativeAppMocks.exitApp).not.toHaveBeenCalled();
   });
 
   it('opens the dashboard immediately when an installed automation already exists', () => {
