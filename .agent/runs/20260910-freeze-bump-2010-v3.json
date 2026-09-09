@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 4,
-  "command": "git grep -n -E '2\\.0\\.10|20010' -- package.json apps/mobile/package.json apps/mobile/android/app/build.gradle docs/release/google-play.md && ! git grep -n -E '2\\.0\\.9|20009' -- package.json apps/mobile/package.json apps/mobile/android/app/build.gradle docs/release/google-play.md",
-  "pid": 22596,
+  "command": "git push origin HEAD:refs/heads/work/freeze-v2.0.10 && git fetch origin work/freeze-v2.0.10 && test \"$(git rev-parse HEAD)\" = \"bc8a061e868951c0313d80ff1d93c5235912ce29\" && test \"$(git rev-parse origin/work/freeze-v2.0.10)\" = \"bc8a061e868951c0313d80ff1d93c5235912ce29\" && test -z \"$(git status --porcelain)\" && echo PUBLISHED_TESTED_SHA=$(git rev-parse HEAD)",
+  "pid": 22613,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:20:05.581059+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T22:20:05.986595+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-bump-2010-v3",
@@ -18,5 +18,5 @@
   "task_digest": "930cd460b7607854ddea14743c13e44b2ddce2fa9b11312c3a5f86ad177c3a62",
   "daemon_version": "4.18.19",
   "daemon_pid": 22399,
-  "updated_at": "2026-09-09T22:20:05.652382+00:00"
+  "updated_at": "2026-09-09T22:20:06.000801+00:00"
 }
