@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-add-plug-back-probe-v2",
+  "task_digest": "f9df18c69677ccbe09e796339c52b0785ac09cd0f0a174858286ce31a9f86e1e",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T20:49:11.199282+00:00",
+  "attempt_id": "d548793912eeec753b3209c7",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 30107,
+  "updated_at": "2026-09-09T20:49:11.199428+00:00",
+  "pid": 30107
+}
