@@ -36,8 +36,8 @@ vi.mock('@capacitor/app', () => ({
   }
 }));
 
-vi.mock('@capacitor/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@capacitor/core')>();
+vi.mock(import('@capacitor/core'), async (importOriginal) => {
+  const actual = await importOriginal();
   return {
     ...actual,
     Capacitor: {
