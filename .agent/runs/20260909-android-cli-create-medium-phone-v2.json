@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-cli-create-medium-phone-v2",
+  "task_digest": "2e857dc896d7f57e1859f7b041966aac4e8e91b346750c389a6cec3dea3dd49b",
+  "idle_timeout": 1200,
+  "task_timeout": 7200,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-09T06:19:58.865431+00:00",
+  "attempt_id": "93262bfa9ba5cb1687d7ebb5",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 13862,
+  "updated_at": "2026-09-09T06:19:58.865489+00:00",
+  "pid": 13862
+}
