@@ -17,6 +17,16 @@ Android:
   background location is requested.
 - Confirm local Shelly HTTP still works through `CapacitorHttp`.
 - Confirm `@lcl/shelly-client` rejects non-local RPC hosts before fetch.
+- Confirm Android system Back stays inside the app for setup, installation detail,
+  and the empty management dashboard, and exits only from a root screen.
+- Confirm Android 16 edge-to-edge/system-bar insets do not cover controls on a real
+  phone. The Capacitor configuration uses `adjustMarginsForEdgeToEdge: 'auto'`.
+- Treat an unsigned `assembleRelease`/`bundleRelease` compile as a build gate only;
+  the Play-ready AAB must still be signed with the registered upload key.
+- While `targetSdkVersion` remains 36, do not add `ACCESS_LOCAL_NETWORK`
+  prematurely. Before moving to target SDK 37 or later, add the Android local
+  network runtime-permission flow and test both denial and revocation so Shelly LAN
+  access cannot silently regress.
 - Use `docs/release/google-play.md` for Play Console app creation values.
 
 iOS:
