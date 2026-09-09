@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 6,
   "total": 9,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{if(document.body.innerText.includes(\"What do you want to do?\")){const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Control temperature\"));if(!b)throw new Error(\"temperature button missing\");b.click();return \"opened-temperature\";}return \"already-deep\";})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);console.log(m.result.result.value);ws.close();}}' && sleep 1",
-  "pid": 62340,
+  "command": "for i in 1 2 3 4 5; do sleep 4; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); test -n \"$WS\" || break; OUT=$(WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`JSON.stringify({text:document.body.innerText,buttons:[...document.querySelectorAll(\"button\")].map(x=>x.innerText.trim()).filter(Boolean)})`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){process.stdout.write(m.result.result.value);ws.close();}}' 2>/dev/null || true); printf 'BLE_POLL_%s=%s\\n' \"$i\" \"$(printf '%s' \"$OUT\" | python3 -c 'import json,sys; s=sys.stdin.read(); print(\" | \".join(json.loads(s)[\"text\"].splitlines()[-20:]) if s else \"NO_DOM\")')\"; printf '%s' \"$OUT\" >/tmp/lcl_ble_last.json; done; true",
+  "pid": 62502,
   "timeout": 240,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:17:29.398325+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T21:17:33.741893+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-shelly-ble-discovery-restore-v1",
@@ -18,5 +18,5 @@
   "task_digest": "1abfdc538088104a23e735a0650f7af2a84e625f87e43ff715e227a27867bf72",
   "daemon_version": "4.18.19",
   "daemon_pid": 62050,
-  "updated_at": "2026-09-09T21:17:29.471603+00:00"
+  "updated_at": "2026-09-09T21:17:33.764401+00:00"
 }
