@@ -1,0 +1,18 @@
+{
+  "id": "20260910-freeze-hardware-matrix-final-v2",
+  "mode": "commands",
+  "work_branch": "work/freeze-v2.0.10",
+  "allow_write": true,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 3600,
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune --tags origin; test \"$(git rev-parse HEAD)\" = \"e75af928954004fbe8f13c2cf36c7f581370d513\"; test \"$(git rev-parse origin/work/freeze-v2.0.10)\" = \"e75af928954004fbe8f13c2cf36c7f581370d513\"; test \"$(git rev-parse origin/main)\" = \"1cd0215548aea5203b064fcf2b24c4c628f1c30e\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"; ! git show-ref --verify --quiet refs/tags/v2.0.10; test -z \"$(git status --porcelain)\"",
+    "python3 -c 'from pathlib import Path; import re; p=Path(\"docs/testing/hardware-matrix.md\"); s=p.read_text(); pat=r\"^\\| Final destructive `2\\.0\\.10` phone-alpha install \\| blocked\\s+\\| .* \\|$\"; new=\"| Final destructive `2.0.10` phone-alpha install | ✅ | On freeze SHA `e75af928…`, `pnpm android:phone-alpha` logged destructive clean uninstall before install, then cold-started the app. Installed `versionName=2.0.10`, `versionCode=20010`, `targetSdk=36`; build APK and pulled installed `base.apk` both matched alpha signer SHA-256 `2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76`. Fresh launch returned `Status: ok`, the process had a PID and `topResumedActivity`/focused activity was `MainActivity`, with no fatal process error in the smoke log. After the phone data wipe, direct Shelly RPC still showed script id `1` running, relay OFF, zero schedules, and a live compact `/diag`; a second read 5 s later confirmed running + relay OFF. |\"; s2,n=re.subn(pat,new,s,count=1,flags=re.M); assert n==1,n; p.write_text(s2)' && git diff --check && git diff -- docs/testing/hardware-matrix.md",
+    "git add docs/testing/hardware-matrix.md && git commit -m \"docs(testing): complete v2.0.10 physical freeze\" && test -z \"$(git status --porcelain)\" && echo FINAL_MATRIX_SHA=$(git rev-parse HEAD)",
+    "git push origin HEAD:refs/heads/work/freeze-v2.0.10 && git fetch origin work/freeze-v2.0.10; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/freeze-v2.0.10)\"; test -z \"$(git status --porcelain)\"; echo PUBLISHED_FINAL_MATRIX_SHA=$(git rev-parse HEAD)"
+  ]
+}
