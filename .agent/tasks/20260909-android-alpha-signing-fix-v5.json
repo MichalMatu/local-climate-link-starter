@@ -1,0 +1,25 @@
+{
+  "id": "20260909-android-alpha-signing-fix-v5",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/android-alpha-signing-fix-v1",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 3600,
+  "idle_timeout": 600,
+  "task_timeout": 7200,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse HEAD)\" = \"83fa45e81ee829c639ee1a65280ab19d80c72dbc\"",
+    "test \"$(git rev-parse origin/work/android-alpha-signing-fix-v1)\" = \"83fa45e81ee829c639ee1a65280ab19d80c72dbc\"",
+    "test \"$(git rev-parse origin/main)\" = \"fd985071823793804fc5610f989d1829b00d05d8\"",
+    "bash -n scripts/android/ensure-alpha-signing.sh scripts/android/phone-alpha-install.sh",
+    "pnpm install --frozen-lockfile",
+    "pnpm check:full",
+    "pnpm android:phone-alpha",
+    "git status --short",
+    "git diff --check",
+    "test -z \"$(git diff --name-only origin/main...HEAD -- packages/automation-core packages/script-generator)\""
+  ]
+}
