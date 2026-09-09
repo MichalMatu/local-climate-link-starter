@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 8,
-  "command": "SDK=\"$HOME/Library/Android/sdk\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; cd apps/mobile/android && ./gradlew --no-daemon assembleDebug lintDebug assembleRelease bundleRelease && cd ../../..",
-  "pid": 1396,
+  "command": "pnpm audit --prod --audit-level=high",
+  "pid": 2377,
   "timeout": 3600,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T08:03:01.465410+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-09T08:03:54.708490+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-android-native-navigation-hardening-v3",
@@ -18,5 +18,5 @@
   "task_digest": "47ddb55db393d2f12634df4da2d00d2395b5c185b0b668bb4c0bcb4984df1c72",
   "daemon_version": "4.18.19",
   "daemon_pid": 97100,
-  "updated_at": "2026-09-09T08:03:01.538574+00:00"
+  "updated_at": "2026-09-09T08:03:54.791135+00:00"
 }
