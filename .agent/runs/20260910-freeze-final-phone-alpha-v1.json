@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 1,
+  "index": 2,
   "total": 7,
-  "command": "set -e; git fetch --prune --tags origin; test \"$(git rev-parse HEAD)\" = \"e75af928954004fbe8f13c2cf36c7f581370d513\"; test \"$(git rev-parse origin/work/freeze-v2.0.10)\" = \"e75af928954004fbe8f13c2cf36c7f581370d513\"; test \"$(git rev-parse origin/main)\" = \"1cd0215548aea5203b064fcf2b24c4c628f1c30e\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"; ! git show-ref --verify --quiet refs/tags/v2.0.10; test -z \"$(git status --porcelain)\"; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; test -x \"$ADB\"; DEVICES=\"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\"; test \"$DEVICES\" = \"RFCT70L7E8J\"; MODEL=\"$(\"$ADB\" -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\"; printf 'authorized_device=%s model=%s\\n' \"$DEVICES\" \"$MODEL\"; test \"$MODEL\" = \"SM-S906B\" -o \"$MODEL\" = \"SM_S906B\"",
-  "pid": 38310,
+  "command": "set -e; set -o pipefail; pnpm android:phone-alpha 2>&1 | tee /tmp/lcl-phone-alpha.log",
+  "pid": 38409,
   "timeout": 7200,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:33:06.067854+00:00",
-  "stage_name": "command-1",
-  "stage_index": 1,
+  "started_at": "2026-09-09T22:33:10.680176+00:00",
+  "stage_name": "command-2",
+  "stage_index": 2,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-final-phone-alpha-v1",
@@ -18,5 +18,5 @@
   "task_digest": "5e455d63e61bde5473846267a9baf3167bca830b4797f49c1e008c569afbee80",
   "daemon_version": "4.18.19",
   "daemon_pid": 38172,
-  "updated_at": "2026-09-09T22:33:06.068139+00:00"
+  "updated_at": "2026-09-09T22:33:10.764057+00:00"
 }
