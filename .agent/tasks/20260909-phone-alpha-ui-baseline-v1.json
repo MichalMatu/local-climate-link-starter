@@ -1,0 +1,22 @@
+{
+  "id": "20260909-phone-alpha-ui-baseline-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"771b23456cf7b3fafe62cba3263e1f8f7118580b\"",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); printf 'SERIAL=%s\\n' \"$SERIAL\"; \"$ADB\" -s \"$SERIAL\" shell getprop ro.product.manufacturer; \"$ADB\" -s \"$SERIAL\" shell getprop ro.product.model; \"$ADB\" -s \"$SERIAL\" shell wm size; \"$ADB\" -s \"$SERIAL\" shell wm density",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell dumpsys package link.localclimate.app | grep -E 'versionCode=|versionName=|targetSdk=' | head -10",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); REMOTE=$(\"$ADB\" -s \"$SERIAL\" shell pm path link.localclimate.app | sed -n 's/^package://p' | head -1 | tr -d '\\r'); TMP=/tmp/lcl-phone-alpha-baseline.apk; rm -f \"$TMP\"; \"$ADB\" -s \"$SERIAL\" pull \"$REMOTE\" \"$TMP\" >/dev/null; \"$HOME/Library/Android/sdk/build-tools/36.0.0/apksigner\" verify --print-certs \"$TMP\" | grep 'Signer #1 certificate SHA-256 digest'; rm -f \"$TMP\"",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell am force-stop link.localclimate.app; \"$ADB\" -s \"$SERIAL\" logcat -c; \"$ADB\" -s \"$SERIAL\" shell am start -W -n link.localclimate.app/.MainActivity; sleep 2; printf 'PID='; \"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell uiautomator dump /sdcard/lcl-window.xml >/dev/null; \"$ADB\" -s \"$SERIAL\" shell cat /sdcard/lcl-window.xml | head -c 20000; printf '\\n'",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief '*:W' | tail -120 || true",
+    "git status --short && git diff --check"
+  ]
+}
