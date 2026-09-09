@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-add-plug-ime-back-v1",
+  "task_digest": "6c676c5202342a959d04c4a20e16c24a59c3a9710e7f6b0043a6009ce6840339",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T20:42:50.878321+00:00",
+  "attempt_id": "eee19835820ab4765b0870c9",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 24879,
+  "updated_at": "2026-09-09T20:42:50.878474+00:00",
+  "pid": 24879
+}
