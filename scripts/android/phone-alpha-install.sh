@@ -33,13 +33,12 @@ read_property() {
 STORE_FILE="$(read_property storeFile)"
 STORE_PASSWORD="$(read_property storePassword)"
 KEY_ALIAS="$(read_property keyAlias)"
-KEY_PASSWORD="$(read_property keyPassword)"
 APKSIGNER="$(find "$SDK/build-tools" -maxdepth 2 -type f -name apksigner | sort | tail -1)"
 
 [[ -f "$STORE_FILE" ]]
 [[ -x "$APKSIGNER" ]]
 
-KEY_FINGERPRINT="$(keytool -list -v -keystore "$STORE_FILE" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" -keypass "$KEY_PASSWORD" 2>/dev/null | awk '/SHA256:/{print $2; exit}' | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+KEY_FINGERPRINT="$(keytool -list -v -keystore "$STORE_FILE" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" 2>/dev/null | awk '/SHA256:/{print $2; exit}' | tr -d ':' | tr '[:upper:]' '[:lower:]')"
 APK_FINGERPRINT="$("$APKSIGNER" verify --print-certs "$APK" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -1 | tr '[:upper:]' '[:lower:]')"
 
 [[ -n "$KEY_FINGERPRINT" && "$KEY_FINGERPRINT" == "$APK_FINGERPRINT" ]]
