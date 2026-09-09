@@ -1,0 +1,24 @@
+{
+  "id": "20260909-agp-native-emulator-smoke-v3",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/android-agp-8-9-1",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/work/android-agp-8-9-1)\" = \"1b3536881faf5845c4208d9fccce247da786949a\"",
+    "git checkout -B work/android-agp-8-9-1 origin/work/android-agp-8-9-1 && git reset --hard origin/work/android-agp-8-9-1 && git clean -fd && test -z \"$(git status --porcelain)\"",
+    "pnpm install --frozen-lockfile && pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; cd apps/mobile/android; ./gradlew --no-daemon assembleDebug lintDebug",
+    "set -e; test -f apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; shasum -a 256 apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; du -h apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; tail -120 \"$HOME/.android/medium_phone/emulator.log\" 2>/dev/null || true; df -h / \"$HOME\"",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; export ANDROID_SDK_ROOT=\"$SDK\" ANDROID_HOME=\"$SDK\" PATH=\"$SDK/platform-tools:$SDK/emulator:$PATH\"; adb kill-server || true; pkill -f 'emulator.*medium_phone' || true; nohup \"$SDK/emulator/emulator\" -avd medium_phone -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot-save > /tmp/lcl-medium-phone-emulator.log 2>&1 & echo $! > /tmp/lcl-medium-phone-emulator.pid; for i in $(seq 1 120); do adb start-server >/dev/null 2>&1 || true; BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r' || true); if [ \"$BOOT\" = \"1\" ]; then break; fi; if ! kill -0 \"$(cat /tmp/lcl-medium-phone-emulator.pid)\" 2>/dev/null; then echo 'EMULATOR_EXITED'; cat /tmp/lcl-medium-phone-emulator.log; exit 1; fi; sleep 2; done; test \"$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\"; printf 'ANDROID_RELEASE=%s API=%s ABI=%s\\n' \"$(adb shell getprop ro.build.version.release | tr -d '\\r')\" \"$(adb shell getprop ro.build.version.sdk | tr -d '\\r')\" \"$(adb shell getprop ro.product.cpu.abi | tr -d '\\r')\"; tail -80 /tmp/lcl-medium-phone-emulator.log",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; export PATH=\"$SDK/platform-tools:$PATH\"; APK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; adb install -r \"$APK\"; adb shell pm clear link.localclimate.app >/dev/null; adb logcat -c; adb shell am start -W -n link.localclimate.app/.MainActivity; sleep 4; PID=$(adb shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; printf 'APP_PID=%s\\n' \"$PID\"; adb shell dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' | grep 'link.localclimate.app' | head -2",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; export PATH=\"$SDK/platform-tools:$PATH\"; PID=$(adb shell pidof link.localclimate.app | tr -d '\\r'); adb logcat --pid=\"$PID\" -d -v brief > /tmp/lcl-app-logcat.txt; if grep -E 'FATAL EXCEPTION|ANR in link\\.localclimate\\.app|Process link\\.localclimate\\.app .* has died|chromium.*(crash|Aw, Snap)' /tmp/lcl-app-logcat.txt; then cat /tmp/lcl-app-logcat.txt; exit 1; fi; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=|targetSdk=' | head -10; tail -80 /tmp/lcl-app-logcat.txt",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; export PATH=\"$SDK/platform-tools:$PATH\"; adb shell settings put system accelerometer_rotation 0; adb shell settings put system user_rotation 1; sleep 2; adb shell input keyevent KEYCODE_BACK; sleep 2; PID=$(adb shell pidof link.localclimate.app | tr -d '\\r' || true); test -n \"$PID\"; printf 'POST_ROTATION_BACK_PID=%s\\n' \"$PID\"; adb shell settings put system user_rotation 0; adb shell wm density; adb shell wm size",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; export PATH=\"$SDK/platform-tools:$PATH\"; adb emu kill || true; sleep 2; git reset --hard HEAD; git clean -fd; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"1b3536881faf5845c4208d9fccce247da786949a\""
+  ]
+}
