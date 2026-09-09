@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 8,
   "total": 9,
-  "command": "START=$(cat /tmp/lcl_scan_start); END=$(cat /tmp/lcl_scan_end); WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); START=\"$START\" END=\"$END\" WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const xs=[...document.querySelectorAll(\"input\")];if(xs.length<2)throw new Error(\"scan inputs missing\");for(const [e,v] of [[xs[0],${JSON.stringify(process.env.START)}],[xs[1],${JSON.stringify(process.env.END)}]]){const s=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,\"value\").set;s.call(e,v);e.dispatchEvent(new Event(\"input\",{bubbles:true}));e.dispatchEvent(new Event(\"change\",{bubbles:true}));}return xs.map(x=>x.value).join(\" -> \" )})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}console.log(\"RANGE_INPUTS=\"+m.result.result.value);ws.close();}}' && sleep 1",
-  "pid": 41894,
+  "command": "for i in $(seq 1 45); do sleep 4; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); test -n \"$WS\" || { echo 'WebView disappeared during scan' >&2; exit 1; }; OUT=$(WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`JSON.stringify({text:document.body.innerText,buttons:[...document.querySelectorAll(\"button\")].map(x=>x.innerText.trim()).filter(Boolean)})`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){process.stdout.write(m.result.result.value);ws.close();}}'); printf 'SCAN_POLL_%02d=%s\\n' \"$i\" \"$(printf '%s' \"$OUT\" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(\" | \".join(d[\"text\"].splitlines()[-12:]))')\"; if printf '%s' \"$OUT\" | python3 -c 'import json,sys; d=json.load(sys.stdin); b=d[\"buttons\"]; raise SystemExit(0 if any(x in (\"Start scan\",\"Scan\") for x in b) and not any(\"Stop\" in x for x in b) else 1)'; then printf '%s' \"$OUT\" >/tmp/lcl_scan_result.json; break; fi; done; test -s /tmp/lcl_scan_result.json; python3 -c 'import json; d=json.load(open(\"/tmp/lcl_scan_result.json\")); print(\"FINAL_SCAN_TEXT_BEGIN\"); print(d[\"text\"]); print(\"FINAL_SCAN_TEXT_END\")'",
+  "pid": 41984,
   "timeout": 240,
   "idle_timeout": 150,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T20:59:32.281522+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-09T20:59:34.368558+00:00",
+  "stage_name": "command-8",
+  "stage_index": 8,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-shelly-discovery-v1",
@@ -18,5 +18,5 @@
   "task_digest": "9f78118d53e743deb478e20173fb71d3df6669244c57f2342954ec4f114f5a88",
   "daemon_version": "4.18.19",
   "daemon_pid": 41035,
-  "updated_at": "2026-09-09T20:59:32.364726+00:00"
+  "updated_at": "2026-09-09T20:59:34.436727+00:00"
 }
