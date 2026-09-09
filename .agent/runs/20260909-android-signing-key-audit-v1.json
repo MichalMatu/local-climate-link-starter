@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-signing-key-audit-v1",
+  "task_digest": "7f00be234b45c5aabc3ed30059e3722ea9e35abbde86f76c8fa60adc7a6291bd",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T19:44:27.569812+00:00",
+  "attempt_id": "dea2cc3b5bc62359beb48fff",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 75338,
+  "updated_at": "2026-09-09T19:44:27.569878+00:00",
+  "pid": 75338
+}
