@@ -591,10 +591,10 @@ test('installed automation detail safely pauses and resumes on phone', async ({
     page.getByText('Automatyka zatrzymana, wyjście potwierdzone jako OFF.')
   ).toBeVisible();
   await expect(page.getByText('Wstrzymana')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Wznów automatykę' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Uruchom automatykę' })).toBeVisible();
   await expect(page.getByText('OFF', { exact: true })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Wznów automatykę' }).click();
+  await page.getByRole('button', { name: 'Uruchom automatykę' }).click();
   await expect(page.getByText('Automatyka uruchomiona.')).toBeVisible();
   await expect(page.getByText('Działa')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Wstrzymaj automatykę' })).toBeVisible();

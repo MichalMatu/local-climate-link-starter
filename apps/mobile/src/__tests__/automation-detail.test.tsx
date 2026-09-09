@@ -333,11 +333,12 @@ describe('InstallationDetailScreen', () => {
       )
     ).toBeVisible();
     expect(await screen.findByText('Wstrzymana')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Wznów automatykę' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Skrypt zatrzymany' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Uruchom automatykę' })).toBeVisible();
     expect(rpcMethods).toContain('Script.Stop');
     expect(rpcMethods).toContain('Switch.Set');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Wznów automatykę' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Uruchom automatykę' }));
 
     expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();

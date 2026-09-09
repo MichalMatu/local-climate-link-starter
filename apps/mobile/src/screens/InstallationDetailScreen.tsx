@@ -2,7 +2,9 @@ import { ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
+import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
 import {
   formatInstallationMetric,
   installationHealthLabel,
@@ -110,7 +112,7 @@ const InstalledAutomationDetail = ({
   toasts,
   queryClient
 }: InstalledAutomationDetailProps) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
   const snapshot = diagnosticsQuery.isSuccess ? diagnosticsQuery.data : undefined;
@@ -123,6 +125,16 @@ const InstalledAutomationDetail = ({
     scriptMatch === 'matched' &&
     (control?.automationMode === 'auto' || control?.automationMode === 'manual');
   const runtimeHealth = snapshot ? installedAutomationHealth(snapshot) : null;
+  const recovery = installationRecoveryState({
+    diagnosticsError: diagnosticsQuery.isError,
+    controlError: controlQuery.isError,
+    scriptMatch,
+    automationMode: control?.automationMode ?? null,
+    runtimeHealth
+  });
+  const recoveryCopy = recovery
+    ? installationHealthCopy[locale].issues[recovery.issue]
+    : null;
 
   const automationMutation = useMutation({
     mutationFn: () =>
@@ -157,13 +169,15 @@ const InstalledAutomationDetail = ({
 
   let healthLabel = t('dashboard.health.loading');
   let healthTone: 'ok' | 'warning' | 'offline' = 'warning';
-  if (isPaused) {
-    healthLabel = t('dashboard.health.paused');
-  } else if (control && scriptMatch !== 'matched') {
-    healthLabel = t('dashboard.health.attention');
-  } else if (diagnosticsQuery.isError && controlQuery.isError) {
+  if (recovery?.issue === 'offline') {
     healthLabel = t('dashboard.health.offline');
     healthTone = 'offline';
+  } else if (recovery?.issue === 'script-stopped') {
+    healthLabel = t('dashboard.health.paused');
+  } else if (recovery?.issue === 'ownership-problem') {
+    healthLabel = t('dashboard.health.attention');
+  } else if (recovery?.issue === 'sensor-missing') {
+    healthLabel = t('dashboard.health.stale');
   } else if (diagnosticsQuery.isError) {
     healthLabel = t('dashboard.health.attention');
   } else if (runtimeHealth) {
@@ -191,6 +205,47 @@ const InstalledAutomationDetail = ({
       </header>
 
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
+        {recovery && recoveryCopy && (
+          <article className="automation-card installation-detail-recovery" role="status">
+            <div className="installation-section-heading">
+              <div>
+                <p className="automation-card__eyebrow">
+                  {installationHealthCopy[locale].eyebrow}
+                </p>
+                <h2>{recoveryCopy.title}</h2>
+              </div>
+            </div>
+            <p className="installation-detail-note">{recoveryCopy.description}</p>
+            <div className="installation-detail-actions">
+              <button
+                className={
+                  recovery.action === 'resume' ? 'primary-action' : 'secondary-action'
+                }
+                type="button"
+                disabled={
+                  recovery.action === 'resume'
+                    ? automationMutation.isPending
+                    : diagnosticsQuery.isFetching || controlQuery.isFetching
+                }
+                onClick={() => {
+                  if (recovery.action === 'resume') {
+                    automationMutation.mutate();
+                    return;
+                  }
+                  void refreshAll();
+                }}
+              >
+                {recovery.action === 'resume' && automationMutation.isPending
+                  ? t('detail.changingState')
+                  : recovery.action === 'refresh' &&
+                      (diagnosticsQuery.isFetching || controlQuery.isFetching)
+                    ? t('common.refreshing')
+                    : recoveryCopy.action}
+              </button>
+            </div>
+          </article>
+        )}
+
         <article className="automation-card installation-detail-live">
           <div className="installation-section-heading">
             <div>
@@ -273,23 +328,21 @@ const InstalledAutomationDetail = ({
             </div>
           </dl>
 
-          <div className="installation-detail-actions">
-            <button
-              className={isPaused ? 'primary-action' : 'secondary-action'}
-              type="button"
-              disabled={!canToggleAutomation || automationMutation.isPending}
-              onClick={() => automationMutation.mutate()}
-            >
-              {automationMutation.isPending
-                ? t('detail.changingState')
-                : isPaused
-                  ? t('detail.resume')
-                  : t('detail.pause')}
-            </button>
-          </div>
-
-          {control && scriptMatch !== 'matched' && (
-            <p className="installation-detail-note">{t('detail.scriptNeedsAttention')}</p>
+          {canToggleAutomation && recovery?.issue !== 'script-stopped' && (
+            <div className="installation-detail-actions">
+              <button
+                className={isPaused ? 'primary-action' : 'secondary-action'}
+                type="button"
+                disabled={automationMutation.isPending}
+                onClick={() => automationMutation.mutate()}
+              >
+                {automationMutation.isPending
+                  ? t('detail.changingState')
+                  : isPaused
+                    ? t('detail.resume')
+                    : t('detail.pause')}
+              </button>
+            </div>
           )}
         </article>
 
