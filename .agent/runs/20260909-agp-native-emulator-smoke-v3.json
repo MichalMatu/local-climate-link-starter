@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 10,
-  "command": "set -e; test -f apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; shasum -a 256 apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; du -h apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; tail -120 \"$HOME/.android/medium_phone/emulator.log\" 2>/dev/null || true; df -h / \"$HOME\"",
-  "pid": 49830,
+  "command": "set -e; SDK=\"$HOME/Library/Android/sdk\"; export ANDROID_SDK_ROOT=\"$SDK\" ANDROID_HOME=\"$SDK\" PATH=\"$SDK/platform-tools:$SDK/emulator:$PATH\"; adb kill-server || true; pkill -f 'emulator.*medium_phone' || true; nohup \"$SDK/emulator/emulator\" -avd medium_phone -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot-save > /tmp/lcl-medium-phone-emulator.log 2>&1 & echo $! > /tmp/lcl-medium-phone-emulator.pid; for i in $(seq 1 120); do adb start-server >/dev/null 2>&1 || true; BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r' || true); if [ \"$BOOT\" = \"1\" ]; then break; fi; if ! kill -0 \"$(cat /tmp/lcl-medium-phone-emulator.pid)\" 2>/dev/null; then echo 'EMULATOR_EXITED'; cat /tmp/lcl-medium-phone-emulator.log; exit 1; fi; sleep 2; done; test \"$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\"; printf 'ANDROID_RELEASE=%s API=%s ABI=%s\\n' \"$(adb shell getprop ro.build.version.release | tr -d '\\r')\" \"$(adb shell getprop ro.build.version.sdk | tr -d '\\r')\" \"$(adb shell getprop ro.product.cpu.abi | tr -d '\\r')\"; tail -80 /tmp/lcl-medium-phone-emulator.log",
+  "pid": 49848,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T06:56:53.443831+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T06:56:53.825229+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260909-agp-native-emulator-smoke-v3",
@@ -18,5 +18,5 @@
   "task_digest": "6e36cd6204d85925ce77c2f98fb2a5629b88f43512dd3562cffb6f1f3c47a98b",
   "daemon_version": "4.18.19",
   "daemon_pid": 47579,
-  "updated_at": "2026-09-09T06:56:53.517990+00:00"
+  "updated_at": "2026-09-09T06:56:53.893641+00:00"
 }
