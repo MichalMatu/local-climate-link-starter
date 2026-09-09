@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.19",
   "state": "idle",
-  "pid": 62280,
-  "updated_at": "2026-09-09T07:15:45.169688+00:00",
+  "pid": 63979,
+  "updated_at": "2026-09-09T07:16:59.147981+00:00",
   "self_revision": "8e04f75287630cb1db363f1b53c3c0b770e10dcc",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 62280,
-  "supervisor_pid": 56526,
-  "last_task_id": "20260909-android-emulator-smoke-v5",
+  "worker_pid": 63979,
+  "supervisor_pid": 63742,
   "execution_variant": "parallel"
 }
