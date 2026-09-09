@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 8,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const text=document.body.innerText;if(text.includes(\"Your automations\"))return \"already-dashboard\";const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Manage existing automation\"));if(!b)throw new Error(\"dashboard/root not found: \"+text.slice(0,500));b.click();return \"opened-dashboard\";})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}console.log(m.result.result.value);ws.close();}}' && sleep 4",
-  "pid": 75883,
+  "command": "for i in $(seq 1 6); do WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); OUT=$(WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`JSON.stringify({text:document.body.innerText,buttons:[...document.querySelectorAll(\"button\")].map(x=>x.innerText.trim()).filter(Boolean)})`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){process.stdout.write(m.result.result.value);ws.close();}}'); echo \"DASHBOARD_POLL_$i=$OUT\"; printf '%s' \"$OUT\" >/tmp/lcl_dashboard_last.json; if printf '%s' \"$OUT\" | python3 -c 'import json,sys; d=json.load(sys.stdin); raise SystemExit(0 if d.get(\"text\",\"\").find(\"Shelly Plug S Gen3\")>=0 and \"Open system\" in d.get(\"buttons\",[]) else 1)'; then break; fi; sleep 5; done; python3 -c 'import json; d=json.load(open(\"/tmp/lcl_dashboard_last.json\")); assert \"Shelly Plug S Gen3\" in d[\"text\"] and \"Open system\" in d[\"buttons\"]; print(\"DASHBOARD_FINAL_BEGIN\"); print(d[\"text\"]); print(\"DASHBOARD_FINAL_END\")'",
+  "pid": 76029,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:31:33.513745+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T21:31:38.145742+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-dashboard-detail-v2",
@@ -18,5 +18,5 @@
   "task_digest": "104c708dc604d380fc666982a9f27bc06529fe1656a3a442409ff4637803ab45",
   "daemon_version": "4.18.19",
   "daemon_pid": 75662,
-  "updated_at": "2026-09-09T21:31:33.603808+00:00"
+  "updated_at": "2026-09-09T21:31:38.180254+00:00"
 }
