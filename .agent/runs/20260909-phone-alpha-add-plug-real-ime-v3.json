@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-add-plug-real-ime-v3",
+  "task_digest": "438471960a5ecbbd514888e1cabae60e72523ca4f7c74cbd5f0ff318966abf17",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T20:52:57.233589+00:00",
+  "attempt_id": "5de7260a4bf7e8f64d8c24ef",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 33955,
+  "updated_at": "2026-09-09T20:52:57.233823+00:00",
+  "pid": 33955
+}
