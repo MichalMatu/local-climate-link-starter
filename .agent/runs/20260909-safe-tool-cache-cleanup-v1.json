@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 7,
-  "command": "set -e; ROOT=\"$HOME/agent-workspace/repos/local-climate-link-starter/work\"; rm -rf \"$ROOT/node_modules\" \"$ROOT/apps/mobile/node_modules\" \"$ROOT/apps/mobile/dist\" \"$ROOT/apps/mobile/test-results\" \"$ROOT/apps/mobile/playwright-report\" \"$ROOT/test-results\"; find \"$ROOT/packages\" -maxdepth 2 -type d \\( -name dist -o -name build -o -name coverage \\) -prune -exec rm -rf {} + 2>/dev/null || true",
-  "pid": 9181,
+  "command": "set -e; rm -rf \"$HOME/.gradle/caches/8.9\" \"$HOME/.gradle/caches/build-cache-1\"; if [ -d \"$HOME/.gradle/wrapper/dists\" ]; then find \"$HOME/.gradle/wrapper/dists\" -mindepth 1 -maxdepth 1 ! -name 'gradle-8.11.1-*' -exec rm -rf {} +; fi",
+  "pid": 9235,
   "timeout": 900,
   "idle_timeout": 300,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T06:14:13.666107+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T06:14:16.473534+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260909-safe-tool-cache-cleanup-v1",
@@ -18,5 +18,5 @@
   "task_digest": "904186d99628c771509c022573ea36d6473bb615b2185be379da61465beb731c",
   "daemon_version": "4.18.19",
   "daemon_pid": 9027,
-  "updated_at": "2026-09-09T06:14:13.763381+00:00"
+  "updated_at": "2026-09-09T06:14:16.559111+00:00"
 }
