@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-cli-create-emulator-v1",
+  "task_digest": "68ccd301d2138d43f2894d0db997cfd396e2d508cc114937baad9a21cb7ac8f1",
+  "idle_timeout": 1200,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T06:05:02.305145+00:00",
+  "attempt_id": "e9783b119dfecb42b1a83362",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 1778,
+  "updated_at": "2026-09-09T06:05:02.305238+00:00",
+  "pid": 1778
+}
