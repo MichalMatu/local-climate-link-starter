@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-shelly-add-status-v1",
+  "task_digest": "d58a65cf030263888e86e08c3fe8171abca78a6d344bbeb5d69ba12f9a3428fa",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T21:01:17.768240+00:00",
+  "attempt_id": "070553b195d49ae346808f90",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 44619,
+  "updated_at": "2026-09-09T21:01:17.768433+00:00",
+  "pid": 44619
+}
