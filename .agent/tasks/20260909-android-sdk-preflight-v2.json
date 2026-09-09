@@ -1,0 +1,23 @@
+{
+  "id": "20260909-android-sdk-preflight-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/pre-phone-hardening-v1",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 3600,
+  "idle_timeout": 1200,
+  "task_timeout": 10800,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse origin/work/pre-phone-hardening-v1)\" = \"44c46d50ed3e72e7121602a562286e53cb4de50d\"",
+    "git checkout -B work/pre-phone-hardening-v1 origin/work/pre-phone-hardening-v1 && git reset --hard origin/work/pre-phone-hardening-v1 && git clean -fd",
+    "set -e; command -v brew; brew --version; if command -v sdkmanager >/dev/null 2>&1; then SDKMANAGER=$(command -v sdkmanager); else SDKMANAGER=$(brew list --cask android-commandlinetools 2>/dev/null | grep '/sdkmanager$' | head -1 || true); fi; if [ -z \"${SDKMANAGER:-}\" ]; then brew install --cask android-commandlinetools; SDKMANAGER=$(brew list --cask android-commandlinetools | grep '/sdkmanager$' | head -1); fi; test -x \"$SDKMANAGER\"; printf 'SDKMANAGER=%s\\n' \"$SDKMANAGER\"; printf '%s\\n' \"$SDKMANAGER\" > /tmp/lcl-sdkmanager-path",
+    "set -e; SDKMANAGER=$(cat /tmp/lcl-sdkmanager-path); export ANDROID_SDK_ROOT=\"$HOME/Library/Android/sdk\"; export ANDROID_HOME=\"$ANDROID_SDK_ROOT\"; mkdir -p \"$ANDROID_SDK_ROOT\"; yes | \"$SDKMANAGER\" --sdk_root=\"$ANDROID_SDK_ROOT\" --licenses >/tmp/lcl-android-licenses.log 2>&1 || true; \"$SDKMANAGER\" --sdk_root=\"$ANDROID_SDK_ROOT\" 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'; test -d \"$ANDROID_SDK_ROOT/platforms/android-36\"; test -d \"$ANDROID_SDK_ROOT/build-tools/36.0.0\"; printf 'ANDROID_SDK_ROOT=%s\\n' \"$ANDROID_SDK_ROOT\"",
+    "pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android",
+    "set -e; export ANDROID_SDK_ROOT=\"$HOME/Library/Android/sdk\"; export ANDROID_HOME=\"$ANDROID_SDK_ROOT\"; printf 'sdk.dir=%s\\n' \"$ANDROID_SDK_ROOT\" > apps/mobile/android/local.properties; cd apps/mobile/android; ./gradlew --no-daemon assembleDebug lintDebug",
+    "test -f apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk && ls -lh apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk && shasum -a 256 apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk",
+    "git status --short --untracked-files=no; git diff --check; test -z \"$(git status --porcelain --untracked-files=no)\""
+  ]
+}
