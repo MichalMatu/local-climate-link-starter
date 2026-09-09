@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 10,
-  "command": "pnpm install --frozen-lockfile && pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android",
-  "pid": 47793,
+  "command": "set -e; SDK=\"$HOME/Library/Android/sdk\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; cd apps/mobile/android; ./gradlew --no-daemon assembleDebug lintDebug",
+  "pid": 48082,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T06:54:59.492266+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T06:55:09.704053+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260909-agp-native-emulator-smoke-v3",
@@ -18,5 +18,5 @@
   "task_digest": "6e36cd6204d85925ce77c2f98fb2a5629b88f43512dd3562cffb6f1f3c47a98b",
   "daemon_version": "4.18.19",
   "daemon_pid": 47579,
-  "updated_at": "2026-09-09T06:54:59.561415+00:00"
+  "updated_at": "2026-09-09T06:55:09.788655+00:00"
 }
