@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-freeze-preflight-version-check-v1",
+  "task_digest": "dfaf074213de7eb9ac4d3e66cb282578f9e673a7786b58f9861c07706f0ba131",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T22:02:51.782944+00:00",
+  "attempt_id": "1350c7536e6aaacf6140b964",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 4279,
+  "updated_at": "2026-09-09T22:02:51.783122+00:00",
+  "pid": 4279
+}
