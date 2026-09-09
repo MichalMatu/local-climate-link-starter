@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-cli-profiles-v1",
+  "task_digest": "7f20c22894e1c7b4f6b4c71724c5d5b13982111e6e28b0bc82fce8f461fb847c",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T06:03:04.638113+00:00",
+  "attempt_id": "293664b6bc8b4e91dbe276b1",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 99818,
+  "updated_at": "2026-09-09T06:03:04.638167+00:00",
+  "pid": 99818
+}
