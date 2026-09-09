@@ -1,0 +1,29 @@
+{
+  "id": "20260909-button-proof-roadmap-v5",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/installation-health-recovery",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "commands": [
+    "git fetch --prune origin",
+    "test $(git rev-parse origin/main) = 186ed0f74d51ba79f5a6f43bb4c66ac5e56be239",
+    "git checkout -B work/installation-health-recovery origin/work/installation-health-recovery",
+    "git reset --hard origin/work/installation-health-recovery && git clean -fd",
+    "test $(git rev-parse HEAD) = 186ed0f74d51ba79f5a6f43bb4c66ac5e56be239",
+    "printf '%s' 'IyMjIEJ1dHRvbiDigJQgaGFyZHdhcmUgdmFsaWRhdGlvbiBjb21wbGV0ZQoKUmVhbC1oYXJkd2FyZSB2YWxpZGF0aW9uIHdhcyBjb21wbGV0ZWQgb24gMjAyNi0wOS0wOSB3aXRoIFNoZWxseSBQbHVnIFMgR2VuMwptb2RlbCBgUzNQTC0wMDExMkVVYCwgZmlybXdhcmUgYDEuNy41YCAodGVzdCBkZXZpY2UgYDE5Mi4xNjguMC4xNmApLCBhbmQKYFBMVUdTX1VJLmNvbnRyb2xzWyJzd2l0Y2g6MCJdLmluX21vZGUgPSAibW9tZW50YXJ5ImAuCgpIYXJkd2FyZS9SUEMgcHJvb2Y6CgotIGBCdXR0b24uR2V0Q29uZmlnIGlkPTBgIGFuZCBgQnV0dG9uLkdldFN0YXR1cyBpZD0wYCBib3RoIHJldHVybmVkCiAgYEFyZ3VtZW50ICdpZCcsIHZhbHVlIDAgbm90IGZvdW5kYCwgc28gdGhlcmUgaXMgbm8gcGh5c2ljYWwgYGJ1dHRvbjowYAogIGNvbXBvbmVudCBvbiB0aGlzIGRldmljZTsgdGhlIGdlbmVyaWMgYEJ1dHRvbi4qYCBSUEMgbmFtZXNwYWNlIG11c3Qgbm90IGJlCiAgdHJlYXRlZCBhcyBwcm9vZiBvZiBvbmUsCi0gYSBwYXNzaXZlIFYyIHdlYnNvY2tldCBsaXN0ZW5lciBvbiBgd3M6Ly8xOTIuMTY4LjAuMTYvcnBjYCBvcGVuZWQgY29ycmVjdGx5CiAgd2l0aCBgd3JpdGU9RmFsc2VgIGFuZCBtYWRlIG5vIGNvbmZpZ3VyYXRpb24gY2hhbmdlcywKLSBhIHJlYWwgcGh5c2ljYWwgcHJlc3MgcHJvZHVjZWQgYE5vdGlmeVN0YXR1c2AgdXBkYXRlcyB3aXRoCiAgYHN3aXRjaDowLm91dHB1dD10cnVlLCBzb3VyY2U6ImJ1dHRvbiJgIGFuZCBsYXRlcgogIGBzd2l0Y2g6MC5vdXRwdXQ9ZmFsc2UsIHNvdXJjZToiYnV0dG9uImAsCi0gbm8gc2VwYXJhdGUgYnV0dG9uIGBOb3RpZnlFdmVudGAgd2FzIG9ic2VydmVkIGluIHRoYXQgcnVuLAotIHRoZSBsaXN0ZW5lciBleGl0ZWQgY2xlYW5seTsgaXRzIExvY2FsIEFnZW50IGNsYWltIHdhcyByZWxlYXNlZCBhbmQgdGhlIGFnZW50CiAgcmV0dXJuZWQgdG8gSURMRS4KClRoZSBwaHlzaWNhbC1idXR0b24gZXhwZXJpbWVudCBpcyB0aGVyZWZvcmUgRE9ORS4gUHJlc2VydmUgbmF0aXZlIGBtb21lbnRhcnlgCmJlaGF2aW9yOiBkbyBub3Qgc2V0IGRldGFjaGVkIG1vZGUsIGRvIG5vdCBpbXBsZW1lbnQgbG9uZy1wcmVzcyBwYXVzZS9zdG9wLCBkbwpub3QgdGFrZSBvd25lcnNoaXAgb2YgdGhlIHBoeXNpY2FsIGJ1dHRvbiwgYW5kIGRvIG5vdCBjaGFuZ2UKYFBMVUdTX1VJLmNvbnRyb2xzWyJzd2l0Y2g6MCJdLmluX21vZGVgLiBgc291cmNlOiJidXR0b24iYCBtYXkgYmUgdXNlZCBmb3IKZGlhZ25vc3RpY3MuIE5vIGZ1cnRoZXIgdXNlciBidXR0b24gdGVzdCBpcyByZXF1aXJlZCB3aXRob3V0IGEgbmV3IGp1c3RpZmllZApoYXJkd2FyZSBnYXRlLgoKVGhpcyBrZWVwcyBtYW51YWwgcmVsYXkgY29udHJvbCBwcmVkaWN0YWJsZSwgYXZvaWRzIHNwZW5kaW5nIHNjcmlwdC9VSSBidWRnZXQgb24KYW4gZXZlbnQgcGF0aCB0aGUgdGVzdGVkIGRldmljZSBkb2VzIG5vdCBleHBvc2Ugc2VwYXJhdGVseSwgYW5kIGxlYXZlcyBTdGFibGUKQ29yZSB2MSB1bmNoYW5nZWQuCg==' | base64 -d > /tmp/button-section.md",
+    "python3 - <<'PY'\nfrom pathlib import Path\np = Path('docs/product/next-functional-steps.md')\ns = p.read_text()\nstart = s.index('### Button — hardware validation complete\\n')\nend = s.index('\\n## 6. Dedicated screen for every Shelly / installed system', start)\nreplacement = Path('/tmp/button-section.md').read_text()\np.write_text(s[:start] + replacement + s[end:])\nPY",
+    "git diff --check",
+    "test $(git diff --name-only) = docs/product/next-functional-steps.md",
+    "pnpm exec prettier --check docs/product/next-functional-steps.md",
+    "git add docs/product/next-functional-steps.md && git diff --cached --check",
+    "git commit -m 'Record Plug S Gen3 button hardware proof'",
+    "git push origin work/installation-health-recovery",
+    "git rev-parse HEAD",
+    "test -z $(git status --porcelain)"
+  ]
+}
