@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 9,
-  "command": "set -e; export ANDROID_SDK_ROOT=\"$HOME/Library/Android/sdk\"; export ANDROID_HOME=\"$ANDROID_SDK_ROOT\"; printf 'sdk.dir=%s\\n' \"$ANDROID_SDK_ROOT\" > apps/mobile/android/local.properties; cd apps/mobile/android; ./gradlew --no-daemon assembleDebug lintDebug",
-  "pid": 91552,
+  "command": "set -e; export ANDROID_SDK_ROOT=\"$HOME/Library/Android/sdk\"; export ANDROID_HOME=\"$ANDROID_SDK_ROOT\"; export PATH=\"$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH\"; AVD=lcl_api36_smoke; if ! avdmanager list avd | grep -q \"Name: $AVD\"; then echo no | avdmanager create avd -f -n \"$AVD\" -k 'system-images;android-36;google_apis;arm64-v8a' --device pixel_6; fi; adb kill-server || true; adb start-server; nohup emulator -avd \"$AVD\" -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect >/tmp/lcl-emulator.log 2>&1 & echo $! >/tmp/lcl-emulator.pid; adb wait-for-device; for i in $(seq 1 120); do BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r'); [ \"$BOOT\" = \"1\" ] && break; sleep 2; done; test \"$(adb shell getprop sys.boot_completed | tr -d '\\r')\" = \"1\"; adb shell input keyevent 82 || true; adb shell settings put global window_animation_scale 0; adb shell settings put global transition_animation_scale 0; adb shell settings put global animator_duration_scale 0; adb shell getprop ro.build.version.release; adb shell getprop ro.build.version.sdk",
+  "pid": 91898,
   "timeout": 5400,
   "idle_timeout": 1800,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T05:52:49.089515+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T05:53:09.163338+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-android-emulator-smoke-v1",
@@ -18,5 +18,5 @@
   "task_digest": "c4ceb2e7be4b7e44389e44bc47b7b34e58a15dd7491df4c810cebc8c3b12e39c",
   "daemon_version": "4.18.19",
   "daemon_pid": 89479,
-  "updated_at": "2026-09-09T05:52:49.182527+00:00"
+  "updated_at": "2026-09-09T05:53:09.240795+00:00"
 }
