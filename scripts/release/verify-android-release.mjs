@@ -3,10 +3,11 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
-const version = process.argv[2];
+const projectVersion = JSON.parse(readFileSync('package.json', 'utf8')).version;
+const version = process.argv[2] || projectVersion;
 
-if (!version) {
-  throw new Error('Usage: node scripts/release/verify-android-release.mjs <version>');
+if (typeof version !== 'string' || version.length === 0) {
+  throw new Error('Missing release version.');
 }
 
 const releaseDir = join('artifacts', 'releases', `v${version}`);

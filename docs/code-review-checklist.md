@@ -102,6 +102,7 @@ Use this before merging any Codex-generated change.
 [ ] pnpm format:check
 [ ] pnpm lint
 [ ] pnpm quality:ux
+[ ] pnpm quality:repo
 [ ] pnpm typecheck
 [ ] pnpm test
 [ ] pnpm e2e:responsive when layout or navigation changed

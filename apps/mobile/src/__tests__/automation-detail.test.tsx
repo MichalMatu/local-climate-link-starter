@@ -72,7 +72,13 @@ const diagnosticPayload = () => ({
   ]
 });
 
-const installShellyFetchMock = () => {
+type ShellyFetchMockOptions = {
+  offline?: boolean;
+  diagnostics?: 'ok' | 'stale';
+  scriptId?: number | null;
+};
+
+const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
   let scriptRunning = true;
   let relayOn = true;
   const rpcMethods: string[] = [];
@@ -81,7 +87,15 @@ const installShellyFetchMock = () => {
     const url = input instanceof URL ? input.toString() : String(input);
     const target = new URL(url, 'http://localhost').searchParams.get('target');
     if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
-      return scriptRunning ? jsonResponse(diagnosticPayload()) : jsonResponse({}, 503);
+      if (options.offline || !scriptRunning) {
+        return jsonResponse({}, 503);
+      }
+
+      const payload = diagnosticPayload();
+      if (options.diagnostics === 'stale') {
+        payload.g[16] = 'st';
+      }
+      return jsonResponse(payload);
     }
 
     const body = JSON.parse(String(init?.body ?? '{}')) as {
@@ -91,6 +105,10 @@ const installShellyFetchMock = () => {
     };
     if (body.method) {
       rpcMethods.push(body.method);
+    }
+
+    if (options.offline) {
+      return jsonResponse({ error: 'offline' }, 503);
     }
 
     let result: unknown = {};
@@ -126,18 +144,23 @@ const installShellyFetchMock = () => {
           }
         };
         break;
-      case 'Script.List':
+      case 'Script.List': {
+        const scriptId = options.scriptId === undefined ? 1 : options.scriptId;
         result = {
-          scripts: [
-            {
-              id: 1,
-              name: 'Local Climate Link Thermostat',
-              enable: true,
-              running: scriptRunning
-            }
-          ]
+          scripts:
+            scriptId === null
+              ? []
+              : [
+                  {
+                    id: scriptId,
+                    name: 'Local Climate Link Thermostat',
+                    enable: true,
+                    running: scriptRunning
+                  }
+                ]
         };
         break;
+      }
       case 'Script.Stop':
         scriptRunning = false;
         result = null;
@@ -343,6 +366,40 @@ describe('InstallationDetailScreen', () => {
     expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(rpcMethods).toContain('Script.Start');
+  });
+
+  it.each([
+    {
+      name: 'offline',
+      options: { offline: true },
+      heading: 'Shelly offline'
+    },
+    {
+      name: 'stale sensor',
+      options: { diagnostics: 'stale' as const },
+      heading: 'Brak świeżych danych z czujnika'
+    },
+    {
+      name: 'ownership mismatch',
+      options: { scriptId: 2 },
+      heading: 'Problem właściciela wyjścia'
+    }
+  ])('offers read-only recovery for $name state', async ({ options, heading }) => {
+    const saved = installation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    const { rpcMethods } = installShellyFetchMock(options);
+
+    renderDetail(saved.id);
+
+    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    const refresh = screen.getByRole('button', { name: 'Sprawdź ponownie' });
+    expect(refresh).toBeVisible();
+
+    fireEvent.click(refresh);
+    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    expect(rpcMethods).not.toContain('Script.Start');
+    expect(rpcMethods).not.toContain('Script.Stop');
+    expect(rpcMethods).not.toContain('Switch.Set');
   });
 
   it('manages a native daily schedule end to end without a climate script owner', async () => {
