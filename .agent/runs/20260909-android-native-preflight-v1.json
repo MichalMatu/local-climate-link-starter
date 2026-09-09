@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 10,
-  "command": "pnpm --filter @lcl/mobile build",
-  "pid": 61376,
+  "command": "pnpm --filter @lcl/mobile exec cap sync android",
+  "pid": 61478,
   "timeout": 3600,
   "idle_timeout": 1200,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T05:15:32.274506+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-09T05:15:36.496479+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260909-android-native-preflight-v1",
@@ -18,5 +18,5 @@
   "task_digest": "af1c56c93b07255703ce0f4bc0412d5e32c1233b2c102c930e52aab130e5b429",
   "daemon_version": "4.18.19",
   "daemon_pid": 61084,
-  "updated_at": "2026-09-09T05:15:32.367278+00:00"
+  "updated_at": "2026-09-09T05:15:36.517733+00:00"
 }
