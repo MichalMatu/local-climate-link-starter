@@ -1,0 +1,20 @@
+{
+  "id": "20260909-final-alpha-apk-inspect-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-alpha-snapshot-v1",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 1200,
+  "idle_timeout": 600,
+  "task_timeout": 1800,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"fd985071823793804fc5610f989d1829b00d05d8\" && test \"$(git rev-parse origin/work/final-alpha-snapshot-v1)\" = \"fd985071823793804fc5610f989d1829b00d05d8\"",
+    "APK=/Users/michal/Desktop/LocalClimateLink-v2.0.9-alpha-fd985071.apk; test -f \"$APK\"; shasum -a 256 \"$APK\" | grep '^9e284b14dcd3d6d452fa627a0c722d3f39db757048162be59f234e3fe6477498 ' ",
+    "SDK=\"$HOME/Library/Android/sdk\"; BT=\"$SDK/build-tools/36.0.0\"; test -x \"$BT/apksigner\"; \"$BT/apksigner\" verify --verbose --print-certs /Users/michal/Desktop/LocalClimateLink-v2.0.9-alpha-fd985071.apk",
+    "SDK=\"$HOME/Library/Android/sdk\"; BT=\"$SDK/build-tools/36.0.0\"; if test -x \"$BT/aapt2\"; then \"$BT/aapt2\" dump badging /Users/michal/Desktop/LocalClimateLink-v2.0.9-alpha-fd985071.apk | sed -n '1,14p'; fi",
+    "SDK=\"$HOME/Library/Android/sdk\"; BT=\"$SDK/build-tools/36.0.0\"; if test -x \"$BT/aapt2\"; then \"$BT/aapt2\" dump permissions /Users/michal/Desktop/LocalClimateLink-v2.0.9-alpha-fd985071.apk; fi",
+    "SDK=\"$HOME/Library/Android/sdk\"; BT=\"$SDK/build-tools/36.0.0\"; if test -x \"$BT/zipalign\"; then \"$BT/zipalign\" -c -v 4 /Users/michal/Desktop/LocalClimateLink-v2.0.9-alpha-fd985071.apk; fi"
+  ]
+}
