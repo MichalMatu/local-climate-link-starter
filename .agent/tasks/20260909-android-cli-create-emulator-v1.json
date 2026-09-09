@@ -1,0 +1,17 @@
+{
+  "id": "20260909-android-cli-create-emulator-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/android-toolchain-preflight-v1",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 3600,
+  "idle_timeout": 1200,
+  "task_timeout": 7200,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/work/android-toolchain-preflight-v1)\" = \"8c93be488f1740ef3a4c2ef3c2201da0991f36ff\"",
+    "set -e; SDK=\"$HOME/Library/Android/sdk\"; if ! android --sdk=\"$SDK\" emulator list | grep -q .; then android --sdk=\"$SDK\" emulator create medium_phone; fi; printf '%s\\n' '--- emulator list ---'; android --sdk=\"$SDK\" emulator list",
+    "android --sdk=\"$HOME/Library/Android/sdk\" emulator start -h"
+  ]
+}
