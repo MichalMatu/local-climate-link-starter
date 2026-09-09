@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 8,
+  "index": 9,
   "total": 9,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); test -n \"$WS\"; WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const r=[...document.querySelectorAll(\"button\")].find(x=>x.getAttribute(\"aria-label\")===\"Refresh\");if(r)r.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){ws.close();}}'; sleep 4; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`JSON.stringify({text:document.body.innerText,buttons:[...document.querySelectorAll(\"button\")].map(x=>({text:x.innerText.trim(),aria:x.getAttribute(\"aria-label\"),title:x.getAttribute(\"title\")})).filter(x=>x.text||x.aria||x.title)})`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){console.log(\"AFTER_BLE=\"+m.result.result.value);const d=JSON.parse(m.result.result.value);const auto=d.buttons.some(x=>x.text===\"MANUAL\"&&String(x.title||\"\").includes(\"Automation is running\"));const relay=d.buttons.some(x=>x.text===\"ON\"&&String(x.title||\"\").includes(\"Relay is OFF\"));if(!auto||!relay)process.exit(2);ws.close();}}'",
-  "pid": 63023,
+  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; git status --short; git diff --check",
+  "pid": 63112,
   "timeout": 240,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:18:00.572787+00:00",
-  "stage_name": "command-8",
-  "stage_index": 8,
+  "started_at": "2026-09-09T21:18:05.293816+00:00",
+  "stage_name": "command-9",
+  "stage_index": 9,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-shelly-ble-discovery-restore-v1",
@@ -18,5 +18,5 @@
   "task_digest": "1abfdc538088104a23e735a0650f7af2a84e625f87e43ff715e227a27867bf72",
   "daemon_version": "4.18.19",
   "daemon_pid": 62050,
-  "updated_at": "2026-09-09T21:18:00.652868+00:00"
+  "updated_at": "2026-09-09T21:18:05.379692+00:00"
 }
