@@ -1,0 +1,17 @@
+{
+  "id": "20260910-freeze-phone-precheck-v1",
+  "mode": "commands",
+  "work_branch": "work/freeze-v2.0.10",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch --prune --tags origin; echo HEAD=$(git rev-parse HEAD); echo REMOTE_WORK=$(git rev-parse origin/work/freeze-v2.0.10); echo REMOTE_MAIN=$(git rev-parse origin/main); echo V209_REF=$(git rev-parse refs/tags/v2.0.9); echo V209_COMMIT=$(git rev-parse 'v2.0.9^{}'); printf 'STATUS_BEGIN\\n'; git status --porcelain; printf 'STATUS_END\\n'",
+    "SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; echo SDK=$SDK; echo ADB=$ADB; test -x \"$ADB\"; \"$ADB\" devices -l; echo AUTHORIZED_SERIALS; \"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d'",
+    "test \"$(git rev-parse HEAD)\" = \"bc8a061e868951c0313d80ff1d93c5235912ce29\"; test \"$(git rev-parse origin/work/freeze-v2.0.10)\" = \"bc8a061e868951c0313d80ff1d93c5235912ce29\"; test \"$(git rev-parse origin/main)\" = \"1cd0215548aea5203b064fcf2b24c4c628f1c30e\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"; test -z \"$(git status --porcelain)\"; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; test \"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\" = \"RFCT70L7E8J\"; echo PHONE_FREEZE_PRECHECK=pass"
+  ]
+}
