@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "pnpm install --frozen-lockfile",
-  "pid": 18082,
+  "command": "pnpm check:full",
+  "pid": 18157,
   "timeout": 7200,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:17:12.130133+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T22:17:13.618354+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-bump-2010-v2",
@@ -18,5 +18,5 @@
   "task_digest": "6cf3953023ad33ec4f42f6cf7e7b6d7cc1586990795a4c7a739916bb0fdb6d1f",
   "daemon_version": "4.18.19",
   "daemon_pid": 17484,
-  "updated_at": "2026-09-09T22:17:12.143322+00:00"
+  "updated_at": "2026-09-09T22:17:13.695030+00:00"
 }
