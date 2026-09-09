@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-shelly-discovery-v1",
+  "task_digest": "9f78118d53e743deb478e20173fb71d3df6669244c57f2342954ec4f114f5a88",
+  "idle_timeout": 150,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T20:59:21.365156+00:00",
+  "attempt_id": "b31d10e11cd2a12f5512afdd",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 41035,
+  "updated_at": "2026-09-09T20:59:21.365329+00:00",
+  "pid": 41035
+}
