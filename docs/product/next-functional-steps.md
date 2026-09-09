@@ -223,29 +223,27 @@ Do not promise dynamic flashing for low sensor battery, weak RSSI, or arbitrary
 runtime errors until a real-device test proves that repeated runtime LED control
 is practical and does not harm script size, memory, or reliability.
 
-### Button — hardware validation gate
+### Button — hardware validation complete
 
-Keep the native short-press relay behavior unchanged until the exact Plug S Gen3
-button event behavior is proven on real hardware. The device documentation
-exposes button mode through `PLUGS_UI`, but Plug S Gen3 does not advertise a
-normal `Input` component in its documented component list, so `long_push` must
-not be assumed to be script-visible.
+Real-hardware validation was completed on 2026-09-09 with Shelly Plug S Gen3
+firmware `1.7.5` and `PLUGS_UI` `switch:0` configured with
+`in_mode=momentary`.
 
-If a long-press pause is proven feasible, its safety semantics must be:
+Observed behavior:
 
-```text
-physical long press
--> force relay OFF
--> pause/stop automation
--> visibly report paused state
-```
+- there is no separate `button:0` component,
+- a physical press produced websocket output updates with
+  `output:true source:"button"` and `output:false source:"button"`,
+- no separate `NotifyEvent` for the button was observed in the validation run.
 
-Never implement "long press -> Script.Stop" while leaving the relay's previous
-state ambiguous.
+The product decision is therefore to preserve the native momentary button
+behavior. Do not switch the device to detached input mode and do not add a
+long-press pause/stop feature. Treat the physical button as native Shelly relay
+control rather than as a script-visible automation command surface.
 
-The Shelly used by the project was unreachable during the 2026-09-08 roadmap
-re-audit, so this capability remains explicitly unverified until a later local
-hardware test.
+This keeps manual relay control predictable, avoids spending script/UI budget on
+an event path the tested device does not expose separately, and leaves Stable
+Core v1 unchanged.
 
 ## 6. Dedicated screen for every Shelly / installed system
 
@@ -283,7 +281,8 @@ Use this sequence:
 5. Progressive disclosure of advanced and developer diagnostics.
 6. First automation expansion using native Shelly capabilities where possible.
 7. LED configuration.
-8. Physical-button experiment only after real-hardware proof.
+8. Physical-button hardware validation: complete; keep native momentary behavior
+   with no detached mode or long-press pause.
 
 The numbered product goals remain the six goals above; Phase 0 is an enabling
 architecture change, not an additional product feature.
@@ -310,10 +309,12 @@ Shelly runtime as the primary installed-system status source.
 Static relay-based RGB indication is documented. Arbitrary dynamic error flashes
 are a separate experiment, not a guaranteed feature.
 
-### 5. Long-press support is not yet proven on Plug S Gen3
+### 5. Physical button is intentionally native-only on Plug S Gen3
 
-Do not spend script budget or redesign manual control until hardware evidence
-exists.
+The firmware `1.7.5` hardware test did not expose a separate `button:0` component
+or a separate button `NotifyEvent`; websocket relay updates carried
+`source:"button"`. Preserve native `momentary` behavior instead of adding
+detached-mode or long-press automation semantics.
 
 ### 6. UI refactor can become a big-bang rewrite
 
