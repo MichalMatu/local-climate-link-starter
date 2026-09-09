@@ -734,6 +734,12 @@ for (const viewport of viewports) {
     await expect(
       page.getByRole('button', { name: 'Shelly', exact: true })
     ).toHaveAttribute('aria-current', 'page');
+    const setupTouchTargetHeights = await page
+      .locator('.setup-context__back, .setup-top-nav__item')
+      .evaluateAll((elements) =>
+        elements.map((element) => Math.round(element.getBoundingClientRect().height))
+      );
+    expect(Math.min(...setupTouchTargetHeights)).toBeGreaterThanOrEqual(44);
     await expect(page.getByRole('region', { name: 'Gniazdka Shelly' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Dodaj gniazdko' })).toBeVisible();
     await expect(page.getByLabel('Dodane gniazdka')).toBeVisible();
