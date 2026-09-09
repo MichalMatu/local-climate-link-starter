@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 6,
-  "command": "pnpm install --frozen-lockfile",
-  "pid": 4475,
+  "command": "pnpm check:full",
+  "pid": 4542,
   "timeout": 7200,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:02:55.231120+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-09T22:02:57.230534+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260909-freeze-preflight-version-check-v1",
@@ -18,5 +18,5 @@
   "task_digest": "dfaf074213de7eb9ac4d3e66cb282578f9e673a7786b58f9861c07706f0ba131",
   "daemon_version": "4.18.19",
   "daemon_pid": 4279,
-  "updated_at": "2026-09-09T22:02:55.299237+00:00"
+  "updated_at": "2026-09-09T22:02:57.305625+00:00"
 }
