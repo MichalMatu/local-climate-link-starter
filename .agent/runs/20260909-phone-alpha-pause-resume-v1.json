@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-pause-resume-v1",
+  "task_digest": "a9da82d92b22a16f54fba665170937214fe0fec28834d6345e8c04acc326c84c",
+  "idle_timeout": 120,
+  "task_timeout": 1500,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T21:39:30.331349+00:00",
+  "attempt_id": "b716a4e31df631a44d6e36c6",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 83571,
+  "updated_at": "2026-09-09T21:39:30.331574+00:00",
+  "pid": 83571
+}
