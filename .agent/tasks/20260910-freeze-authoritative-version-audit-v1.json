@@ -1,0 +1,20 @@
+{
+  "id": "20260910-freeze-authoritative-version-audit-v1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch --prune --tags origin && echo MAIN=$(git rev-parse origin/main) && test \"$(git rev-parse origin/main)\" = \"1cd0215548aea5203b064fcf2b24c4c628f1c30e\" && test -z \"$(git status --porcelain)\"",
+    "echo 'DIFF_FROM_TESTED_PRODUCT'; git diff --name-status 771b23456cf7b3fafe62cba3263e1f8f7118580b..origin/main; echo 'COMMITS_FROM_TESTED_PRODUCT'; git log --oneline --decorate 771b23456cf7b3fafe62cba3263e1f8f7118580b..origin/main",
+    "echo 'VERSION_OCCURRENCES_TRACKED'; git grep -n -E '2\\.0\\.9|20009' origin/main -- . ':(exclude)docs/HANDOFF_NEXT_CHAT.md' || true; echo 'ALL_PACKAGE_VERSIONS'; git ls-tree -r --name-only origin/main | grep 'package.json$' | while read f; do printf '%s: ' \"$f\"; git show \"origin/main:$f\" | grep -m1 '\"version\"' || true; done",
+    "echo 'RELEASE_BUMP_209'; git show --stat --oneline 56c5657; git show --format=fuller --no-ext-diff 56c5657 -- package.json apps/mobile/package.json apps/mobile/android/app/build.gradle pnpm-lock.yaml scripts/release docs/release || true",
+    "echo 'V209_TAG'; git cat-file -t refs/tags/v2.0.9; echo V209_REF=$(git rev-parse refs/tags/v2.0.9); echo V209_COMMIT=$(git rev-parse 'v2.0.9^{}'); git show --no-patch --format=fuller refs/tags/v2.0.9; echo 'RECENT_TAGS'; git tag --list 'v*' --sort=-v:refname | head -15",
+    "echo 'RELEASE_FILES'; git ls-tree -r --name-only origin/main | grep -E '(^|/)(release|version|store|android).*(\\.md|\\.mjs|\\.js|\\.ts|\\.sh|\\.json)$|(^|/)package.json$|build.gradle$' | head -200; echo 'GH_RELEASES'; gh release list --repo MichalMatu/local-climate-link-starter --limit 15 || true"
+  ]
+}
