@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-freeze-bump-2010-v2",
+  "task_digest": "6cf3953023ad33ec4f42f6cf7e7b6d7cc1586990795a4c7a739916bb0fdb6d1f",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T22:17:05.675852+00:00",
+  "attempt_id": "bfeab2e8df538cf6f3358270",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 17484,
+  "updated_at": "2026-09-09T22:17:05.675999+00:00",
+  "pid": 17484
+}
