@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260909-phone-adb-presence-v3",
   "task_digest": "d5e7896fdbad387ace7ccb318e58166a61a7ab7794edb85dbeb8a5d7e342cf7e",
-  "idle_timeout": 60,
-  "task_timeout": 600,
-  "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T09:06:52.858501+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-09T09:06:54.976285+00:00",
   "attempt_id": "b193e4ac995bd98b9f1e477c",
   "daemon_version": "4.18.19",
   "daemon_pid": 45993,
-  "updated_at": "2026-09-09T09:06:52.858660+00:00",
+  "updated_at": "2026-09-09T09:06:55.225426+00:00",
   "pid": 45993
 }
