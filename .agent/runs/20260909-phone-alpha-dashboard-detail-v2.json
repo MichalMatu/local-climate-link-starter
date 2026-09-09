@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-dashboard-detail-v2",
+  "task_digest": "104c708dc604d380fc666982a9f27bc06529fe1656a3a442409ff4637803ab45",
+  "idle_timeout": 120,
+  "task_timeout": 1500,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T21:31:28.208349+00:00",
+  "attempt_id": "a21ab91b20aa1a75b9ae01d5",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 75662,
+  "updated_at": "2026-09-09T21:31:28.208555+00:00",
+  "pid": 75662
+}
