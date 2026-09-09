@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-pre-phone-hardening-commit-v2",
+  "task_digest": "6042de78d1fba7601950fad8ffd9521c025d3d5a6437597dc07281cf2ea62cbe",
+  "idle_timeout": 1200,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T05:45:51.343794+00:00",
+  "attempt_id": "c3006ef0bfb3880d553103ee",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 81164,
+  "updated_at": "2026-09-09T05:45:51.344063+00:00",
+  "pid": 81164
+}
