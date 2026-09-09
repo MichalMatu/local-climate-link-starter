@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload responsive visual audit
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: responsive-visual-audit
           path: test-results/visual-audit
