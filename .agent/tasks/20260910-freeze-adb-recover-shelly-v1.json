@@ -1,0 +1,18 @@
+{
+  "id": "20260910-freeze-adb-recover-shelly-v1",
+  "mode": "commands",
+  "work_branch": "work/freeze-v2.0.10",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; test \"$(git rev-parse HEAD)\" = \"bc8a061e868951c0313d80ff1d93c5235912ce29\"; test -z \"$(git status --porcelain)\"; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; test -x \"$ADB\"; \"$ADB\" kill-server || true; \"$ADB\" start-server; sleep 2; \"$ADB\" devices -l; SERIALS=\"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\"; if [ \"$SERIALS\" = \"RFCT70L7E8J\" ]; then echo ADB_PHONE_RECOVERED=yes; else echo ADB_PHONE_RECOVERED=no; fi",
+    "set -e; BASE=http://192.168.0.16; curl -fsS --max-time 8 \"$BASE/rpc/Shelly.GetDeviceInfo\" -o /tmp/lcl-device.json; curl -fsS --max-time 8 \"$BASE/rpc/Script.List\" -o /tmp/lcl-scripts.json; curl -fsS --max-time 8 \"$BASE/rpc/Script.GetStatus?id=1\" -o /tmp/lcl-script-status.json; curl -fsS --max-time 8 \"$BASE/rpc/Switch.GetStatus?id=0\" -o /tmp/lcl-switch.json; curl -fsS --max-time 8 \"$BASE/rpc/Schedule.List\" -o /tmp/lcl-schedules.json; curl -fsS --max-time 8 \"$BASE/script/1/diag\" -o /tmp/lcl-diag.json; python3 - <<'PY'\nimport json\nfrom pathlib import Path\ndef load(p): return json.loads(Path(p).read_text())\ndevice=load('/tmp/lcl-device.json')\nscripts=load('/tmp/lcl-scripts.json')\nstatus=load('/tmp/lcl-script-status.json')\nswitch=load('/tmp/lcl-switch.json')\nschedules=load('/tmp/lcl-schedules.json')\ndiag=load('/tmp/lcl-diag.json')\nassert device.get('model') == 'S3PL-00112EU', device\nitems=scripts.get('scripts', []) if isinstance(scripts, dict) else scripts\nscript=next((x for x in items if x.get('id') == 1), None)\nassert script is not None, scripts\nassert script.get('name') == 'Local Climate Link Thermostat', script\nassert status.get('running') is True, status\nassert switch.get('output') is False, switch\nassert isinstance(diag, dict) and diag, diag\nif isinstance(schedules, dict):\n    jobs=schedules.get('jobs', schedules.get('schedules', []))\nelse:\n    jobs=schedules\nassert isinstance(jobs, list), schedules\nprint('shelly_model='+str(device.get('model')))\nprint('shelly_firmware='+str(device.get('ver') or device.get('fw_id') or device.get('app')))\nprint('script_id=1')\nprint('script_name='+str(script.get('name')))\nprint('script_running=true')\nprint('relay_output=false')\nprint('schedule_count='+str(len(jobs)))\nprint('diag_keys='+','.join(sorted(diag.keys())))\nPY",
+    "set -e; BASE=http://192.168.0.16; sleep 5; curl -fsS --max-time 8 \"$BASE/rpc/Script.GetStatus?id=1\" -o /tmp/lcl-script-status-2.json; curl -fsS --max-time 8 \"$BASE/rpc/Switch.GetStatus?id=0\" -o /tmp/lcl-switch-2.json; curl -fsS --max-time 8 \"$BASE/script/1/diag\" -o /tmp/lcl-diag-2.json; python3 - <<'PY'\nimport json\nfrom pathlib import Path\nstatus=json.loads(Path('/tmp/lcl-script-status-2.json').read_text())\nswitch=json.loads(Path('/tmp/lcl-switch-2.json').read_text())\ndiag=json.loads(Path('/tmp/lcl-diag-2.json').read_text())\nassert status.get('running') is True, status\nassert switch.get('output') is False, switch\nassert isinstance(diag, dict) and diag, diag\nprint('shelly_runtime_recheck=pass')\nprint('shelly_relay_final=false')\nPY",
+    "test -z \"$(git status --porcelain)\" && echo VERIFIED_SHA=$(git rev-parse HEAD)"
+  ]
+}
