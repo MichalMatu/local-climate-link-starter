@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-existing-package-inspect-v1",
+  "task_digest": "0a58155a9d5676d35ff6d40a1b2957aed81536421b4a96753d5b36ced8aca3ae",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T19:39:54.049876+00:00",
+  "attempt_id": "94a1293e5c64181c3896e023",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 72057,
+  "updated_at": "2026-09-09T19:39:54.050025+00:00",
+  "pid": 72057
+}
