@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 4,
   "total": 10,
-  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); test -n \"$SERIAL\"; \"$ADB\" -s \"$SERIAL\" shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 1; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; \"$ADB\" -s \"$SERIAL\" forward tcp:9222 localabstract:webview_devtools_remote_$PID >/dev/null; sleep 1; curl -fsS http://127.0.0.1:9222/json >/dev/null",
-  "pid": 64592,
+  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const settings=[...document.querySelectorAll(\"button\")].find(x=>x.getAttribute(\"aria-label\")===\"Plug settings\");if(!settings)throw new Error(\"plug settings missing\");settings.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);ws.close();}}' && sleep 1; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Scan BLE\"));if(!b)throw new Error(\"Scan BLE missing\");b.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);ws.close();}}'",
+  "pid": 64677,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:19:32.279617+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-09T21:19:36.507452+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-save-sensor-inspect-rule-v1",
@@ -18,5 +18,5 @@
   "task_digest": "34c849eb7af1fe107651e34572ae0d41279d774555f4e6026ae7fe1b822b1783",
   "daemon_version": "4.18.19",
   "daemon_pid": 64426,
-  "updated_at": "2026-09-09T21:19:32.357947+00:00"
+  "updated_at": "2026-09-09T21:19:36.604491+00:00"
 }
