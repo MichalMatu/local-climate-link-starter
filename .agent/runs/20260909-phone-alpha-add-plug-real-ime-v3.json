@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 4,
   "total": 9,
-  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); test -n \"$SERIAL\"; \"$ADB\" -s \"$SERIAL\" shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 1; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; \"$ADB\" -s \"$SERIAL\" forward tcp:9222 localabstract:webview_devtools_remote_$PID >/dev/null; sleep 1; curl -fsS http://127.0.0.1:9222/json >/dev/null",
-  "pid": 34144,
+  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{if(!document.body.innerText.includes(\"Scan network\")){const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.trim()===\"Add plug\");if(!b)throw new Error(\"Add plug missing\");b.click();}return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);ws.close();}}' && sleep 1",
+  "pid": 34249,
   "timeout": 240,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T20:52:59.715497+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-09T20:53:04.100316+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-add-plug-real-ime-v3",
@@ -18,5 +18,5 @@
   "task_digest": "438471960a5ecbbd514888e1cabae60e72523ca4f7c74cbd5f0ff318966abf17",
   "daemon_version": "4.18.19",
   "daemon_pid": 33955,
-  "updated_at": "2026-09-09T20:52:59.794683+00:00"
+  "updated_at": "2026-09-09T20:53:04.192691+00:00"
 }
