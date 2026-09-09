@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "pnpm exec playwright install chromium",
-  "pid": 24729,
+  "command": "pnpm e2e:responsive",
+  "pid": 25079,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T04:46:11.315516+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T04:46:26.018356+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260909-installation-health-recovery-e2e-v2",
@@ -18,5 +18,5 @@
   "task_digest": "b29cd31e82897ae50f28c0ff6d663683be217f4f35d85f43370bbf036dee57aa",
   "daemon_version": "4.18.19",
   "daemon_pid": 24451,
-  "updated_at": "2026-09-09T04:46:11.387660+00:00"
+  "updated_at": "2026-09-09T04:46:26.110615+00:00"
 }
