@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-button-proof-roadmap-v4",
+  "task_digest": "4328c54642be312e843e91cb314db6b3ab0150791653c47c41e693093b17cdbc",
+  "idle_timeout": 120,
+  "task_timeout": 900,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T04:15:34.546732+00:00",
+  "attempt_id": "415972db2f5d04b26cc82cdc",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 82455,
+  "updated_at": "2026-09-09T04:15:34.546977+00:00",
+  "pid": 82455
+}
