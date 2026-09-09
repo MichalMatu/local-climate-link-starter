@@ -1,0 +1,18 @@
+{
+  "id": "20260909-phone-alpha-dom-baseline-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 180,
+  "idle_timeout": 90,
+  "task_timeout": 900,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"771b23456cf7b3fafe62cba3263e1f8f7118580b\"",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); \"$ADB\" -s \"$SERIAL\" shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 1; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; \"$ADB\" -s \"$SERIAL\" forward tcp:9222 localabstract:webview_devtools_remote_$PID >/dev/null; sleep 1; curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); assert len(d)==1; print(d[0][\"title\"], d[0][\"url\"], d[0][\"webSocketDebuggerUrl\"])'",
+    "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS); let id=1; ws.onopen=()=>ws.send(JSON.stringify({id:id++,method:\"Runtime.evaluate\",params:{expression:`JSON.stringify({title:document.title,url:location.href,text:document.body.innerText,interactive:[...document.querySelectorAll(\"button,a,input,select,textarea,[role=button]\")].map((e,i)=>({i,tag:e.tagName,text:(e.innerText||e.value||\"\").trim(),aria:e.getAttribute(\"aria-label\"),disabled:!!e.disabled})).filter(x=>x.text||x.aria)})`,returnByValue:true}})); ws.onmessage=e=>{const m=JSON.parse(e.data); if(m.id===1){console.log(m.result.result.value); ws.close();}}; ws.onerror=e=>{console.error(e); process.exit(1)};'",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; git status --short; git diff --check"
+  ]
+}
