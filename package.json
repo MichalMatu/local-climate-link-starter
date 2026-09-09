@@ -27,6 +27,7 @@
     "hardware:shelly:install": "tsx scripts/hardware/shelly-install-thermostat.ts",
     "hardware:shelly:matrix": "tsx scripts/hardware/shelly-real-matrix.ts",
     "hardware:shelly:soak": "tsx scripts/hardware/shelly-soak-logger.ts",
+    "android:phone-alpha": "bash scripts/android/phone-alpha-install.sh",
     "release:android": "pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android && cd apps/mobile/android && ./gradlew assembleRelease bundleRelease && cd ../../.. && node scripts/release/collect-android-release.mjs ${LCL_RELEASE_VERSION:-} && node scripts/release/verify-android-release.mjs ${LCL_RELEASE_VERSION:-}",
     "release:android:verify": "node scripts/release/verify-android-release.mjs ${LCL_RELEASE_VERSION:-}",
     "sandbox:doctor": "bash tools/sandbox/sandbox-doctor.sh",
