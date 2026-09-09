@@ -1,0 +1,33 @@
+{
+  "id": "20260909-android-cli-create-emulator-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/android-toolchain-preflight-v1",
+  "allow_write": false,
+  "started_at": "2026-09-09T06:05:02.305196+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [],
+  "verification": [],
+  "stages": [],
+  "failure_reason": "exception",
+  "error": "OSError: [Errno 28] No space left on device",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/michal/local-agent/local_agent/runtime/executor.py\", line 424, in run_command\n    live_output.emit(item)\n    ~~~~~~~~~~~~~~~~^^^^^^\n  File \"/Users/michal/local-agent/local_agent/runtime/output.py\", line 168, in emit\n    self._emit_normal_line(line)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/Users/michal/local-agent/local_agent/runtime/output.py\", line 160, in _emit_normal_line\n    self._print_line(line)\n    ~~~~~~~~~~~~~~~~^^^^^^\n  File \"/Users/michal/local-agent/local_agent/runtime/output.py\", line 56, in _print_line\n    print(f\"[CMD] {line}\", end=\"\", flush=True)\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] No space left on device\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/michal/local-agent/local_agent/foundation/core.py\", line 962, in process_task\n    command_results, command_history = run_command_list(\n                                       ~~~~~~~~~~~~~~~~^\n        commands,\n        ^^^^^^^^^\n    ...<3 lines>...\n        runner=runner,\n        ^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/michal/local-agent/local_agent/foundation/core.py\", line 822, in run_command_list\n    result = command_runner(command, effective_timeout, stage=stage)\n  File \"/Users/michal/local-agent/local_agent/runtime/executor.py\", line 468, in run_command\n    self.core.kill_process_group(proc)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/Users/michal/local-agent/local_agent/foundation/core.py\", line 168, in kill_process_group\n    terminate_process_group(proc, log)\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^\n  File \"/Users/michal/local-agent/local_agent/foundation/process.py\", line 501, in terminate_process_group\n    log(f\"terminating process group pgid={process_group}\")\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/michal/local-agent/local_agent/foundation/core.py\", line 87, in log\n    print(f\"[{now_iso()}] {message}\", flush=True)\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] No space left on device\n",
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.095
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.074
+  },
+  "finished_at": "2026-09-09T06:06:11.237829+00:00",
+  "task_digest": "68ccd301d2138d43f2894d0db997cfd396e2d508cc114937baad9a21cb7ac8f1",
+  "idle_timeout": 1200,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "attempt_id": "e9783b119dfecb42b1a83362",
+  "daemon_version": "4.18.19"
+}
