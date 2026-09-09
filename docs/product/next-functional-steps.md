@@ -226,20 +226,30 @@ is practical and does not harm script size, memory, or reliability.
 ### Button — hardware validation complete
 
 Real-hardware validation was completed on 2026-09-09 with Shelly Plug S Gen3
-firmware `1.7.5` and `PLUGS_UI` `switch:0` configured with
-`in_mode=momentary`.
+model `S3PL-00112EU`, firmware `1.7.5` (test device `192.168.0.16`), and
+`PLUGS_UI.controls["switch:0"].in_mode = "momentary"`.
 
-Observed behavior:
+Hardware/RPC proof:
 
-- there is no separate `button:0` component,
-- a physical press produced websocket output updates with
-  `output:true source:"button"` and `output:false source:"button"`,
-- no separate `NotifyEvent` for the button was observed in the validation run.
+- `Button.GetConfig id=0` and `Button.GetStatus id=0` both returned
+  `Argument 'id', value 0 not found`, so there is no physical `button:0`
+  component on this device; the generic `Button.*` RPC namespace must not be
+  treated as proof of one,
+- a passive V2 websocket listener on `ws://192.168.0.16/rpc` opened correctly
+  with `write=False` and made no configuration changes,
+- a real physical press produced `NotifyStatus` updates with
+  `switch:0.output=true, source:"button"` and later
+  `switch:0.output=false, source:"button"`,
+- no separate button `NotifyEvent` was observed in that run,
+- the listener exited cleanly; its Local Agent claim was released and the agent
+  returned to IDLE.
 
-The product decision is therefore to preserve the native momentary button
-behavior. Do not switch the device to detached input mode and do not add a
-long-press pause/stop feature. Treat the physical button as native Shelly relay
-control rather than as a script-visible automation command surface.
+The physical-button experiment is therefore DONE. Preserve native `momentary`
+behavior: do not set detached mode, do not implement long-press pause/stop, do
+not take ownership of the physical button, and do not change
+`PLUGS_UI.controls["switch:0"].in_mode`. `source:"button"` may be used for
+diagnostics. No further user button test is required without a new justified
+hardware gate.
 
 This keeps manual relay control predictable, avoids spending script/UI budget on
 an event path the tested device does not expose separately, and leaves Stable
