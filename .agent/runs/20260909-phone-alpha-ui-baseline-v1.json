@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 8,
-  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell am force-stop link.localclimate.app; \"$ADB\" -s \"$SERIAL\" logcat -c; \"$ADB\" -s \"$SERIAL\" shell am start -W -n link.localclimate.app/.MainActivity; sleep 2; printf 'PID='; \"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true",
-  "pid": 5862,
+  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell uiautomator dump /sdcard/lcl-window.xml >/dev/null; \"$ADB\" -s \"$SERIAL\" shell cat /sdcard/lcl-window.xml | head -c 20000; printf '\\n'",
+  "pid": 5925,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T20:20:16.944112+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T20:20:20.367418+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-ui-baseline-v1",
@@ -18,5 +18,5 @@
   "task_digest": "5363225285d154bb9db1e853a3f16ba4c9a28d6b2930e56946d19718e9a740ab",
   "daemon_version": "4.18.19",
   "daemon_pid": 5589,
-  "updated_at": "2026-09-09T20:20:17.034016+00:00"
+  "updated_at": "2026-09-09T20:20:20.446709+00:00"
 }
