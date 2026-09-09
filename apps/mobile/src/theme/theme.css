@@ -142,12 +142,15 @@ select {
 }
 
 .setup-context__back {
+  align-items: center;
   background: transparent;
-  flex: 0 0 auto;
   border: 0;
   color: var(--lcl-color-accent);
   cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
   font-weight: 800;
+  min-height: var(--lcl-size-control-min-height);
   padding: var(--lcl-spacing-sm) 0;
 }
 
@@ -1482,7 +1485,7 @@ select {
 
   .setup-top-nav__item {
     font-size: var(--lcl-font-size-xs);
-    min-height: var(--lcl-size-compact-control-min-height);
+    min-height: var(--lcl-size-control-min-height);
     padding: 0;
   }
 
