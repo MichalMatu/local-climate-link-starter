@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 7,
+  "index": 8,
   "total": 11,
-  "command": "pnpm exec playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts:569 apps/mobile/e2e/responsive.spec.ts:655 --reporter=line",
-  "pid": 47303,
+  "command": "pnpm check:full",
+  "pid": 47781,
   "timeout": 2400,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T05:00:50.239851+00:00",
-  "stage_name": "command-7",
-  "stage_index": 7,
+  "started_at": "2026-09-09T05:00:58.290568+00:00",
+  "stage_name": "command-8",
+  "stage_index": 8,
   "stage_total": 11,
   "stage_phase": "commands",
   "task_id": "20260909-health-recovery-e2e-fix-v3",
@@ -18,5 +18,5 @@
   "task_digest": "7f9947d2d2efdf7daaf7a398f3f8df916297b9afcdf374e03b46523b85d5e85b",
   "daemon_version": "4.18.19",
   "daemon_pid": 47071,
-  "updated_at": "2026-09-09T05:00:50.305334+00:00"
+  "updated_at": "2026-09-09T05:00:58.355106+00:00"
 }
