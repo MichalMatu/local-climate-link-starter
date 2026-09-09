@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 7,
-  "command": "cat > /tmp/lcl-release-v2.0.10.md <<'EOF'\n# Local Climate Link v2.0.10\n\nFreeze release for Android `versionName 2.0.10` / `versionCode 20010`.\n\n## Verification\n\n- `pnpm install --frozen-lockfile` passed on the version bump commit.\n- `pnpm check:full` passed on the exact tested freeze lineage.\n- Final GitHub CI passed on PR head `89360f74916843208954dacfd667c3d974c011a1` and merged `main` SHA `fbd0e6412b6589fcea6686a7ef48ab999d9921f3`.\n- Samsung Galaxy S22+ / Android 16 clean phone-alpha install verified `2.0.10 / 20010`, cold launch, running process and expected alpha signer.\n- Shelly Plug S Gen3 firmware `1.7.5` retained Local Climate Link script id `1`, `running=true`, relay `OFF`, zero schedules and working diagnostics after phone data wipe.\n- Signed Android release APK/AAB were built from the final `main` SHA and passed `release:android:verify`.\n\n## Scope notes\n\n- Physical stale-sensor forcing was not performed during this freeze; deterministic/generated-runtime coverage exists, but no physical PASS is claimed.\n- Automated DOM/CDP/process evidence is not claimed as human visual QA.\n- `VPD —` with VPD assist disabled is intentional; configurable VPD ranges are unchanged.\n\n## Assets\n\n- Android APK\n- Android AAB for Play testing\n- SHA-256 checksum file\nEOF\nset -e; gh release create v2.0.10 --repo MichalMatu/local-climate-link-starter --draft --title \"Local Climate Link v2.0.10\" --notes-file /tmp/lcl-release-v2.0.10.md artifacts/releases/v2.0.10/local-climate-link-v2.0.10-android-release.apk artifacts/releases/v2.0.10/local-climate-link-v2.0.10-android-release.aab artifacts/releases/v2.0.10/local-climate-link-v2.0.10-sha256.txt; echo RELEASE_DRAFT_CREATED=true",
-  "pid": 59000,
+  "command": "set -e; gh api repos/MichalMatu/local-climate-link-starter/releases/tags/v2.0.10 >/tmp/lcl-release-draft.json; python3 -c 'import json; d=json.load(open(\"/tmp/lcl-release-draft.json\")); assert d.get(\"draft\") is True,d; assert d.get(\"tag_name\")==\"v2.0.10\",d; names=sorted(a.get(\"name\") for a in d.get(\"assets\",[])); exp=sorted([\"local-climate-link-v2.0.10-android-release.apk\",\"local-climate-link-v2.0.10-android-release.aab\",\"local-climate-link-v2.0.10-sha256.txt\"]); assert names==exp,(names,exp); print(\"DRAFT_ASSETS=\"+\",\".join(names)); print(\"DRAFT_VERIFIED=true\")'; test \"$(git rev-parse 'v2.0.10^{}')\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"",
+  "pid": 59053,
   "timeout": 3600,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:51:28.451063+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-09T22:51:31.603766+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-publish-v2010-v1",
@@ -18,5 +18,5 @@
   "task_digest": "8dfa4a1167911a7df8f6e6c585da55ba019559242f625ae7c50c1409d9e3480d",
   "daemon_version": "4.18.19",
   "daemon_pid": 56026,
-  "updated_at": "2026-09-09T22:51:28.547954+00:00"
+  "updated_at": "2026-09-09T22:51:31.676195+00:00"
 }
