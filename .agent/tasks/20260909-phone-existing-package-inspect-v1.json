@@ -1,0 +1,18 @@
+{
+  "id": "20260909-phone-existing-package-inspect-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-alpha-snapshot-v1",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"fd985071823793804fc5610f989d1829b00d05d8\" && test \"$(git rev-parse origin/work/final-alpha-snapshot-v1)\" = \"fd985071823793804fc5610f989d1829b00d05d8\"",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); printf 'SERIAL=%s\\n' \"$SERIAL\"; printf '%s\\n' '--- existing package metadata ---'; \"$ADB\" -s \"$SERIAL\" shell dumpsys package link.localclimate.app | grep -E 'versionCode=|versionName=|targetSdk=|firstInstallTime=|lastUpdateTime=|flags=|pkgFlags=' | head -30; printf '%s\\n' '--- package path ---'; \"$ADB\" -s \"$SERIAL\" shell pm path link.localclimate.app",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); REMOTE=$(\"$ADB\" -s \"$SERIAL\" shell pm path link.localclimate.app | sed -n 's/^package://p' | head -1 | tr -d '\\r'); test -n \"$REMOTE\"; TMP=/tmp/lcl-existing-base.apk; rm -f \"$TMP\"; \"$ADB\" -s \"$SERIAL\" pull \"$REMOTE\" \"$TMP\" >/dev/null; test -s \"$TMP\"; printf '%s\\n' '--- existing package signer ---'; \"$HOME/Library/Android/sdk/build-tools/36.0.0/apksigner\" verify --print-certs \"$TMP\" | grep -E 'Signer #1 certificate (DN|SHA-256 digest|SHA-1 digest)|Number of signers'; rm -f \"$TMP\"",
+    "printf '%s\\n' '--- managed checkout status ---'; git status --short; git diff --check"
+  ]
+}
