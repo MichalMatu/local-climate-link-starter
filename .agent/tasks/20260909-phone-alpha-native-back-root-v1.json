@@ -1,0 +1,18 @@
+{
+  "id": "20260909-phone-alpha-native-back-root-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 180,
+  "idle_timeout": 90,
+  "task_timeout": 900,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"771b23456cf7b3fafe62cba3263e1f8f7118580b\"",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); \"$ADB\" -s \"$SERIAL\" shell am force-stop link.localclimate.app; \"$ADB\" -s \"$SERIAL\" logcat -c; \"$ADB\" -s \"$SERIAL\" shell am start -W -n link.localclimate.app/.MainActivity; sleep 1; printf '%s\\n' '--- before Back ---'; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; \"$ADB\" -s \"$SERIAL\" shell input keyevent 4; sleep 1; printf '%s\\n' '--- after Back ---'; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; if \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' | grep -q 'link.localclimate.app'; then echo 'root Back did not leave app' >&2; exit 1; fi",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); printf '%s\\n' '--- relaunch ---'; \"$ADB\" -s \"$SERIAL\" shell am start -W -n link.localclimate.app/.MainActivity; sleep 1; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; printf 'PID=%s\\n' \"$PID\"; \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief '*:E' | tail -80 || true",
+    "git status --short && git diff --check"
+  ]
+}
