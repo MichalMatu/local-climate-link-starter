@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 1,
+  "index": 5,
   "total": 5,
-  "command": "set -e; git fetch --prune --tags origin; test \"$(git rev-parse HEAD)\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse origin/main)\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse refs/tags/v2.0.10)\" = \"d88eed2ce52fcd9dd596dcee1e2b7761429c8ad9\"; test \"$(git rev-parse 'v2.0.10^{}')\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"; gh api repos/MichalMatu/local-climate-link-starter/immutable-releases >/tmp/lcl-immutable-prepublish.json; python3 -c 'import json; d=json.load(open(\"/tmp/lcl-immutable-prepublish.json\")); assert d.get(\"enabled\") is True,d; print(\"IMMUTABLE_PREPUBLISH=true\")'; test -f artifacts/releases/v2.0.10/local-climate-link-v2.0.10-android-release.apk; test -f artifacts/releases/v2.0.10/local-climate-link-v2.0.10-android-release.aab; test -f artifacts/releases/v2.0.10/local-climate-link-v2.0.10-sha256.txt; test -z \"$(git status --porcelain)\"",
-  "pid": 60638,
+  "command": "set -e; git fetch --tags origin; test \"$(git rev-parse HEAD)\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse origin/main)\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse refs/tags/v2.0.10)\" = \"d88eed2ce52fcd9dd596dcee1e2b7761429c8ad9\"; test \"$(git rev-parse 'v2.0.10^{}')\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"; test -z \"$(git status --porcelain)\"; echo FREEZE_COMPLETE_SHA=$(git rev-parse HEAD); echo V2010_TAG_OBJECT=$(git rev-parse refs/tags/v2.0.10); echo V209_UNCHANGED=true",
+  "pid": 60785,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:53:03.441102+00:00",
-  "stage_name": "command-1",
-  "stage_index": 1,
+  "started_at": "2026-09-09T22:53:08.342231+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-publish-v2010-v2",
@@ -18,5 +18,5 @@
   "task_digest": "f08c9e438b7d863dbfe306a8b6176118629c19542a7464204f3409b5287c711a",
   "daemon_version": "4.18.19",
   "daemon_pid": 60483,
-  "updated_at": "2026-09-09T22:53:03.441277+00:00"
+  "updated_at": "2026-09-09T22:53:08.425902+00:00"
 }
