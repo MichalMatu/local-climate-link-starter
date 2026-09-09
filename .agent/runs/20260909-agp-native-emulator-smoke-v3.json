@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 1,
+  "index": 3,
   "total": 10,
-  "command": "git fetch --prune origin && test \"$(git rev-parse origin/work/android-agp-8-9-1)\" = \"1b3536881faf5845c4208d9fccce247da786949a\"",
-  "pid": 47722,
+  "command": "pnpm install --frozen-lockfile && pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android",
+  "pid": 47793,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T06:54:57.735204+00:00",
-  "stage_name": "command-1",
-  "stage_index": 1,
+  "started_at": "2026-09-09T06:54:59.492266+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260909-agp-native-emulator-smoke-v3",
@@ -18,5 +18,5 @@
   "task_digest": "6e36cd6204d85925ce77c2f98fb2a5629b88f43512dd3562cffb6f1f3c47a98b",
   "daemon_version": "4.18.19",
   "daemon_pid": 47579,
-  "updated_at": "2026-09-09T06:54:57.735371+00:00"
+  "updated_at": "2026-09-09T06:54:59.561415+00:00"
 }
