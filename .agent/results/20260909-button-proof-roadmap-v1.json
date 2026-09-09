@@ -1,9 +1,0 @@
-{
-  "id": "20260909-button-proof-roadmap-v1",
-  "status": "failed",
-  "failure_reason": "invalid_task_file",
-  "started_at": null,
-  "finished_at": "2026-09-09T04:12:09.753931+00:00",
-  "daemon_version": "4.18.19",
-  "error": "JSONDecodeError: Expecting ',' delimiter: line 16 column 506 (char 1085)"
-}
