@@ -1,0 +1,9 @@
+{
+  "id": "20260909-pre-phone-hardening-commit-v1",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-09T05:38:48.037890+00:00",
+  "daemon_version": "4.18.19",
+  "error": "JSONDecodeError: Invalid control character at: line 16 column 20300 (char 21034)"
+}
