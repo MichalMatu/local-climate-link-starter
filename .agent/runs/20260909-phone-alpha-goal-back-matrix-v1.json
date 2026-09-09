@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 7,
   "total": 10,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); LABEL='Control by time' WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(${JSON.stringify(process.env.LABEL)}));if(!b)throw new Error(\"button missing\");b.click();return \"clicked\"})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);console.log(m.result.result.value);ws.close();}}' && sleep 1",
-  "pid": 20890,
+  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); LABEL='Manage existing automation' WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(${JSON.stringify(process.env.LABEL)}));if(!b)throw new Error(\"button missing\");b.click();return \"clicked\"})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);console.log(m.result.result.value);ws.close();}}' && sleep 1",
+  "pid": 20990,
   "timeout": 240,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T20:37:39.055483+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T20:37:42.125305+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-goal-back-matrix-v1",
@@ -18,5 +18,5 @@
   "task_digest": "b6149604b049b06ec44fcd343405f45dc052976d42e34233a9593751407f5eab",
   "daemon_version": "4.18.19",
   "daemon_pid": 20576,
-  "updated_at": "2026-09-09T20:37:39.097099+00:00"
+  "updated_at": "2026-09-09T20:37:42.202294+00:00"
 }
