@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 11,
-  "command": "pnpm --filter @lcl/mobile build",
-  "pid": 25943,
+  "command": "pnpm --filter @lcl/mobile exec cap sync android",
+  "pid": 26045,
   "timeout": 3600,
   "idle_timeout": 1200,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T08:37:43.898000+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-09T08:37:48.617392+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 11,
   "stage_phase": "commands",
   "task_id": "20260909-final-alpha-apk-v1",
@@ -18,5 +18,5 @@
   "task_digest": "f2bd861aa5f27b3d343b1e3f236cc8a89acc519beb4a8871300a4cc2d9cbc2c2",
   "daemon_version": "4.18.19",
   "daemon_pid": 25562,
-  "updated_at": "2026-09-09T08:37:43.924535+00:00"
+  "updated_at": "2026-09-09T08:37:48.690019+00:00"
 }
