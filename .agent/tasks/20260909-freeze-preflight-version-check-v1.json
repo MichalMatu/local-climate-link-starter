@@ -1,0 +1,20 @@
+{
+  "id": "20260909-freeze-preflight-version-check-v1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch --prune --tags origin && test \"$(git rev-parse origin/main)\" = \"771b23456cf7b3fafe62cba3263e1f8f7118580b\"",
+    "echo 'LATEST_TAGS'; git tag --list 'v*' --sort=-v:refname | head -20; echo 'V209_REF='$(git rev-parse refs/tags/v2.0.9); echo 'V209_COMMIT='$(git rev-parse 'v2.0.9^{}'); test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"",
+    "echo 'VERSION_OCCURRENCES'; rg -n --hidden --glob '!node_modules/**' --glob '!apps/mobile/android/.gradle/**' --glob '!.git/**' '2\\.0\\.9|20009' . || true; echo 'VERSION_HISTORY'; git log -n 20 --oneline -- package.json apps/mobile/android/app/build.gradle",
+    "pnpm install --frozen-lockfile",
+    "pnpm check:full",
+    "git status --short; git diff --check"
+  ]
+}
