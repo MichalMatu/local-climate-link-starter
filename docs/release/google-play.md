@@ -71,6 +71,13 @@ Location on Android 11 and lower: legacy Android BLE scan requirement only.
 No background location.
 ```
 
+The current app targets Android API 36. At this target level there is no separate
+`ACCESS_LOCAL_NETWORK` runtime permission in the app; local Shelly RPC uses the
+normal network permission and Capacitor HTTP. Before increasing `targetSdkVersion`
+to 37 or later, add the Android local-network permission flow and explicitly test
+both denial and revocation. Do not raise the target SDK first and discover the LAN
+regression during release testing.
+
 Data safety starting point:
 
 ```text

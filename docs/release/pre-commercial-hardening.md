@@ -158,7 +158,8 @@ Completed before the next phone session:
   installation detail/recovery, Shelly setup, and the advanced modal with no
   horizontal overflow or clipped primary controls.
 - Responsive E2E now uses the three representative phone viewports required by
-  `AGENTS.md`, plus tablet and desktop coverage.
+  `AGENTS.md`, plus tablet and desktop coverage. Setup navigation and the
+  change-goal action are also guarded at a minimum 44 px touch-target height.
 - Component tests explicitly prove that offline, stale-sensor, and ownership
   recovery refreshes do not call `Script.Start`, `Script.Stop`, or `Switch.Set`.
 - `pnpm quality:repo` now guards Android/package version consistency, internal
@@ -173,22 +174,48 @@ Completed before the next phone session:
   responsibility boundary and regression reason.
 - Android release version defaults were corrected to use the root package version
   instead of the stale hard-coded `2.0.5`; docs now match `2.0.9` / `20009`.
-- Native Android preflight passes on macOS after configuring Android SDK 36:
-  Capacitor sync, `assembleDebug`, and `lintDebug` completed successfully; the
-  generated debug APK was 4.2 MB.
-- Android Gradle Plugin 8.7.2 emits a non-blocking compatibility warning for
-  `compileSdk = 36` because that plugin version declares testing through API 35.
-  Keep the warning visible for a later release-toolchain upgrade rather than
-  suppressing it just to silence logs.
-- The firmware summary now reflects the final 2026-07-04 Shelly 1.7.5 real BLE
-  16/16 matrix while preserving earlier failed attempts as historical evidence.
+- Android Gradle Plugin is now `8.9.1`, aligned with `compileSdk = 36`, while the
+  existing Gradle `8.11.1` wrapper remains unchanged. On macOS with Android SDK 36,
+  `assembleDebug` and `lintDebug` complete successfully.
+- Android native Back is explicitly handled through the Capacitor App plugin on
+  the existing small state router. Tests cover setup, installation detail, root
+  exit, empty management, web-preview isolation, and listener cleanup.
+- Android edge-to-edge hardening uses
+  `android.adjustMarginsForEdgeToEdge = 'auto'` for the current target SDK 36.
+  Real-device system-bar/inset behavior remains part of the first phone smoke.
+- The unsigned Android release compile path is proven: `assembleRelease` and
+  `bundleRelease` complete successfully. This is a build gate only and does not
+  replace a Play-ready signed AAB using the registered upload key.
+- `pnpm audit --prod --audit-level=high` reports no known production dependency
+  vulnerabilities at the audited dependency set.
+- The current dependency set has a reproducible offline Sandbox Pack with key
+  `7b83b258f95141f0ecb5c7c11fce90a4d115574cc877e2fea59f32432a378813`;
+  its parts and full-pack SHA-256 were independently verified and stored in the
+  persistent Library cache.
+- Native emulator smoke was attempted, but the Play Store `medium_phone` AVD is
+  host-environment blocked: it insists on a 7.37 GB userdata partition while the
+  Mac has less free space available. This is not treated as an application
+  failure because debug/release Gradle builds and native lint pass. A real phone
+  is the authoritative native UI, Back, inset, BLE, and LAN gate.
+- The firmware summary reflects the final 2026-07-04 Shelly 1.7.5 real BLE 16/16
+  matrix while preserving earlier failed attempts as historical evidence.
 
-Still requires a real device / native environment before calling the product
-release-ready:
+Future Android platform gate:
 
-- signed Android release/AAB build on the configured SDK and registered upload key;
+- While `targetSdkVersion` is 36, local Shelly LAN access continues through the
+  normal network permission and Capacitor HTTP. Do not add
+  `ACCESS_LOCAL_NETWORK` prematurely.
+- Before moving to target SDK 37 or later, add the Android local-network runtime
+  permission flow and test both denial and revocation before allowing the target
+  SDK bump to merge.
+
+Still requires a real device / signed release environment before calling the
+product release-ready:
+
+- build and verify a signed Android AAB with the registered Play upload key;
 - clean install/upgrade and lifecycle checks on a real Android phone;
-- real phone BLE permission/scan behavior and Capacitor networking;
+- real-phone Android Back and edge-to-edge/system-bar inset checks;
+- real-phone BLE permission/scan behavior and Capacitor LAN networking;
 - one final Shelly + Xiaomi/PVVX + TP357 smoke pass after installing the candidate;
 - signed release/AAB verification with the registered Play upload key.
 
