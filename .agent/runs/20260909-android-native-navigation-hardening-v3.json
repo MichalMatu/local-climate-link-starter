@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 8,
-  "command": "pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android && grep -q 'capacitor-app' apps/mobile/android/capacitor.settings.gradle && grep -q 'capacitor-app' apps/mobile/android/app/capacitor.build.gradle",
-  "pid": 1191,
+  "command": "python3 -c \"import subprocess; changed=set(subprocess.check_output(['git','diff','--name-only'], text=True).splitlines()); allowed={'pnpm-lock.yaml','apps/mobile/android/capacitor.settings.gradle','apps/mobile/android/app/capacitor.build.gradle'}; print('GENERATED_CHANGED=', sorted(changed)); unexpected=changed-allowed; assert not unexpected, unexpected\"",
+  "pid": 1386,
   "timeout": 3600,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T08:02:55.510715+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-09T08:03:01.091551+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-android-native-navigation-hardening-v3",
@@ -18,5 +18,5 @@
   "task_digest": "47ddb55db393d2f12634df4da2d00d2395b5c185b0b668bb4c0bcb4984df1c72",
   "daemon_version": "4.18.19",
   "daemon_pid": 97100,
-  "updated_at": "2026-09-09T08:02:55.526496+00:00"
+  "updated_at": "2026-09-09T08:03:01.173558+00:00"
 }
