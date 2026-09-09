@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 7,
-  "command": "set -e; rm -rf \"$HOME/.gradle/caches/8.9\" \"$HOME/.gradle/caches/build-cache-1\"; if [ -d \"$HOME/.gradle/wrapper/dists\" ]; then find \"$HOME/.gradle/wrapper/dists\" -mindepth 1 -maxdepth 1 ! -name 'gradle-8.11.1-*' -exec rm -rf {} +; fi",
-  "pid": 9235,
+  "command": "set -e; if command -v brew >/dev/null 2>&1; then brew cleanup -s || true; CACHE=$(brew --cache 2>/dev/null || true); if [ -n \"$CACHE\" ] && [ -d \"$CACHE\" ]; then rm -rf \"$CACHE\"/*; fi; fi",
+  "pid": 9396,
   "timeout": 900,
   "idle_timeout": 300,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T06:14:16.473534+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-09T06:14:24.195249+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260909-safe-tool-cache-cleanup-v1",
@@ -18,5 +18,5 @@
   "task_digest": "904186d99628c771509c022573ea36d6473bb615b2185be379da61465beb731c",
   "daemon_version": "4.18.19",
   "daemon_pid": 9027,
-  "updated_at": "2026-09-09T06:14:16.559111+00:00"
+  "updated_at": "2026-09-09T06:14:24.267544+00:00"
 }
