@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-offline-roundtrip-v1",
+  "task_digest": "6bc5c2a1fe02134c3e4923e5d0f29b6979142b63b7cd918d0e44c93f59d91e52",
+  "idle_timeout": 120,
+  "task_timeout": 1500,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T21:58:29.578755+00:00",
+  "attempt_id": "8cdf1ccc5790fe5cd974a07b",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 446,
+  "updated_at": "2026-09-09T21:58:29.578916+00:00",
+  "pid": 446
+}
