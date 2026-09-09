@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 8,
+  "index": 9,
   "total": 11,
-  "command": "SDK=\"$HOME/Library/Android/sdk\"; test -d \"$SDK\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; cd apps/mobile/android && ./gradlew --no-daemon assembleDebug lintDebug && cd ../../..",
-  "pid": 26113,
+  "command": "APK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; test -f \"$APK\"; printf '%s\\n' '--- canonical debug APK ---'; ls -lh \"$APK\"; shasum -a 256 \"$APK\"; OUT=\"/Users/michal/Desktop/LocalClimateLink-v2.0.9-alpha-fd985071.apk\"; cp \"$APK\" \"$OUT\"; ls -lh \"$OUT\"; shasum -a 256 \"$OUT\"",
+  "pid": 26382,
   "timeout": 3600,
   "idle_timeout": 1200,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T08:37:50.326771+00:00",
-  "stage_name": "command-8",
-  "stage_index": 8,
+  "started_at": "2026-09-09T08:38:04.955292+00:00",
+  "stage_name": "command-9",
+  "stage_index": 9,
   "stage_total": 11,
   "stage_phase": "commands",
   "task_id": "20260909-final-alpha-apk-v1",
@@ -18,5 +18,5 @@
   "task_digest": "f2bd861aa5f27b3d343b1e3f236cc8a89acc519beb4a8871300a4cc2d9cbc2c2",
   "daemon_version": "4.18.19",
   "daemon_pid": 25562,
-  "updated_at": "2026-09-09T08:37:50.406049+00:00"
+  "updated_at": "2026-09-09T08:38:05.040101+00:00"
 }
