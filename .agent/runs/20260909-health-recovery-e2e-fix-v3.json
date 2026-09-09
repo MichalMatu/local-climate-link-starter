@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-health-recovery-e2e-fix-v3",
+  "task_digest": "7f9947d2d2efdf7daaf7a398f3f8df916297b9afcdf374e03b46523b85d5e85b",
+  "idle_timeout": 900,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T05:00:45.621859+00:00",
+  "attempt_id": "4c3baff52f391586a5576c62",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 47071,
+  "updated_at": "2026-09-09T05:00:45.622035+00:00",
+  "pid": 47071
+}
