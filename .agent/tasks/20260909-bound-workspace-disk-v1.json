@@ -1,0 +1,17 @@
+{
+  "id": "20260909-bound-workspace-disk-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/android-toolchain-preflight-v1",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "commands": [
+    "set -e; ROOT=\"$HOME/agent-workspace/repos/local-climate-link-starter\"; test -d \"$ROOT\"; du -sh \"$ROOT\"; du -sh \"$ROOT\"/* \"$ROOT\"/.[!.]* 2>/dev/null | sort -h | tail -40 || true",
+    "set -e; ROOT=\"$HOME/agent-workspace/repos/local-climate-link-starter\"; find \"$ROOT\" -maxdepth 4 -type d \\( -name node_modules -o -name build -o -name dist -o -name coverage -o -name test-results -o -name playwright-report \\) -prune -exec du -sh {} + 2>/dev/null | sort -h | tail -60 || true",
+    "set -e; ROOT=\"$HOME/agent-workspace/repos/local-climate-link-starter\"; find \"$ROOT\" -maxdepth 3 -type f -size +100M -print0 2>/dev/null | xargs -0 -r du -h | sort -h | tail -50 || true"
+  ]
+}
