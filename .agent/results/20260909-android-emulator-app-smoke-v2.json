@@ -1,0 +1,117 @@
+{
+  "id": "20260909-android-emulator-app-smoke-v2",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/android-toolchain-preflight-v1",
+  "allow_write": true,
+  "started_at": "2026-09-09T06:22:09.501947+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch --prune origin && test \"$(git rev-parse origin/work/android-toolchain-preflight-v1)\" = \"8c93be488f1740ef3a4c2ef3c2201da0991f36ff\"",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   79289db..b577ba6  agent-control -> origin/agent-control\n   3f750b5..32198f6  work/storage-resilience-tests-v1 -> origin/work/storage-resilience-tests-v1\n",
+      "elapsed_seconds": 1.093,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1.88,
+      "output_policy": "stream",
+      "captured_output_chars": 218,
+      "output_truncated": false,
+      "current_rss_mb": 1.88,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 10,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "git checkout -B work/android-toolchain-preflight-v1 origin/work/android-toolchain-preflight-v1 && git reset --hard origin/work/android-toolchain-preflight-v1 && git clean -fd && test -z \"$(git status --porcelain)\"",
+      "exit_code": 0,
+      "output": "Switched to and reset branch 'work/android-toolchain-preflight-v1'\nbranch 'work/android-toolchain-preflight-v1' set up to track 'origin/work/android-toolchain-preflight-v1'.\nYour branch is up to date with 'origin/work/android-toolchain-preflight-v1'.\nHEAD is now at 8c93be4 Harden pre-phone verification and Android release checks\n",
+      "elapsed_seconds": 0.373,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.67,
+      "output_policy": "stream",
+      "captured_output_chars": 331,
+      "output_truncated": false,
+      "current_rss_mb": 3.67,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 10,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set -e; SDK=\"$HOME/Library/Android/sdk\"; export ANDROID_SDK_ROOT=\"$SDK\" ANDROID_HOME=\"$SDK\"; export PATH=\"$SDK/platform-tools:$SDK/emulator:$PATH\"; android --sdk=\"$SDK\" emulator start medium_phone; adb wait-for-device; test \"$(adb shell getprop sys.boot_completed | tr -d '\\r')\" = \"1\"; printf 'ANDROID_RELEASE=%s API=%s ABI=%s\\n' \"$(adb shell getprop ro.build.version.release | tr -d '\\r')\" \"$(adb shell getprop ro.build.version.sdk | tr -d '\\r')\" \"$(adb shell getprop ro.product.cpu.abi | tr -d '\\r')\"",
+      "exit_code": 124,
+      "output": "Emulator process 16120 started, log file location: '/Users/michal/.android/medium_phone/emulator.log'\n\nWaiting for virtual device 'medium_phone' to fully start (299 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (299 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (298 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (297 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (296 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (295 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (294 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (293 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (292 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (291 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (290 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (289 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (289 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (288 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (287 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (286 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (285 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (284 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (283 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (282 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (281 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (280 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (279 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (279 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (278 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (277 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (276 seconds left)\nWaiting for virtual device 'medium_phone' to fully start (275 seconds left)Emulator process has exited early, see log for details.\n",
+      "elapsed_seconds": 1826.439,
+      "timed_out": false,
+      "idle_timed_out": true,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 95.67,
+      "output_policy": "stream",
+      "captured_output_chars": 2286,
+      "output_truncated": false,
+      "current_rss_mb": 7.53,
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 10,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 10,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.093
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 10,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.373
+    },
+    {
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 10,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 1826.439
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.089
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "failure_reason": "command_idle_timeout",
+  "finished_at": "2026-09-09T06:52:38.889007+00:00",
+  "task_digest": "ba6bc508ea5871c8c63300c674ce56f89b5e11cd5734c4ac608ff9dbf6ffb22d",
+  "idle_timeout": 1800,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "e44c000beccc3260f5b64e86",
+  "daemon_version": "4.18.19"
+}
