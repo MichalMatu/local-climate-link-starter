@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 8,
-  "command": "pnpm install --no-frozen-lockfile",
-  "pid": 97305,
+  "command": "pnpm --filter @lcl/mobile test -- app-routes.test.tsx && pnpm check:full",
+  "pid": 97421,
   "timeout": 3600,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T08:00:54.540892+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-09T08:00:56.844368+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-android-native-navigation-hardening-v3",
@@ -18,5 +18,5 @@
   "task_digest": "47ddb55db393d2f12634df4da2d00d2395b5c185b0b668bb4c0bcb4984df1c72",
   "daemon_version": "4.18.19",
   "daemon_pid": 97100,
-  "updated_at": "2026-09-09T08:00:54.615414+00:00"
+  "updated_at": "2026-09-09T08:00:56.922164+00:00"
 }
