@@ -1,0 +1,20 @@
+{
+  "id": "20260909-android-signing-key-audit-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-alpha-snapshot-v1",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"fd985071823793804fc5610f989d1829b00d05d8\" && test \"$(git rev-parse origin/work/final-alpha-snapshot-v1)\" = \"fd985071823793804fc5610f989d1829b00d05d8\"",
+    "printf '%s\\n' '--- signing env presence (values hidden) ---'; for V in LCL_ANDROID_KEYSTORE_FILE LCL_ANDROID_KEYSTORE_PASSWORD LCL_ANDROID_KEY_ALIAS LCL_ANDROID_KEY_PASSWORD; do if env | grep -q \"^${V}=\"; then printf '%s=set\\n' \"$V\"; else printf '%s=unset\\n' \"$V\"; fi; done",
+    "printf '%s\\n' '--- repo-related keystore candidates ---'; find \"$HOME/.android\" /Users/michal/agent-workspace/repos/local-climate-link-starter -maxdepth 5 -type f \\( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' \\) -print 2>/dev/null | sort",
+    "if test -f \"$HOME/.android/debug.keystore\"; then printf '%s\\n' '--- default Android debug signer ---'; keytool -list -v -keystore \"$HOME/.android/debug.keystore\" -storepass android -alias androiddebugkey -keypass android 2>/dev/null | grep -E 'Owner:|SHA256:' | head -4; fi",
+    "if test -n \"${LCL_ANDROID_KEYSTORE_FILE:-}\" && test -n \"${LCL_ANDROID_KEYSTORE_PASSWORD:-}\" && test -n \"${LCL_ANDROID_KEY_ALIAS:-}\"; then test -f \"$LCL_ANDROID_KEYSTORE_FILE\"; printf '%s\\n' '--- configured LCL signer ---'; keytool -list -v -keystore \"$LCL_ANDROID_KEYSTORE_FILE\" -storepass \"$LCL_ANDROID_KEYSTORE_PASSWORD\" -alias \"$LCL_ANDROID_KEY_ALIAS\" 2>/dev/null | grep -E 'Owner:|SHA256:' | head -4; else printf '%s\\n' 'configured LCL signer unavailable in current environment'; fi",
+    "printf '%s\\n' '--- managed checkout status ---'; git status --short; git diff --check"
+  ]
+}
