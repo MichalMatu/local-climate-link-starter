@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-time-ownership-conflict-v2",
+  "task_digest": "5eb8da48adcfa69e5bd6feb538a38368c21a55326101e5635129e6a0451f663d",
+  "idle_timeout": 120,
+  "task_timeout": 1500,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T21:54:17.774265+00:00",
+  "attempt_id": "4b32408569fa8de3b582e9ce",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 96369,
+  "updated_at": "2026-09-09T21:54:17.774354+00:00",
+  "pid": 96369
+}
