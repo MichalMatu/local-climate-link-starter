@@ -1,0 +1,22 @@
+{
+  "id": "20260909-android-native-navigation-hardening-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/android-native-navigation-hardening-v1",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 3600,
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"a2e005749fd65e7f70a6efba190bb7df3aab97a9\" && test \"$(git rev-parse origin/work/android-native-navigation-hardening-v1)\" = \"e693b612b84dbf0c61c7b9864b0a692e067ef3dd\" && git checkout -B work/android-native-navigation-hardening-v1 origin/work/android-native-navigation-hardening-v1 && git reset --hard origin/work/android-native-navigation-hardening-v1 && git clean -fd && test -z \"$(git status --porcelain)\"",
+    "pnpm install --no-frozen-lockfile",
+    "pnpm --filter @lcl/mobile test -- app-routes.test.tsx && pnpm check:full",
+    "pnpm --filter @lcl/mobile build && pnpm --filter @lcl/mobile exec cap sync android && grep -q 'capacitor-app' apps/mobile/android/capacitor.settings.gradle && grep -q 'capacitor-app' apps/mobile/android/app/capacitor.build.gradle",
+    "python3 -c \"import subprocess; changed=set(subprocess.check_output(['git','diff','--name-only'], text=True).splitlines()); allowed={'pnpm-lock.yaml','apps/mobile/android/capacitor.settings.gradle','apps/mobile/android/app/capacitor.build.gradle'}; unexpected=changed-allowed; print('GENERATED_CHANGED=', sorted(changed)); assert not unexpected, unexpected\"",
+    "SDK=\"$HOME/Library/Android/sdk\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; cd apps/mobile/android && ./gradlew --no-daemon assembleDebug lintDebug assembleRelease bundleRelease && cd ../../..",
+    "pnpm audit --prod --audit-level=high",
+    "git diff --check && test -z \"$(git diff --name-only -- packages/automation-core packages/script-generator)\" && git add pnpm-lock.yaml apps/mobile/android/capacitor.settings.gradle apps/mobile/android/app/capacitor.build.gradle && git diff --cached --quiet || git commit -m \"Wire Capacitor App plugin on Android\"; git push origin work/android-native-navigation-hardening-v1 && git fetch origin work/android-native-navigation-hardening-v1 && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/android-native-navigation-hardening-v1)\" && test -z \"$(git status --porcelain)\" && printf 'HEAD=%s\\n' \"$(git rev-parse HEAD)\""
+  ]
+}
