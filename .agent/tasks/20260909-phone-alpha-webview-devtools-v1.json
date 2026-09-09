@@ -1,0 +1,18 @@
+{
+  "id": "20260909-phone-alpha-webview-devtools-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 180,
+  "idle_timeout": 90,
+  "task_timeout": 900,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/main)\" = \"771b23456cf7b3fafe62cba3263e1f8f7118580b\"",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); \"$ADB\" -s \"$SERIAL\" shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 1; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; printf 'PID=%s\\n' \"$PID\"; \"$ADB\" -s \"$SERIAL\" shell cat /proc/net/unix | grep -E 'webview_devtools_remote|chrome_devtools_remote' || true",
+    "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); SOCKET=\"webview_devtools_remote_${PID}\"; if \"$ADB\" -s \"$SERIAL\" shell cat /proc/net/unix | grep -q \"@$SOCKET\"; then \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; \"$ADB\" -s \"$SERIAL\" forward tcp:9222 localabstract:$SOCKET; sleep 1; printf '%s\\n' '--- devtools targets ---'; curl -fsS http://127.0.0.1:9222/json; \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222; else echo 'WebView DevTools socket not exposed'; fi",
+    "git status --short && git diff --check"
+  ]
+}
