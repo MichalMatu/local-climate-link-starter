@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -e; if command -v brew >/dev/null 2>&1; then brew cleanup -s || true; CACHE=$(brew --cache 2>/dev/null || true); if [ -n \"$CACHE\" ] && [ -d \"$CACHE\" ]; then rm -rf \"$CACHE\"/*; fi; fi",
-  "pid": 9396,
+  "command": "df -h / \"$HOME\" && du -sh \"$HOME/.gradle\" \"$HOME/Library/Android/sdk\" \"$HOME/agent-workspace/repos/local-climate-link-starter\" 2>/dev/null || true",
+  "pid": 9543,
   "timeout": 900,
   "idle_timeout": 300,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T06:14:24.195249+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T06:14:29.961480+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260909-safe-tool-cache-cleanup-v1",
@@ -18,5 +18,5 @@
   "task_digest": "904186d99628c771509c022573ea36d6473bb615b2185be379da61465beb731c",
   "daemon_version": "4.18.19",
   "daemon_pid": 9027,
-  "updated_at": "2026-09-09T06:14:24.267544+00:00"
+  "updated_at": "2026-09-09T06:14:30.035176+00:00"
 }
