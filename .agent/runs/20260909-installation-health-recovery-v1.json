@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 8,
   "total": 12,
-  "command": "git checkout -B work/installation-health-recovery-v1 origin/work/installation-health-recovery-v1 && git reset --hard origin/work/installation-health-recovery-v1 && git clean -fd",
-  "pid": 3314,
+  "command": "pnpm --filter @lcl/mobile exec vitest run src/flows/installations/healthRecovery.test.ts src/__tests__/automation-detail.test.tsx",
+  "pid": 3462,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T04:30:28.141486+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T04:30:31.099628+00:00",
+  "stage_name": "command-8",
+  "stage_index": 8,
   "stage_total": 12,
   "stage_phase": "commands",
   "task_id": "20260909-installation-health-recovery-v1",
@@ -18,5 +18,5 @@
   "task_digest": "f40a7bcc81c01372d9c3833b43bd507605a0851ca20812a4478e4ad5c30d07d4",
   "daemon_version": "4.18.19",
   "daemon_pid": 2998,
-  "updated_at": "2026-09-09T04:30:28.210119+00:00"
+  "updated_at": "2026-09-09T04:30:31.171620+00:00"
 }
