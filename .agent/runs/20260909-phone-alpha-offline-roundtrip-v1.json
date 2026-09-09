@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 5,
-  "command": "set +e; KEY='lcl.installedAutomations.v1'; BACKUP=/tmp/lcl_installed_automations_offline_backup.txt; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); KEY=\"$KEY\" BACKUP=\"$BACKUP\" WS=\"$WS\" node -e 'const fs=require(\"fs\");const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`localStorage.getItem(${JSON.stringify(process.env.KEY)})`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){const v=m.result.result.value;if(typeof v!==\"string\"||!v)process.exit(2);fs.writeFileSync(process.env.BACKUP,v);console.log(\"BACKUP_BYTES=\"+Buffer.byteLength(v));ws.close();}}'; RC=$?; if [ $RC -eq 0 ]; then WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); KEY=\"$KEY\" WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const k=${JSON.stringify(process.env.KEY)};const raw=localStorage.getItem(k);const d=JSON.parse(raw);const x=d.installations.find(x=>x.kind===\"climate\");if(!x)throw new Error(\"climate installation missing\");x.shelly.baseUrl=\"http://192.0.2.1/\";localStorage.setItem(k,JSON.stringify(d));location.reload();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(3)}ws.close();}}'; RC=$?; fi; sleep 13; if [ $RC -eq 0 ]; then WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`document.body.innerText`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){const t=m.result.result.value||\"\";console.log(\"OFFLINE_UI_BEGIN\\n\"+t+\"\\nOFFLINE_UI_END\");if(!t.includes(\"Offline\")||!t.includes(\"Cannot reach Shelly.\"))process.exit(4);ws.close();}}'; RC=$?; fi; RAW64=$(base64 < \"$BACKUP\" | tr -d '\\n'); WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); KEY=\"$KEY\" RAW64=\"$RAW64\" WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);const raw=Buffer.from(process.env.RAW64,\"base64\").toString();ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{localStorage.setItem(${JSON.stringify(process.env.KEY)},${JSON.stringify(raw)});location.reload();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(5)}ws.close();}}'; RESTORE_RC=$?; sleep 8; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0][\"webSocketDebuggerUrl\"] if d else \"\")'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`document.body.innerText`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){const t=m.result.result.value||\"\";console.log(\"RESTORED_UI_BEGIN\\n\"+t+\"\\nRESTORED_UI_END\");if(!t.includes(\"Shelly Plug S Gen3\"))process.exit(6);ws.close();}}'; VERIFY_RC=$?; rm -f \"$BACKUP\"; if [ $RC -ne 0 ]; then exit $RC; fi; if [ $RESTORE_RC -ne 0 ]; then exit $RESTORE_RC; fi; exit $VERIFY_RC",
-  "pid": 815,
+  "command": "SCRIPT=$(curl -fsS --max-time 5 'http://192.168.0.16/rpc/Script.GetStatus?id=1'); RELAY=$(curl -fsS --max-time 5 'http://192.168.0.16/rpc/Switch.GetStatus?id=0'); echo FINAL_SCRIPT=$SCRIPT; echo FINAL_RELAY=$RELAY; SCRIPT=\"$SCRIPT\" RELAY=\"$RELAY\" python3 -c 'import json,os; s=json.loads(os.environ[\"SCRIPT\"]); r=json.loads(os.environ[\"RELAY\"]); assert s.get(\"running\") is True,s; assert r.get(\"output\") is False,r'",
+  "pid": 1240,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:58:34.866882+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-09T21:58:57.204305+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-offline-roundtrip-v1",
@@ -18,5 +18,5 @@
   "task_digest": "6bc5c2a1fe02134c3e4923e5d0f29b6979142b63b7cd918d0e44c93f59d91e52",
   "daemon_version": "4.18.19",
   "daemon_pid": 446,
-  "updated_at": "2026-09-09T21:58:34.885117+00:00"
+  "updated_at": "2026-09-09T21:58:57.274377+00:00"
 }
