@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 1,
+  "index": 3,
   "total": 4,
-  "command": "set -e; test \"$(git rev-parse HEAD)\" = \"bc8a061e868951c0313d80ff1d93c5235912ce29\"; test -z \"$(git status --porcelain)\"; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; test -x \"$ADB\"; \"$ADB\" kill-server || true; \"$ADB\" start-server; sleep 2; \"$ADB\" devices -l; SERIALS=\"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\"; if [ \"$SERIALS\" = \"RFCT70L7E8J\" ]; then echo ADB_PHONE_RECOVERED=yes; else echo ADB_PHONE_RECOVERED=no; fi",
-  "pid": 28274,
+  "command": "set -e; BASE=http://192.168.0.16; sleep 5; curl -fsS --max-time 8 \"$BASE/rpc/Script.GetStatus?id=1\" -o /tmp/lcl-script-status-2.json; curl -fsS --max-time 8 \"$BASE/rpc/Switch.GetStatus?id=0\" -o /tmp/lcl-switch-2.json; curl -fsS --max-time 8 \"$BASE/script/1/diag\" -o /tmp/lcl-diag-2.json; python3 - <<'PY'\nimport json\nfrom pathlib import Path\nstatus=json.loads(Path('/tmp/lcl-script-status-2.json').read_text())\nswitch=json.loads(Path('/tmp/lcl-switch-2.json').read_text())\ndiag=json.loads(Path('/tmp/lcl-diag-2.json').read_text())\nassert status.get('running') is True, status\nassert switch.get('output') is False, switch\nassert isinstance(diag, dict) and diag, diag\nprint('shelly_runtime_recheck=pass')\nprint('shelly_relay_final=false')\nPY",
+  "pid": 28386,
   "timeout": 900,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T22:23:55.493616+00:00",
-  "stage_name": "command-1",
-  "stage_index": 1,
+  "started_at": "2026-09-09T22:23:58.972882+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260910-freeze-adb-recover-shelly-v1",
@@ -18,5 +18,5 @@
   "task_digest": "47251b24ff20c8700c9859351b2afffa599cef3caac17d0b556bff5f1dcff003",
   "daemon_version": "4.18.19",
   "daemon_pid": 28138,
-  "updated_at": "2026-09-09T22:23:55.493773+00:00"
+  "updated_at": "2026-09-09T22:23:59.069764+00:00"
 }
