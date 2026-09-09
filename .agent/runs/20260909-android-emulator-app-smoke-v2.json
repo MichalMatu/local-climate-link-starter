@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-emulator-app-smoke-v2",
+  "task_digest": "ba6bc508ea5871c8c63300c674ce56f89b5e11cd5734c4ac608ff9dbf6ffb22d",
+  "idle_timeout": 1800,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T06:22:09.501876+00:00",
+  "attempt_id": "e44c000beccc3260f5b64e86",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 15876,
+  "updated_at": "2026-09-09T06:22:09.502003+00:00",
+  "pid": 15876
+}
