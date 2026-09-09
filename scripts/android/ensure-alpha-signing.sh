@@ -56,7 +56,6 @@ printf '%s\n' 'Local Climate Link alpha signer:'
 keytool -list -v \
   -keystore "$STORE_FILE" \
   -storepass "$STORE_PASSWORD" \
-  -alias "$KEY_ALIAS" \
-  -keypass "$KEY_PASSWORD" 2>/dev/null \
+  -alias "$KEY_ALIAS" 2>/dev/null \
   | grep -E 'Owner:|SHA256:' \
   | head -2
