@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-mobile-touch-targets-v1",
+  "task_digest": "80d49c75ff226d9522a8abb21e3855f99265b11dd085fbe9a8cedddf1b6c778f",
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T07:38:34.498977+00:00",
+  "attempt_id": "dcb3971d9bf4d8dd436fdb0d",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 76557,
+  "updated_at": "2026-09-09T07:38:34.499178+00:00",
+  "pid": 76557
+}
