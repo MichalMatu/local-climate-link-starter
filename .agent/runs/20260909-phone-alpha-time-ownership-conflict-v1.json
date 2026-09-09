@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 8,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const t=document.body.innerText;if(t.includes(\"Live status and control for this local system.\")){const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Back to automations\"));if(!b)throw new Error(\"back missing\");b.click();return \"back-clicked\";}return \"not-detail\";})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}console.log(m.result.result.value);ws.close();}}' && sleep 2; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const t=document.body.innerText;if(t.includes(\"What do you want to do?\"))return \"already-intent\";const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.trim()===\"Add automation\");if(!b)throw new Error(\"Add automation missing: \"+t.slice(0,700));b.click();return \"add-clicked\";})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}console.log(m.result.result.value);ws.close();}}' && sleep 2",
-  "pid": 93853,
+  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Control by time\"));if(!b)throw new Error(\"Control by time missing: \"+document.body.innerText.slice(0,900));b.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}ws.close();}}' && sleep 2; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.trim()===\"Schedule\");if(!b)throw new Error(\"Schedule tab missing: \"+document.body.innerText.slice(0,900));b.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}ws.close();}}' && sleep 2",
+  "pid": 93945,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:51:13.708239+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-09T21:51:18.505596+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-time-ownership-conflict-v1",
@@ -18,5 +18,5 @@
   "task_digest": "6af2c88d3ebb3934f9edbf861e72589d9ddc0c0c27630484efef9d25aab3e91a",
   "daemon_version": "4.18.19",
   "daemon_pid": 93589,
-  "updated_at": "2026-09-09T21:51:13.783960+00:00"
+  "updated_at": "2026-09-09T21:51:18.575422+00:00"
 }
