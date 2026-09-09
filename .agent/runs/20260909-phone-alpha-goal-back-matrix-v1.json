@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-phone-alpha-goal-back-matrix-v1",
+  "task_digest": "b6149604b049b06ec44fcd343405f45dc052976d42e34233a9593751407f5eab",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T20:37:30.566506+00:00",
+  "attempt_id": "5d62c65d371bd99d62480687",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 20576,
+  "updated_at": "2026-09-09T20:37:30.566626+00:00",
+  "pid": 20576
+}
