@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 8,
+  "index": 9,
   "total": 11,
-  "command": "pnpm android:phone-alpha",
-  "pid": 97445,
+  "command": "git status --short",
+  "pid": 98079,
   "timeout": 3600,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-09T20:09:29.921476+00:00",
-  "stage_name": "command-8",
-  "stage_index": 8,
+  "started_at": "2026-09-09T20:09:59.401925+00:00",
+  "stage_name": "command-9",
+  "stage_index": 9,
   "stage_total": 11,
   "stage_phase": "commands",
   "task_id": "20260909-android-alpha-signing-fix-v5",
@@ -18,5 +18,5 @@
   "task_digest": "aa9dae0a444cb27c769ec55ee86a8210686e3663ad91afd322deab3576232fc2",
   "daemon_version": "4.18.19",
   "daemon_pid": 93984,
-  "updated_at": "2026-09-09T20:09:29.993555+00:00"
+  "updated_at": "2026-09-09T20:09:59.479961+00:00"
 }
