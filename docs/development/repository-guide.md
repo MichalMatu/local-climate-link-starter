@@ -28,6 +28,7 @@ pnpm test
 pnpm format
 pnpm format:check
 pnpm quality:ux
+pnpm quality:repo
 pnpm e2e:responsive
 pnpm tokens:build
 pnpm check
@@ -39,8 +40,9 @@ Quality gates:
 
 ```bash
 pnpm quality:ux        # static UX/style guardrails
+pnpm quality:repo      # package boundaries + Android/release version consistency
 pnpm e2e:responsive   # responsive smoke across phone/tablet/desktop viewports
-pnpm check            # format, lint, UX gate, typecheck, tests, coverage, build
+pnpm check            # format, lint, UX/repo gates, typecheck, tests, coverage, build
 pnpm check:landing    # landing page deploy gate
 pnpm check:full       # check + responsive smoke
 ```
@@ -67,7 +69,7 @@ As of the v2.0.7 release, `main` contains the complete latest code (the content 
 Recommended workflow:
 
 1. Work on `main` and run `pnpm check`.
-2. For a release: bump versions, run `LCL_RELEASE_VERSION=<version> pnpm release:android`, verify artifacts.
+2. For a release: bump versions, run `pnpm release:android`, then verify artifacts. `LCL_RELEASE_VERSION` is an optional explicit override; otherwise the root `package.json` version is used.
 3. Push `main`, create GitHub Release + tag.
 4. (optional) The `work` branch can be kept for reference or deleted if no longer needed.
 
@@ -99,14 +101,15 @@ Release builds require the local signing environment for the **upload key**
 set -a
 source ~/.local-climate-link/android/release-signing.env
 set +a
-LCL_RELEASE_VERSION=2.0.8 pnpm release:android
+pnpm release:android
 ```
 
 This loads the correct upload keystore (typically `local-climate-link-upload.jks`).
 
 The release script builds the web app, syncs Capacitor, builds APK/AAB, collects
 artifacts under `artifacts/releases/v<version>/`, verifies checksums, and checks
-Android signatures. Do not upload artifacts if `verify-android-release.mjs`
+Android signatures. By default `<version>` comes from the root `package.json`; set
+`LCL_RELEASE_VERSION` only when an explicit override is intentional. Do not upload artifacts if `verify-android-release.mjs`
 fails.
 
 > **Important:** Always use the upload key registered in the Play Console.
@@ -294,6 +297,7 @@ pnpm install --frozen-lockfile
 pnpm format:check
 pnpm lint
 pnpm quality:ux
+pnpm quality:repo
 pnpm typecheck
 pnpm test
 pnpm build

@@ -96,6 +96,7 @@ Run:
 
 ```text
 pnpm quality:ux
+pnpm quality:repo
 LCL_E2E_PORT=5174 pnpm e2e:responsive
 ```
 
@@ -131,6 +132,7 @@ Before commercial packaging, run and keep the output clean:
 pnpm format:check
 pnpm lint
 pnpm quality:ux
+pnpm quality:repo
 pnpm typecheck
 pnpm test
 pnpm test:coverage:core
@@ -139,6 +141,56 @@ LCL_E2E_PORT=5174 pnpm e2e:responsive
 ```
 
 Then install on a real Android phone and run the hardware smoke matrix.
+
+## Software-only audit status — 2026-09-09
+
+Completed before the next phone session:
+
+- Installation Health & Recovery is merged: offline, stopped script, stale sensor
+  data, and ownership mismatch have focused user-facing states. Recovery remains
+  conservative: read-only refresh or the existing verified script resume path.
+- Exact-source Linux sandbox `check:full` passes, including responsive Playwright
+  smoke, workspace builds, and 100% coverage gates for `automation-core` and
+  `script-generator`.
+- The same health/recovery change passed the macOS Local Agent full gate and
+  canonical GitHub CI before merge.
+- Visual audit passed at `360x800`, `390x844`, `412x915`, and `768x1024` for
+  installation detail/recovery, Shelly setup, and the advanced modal with no
+  horizontal overflow or clipped primary controls.
+- Responsive E2E now uses the three representative phone viewports required by
+  `AGENTS.md`, plus tablet and desktop coverage.
+- Component tests explicitly prove that offline, stale-sensor, and ownership
+  recovery refreshes do not call `Script.Start`, `Script.Stop`, or `Switch.Set`.
+- `pnpm quality:repo` now guards Android/package version consistency, internal
+  workspace dependency cycles, screen network/BLE boundaries, and domain-package
+  React/Ionic boundaries. It runs as part of `pnpm check`.
+- Package dependency audit found no internal cycles and no React/Ionic imports in
+  domain packages. Screens do not directly call Shelly RPC or the Capacitor BLE
+  plugin.
+- Large setup files (`useHardwareSetupFlow.ts`, `ShellySetupPage.tsx`,
+  `RuleSetupPage.tsx`, `SensorSetupPage.tsx`) remain maintainability risks, but
+  are intentionally not split before first phone testing without a concrete
+  responsibility boundary and regression reason.
+- Android release version defaults were corrected to use the root package version
+  instead of the stale hard-coded `2.0.5`; docs now match `2.0.9` / `20009`.
+- Native Android preflight passes on macOS after configuring Android SDK 36:
+  Capacitor sync, `assembleDebug`, and `lintDebug` completed successfully; the
+  generated debug APK was 4.2 MB.
+- Android Gradle Plugin 8.7.2 emits a non-blocking compatibility warning for
+  `compileSdk = 36` because that plugin version declares testing through API 35.
+  Keep the warning visible for a later release-toolchain upgrade rather than
+  suppressing it just to silence logs.
+- The firmware summary now reflects the final 2026-07-04 Shelly 1.7.5 real BLE
+  16/16 matrix while preserving earlier failed attempts as historical evidence.
+
+Still requires a real device / native environment before calling the product
+release-ready:
+
+- signed Android release/AAB build on the configured SDK and registered upload key;
+- clean install/upgrade and lifecycle checks on a real Android phone;
+- real phone BLE permission/scan behavior and Capacitor networking;
+- one final Shelly + Xiaomi/PVVX + TP357 smoke pass after installing the candidate;
+- signed release/AAB verification with the registered Play upload key.
 
 ## Deferred commercial plan
 

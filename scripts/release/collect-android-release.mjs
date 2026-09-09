@@ -2,10 +2,11 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 
-const version = process.argv[2];
+const projectVersion = JSON.parse(readFileSync('package.json', 'utf8')).version;
+const version = process.argv[2] || projectVersion;
 
-if (!version) {
-  throw new Error('Usage: node scripts/release/collect-android-release.mjs <version>');
+if (typeof version !== 'string' || version.length === 0) {
+  throw new Error('Missing release version.');
 }
 
 const releaseDir = join('artifacts', 'releases', `v${version}`);

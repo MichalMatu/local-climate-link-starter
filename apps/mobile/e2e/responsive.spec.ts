@@ -39,8 +39,9 @@ const draft = {
 };
 
 const viewports = [
-  { name: 'phone-small', width: 360, height: 740 },
+  { name: 'phone-small', width: 360, height: 800 },
   { name: 'phone', width: 390, height: 844 },
+  { name: 'phone-large', width: 412, height: 915 },
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'desktop', width: 1440, height: 900 }
 ] as const;

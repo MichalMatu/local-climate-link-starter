@@ -334,12 +334,12 @@ The hardware helper parses compact `/diag` fields from `{ v, z, s, q, y, p, g }`
 
 ## Firmware matrix
 
-| Device             | Firmware version | Tested date | Result | Notes                                                                                                                                                  |
-| ------------------ | ---------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Shelly Plug S Gen3 | 1.2.3-matter22   | 2026-06-29  | ✅     | BLE discovery and scripts work; Matter flag present                                                                                                    |
-| Shelly Plug S Gen3 | 1.7.5            | 2026-06-30  | ⚠️     | Matter OFF, MQTT OFF, scripts work; generated runtime relay matrix passed 16/16, but real BLE matrix was blocked by weak/missing sensor advertisements |
-| Xiaomi PVVX        |                  |             | ☐      | Record BTHome v2, encrypted off, advertising interval                                                                                                  |
-| TP357              | stock            |             | ☐      | Record raw payload sample ID                                                                                                                           |
+| Device             | Firmware version | Tested date | Result | Notes                                                                                                                                                                                                                                          |
+| ------------------ | ---------------- | ----------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shelly Plug S Gen3 | 1.2.3-matter22   | 2026-06-29  | ✅     | BLE discovery and scripts work; Matter flag present                                                                                                                                                                                            |
+| Shelly Plug S Gen3 | 1.7.5            | 2026-07-04  | ✅     | Final real BLE runtime matrix passed 16/16 with Xiaomi/PVVX + TP357, all four modes and VPD off/on; every case saw relay ON/OFF and finished safe OFF. Earlier 2026-06-30 advertisement failures remain recorded above as historical evidence. |
+| Xiaomi PVVX        |                  |             | ☐      | Record BTHome v2, encrypted off, advertising interval                                                                                                                                                                                          |
+| TP357              | stock            |             | ☐      | Record raw payload sample ID                                                                                                                                                                                                                   |
 
 ## Support rule
 
