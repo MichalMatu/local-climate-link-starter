@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-avd-diagnose-v1",
+  "task_digest": "cde06d5665b3d82a7830aa0ee52cdef95d6e7ec1e0d3598b78a25b707273d303",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T05:56:06.711079+00:00",
+  "attempt_id": "ebfa1eb0bf4009bce226aac7",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 94341,
+  "updated_at": "2026-09-09T05:56:06.711251+00:00",
+  "pid": 94341
+}
