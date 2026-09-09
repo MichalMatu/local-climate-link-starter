@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 4,
-  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); \"$ADB\" -s \"$SERIAL\" shell am force-stop link.localclimate.app; \"$ADB\" -s \"$SERIAL\" logcat -c; \"$ADB\" -s \"$SERIAL\" shell am start -W -n link.localclimate.app/.MainActivity; sleep 1; printf '%s\\n' '--- before Back ---'; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; \"$ADB\" -s \"$SERIAL\" shell input keyevent 4; sleep 1; printf '%s\\n' '--- after Back ---'; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; if \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' | grep -q 'link.localclimate.app'; then echo 'root Back did not leave app' >&2; exit 1; fi",
-  "pid": 8771,
+  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); printf '%s\\n' '--- relaunch ---'; \"$ADB\" -s \"$SERIAL\" shell am start -W -n link.localclimate.app/.MainActivity; sleep 1; \"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; printf 'PID=%s\\n' \"$PID\"; \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief '*:E' | tail -80 || true",
+  "pid": 8873,
   "timeout": 180,
   "idle_timeout": 90,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T20:23:42.278897+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-09T20:23:45.965061+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-native-back-root-v1",
@@ -18,5 +18,5 @@
   "task_digest": "36047cfcf3018a2a3771bf964a68095f4599d995830ab6cac892d72d7a6f22fb",
   "daemon_version": "4.18.19",
   "daemon_pid": 8598,
-  "updated_at": "2026-09-09T20:23:42.364442+00:00"
+  "updated_at": "2026-09-09T20:23:46.009652+00:00"
 }
