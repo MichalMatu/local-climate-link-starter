@@ -1,0 +1,25 @@
+{
+  "id": "20260909-button-proof-roadmap-v6",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/installation-health-recovery",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 900,
+  "commands": [
+    "git fetch --prune origin",
+    "test $(git rev-parse origin/main) = 186ed0f74d51ba79f5a6f43bb4c66ac5e56be239",
+    "git checkout -B work/installation-health-recovery origin/work/installation-health-recovery",
+    "git reset --hard origin/work/installation-health-recovery && git clean -fd",
+    "git cat-file -e '52ca939^{commit}'",
+    "git cherry-pick 52ca939",
+    "git diff --check origin/main...HEAD",
+    "test $(git diff --name-only origin/main...HEAD) = docs/product/next-functional-steps.md",
+    "git push --no-verify origin HEAD:refs/heads/work/installation-health-recovery",
+    "git rev-parse HEAD",
+    "test -z $(git status --porcelain)"
+  ]
+}
