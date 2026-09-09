@@ -1,5 +1,16 @@
 apply plugin: 'com.android.application'
 
+def alphaSigningPropertiesFile = new File(System.getProperty("user.home"), ".local-climate-link/android/alpha-signing.properties")
+def alphaSigningProperties = new Properties()
+if (alphaSigningPropertiesFile.exists()) {
+    alphaSigningPropertiesFile.withInputStream { alphaSigningProperties.load(it) }
+}
+def alphaKeystoreFile = alphaSigningProperties.getProperty("storeFile")
+def alphaKeystorePassword = alphaSigningProperties.getProperty("storePassword")
+def alphaKeyAlias = alphaSigningProperties.getProperty("keyAlias")
+def alphaKeyPassword = alphaSigningProperties.getProperty("keyPassword")
+def hasAlphaSigning = alphaKeystoreFile && alphaKeystorePassword && alphaKeyAlias && alphaKeyPassword && new File(alphaKeystoreFile).exists()
+
 def releaseKeystoreFile = System.getenv("LCL_ANDROID_KEYSTORE_FILE")
 def releaseKeystorePassword = System.getenv("LCL_ANDROID_KEYSTORE_PASSWORD")
 def releaseKeyAlias = System.getenv("LCL_ANDROID_KEY_ALIAS")
@@ -10,6 +21,14 @@ android {
     namespace "link.localclimate.app"
     compileSdk rootProject.ext.compileSdkVersion
     signingConfigs {
+        if (hasAlphaSigning) {
+            alpha {
+                storeFile file(alphaKeystoreFile)
+                storePassword alphaKeystorePassword
+                keyAlias alphaKeyAlias
+                keyPassword alphaKeyPassword
+            }
+        }
         release {
             if (hasReleaseSigning) {
                 storeFile file(releaseKeystoreFile)
@@ -32,6 +51,11 @@ android {
         }
     }
     buildTypes {
+        debug {
+            if (hasAlphaSigning) {
+                signingConfig signingConfigs.alpha
+            }
+        }
         release {
             if (hasReleaseSigning) {
                 signingConfig signingConfigs.release
