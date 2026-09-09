@@ -1,0 +1,24 @@
+{
+  "id": "20260909-android-native-preflight-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/pre-phone-hardening-v1",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "command_timeout": 3600,
+  "idle_timeout": 1200,
+  "task_timeout": 7200,
+  "commands": [
+    "git fetch --prune origin",
+    "test \"$(git rev-parse origin/work/pre-phone-hardening-v1)\" = \"44c46d50ed3e72e7121602a562286e53cb4de50d\"",
+    "git checkout -B work/pre-phone-hardening-v1 origin/work/pre-phone-hardening-v1 && git reset --hard origin/work/pre-phone-hardening-v1 && git clean -fd",
+    "printf '%s\\n' '--- user checkout read-only audit ---'; test -d /Users/michal/Desktop/local-climate-link-starter/.git; git -C /Users/michal/Desktop/local-climate-link-starter remote get-url origin; git -C /Users/michal/Desktop/local-climate-link-starter rev-parse HEAD; git -C /Users/michal/Desktop/local-climate-link-starter status --porcelain || true",
+    "printf '%s\\n' '--- toolchain ---'; node --version; pnpm --version; java -version; printf 'ANDROID_HOME=%s\\n' \"${ANDROID_HOME:-}\"; printf 'ANDROID_SDK_ROOT=%s\\n' \"${ANDROID_SDK_ROOT:-}\"",
+    "pnpm --filter @lcl/mobile build",
+    "pnpm --filter @lcl/mobile exec cap sync android",
+    "cd apps/mobile/android && ./gradlew assembleDebug lintDebug",
+    "test -f app/build/outputs/apk/debug/app-debug.apk && ls -lh app/build/outputs/apk/debug/app-debug.apk && shasum -a 256 app/build/outputs/apk/debug/app-debug.apk",
+    "cd ../../.. && printf '%s\\n' '--- managed checkout status after native preflight ---'; git status --short; git diff --check"
+  ]
+}
