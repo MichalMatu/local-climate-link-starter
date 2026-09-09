@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 4,
   "total": 4,
-  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIALS=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}'); COUNT=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d' | wc -l | tr -d ' '); test \"$COUNT\" = \"1\"; SERIAL=$(printf '%s\\n' \"$SERIALS\" | sed '/^$/d'); printf 'SERIAL=%s\\n' \"$SERIAL\"; printf '%s\\n' '--- existing package metadata ---'; \"$ADB\" -s \"$SERIAL\" shell dumpsys package link.localclimate.app | grep -E 'versionCode=|versionName=|targetSdk=|firstInstallTime=|lastUpdateTime=|flags=|pkgFlags=' | head -30; printf '%s\\n' '--- package path ---'; \"$ADB\" -s \"$SERIAL\" shell pm path link.localclimate.app",
-  "pid": 72205,
+  "command": "printf '%s\\n' '--- managed checkout status ---'; git status --short; git diff --check",
+  "pid": 72316,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T19:39:56.799594+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-09T19:40:02.028967+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260909-phone-existing-package-inspect-v1",
@@ -18,5 +18,5 @@
   "task_digest": "0a58155a9d5676d35ff6d40a1b2957aed81536421b4a96753d5b36ced8aca3ae",
   "daemon_version": "4.18.19",
   "daemon_pid": 72057,
-  "updated_at": "2026-09-09T19:39:56.890691+00:00"
+  "updated_at": "2026-09-09T19:40:02.112274+00:00"
 }
