@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-android-alpha-signing-fix-v4",
+  "task_digest": "64a6a189786dbe518d16852dea1464a2f30fa0d087f4c4508975dbd4f16bbdfe",
+  "idle_timeout": 600,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-09T20:05:34.779753+00:00",
+  "attempt_id": "b9de37b12771e4b13603df24",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 91890,
+  "updated_at": "2026-09-09T20:05:34.779847+00:00",
+  "pid": 91890
+}
