@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 6,
   "total": 9,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{if(!document.body.innerText.includes(\"What do you want to do?\"))return document.body.innerText.slice(0,300);const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Control temperature\"));if(!b)throw new Error(\"temperature button missing\");b.click();return \"opened temperature\"})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails)process.exit(1);console.log(m.result.result.value);ws.close();}}' && sleep 1",
-  "pid": 41709,
+  "command": "START=$(cat /tmp/lcl_scan_start); END=$(cat /tmp/lcl_scan_end); WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); START=\"$START\" END=\"$END\" WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const xs=[...document.querySelectorAll(\"input\")];if(xs.length<2)throw new Error(\"scan inputs missing\");for(const [e,v] of [[xs[0],${JSON.stringify(process.env.START)}],[xs[1],${JSON.stringify(process.env.END)}]]){const s=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,\"value\").set;s.call(e,v);e.dispatchEvent(new Event(\"input\",{bubbles:true}));e.dispatchEvent(new Event(\"change\",{bubbles:true}));}return xs.map(x=>x.value).join(\" -> \" )})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}console.log(\"RANGE_INPUTS=\"+m.result.result.value);ws.close();}}' && sleep 1",
+  "pid": 41894,
   "timeout": 240,
   "idle_timeout": 150,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T20:59:27.881390+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-09T20:59:32.281522+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-shelly-discovery-v1",
@@ -18,5 +18,5 @@
   "task_digest": "9f78118d53e743deb478e20173fb71d3df6669244c57f2342954ec4f114f5a88",
   "daemon_version": "4.18.19",
   "daemon_pid": 41035,
-  "updated_at": "2026-09-09T20:59:27.950666+00:00"
+  "updated_at": "2026-09-09T20:59:32.364726+00:00"
 }
