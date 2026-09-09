@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 8,
-  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.includes(\"Control by time\"));if(!b)throw new Error(\"Control by time missing: \"+document.body.innerText.slice(0,900));b.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}ws.close();}}' && sleep 2; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const b=[...document.querySelectorAll(\"button\")].find(x=>x.innerText.trim()===\"Schedule\");if(!b)throw new Error(\"Schedule tab missing: \"+document.body.innerText.slice(0,900));b.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}ws.close();}}' && sleep 2",
-  "pid": 93945,
+  "command": "WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`JSON.stringify({text:document.body.innerText,buttons:[...document.querySelectorAll(\"button\")].map(x=>({text:x.innerText.trim(),disabled:x.disabled})).filter(x=>x.text),inputs:[...document.querySelectorAll(\"input\")].map(x=>({type:x.type,value:x.value}))})`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){console.log(\"TIME_SETUP=\"+m.result.result.value);const d=JSON.parse(m.result.result.value);if(!d.text.includes(\"Shelly Plug S Gen3\"))process.exit(2);const b=d.buttons.find(x=>/^Install/.test(x.text));if(!b||b.disabled)process.exit(3);ws.close();}}'",
+  "pid": 94100,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-09T21:51:18.505596+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-09T21:51:23.163813+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260909-phone-alpha-time-ownership-conflict-v1",
@@ -18,5 +18,5 @@
   "task_digest": "6af2c88d3ebb3934f9edbf861e72589d9ddc0c0c27630484efef9d25aab3e91a",
   "daemon_version": "4.18.19",
   "daemon_pid": 93589,
-  "updated_at": "2026-09-09T21:51:18.575422+00:00"
+  "updated_at": "2026-09-09T21:51:23.246315+00:00"
 }
