@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-bound-workspace-disk-v1",
+  "task_digest": "2de92334772e4ce11d04fff252b6d150a686d96828ca6a77fe6ab6978353a871",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T06:11:08.653864+00:00",
+  "attempt_id": "7d0621e4212927a613fd1486",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 7316,
+  "updated_at": "2026-09-09T06:11:08.653941+00:00",
+  "pid": 7316
+}
