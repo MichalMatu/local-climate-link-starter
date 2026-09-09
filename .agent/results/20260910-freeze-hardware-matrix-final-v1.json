@@ -1,0 +1,89 @@
+{
+  "id": "20260910-freeze-hardware-matrix-final-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/freeze-v2.0.10",
+  "allow_write": true,
+  "started_at": "2026-09-09T22:36:32.393789+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch --prune --tags origin; test \"$(git rev-parse HEAD)\" = \"e75af928954004fbe8f13c2cf36c7f581370d513\"; test \"$(git rev-parse origin/work/freeze-v2.0.10)\" = \"e75af928954004fbe8f13c2cf36c7f581370d513\"; test \"$(git rev-parse origin/main)\" = \"1cd0215548aea5203b064fcf2b24c4c628f1c30e\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; test \"$(git rev-parse 'v2.0.9^{}')\" = \"b44899ba66b202ca05f48a8856a9871daee97832\"; ! git show-ref --verify --quiet refs/tags/v2.0.10; test -z \"$(git status --porcelain)\"",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   cd8a8be..14cea4a  agent-control -> origin/agent-control\n",
+      "elapsed_seconds": 1.117,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.05,
+      "output_policy": "stream",
+      "captured_output_chars": 121,
+      "output_truncated": false,
+      "current_rss_mb": 3.05,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 4,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "python3 -c 'from pathlib import Path; p=Path(\"docs/testing/hardware-matrix.md\"); s=p.read_text(); old=\"| Final destructive `2.0.10` phone-alpha install | blocked | Not executed in the continuation on 2026-09-10 because `adb devices -l` was empty; restarting the ADB server did not restore `RFCT70L7E8J`. The task stopped before uninstall/install, so no `2.0.10` device PASS is claimed yet. |\"; new=\"| Final destructive `2.0.10` phone-alpha install | ✅ | On freeze SHA `e75af928…`, `pnpm android:phone-alpha` logged destructive clean uninstall before install, then cold-started the app. Installed `versionName=2.0.10`, `versionCode=20010`, `targetSdk=36`; build APK and pulled installed `base.apk` both matched alpha signer SHA-256 `2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76`. Fresh launch returned `Status: ok`, the process had a PID and `topResumedActivity`/focused activity was `MainActivity`, with no fatal process error in the smoke log. After the phone data wipe, direct Shelly RPC still showed script id `1` running, relay OFF, zero schedules, and a live compact `/diag`; a second read 5 s later confirmed running + relay OFF. |\"; assert s.count(old)==1, s.count(old); p.write_text(s.replace(old,new))' && git diff --check && git diff -- docs/testing/hardware-matrix.md",
+      "exit_code": 1,
+      "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from pathlib import Path; p=Path(\"docs/testing/hardware-matrix.md\"); s=p.read_text(); old=\"| Final destructive `2.0.10` phone-alpha install | blocked | Not executed in the continuation on 2026-09-10 because `adb devices -l` was empty; restarting the ADB server did not restore `RFCT70L7E8J`. The task stopped before uninstall/install, so no `2.0.10` device PASS is claimed yet. |\"; new=\"| Final destructive `2.0.10` phone-alpha install | ✅ | On freeze SHA `e75af928…`, `pnpm android:phone-alpha` logged destructive clean uninstall before install, then cold-started the app. Installed `versionName=2.0.10`, `versionCode=20010`, `targetSdk=36`; build APK and pulled installed `base.apk` both matched alpha signer SHA-256 `2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76`. Fresh launch returned `Status: ok`, the process had a PID and `topResumedActivity`/focused activity was `MainActivity`, with no fatal process error in the smoke log. After the phone data wipe, direct Shelly RPC still showed script id `1` running, relay OFF, zero schedules, and a live compact `/diag`; a second read 5 s later confirmed running + relay OFF. |\"; assert s.count(old)==1, s.count(old); p.write_text(s.replace(old,new))\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ^^^^^^^^^^^^^^^\nAssertionError: 0\n",
+      "elapsed_seconds": 0.407,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1.92,
+      "output_policy": "stream",
+      "captured_output_chars": 2491,
+      "output_truncated": false,
+      "current_rss_mb": 1.92,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 4,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 4,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.117
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 4,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.407
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.067
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-09T22:36:35.488547+00:00",
+  "task_digest": "d5173e9a2f6ffb24121f7397f55ef0db6d4b49eaeee78a0364a0639c068808f7",
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "913d99e44d2b85a743fc2c9f",
+  "daemon_version": "4.18.19"
+}
