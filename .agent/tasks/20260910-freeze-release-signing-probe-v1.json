@@ -1,0 +1,20 @@
+{
+  "id": "20260910-freeze-release-signing-probe-v1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune --tags origin; git reset --hard origin/main; test \"$(git rev-parse HEAD)\" = \"fbd0e6412b6589fcea6686a7ef48ab999d9921f3\"; test \"$(git rev-parse refs/tags/v2.0.9)\" = \"90378921a79ed3ecb43013e322d27629bf15db64\"; ! git show-ref --verify --quiet refs/tags/v2.0.10; test -z \"$(git status --porcelain)\"",
+    "printf 'KEYSTORE_FILE_ENV=%s\\n' \"$([ -n \"${LCL_ANDROID_KEYSTORE_FILE:-}\" ] && echo present || echo absent)\"; printf 'KEYSTORE_PASSWORD_ENV=%s\\n' \"$([ -n \"${LCL_ANDROID_KEYSTORE_PASSWORD:-}\" ] && echo present || echo absent)\"; printf 'KEY_ALIAS_ENV=%s\\n' \"$([ -n \"${LCL_ANDROID_KEY_ALIAS:-}\" ] && echo present || echo absent)\"; printf 'KEY_PASSWORD_ENV=%s\\n' \"$([ -n \"${LCL_ANDROID_KEY_PASSWORD:-}\" ] && echo present || echo absent)\"",
+    "set -e; echo CANDIDATE_SIGNING_FILES; for d in \"$HOME/.local-climate-link\" \"$HOME/.config/local-climate-link\"; do if [ -d \"$d\" ]; then find \"$d\" -maxdepth 3 -type f -print | sed \"s#^$HOME#~#\"; fi; done; echo PROFILE_REFERENCES; for f in \"$HOME/.zshrc\" \"$HOME/.zprofile\" \"$HOME/.bash_profile\" \"$HOME/.bashrc\"; do if [ -f \"$f\" ] && grep -q 'LCL_ANDROID_' \"$f\"; then printf '%s: ' \"$(basename \"$f\")\"; grep -o 'LCL_ANDROID_[A-Z_]*' \"$f\" | sort -u | tr '\\n' ' '; echo; fi; done",
+    "set -e; echo EXISTING_RELEASE_DIRS; if [ -d artifacts/releases ]; then find artifacts/releases -maxdepth 2 -type f -print | sort; else echo none; fi",
+    "set +e; gh auth status --hostname github.com >/tmp/lcl-gh-auth.txt 2>&1; AUTH_RC=$?; sed -E 's/(token:).*/\\1 [redacted]/I' /tmp/lcl-gh-auth.txt; echo GH_AUTH_RC=$AUTH_RC; gh api repos/MichalMatu/local-climate-link-starter/immutable-releases >/tmp/lcl-immutable.json 2>/tmp/lcl-immutable.err; IMM_RC=$?; if [ $IMM_RC -eq 0 ]; then python3 -c 'import json; d=json.load(open(\"/tmp/lcl-immutable.json\")); print(\"IMMUTABLE_RELEASES_ENABLED=\"+str(bool(d.get(\"enabled\"))).lower()); print(\"IMMUTABLE_ENFORCED_BY_OWNER=\"+str(bool(d.get(\"enforced_by_owner\"))).lower())'; else echo IMMUTABLE_RELEASES_ENABLED=false_or_unavailable; sed -n '1,3p' /tmp/lcl-immutable.err; fi; gh release view v2.0.10 --repo MichalMatu/local-climate-link-starter >/dev/null 2>&1; echo V2010_RELEASE_EXISTS=$?; exit 0",
+    "test -z \"$(git status --porcelain)\"; echo PROBE_SHA=$(git rev-parse HEAD)"
+  ]
+}
