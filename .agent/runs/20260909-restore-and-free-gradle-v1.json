@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260909-restore-and-free-gradle-v1",
+  "task_digest": "ac3124af657e7d8ecf9308dd383306ba6b9e46577311e02f0d168d6cb29f5a7a",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-09T06:18:02.383662+00:00",
+  "attempt_id": "b56227054a754b450dda8ffc",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 12168,
+  "updated_at": "2026-09-09T06:18:02.383746+00:00",
+  "pid": 12168
+}
