@@ -1,9 +1,0 @@
-{
-  "event": "invalid_task_rejected",
-  "status": "failed",
-  "failure_reason": "invalid_task_file",
-  "updated_at": "2026-09-08T23:44:43.423571+00:00",
-  "task_id": "20260909-shelly-button-websocket-listen-v1",
-  "daemon_version": "4.18.19",
-  "pid": 6162
-}
