@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 5,
-  "command": "set -e; mkdir -p artifacts/ui-audit/final-20260910; pnpm e2e:responsive; for f in artifacts/ui-audit/final-20260910/{01-dashboard-climate,02-climate-detail,03-dashboard-time,04-time-detail,05-add-automation-intent,06-script-preview}.png; do test -s \"$f\"; done",
-  "pid": 59592,
+  "command": "set -e; git checkout -- apps/mobile/e2e/responsive.spec.ts; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; SERIAL=RFCT70L7E8J; PACKAGE=link.localclimate.app; DEVICES=\"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\"; test \"$DEVICES\" = \"$SERIAL\"; \"$ADB\" -s \"$SERIAL\" shell am start -W -n \"$PACKAGE/.MainActivity\" >/tmp/lcl-final-visual-start.log; sleep 2; \"$ADB\" -s \"$SERIAL\" exec-out screencap -p > artifacts/ui-audit/final-20260910/07-physical-s22plus.png; test -s artifacts/ui-audit/final-20260910/07-physical-s22plus.png; test -z \"$(git status --porcelain | grep -v '^?? artifacts/ui-audit/final-20260910/')\"",
+  "pid": 60127,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T04:20:50.408599+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-10T04:21:17.852566+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260910-final-visual-audit-v1",
@@ -18,5 +18,5 @@
   "task_digest": "7efda2bf55df8f5b47a5e1333fc2654509724907720ca7a909396afb6fc24e53",
   "daemon_version": "4.18.19",
   "daemon_pid": 59287,
-  "updated_at": "2026-09-10T04:20:50.478247+00:00"
+  "updated_at": "2026-09-10T04:21:17.920113+00:00"
 }
