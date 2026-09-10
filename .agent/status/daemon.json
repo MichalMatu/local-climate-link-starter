@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.18.19",
-  "state": "running",
+  "state": "idle",
   "pid": 49494,
-  "updated_at": "2026-09-10T00:40:37.849317+00:00",
+  "updated_at": "2026-09-10T00:40:58.116485+00:00",
   "self_revision": "8e04f75287630cb1db363f1b53c3c0b770e10dcc",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -14,7 +14,7 @@
   "task_timeout_default": 1800,
   "task_timeout_max": 21600,
   "memory_limit_mb_default": 4096,
-  "current_task_id": "cleanup-work-branches-20260910-002",
+  "current_task_id": null,
   "current_attempt_id": null,
   "current_task_digest": null,
   "repository_id": "local-climate-link-starter",
@@ -25,6 +25,6 @@
   "execution_model": "multi_repository_worker",
   "worker_pid": 49494,
   "supervisor_pid": 41669,
-  "active_resources": [],
+  "last_task_id": "cleanup-work-branches-20260910-002",
   "execution_variant": "parallel"
 }
