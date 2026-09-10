@@ -1,0 +1,18 @@
+{
+  "id": "20260910-final-validation-main-v2",
+  "mode": "commands",
+  "work_branch": "work/final-validation-20260910",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune origin; git reset --hard origin/work/final-validation-20260910; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test \"$(git rev-parse origin/main)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test -z \"$(git status --porcelain)\"; echo FINAL_BASE_SHA=$(git rev-parse HEAD)",
+    "set -e; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; SERIAL=RFCT70L7E8J; PACKAGE=link.localclimate.app; test -x \"$ADB\"; DEVICES=\"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\"; test \"$DEVICES\" = \"$SERIAL\"; MODEL=\"$(\"$ADB\" -s \"$SERIAL\" shell getprop ro.product.model | tr -d '\\r')\"; test \"$MODEL\" = \"SM-S906B\" -o \"$MODEL\" = \"SM_S906B\"; DUMP=\"$(\"$ADB\" -s \"$SERIAL\" shell dumpsys package \"$PACKAGE\" | tr -d '\\r')\"; printf '%s\\n' \"$DUMP\" | grep -q 'versionName=2.0.10'; printf '%s\\n' \"$DUMP\" | grep -q 'versionCode=20010'; \"$ADB\" -s \"$SERIAL\" shell am force-stop \"$PACKAGE\"; \"$ADB\" -s \"$SERIAL\" logcat -c; \"$ADB\" -s \"$SERIAL\" shell am start -W -n \"$PACKAGE/.MainActivity\"; sleep 3; PID=\"$(\"$ADB\" -s \"$SERIAL\" shell pidof \"$PACKAGE\" | tr -d '\\r')\"; test -n \"$PID\"; ACT=\"$(\"$ADB\" -s \"$SERIAL\" shell dumpsys activity activities | tr -d '\\r')\"; printf '%s\\n' \"$ACT\" | grep -E 'topResumedActivity|mResumedActivity|ResumedActivity' | grep -m1 \"$PACKAGE\" >/dev/null || printf '%s\\n' \"$ACT\" | grep -m1 \"$PACKAGE/.MainActivity\" >/dev/null; if \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief | grep -E 'FATAL EXCEPTION|AndroidRuntime:.*FATAL|Process: link.localclimate.app.*has died'; then echo 'phone smoke found fatal process error' >&2; exit 1; fi; echo PHONE_SMOKE_PID=$PID MODEL=$MODEL VERSION=2.0.10 CODE=20010",
+    "set +e; SHELLY_URL=http://192.168.0.16 XIAOMI_MAC=A4:C1:38:4F:24:CD TP357_MAC=F7:5F:8D:0F:76:20 SENSOR_FILTER=all VPD_OPTIONS=both pnpm hardware:shelly:matrix; MATRIX_RC=$?; BASE=http://192.168.0.16; curl -fsS --max-time 8 \"$BASE/rpc/Switch.Set?id=0&on=false\" -o /tmp/lcl-final-off-v2.json; OFF_RC=$?; curl -fsS --max-time 8 \"$BASE/rpc/Switch.GetStatus?id=0\" -o /tmp/lcl-final-switch-v2.json; STATUS_RC=$?; curl -fsS --max-time 8 \"$BASE/rpc/Script.List\" -o /tmp/lcl-final-scripts-v2.json; SCRIPTS_RC=$?; if [ $OFF_RC -ne 0 ] || [ $STATUS_RC -ne 0 ] || [ $SCRIPTS_RC -ne 0 ]; then echo 'final Shelly cleanup RPC failed' >&2; exit 1; fi; python3 -c 'import json; from pathlib import Path; sw=json.loads(Path(\"/tmp/lcl-final-switch-v2.json\").read_text()); ss=json.loads(Path(\"/tmp/lcl-final-scripts-v2.json\").read_text()); assert sw.get(\"output\") is False, sw; scripts=ss.get(\"scripts\",[]) if isinstance(ss,dict) else ss; managed=[s for s in scripts if s.get(\"name\")==\"Local Climate Link Thermostat\"]; assert all(s.get(\"running\") is not True for s in managed), managed; print(\"FINAL_RELAY_OFF=true\"); print(\"FINAL_MANAGED_RUNNING=0\"); print(\"FINAL_MANAGED_SCRIPT_COUNT=\"+str(len(managed)))'; CLEAN_RC=$?; if [ $CLEAN_RC -ne 0 ]; then exit $CLEAN_RC; fi; exit $MATRIX_RC",
+    "set -e; test -z \"$(git status --porcelain)\"; git diff --check; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; echo VERIFIED_FINAL_SHA=$(git rev-parse HEAD)"
+  ]
+}
