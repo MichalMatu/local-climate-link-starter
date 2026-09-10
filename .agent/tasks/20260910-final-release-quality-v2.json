@@ -1,0 +1,19 @@
+{
+  "id": "20260910-final-release-quality-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 3600,
+  "idle_timeout": 600,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; BASE=408f4e49170b0d5919c812a5fdbd3cf3eb4183f0; git fetch --prune origin; git checkout -B work/final-quality-audit-20260910 origin/work/final-quality-audit-20260910; git reset --hard $BASE; git clean -fd; test \"$(git rev-parse HEAD)\" = \"$BASE\"; test -z \"$(git status --porcelain)\"; echo FINAL_AUDIT_START_SHA=$(git rev-parse HEAD)",
+    "set -e; pnpm tokens:build; test -z \"$(git status --porcelain)\"; RAW_SVG=$(git grep -n '<svg' -- apps/mobile/src | grep '.tsx:' | grep -v '/__tests__/' || true); test -z \"$RAW_SVG\"; INLINE=$(git grep -n 'style={{' -- apps/mobile/src | grep '.tsx:' | grep -v '/__tests__/' || true); test -z \"$INLINE\"; MARKERS=$(git grep -n -E 'TODO|FIXME|HACK|@ts-ignore|eslint-disable|console[.](log|debug)|as any' -- apps/mobile/src packages ':!**/dist/**' || true); test -z \"$MARKERS\"; echo '=== LARGEST_MOBILE_SOURCES ==='; find apps/mobile/src -type f | grep -E '[.]tsx?$' | grep -v '/__tests__/' | xargs wc -l | sort -nr | head -12; echo TOKEN_AND_HYGIENE_AUDIT_OK",
+    "set -e; pnpm check:full; test -z \"$(git status --porcelain)\"; echo CHECK_FULL_OK",
+    "set -e; SERIAL=RFCT70L7E8J; test \"$(adb -s $SERIAL get-state)\" = device; test \"$(adb -s $SERIAL shell getprop ro.product.model | xargs)\" = SM-S906B; pnpm --filter @lcl/mobile exec cap sync android; (cd apps/mobile/android && ./gradlew assembleDebug); APK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; test -f $APK; adb -s $SERIAL install -r $APK | tee /tmp/lcl-final-install.log; grep -q Success /tmp/lcl-final-install.log; adb -s $SERIAL shell am force-stop link.localclimate.app; adb -s $SERIAL shell am start -n link.localclimate.app/.MainActivity; sleep 3; PID=$(adb -s $SERIAL shell pidof link.localclimate.app | xargs); test -n \"$PID\"; adb -s $SERIAL forward --remove tcp:9222 >/dev/null 2>&1 || true; adb -s $SERIAL forward tcp:9222 localabstract:webview_devtools_remote_$PID; curl --fail --silent --show-error http://127.0.0.1:9222/json > /tmp/lcl-final-pages.json; git show origin/agent-control:.agent/scripts/cdp-settings-page-v1-audit.mjs > /tmp/cdp-settings-page-v1-audit.mjs; node /tmp/cdp-settings-page-v1-audit.mjs /tmp/lcl-final-pages.json; adb -s $SERIAL forward --remove tcp:9222; echo PHYSICAL_S22_FINAL_SMOKE_OK",
+    "set -e; git reset --hard 408f4e49170b0d5919c812a5fdbd3cf3eb4183f0; git clean -fd; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/final-quality-audit-20260910)\"; echo FINAL_RELEASE_QUALITY_SHA=$(git rev-parse HEAD)"
+  ]
+}
