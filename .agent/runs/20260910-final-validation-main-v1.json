@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-final-validation-main-v1",
+  "task_digest": "f2a5d558d76d064ae4c7623e6fc080a5d927f158d015aceba296474ff015f2f8",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T03:49:44.959214+00:00",
+  "attempt_id": "be3dd90385552924adf9b0cf",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 31387,
+  "updated_at": "2026-09-10T03:49:44.959286+00:00",
+  "pid": 31387
+}
