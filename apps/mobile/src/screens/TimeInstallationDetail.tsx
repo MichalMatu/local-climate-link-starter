@@ -8,6 +8,7 @@ import {
 } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import { dailyTimeAutomationConfigSchema } from '../flows/time-automation/config.js';
@@ -169,11 +170,18 @@ export const TimeInstallationDetail = ({
           <button className="detail-back-link" type="button" onClick={onBack}>
             ← {t('detail.backToDashboard')}
           </button>
-          <p className="automation-card__eyebrow">{t('time.family')}</p>
+          <div className="automation-status-row">
+            <span className={healthClass(runtimeState)}>{stateLabel}</span>
+            <span className="automation-status-mode">{t('time.family')}</span>
+          </div>
           <h1>{installation.shelly.name}</h1>
           <p>{t('time.detail.description')}</p>
         </div>
-        <span className={healthClass(runtimeState)}>{stateLabel}</span>
+        <RefreshIconButton
+          busy={runtimeQuery.isFetching}
+          label={t('common.refresh')}
+          onRefresh={() => void runtimeQuery.refetch()}
+        />
       </header>
 
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
@@ -183,14 +191,6 @@ export const TimeInstallationDetail = ({
               <p className="automation-card__eyebrow">{t('detail.currentState')}</p>
               <h2>{t('time.scheduleSummary')}</h2>
             </div>
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={runtimeQuery.isFetching}
-              onClick={() => void runtimeQuery.refetch()}
-            >
-              {t('common.refresh')}
-            </button>
           </div>
 
           <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
