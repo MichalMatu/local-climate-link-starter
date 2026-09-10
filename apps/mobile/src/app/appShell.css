@@ -1,0 +1,39 @@
+.app-shell {
+  position: relative;
+}
+
+.app-shell > .demo-shell {
+  padding-top: calc(
+    var(--lcl-fluid-shell-padding) + var(--lcl-size-control-min-height) + var(--lcl-spacing-sm)
+  );
+}
+
+.app-settings-trigger {
+  align-items: center;
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  box-shadow: var(--lcl-shadow-md);
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  display: inline-flex;
+  height: var(--lcl-size-control-min-height);
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: var(--lcl-fluid-shell-padding);
+  top: var(--lcl-fluid-shell-padding);
+  width: var(--lcl-size-control-min-height);
+  z-index: 20;
+}
+
+.app-settings-trigger:hover,
+.app-settings-trigger:focus-visible {
+  border-color: var(--lcl-color-accent);
+  color: var(--lcl-color-accent);
+}
+
+.app-settings-trigger__icon {
+  height: var(--lcl-size-icon-sm);
+  width: var(--lcl-size-icon-sm);
+}
