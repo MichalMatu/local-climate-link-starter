@@ -24,5 +24,7 @@ export const useTimeAutomationRuntime = (
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: 30_000,
-    refetchOnWindowFocus: false
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });

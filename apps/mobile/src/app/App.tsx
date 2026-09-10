@@ -46,7 +46,7 @@ const AppContent = () => {
         >
           <SettingsIcon />
         </button>
-        <AppRoutes />
+        <AppRoutes onOpenSettings={() => setSettingsOpen(true)} />
       </div>
 
       <AppSettingsModal

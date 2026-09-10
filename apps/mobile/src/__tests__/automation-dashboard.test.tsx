@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
@@ -169,19 +169,26 @@ const installTimeShellyFetchMock = () => {
   return fetchMock;
 };
 
-const renderDashboard = (onAddAutomation = vi.fn(), onOpenInstallation = vi.fn()) => {
+const renderDashboard = (
+  onAddAutomation = vi.fn(),
+  onOpenInstallation = vi.fn(),
+  onOpenSettings = vi.fn()
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
   });
   return {
     onAddAutomation,
     onOpenInstallation,
+    onOpenSettings,
+    queryClient,
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AutomationDashboardScreen
             onAddAutomation={onAddAutomation}
             onOpenInstallation={onOpenInstallation}
+            onOpenSettings={onOpenSettings}
           />
         </QueryClientProvider>
       </I18nProvider>
@@ -225,14 +232,19 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('1.31 kPa')).toBeVisible();
     expect(screen.getByText('Salon')).toBeVisible();
     expect(screen.getByText('Xiaomi salon')).toBeVisible();
-    expect(await screen.findByText('Działa')).toBeVisible();
+    expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
-    expect(screen.getByRole('tab', { name: 'Klimat' })).toHaveAttribute(
-      'aria-selected',
-      'true'
+    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+      'aria-current',
+      'page'
     );
-    expect(screen.getByRole('tab', { name: 'Czas' })).toBeDisabled();
+    const timeNav = screen.getByRole('button', { name: 'Czas' });
+    expect(timeNav).toBeEnabled();
+    fireEvent.click(timeNav);
+    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Klimat' }));
+    expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
   });
 
@@ -251,11 +263,15 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
-    expect(screen.getByRole('tab', { name: 'Czas' })).toHaveAttribute(
-      'aria-selected',
-      'true'
+    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
+      'aria-current',
+      'page'
     );
-    expect(screen.getByRole('tab', { name: 'Klimat' })).toBeDisabled();
+    const climateNav = screen.getByRole('button', { name: 'Klimat' });
+    expect(climateNav).toBeEnabled();
+    fireEvent.click(climateNav);
+    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
     expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);
@@ -277,7 +293,7 @@ describe('AutomationDashboardScreen', () => {
     expect(await screen.findByText('Dane nieaktualne')).toBeVisible();
   });
 
-  it('uses effective runtime thresholds and recovers after a manual refresh', async () => {
+  it('uses effective runtime thresholds and recovers without a manual refresh control', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
     let diagnosticAttempts = 0;
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -301,12 +317,15 @@ describe('AutomationDashboardScreen', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    renderDashboard();
+    const { queryClient } = renderDashboard();
 
     expect(await screen.findByText('Wymaga uwagi')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Odśwież' }));
+    expect(screen.queryByRole('button', { name: 'Odśwież' })).toBeNull();
+    await queryClient.refetchQueries({
+      predicate: (query) => query.queryKey[0] === 'installed-automation-diagnostics'
+    });
 
-    expect(await screen.findByText('Działa')).toBeVisible();
+    await waitFor(() => expect(screen.queryByText('Wymaga uwagi')).toBeNull());
     expect(screen.getByText('19.25°C / 19.75°C')).toBeVisible();
     expect(diagnosticAttempts).toBe(2);
   });

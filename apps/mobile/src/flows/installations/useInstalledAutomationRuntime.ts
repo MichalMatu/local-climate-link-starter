@@ -40,7 +40,9 @@ export const useInstalledAutomationDiagnostics = (
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: 30_000,
-    refetchOnWindowFocus: false
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });
 
 export const useInstalledAutomationControl = (
@@ -53,7 +55,9 @@ export const useInstalledAutomationControl = (
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: 30_000,
-    refetchOnWindowFocus: false
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });
 
 export type InstalledAutomationControlAction = 'auto' | 'manual' | 'on' | 'off';

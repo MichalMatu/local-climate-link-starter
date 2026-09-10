@@ -97,9 +97,11 @@ export const pl = {
     title: 'Twoje automatyki',
     climateTab: 'Klimat',
     timeTab: 'Czas',
+    settingsTab: 'Ustawienia',
     description: 'Podgląd tego, co aktualnie widzi i robi każde Shelly.',
     addAutomation: 'Dodaj automatykę',
     emptyTitle: 'Nie masz jeszcze zapisanej automatyki',
+    emptyCategory: 'Brak automatyzacji',
     emptyDescription:
       'Skonfiguruj pierwszy system, aby zobaczyć tutaj jego bieżący stan.',
     configureFirst: 'Skonfiguruj pierwszy system',

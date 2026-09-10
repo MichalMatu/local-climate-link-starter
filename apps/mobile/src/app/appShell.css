@@ -7,10 +7,7 @@
 }
 
 .app-shell > .dashboard-shell > .dashboard-header {
-  padding-right: calc(
-    var(--lcl-size-control-min-height) + var(--lcl-size-control-min-height) +
-      var(--lcl-spacing-sm) + var(--lcl-spacing-sm)
-  );
+  padding-right: 0;
 }
 
 .app-settings-trigger {
@@ -30,6 +27,10 @@
   top: var(--lcl-fluid-shell-padding);
   width: var(--lcl-size-control-min-height);
   z-index: var(--lcl-z-index-header);
+}
+
+.app-shell:has(> .dashboard-shell) > .app-settings-trigger {
+  display: none;
 }
 
 .app-settings-trigger:hover,

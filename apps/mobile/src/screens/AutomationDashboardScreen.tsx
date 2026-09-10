@@ -1,4 +1,6 @@
-import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import type {
   ClimateInstalledAutomation,
@@ -9,7 +11,6 @@ import { installedAutomationHealth } from '../flows/installations/runtimeDiagnos
 import {
   formatInstallationMetric,
   installationHealthLabel,
-  INSTALLATION_MODE_KEYS,
   installationThresholdSummary
 } from '../flows/installations/presentation.js';
 import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
@@ -19,8 +20,75 @@ import {
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
-import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
+import './AutomationDashboardScreen.css';
+
+type IconProps = { className?: string };
+
+const ThermometerIcon = ({ className }: IconProps) => (
+  <svg
+    aria-hidden="true"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4 4 0 1 1-4 0Z" />
+    <path d="M12 9v6" />
+  </svg>
+);
+
+const ClockIcon = ({ className }: IconProps) => (
+  <svg
+    aria-hidden="true"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="8" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+
+const SettingsIcon = ({ className }: IconProps) => (
+  <svg
+    aria-hidden="true"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.55v-.1a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 3.75 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2V9.55h.05a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.86-2.86.06.06A1.7 1.7 0 0 0 8.15 3.75a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4.05v.05a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4H21v4.05h-.1a1.7 1.7 0 0 0-1.1.4 1.7 1.7 0 0 0-.4 1Z" />
+  </svg>
+);
+
+const DotsIcon = ({ className }: IconProps) => (
+  <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="5" r="1.5" />
+    <circle cx="12" cy="12" r="1.5" />
+    <circle cx="12" cy="19" r="1.5" />
+  </svg>
+);
+
+const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
+  const root = query.queryKey[0];
+  return (
+    root === 'installed-automation-diagnostics' ||
+    root === 'installed-automation-control' ||
+    root === 'time-automation-runtime'
+  );
+};
 
 type AutomationCardProps = {
   installation: InstalledAutomation;
@@ -46,55 +114,72 @@ const ClimateAutomationCard = ({
     ? installedAutomationScriptMatch(installation, controlStatus)
     : null;
   const controlsVerified = controlMatch === 'matched';
+  const automationRunning = controlsVerified && controlStatus?.automationMode === 'auto';
   const manualControl = controlsVerified && controlStatus?.automationMode === 'manual';
   const relayState =
     controlStatus?.relayOn ??
     snapshot?.plug?.relayState ??
     snapshot?.diagnostics.relayState;
+  const purposeLabel =
+    installation.config.rule.control.metric === 'humidity'
+      ? t('intent.humidity.context')
+      : t('intent.temperature.context');
+
+  let warningLabel: string | null = null;
+  let warningClass = 'attention';
+  if (controlMatch !== null && controlMatch !== 'matched') {
+    warningLabel = t('dashboard.health.attention');
+  } else if (query.isError && control.isError) {
+    warningLabel = t('dashboard.health.offline');
+    warningClass = 'offline';
+  } else if (health !== null && health !== 'ok') {
+    warningLabel = installationHealthLabel(health, t);
+    warningClass = health;
+  } else if (query.isError || control.isError) {
+    warningLabel = t('dashboard.health.attention');
+  }
 
   return (
-    <article className="automation-card">
+    <article className="automation-card automation-card--climate">
       <header className="automation-card__header">
+        <span
+          className={`automation-card__leading-icon${
+            automationRunning ? ' automation-card__leading-icon--active' : ''
+          }`}
+        >
+          <ThermometerIcon className="automation-card__leading-icon-svg" />
+        </span>
         <div className="automation-card__identity">
-          <div className="automation-status-row">
-            {controlsVerified && controlStatus?.automationMode === 'manual' ? (
-              <span className="automation-health automation-health--paused">
-                {t('dashboard.health.paused')}
-              </span>
-            ) : controlMatch !== null && controlMatch !== 'matched' ? (
-              <span className="automation-health automation-health--attention">
-                {t('dashboard.health.attention')}
-              </span>
-            ) : query.isError ? (
-              control.isPending ? (
-                <span className="automation-health automation-health--unknown">
-                  {t('dashboard.health.loading')}
-                </span>
-              ) : control.isError ? (
-                <span className="automation-health automation-health--offline">
-                  {t('dashboard.health.offline')}
-                </span>
-              ) : (
-                <span className="automation-health automation-health--attention">
-                  {t('dashboard.health.attention')}
-                </span>
-              )
-            ) : query.isPending ? (
-              <span className="automation-health automation-health--unknown">
-                {t('dashboard.health.loading')}
-              </span>
-            ) : (
-              <span
-                className={`automation-health automation-health--${health ?? 'unknown'}`}
-              >
-                {installationHealthLabel(health ?? 'unknown', t)}
-              </span>
-            )}
-            <span className="automation-status-mode">
-              {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
-            </span>
-          </div>
           <h2>{installation.shelly.name}</h2>
+          <p className="automation-card__purpose">{purposeLabel}</p>
+          {warningLabel && (
+            <span className={`automation-health automation-health--${warningClass}`}>
+              {warningLabel}
+            </span>
+          )}
+        </div>
+        <div className="automation-card__header-actions">
+          <button
+            className="automation-master-switch"
+            type="button"
+            role="switch"
+            aria-checked={automationRunning}
+            aria-label={automationRunning ? t('detail.pause') : t('detail.resume')}
+            title={automationRunning ? t('detail.pause') : t('detail.resume')}
+            disabled={action.isPending || !controlsVerified}
+            onClick={() => action.mutate(automationRunning ? 'manual' : 'auto')}
+          >
+            <span className="automation-master-switch__thumb" />
+          </button>
+          <button
+            className="automation-card__menu"
+            type="button"
+            aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name}`}
+            title={t('dashboard.openSystem')}
+            onClick={() => onOpen(installation.id)}
+          >
+            <DotsIcon className="automation-card__menu-icon" />
+          </button>
         </div>
       </header>
 
@@ -146,7 +231,7 @@ const ClimateAutomationCard = ({
             <button
               className="automation-control-button"
               type="button"
-              aria-pressed={controlsVerified && controlStatus?.automationMode === 'auto'}
+              aria-pressed={automationRunning}
               disabled={action.isPending || !controlsVerified}
               onClick={() => {
                 if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
@@ -223,11 +308,13 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
 type AutomationDashboardScreenProps = {
   onAddAutomation(): void;
   onOpenInstallation(installationId: string): void;
+  onOpenSettings?: () => void;
 };
 
 export const AutomationDashboardScreen = ({
   onAddAutomation,
-  onOpenInstallation
+  onOpenInstallation,
+  onOpenSettings
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
@@ -235,29 +322,32 @@ export const AutomationDashboardScreen = ({
   const hasClimate = installations.some((installation) => installation.kind !== 'time');
   const hasTime = installations.some((installation) => installation.kind === 'time');
   const [activeKind, setActiveKind] = useState<'climate' | 'time'>(() =>
-    hasClimate ? 'climate' : 'time'
+    hasTime && !hasClimate ? 'time' : 'climate'
   );
 
   useEffect(() => {
-    if (activeKind === 'climate' && !hasClimate && hasTime) {
-      setActiveKind('time');
-    } else if (activeKind === 'time' && !hasTime && hasClimate) {
-      setActiveKind('climate');
-    }
-  }, [activeKind, hasClimate, hasTime]);
+    if (Capacitor.getPlatform() === 'web') return;
 
-  const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
-    const root = query.queryKey[0];
-    return (
-      root === 'installed-automation-diagnostics' ||
-      root === 'installed-automation-control' ||
-      root === 'time-automation-runtime'
-    );
-  };
-  const activeRefreshes = useIsFetching({ predicate: isDashboardRuntimeQuery });
-  const refreshAll = () => {
-    void queryClient.refetchQueries({ predicate: isDashboardRuntimeQuery });
-  };
+    let active = true;
+    let removeListener: (() => Promise<void>) | undefined;
+    void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) {
+        void queryClient.refetchQueries({ predicate: isDashboardRuntimeQuery });
+      }
+    }).then((handle) => {
+      if (!active) {
+        void handle.remove();
+        return;
+      }
+      removeListener = () => handle.remove();
+    });
+
+    return () => {
+      active = false;
+      if (removeListener) void removeListener();
+    };
+  }, [queryClient]);
+
   const visibleInstallations = installations.filter((installation) =>
     activeKind === 'time' ? installation.kind === 'time' : installation.kind !== 'time'
   );
@@ -268,49 +358,29 @@ export const AutomationDashboardScreen = ({
         <div>
           <h1>{t('dashboard.title')}</h1>
         </div>
-        <RefreshIconButton
-          busy={activeRefreshes > 0}
-          className="dashboard-refresh-action"
-          label={t('common.refresh')}
-          onRefresh={refreshAll}
-        />
       </header>
 
-      <div
-        className="dashboard-kind-tabs"
-        role="tablist"
-        aria-label={t('dashboard.systemsLabel')}
-      >
-        <button
-          className="dashboard-kind-tab"
-          type="button"
-          role="tab"
-          aria-selected={activeKind === 'climate'}
-          disabled={!hasClimate}
-          onClick={() => setActiveKind('climate')}
-        >
-          {t('dashboard.climateTab')}
-        </button>
-        <button
-          className="dashboard-kind-tab"
-          type="button"
-          role="tab"
-          aria-selected={activeKind === 'time'}
-          disabled={!hasTime}
-          onClick={() => setActiveKind('time')}
-        >
-          {t('dashboard.timeTab')}
-        </button>
-      </div>
-
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
-        {visibleInstallations.map((installation) => (
-          <AutomationCard
-            key={installation.id}
-            installation={installation}
-            onOpen={onOpenInstallation}
-          />
-        ))}
+        {visibleInstallations.length > 0 ? (
+          visibleInstallations.map((installation) => (
+            <AutomationCard
+              key={installation.id}
+              installation={installation}
+              onOpen={onOpenInstallation}
+            />
+          ))
+        ) : (
+          <div className="dashboard-kind-empty" role="status">
+            <span className="dashboard-kind-empty__icon">
+              {activeKind === 'time' ? (
+                <ClockIcon className="dashboard-nav__icon" />
+              ) : (
+                <ThermometerIcon className="dashboard-nav__icon" />
+              )}
+            </span>
+            <strong>{t('dashboard.emptyCategory')}</strong>
+          </div>
+        )}
       </section>
 
       <button
@@ -324,6 +394,38 @@ export const AutomationDashboardScreen = ({
           <path d="M12 5v14M5 12h14" />
         </svg>
       </button>
+
+      <nav className="dashboard-bottom-nav" aria-label={t('dashboard.systemsLabel')}>
+        <button
+          className="dashboard-bottom-nav__item"
+          type="button"
+          data-dashboard-kind="climate"
+          aria-current={activeKind === 'climate' ? 'page' : undefined}
+          onClick={() => setActiveKind('climate')}
+        >
+          <ThermometerIcon className="dashboard-nav__icon" />
+          <span>{t('dashboard.climateTab')}</span>
+        </button>
+        <button
+          className="dashboard-bottom-nav__item"
+          type="button"
+          data-dashboard-kind="time"
+          aria-current={activeKind === 'time' ? 'page' : undefined}
+          onClick={() => setActiveKind('time')}
+        >
+          <ClockIcon className="dashboard-nav__icon" />
+          <span>{t('dashboard.timeTab')}</span>
+        </button>
+        <button
+          className="dashboard-bottom-nav__item"
+          type="button"
+          aria-haspopup="dialog"
+          onClick={() => onOpenSettings?.()}
+        >
+          <SettingsIcon className="dashboard-nav__icon" />
+          <span>{t('dashboard.settingsTab')}</span>
+        </button>
+      </nav>
     </main>
   );
 };

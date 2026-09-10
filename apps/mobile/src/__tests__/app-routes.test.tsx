@@ -13,8 +13,10 @@ import type { SetupIntent } from '../flows/setup-intent.js';
 const nativeAppMocks = vi.hoisted(() => {
   let backListener: (() => void) | undefined;
   const removeListener = vi.fn(async () => undefined);
-  const addListener = vi.fn(async (_eventName: string, listener: () => void) => {
-    backListener = listener;
+  const addListener = vi.fn(async (eventName: string, listener: () => void) => {
+    if (eventName === 'backButton') {
+      backListener = listener;
+    }
     return { remove: removeListener };
   });
   return {
@@ -121,7 +123,12 @@ describe('AppRoutes user intent entry', () => {
   it('returns from Android setup to the goal and exits only at the root', async () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
     const view = renderRoutes();
-    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(nativeAppMocks.addListener).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function)
+      )
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
@@ -154,7 +161,12 @@ describe('AppRoutes user intent entry', () => {
     useInstalledAutomationStore.getState().upsertInstallation(installation);
 
     renderRoutes();
-    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(nativeAppMocks.addListener).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function)
+      )
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
 
@@ -168,7 +180,12 @@ describe('AppRoutes user intent entry', () => {
   it('keeps zero-installation Android state on the canonical goal screen', async () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
     renderRoutes();
-    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(nativeAppMocks.addListener).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function)
+      )
+    );
 
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     expect(

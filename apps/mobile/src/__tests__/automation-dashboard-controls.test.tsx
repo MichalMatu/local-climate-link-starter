@@ -84,14 +84,19 @@ describe('AutomationDashboardScreen controls', () => {
       </I18nProvider>
     );
 
+    const master = screen.getByRole('switch', { name: 'Wznów automatykę' });
     const manual = screen.getByRole('button', { name: 'MANUAL' });
     const auto = screen.getByRole('button', { name: 'AUTO' });
     const on = screen.getByRole('button', { name: 'ON' });
     const off = screen.getByRole('button', { name: 'OFF' });
 
+    expect(master).toHaveAttribute('aria-checked', 'false');
     expect(manual).toHaveAttribute('aria-pressed', 'true');
     expect(off).toHaveAttribute('aria-pressed', 'true');
     expect(on).toBeEnabled();
+
+    fireEvent.click(master);
+    expect(runtimeMocks.mutate).toHaveBeenCalledWith('auto');
 
     fireEvent.click(auto);
     expect(runtimeMocks.mutate).toHaveBeenCalledWith('auto');

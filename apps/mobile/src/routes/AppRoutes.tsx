@@ -51,7 +51,11 @@ const resolveAndroidBackRoute = (
   return null;
 };
 
-export const AppRoutes = () => {
+type AppRoutesProps = {
+  onOpenSettings?: () => void;
+};
+
+export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
   const installations = useInstalledAutomationStore((state) => state.installations);
   const [route, setRoute] = useState<AppRoute>(() =>
     installations.length > 0 ? { type: 'dashboard' } : { type: 'intent' }
@@ -136,6 +140,7 @@ export const AppRoutes = () => {
         onOpenInstallation={(installationId) =>
           navigate({ type: 'installation', installationId })
         }
+        {...(onOpenSettings ? { onOpenSettings } : {})}
       />
     );
   }

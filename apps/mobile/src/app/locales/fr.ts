@@ -101,9 +101,11 @@ export const fr = {
     title: 'Vos automatisations',
     climateTab: 'Climat',
     timeTab: 'Temps',
+    settingsTab: 'Réglages',
     description: 'Voyez ce que chaque Shelly mesure et fait actuellement.',
     addAutomation: 'Ajouter une automatisation',
     emptyTitle: 'Aucune automatisation enregistrée',
+    emptyCategory: 'Aucune automatisation',
     emptyDescription:
       'Configurez votre premier système pour voir ici son état en direct.',
     configureFirst: 'Configurer le premier système',

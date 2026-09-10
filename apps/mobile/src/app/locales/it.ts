@@ -99,9 +99,11 @@ export const it = {
     title: 'Le tue automazioni',
     climateTab: 'Clima',
     timeTab: 'Tempo',
+    settingsTab: 'Impostazioni',
     description: 'Guarda cosa vede e fa attualmente ogni Shelly.',
     addAutomation: 'Aggiungi automazione',
     emptyTitle: 'Nessuna automazione salvata',
+    emptyCategory: 'Nessuna automazione',
     emptyDescription:
       'Configura il primo sistema per vedere qui lo stato in tempo reale.',
     configureFirst: 'Configura il primo sistema',
