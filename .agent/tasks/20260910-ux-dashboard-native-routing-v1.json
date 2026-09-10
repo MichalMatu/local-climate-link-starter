@@ -1,0 +1,18 @@
+{
+  "id": "20260910-ux-dashboard-native-routing-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/ux-dashboard-target-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune origin; git checkout -B work/ux-dashboard-target-20260910 origin/work/ux-dashboard-target-20260910; test \"$(git rev-parse HEAD)\" = \"97e0ed9374bb0bac9ed50075adce9c9e7a68de83\"; test -z \"$(git status --porcelain)\"; echo START_SHA=$(git rev-parse HEAD)",
+    "set -e; git cherry-pick 731b740f8793c45c3dc8597ef8708627dee6ac04; git diff HEAD^ -- apps/mobile/src/routes/AppRoutes.tsx; git diff --check",
+    "set -e; pnpm --filter @lcl/mobile lint; pnpm --filter @lcl/mobile typecheck; pnpm --filter @lcl/mobile test",
+    "set -e; HUSKY=0 git push origin HEAD:work/ux-dashboard-target-20260910; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-dashboard-target-20260910)\"; echo NATIVE_ROUTING_SHA=$(git rev-parse HEAD)"
+  ]
+}
