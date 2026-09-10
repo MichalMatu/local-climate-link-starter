@@ -52,15 +52,20 @@ vi.mock(import('@capacitor/core'), async (importOriginal) => {
 vi.mock('../screens/InstallationDetailScreen.js', () => ({
   InstallationDetailScreen: ({
     installationId,
-    onBack
+    onBack,
+    onNavigateDashboard
   }: {
     installationId: string;
     onBack: () => void;
+    onNavigateDashboard?: (kind: 'climate' | 'time') => void;
   }) => (
     <section>
       <p>{`mock-installation-${installationId}`}</p>
       <button type="button" onClick={onBack}>
         mock-dashboard-back
+      </button>
+      <button type="button" onClick={() => onNavigateDashboard?.('time')}>
+        mock-dashboard-time
       </button>
     </section>
   )
@@ -235,6 +240,16 @@ describe('AppRoutes user intent entry', () => {
 
     renderRoutes();
 
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-time' }));
+    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Klimat' }));
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
 

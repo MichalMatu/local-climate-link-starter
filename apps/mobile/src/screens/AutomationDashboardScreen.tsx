@@ -5,12 +5,15 @@ import {
   IconClock,
   IconDotsVertical,
   IconPlus,
-  IconSettings,
   IconTemperature
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import {
+  AppBottomNavigation,
+  type AppNavigationKind
+} from '../components/AppBottomNavigation.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -254,12 +257,14 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
   );
 
 type AutomationDashboardScreenProps = {
+  initialKind?: AppNavigationKind;
   onAddAutomation(): void;
   onOpenInstallation(installationId: string): void;
   onOpenSettings?: () => void;
 };
 
 export const AutomationDashboardScreen = ({
+  initialKind,
   onAddAutomation,
   onOpenInstallation,
   onOpenSettings
@@ -269,8 +274,8 @@ export const AutomationDashboardScreen = ({
   const queryClient = useQueryClient();
   const hasClimate = installations.some((installation) => installation.kind !== 'time');
   const hasTime = installations.some((installation) => installation.kind === 'time');
-  const [activeKind, setActiveKind] = useState<'climate' | 'time'>(() =>
-    hasTime && !hasClimate ? 'time' : 'climate'
+  const [activeKind, setActiveKind] = useState<AppNavigationKind>(
+    () => initialKind ?? (hasTime && !hasClimate ? 'time' : 'climate')
   );
 
   useEffect(() => {
@@ -301,7 +306,7 @@ export const AutomationDashboardScreen = ({
   );
 
   return (
-    <main className="demo-shell dashboard-shell">
+    <main className="demo-shell dashboard-shell app-bottom-nav-shell">
       <header className="demo-header dashboard-header">
         <h1>{t('dashboard.title')}</h1>
       </header>
@@ -340,38 +345,12 @@ export const AutomationDashboardScreen = ({
         <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
       </button>
 
-      <nav className="dashboard-bottom-nav" aria-label={t('dashboard.systemsLabel')}>
-        <button
-          className="dashboard-bottom-nav__item"
-          type="button"
-          data-dashboard-kind="climate"
-          aria-current={activeKind === 'climate' ? 'page' : undefined}
-          onClick={() => setActiveKind('climate')}
-        >
-          <IconTemperature className="dashboard-nav__icon" aria-hidden="true" />
-          <span>{t('dashboard.climateTab')}</span>
-        </button>
-        <button
-          className="dashboard-bottom-nav__item"
-          type="button"
-          data-dashboard-kind="time"
-          aria-current={activeKind === 'time' ? 'page' : undefined}
-          onClick={() => setActiveKind('time')}
-        >
-          <IconClock className="dashboard-nav__icon" aria-hidden="true" />
-          <span>{t('dashboard.timeTab')}</span>
-        </button>
-        <button
-          className="dashboard-bottom-nav__item"
-          type="button"
-          aria-haspopup="dialog"
-          disabled={!onOpenSettings}
-          onClick={() => onOpenSettings?.()}
-        >
-          <IconSettings className="dashboard-nav__icon" aria-hidden="true" />
-          <span>{t('dashboard.settingsTab')}</span>
-        </button>
-      </nav>
+      <AppBottomNavigation
+        activeKind={activeKind}
+        onOpenClimate={() => setActiveKind('climate')}
+        onOpenTime={() => setActiveKind('time')}
+        {...(onOpenSettings ? { onOpenSettings } : {})}
+      />
     </main>
   );
 };

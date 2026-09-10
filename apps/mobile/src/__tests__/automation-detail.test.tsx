@@ -1,5 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import type { ShellyScheduleJob } from '@lcl/shelly-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -299,16 +306,28 @@ const installTimeShellyFetchMock = () => {
   };
 };
 
-const renderDetail = (installationId: string, onBack = vi.fn()) => {
+const renderDetail = (
+  installationId: string,
+  onBack = vi.fn(),
+  onNavigateDashboard = vi.fn(),
+  onOpenSettings = vi.fn()
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
   return {
     onBack,
+    onNavigateDashboard,
+    onOpenSettings,
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <InstallationDetailScreen installationId={installationId} onBack={onBack} />
+          <InstallationDetailScreen
+            installationId={installationId}
+            onBack={onBack}
+            onNavigateDashboard={onNavigateDashboard}
+            onOpenSettings={onOpenSettings}
+          />
         </QueryClientProvider>
       </I18nProvider>
     )
@@ -339,18 +358,31 @@ describe('InstallationDetailScreen', () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
+    const { onBack, onNavigateDashboard, onOpenSettings } = renderDetail(saved.id);
 
-    renderDetail(saved.id);
-
-    expect(await screen.findByText('Działa')).toBeVisible();
+    expect(await screen.findByText('21.4°C')).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
-    expect(screen.getByText('21.4°C')).toBeVisible();
+    expect(screen.getByText('Sterowanie temperaturą')).toBeVisible();
     expect(screen.getByText('55.2%')).toBeVisible();
     expect(screen.getByText('1.31 kPa')).toBeVisible();
     expect(screen.getAllByText('19°C / 20°C').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Przedpokój')).toBeVisible();
+    expect(
+      document.querySelector('.installation-detail-header .detail-back-link')
+    ).toBeNull();
+    expect(
+      document.querySelector('.installation-detail-header .runtime-refresh-action')
+    ).toBeNull();
+    expect(document.querySelector('.app-bottom-nav')).not.toBeNull();
+    expect(
+      document.querySelectorAll('.installation-detail-shell svg:not(.tabler-icon)')
+    ).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Wstrzymaj automatykę' }));
+    const auto = screen.getByRole('button', { name: 'AUTO' });
+    const manual = screen.getByRole('button', { name: 'MANUAL' });
+    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
+
+    fireEvent.click(manual);
 
     const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
     expect(
@@ -358,17 +390,22 @@ describe('InstallationDetailScreen', () => {
         'Automatyka zatrzymana, wyjście potwierdzone jako OFF.'
       )
     ).toBeVisible();
-    expect(await screen.findByText('Wstrzymana')).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Skrypt zatrzymany' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Uruchom automatykę' })).toBeVisible();
+    await waitFor(() => expect(manual).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.queryByRole('heading', { name: 'Skrypt zatrzymany' })).toBeNull();
     expect(rpcMethods).toContain('Script.Stop');
     expect(rpcMethods).toContain('Switch.Set');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Uruchom automatykę' }));
+    fireEvent.click(auto);
 
     expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
-    expect(await screen.findByText('Działa')).toBeVisible();
+    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
     expect(rpcMethods).toContain('Script.Start');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
+    expect(onNavigateDashboard).toHaveBeenCalledWith('time');
+    expect(onBack).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
   it('shows the current deployed script for the saved climate automation', async () => {
@@ -378,11 +415,10 @@ describe('InstallationDetailScreen', () => {
 
     renderDetail(saved.id);
 
-    expect(await screen.findByText('Działa')).toBeVisible();
-    const showScript = screen.getByRole('button', {
+    const showScript = await screen.findByRole('button', {
       name: 'Pokaż wdrożony skrypt'
     });
-    expect(showScript).toBeEnabled();
+    await waitFor(() => expect(showScript).toBeEnabled());
 
     fireEvent.click(showScript);
 

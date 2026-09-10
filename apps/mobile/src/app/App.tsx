@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { IconSettings } from '@tabler/icons-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, lazy, useState } from 'react';
 import { AppRoutes } from '../routes/AppRoutes.js';
@@ -12,22 +13,6 @@ const DevCommandPalette = import.meta.env.DEV
       return { default: module.DevCommandPalette };
     })
   : null;
-
-const SettingsIcon = () => (
-  <svg
-    aria-hidden="true"
-    className="app-settings-trigger__icon"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.55v-.1a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 3.75 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2V9.55h.05a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.86-2.86.06.06A1.7 1.7 0 0 0 8.15 3.75a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4.05v.05a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4H21v4.05h-.1a1.7 1.7 0 0 0-1.1.4 1.7 1.7 0 0 0-.4 1Z" />
-  </svg>
-);
 
 const AppContent = () => {
   const { t } = useTranslation();
@@ -44,7 +29,7 @@ const AppContent = () => {
           title={t('settings.open')}
           onClick={() => setSettingsOpen(true)}
         >
-          <SettingsIcon />
+          <IconSettings className="app-settings-trigger__icon" aria-hidden="true" />
         </button>
         <AppRoutes onOpenSettings={() => setSettingsOpen(true)} />
       </div>

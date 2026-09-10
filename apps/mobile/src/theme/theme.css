@@ -2143,3 +2143,71 @@ select {
     width: 100%;
   }
 }
+
+/* Shared-shell Climate Detail alignment with the compact Dashboard visual language. */
+.installation-detail-shell.app-bottom-nav-shell {
+  gap: var(--lcl-spacing-md);
+}
+
+.installation-detail-shell .installation-detail-header {
+  align-items: center;
+  min-height: var(--lcl-size-control-min-height);
+}
+
+.installation-detail-shell .installation-detail-header > div {
+  gap: var(--lcl-spacing-xs);
+}
+
+.installation-detail-shell .installation-detail-header h1 {
+  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));
+  line-height: var(--lcl-line-height-tight);
+}
+
+.installation-detail-shell .installation-detail-purpose {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  line-height: var(--lcl-line-height-compact);
+  margin: 0;
+}
+
+.installation-detail-shell .automation-card {
+  box-shadow: none;
+  gap: var(--lcl-spacing-sm);
+  padding: var(--lcl-spacing-md);
+}
+
+.installation-detail-shell
+  .installation-detail-live
+  .automation-metrics
+  > div:first-child
+  strong {
+  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-sm));
+}
+
+.installation-detail-shell .installation-detail-mode-control {
+  background: var(--lcl-color-surface-muted);
+  border: 0;
+  border-radius: var(--lcl-radius-round);
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+}
+
+.installation-detail-shell .installation-detail-mode-control > * {
+  flex: 1 1 0;
+}
+
+.installation-detail-shell .installation-detail-mode-control .automation-control-button {
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-round);
+  color: var(--lcl-color-text-muted);
+  min-height: var(--lcl-size-compact-control-min-height);
+}
+
+.installation-detail-shell
+  .installation-detail-mode-control
+  .automation-control-button[aria-pressed='true'] {
+  background: var(--lcl-color-accent);
+  color: var(--lcl-color-accent-contrast);
+}

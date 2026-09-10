@@ -6,19 +6,21 @@ import {
   type ToastMessage,
   type ToastTone
 } from '@lcl/ui';
+import { IconCode } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import {
+  AppBottomNavigation,
+  type AppNavigationKind
+} from '../components/AppBottomNavigation.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
-import { CodeIcon } from '../components/icons/CodeIcon.js';
-import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
 import {
   formatInstallationMetric,
-  installationHealthLabel,
   INSTALLATION_MODE_KEYS,
   installationThresholdSummary
 } from '../flows/installations/presentation.js';
@@ -46,19 +48,18 @@ import {
 type InstallationDetailScreenProps = {
   installationId: string;
   onBack(): void;
+  onNavigateDashboard?: (kind: AppNavigationKind) => void;
+  onOpenSettings?: () => void;
 };
-
-type DetailHealthTone = 'ok' | 'warning' | 'offline' | 'paused';
-
-const healthClass = (tone: DetailHealthTone) =>
-  `automation-health automation-health--${tone === 'warning' ? 'attention' : tone}`;
 
 const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
   installationThresholdSummary(installation);
 
 export const InstallationDetailScreen = ({
   installationId,
-  onBack
+  onBack,
+  onNavigateDashboard,
+  onOpenSettings
 }: InstallationDetailScreenProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -82,7 +83,7 @@ export const InstallationDetailScreen = ({
 
   if (!installation) {
     return (
-      <main className="demo-shell installation-detail-shell">
+      <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
         <header className="demo-header installation-detail-header">
           <div>
             <p className="demo-kicker">Local Climate Link</p>
@@ -109,6 +110,8 @@ export const InstallationDetailScreen = ({
       dismissToast={dismissToast}
       toasts={toasts}
       queryClient={queryClient}
+      {...(onNavigateDashboard ? { onNavigateDashboard } : {})}
+      {...(onOpenSettings ? { onOpenSettings } : {})}
     />
   );
 };
@@ -120,6 +123,8 @@ type InstalledAutomationDetailProps = {
   dismissToast(id: string): void;
   toasts: ToastMessage[];
   queryClient: ReturnType<typeof useQueryClient>;
+  onNavigateDashboard?: (kind: AppNavigationKind) => void;
+  onOpenSettings?: () => void;
 };
 
 const InstalledAutomationDetail = ({
@@ -128,7 +133,9 @@ const InstalledAutomationDetail = ({
   pushToast,
   dismissToast,
   toasts,
-  queryClient
+  queryClient,
+  onNavigateDashboard,
+  onOpenSettings
 }: InstalledAutomationDetailProps) => {
   const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
@@ -166,8 +173,10 @@ const InstalledAutomationDetail = ({
     automationMode: control?.automationMode ?? null,
     runtimeHealth
   });
-  const recoveryCopy = recovery
-    ? installationHealthCopy[locale].issues[recovery.issue]
+  const visibleRecovery =
+    recovery?.issue === 'script-stopped' && isPaused ? null : recovery;
+  const recoveryCopy = visibleRecovery
+    ? installationHealthCopy[locale].issues[visibleRecovery.issue]
     : null;
 
   const automationMutation = useMutation({
@@ -238,52 +247,24 @@ const InstalledAutomationDetail = ({
       .catch(() => pushToast('warning', scriptCopy.copyFailed));
   };
 
-  let healthLabel = t('dashboard.health.loading');
-  let healthTone: DetailHealthTone = 'warning';
-  if (recovery?.issue === 'offline') {
-    healthLabel = t('dashboard.health.offline');
-    healthTone = 'offline';
-  } else if (recovery?.issue === 'script-stopped') {
-    healthLabel = t('dashboard.health.paused');
-    healthTone = 'paused';
-  } else if (recovery?.issue === 'ownership-problem') {
-    healthLabel = t('dashboard.health.attention');
-  } else if (recovery?.issue === 'sensor-missing') {
-    healthLabel = t('dashboard.health.stale');
-  } else if (diagnosticsQuery.isError) {
-    healthLabel = t('dashboard.health.attention');
-  } else if (runtimeHealth) {
-    healthLabel = installationHealthLabel(runtimeHealth, t);
-    healthTone = runtimeHealth === 'ok' ? 'ok' : 'warning';
-  }
-
   const relayState =
     control?.relayOn ?? snapshot?.plug?.relayState ?? snapshot?.diagnostics.relayState;
+  const purposeLabel =
+    installation.config.rule.control.metric === 'humidity'
+      ? t('intent.humidity.context')
+      : t('intent.temperature.context');
 
   return (
     <main className="demo-shell installation-detail-shell">
       <header className="demo-header installation-detail-header">
         <div>
-          <button className="detail-back-link" type="button" onClick={onBack}>
-            ← {t('detail.backToDashboard')}
-          </button>
-          <div className="automation-status-row">
-            <span className={healthClass(healthTone)}>{healthLabel}</span>
-            <span className="automation-status-mode">
-              {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
-            </span>
-          </div>
           <h1>{installation.shelly.name}</h1>
+          <p className="installation-detail-purpose">{purposeLabel}</p>
         </div>
-        <RefreshIconButton
-          busy={diagnosticsQuery.isFetching || controlQuery.isFetching}
-          label={t('common.refresh')}
-          onRefresh={() => void refreshAll()}
-        />
       </header>
 
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
-        {recovery && recoveryCopy && (
+        {visibleRecovery && recoveryCopy && (
           <article className="automation-card installation-detail-recovery" role="status">
             <div className="installation-section-heading">
               <div>
@@ -297,25 +278,27 @@ const InstalledAutomationDetail = ({
             <div className="installation-detail-actions">
               <button
                 className={
-                  recovery.action === 'resume' ? 'primary-action' : 'secondary-action'
+                  visibleRecovery.action === 'resume'
+                    ? 'primary-action'
+                    : 'secondary-action'
                 }
                 type="button"
                 disabled={
-                  recovery.action === 'resume'
+                  visibleRecovery.action === 'resume'
                     ? automationMutation.isPending
                     : diagnosticsQuery.isFetching || controlQuery.isFetching
                 }
                 onClick={() => {
-                  if (recovery.action === 'resume') {
+                  if (visibleRecovery.action === 'resume') {
                     automationMutation.mutate();
                     return;
                   }
                   void refreshAll();
                 }}
               >
-                {recovery.action === 'resume' && automationMutation.isPending
+                {visibleRecovery.action === 'resume' && automationMutation.isPending
                   ? t('detail.changingState')
-                  : recovery.action === 'refresh' &&
+                  : visibleRecovery.action === 'refresh' &&
                       (diagnosticsQuery.isFetching || controlQuery.isFetching)
                     ? t('common.refreshing')
                     : recoveryCopy.action}
@@ -381,7 +364,7 @@ const InstalledAutomationDetail = ({
               type="button"
               onClick={() => setScriptOpen(true)}
             >
-              <CodeIcon />
+              <IconCode className="icon-action__svg" aria-hidden="true" />
             </button>
           </div>
 
@@ -400,21 +383,43 @@ const InstalledAutomationDetail = ({
             </div>
           </dl>
 
-          <div className="installation-detail-actions">
-            {canToggleAutomation && recovery?.issue !== 'script-stopped' && (
+          <div className="installation-detail-actions installation-detail-mode-actions">
+            <div
+              className="automation-control-group installation-detail-mode-control"
+              role="group"
+              aria-label={t('detail.automation')}
+            >
               <button
-                className={isPaused ? 'primary-action' : 'secondary-action'}
+                className="automation-control-button"
                 type="button"
-                disabled={automationMutation.isPending || deleteMutation.isPending}
-                onClick={() => automationMutation.mutate()}
+                aria-pressed={control?.automationMode === 'auto'}
+                disabled={
+                  !canToggleAutomation ||
+                  automationMutation.isPending ||
+                  deleteMutation.isPending
+                }
+                onClick={() => {
+                  if (isPaused) automationMutation.mutate();
+                }}
               >
-                {automationMutation.isPending
-                  ? t('detail.changingState')
-                  : isPaused
-                    ? t('detail.resume')
-                    : t('detail.pause')}
+                AUTO
               </button>
-            )}
+              <button
+                className="automation-control-button"
+                type="button"
+                aria-pressed={isPaused}
+                disabled={
+                  !canToggleAutomation ||
+                  automationMutation.isPending ||
+                  deleteMutation.isPending
+                }
+                onClick={() => {
+                  if (control?.automationMode === 'auto') automationMutation.mutate();
+                }}
+              >
+                MANUAL
+              </button>
+            </div>
             <button
               className="secondary-action secondary-action--danger"
               type="button"
@@ -428,6 +433,15 @@ const InstalledAutomationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
+
+      <AppBottomNavigation
+        activeKind="climate"
+        onOpenClimate={() =>
+          onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
+        }
+        onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
+        {...(onOpenSettings ? { onOpenSettings } : {})}
+      />
 
       <Modal
         closeLabel={t('common.close')}

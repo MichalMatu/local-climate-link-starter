@@ -6,7 +6,7 @@
   padding-right: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-sm));
 }
 
-.app-shell > .dashboard-shell > .dashboard-header {
+.app-shell:has(.app-bottom-nav) > .demo-shell > .demo-header {
   padding-right: 0;
 }
 
@@ -29,7 +29,7 @@
   z-index: var(--lcl-z-index-header);
 }
 
-.app-shell:has(> .dashboard-shell) > .app-settings-trigger {
+.app-shell:has(.app-bottom-nav) > .app-settings-trigger {
   display: none;
 }
 

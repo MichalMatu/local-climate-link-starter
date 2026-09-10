@@ -1,7 +1,6 @@
 import { type ToastTone } from '@lcl/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '../app/i18n.js';
-import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import {
   applyInstalledShellyLedPreset,
   installedShellyLedSettingsQueryKey,
@@ -28,7 +27,7 @@ export const ShellyLedSettingsCard = ({
   installation,
   onFeedback
 }: ShellyLedSettingsCardProps) => {
-  const { locale, t } = useTranslation();
+  const { locale } = useTranslation();
   const copy = deviceLedCopy[locale];
   const queryClient = useQueryClient();
   const queryKey = installedShellyLedSettingsQueryKey(installation);
@@ -36,7 +35,9 @@ export const ShellyLedSettingsCard = ({
     queryKey,
     queryFn: () => readInstalledShellyLedSettings(installation),
     retry: false,
-    refetchOnWindowFocus: false
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });
   const presetMutation = useMutation({
     mutationFn: (preset: InstalledShellyLedPreset) =>
@@ -71,11 +72,6 @@ export const ShellyLedSettingsCard = ({
         <div>
           <h2>{copy.title}</h2>
         </div>
-        <RefreshIconButton
-          busy={settingsQuery.isFetching}
-          label={t('common.refresh')}
-          onRefresh={() => void settingsQuery.refetch()}
-        />
       </div>
 
       {settingsQuery.isPending ? (

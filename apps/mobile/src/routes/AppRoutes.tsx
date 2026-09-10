@@ -2,6 +2,7 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
@@ -28,7 +29,7 @@ const RouteFallback = () => {
 type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
 type AppRoute =
   | { type: 'intent' }
-  | { type: 'dashboard' }
+  | { type: 'dashboard'; kind?: AppNavigationKind }
   | { type: 'setup'; intent: SetupRouteIntent }
   | { type: 'installation'; installationId: string };
 
@@ -136,6 +137,7 @@ export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
     }
     return (
       <AutomationDashboardScreen
+        {...(route.kind ? { initialKind: route.kind } : {})}
         onAddAutomation={() => navigate({ type: 'intent' })}
         onOpenInstallation={(installationId) =>
           navigate({ type: 'installation', installationId })
@@ -150,6 +152,8 @@ export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
       <InstallationDetailScreen
         installationId={route.installationId}
         onBack={() => navigate({ type: 'dashboard' })}
+        onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
+        {...(onOpenSettings ? { onOpenSettings } : {})}
       />
     );
   }

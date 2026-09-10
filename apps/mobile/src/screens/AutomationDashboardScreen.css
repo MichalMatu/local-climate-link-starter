@@ -1,13 +1,6 @@
 .dashboard-shell {
-  --dashboard-nav-height: calc(
-    var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)
-  );
   align-content: start;
   gap: var(--lcl-spacing-md);
-  padding-bottom: calc(
-    var(--dashboard-nav-height) + var(--lcl-spacing-2xl) +
-      var(--lcl-fluid-shell-padding) + env(safe-area-inset-bottom)
-  );
 }
 
 .dashboard-shell .dashboard-header {
@@ -55,7 +48,6 @@
 
 .automation-card__icon,
 .automation-card__menu-icon,
-.dashboard-nav__icon,
 .dashboard-fab__icon {
   height: var(--lcl-size-control-icon-size);
   width: var(--lcl-size-control-icon-size);
@@ -107,9 +99,7 @@
 }
 
 .automation-card__menu:hover,
-.automation-card__menu:focus-visible,
-.dashboard-bottom-nav__item:hover,
-.dashboard-bottom-nav__item:focus-visible {
+.automation-card__menu:focus-visible {
   color: var(--lcl-color-accent);
 }
 
@@ -263,52 +253,10 @@
   width: var(--lcl-size-control-icon-size);
 }
 
-.dashboard-bottom-nav {
-  align-items: stretch;
-  background: var(--lcl-color-surface);
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  bottom: 0;
-  box-shadow: var(--lcl-shadow-sm);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  left: 0;
-  min-height: var(--dashboard-nav-height);
-  padding: var(--lcl-spacing-xs) var(--lcl-fluid-shell-padding)
-    calc(var(--lcl-spacing-xs) + env(safe-area-inset-bottom));
-  position: fixed;
-  right: 0;
-  z-index: var(--lcl-z-index-header);
-}
-
-.dashboard-bottom-nav__item {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: var(--lcl-radius-md);
-  color: var(--lcl-color-text-muted);
-  cursor: pointer;
-  display: grid;
-  font-size: var(--lcl-font-size-xs);
-  font-weight: var(--lcl-font-weight-semibold);
-  gap: var(--lcl-spacing-xs);
-  justify-items: center;
-  min-width: 0;
-  padding: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
-}
-
-.dashboard-bottom-nav__item[aria-current='page'] {
-  color: var(--lcl-color-accent);
-}
-
-.dashboard-bottom-nav__item:disabled {
-  cursor: not-allowed;
-  opacity: var(--lcl-opacity-disabled);
-}
-
 .dashboard-shell .dashboard-fab {
   border-radius: var(--lcl-radius-round);
   bottom: calc(
-    var(--dashboard-nav-height) + var(--lcl-spacing-md) + env(safe-area-inset-bottom)
+    var(--app-bottom-nav-height) + var(--lcl-spacing-md) + env(safe-area-inset-bottom)
   );
   height: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-md));
   position: fixed;
