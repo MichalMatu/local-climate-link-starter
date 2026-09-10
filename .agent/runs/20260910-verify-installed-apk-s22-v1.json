@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 6,
-  "command": "set -e; adb start-server >/dev/null; DEVICES=$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}'); test \"$DEVICES\" = \"RFCT70L7E8J\"; test \"$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\" = \"SM-S906B\"; echo PHONE_OK=RFCT70L7E8J",
-  "pid": 19237,
+  "command": "pnpm android:phone-alpha",
+  "pid": 19311,
   "timeout": 1800,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T05:30:10.384610+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T05:30:13.984840+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260910-verify-installed-apk-s22-v1",
@@ -18,5 +18,5 @@
   "task_digest": "f3332b6c6e34d15c5f0f5a958ee1ddc44660f0bb5200649e4e510cbfabeac1a8",
   "daemon_version": "4.18.19",
   "daemon_pid": 19061,
-  "updated_at": "2026-09-10T05:30:10.450650+00:00"
+  "updated_at": "2026-09-10T05:30:14.084046+00:00"
 }
