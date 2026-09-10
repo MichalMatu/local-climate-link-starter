@@ -1,0 +1,19 @@
+{
+  "id": "20260910-ux-dashboard-preflight-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/ux-dashboard-target-20260910",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 900,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune origin; git reset --hard origin/work/ux-dashboard-target-20260910; test \"$(git rev-parse HEAD)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; test -z \"$(git status --porcelain)\"; echo HEAD=$(git rev-parse HEAD)",
+    "set -e; printf 'CODEX='; command -v codex || true; printf 'CLAUDE='; command -v claude || true; printf 'NODE='; node --version; printf 'PNPM='; pnpm --version",
+    "set -e; echo '=== DASHBOARD CSS ==='; grep -n -A 16 -B 6 -E '^\\.(dashboard|automation-card|automation-metrics|automation-summary|automation-status|icon-action|refresh-icon)' apps/mobile/src/theme/theme.css | head -n 520",
+    "set -e; echo '=== APP SHELL ==='; cat apps/mobile/src/app/appShell.css; echo '=== REFRESH BUTTON ==='; cat apps/mobile/src/components/RefreshIconButton.tsx; echo '=== ROUTES ZERO STATE ==='; grep -n -A 14 -B 8 -E 'installations.length|route.type === .dashboard.|route.type === .intent.' apps/mobile/src/routes/AppRoutes.tsx",
+    "set -e; adb start-server >/dev/null; DEVICES=$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}'); test \"$DEVICES\" = \"RFCT70L7E8J\"; MODEL=$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r'); test \"$MODEL\" = \"SM-S906B\"; echo PHONE_OK=$MODEL; adb -s RFCT70L7E8J shell wm size; adb -s RFCT70L7E8J shell wm density"
+  ]
+}
