@@ -1,0 +1,115 @@
+{
+  "id": "20260910-rule-relay-test-diagnose-v2",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/relay-test-diagnose-20260910",
+  "allow_write": false,
+  "started_at": "2026-09-10T04:42:46.119338+00:00",
+  "command_timeout": 300,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch --prune origin; git reset --hard origin/work/relay-test-diagnose-20260910; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test \"$(git rev-parse origin/main)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test -z \"$(git status --porcelain)\"",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   0e09eec..79b8618  agent-control -> origin/agent-control\nHEAD is now at 88b1923 fix(mobile): clarify automation detail hierarchy (#31)\n",
+      "elapsed_seconds": 1.083,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 2.91,
+      "output_policy": "stream",
+      "captured_output_chars": 199,
+      "output_truncated": false,
+      "current_rss_mb": 2.91,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "python3 - <<'PY'\nimport json, time, urllib.parse, urllib.request\nBASE='http://192.168.0.16/rpc/'\nNAME='Local Climate Link Thermostat'\ndef rpc(method, **params):\n    cooked={k: ('true' if v is True else 'false' if v is False else v) for k,v in params.items()}\n    url=BASE+method\n    if cooked:\n        url += '?' + urllib.parse.urlencode(cooked)\n    with urllib.request.urlopen(url, timeout=5) as r:\n        return json.loads(r.read().decode())\ndef output():\n    return bool(rpc('Switch.GetStatus', id=0).get('output'))\nscripts=rpc('Script.List').get('scripts', [])\nmanaged=[s for s in scripts if s.get('name') == NAME]\nassert len(managed)==1, managed\nsid=int(managed[0]['id'])\nprint('MANAGED_SCRIPT_ID='+str(sid), 'INITIAL_RUNNING='+str(bool(managed[0].get('running'))))\ndef finish_safe():\n    rpc('Script.Stop', id=sid)\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.2)\n    final_off=not output()\n    final_running=bool(rpc('Script.GetStatus', id=sid).get('running'))\n    print('FINAL_RELAY_OFF='+str(final_off))\n    print('FINAL_SCRIPT_RUNNING='+str(final_running))\n    assert final_off and not final_running\ndef pulse(label, script_running):\n    if script_running:\n        rpc('Script.Start', id=sid)\n        time.sleep(0.5)\n    else:\n        rpc('Script.Stop', id=sid)\n        time.sleep(0.2)\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.15)\n    assert output() is False\n    t0=time.monotonic()\n    rpc('Switch.Set', id=0, on=True)\n    samples=[]\n    for target in (0.0,0.05,0.10,0.25,0.50,1.00):\n        while time.monotonic()-t0 < target:\n            time.sleep(0.005)\n        samples.append((round(time.monotonic()-t0,3), output()))\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.2)\n    final=output()\n    print(label, 'SAMPLES='+json.dumps(samples), 'FINAL_OFF='+str(not final))\n    assert final is False\ntry:\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.2)\n    print('BASELINE_RELAY_OFF='+str(not output()))\n    pulse('SCRIPT_STOPPED', False)\n    pulse('SCRIPT_RUNNING', True)\nfinally:\n    finish_safe()\nPY",
+      "exit_code": 0,
+      "output": "MANAGED_SCRIPT_ID=1 INITIAL_RUNNING=False\nBASELINE_RELAY_OFF=True\nSCRIPT_STOPPED SAMPLES=[[0.041, true], [0.094, true], [0.123, true], [0.256, true], [0.502, true], [1.005, true]] FINAL_OFF=True\nSCRIPT_RUNNING SAMPLES=[[0.042, true], [0.098, true], [0.127, true], [0.251, true], [0.504, true], [1.002, true]] FINAL_OFF=True\nFINAL_RELAY_OFF=True\nFINAL_SCRIPT_RUNNING=False\n",
+      "elapsed_seconds": 5.075,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 29.31,
+      "output_policy": "stream",
+      "captured_output_chars": 372,
+      "output_truncated": false,
+      "current_rss_mb": 29.31,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set -e; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"",
+      "exit_code": 0,
+      "output": "",
+      "elapsed_seconds": 0.554,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.083
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 5.075
+    },
+    {
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.554
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.067
+  },
+  "finished_at": "2026-09-10T04:42:54.256627+00:00",
+  "task_digest": "86d2dc48c6ce5aca21cbca542b49cc18746d89632610babc23bbb3e8deabed6b",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "attempt_id": "2091d787f74d48e2d516e99b",
+  "daemon_version": "4.18.19"
+}
