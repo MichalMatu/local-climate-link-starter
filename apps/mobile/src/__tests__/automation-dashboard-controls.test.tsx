@@ -85,6 +85,7 @@ describe('AutomationDashboardScreen controls', () => {
     );
 
     expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.queryByText('Wymaga uwagi')).toBeNull();
     const manual = screen.getByRole('button', { name: 'MANUAL' });
     const auto = screen.getByRole('button', { name: 'AUTO' });
     const on = screen.getByRole('button', { name: 'ON' });

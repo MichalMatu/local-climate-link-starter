@@ -244,7 +244,13 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Brak automatyzacji')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Klimat' }));
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
+    expect(
+      document.querySelector('.automation-card__menu svg.tabler-icon')
+    ).not.toBeNull();
+    expect(
+      document.querySelectorAll('.dashboard-shell svg:not(.tabler-icon)')
+    ).toHaveLength(0);
   });
 
   it('shows a native time schedule and opens it by stable installation id', async () => {

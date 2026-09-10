@@ -167,7 +167,7 @@ describe('AppRoutes user intent entry', () => {
         expect.any(Function)
       )
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
 
     act(() => nativeAppMocks.fireBack());
@@ -235,7 +235,7 @@ describe('AppRoutes user intent entry', () => {
 
     renderRoutes();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));

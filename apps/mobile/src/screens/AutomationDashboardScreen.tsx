@@ -2,7 +2,6 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
-  IconChevronRight,
   IconClock,
   IconDotsVertical,
   IconPlus,
@@ -110,7 +109,7 @@ const ClimateAutomationCard = ({
   } else if (health !== null && health !== 'ok') {
     warningLabel = installationHealthLabel(health, t);
     warningClass = health;
-  } else if (query.isError || control.isError) {
+  } else if (control.isError || (query.isError && !manualControl)) {
     warningLabel = t('dashboard.health.attention');
   }
 
@@ -225,27 +224,24 @@ const ClimateAutomationCard = ({
         </button>
       </div>
 
-      <footer className="automation-card__footer">
-        <button
-          className={`automation-card__status-link${
-            warningLabel ? ` automation-card__status-link--${warningClass}` : ''
-          }`}
-          type="button"
-          aria-label={t('dashboard.openSystem')}
-          onClick={() => onOpen(installation.id)}
-        >
-          <span className="automation-card__status-copy">
-            {warningLabel && <IconAlertTriangle aria-hidden="true" />}
-            <span>{warningLabel ?? t('dashboard.openSystem')}</span>
-          </span>
-          <IconChevronRight aria-hidden="true" />
-        </button>
-        {action.isError && (
-          <span className="automation-control-error" role="alert">
-            {t('detail.actionFailed')}
-          </span>
-        )}
-      </footer>
+      {(warningLabel || action.isError) && (
+        <footer className="automation-card__footer">
+          {warningLabel && (
+            <div
+              className={`automation-card__status automation-card__status--${warningClass}`}
+              role="status"
+            >
+              <IconAlertTriangle aria-hidden="true" />
+              <span>{warningLabel}</span>
+            </div>
+          )}
+          {action.isError && (
+            <span className="automation-control-error" role="alert">
+              {t('detail.actionFailed')}
+            </span>
+          )}
+        </footer>
+      )}
     </article>
   );
 };

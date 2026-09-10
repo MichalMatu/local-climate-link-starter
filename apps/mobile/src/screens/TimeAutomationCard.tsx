@@ -1,3 +1,4 @@
+import { IconChevronRight } from '@tabler/icons-react';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useTimeAutomationRuntime } from '../flows/time-automation/useTimeAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
@@ -84,7 +85,7 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
           onClick={() => onOpen(installation.id)}
         >
           <span>{t('dashboard.openSystem')}</span>
-          <span aria-hidden="true">›</span>
+          <IconChevronRight className="automation-card__detail-icon" aria-hidden="true" />
         </button>
       </footer>
     </article>
