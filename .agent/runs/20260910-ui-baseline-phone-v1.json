@@ -1,0 +1,9 @@
+{
+  "event": "invalid_task_rejected",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "updated_at": "2026-09-10T01:15:27.751406+00:00",
+  "task_id": "20260910-ui-baseline-phone-v1",
+  "daemon_version": "4.18.19",
+  "pid": 73821
+}
