@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 5,
-  "command": "set -e; pnpm --filter @lcl/mobile lint; pnpm --filter @lcl/mobile typecheck; pnpm --filter @lcl/mobile test; pnpm --filter @lcl/mobile build",
-  "pid": 65775,
+  "command": "set -e; adb start-server >/dev/null; test \"$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}')\" = \"RFCT70L7E8J\"; test \"$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\" = \"SM-S906B\"; cd apps/mobile; pnpm exec cap sync android; cd android; ./gradlew assembleDebug; cd ../../..; adb -s RFCT70L7E8J install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; adb -s RFCT70L7E8J shell am start -n link.localclimate.app/.MainActivity; sleep 5; mkdir -p artifacts/ui-audit/physical-20260910; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/07-dashboard-visual-polish-v2.png; test -s artifacts/ui-audit/physical-20260910/07-dashboard-visual-polish-v2.png; (adb -s RFCT70L7E8J shell uiautomator dump /sdcard/lcl-dashboard.xml >/dev/null 2>&1 && adb -s RFCT70L7E8J pull /sdcard/lcl-dashboard.xml artifacts/ui-audit/physical-20260910/07-dashboard-visual-polish-v2.xml >/dev/null) || true; echo PHONE_SCREENSHOT_OK",
+  "pid": 66602,
   "timeout": 1800,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T12:51:27.714881+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-10T12:52:07.919049+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260910-ux-dashboard-visual-polish-recover-v4",
@@ -18,5 +18,5 @@
   "task_digest": "d52a60a91fad57f4ecbed3cacbe8b8ac94eb92abf327044e1cbec713ad4858fc",
   "daemon_version": "4.18.20",
   "daemon_pid": 65490,
-  "updated_at": "2026-09-10T12:51:27.794667+00:00"
+  "updated_at": "2026-09-10T12:52:07.995775+00:00"
 }
