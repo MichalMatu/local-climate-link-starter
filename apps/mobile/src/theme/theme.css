@@ -1530,10 +1530,7 @@ select {
 .time-schedule-grid {
   display: grid;
   gap: var(--lcl-spacing-md);
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(min(100%, var(--lcl-size-action-min-width)), 1fr)
-  );
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .time-schedule-note {
@@ -1591,9 +1588,9 @@ select {
   border-radius: var(--lcl-radius-lg);
   box-shadow: var(--lcl-shadow-md);
   display: grid;
-  gap: var(--lcl-spacing-lg);
+  gap: var(--lcl-spacing-md);
   min-width: 0;
-  padding: var(--lcl-fluid-panel-padding);
+  padding: var(--lcl-spacing-lg);
 }
 
 .automation-card__header,
@@ -1660,7 +1657,7 @@ select {
   display: grid;
   gap: var(--lcl-spacing-xs);
   min-width: 0;
-  padding: var(--lcl-spacing-md);
+  padding: var(--lcl-spacing-sm);
 }
 
 .automation-metrics span,
@@ -1707,24 +1704,17 @@ select {
 }
 
 @media (max-width: 30rem) {
-  .dashboard-header,
-  .automation-card__header,
-  .automation-card__footer {
+  .dashboard-header {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .dashboard-header .primary-action,
-  .automation-card__footer .secondary-action {
+  .dashboard-header .primary-action {
     width: 100%;
   }
 
   .automation-health {
     align-self: flex-start;
-  }
-
-  .automation-metrics > div:last-child {
-    grid-column: 1 / -1;
   }
 }
 

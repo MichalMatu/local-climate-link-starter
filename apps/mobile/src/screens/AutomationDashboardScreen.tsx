@@ -178,9 +178,7 @@ export const AutomationDashboardScreen = ({
     <main className="demo-shell dashboard-shell">
       <header className="demo-header dashboard-header">
         <div>
-          <p className="demo-kicker">Local Climate Link</p>
           <h1>{t('dashboard.title')}</h1>
-          <p>{t('dashboard.description')}</p>
         </div>
         <button
           className="primary-action dashboard-add-action"
