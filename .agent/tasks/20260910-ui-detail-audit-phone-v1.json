@@ -1,0 +1,20 @@
+{
+  "id": "20260910-ui-detail-audit-phone-v1",
+  "mode": "commands",
+  "work_branch": "work/ui-detail-audit-20260910",
+  "allow_write": true,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch --prune origin && git reset --hard origin/work/ui-detail-audit-20260910 && test \"$(git rev-parse HEAD)\" = \"e1e06fe8a6bc556ce9277a6453eb4c506094f3f8\" && git status --short",
+    "python3 - <<'PY'\nfrom pathlib import Path\np = Path('apps/mobile/e2e/responsive.spec.ts')\ns = p.read_text()\nclimate = \"    await expect(page.getByRole('button', { name: /Wróć do automatyk/ })).toBeVisible();\\n    await expectNoHorizontalOverflow(page);\"\nclimate_new = \"    await expect(page.getByRole('button', { name: /Wróć do automatyk/ })).toBeVisible();\\n    if (viewport.name === 'phone') {\\n      await page.screenshot({ path: 'artifacts/ui-audit/detail-20260910/climate-detail-phone.png', fullPage: true });\\n    }\\n    await expectNoHorizontalOverflow(page);\"\ntime = \"    await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();\\n    await expectNoHorizontalOverflow(page);\"\ntime_new = \"    await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();\\n    if (viewport.name === 'phone') {\\n      await page.screenshot({ path: 'artifacts/ui-audit/detail-20260910/time-detail-phone.png', fullPage: true });\\n    }\\n    await expectNoHorizontalOverflow(page);\"\nassert climate in s\nassert time in s\ns = s.replace(climate, climate_new, 1).replace(time, time_new, 1)\np.write_text(s)\nPY",
+    "mkdir -p artifacts/ui-audit/detail-20260910 && pnpm --filter @lcl/mobile exec playwright test e2e/responsive.spec.ts --grep 'installed automation dashboard shows Shelly runtime on phone$|daily time automation installs and renders on phone$'",
+    "git checkout -- apps/mobile/e2e/responsive.spec.ts && test -f artifacts/ui-audit/detail-20260910/climate-detail-phone.png && test -f artifacts/ui-audit/detail-20260910/time-detail-phone.png && git status --short",
+    "git add artifacts/ui-audit/detail-20260910/climate-detail-phone.png artifacts/ui-audit/detail-20260910/time-detail-phone.png && git commit -m \"test: capture detail UI audit\" && test -z \"$(git status --porcelain)\"",
+    "HUSKY=0 git push origin HEAD:work/ui-detail-audit-20260910 && echo VERIFIED_SHA=$(git rev-parse HEAD) && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ui-detail-audit-20260910)\""
+  ]
+}
