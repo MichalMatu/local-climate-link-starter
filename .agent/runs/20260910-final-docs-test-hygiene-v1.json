@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-final-docs-test-hygiene-v1",
+  "task_digest": "a558dd711df9ac2f057b0f24b3f57428d16149128ff599d8020a9de8c46c881e",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T18:32:05.536653+00:00",
+  "attempt_id": "122fd772617d7bcc874d6cdd",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 13209,
+  "updated_at": "2026-09-10T18:32:05.536844+00:00",
+  "pid": 13209
+}
