@@ -1,15 +1,18 @@
 import {
   FeedbackPanel,
   Modal,
+  ScriptPreview,
   ToastViewport,
   type ToastMessage,
   type ToastTone
 } from '@lcl/ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
+import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
+import { CodeIcon } from '../components/icons/CodeIcon.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
@@ -26,6 +29,10 @@ import {
   pauseInstalledAutomation,
   resumeInstalledAutomation
 } from '../flows/installations/runtimeControl.js';
+import {
+  installedAutomationScriptSourceQueryKey,
+  loadInstalledAutomationScriptSource
+} from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
@@ -130,7 +137,18 @@ const InstalledAutomationDetail = ({
     (state) => state.removeInstallation
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [scriptOpen, setScriptOpen] = useState(false);
   const deleteCopy = installationDeleteCopy[locale];
+  const scriptCopy = installationScriptPreviewCopy[locale];
+  const scriptQueryKey = installedAutomationScriptSourceQueryKey(installation);
+  const scriptSourceQuery = useQuery({
+    queryKey: scriptQueryKey,
+    queryFn: () => loadInstalledAutomationScriptSource(installation),
+    enabled: scriptOpen,
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 0
+  });
   const snapshot = diagnosticsQuery.isSuccess ? diagnosticsQuery.data : undefined;
   const control = controlQuery.data;
   const scriptMatch = control
@@ -190,6 +208,7 @@ const InstalledAutomationDetail = ({
         queryKey: installedAutomationControlQueryKey(installation),
         exact: true
       });
+      queryClient.removeQueries({ queryKey: scriptQueryKey, exact: true });
       removeInstallation(installation.id);
       setDeleteOpen(false);
       onBack();
@@ -199,6 +218,24 @@ const InstalledAutomationDetail = ({
 
   const refreshAll = async () => {
     await Promise.allSettled([diagnosticsQuery.refetch(), controlQuery.refetch()]);
+  };
+
+  const closeScriptPreview = () => {
+    setScriptOpen(false);
+    queryClient.removeQueries({ queryKey: scriptQueryKey, exact: true });
+  };
+
+  const copyScriptSource = () => {
+    const source = scriptSourceQuery.data;
+    if (!source || typeof navigator === 'undefined' || !navigator.clipboard) {
+      pushToast('warning', scriptCopy.copyFailed);
+      return;
+    }
+
+    void navigator.clipboard
+      .writeText(source)
+      .then(() => pushToast('ok', scriptCopy.copyDone))
+      .catch(() => pushToast('warning', scriptCopy.copyFailed));
   };
 
   let healthLabel = t('dashboard.health.loading');
@@ -345,6 +382,16 @@ const InstalledAutomationDetail = ({
               <p className="automation-card__eyebrow">{t('detail.configuration')}</p>
               <h2>{t('detail.automation')}</h2>
             </div>
+            <button
+              aria-label={scriptCopy.action}
+              className="icon-action"
+              disabled={scriptMatch !== 'matched' || deleteMutation.isPending}
+              title={scriptCopy.action}
+              type="button"
+              onClick={() => setScriptOpen(true)}
+            >
+              <CodeIcon />
+            </button>
           </div>
 
           <dl className="automation-summary installation-detail-summary">
@@ -390,6 +437,41 @@ const InstalledAutomationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
+
+      <Modal
+        closeLabel={t('common.close')}
+        open={scriptOpen}
+        size="workspace"
+        title={scriptCopy.title}
+        onClose={closeScriptPreview}
+      >
+        {scriptSourceQuery.isPending && (
+          <p className="installation-detail-note" role="status">
+            {scriptCopy.loading}
+          </p>
+        )}
+        {scriptSourceQuery.isError && (
+          <FeedbackPanel tone="danger" title={scriptCopy.failed}>
+            <button
+              className="secondary-action"
+              type="button"
+              onClick={() => void scriptSourceQuery.refetch()}
+            >
+              {scriptCopy.retry}
+            </button>
+          </FeedbackPanel>
+        )}
+        {scriptSourceQuery.isSuccess && (
+          <ScriptPreview
+            code={scriptSourceQuery.data}
+            copyAriaLabel={scriptCopy.copy}
+            copyLabel={scriptCopy.copy}
+            label={scriptCopy.label}
+            variant="fill"
+            onCopy={copyScriptSource}
+          />
+        )}
+      </Modal>
 
       <Modal
         actions={
