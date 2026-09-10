@@ -88,10 +88,13 @@ export const deleteInstalledAutomation = async (
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
   const relayId = installation.config.output.relayId;
   const setup = await readShellySetupStatus(installation.shelly.baseUrl);
-  const targetScript = setup.scripts.find((script) => script.id === installation.script.id);
+  const targetScript = setup.scripts.find(
+    (script) => script.id === installation.script.id
+  );
   const conflictingManagedScript = setup.scripts.find(
     (script) =>
-      script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME && script.id !== installation.script.id
+      script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME &&
+      script.id !== installation.script.id
   );
 
   if (targetScript && targetScript.name !== LOCAL_CLIMATE_LINK_SCRIPT_NAME) {

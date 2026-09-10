@@ -1,9 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import {
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  type ShellyRpcMethod
-} from '@lcl/shelly-client';
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react';
+import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, type ShellyRpcMethod } from '@lcl/shelly-client';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
@@ -85,7 +89,8 @@ const installShellyDeleteMock = (options: { failDelete?: boolean } = {}) => {
     { id: 1, name: LOCAL_CLIMATE_LINK_SCRIPT_NAME, enable: true, running: true },
     { id: 77, name: 'User utility script', enable: true, running: true }
   ];
-  const rpcCalls: Array<{ method: ShellyRpcMethod; params?: Record<string, unknown> }> = [];
+  const rpcCalls: Array<{ method: ShellyRpcMethod; params?: Record<string, unknown> }> =
+    [];
 
   vi.stubGlobal(
     'fetch',
@@ -218,7 +223,9 @@ describe('climate automation delete', () => {
 
     await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
     expect(
-      useInstalledAutomationStore.getState().installations.some((item) => item.id === saved.id)
+      useInstalledAutomationStore
+        .getState()
+        .installations.some((item) => item.id === saved.id)
     ).toBe(false);
     expect(shelly.relayOn).toBe(false);
     expect(shelly.scripts.some((script) => script.id === 77)).toBe(true);
@@ -242,7 +249,9 @@ describe('climate automation delete', () => {
     ).toBeVisible();
     expect(onBack).not.toHaveBeenCalled();
     expect(
-      useInstalledAutomationStore.getState().installations.some((item) => item.id === saved.id)
+      useInstalledAutomationStore
+        .getState()
+        .installations.some((item) => item.id === saved.id)
     ).toBe(true);
     expect(shelly.relayOn).toBe(false);
   });

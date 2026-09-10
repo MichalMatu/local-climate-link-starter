@@ -31,7 +31,8 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     title: 'Klima-Automation löschen?',
     detail:
       'Das Skript dieser Automation wird erst von Shelly entfernt, nachdem OFF bestätigt wurde. Der Eintrag in der App wird erst nach erfolgreicher Bereinigung gelöscht.',
-    failed: 'Die Automation konnte nicht sicher gelöscht werden. Der App-Eintrag bleibt erhalten.'
+    failed:
+      'Die Automation konnte nicht sicher gelöscht werden. Der App-Eintrag bleibt erhalten.'
   },
   es: {
     action: 'Eliminar automatización',
@@ -39,7 +40,8 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     title: '¿Eliminar la automatización climática?',
     detail:
       'El script de esta automatización solo se eliminará de Shelly después de confirmar OFF. La entrada de la app se elimina únicamente cuando Shelly confirma la limpieza.',
-    failed: 'No se pudo eliminar la automatización de forma segura. La entrada se mantuvo en la app.'
+    failed:
+      'No se pudo eliminar la automatización de forma segura. La entrada se mantuvo en la app.'
   },
   fr: {
     action: 'Supprimer l’automatisation',
@@ -47,7 +49,8 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     title: 'Supprimer l’automatisation climatique ?',
     detail:
       'Le script de cette automatisation ne sera supprimé de Shelly qu’après confirmation de l’état OFF. L’entrée de l’app ne disparaît qu’après confirmation du nettoyage.',
-    failed: 'L’automatisation n’a pas pu être supprimée en toute sécurité. L’entrée a été conservée dans l’app.'
+    failed:
+      'L’automatisation n’a pas pu être supprimée en toute sécurité. L’entrée a été conservée dans l’app.'
   },
   it: {
     action: 'Elimina automazione',
@@ -55,7 +58,8 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     title: 'Eliminare l’automazione climatica?',
     detail:
       'Lo script di questa automazione verrà rimosso da Shelly solo dopo la conferma dello stato OFF. La voce nell’app viene rimossa solo dopo la conferma della pulizia.',
-    failed: 'Non è stato possibile eliminare l’automazione in sicurezza. La voce è rimasta nell’app.'
+    failed:
+      'Non è stato possibile eliminare l’automazione in sicurezza. La voce è rimasta nell’app.'
   },
   'pt-BR': {
     action: 'Excluir automação',
@@ -63,6 +67,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     title: 'Excluir a automação de clima?',
     detail:
       'O script desta automação só será removido do Shelly depois que o estado OFF for confirmado. A entrada do app só é removida após a confirmação da limpeza.',
-    failed: 'Não foi possível excluir a automação com segurança. A entrada foi mantida no app.'
+    failed:
+      'Não foi possível excluir a automação com segurança. A entrada foi mantida no app.'
   }
 };
