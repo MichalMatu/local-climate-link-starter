@@ -1,0 +1,20 @@
+{
+  "id": "20260910-ux-nav-settings-verify-v1",
+  "mode": "commands",
+  "work_branch": "work/ux-nav-settings-20260910",
+  "allow_write": false,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 600,
+  "idle_timeout": 180,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "git fetch --prune origin && test \"$(git rev-parse origin/work/ux-nav-settings-20260910)\" = \"617beb06da460b1634fdc986dea27fb2df450d3b\" && git status --short",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/navigation-settings-regression.test.tsx src/__tests__/app-routes.test.tsx src/__tests__/appSettings.test.tsx",
+    "pnpm --filter @lcl/mobile lint",
+    "pnpm --filter @lcl/mobile typecheck",
+    "pnpm --filter @lcl/mobile build",
+    "git diff --check && git status --short && git rev-parse HEAD"
+  ]
+}
