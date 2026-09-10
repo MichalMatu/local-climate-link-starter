@@ -1,0 +1,88 @@
+{
+  "id": "20260910-final-hygiene-audit-v1",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": false,
+  "started_at": "2026-09-10T17:08:20.356743+00:00",
+  "command_timeout": 600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; BASE=6144d8a07720e278118d4c3051c7a8042e214220; git fetch --prune origin; git checkout -B work/final-quality-audit-20260910 origin/work/final-quality-audit-20260910; test \"$(git rev-parse HEAD)\" = \"$BASE\"; test -z \"$(git status --porcelain)\"; echo HYGIENE_START_SHA=$(git rev-parse HEAD)",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   79e85ef..e17dee6  agent-control -> origin/agent-control\nSwitched to and reset branch 'work/final-quality-audit-20260910'\nbranch 'work/final-quality-audit-20260910' set up to track 'origin/work/final-quality-audit-20260910'.\nYour branch is up to date with 'origin/work/final-quality-audit-20260910'.\nHYGIENE_START_SHA=6144d8a07720e278118d4c3051c7a8042e214220\n",
+      "elapsed_seconds": 1.122,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1.88,
+      "output_policy": "stream",
+      "captured_output_chars": 423,
+      "output_truncated": false,
+      "current_rss_mb": 1.88,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set +e; echo '=== RAW_SVG_MOBILE ==='; git grep -n '<svg' -- apps/mobile/src | grep -E '\\.(tsx|ts):' || true; echo '=== INLINE_STYLE_MOBILE ==='; git grep -n 'style={{' -- apps/mobile/src || true; echo '=== SETTINGS_GEAR_USAGE ==='; git grep -n 'SettingsGearIcon' -- apps/mobile/src || true; echo '=== QUALITY_MARKERS ==='; git grep -n -E 'TODO|FIXME|HACK|@ts-ignore|eslint-disable|console\\.(log|debug)|\\bas any\\b' -- apps/mobile/src packages ':!**/dist/**' || true; echo HYGIENE_AUDIT_DONE",
+      "exit_code": 0,
+      "output": "=== RAW_SVG_MOBILE ===\napps/mobile/src/components/icons/SettingsGearIcon.tsx:2:  <svg\napps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx:91:  <svg\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx:301:    <svg\n=== INLINE_STYLE_MOBILE ===\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx:460:            style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx:888:            style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}\n=== SETTINGS_GEAR_USAGE ===\napps/mobile/src/components/icons/SettingsGearIcon.tsx:1:export const SettingsGearIcon = () => (\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx:11:import { SettingsGearIcon } from '../../../components/icons/SettingsGearIcon.js';\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx:737:                  <SettingsGearIcon />\n=== QUALITY_MARKERS ===\nHYGIENE_AUDIT_DONE\n",
+      "elapsed_seconds": 0.48,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 4.09,
+      "output_policy": "stream",
+      "captured_output_chars": 986,
+      "output_truncated": false,
+      "current_rss_mb": 4.09,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.122
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.48
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.067
+  },
+  "finished_at": "2026-09-10T17:08:23.521626+00:00",
+  "task_digest": "2d97a9a691b7e496fe0a8630c717c2cdc582dc0f3be71a97c71332341f86b1a6",
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 2048,
+  "attempt_id": "c03a08d0b967031d9816640d",
+  "daemon_version": "4.18.20"
+}
