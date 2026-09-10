@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-ux-physical-baseline-v1",
+  "task_digest": "d9bcfea9a94362ad5e12526e932c2ecbbc01e6c31183a4a6b64c9e567c95d0f0",
+  "idle_timeout": 120,
+  "task_timeout": 1200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T07:49:46.399221+00:00",
+  "attempt_id": "f0ec4a1cca5d733eb8abc159",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 21229,
+  "updated_at": "2026-09-10T07:49:46.399377+00:00",
+  "pid": 21229
+}
