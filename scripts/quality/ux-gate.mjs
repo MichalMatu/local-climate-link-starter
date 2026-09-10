@@ -52,10 +52,10 @@ const addFailure = (path, message) => {
 };
 
 const checkSavedShellyCardFeedback = async () => {
-  const path = 'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx';
+  const path = 'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx';
   const source = await readRepoFile(path);
-  const start = source.indexOf('const SavedShellyDeviceCard =');
-  const end = source.indexOf('export const ShellySetupPage');
+  const start = source.indexOf('export const SavedShellyDeviceCard =');
+  const end = source.length;
 
   if (start === -1 || end === -1 || end <= start) {
     addFailure(path, 'cannot find the saved Shelly device card boundary');
