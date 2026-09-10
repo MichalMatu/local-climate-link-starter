@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 5,
   "total": 5,
-  "command": "set -e; printf 'CODEX='; command -v codex || true; printf 'CLAUDE='; command -v claude || true; printf 'NODE='; node --version; printf 'PNPM='; pnpm --version",
-  "pid": 18435,
+  "command": "set -e; adb start-server >/dev/null; DEVICES=$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}'); test \"$DEVICES\" = \"RFCT70L7E8J\"; MODEL=$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r'); test \"$MODEL\" = \"SM-S906B\"; echo PHONE_OK=$MODEL; adb -s RFCT70L7E8J shell wm size; adb -s RFCT70L7E8J shell wm density",
+  "pid": 18500,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T07:46:50.042427+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T07:46:51.818286+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260910-ux-dashboard-preflight-v1",
@@ -18,5 +18,5 @@
   "task_digest": "a694d3d00f677d99d2aa73e0ca50d671e5078a262b72d1b3bfaabae22b54e035",
   "daemon_version": "4.18.19",
   "daemon_pid": 18192,
-  "updated_at": "2026-09-10T07:46:50.120776+00:00"
+  "updated_at": "2026-09-10T07:46:51.910346+00:00"
 }
