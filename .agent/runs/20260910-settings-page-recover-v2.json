@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-settings-page-recover-v2",
+  "task_digest": "979b9b0920e371592b980dcea080251c0f5267737fc206bc801268b88f2bbc7b",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T16:49:18.812241+00:00",
+  "attempt_id": "a0c843015d0bd01f4bde58ea",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 14885,
+  "updated_at": "2026-09-10T16:49:18.812321+00:00",
+  "pid": 14885
+}
