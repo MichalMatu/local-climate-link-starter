@@ -1,0 +1,60 @@
+{
+  "id": "20260910-ux-dashboard-visual-polish-push-recover-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/ux-dashboard-target-20260910",
+  "allow_write": true,
+  "started_at": "2026-09-10T12:57:34.563081+00:00",
+  "command_timeout": 300,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; test \"$(git branch --show-current)\" = \"work/ux-dashboard-target-20260910\"; LOCAL_SHA=$(git rev-parse HEAD); test \"$(git rev-parse --short=7 HEAD)\" = \"0df5dab\"; test \"$(git rev-parse HEAD^)\" = \"c24d6342e5f0b654a1fcff23f8ec917ac83ac36c\"; test -z \"$(git status --porcelain)\"; git fetch origin; test \"$(git rev-parse origin/work/ux-dashboard-target-20260910)\" = \"c24d6342e5f0b654a1fcff23f8ec917ac83ac36c\"; echo LOCAL_SHA=$LOCAL_SHA; echo REMOTE_BASE=$(git rev-parse origin/work/ux-dashboard-target-20260910)",
+      "exit_code": 1,
+      "output": "",
+      "elapsed_seconds": 0.376,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.376
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.074
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.067
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-10T12:57:36.574074+00:00",
+  "task_digest": "f71d0eaefcc21f81341e98ba8d489e4ede3e67673a27777048e928e412ba9237",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 4096,
+  "attempt_id": "2b24dcb46456ba1fcea54cb7",
+  "daemon_version": "4.18.20"
+}
