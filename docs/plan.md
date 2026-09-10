@@ -1,8 +1,10 @@
-# Local Climate Link — current MVP plan
+# Local Climate Link — historical MVP plan
 
-Status: MVP `1.0.0` test candidate plan for this repository.
+Status: historical MVP `1.0.0` plan retained for design context.
 
-This file describes the current direction. Detailed contracts live in
+The repository is now in the `2.0.x` product line. Current architecture lives in
+`docs/architecture/overview.md` and the active product roadmap in
+`docs/product/next-functional-steps.md`. Detailed contracts remain in
 `AGENTS.md`, vertical-slice history in `docs/implementation/vertical-slices.md`,
 and architectural decisions in `docs/adr/`.
 

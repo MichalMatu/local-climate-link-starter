@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Local Climate Link is a configurator for local BLE -> Shelly automations. The app helps the user set up a sensor and a Shelly Plug S Gen3 once. After setup, the Shelly Script is the runtime controller.
+Local Climate Link is a configurator and management UI for local BLE -> Shelly climate automations plus simple Shelly-native time automations. The phone handles setup, status, management and diagnostics; after setup, runtime ownership stays on the Shelly device.
 
 ## Runtime boundary
 
@@ -67,13 +67,14 @@ Domain packages cannot import React, Ionic, Capacitor UI components, or app-spec
 
 ## UI copy and localization
 
-MVP UI copy uses a lightweight app-level i18n layer in
-`apps/mobile/src/app/i18n.ts`. The locale is resolved from the system
-browser/webview language and applied to `document.documentElement.lang`.
+UI copy uses a lightweight app-level i18n layer in
+`apps/mobile/src/app/i18n.ts`. The default locale follows the system
+browser/webview language and is applied to `document.documentElement.lang`.
 Supported locales are Polish, English, German, Spanish, French, Italian, and
 Brazilian Portuguese. Unsupported languages fall back to English, and generic
-Portuguese tags resolve to `pt-BR`. The MVP UI intentionally has no manual
-language switch.
+Portuguese tags resolve to `pt-BR`. The full-page Settings screen can override
+the system locale; that preference is persisted locally and can be returned to
+`system` at any time.
 
 User-facing copy for the main setup path, safety states, validation errors,
 Shelly errors, diagnostics, and demo flow must be added as typed keys under
@@ -92,7 +93,7 @@ Vite/dev builds expose `window.lclDev` and a `/help` developer command menu for
 local testing of locale overrides, theme modes, and runtime error capture. This
 API must not become visible production UI.
 
-## Data flow for MVP setup
+## Current setup/runtime data flow
 
 ```text
 1. User starts setup wizard.
@@ -110,22 +111,24 @@ API must not become visible production UI.
 
 ## Current implementation boundary
 
-Slice 0 and Slice 1 are implemented as a hardware-free demo flow:
+The current mobile shell is intent-first rather than setup-tab-first. With no
+saved installation it opens the goal chooser; with installed automations it
+opens the Dashboard. Dashboard, installation detail, and the full-page Settings
+screen share the bottom navigation (`Klimat / Czas / Ustawienia`). Settings owns
+locale, appearance, and progressively disclosed service diagnostics.
 
-```text
-apps/mobile
-  uses fake Xiaomi and fake TP357 readings
-  uses FakeShellyClient for upload and relay test
-  shows generated Shelly Script preview
-  shows Matter ON blocked state only when the explicit demo scenario is enabled
-  shows the simulated Shelly runtime address in diagnostics
-  exports diagnostics summary
-```
+Installed climate automations use a persistent per-installation model binding a
+stable app installation id to Shelly identity/address, script identity/hash,
+sensor identity and rule configuration. Dashboard/detail runtime state is read
+from the Shelly controller rather than silently substituting phone BLE data.
+Pure time automation uses native Shelly schedules and must not compete with a
+climate script for the same relay.
 
-The demo path does not run real LAN scans, real relay commands, or real BLE runtime
-discovery. The hardware setup flow is no longer demo-only: it can use local
-Shelly RPC for manual IP checks, LAN scanning, script upload, diagnostics, and a
-temporary Shelly-side BLE discovery script.
+The hardware setup flow remains available for real local setup and diagnostics:
+manual Shelly checks, bounded LAN scanning, phone BLE, Shelly-side temporary BLE
+discovery, PVVX operations, generated-script installation, safe relay testing,
+and recovery. The demo adapters remain for hardware-free development; they are
+not the runtime architecture.
 
 Shelly LAN discovery belongs to the hardware setup flow, not directly to React
 components. The flow builds the IPv4 candidate list, removes already saved Shelly
@@ -154,6 +157,35 @@ relay OFF before scanning, stops the main automation while discovery runs, polls
 `/script/<id>/ble-scan`, and stops the discovery script when the modal closes.
 If the automation script was running before discovery, the app starts it again
 after the scan is closed.
+
+## UI quality boundary
+
+Mobile styling should use generated `--lcl-*` design tokens and shared classes.
+Production mobile TSX must not introduce ad-hoc inline `style={{...}}` blocks or
+hand-authored SVG icons; use real Tabler components for standard actions. The UX
+quality gate enforces these rules together with tokenized colors, borders,
+z-indexes, responsive behavior and modal sizing. `pnpm tokens:build` must remain
+idempotent with no generated diff.
+
+## Known refactor boundary
+
+`ShellySetupPage` has been split so reusable/presentational Shelly formatting,
+input UI and saved-device card rendering live in `ShellySetupPresentation.tsx`.
+The remaining high-concentration seam is `useHardwareSetupFlow.ts`. It owns many
+stateful hardware operations and safety-sensitive mutations, so it must not be
+split merely to reduce file length. Future extractions should follow cohesive
+runtime responsibilities while preserving the public flow contract and the
+hardware regression suite. Preferred boundaries are:
+
+```text
+saved Shelly control/status mutations
+Shelly BLE discovery session lifecycle
+phone BLE live scan + PVVX GATT operations
+installation/diagnostic orchestration
+```
+
+Do not mix such refactors with behavioral changes to relay safety, script
+ownership, scan cleanup or installation verification.
 
 ## Safety boundary
 

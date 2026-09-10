@@ -313,17 +313,19 @@ describe('AppRoutes user intent entry', () => {
       'xiaomi_lywsd03mmc_bthome_v2',
       'heating'
     );
-    useInstalledAutomationStore.getState().upsertInstallation(
-      createInstalledAutomation({
-        shelly: { id: 'shellyplugsg3-setup-complete', model: 'S3PL-00112EU', gen: 3 },
-        shellyName: 'Salon',
-        baseUrl: 'http://192.168.0.20/',
-        scriptId: 1,
-        scriptHash: 'lcl-setup-complete',
-        config,
-        nowMs: 1000
-      })
-    );
+    act(() => {
+      useInstalledAutomationStore.getState().upsertInstallation(
+        createInstalledAutomation({
+          shelly: { id: 'shellyplugsg3-setup-complete', model: 'S3PL-00112EU', gen: 3 },
+          shellyName: 'Salon',
+          baseUrl: 'http://192.168.0.20/',
+          scriptId: 1,
+          scriptHash: 'lcl-setup-complete',
+          config,
+          nowMs: 1000
+        })
+      );
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();

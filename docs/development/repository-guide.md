@@ -39,7 +39,7 @@ pnpm check:full
 Quality gates:
 
 ```bash
-pnpm quality:ux        # static UX/style guardrails
+pnpm quality:ux        # static UX/style guardrails, including tokenization + mobile icon/style hygiene
 pnpm quality:repo      # package boundaries + Android/release version consistency
 pnpm e2e:responsive   # responsive smoke across phone/tablet/desktop viewports
 pnpm check            # format, lint, UX/repo gates, typecheck, tests, coverage, build
@@ -56,22 +56,27 @@ pre-push   -> pnpm check
 
 ## Git branch model
 
-`main` is the primary branch:
+`main` is the canonical product branch and the only long-lived source of truth
+for development and releases. Releases are prepared/tagged from `main`, and
+GitHub Pages / official GitHub Releases are built from it.
 
-- All day-to-day development happens on `main`.
-- Releases are prepared and tagged directly on `main` (normal semver tags like `v2.0.7`).
-- GitHub Pages deployment and official GitHub Releases are built from `main`.
+For substantial feature, UX, refactor, hardware or audit work, prefer a
+short-lived `work/<topic>` branch created from the current `main`. Run focused
+checks while iterating, then `pnpm check:full` before integration. Integrate only
+verified history into `main` (fast-forward when possible, otherwise a reviewed
+PR/merge), and delete the temporary `work/*` branch after the integrated SHA is
+verified. Do not keep parallel long-lived development branches.
 
-The `work` branch was a previous development branch. The old "release-only snapshot on main, full history only on work" model has been retired.
-
-As of the v2.0.7 release, `main` contains the complete latest code (the content of the former `work` branch was merged in). From now on, treat `main` as the single source of truth for both development and releases.
+`agent-control` is control-plane state for Local Agent tasks and is not a product
+development branch. A deliberately created `freeze/*` branch may be retained as
+an immutable rollback/audit baseline; never develop on it.
 
 Recommended workflow:
 
-1. Work on `main` and run `pnpm check`.
-2. For a release: bump versions, run `pnpm release:android`, then verify artifacts. `LCL_RELEASE_VERSION` is an optional explicit override; otherwise the root `package.json` version is used.
-3. Push `main`, create GitHub Release + tag.
-4. (optional) The `work` branch can be kept for reference or deleted if no longer needed.
+1. Start from current `main`; use a short-lived `work/<topic>` branch for substantial changes.
+2. Run focused checks during iteration and `pnpm check:full` before integration.
+3. Verify the exact integrated SHA on `main`, then remove the temporary work branch.
+4. For a release: bump versions, run `pnpm release:android`, verify artifacts, then tag/release from `main`. `LCL_RELEASE_VERSION` is an optional explicit override; otherwise the root `package.json` version is used.
 
 CI runs on pushes and PRs targeting `main`. Pages deploy only from `main`.
 
@@ -210,7 +215,9 @@ still pass through the production decision logic.
 
 ## Demo mode and dev console
 
-The mobile setup UI is split into:
+The top-level mobile shell is intent/dashboard-first. Installed users navigate
+with `Klimat / Czas / Ustawienia`; hardware setup keeps the internal technical
+steps:
 
 ```text
 Shelly -> Termometry -> Reguła -> Diag

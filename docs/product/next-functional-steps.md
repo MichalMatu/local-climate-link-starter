@@ -12,6 +12,28 @@ This document is the canonical roadmap for the next product phase. It narrows th
 older broad extension list to the work that should happen before commercial
 packaging. `docs/plan.md` remains the MVP/history document.
 
+## Implementation checkpoint — 2026-09-10 / v2.0.10 line
+
+The roadmap below records the rationale that led to the current architecture.
+The following enabling/product slices are now implemented and should be treated
+as the baseline rather than future work:
+
+- persistent per-installation identity/configuration,
+- intent-first entry and an installed-automation Dashboard,
+- stable per-installation detail management,
+- shared `Klimat / Czas / Ustawienia` bottom navigation and full-page Settings,
+- explicit AUTO/MANUAL + relay controls with exact-script safety checks,
+- native Shelly schedule ownership for pure time automation,
+- progressive disclosure for advanced/service diagnostics,
+- completed physical-button validation preserving native momentary behavior.
+
+Near-term quality/product follow-ups should stay narrow: preserve truthful
+runtime telemetry when controller state changes, decide whether history data
+justifies a compact chart instead of fabricating/staling values, and continue
+reducing hardware-setup composition debt along the documented responsibility
+boundaries. Do not re-open the stable runtime safety model merely to simplify UI
+code.
+
 ## Product direction
 
 Local Climate Link is no longer best described as only a thermostat. The stable
