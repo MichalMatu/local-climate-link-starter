@@ -1,0 +1,16 @@
+{
+  "id": "20260910-final-e2e-overflow-diagnose-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; BASE=408f4e49170b0d5919c812a5fdbd3cf3eb4183f0; git fetch --prune origin; git checkout -B work/final-quality-audit-20260910 origin/work/final-quality-audit-20260910; git reset --hard $BASE; git clean -fd; test \"$(git rev-parse HEAD)\" = \"$BASE\"; test -z \"$(git status --porcelain)\"; echo DIAG_START_SHA=$(git rev-parse HEAD)",
+    "set -e; cp apps/mobile/e2e/responsive.spec.ts /tmp/responsive.spec.ts.final-backup; python3 - <<'PY'\nfrom pathlib import Path\np=Path('apps/mobile/e2e/responsive.spec.ts')\ns=p.read_text()\nold='  expect(overflow.documentOverflow).toBeLessThanOrEqual(1);\\n  expect(overflow.offenders).toEqual([]);'\nnew='  console.log(`OVERFLOW_DIAG=${JSON.stringify(overflow)}`);\\n  expect(overflow.documentOverflow).toBeLessThanOrEqual(1);\\n  expect(overflow.offenders).toEqual([]);'\nassert old in s\np.write_text(s.replace(old,new,1))\nPY\nset +e; pnpm --filter @lcl/mobile exec playwright test -c playwright.config.ts --grep 'daily time automation installs and renders on phone$' --reporter=line 2>&1 | tee /tmp/lcl-overflow-diag.log; TEST_EXIT=${PIPESTATUS[0]}; set -e; grep 'OVERFLOW_DIAG=' /tmp/lcl-overflow-diag.log || true; cp /tmp/responsive.spec.ts.final-backup apps/mobile/e2e/responsive.spec.ts; git diff --check; test -z \"$(git status --porcelain)\"; echo TEST_EXIT=$TEST_EXIT; echo E2E_OVERFLOW_DIAG_DONE"
+  ]
+}
