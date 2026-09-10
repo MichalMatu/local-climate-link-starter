@@ -1,0 +1,17 @@
+{
+  "id": "20260910-extract-shelly-presentation-v3",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 3000,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; BASE=412906bb6cd5d9275ae651c12428edac664e9bdc; git fetch --prune origin; git checkout -B work/final-quality-audit-20260910 origin/work/final-quality-audit-20260910; git reset --hard $BASE; git clean -fd; test \"$(git rev-parse HEAD)\" = \"$BASE\"; test -z \"$(git status --porcelain)\"; echo START_SHA=$(git rev-parse HEAD)",
+    "set -e; git show origin/agent-control:.agent/scripts/extract-shelly-presentation-v1.py > /tmp/extract-shelly-presentation-v1.py; python3 /tmp/extract-shelly-presentation-v1.py; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx scripts/quality/ux-gate.mjs; git diff --check; test -f apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx; LINES=$(wc -l < apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx); echo SHELLY_PAGE_LINES=$LINES; test $LINES -lt 1200; grep -q 'export const SavedShellyDeviceCard' apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx; grep -q 'export const formatNullableMetric' apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx; pnpm quality:ux; pnpm --filter @lcl/mobile lint; pnpm --filter @lcl/mobile typecheck; pnpm --filter @lcl/mobile test; echo SHELLY_PRESENTATION_TESTS_OK",
+    "set -e; git add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx scripts/quality/ux-gate.mjs; git commit -m \"refactor(mobile): split Shelly setup presentation\"; git push -u origin HEAD:work/final-quality-audit-20260910; git fetch origin; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/final-quality-audit-20260910)\"; test -z \"$(git status --porcelain)\"; echo SHELLY_PRESENTATION_SHA=$(git rev-parse HEAD)"
+  ]
+}
