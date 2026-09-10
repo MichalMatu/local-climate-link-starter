@@ -36,9 +36,7 @@ type InstallationDetailScreenProps = {
 type DetailHealthTone = 'ok' | 'warning' | 'offline' | 'paused';
 
 const healthClass = (tone: DetailHealthTone) =>
-  `automation-health automation-health--${
-    tone === 'warning' ? 'attention' : tone
-  }`;
+  `automation-health automation-health--${tone === 'warning' ? 'attention' : tone}`;
 
 const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
   installationThresholdSummary(installation);

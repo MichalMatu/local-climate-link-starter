@@ -4,11 +4,7 @@ type RefreshIconButtonProps = {
   onRefresh(): void;
 };
 
-export const RefreshIconButton = ({
-  busy,
-  label,
-  onRefresh
-}: RefreshIconButtonProps) => (
+export const RefreshIconButton = ({ busy, label, onRefresh }: RefreshIconButtonProps) => (
   <button
     aria-busy={busy}
     aria-label={label}
