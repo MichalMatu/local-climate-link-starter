@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-final-mobile-hygiene-fix-v2",
+  "task_digest": "9cfd5387c671c545a64d1c61617118b0bfefca04afc0c0e6dd635cb8fe82518b",
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T18:05:27.802368+00:00",
+  "attempt_id": "fce4885045343b5ff23c6a54",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 87476,
+  "updated_at": "2026-09-10T18:05:27.802440+00:00",
+  "pid": 87476
+}
