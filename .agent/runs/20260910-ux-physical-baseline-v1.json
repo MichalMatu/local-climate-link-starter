@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 4,
-  "command": "set -e; adb start-server >/dev/null; DEVICES=$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}'); test \"$DEVICES\" = \"RFCT70L7E8J\"; MODEL=$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r'); test \"$MODEL\" = \"SM-S906B\"; adb -s RFCT70L7E8J shell pm path link.localclimate.app >/dev/null; echo PHONE_OK=$MODEL; adb -s RFCT70L7E8J shell dumpsys package link.localclimate.app | grep -E 'versionCode=|versionName=' | head -4",
-  "pid": 21471,
+  "command": "set -e; mkdir -p artifacts/ui-audit/physical-20260910; adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; adb -s RFCT70L7E8J shell am start -W -n link.localclimate.app/.MainActivity | tee /tmp/lcl-ux-launch.txt; grep -q 'Status: ok' /tmp/lcl-ux-launch.txt; sleep 2; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/01-current-launch.png; adb -s RFCT70L7E8J shell uiautomator dump /sdcard/lcl-window.xml >/dev/null; adb -s RFCT70L7E8J pull /sdcard/lcl-window.xml artifacts/ui-audit/physical-20260910/01-current-launch.xml >/dev/null; test -s artifacts/ui-audit/physical-20260910/01-current-launch.png; echo SCREENSHOT_OK; sed -n '1,40p' artifacts/ui-audit/physical-20260910/01-current-launch.xml",
+  "pid": 21551,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T07:49:49.170379+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T07:49:53.311430+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260910-ux-physical-baseline-v1",
@@ -18,5 +18,5 @@
   "task_digest": "d9bcfea9a94362ad5e12526e932c2ecbbc01e6c31183a4a6b64c9e567c95d0f0",
   "daemon_version": "4.18.19",
   "daemon_pid": 21229,
-  "updated_at": "2026-09-10T07:49:49.247615+00:00"
+  "updated_at": "2026-09-10T07:49:53.387306+00:00"
 }
