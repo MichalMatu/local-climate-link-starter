@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-branch-cleanup-audit-unique-v1",
+  "task_digest": "8b274bce7f29c33db952a9f4603906572a43bf585496e44c5a13da7b77c60468",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-10T16:12:31.804181+00:00",
+  "attempt_id": "e738c221f77c42a64c604393",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 82732,
+  "updated_at": "2026-09-10T16:12:31.804320+00:00",
+  "pid": 82732
+}
