@@ -242,6 +242,7 @@ describe('AppRoutes user intent entry', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+    expect(document.querySelector('.app-settings-trigger')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-time' }));
     expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
@@ -274,9 +275,11 @@ describe('AppRoutes user intent entry', () => {
       })
     );
 
-    renderRoutes();
+    const view = renderRoutes();
+    expect(view.container.querySelector('.app-settings-trigger')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
 
+    expect(view.container.querySelector('.app-settings-trigger')).toBeNull();
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(

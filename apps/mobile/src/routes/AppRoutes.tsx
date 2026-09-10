@@ -153,7 +153,7 @@ export const AppRoutes = () => {
   );
 
   if (route.type === 'settings') {
-    return withSettingsTrigger(
+    return (
       <AppSettingsScreen
         onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
@@ -179,7 +179,7 @@ export const AppRoutes = () => {
         <SetupIntentScreen showManage={false} onSelect={selectIntent} />
       );
     }
-    return withSettingsTrigger(
+    return (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
         onAddAutomation={() => navigate({ type: 'intent' })}
@@ -192,7 +192,7 @@ export const AppRoutes = () => {
   }
 
   if (route.type === 'installation') {
-    return withSettingsTrigger(
+    return (
       <InstallationDetailScreen
         installationId={route.installationId}
         onBack={() => navigate({ type: 'dashboard' })}
