@@ -65,7 +65,10 @@ export const AppRoutes = () => {
 
   useEffect(() => {
     hasInstallationsRef.current = installations.length > 0;
-  }, [installations.length]);
+    if (installations.length === 0 && routeRef.current.type === 'dashboard') {
+      navigate({ type: 'intent' });
+    }
+  }, [installations.length, navigate]);
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'android') {
