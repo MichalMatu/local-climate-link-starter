@@ -1,6 +1,7 @@
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useTimeAutomationRuntime } from '../flows/time-automation/useTimeAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
+import { RefreshIconButton } from '../components/RefreshIconButton.js';
 
 type TimeAutomationCardProps = {
   installation: TimeInstalledAutomation;
@@ -42,11 +43,18 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
   return (
     <article className="automation-card">
       <header className="automation-card__header">
-        <div>
-          <p className="automation-card__eyebrow">{t('time.family')}</p>
+        <div className="automation-card__identity">
+          <div className="automation-status-row">
+            <span className={healthClass(state)}>{stateLabel}</span>
+            <span className="automation-status-mode">{t('time.family')}</span>
+          </div>
           <h2>{installation.shelly.name}</h2>
         </div>
-        <span className={healthClass(state)}>{stateLabel}</span>
+        <RefreshIconButton
+          busy={query.isFetching}
+          label={t('common.refresh')}
+          onRefresh={() => void query.refetch()}
+        />
       </header>
 
       <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
@@ -90,14 +98,6 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
             onClick={() => onOpen(installation.id)}
           >
             {t('dashboard.openSystem')}
-          </button>
-          <button
-            className="secondary-action"
-            type="button"
-            disabled={query.isFetching}
-            onClick={() => void query.refetch()}
-          >
-            {t('common.refresh')}
           </button>
         </div>
       </footer>
