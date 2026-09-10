@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-ux-control-tokens-verify-v3",
+  "task_digest": "7381b7b08a012b1d422481ac4c80baa55c706ba9645916f138c7d83751f865af",
+  "idle_timeout": 300,
+  "task_timeout": 3000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T03:06:39.227548+00:00",
+  "attempt_id": "cdef943f2addb78412c2d6d8",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 87301,
+  "updated_at": "2026-09-10T03:06:39.227825+00:00",
+  "pid": 87301
+}
