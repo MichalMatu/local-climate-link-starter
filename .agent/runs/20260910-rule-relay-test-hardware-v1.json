@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 4,
-  "command": "pnpm --filter @lcl/shelly-client build",
-  "pid": 924,
+  "command": "set -e; git show origin/agent-control:.agent/checks/20260910-relay-test-hardware.mjs > /tmp/lcl-relay-test-hardware.mjs; node /tmp/lcl-relay-test-hardware.mjs",
+  "pid": 988,
   "timeout": 600,
   "idle_timeout": 180,
   "memory_limit_mb": 2048,
-  "started_at": "2026-09-10T05:05:58.045129+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T05:06:00.045383+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260910-rule-relay-test-hardware-v1",
@@ -18,5 +18,5 @@
   "task_digest": "1f80f151aa17f06c2117828ea88f0f0f1bacb04f4ff12912374d4763ab1bde15",
   "daemon_version": "4.18.19",
   "daemon_pid": 742,
-  "updated_at": "2026-09-10T05:05:58.125594+00:00"
+  "updated_at": "2026-09-10T05:06:00.112700+00:00"
 }
