@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-extract-shelly-presentation-diagnose-v2",
+  "task_digest": "04a56c5d39220cd16d67e9a3f24b402c47d72f907c85fd662e087862475f8cc3",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T18:20:28.197313+00:00",
+  "attempt_id": "9544a045e5c648a9b631dc40",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 1790,
+  "updated_at": "2026-09-10T18:20:28.197521+00:00",
+  "pid": 1790
+}
