@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-final-release-quality-v2",
+  "task_digest": "406b2aa1a2f88d8b1121ac675b56c1a4c7b0881538a7226633a85773c1f0cb1f",
+  "idle_timeout": 600,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T18:51:21.502483+00:00",
+  "attempt_id": "e500d217ec335ea3a0014341",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 29284,
+  "updated_at": "2026-09-10T18:51:21.502598+00:00",
+  "pid": 29284
+}
