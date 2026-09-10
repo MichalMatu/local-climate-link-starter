@@ -1,0 +1,16 @@
+{
+  "id": "20260910-final-mobile-hygiene-diagnose-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; BASE=6144d8a07720e278118d4c3051c7a8042e214220; git fetch --prune origin; git checkout -B work/final-quality-audit-20260910 origin/work/final-quality-audit-20260910; test \"$(git rev-parse HEAD)\" = \"$BASE\"; test -z \"$(git status --porcelain)\"; echo DIAG_START_SHA=$(git rev-parse HEAD)",
+    "set -e; git show origin/agent-control:.agent/scripts/final-mobile-hygiene-fix-v1.py > /tmp/final-mobile-hygiene-fix-v1.py; python3 /tmp/final-mobile-hygiene-fix-v1.py; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/theme/theme.css scripts/quality/ux-gate.mjs; git diff --check; echo '=== RAW_SVG ==='; RAW_SVG=$(git grep -n '<svg' -- apps/mobile/src | grep -E '\\.tsx:' | grep -v '/__tests__/' || true); printf '%s\n' \"$RAW_SVG\"; test -z \"$RAW_SVG\"; echo GATE_RAW_SVG_OK; echo '=== INLINE_STYLE ==='; INLINE=$(git grep -n 'style={{' -- apps/mobile/src | grep -E '\\.tsx:' | grep -v '/__tests__/' || true); printf '%s\n' \"$INLINE\"; test -z \"$INLINE\"; echo GATE_INLINE_STYLE_OK; echo '=== LEGACY_GEAR ==='; GEAR=$(git grep -n 'SettingsGearIcon' -- apps/mobile/src || true); printf '%s\n' \"$GEAR\"; test -z \"$GEAR\"; echo GATE_LEGACY_GEAR_OK; pnpm quality:ux; echo QUALITY_UX_OK; pnpm --filter @lcl/mobile lint; echo LINT_OK; pnpm --filter @lcl/mobile typecheck; echo TYPECHECK_OK; pnpm --filter @lcl/mobile test -- hardware-setup; echo TEST_OK; git reset --hard HEAD; test -z \"$(git status --porcelain)\"; echo HYGIENE_DIAG_OK"
+  ]
+}
