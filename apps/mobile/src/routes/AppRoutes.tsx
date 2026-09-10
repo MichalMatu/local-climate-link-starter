@@ -104,22 +104,32 @@ export const AppRoutes = () => {
     };
   }, [navigate]);
 
+  const selectIntent = (intent: SetupIntent) => {
+    if (intent === 'manage') {
+      if (installations.length > 0) {
+        navigate({ type: 'dashboard' });
+      }
+      return;
+    }
+    navigate({ type: 'setup', intent });
+  };
+
   if (route.type === 'intent') {
     return (
       <SetupIntentScreen
         {...(installations.length > 0
           ? { onCancel: () => navigate({ type: 'dashboard' }) }
           : {})}
-        onSelect={(intent) =>
-          navigate(
-            intent === 'manage' ? { type: 'dashboard' } : { type: 'setup', intent }
-          )
-        }
+        showManage={installations.length > 0}
+        onSelect={selectIntent}
       />
     );
   }
 
   if (route.type === 'dashboard') {
+    if (installations.length === 0) {
+      return <SetupIntentScreen showManage={false} onSelect={selectIntent} />;
+    }
     return (
       <AutomationDashboardScreen
         onAddAutomation={() => navigate({ type: 'intent' })}

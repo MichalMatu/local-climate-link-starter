@@ -165,19 +165,16 @@ describe('AppRoutes user intent entry', () => {
     await waitFor(() => expect(nativeAppMocks.exitApp).toHaveBeenCalledTimes(1));
   });
 
-  it('returns from an empty Android management dashboard to the goal', async () => {
+  it('keeps zero-installation Android state on the canonical goal screen', async () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
     renderRoutes();
     await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalledTimes(1));
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
-    );
-    expect(screen.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
-
-    act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
-    expect(nativeAppMocks.exitApp).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
+    ).toBeNull();
+    expect(screen.queryByText('Nie masz jeszcze zapisanej automatyki')).toBeNull();
   });
 
   it('opens the dashboard immediately when an installed automation already exists', () => {
@@ -236,8 +233,8 @@ describe('AppRoutes user intent entry', () => {
     expect(screen.getByRole('button', { name: /Sterować wilgotnością/ })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
     expect(
-      screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
-    ).toBeVisible();
+      screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
+    ).toBeNull();
   });
 
   it('opens time setup and returns to the dashboard after setup completion', async () => {
@@ -246,19 +243,50 @@ describe('AppRoutes user intent entry', () => {
     fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
 
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    useInstalledAutomationStore.getState().upsertInstallation(
+      createInstalledAutomation({
+        shelly: { id: 'shellyplugsg3-setup-complete', model: 'S3PL-00112EU', gen: 3 },
+        shellyName: 'Salon',
+        baseUrl: 'http://192.168.0.20/',
+        scriptId: 1,
+        scriptHash: 'lcl-setup-complete',
+        config,
+        nowMs: 1000
+      })
+    );
+
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   });
 
-  it('opens the management dashboard from the user goal', () => {
-    renderRoutes();
+  it('shows management only when an installation exists', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    useInstalledAutomationStore.getState().upsertInstallation(
+      createInstalledAutomation({
+        shelly: { id: 'shellyplugsg3-manage', model: 'S3PL-00112EU', gen: 3 },
+        shellyName: 'Salon',
+        baseUrl: 'http://192.168.0.20/',
+        scriptId: 1,
+        scriptHash: 'lcl-manage',
+        config,
+        nowMs: 1000
+      })
+    );
 
+    renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
     fireEvent.click(
       screen.getByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     );
 
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
   });
 
   it('opens the selected goal and can return to goal selection', async () => {

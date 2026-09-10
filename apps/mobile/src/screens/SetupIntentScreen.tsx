@@ -4,6 +4,7 @@ import type { SetupIntent } from '../flows/setup-intent.js';
 type SetupIntentScreenProps = {
   onSelect(intent: SetupIntent): void;
   onCancel?(): void;
+  showManage?: boolean;
 };
 
 const INTENT_CHOICES = [
@@ -29,7 +30,11 @@ const INTENT_CHOICES = [
   }
 ] as const;
 
-export const SetupIntentScreen = ({ onSelect, onCancel }: SetupIntentScreenProps) => {
+export const SetupIntentScreen = ({
+  onSelect,
+  onCancel,
+  showManage = true
+}: SetupIntentScreenProps) => {
   const { t } = useTranslation();
 
   return (
@@ -51,20 +56,22 @@ export const SetupIntentScreen = ({ onSelect, onCancel }: SetupIntentScreenProps
       </header>
 
       <section className="intent-choice-grid" aria-label={t('intent.choiceLabel')}>
-        {INTENT_CHOICES.map((choice) => (
-          <button
-            key={choice.id}
-            className="intent-choice"
-            type="button"
-            onClick={() => onSelect(choice.id)}
-          >
-            <strong>{t(choice.titleKey)}</strong>
-            <span>{t(choice.descriptionKey)}</span>
-            <span className="intent-choice__action" aria-hidden="true">
-              {t('intent.open')}
-            </span>
-          </button>
-        ))}
+        {INTENT_CHOICES.filter((choice) => showManage || choice.id !== 'manage').map(
+          (choice) => (
+            <button
+              key={choice.id}
+              className="intent-choice"
+              type="button"
+              onClick={() => onSelect(choice.id)}
+            >
+              <strong>{t(choice.titleKey)}</strong>
+              <span>{t(choice.descriptionKey)}</span>
+              <span className="intent-choice__action" aria-hidden="true">
+                {t('intent.open')}
+              </span>
+            </button>
+          )
+        )}
       </section>
     </main>
   );

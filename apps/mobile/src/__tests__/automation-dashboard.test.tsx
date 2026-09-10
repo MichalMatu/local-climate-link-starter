@@ -202,12 +202,12 @@ describe('AutomationDashboardScreen', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows a useful empty state', () => {
+  it('does not duplicate the canonical zero-installation state', () => {
     const { onAddAutomation } = renderDashboard();
 
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Skonfiguruj pierwszy system' }));
+    expect(screen.queryByText('Nie masz jeszcze zapisanej automatyki')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
     expect(onAddAutomation).toHaveBeenCalledTimes(1);
   });
 
@@ -226,7 +226,7 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Salon')).toBeVisible();
     expect(screen.getByText('Xiaomi salon')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
-    expect(screen.getByText('ON')).toBeVisible();
+    expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
   });

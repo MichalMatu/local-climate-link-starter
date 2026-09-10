@@ -2,11 +2,8 @@
   position: relative;
 }
 
-.app-shell > .demo-shell {
-  padding-top: calc(
-    var(--lcl-fluid-shell-padding) + var(--lcl-size-control-min-height) +
-      var(--lcl-spacing-sm)
-  );
+.app-shell > .demo-shell > .demo-header {
+  padding-right: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-sm));
 }
 
 .app-settings-trigger {

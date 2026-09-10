@@ -12,6 +12,7 @@ import {
 } from '../flows/installations/presentation.js';
 import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
 import {
+  useInstalledAutomationActions,
   useInstalledAutomationControl,
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
@@ -33,38 +34,51 @@ const ClimateAutomationCard = ({
 }) => {
   const { t } = useTranslation();
   const query = useInstalledAutomationDiagnostics(installation);
-  const controlFallback = useInstalledAutomationControl(installation, {
-    enabled: query.isError
-  });
+  const control = useInstalledAutomationControl(installation);
+  const action = useInstalledAutomationActions(installation);
 
   const snapshot = query.data;
   const health = snapshot ? installedAutomationHealth(snapshot) : null;
-  const relayState = snapshot?.plug?.relayState ?? snapshot?.diagnostics.relayState;
+  const controlStatus = control.data;
+  const controlMatch = controlStatus
+    ? installedAutomationScriptMatch(installation, controlStatus)
+    : null;
+  const controlsVerified = controlMatch === 'matched';
+  const manualControl = controlsVerified && controlStatus?.automationMode === 'manual';
+  const relayState =
+    controlStatus?.relayOn ??
+    snapshot?.plug?.relayState ??
+    snapshot?.diagnostics.relayState;
+
+  const refresh = () => {
+    void Promise.all([query.refetch(), control.refetch()]);
+  };
 
   return (
     <article className="automation-card">
       <header className="automation-card__header">
         <div className="automation-card__identity">
           <div className="automation-status-row">
-            {query.isError ? (
-              controlFallback.data &&
-              installedAutomationScriptMatch(installation, controlFallback.data) ===
-                'matched' &&
-              controlFallback.data.automationMode === 'manual' ? (
-                <span className="automation-health automation-health--paused">
-                  {t('dashboard.health.paused')}
-                </span>
-              ) : controlFallback.data ? (
-                <span className="automation-health automation-health--attention">
-                  {t('dashboard.health.attention')}
-                </span>
-              ) : controlFallback.isPending ? (
+            {controlsVerified && controlStatus?.automationMode === 'manual' ? (
+              <span className="automation-health automation-health--paused">
+                {t('dashboard.health.paused')}
+              </span>
+            ) : controlMatch !== null && controlMatch !== 'matched' ? (
+              <span className="automation-health automation-health--attention">
+                {t('dashboard.health.attention')}
+              </span>
+            ) : query.isError ? (
+              control.isPending ? (
                 <span className="automation-health automation-health--unknown">
                   {t('dashboard.health.loading')}
                 </span>
-              ) : (
+              ) : control.isError ? (
                 <span className="automation-health automation-health--offline">
                   {t('dashboard.health.offline')}
+                </span>
+              ) : (
+                <span className="automation-health automation-health--attention">
+                  {t('dashboard.health.attention')}
                 </span>
               )
             ) : query.isPending ? (
@@ -85,9 +99,9 @@ const ClimateAutomationCard = ({
           <h2>{installation.shelly.name}</h2>
         </div>
         <RefreshIconButton
-          busy={query.isFetching}
+          busy={query.isFetching || control.isFetching}
           label={t('common.refresh')}
-          onRefresh={() => void query.refetch()}
+          onRefresh={refresh}
         />
       </header>
 
@@ -142,6 +156,66 @@ const ClimateAutomationCard = ({
               : t('dashboard.liveFromShelly')}
         </span>
         <div className="automation-card__actions">
+          <div className="automation-card__controls">
+            <div
+              className="automation-control-group"
+              role="group"
+              aria-label={t('detail.automation')}
+            >
+              <button
+                className="automation-control-button"
+                type="button"
+                aria-pressed={
+                  controlsVerified && controlStatus?.automationMode === 'auto'
+                }
+                disabled={action.isPending || !controlsVerified}
+                onClick={() => {
+                  if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
+                }}
+              >
+                AUTO
+              </button>
+              <button
+                className="automation-control-button"
+                type="button"
+                aria-pressed={manualControl}
+                disabled={action.isPending || !controlsVerified}
+                onClick={() => {
+                  if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
+                }}
+              >
+                MANUAL
+              </button>
+            </div>
+            <div
+              className="automation-control-group"
+              role="group"
+              aria-label={t('dashboard.output')}
+            >
+              <button
+                className="automation-control-button"
+                type="button"
+                aria-pressed={manualControl && controlStatus?.relayOn === true}
+                disabled={action.isPending || !manualControl}
+                onClick={() => {
+                  if (!controlStatus?.relayOn) action.mutate('on');
+                }}
+              >
+                ON
+              </button>
+              <button
+                className="automation-control-button"
+                type="button"
+                aria-pressed={manualControl && controlStatus?.relayOn === false}
+                disabled={action.isPending || !manualControl}
+                onClick={() => {
+                  if (controlStatus?.relayOn) action.mutate('off');
+                }}
+              >
+                OFF
+              </button>
+            </div>
+          </div>
           <button
             className="secondary-action"
             type="button"
@@ -150,6 +224,11 @@ const ClimateAutomationCard = ({
             {t('dashboard.openSystem')}
           </button>
         </div>
+        {action.isError && (
+          <span className="automation-control-error" role="alert">
+            {t('detail.actionFailed')}
+          </span>
+        )}
       </footer>
     </article>
   );
@@ -189,27 +268,15 @@ export const AutomationDashboardScreen = ({
         </button>
       </header>
 
-      {installations.length === 0 ? (
-        <section className="demo-panel dashboard-empty">
-          <h2>{t('dashboard.emptyTitle')}</h2>
-          <p>{t('dashboard.emptyDescription')}</p>
-          <div className="action-row">
-            <button className="primary-action" type="button" onClick={onAddAutomation}>
-              {t('dashboard.configureFirst')}
-            </button>
-          </div>
-        </section>
-      ) : (
-        <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
-          {installations.map((installation) => (
-            <AutomationCard
-              key={installation.id}
-              installation={installation}
-              onOpen={onOpenInstallation}
-            />
-          ))}
-        </section>
-      )}
+      <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
+        {installations.map((installation) => (
+          <AutomationCard
+            key={installation.id}
+            installation={installation}
+            onOpen={onOpenInstallation}
+          />
+        ))}
+      </section>
     </main>
   );
 };

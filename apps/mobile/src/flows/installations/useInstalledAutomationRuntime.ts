@@ -1,7 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ClimateInstalledAutomation } from './model.js';
 import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
-import { readInstalledAutomationControlStatus } from './runtimeControl.js';
+import {
+  pauseInstalledAutomation,
+  readInstalledAutomationControlStatus,
+  resumeInstalledAutomation,
+  setInstalledAutomationRelayState
+} from './runtimeControl.js';
 
 const installationQueryIdentity = (installation: ClimateInstalledAutomation) =>
   [
@@ -50,3 +55,32 @@ export const useInstalledAutomationControl = (
     refetchInterval: 30_000,
     refetchOnWindowFocus: false
   });
+
+export type InstalledAutomationControlAction = 'auto' | 'manual' | 'on' | 'off';
+
+export const useInstalledAutomationActions = (
+  installation: ClimateInstalledAutomation
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (action: InstalledAutomationControlAction) => {
+      switch (action) {
+        case 'auto':
+          return resumeInstalledAutomation(installation);
+        case 'manual':
+          return pauseInstalledAutomation(installation);
+        case 'on':
+          return setInstalledAutomationRelayState(installation, true);
+        case 'off':
+          return setInstalledAutomationRelayState(installation, false);
+      }
+    },
+    onSuccess: (status) => {
+      queryClient.setQueryData(installedAutomationControlQueryKey(installation), status);
+      void queryClient.invalidateQueries({
+        queryKey: installedAutomationDiagnosticsQueryKey(installation)
+      });
+    }
+  });
+};
