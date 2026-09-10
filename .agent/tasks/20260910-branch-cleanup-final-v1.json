@@ -1,0 +1,16 @@
+{
+  "id": "20260910-branch-cleanup-final-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/ux-climate-detail-unify-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -eu; TARGET=516342b5b3f078773cc23e51d7bd4eecfb08f528; git fetch --prune origin; test \"$(git rev-parse origin/work/ux-climate-detail-unify-20260910)\" = \"$TARGET\"; test \"$(git rev-parse origin/main)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; test \"$(git rev-parse origin/freeze/working-baseline-20260910)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; git rev-parse origin/agent-control >/dev/null; REMOTE=$(git config --get remote.origin.url); case \"$REMOTE\" in *MichalMatu/local-climate-link-starter*) ;; *) echo \"unexpected remote: $REMOTE\"; exit 2;; esac; for b in work/final-visual-audit-20260910 work/fix-rule-relay-test-20260910 work/ui-baseline-audit-20260910 work/ui-detail-audit-20260910 work/ui-polish-target-20260910 work/ux-climate-delete-20260910 work/ux-climate-script-preview-20260910 work/ux-control-tokens-20260910 work/ux-detail-hierarchy-20260910 work/ux-nav-settings-20260910 work/ux-runtime-card-status-20260910; do git show-ref --verify --quiet \"refs/remotes/origin/$b\" || { echo \"missing expected branch $b\"; exit 3; }; done; test -f apps/mobile/src/__tests__/climate-delete.test.tsx; test -f apps/mobile/src/__tests__/script-preview.test.ts; test -f apps/mobile/src/__tests__/navigation-settings-regression.test.tsx; grep -q 'deleteInstalledAutomation' apps/mobile/src/__tests__/climate-delete.test.tsx; grep -q 'loadInstalledAutomationScriptSource' apps/mobile/src/__tests__/script-preview.test.ts; grep -q 'Ustawienia aplikacji' apps/mobile/src/__tests__/navigation-settings-regression.test.tsx; git diff --quiet; echo BRANCH_FINAL_GUARDS_OK",
+    "set -eu; git push origin --delete work/final-visual-audit-20260910 work/fix-rule-relay-test-20260910 work/ui-baseline-audit-20260910 work/ui-detail-audit-20260910 work/ui-polish-target-20260910 work/ux-climate-delete-20260910 work/ux-climate-script-preview-20260910 work/ux-control-tokens-20260910 work/ux-detail-hierarchy-20260910 work/ux-nav-settings-20260910 work/ux-runtime-card-status-20260910; git fetch --prune origin; test \"$(git rev-parse origin/work/ux-climate-detail-unify-20260910)\" = \"516342b5b3f078773cc23e51d7bd4eecfb08f528\"; test \"$(git rev-parse origin/main)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; test \"$(git rev-parse origin/freeze/working-baseline-20260910)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; git rev-parse origin/agent-control >/dev/null; COUNT=$(git for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | wc -l | tr -d ' '); test \"$COUNT\" = \"4\"; echo REMAINING_REMOTE_BRANCHES; git for-each-ref --format='%(refname:short)' refs/remotes/origin | sort; echo BRANCH_FINAL_CLEANUP_OK"
+  ]
+}
