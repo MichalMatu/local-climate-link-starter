@@ -1,0 +1,24 @@
+{
+  "id": "20260910-ux-control-tokens-verify-v3",
+  "mode": "commands",
+  "work_branch": "work/ux-control-tokens-20260910",
+  "allow_write": true,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 3000,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch --prune origin && git reset --hard origin/work/ux-control-tokens-20260910 && test \"$(git rev-parse HEAD)\" = \"90aced3bf885e45e0e471e11ff552aaaba202618\" && git status --short",
+    "python3 -c \"import base64;exec(base64.b64decode('CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKcnVsZSA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy9zY3JlZW5zL2hhcmR3YXJlLXNldHVwL3BhZ2VzL1J1bGVTZXR1cFBhZ2UudHN4IikKdGV4dCA9IHJ1bGUucmVhZF90ZXh0KCkKaW1wb3J0X21hcmtlciA9ICJpbXBvcnQgeyB1c2VDYWxsYmFjaywgdXNlRWZmZWN0LCB1c2VJZCwgdXNlUmVmLCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbiIKY29kZV9pbXBvcnQgPSAiaW1wb3J0IHsgQ29kZUljb24gfSBmcm9tICcuLi8uLi8uLi9jb21wb25lbnRzL2ljb25zL0NvZGVJY29uLmpzJztcbiIKYXNzZXJ0IGltcG9ydF9tYXJrZXIgaW4gdGV4dAphc3NlcnQgY29kZV9pbXBvcnQgbm90IGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShpbXBvcnRfbWFya2VyLCBpbXBvcnRfbWFya2VyICsgY29kZV9pbXBvcnQsIDEpCgpzdGFydF9tYXJrZXIgPSAiY29uc3QgR2VuZXJhdGVkU2NyaXB0SWNvbiA9ICgpID0+ICgiCm5leHRfbWFya2VyID0gImNvbnN0IFRyYXNoSWNvbiA9ICgpID0+ICgiCnN0YXJ0ID0gdGV4dC5pbmRleChzdGFydF9tYXJrZXIpCmVuZCA9IHRleHQuaW5kZXgobmV4dF9tYXJrZXIsIHN0YXJ0KQp0ZXh0ID0gdGV4dFs6c3RhcnRdICsgdGV4dFtlbmQ6XQphc3NlcnQgdGV4dC5jb3VudCgiPEdlbmVyYXRlZFNjcmlwdEljb24gLz4iKSA9PSAxCnRleHQgPSB0ZXh0LnJlcGxhY2UoIjxHZW5lcmF0ZWRTY3JpcHRJY29uIC8+IiwgIjxDb2RlSWNvbiAvPiIsIDEpCnJ1bGUud3JpdGVfdGV4dCh0ZXh0KQoKZGFzaGJvYXJkID0gUGF0aCgiYXBwcy9tb2JpbGUvc3JjL3NjcmVlbnMvQXV0b21hdGlvbkRhc2hib2FyZFNjcmVlbi50c3giKQp0ZXh0ID0gZGFzaGJvYXJkLnJlYWRfdGV4dCgpCm5lZWRsZSA9ICdjbGFzc05hbWU9InByaW1hcnktYWN0aW9uIiB0eXBlPSJidXR0b24iIG9uQ2xpY2s9e29uQWRkQXV0b21hdGlvbn0nCmFzc2VydCB0ZXh0LmNvdW50KG5lZWRsZSkgPj0gMQp0ZXh0ID0gdGV4dC5yZXBsYWNlKAogICAgbmVlZGxlLAogICAgJ2NsYXNzTmFtZT0icHJpbWFyeS1hY3Rpb24gZGFzaGJvYXJkLWFkZC1hY3Rpb24iIHR5cGU9ImJ1dHRvbiIgb25DbGljaz17b25BZGRBdXRvbWF0aW9ufScsCiAgICAxCikKZGFzaGJvYXJkLndyaXRlX3RleHQodGV4dCkKCmNzcyA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy90aGVtZS90aGVtZS5jc3MiKQp0ZXh0ID0gY3NzLnJlYWRfdGV4dCgpCmJhZF9zdGFydCA9ICIucnVsZS1kZXZlbG9wZXItYWN0aW9ucyAuaWNvbi1hY3Rpb25fX3N2ZyB7IgpzdGFydCA9IHRleHQuaW5kZXgoYmFkX3N0YXJ0KQplbmQgPSB0ZXh0LmluZGV4KCJ9XG4iLCBzdGFydCkgKyAyCmlmIHRleHRbZW5kOmVuZCsxXSA9PSAiXG4iOgogICAgZW5kICs9IDEKdGV4dCA9IHRleHRbOnN0YXJ0XSArIHRleHRbZW5kOl0KCm1hcmtlciA9ICIiIi5kYXNoYm9hcmQtaGVhZGVyIHsKICBhbGlnbi1pdGVtczogY2VudGVyOwp9CgoiIiIKYWRkaXRpb24gPSBtYXJrZXIgKyAiIiIuZGFzaGJvYXJkLWFkZC1hY3Rpb24gewogIG1pbi13aWR0aDogdmFyKC0tbGNsLXNpemUtYWN0aW9uLW1pbi13aWR0aCk7Cn0KCiIiIgphc3NlcnQgbWFya2VyIGluIHRleHQKYXNzZXJ0ICIuZGFzaGJvYXJkLWFkZC1hY3Rpb24geyIgbm90IGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShtYXJrZXIsIGFkZGl0aW9uLCAxKQpjc3Mud3JpdGVfdGV4dCh0ZXh0KQo='))\"",
+    "! grep -R --line-number --fixed-strings -- '--lcl-size-icon-sm' apps/mobile/src && grep -R --line-number --fixed-strings '<CodeIcon />' apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx && grep -R --line-number --fixed-strings 'dashboard-add-action' apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css",
+    "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css && pnpm format:check",
+    "pnpm --filter @lcl/mobile test && pnpm --filter @lcl/mobile lint && pnpm --filter @lcl/mobile typecheck && pnpm --filter @lcl/mobile build",
+    "pnpm e2e:responsive",
+    "git diff --check && git status --short",
+    "git add apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css && git commit -m \"fix(mobile): normalize action icon sizing\" && test -z \"$(git status --porcelain)\"",
+    "pnpm check",
+    "HUSKY=0 git push origin HEAD:work/ux-control-tokens-20260910 && echo VERIFIED_SHA=$(git rev-parse HEAD) && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-control-tokens-20260910)\""
+  ]
+}
