@@ -1,6 +1,16 @@
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { IconSettings } from '@tabler/icons-react';
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react';
+import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
@@ -27,16 +37,20 @@ const RouteFallback = () => {
 };
 
 type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
-type AppRoute =
+type PrimaryAppRoute =
   | { type: 'intent' }
   | { type: 'dashboard'; kind?: AppNavigationKind }
   | { type: 'setup'; intent: SetupRouteIntent }
   | { type: 'installation'; installationId: string };
+type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
 const resolveAndroidBackRoute = (
   route: AppRoute,
   hasInstallations: boolean
 ): AppRoute | null => {
+  if (route.type === 'settings') {
+    return route.returnTo;
+  }
   if (route.type === 'installation') {
     return { type: 'dashboard' };
   }
@@ -52,11 +66,8 @@ const resolveAndroidBackRoute = (
   return null;
 };
 
-type AppRoutesProps = {
-  onOpenSettings?: () => void;
-};
-
-export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
+export const AppRoutes = () => {
+  const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
   const [route, setRoute] = useState<AppRoute>(() =>
     installations.length > 0 ? { type: 'dashboard' } : { type: 'intent' }
@@ -67,6 +78,13 @@ export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
     routeRef.current = nextRoute;
     setRoute(nextRoute);
   }, []);
+  const openSettings = useCallback(() => {
+    const current = routeRef.current;
+    if (current.type === 'settings') {
+      return;
+    }
+    navigate({ type: 'settings', returnTo: current });
+  }, [navigate]);
 
   useEffect(() => {
     hasInstallationsRef.current = installations.length > 0;
@@ -119,8 +137,32 @@ export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
     navigate({ type: 'setup', intent });
   };
 
+  const withSettingsTrigger = (content: ReactNode) => (
+    <>
+      <button
+        className="app-settings-trigger"
+        type="button"
+        aria-label={t('settings.open')}
+        title={t('settings.open')}
+        onClick={openSettings}
+      >
+        <IconSettings className="app-settings-trigger__icon" aria-hidden="true" />
+      </button>
+      {content}
+    </>
+  );
+
+  if (route.type === 'settings') {
+    return withSettingsTrigger(
+      <AppSettingsScreen
+        onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
+        onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
+      />
+    );
+  }
+
   if (route.type === 'intent') {
-    return (
+    return withSettingsTrigger(
       <SetupIntentScreen
         {...(installations.length > 0
           ? { onCancel: () => navigate({ type: 'dashboard' }) }
@@ -133,32 +175,34 @@ export const AppRoutes = ({ onOpenSettings }: AppRoutesProps = {}) => {
 
   if (route.type === 'dashboard') {
     if (installations.length === 0) {
-      return <SetupIntentScreen showManage={false} onSelect={selectIntent} />;
+      return withSettingsTrigger(
+        <SetupIntentScreen showManage={false} onSelect={selectIntent} />
+      );
     }
-    return (
+    return withSettingsTrigger(
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
         onAddAutomation={() => navigate({ type: 'intent' })}
         onOpenInstallation={(installationId) =>
           navigate({ type: 'installation', installationId })
         }
-        {...(onOpenSettings ? { onOpenSettings } : {})}
+        onOpenSettings={openSettings}
       />
     );
   }
 
   if (route.type === 'installation') {
-    return (
+    return withSettingsTrigger(
       <InstallationDetailScreen
         installationId={route.installationId}
         onBack={() => navigate({ type: 'dashboard' })}
         onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
+        onOpenSettings={openSettings}
       />
     );
   }
 
-  return (
+  return withSettingsTrigger(
     <Suspense fallback={<RouteFallback />}>
       <HardwareSetupScreen
         setupIntent={route.intent}
