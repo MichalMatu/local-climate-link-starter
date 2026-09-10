@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-settings-page-v1",
+  "task_digest": "e6cdcb1975391ea4520ef1fa785c8dac6ea1ba9f46b2a5a51935b72486753993",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T16:39:51.769741+00:00",
+  "attempt_id": "4f19ce7b3caddf2843268b7a",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 8805,
+  "updated_at": "2026-09-10T16:39:51.769939+00:00",
+  "pid": 8805
+}
