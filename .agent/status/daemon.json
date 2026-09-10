@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.20",
   "state": "idle",
-  "pid": 89678,
-  "updated_at": "2026-09-10T14:49:46.481780+00:00",
+  "pid": 95222,
+  "updated_at": "2026-09-10T14:50:50.420153+00:00",
   "self_revision": "0bb99d790dbed19a528b4cb8ac238432134b5660",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 89678,
-  "supervisor_pid": 89088,
-  "last_task_id": "20260910-dashboard-remove-master-switch-v1",
+  "worker_pid": 95222,
+  "supervisor_pid": 94983,
   "execution_variant": "parallel"
 }
