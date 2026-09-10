@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260910-climate-detail-unify-recover-v1",
   "task_digest": "513ed40772fc5a77a1c7d3ed271da3d3eda57ebf9cf7da952b674c44c3061215",
-  "idle_timeout": 300,
-  "task_timeout": 3600,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T15:25:18.947767+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-10T15:25:22.022157+00:00",
   "attempt_id": "fe6c283a54a5717c2d264f48",
   "daemon_version": "4.18.20",
   "daemon_pid": 33822,
-  "updated_at": "2026-09-10T15:25:18.947844+00:00",
+  "updated_at": "2026-09-10T15:25:22.469313+00:00",
   "pid": 33822
 }
