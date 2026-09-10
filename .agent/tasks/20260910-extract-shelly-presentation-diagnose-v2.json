@@ -1,0 +1,16 @@
+{
+  "id": "20260910-extract-shelly-presentation-diagnose-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; BASE=412906bb6cd5d9275ae651c12428edac664e9bdc; git fetch --prune origin; git checkout -B work/final-quality-audit-20260910 origin/work/final-quality-audit-20260910; git reset --hard $BASE; git clean -fd; test \"$(git rev-parse HEAD)\" = \"$BASE\"; test -z \"$(git status --porcelain)\"; echo DIAG_START_SHA=$(git rev-parse HEAD)",
+    "set +e; git show origin/agent-control:.agent/scripts/extract-shelly-presentation-v1.py > /tmp/extract-shelly-presentation-v1.py; python3 /tmp/extract-shelly-presentation-v1.py; echo APPLY_EXIT=$?; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx scripts/quality/ux-gate.mjs; echo PRETTIER_EXIT=$?; git diff --check; echo DIFF_CHECK_EXIT=$?; test -f apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx; echo PRESENTATION_FILE_EXIT=$?; LINES=$(wc -l < apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx); echo SHELLY_PAGE_LINES=$LINES; test $LINES -lt 1200; echo LINE_GATE_EXIT=$?; git grep -n 'export const SavedShellyDeviceCard' -- apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx; echo EXPORT_GATE_EXIT=$?; pnpm quality:ux; echo QUALITY_UX_EXIT=$?; pnpm --filter @lcl/mobile typecheck; echo TYPECHECK_EXIT=$?; git reset --hard HEAD; git clean -fd; echo DIAG_DONE; exit 0"
+  ]
+}
