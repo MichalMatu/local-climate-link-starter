@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 6,
-  "command": "set -e; adb start-server >/dev/null; DEVICES=$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}'); test \"$DEVICES\" = \"RFCT70L7E8J\"; test \"$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\" = \"SM-S906B\"; adb -s RFCT70L7E8J install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; adb -s RFCT70L7E8J shell am start -W -n link.localclimate.app/.MainActivity | tee /tmp/lcl-dashboard-launch-v2.txt; grep -q 'Status: ok' /tmp/lcl-dashboard-launch-v2.txt; sleep 3; mkdir -p artifacts/ui-audit/physical-20260910; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/03-dashboard-polish-v2.png; test -s artifacts/ui-audit/physical-20260910/03-dashboard-polish-v2.png; echo PHONE_SCREENSHOT_OK",
-  "pid": 40062,
+  "command": "set -e; git status --short; git diff --stat; git add apps/mobile artifacts/ui-audit/physical-20260910/03-dashboard-polish-v2.png; git commit -m 'feat(ui): compact dashboard controls and routing'; git push origin HEAD:work/ux-dashboard-target-20260910; test -z \"$(git status --porcelain)\"; echo POLISH_SHA=$(git rev-parse HEAD)",
+  "pid": 40244,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T08:09:06.669869+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-10T08:09:15.601298+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260910-ux-dashboard-polish-v2",
@@ -18,5 +18,5 @@
   "task_digest": "751a2162669d80dfd326de44aa3d9f86a691bcaa55a79a7dd3d2ab4b715c96ca",
   "daemon_version": "4.18.19",
   "daemon_pid": 37933,
-  "updated_at": "2026-09-10T08:09:06.741757+00:00"
+  "updated_at": "2026-09-10T08:09:15.669918+00:00"
 }
