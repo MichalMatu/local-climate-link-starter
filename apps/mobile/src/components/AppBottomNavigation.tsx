@@ -5,7 +5,7 @@ import './AppBottomNavigation.css';
 export type AppNavigationKind = 'climate' | 'time';
 
 type AppBottomNavigationProps = {
-  activeKind: AppNavigationKind;
+  activeKind: AppNavigationKind | 'settings';
   onOpenClimate(): void;
   onOpenTime(): void;
   onOpenSettings?: () => void;
@@ -54,8 +54,8 @@ export const AppBottomNavigation = ({
         className="dashboard-bottom-nav__item app-bottom-nav__item"
         type="button"
         data-dashboard-kind="settings"
-        aria-haspopup="dialog"
-        disabled={!onOpenSettings}
+        aria-current={activeKind === 'settings' ? 'page' : undefined}
+        disabled={!onOpenSettings && activeKind !== 'settings'}
         onClick={() => onOpenSettings?.()}
       >
         <IconSettings
