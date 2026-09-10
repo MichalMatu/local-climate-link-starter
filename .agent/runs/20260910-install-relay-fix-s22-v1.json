@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-install-relay-fix-s22-v1",
+  "task_digest": "19a7c57406d7a27c63a674f10b6446ebd87656554812632d3dc1584d0b18660b",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T05:18:08.228342+00:00",
+  "attempt_id": "6c8a1d3a316ddbfd3f89894e",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 9972,
+  "updated_at": "2026-09-10T05:18:08.228467+00:00",
+  "pid": 9972
+}
