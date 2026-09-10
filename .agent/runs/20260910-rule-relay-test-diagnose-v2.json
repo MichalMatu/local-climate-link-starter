@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 3,
-  "command": "python3 - <<'PY'\nimport json, time, urllib.parse, urllib.request\nBASE='http://192.168.0.16/rpc/'\nNAME='Local Climate Link Thermostat'\ndef rpc(method, **params):\n    cooked={k: ('true' if v is True else 'false' if v is False else v) for k,v in params.items()}\n    url=BASE+method\n    if cooked:\n        url += '?' + urllib.parse.urlencode(cooked)\n    with urllib.request.urlopen(url, timeout=5) as r:\n        return json.loads(r.read().decode())\ndef output():\n    return bool(rpc('Switch.GetStatus', id=0).get('output'))\nscripts=rpc('Script.List').get('scripts', [])\nmanaged=[s for s in scripts if s.get('name') == NAME]\nassert len(managed)==1, managed\nsid=int(managed[0]['id'])\nprint('MANAGED_SCRIPT_ID='+str(sid), 'INITIAL_RUNNING='+str(bool(managed[0].get('running'))))\ndef finish_safe():\n    rpc('Script.Stop', id=sid)\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.2)\n    final_off=not output()\n    final_running=bool(rpc('Script.GetStatus', id=sid).get('running'))\n    print('FINAL_RELAY_OFF='+str(final_off))\n    print('FINAL_SCRIPT_RUNNING='+str(final_running))\n    assert final_off and not final_running\ndef pulse(label, script_running):\n    if script_running:\n        rpc('Script.Start', id=sid)\n        time.sleep(0.5)\n    else:\n        rpc('Script.Stop', id=sid)\n        time.sleep(0.2)\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.15)\n    assert output() is False\n    t0=time.monotonic()\n    rpc('Switch.Set', id=0, on=True)\n    samples=[]\n    for target in (0.0,0.05,0.10,0.25,0.50,1.00):\n        while time.monotonic()-t0 < target:\n            time.sleep(0.005)\n        samples.append((round(time.monotonic()-t0,3), output()))\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.2)\n    final=output()\n    print(label, 'SAMPLES='+json.dumps(samples), 'FINAL_OFF='+str(not final))\n    assert final is False\ntry:\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.2)\n    print('BASELINE_RELAY_OFF='+str(not output()))\n    pulse('SCRIPT_STOPPED', False)\n    pulse('SCRIPT_RUNNING', True)\nfinally:\n    finish_safe()\nPY",
-  "pid": 77456,
+  "command": "set -e; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"",
+  "pid": 77593,
   "timeout": 300,
   "idle_timeout": 120,
   "memory_limit_mb": 1024,
-  "started_at": "2026-09-10T04:42:48.490950+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T04:42:53.566909+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 3,
   "stage_phase": "commands",
   "task_id": "20260910-rule-relay-test-diagnose-v2",
@@ -18,5 +18,5 @@
   "task_digest": "86d2dc48c6ce5aca21cbca542b49cc18746d89632610babc23bbb3e8deabed6b",
   "daemon_version": "4.18.19",
   "daemon_pid": 77181,
-  "updated_at": "2026-09-10T04:42:48.569064+00:00"
+  "updated_at": "2026-09-10T04:42:53.647964+00:00"
 }
