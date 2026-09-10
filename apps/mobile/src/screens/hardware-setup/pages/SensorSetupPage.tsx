@@ -6,9 +6,9 @@ import {
   type ToastMessage,
   type ToastTone
 } from '@lcl/ui';
+import { IconSettings } from '@tabler/icons-react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { SettingsGearIcon } from '../../../components/icons/SettingsGearIcon.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import { mutationError } from '../helpers.js';
@@ -452,12 +452,11 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
         title={t('hardware.sensor.add')}
         headerActions={
           <button
-            className="secondary-action"
+            className="secondary-action modal-header-action--compact"
             type="button"
             disabled={isPhoneBleScanPending}
             title={t('hardware.sensor.scanPhoneTitle')}
             onClick={openPhoneBleScanModal}
-            style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}
           >
             {t('hardware.sensor.scanBle')}
           </button>
@@ -734,7 +733,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   title={t('hardware.sensor.settingsTitle')}
                   onClick={() => openSensorSettings(device)}
                 >
-                  <SettingsGearIcon />
+                  <IconSettings className="icon-action__svg" aria-hidden="true" />
                 </button>
               </div>
               <div className="sensor-chart-stack">

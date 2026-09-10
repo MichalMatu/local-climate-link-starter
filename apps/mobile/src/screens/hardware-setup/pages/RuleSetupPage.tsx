@@ -8,6 +8,7 @@ import {
   type ToastTone
 } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
+import { IconTrash } from '@tabler/icons-react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
@@ -86,21 +87,6 @@ const copyToClipboard = async (value: string): Promise<void> => {
   }
   await navigator.clipboard.writeText(value);
 };
-
-const TrashIcon = () => (
-  <svg
-    aria-hidden="true"
-    className="icon-action__svg"
-    focusable="false"
-    viewBox="0 0 24 24"
-  >
-    <path d="M7 7h10" />
-    <path d="M10 7V5.5h4V7" />
-    <path d="m9 9.5.5 8.5A1.5 1.5 0 0 0 11 19.5h2A1.5 1.5 0 0 0 14.5 18l.5-8.5" />
-    <path d="M11 11.5v5" />
-    <path d="M13 11.5v5" />
-  </svg>
-);
 
 const createAdvancedDraft = (
   flow: HardwarePageProps['flow']
@@ -607,7 +593,7 @@ export const RuleSetupPage = ({
                 title={t('hardware.rule.deleteScriptTitle')}
                 onClick={() => setIsDeleteConfirmModalOpen(true)}
               >
-                <TrashIcon />
+                <IconTrash className="icon-action__svg" aria-hidden="true" />
                 {t('hardware.rule.deleteScriptFromShelly')}
               </button>
               {onOpenDiagnostics && (

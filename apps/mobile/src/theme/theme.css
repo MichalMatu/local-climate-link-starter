@@ -424,6 +424,12 @@ select {
   background: var(--lcl-color-accent-strong);
 }
 
+.modal-header-action--compact {
+  font-size: var(--lcl-font-size-sm);
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding-inline: var(--lcl-spacing-sm);
+}
+
 .primary-action:disabled,
 .secondary-action:disabled {
   cursor: not-allowed;

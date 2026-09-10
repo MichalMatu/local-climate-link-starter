@@ -9,6 +9,7 @@ import {
   type ToastTone
 } from '@lcl/ui';
 import type { ShellyClockStatus, ShellyComponentState } from '@lcl/shelly-client';
+import { IconBluetooth, IconRefresh, IconSettings, IconTrash } from '@tabler/icons-react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import {
   useTranslation,
@@ -263,52 +264,6 @@ type SavedShellyDeviceCardProps = {
   onSettingsOpen: (device: ShellyDraftDevice) => void;
 };
 
-type ActionIconName = 'refresh' | 'bluetooth' | 'trash' | 'settings';
-
-const ActionIcon = ({ name }: { name: ActionIconName }) => {
-  const content = (() => {
-    switch (name) {
-      case 'refresh':
-        return (
-          <>
-            <path d="M18.5 9.5h-4v-4" />
-            <path d="M18.1 9.5A6.8 6.8 0 1 0 19 13" />
-          </>
-        );
-      case 'bluetooth':
-        return <path d="m7 7 10 10-5 4V3l5 4L7 17" />;
-      case 'trash':
-        return (
-          <>
-            <path d="M7 7h10" />
-            <path d="M10 7V5.5h4V7" />
-            <path d="m9 9.5.5 8.5A1.5 1.5 0 0 0 11 19.5h2A1.5 1.5 0 0 0 14.5 18l.5-8.5" />
-            <path d="M11 11.5v5" />
-            <path d="M13 11.5v5" />
-          </>
-        );
-      case 'settings':
-        return (
-          <>
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-            <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6" />
-          </>
-        );
-    }
-  })();
-
-  return (
-    <svg
-      aria-hidden="true"
-      className="icon-action__svg"
-      focusable="false"
-      viewBox="0 0 24 24"
-    >
-      {content}
-    </svg>
-  );
-};
-
 const SavedShellyDeviceCard = ({
   device,
   controlState,
@@ -369,7 +324,7 @@ const SavedShellyDeviceCard = ({
           title={t('hardware.shelly.settings')}
           onClick={() => onSettingsOpen(device)}
         >
-          <ActionIcon name="settings" />
+          <IconSettings className="icon-action__svg" aria-hidden="true" />
         </button>
       </div>
 
@@ -401,7 +356,7 @@ const SavedShellyDeviceCard = ({
           title={t('hardware.shelly.refreshControlTitle')}
           onClick={() => onRefreshControl(device)}
         >
-          <ActionIcon name="refresh" />
+          <IconRefresh className="icon-action__svg" aria-hidden="true" />
         </button>
         <button
           className={automationToggleClass}
@@ -880,12 +835,11 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
         title={t('hardware.shelly.add')}
         headerActions={
           <button
-            className="secondary-action"
+            className="secondary-action modal-header-action--compact"
             type="button"
             disabled={isAnyShellyCheckPending}
             title={t('hardware.shelly.networkScanTitle')}
             onClick={openScanModalFromAdd}
-            style={{ fontSize: '0.8em', padding: '0 8px', minHeight: '28px' }}
           >
             {t('hardware.shelly.scanNetwork')}
           </button>
@@ -1152,7 +1106,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
                   openBleScanModal(settingsShelly);
                 }}
               >
-                <ActionIcon name="bluetooth" />
+                <IconBluetooth className="icon-action__svg" aria-hidden="true" />
                 {t('hardware.shelly.scanBle')}
               </button>
               <button
@@ -1165,7 +1119,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
                   removeSavedShelly(settingsShelly);
                 }}
               >
-                <ActionIcon name="trash" />
+                <IconTrash className="icon-action__svg" aria-hidden="true" />
                 {t('common.delete')}
               </button>
             </div>

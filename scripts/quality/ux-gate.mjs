@@ -497,6 +497,31 @@ const checkThemeTokenPatterns = async () => {
   });
 };
 
+const checkMobileProductionMarkupHygiene = async () => {
+  const paths = (await listRepoFiles('apps/mobile/src')).filter(
+    (path) =>
+      path.endsWith('.tsx') &&
+      !path.includes('/__tests__/') &&
+      !/\.(?:test|spec)\.tsx$/.test(path)
+  );
+
+  for (const path of paths) {
+    const source = await readRepoFile(path);
+    if (source.includes('<svg')) {
+      addFailure(
+        path,
+        'production mobile icons must use Tabler/shared components, not hand-authored SVG'
+      );
+    }
+    if (/style=\{\{/.test(source)) {
+      addFailure(
+        path,
+        'production mobile layout/style must use tokenized CSS classes, not inline style objects'
+      );
+    }
+  }
+};
+
 const checkPackageRuntimeCopy = async () => {
   const blockedCopyPattern =
     /(['"`])(?:(?!\1).)*(?:[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|Kopiuj|Temperatura|Wilgotność|Bateria|brak|zgodne|blokada|Skan BLE|zabrakło pamięci)(?:(?!\1).)*\1/;
@@ -524,6 +549,7 @@ await checkSelectControlPatterns();
 await checkResponsiveCss();
 await checkModalSizingPatterns();
 await checkThemeTokenPatterns();
+await checkMobileProductionMarkupHygiene();
 await checkPackageRuntimeCopy();
 
 if (failures.length > 0) {
