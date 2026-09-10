@@ -182,7 +182,11 @@ export const AutomationDashboardScreen = ({
           <h1>{t('dashboard.title')}</h1>
           <p>{t('dashboard.description')}</p>
         </div>
-        <button className="primary-action" type="button" onClick={onAddAutomation}>
+        <button
+          className="primary-action dashboard-add-action"
+          type="button"
+          onClick={onAddAutomation}
+        >
           {t('dashboard.addAutomation')}
         </button>
       </header>
