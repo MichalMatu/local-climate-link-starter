@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 4,
-  "command": "set -e; pnpm quality:repo; pnpm quality:ux; echo QUALITY_GATES_OK",
-  "pid": 31094,
+  "command": "set -e; pnpm tokens:build; echo TOKEN_BUILD_STATUS; git status --short; echo TOKEN_BUILD_DIFF_BEGIN; git diff -- packages/design-tokens apps/mobile/src apps/landing/src packages/ui/src; echo TOKEN_BUILD_DIFF_END; git reset --hard HEAD; test -z \"$(git status --porcelain)\"; echo TOKEN_GENERATION_AUDIT_DONE",
+  "pid": 31165,
   "timeout": 1200,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T17:03:44.905402+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-10T17:03:46.890034+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260910-final-quality-audit-v1",
@@ -18,5 +18,5 @@
   "task_digest": "ef9d967b303b9ddfffcc788df10f0750db70e61f26f1e93b6c689ac2aa518e46",
   "daemon_version": "4.18.20",
   "daemon_pid": 30814,
-  "updated_at": "2026-09-10T17:03:44.975829+00:00"
+  "updated_at": "2026-09-10T17:03:46.972831+00:00"
 }
