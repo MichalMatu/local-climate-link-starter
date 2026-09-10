@@ -108,5 +108,9 @@ await clickKind('climate');
 const climateCurrent = await evalValue(session.call, `document.querySelector('[data-dashboard-kind="climate"]')?.getAttribute('aria-current') ?? null`);
 if (climateCurrent !== 'page') throw new Error(`Climate nav failed from Settings: ${climateCurrent}`);
 
+await clickKind('settings');
+const finalSettings = await evalValue(session.call, `document.querySelector('[data-dashboard-kind="settings"]')?.getAttribute('aria-current') ?? null`);
+if (finalSettings !== 'page') throw new Error(`Settings final state failed: ${finalSettings}`);
+
 console.log('SETTINGS_PAGE_NAV_OK');
 session.socket.close();
