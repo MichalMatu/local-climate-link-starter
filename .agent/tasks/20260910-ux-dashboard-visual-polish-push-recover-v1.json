@@ -1,0 +1,16 @@
+{
+  "id": "20260910-ux-dashboard-visual-polish-push-recover-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/ux-dashboard-target-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; test \"$(git branch --show-current)\" = \"work/ux-dashboard-target-20260910\"; LOCAL_SHA=$(git rev-parse HEAD); test \"$(git rev-parse --short=7 HEAD)\" = \"0df5dab\"; test \"$(git rev-parse HEAD^)\" = \"c24d6342e5f0b654a1fcff23f8ec917ac83ac36c\"; test -z \"$(git status --porcelain)\"; git fetch origin; test \"$(git rev-parse origin/work/ux-dashboard-target-20260910)\" = \"c24d6342e5f0b654a1fcff23f8ec917ac83ac36c\"; echo LOCAL_SHA=$LOCAL_SHA; echo REMOTE_BASE=$(git rev-parse origin/work/ux-dashboard-target-20260910)",
+    "set -e; LOCAL_SHA=$(git rev-parse HEAD); git push origin HEAD:work/ux-dashboard-target-20260910; git fetch origin; test \"$(git rev-parse origin/work/ux-dashboard-target-20260910)\" = \"$LOCAL_SHA\"; test -z \"$(git status --porcelain)\"; echo DASHBOARD_VISUAL_SHA=$LOCAL_SHA"
+  ]
+}
