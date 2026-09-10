@@ -104,6 +104,9 @@ export const AppRoutes = () => {
   if (route.type === 'intent') {
     return (
       <SetupIntentScreen
+        {...(installations.length > 0
+          ? { onCancel: () => navigate({ type: 'dashboard' }) }
+          : {})}
         onSelect={(intent) =>
           navigate(
             intent === 'manage' ? { type: 'dashboard' } : { type: 'setup', intent }
