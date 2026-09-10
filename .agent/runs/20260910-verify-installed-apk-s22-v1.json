@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-verify-installed-apk-s22-v1",
+  "task_digest": "f3332b6c6e34d15c5f0f5a958ee1ddc44660f0bb5200649e4e510cbfabeac1a8",
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T05:30:07.753541+00:00",
+  "attempt_id": "40a019d9159b619435834186",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 19061,
+  "updated_at": "2026-09-10T05:30:07.753662+00:00",
+  "pid": 19061
+}
