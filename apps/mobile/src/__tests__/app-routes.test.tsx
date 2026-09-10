@@ -257,6 +257,40 @@ describe('AppRoutes user intent entry', () => {
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   });
 
+  it('opens Settings as a full page and returns through bottom navigation', () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    useInstalledAutomationStore.getState().upsertInstallation(
+      createInstalledAutomation({
+        shelly: { id: 'shellyplugsg3-settings-route', model: 'S3PL-00112EU', gen: 3 },
+        shellyName: 'Salon',
+        baseUrl: 'http://192.168.0.20/',
+        scriptId: 1,
+        scriptHash: 'lcl-settings-route',
+        config,
+        nowMs: 1000
+      })
+    );
+
+    renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
+    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+  });
+
   it('starts from the user goal instead of technical setup tabs', () => {
     renderRoutes();
 

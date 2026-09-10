@@ -1,10 +1,10 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { AppSettingsModal } from '../app/AppSettingsModal.js';
+import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { I18nProvider, getLocalePreference, setLocalePreference } from '../app/i18n.js';
 import { clearRuntimeIssues, reportRuntimeIssue } from '../app/runtimeDiagnostics.js';
 import { getThemeMode, setThemeMode } from '../app/themeMode.js';
 
-describe('app settings modal', () => {
+describe('app settings screen', () => {
   const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
 
   beforeEach(() => {
@@ -43,45 +43,32 @@ describe('app settings modal', () => {
 
     render(
       <I18nProvider>
-        <AppSettingsModal
-          open
-          supportReportInput={{
-            platform: 'android',
-            shellyDevices: [
-              { name: 'Shelly Plug S Gen3', detail: 'http://192.168.0.20/' }
-            ],
-            sensorDevices: [{ name: 'Thermometer 24:CD', detail: 'BTHome v2 A4:C1' }],
-            selectedShelly: 'Shelly Plug S Gen3',
-            selectedSensor: 'Thermometer 24:CD',
-            lastDiagnostics: [{ name: 'Relay', detail: 'OFF' }]
-          }}
-          supportRows={[
-            { label: 'App version', value: '2.0.8' },
-            { label: 'Platform', value: 'android' }
-          ]}
-          onClose={vi.fn()}
-        />
+        <AppSettingsScreen onOpenClimate={vi.fn()} onOpenTime={vi.fn()} />
       </I18nProvider>
     );
 
-    const dialog = screen.getByRole('dialog', { name: 'App settings' });
-    expect(within(dialog).getByText(/client saw a blank screen/)).toBeInTheDocument();
+    const settings = screen.getByRole('main');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    const diagnostics = settings.querySelector('details');
+    if (!diagnostics) throw new Error('settings diagnostics missing');
+    fireEvent.click(diagnostics.querySelector('summary')!);
+    expect(within(settings).getByText(/client saw a blank screen/)).toBeInTheDocument();
 
     act(() => {
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Deutsch' }));
+      fireEvent.click(within(settings).getByRole('button', { name: 'Deutsch' }));
     });
     expect(getLocalePreference()).toBe('de');
     expect(document.documentElement.lang).toBe('de');
 
     act(() => {
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Dunkel' }));
+      fireEvent.click(within(settings).getByRole('button', { name: 'Dunkel' }));
     });
     expect(getThemeMode()).toBe('dark');
     expect(document.documentElement.getAttribute('data-lcl-theme')).toBe('dark');
 
     await act(async () => {
       fireEvent.click(
-        within(dialog).getByRole('button', { name: 'Support-Bericht kopieren' })
+        within(settings).getByRole('button', { name: 'Support-Bericht kopieren' })
       );
     });
 

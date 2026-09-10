@@ -721,32 +721,17 @@ describe('HardwareSetupScreen', () => {
     expect(getRuleSummary()).not.toHaveTextContent('Termometr:');
   });
 
-  it('opens production app settings from diagnostics', async () => {
+  it('does not duplicate app settings inside developer diagnostics', () => {
     renderHardwareSetup();
 
     openDeveloperDiagnostics();
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia aplikacji' }));
 
-    const settingsDialog = await screen.findByRole('dialog', {
-      name: 'Ustawienia aplikacji'
-    });
-    expect(within(settingsDialog).getByText('Język')).toBeInTheDocument();
-    expect(within(settingsDialog).getByText('Wygląd')).toBeInTheDocument();
-    expect(within(settingsDialog).getByText('Diagnostyka wsparcia')).toBeInTheDocument();
-
-    act(() => {
-      fireEvent.click(within(settingsDialog).getByRole('button', { name: 'English' }));
-    });
-    await waitFor(() => expect(document.documentElement.lang).toBe('en'));
-    expect(within(settingsDialog).getByText('Language')).toBeInTheDocument();
-
-    act(() => {
-      fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Dark' }));
-    });
-    expect(document.documentElement.getAttribute('data-lcl-theme')).toBe('dark');
     expect(
-      within(settingsDialog).getByRole('button', { name: 'Copy support report' })
-    ).toBeInTheDocument();
+      screen.queryByRole('button', { name: 'Ustawienia aplikacji' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('dialog', { name: 'Ustawienia aplikacji' })
+    ).not.toBeInTheDocument();
   });
 
   it('keeps keyboard focus inside setup modals and restores it on close', async () => {

@@ -228,7 +228,11 @@ export const AppSettingsScreen = ({
                 {t('settings.support.copyReport')}
               </button>
               {runtimeIssues.length > 0 && (
-                <button className="secondary-action" type="button" onClick={clearDiagnostics}>
+                <button
+                  className="secondary-action"
+                  type="button"
+                  onClick={clearDiagnostics}
+                >
                   {t('settings.support.clearDiagnostics')}
                 </button>
               )}
