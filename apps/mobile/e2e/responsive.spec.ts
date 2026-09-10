@@ -385,11 +385,31 @@ const requiredBox = async (locator: Locator) => {
   return box!;
 };
 
-const expectDetailHierarchy = async (page: Page) => {
-  const [gridBox, liveBox, headerBox, refreshBox] = await Promise.all([
+const expectClimateDetailHierarchy = async (page: Page) => {
+  const [gridBox, liveBox] = await Promise.all([
+    requiredBox(page.locator('.installation-detail-grid')),
+    requiredBox(page.locator('.installation-detail-live'))
+  ]);
+
+  expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
+  await expect(page.locator('.installation-detail-header .detail-back-link')).toHaveCount(
+    0
+  );
+  await expect(
+    page.locator('.installation-detail-header .runtime-refresh-action')
+  ).toHaveCount(0);
+  await expect(page.locator('.app-bottom-nav')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+    'aria-current',
+    'page'
+  );
+};
+
+const expectTimeDetailHierarchy = async (page: Page) => {
+  const [gridBox, liveBox, refreshBox] = await Promise.all([
     requiredBox(page.locator('.installation-detail-grid')),
     requiredBox(page.locator('.installation-detail-live')),
-    requiredBox(page.locator('.installation-detail-header')),
     requiredBox(
       page.locator('.installation-detail-header').getByRole('button', { name: 'Odśwież' })
     )
@@ -398,10 +418,7 @@ const expectDetailHierarchy = async (page: Page) => {
   expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
   expect(refreshBox.width).toBeLessThanOrEqual(48);
-  expect(Math.abs(refreshBox.y - headerBox.y)).toBeLessThanOrEqual(2);
-  expect(
-    Math.abs(refreshBox.x + refreshBox.width - (headerBox.x + headerBox.width))
-  ).toBeLessThanOrEqual(2);
+  await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toBeVisible();
 };
 
 const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
@@ -457,7 +474,7 @@ const expectShellyCardActionsLayout = async (page: Page) => {
   const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
   const boxes = await Promise.all([
     requiredBox(shellyControls.getByRole('button', { name: 'Odśwież' })),
-    requiredBox(shellyControls.getByRole('button', { name: 'MANUAL' })),
+    requiredBox(shellyControls.getByRole('button', { name: 'MANUAL', exact: true })),
     requiredBox(shellyControls.getByRole('button', { name: /^(ON|OFF)$/ }))
   ]);
   const topSpread =
@@ -566,21 +583,23 @@ for (const viewport of viewports) {
     await expect(page.getByText('21.4°C')).toBeVisible();
     await expect(page.getByText('55.2%')).toBeVisible();
     await expect(page.getByText('1.31 kPa')).toBeVisible();
-    await expect(page.getByText('Działa')).toBeVisible();
+    await expect(page.getByText('Działa')).toHaveCount(0);
     await expect(page.getByText('19°C / 20°C')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Odśwież' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
-    await page.getByRole('button', { name: 'Szczegóły' }).click();
+    await page.getByRole('button', { name: 'Szczegóły: Salon' }).click();
     await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Klimat teraz' })).toBeVisible();
     await expect(page.getByText('21.4°C')).toBeVisible();
     await expect(page.getByText('55.2%')).toBeVisible();
     await expect(page.getByText('1.31 kPa')).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Wstrzymaj automatykę' })
-    ).toBeVisible();
-    await expect(page.getByRole('button', { name: /Wróć do automatyk/ })).toBeVisible();
-    await expectDetailHierarchy(page);
+    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toHaveCount(0);
+    await expectClimateDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
     expect(consoleProblems).toEqual([]);
@@ -603,22 +622,22 @@ test('installed automation detail safely pauses and resumes on phone', async ({
   await mockShellyRpc(page);
   await page.goto('/');
 
-  await page.getByRole('button', { name: 'Szczegóły' }).click();
+  await page.getByRole('button', { name: 'Szczegóły: Salon' }).click();
   await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
-  await expect(page.getByText('Działa')).toBeVisible();
+  const auto = page.getByRole('button', { name: 'AUTO', exact: true });
+  const manual = page.getByRole('button', { name: 'MANUAL', exact: true });
+  await expect(auto).toHaveAttribute('aria-pressed', 'true');
 
-  await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
+  await manual.click();
   await expect(
     page.getByText('Automatyka zatrzymana, wyjście potwierdzone jako OFF.')
   ).toBeVisible();
-  await expect(page.getByText('Wstrzymana')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Uruchom automatykę' })).toBeVisible();
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByText('OFF', { exact: true })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Uruchom automatykę' }).click();
+  await auto.click();
   await expect(page.getByText('Automatyka uruchomiona.')).toBeVisible();
-  await expect(page.getByText('Działa')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Wstrzymaj automatykę' })).toBeVisible();
+  await expect(auto).toHaveAttribute('aria-pressed', 'true');
 
   await expectNoHorizontalOverflow(page);
   await expectNoLegacyInlineFeedback(page);
@@ -668,7 +687,7 @@ for (const viewport of viewports) {
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
     await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();
-    await expectDetailHierarchy(page);
+    await expectTimeDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     expect(consoleProblems).toEqual([]);
   });
@@ -718,8 +737,8 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   const deleteDialog = page.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
   await expect(deleteDialog).toBeVisible();
   await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();
-  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-  await expect(page.getByText('Nie masz jeszcze zapisanej automatyki')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+  await expect(page.getByText('Nie masz jeszcze zapisanej automatyki')).toHaveCount(0);
 
   expect(rpcState.createCount).toBe(2);
   expect(rpcState.updateCount).toBeGreaterThanOrEqual(8);
@@ -769,7 +788,9 @@ for (const viewport of viewports) {
 
     const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
     await expectRelayActionVisible(page);
-    await expect(shellyControls.getByRole('button', { name: 'MANUAL' })).toBeVisible();
+    await expect(
+      shellyControls.getByRole('button', { name: 'MANUAL', exact: true })
+    ).toBeVisible();
     await expect(shellyControls.getByRole('button', { name: 'Odśwież' })).toBeVisible();
     await expectShellyCardActionsLayout(page);
     await expectNoHorizontalOverflow(page);
