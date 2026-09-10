@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 3,
-  "command": "set -e; git show origin/agent-control:.agent/scripts/final-docs-test-hygiene-v1.py > /tmp/final-docs-test-hygiene-v1.py; python3 /tmp/final-docs-test-hygiene-v1.py; pnpm exec prettier --write apps/mobile/src/__tests__/app-routes.test.tsx docs/architecture/overview.md docs/architecture/refactor-boundaries.md docs/development/repository-guide.md docs/plan.md docs/product/next-functional-steps.md; git diff --check; bash -lc 'set -o pipefail; pnpm --filter @lcl/mobile exec vitest run src/__tests__/app-routes.test.tsx 2>&1 | tee /tmp/app-routes-final.log'; test -z \"$(grep -F 'not wrapped in act' /tmp/app-routes-final.log || true)\"; pnpm quality:repo; pnpm quality:ux; pnpm --filter @lcl/mobile lint; pnpm --filter @lcl/mobile typecheck; pnpm --filter @lcl/mobile test; echo DOCS_TEST_HYGIENE_OK",
-  "pid": 13396,
+  "command": "set -e; git add apps/mobile/src/__tests__/app-routes.test.tsx docs/architecture/overview.md docs/architecture/refactor-boundaries.md docs/development/repository-guide.md docs/plan.md docs/product/next-functional-steps.md; git commit -m \"docs: align architecture and refactor boundaries\"; git push -u origin HEAD:work/final-quality-audit-20260910; git fetch origin; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/final-quality-audit-20260910)\"; test -z \"$(git status --porcelain)\"; echo DOCS_SHA=$(git rev-parse HEAD)",
+  "pid": 14284,
   "timeout": 1800,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T18:32:08.197059+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T18:32:49.490864+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 3,
   "stage_phase": "commands",
   "task_id": "20260910-final-docs-test-hygiene-v1",
@@ -18,5 +18,5 @@
   "task_digest": "a558dd711df9ac2f057b0f24b3f57428d16149128ff599d8020a9de8c46c881e",
   "daemon_version": "4.18.20",
   "daemon_pid": 13209,
-  "updated_at": "2026-09-10T18:32:08.295483+00:00"
+  "updated_at": "2026-09-10T18:32:49.579664+00:00"
 }
