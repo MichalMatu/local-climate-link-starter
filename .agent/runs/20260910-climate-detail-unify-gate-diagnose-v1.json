@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-climate-detail-unify-gate-diagnose-v1",
+  "task_digest": "e59483f77f2baa0a127fdac3b1d656aad7f432697be8c08fe51d9839a2519f7d",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T15:39:16.923116+00:00",
+  "attempt_id": "ef3daa966f0faf34cecc302a",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 45115,
+  "updated_at": "2026-09-10T15:39:16.923295+00:00",
+  "pid": 45115
+}
