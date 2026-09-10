@@ -1,0 +1,105 @@
+{
+  "id": "20260910-ux-control-tokens-verify-v2",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/ux-control-tokens-20260910",
+  "allow_write": true,
+  "started_at": "2026-09-10T03:02:25.980450+00:00",
+  "command_timeout": 1200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch --prune origin && git reset --hard origin/work/ux-control-tokens-20260910 && test \"$(git rev-parse HEAD)\" = \"90aced3bf885e45e0e471e11ff552aaaba202618\" && git status --short",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   59e946d..7ef7999  agent-control -> origin/agent-control\n   7cdce28..90aced3  main          -> origin/main\nHEAD is now at 90aced3 Show deployed climate script on saved automation (#29)\n",
+      "elapsed_seconds": 1.13,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.05,
+      "output_policy": "stream",
+      "captured_output_chars": 249,
+      "output_truncated": false,
+      "current_rss_mb": 3.05,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 10,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "python3 -c \"import base64;exec(base64.b64decode('CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKcnVsZSA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy9zY3JlZW5zL2hhcmR3YXJlLXNldHVwL3BhZ2VzL1J1bGVTZXR1cFBhZ2UudHN4IikKdGV4dCA9IHJ1bGUucmVhZF90ZXh0KCkKaW1wb3J0X21hcmtlciA9ICJpbXBvcnQgeyB1c2VDYWxsYmFjaywgdXNlRWZmZWN0LCB1c2VJZCwgdXNlUmVmLCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbiIKY29kZV9pbXBvcnQgPSAiaW1wb3J0IHsgQ29kZUljb24gfSBmcm9tICcuLi8uLi8uLi9jb21wb25lbnRzL2ljb25zL0NvZGVJY29uLmpzJztcbiIKYXNzZXJ0IGltcG9ydF9tYXJrZXIgaW4gdGV4dAphc3NlcnQgY29kZV9pbXBvcnQgbm90IGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShpbXBvcnRfbWFya2VyLCBpbXBvcnRfbWFya2VyICsgY29kZV9pbXBvcnQsIDEpCmljb25fYmxvY2sgPSAiIiJjb25zdCBHZW5lcmF0ZWRTY3JpcHRJY29uID0gKCkgPT4gKAogIDxzdmcKICAgIGFyaWEtaGlkZGVuPVwidHJ1ZVwiCiAgICBjbGFzc05hbWU9XCJpY29uLWFjdGlvbl9fc3ZnXCIKICAgIGZvY3VzYWJsZT1cImZhbHNlXCIKICAgIHZpZXdCb3g9XCIwIDAgMjQgMjRcIgogID4KICAgIDxwYXRoIGQ9XCJtOSA4LTQgNCA0IDRcIiAvPgogICAgPHBhdGggZD1cIm0xNSA4IDQgNC00IDRcIiAvPgogICAgPHBhdGggZD1cIm0xMyA2LTIgMTJcIiAvPgogIDwvc3ZnPgopOwoKIiIiCmFzc2VydCBpY29uX2Jsb2NrIGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShpY29uX2Jsb2NrLCAiIiwgMSkKYXNzZXJ0ICI8R2VuZXJhdGVkU2NyaXB0SWNvbiAvPiIgaW4gdGV4dAp0ZXh0ID0gdGV4dC5yZXBsYWNlKCI8R2VuZXJhdGVkU2NyaXB0SWNvbiAvPiIsICI8Q29kZUljb24gLz4iLCAxKQpydWxlLndyaXRlX3RleHQodGV4dCkKCmRhc2hib2FyZCA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy9zY3JlZW5zL0F1dG9tYXRpb25EYXNoYm9hcmRTY3JlZW4udHN4IikKdGV4dCA9IGRhc2hib2FyZC5yZWFkX3RleHQoKQpvbGQgPSAiIiI8YnV0dG9uIGNsYXNzTmFtZT1cInByaW1hcnktYWN0aW9uXCIgdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9e29uQWRkQXV0b21hdGlvbn19PgogICAgICAgICAge3QoJ2Rhc2hib2FyZC5hZGRBdXRvbWF0aW9uJyl9CiAgICAgICAgPC9idXR0b24+IiIiCm5ldyA9ICIiIjxidXR0b24KICAgICAgICAgIGNsYXNzTmFtZT1cInByaW1hcnktYWN0aW9uIGRhc2hib2FyZC1hZGQtYWN0aW9uXCIKICAgICAgICAgIHR5cGU9XCJidXR0b25cIgogICAgICAgICAgb25DbGljaz17b25BZGRBdXRvbWF0aW9ufQogICAgICAgID4KICAgICAgICAgIHt0KCdkYXNoYm9hcmQuYWRkQXV0b21hdGlvbicpfQogICAgICAgIDwvYnV0dG9uPiIiIgphc3NlcnQgb2xkIGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShvbGQsIG5ldywgMSkKZGFzaGJvYXJkLndyaXRlX3RleHQodGV4dCkKCmNzcyA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy90aGVtZS90aGVtZS5jc3MiKQp0ZXh0ID0gY3NzLnJlYWRfdGV4dCgpCmJhZCA9ICIiIi5ydWxlLWRldmVsb3Blci1hY3Rpb25zIC5pY29uLWFjdGlvbl9fc3ZnIHsKICBoZWlnaHQ6IHZhcigtLWxjbC1zaXplLWljb24tc20pOwogIHdpZHRoOiB2YXIoLS1sY2wtc2l6ZS1pY29uLXNtKTsKfQoKIiIiCmFzc2VydCBiYWQgaW4gdGV4dAp0ZXh0ID0gdGV4dC5yZXBsYWNlKGJhZCwgIiIsIDEpCm1hcmtlciA9ICIiIi5kYXNoYm9hcmQtaGVhZGVyIHsKICBhbGlnbi1pdGVtczogY2VudGVyOwp9CgoiIiIKYWRkaXRpb24gPSBtYXJrZXIgKyAiIiIuZGFzaGJvYXJkLWFkZC1hY3Rpb24gewogIG1pbi13aWR0aDogdmFyKC0tbGNsLXNpemUtYWN0aW9uLW1pbi13aWR0aCk7Cn0KCiIiIgphc3NlcnQgbWFya2VyIGluIHRleHQKYXNzZXJ0ICIuZGFzaGJvYXJkLWFkZC1hY3Rpb24geyIgbm90IGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShtYXJrZXIsIGFkZGl0aW9uLCAxKQpjc3Mud3JpdGVfdGV4dCh0ZXh0KQo='))\"",
+      "exit_code": 1,
+      "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import base64;exec(base64.b64decode('CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKcnVsZSA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy9zY3JlZW5zL2hhcmR3YXJlLXNldHVwL3BhZ2VzL1J1bGVTZXR1cFBhZ2UudHN4IikKdGV4dCA9IHJ1bGUucmVhZF90ZXh0KCkKaW1wb3J0X21hcmtlciA9ICJpbXBvcnQgeyB1c2VDYWxsYmFjaywgdXNlRWZmZWN0LCB1c2VJZCwgdXNlUmVmLCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbiIKY29kZV9pbXBvcnQgPSAiaW1wb3J0IHsgQ29kZUljb24gfSBmcm9tICcuLi8uLi8uLi9jb21wb25lbnRzL2ljb25zL0NvZGVJY29uLmpzJztcbiIKYXNzZXJ0IGltcG9ydF9tYXJrZXIgaW4gdGV4dAphc3NlcnQgY29kZV9pbXBvcnQgbm90IGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShpbXBvcnRfbWFya2VyLCBpbXBvcnRfbWFya2VyICsgY29kZV9pbXBvcnQsIDEpCmljb25fYmxvY2sgPSAiIiJjb25zdCBHZW5lcmF0ZWRTY3JpcHRJY29uID0gKCkgPT4gKAogIDxzdmcKICAgIGFyaWEtaGlkZGVuPVwidHJ1ZVwiCiAgICBjbGFzc05hbWU9XCJpY29uLWFjdGlvbl9fc3ZnXCIKICAgIGZvY3VzYWJsZT1cImZhbHNlXCIKICAgIHZpZXdCb3g9XCIwIDAgMjQgMjRcIgogID4KICAgIDxwYXRoIGQ9XCJtOSA4LTQgNCA0IDRcIiAvPgogICAgPHBhdGggZD1cIm0xNSA4IDQgNC00IDRcIiAvPgogICAgPHBhdGggZD1cIm0xMyA2LTIgMTJcIiAvPgogIDwvc3ZnPgopOwoKIiIiCmFzc2VydCBpY29uX2Jsb2NrIGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShpY29uX2Jsb2NrLCAiIiwgMSkKYXNzZXJ0ICI8R2VuZXJhdGVkU2NyaXB0SWNvbiAvPiIgaW4gdGV4dAp0ZXh0ID0gdGV4dC5yZXBsYWNlKCI8R2VuZXJhdGVkU2NyaXB0SWNvbiAvPiIsICI8Q29kZUljb24gLz4iLCAxKQpydWxlLndyaXRlX3RleHQodGV4dCkKCmRhc2hib2FyZCA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy9zY3JlZW5zL0F1dG9tYXRpb25EYXNoYm9hcmRTY3JlZW4udHN4IikKdGV4dCA9IGRhc2hib2FyZC5yZWFkX3RleHQoKQpvbGQgPSAiIiI8YnV0dG9uIGNsYXNzTmFtZT1cInByaW1hcnktYWN0aW9uXCIgdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9e29uQWRkQXV0b21hdGlvbn19PgogICAgICAgICAge3QoJ2Rhc2hib2FyZC5hZGRBdXRvbWF0aW9uJyl9CiAgICAgICAgPC9idXR0b24+IiIiCm5ldyA9ICIiIjxidXR0b24KICAgICAgICAgIGNsYXNzTmFtZT1cInByaW1hcnktYWN0aW9uIGRhc2hib2FyZC1hZGQtYWN0aW9uXCIKICAgICAgICAgIHR5cGU9XCJidXR0b25cIgogICAgICAgICAgb25DbGljaz17b25BZGRBdXRvbWF0aW9ufQogICAgICAgID4KICAgICAgICAgIHt0KCdkYXNoYm9hcmQuYWRkQXV0b21hdGlvbicpfQogICAgICAgIDwvYnV0dG9uPiIiIgphc3NlcnQgb2xkIGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShvbGQsIG5ldywgMSkKZGFzaGJvYXJkLndyaXRlX3RleHQodGV4dCkKCmNzcyA9IFBhdGgoImFwcHMvbW9iaWxlL3NyYy90aGVtZS90aGVtZS5jc3MiKQp0ZXh0ID0gY3NzLnJlYWRfdGV4dCgpCmJhZCA9ICIiIi5ydWxlLWRldmVsb3Blci1hY3Rpb25zIC5pY29uLWFjdGlvbl9fc3ZnIHsKICBoZWlnaHQ6IHZhcigtLWxjbC1zaXplLWljb24tc20pOwogIHdpZHRoOiB2YXIoLS1sY2wtc2l6ZS1pY29uLXNtKTsKfQoKIiIiCmFzc2VydCBiYWQgaW4gdGV4dAp0ZXh0ID0gdGV4dC5yZXBsYWNlKGJhZCwgIiIsIDEpCm1hcmtlciA9ICIiIi5kYXNoYm9hcmQtaGVhZGVyIHsKICBhbGlnbi1pdGVtczogY2VudGVyOwp9CgoiIiIKYWRkaXRpb24gPSBtYXJrZXIgKyAiIiIuZGFzaGJvYXJkLWFkZC1hY3Rpb24gewogIG1pbi13aWR0aDogdmFyKC0tbGNsLXNpemUtYWN0aW9uLW1pbi13aWR0aCk7Cn0KCiIiIgphc3NlcnQgbWFya2VyIGluIHRleHQKYXNzZXJ0ICIuZGFzaGJvYXJkLWFkZC1hY3Rpb24geyIgbm90IGluIHRleHQKdGV4dCA9IHRleHQucmVwbGFjZShtYXJrZXIsIGFkZGl0aW9uLCAxKQpjc3Mud3JpdGVfdGV4dCh0ZXh0KQo='))\n                  ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<string>\", line 43, in <module>\nAssertionError\n",
+      "elapsed_seconds": 0.442,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.12,
+      "output_policy": "stream",
+      "captured_output_chars": 5555,
+      "output_truncated": false,
+      "current_rss_mb": 3.12,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 10,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 10,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.13
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 10,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.442
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": " M apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\n",
+    "elapsed_seconds": 0.072
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "diff --git a/apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx b/apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\nindex 70b555a..f62da45 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\n@@ -9,6 +9,7 @@ import {\n } from '@lcl/ui';\n import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';\n import { useCallback, useEffect, useId, useRef, useState } from 'react';\n+import { CodeIcon } from '../../../components/icons/CodeIcon.js';\n import {\n   useTranslation,\n   type Translate,\n@@ -86,19 +87,6 @@ const copyToClipboard = async (value: string): Promise<void> => {\n   await navigator.clipboard.writeText(value);\n };\n \n-const GeneratedScriptIcon = () => (\n-  <svg\n-    aria-hidden=\"true\"\n-    className=\"icon-action__svg\"\n-    focusable=\"false\"\n-    viewBox=\"0 0 24 24\"\n-  >\n-    <path d=\"m9 8-4 4 4 4\" />\n-    <path d=\"m15 8 4 4-4 4\" />\n-    <path d=\"m13 6-2 12\" />\n-  </svg>\n-);\n-\n const TrashIcon = () => (\n   <svg\n     aria-hidden=\"true\"\n@@ -597,7 +585,7 @@ export const RuleSetupPage = ({\n                 title={t('hardware.rule.scriptPreviewTitle')}\n                 onClick={() => setIsScriptModalOpen(true)}\n               >\n-                <GeneratedScriptIcon />\n+                <CodeIcon />\n                 {t('hardware.rule.scriptPreview')}\n               </button>\n               <button\n",
+    "elapsed_seconds": 0.069
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-10T03:02:29.616345+00:00",
+  "workspace_checkpoint": {
+    "version": 2,
+    "task_id": "20260910-ux-control-tokens-verify-v2",
+    "reason": "task-exit",
+    "created_at": "2026-09-10T03:02:29.984171+00:00",
+    "base_head": "90aced3bf885e45e0e471e11ff552aaaba202618",
+    "work_branch": "agent-work",
+    "path": "/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260910-ux-control-tokens-verify-v2/1789009349849717000-task-exit",
+    "tracked_patch": "tracked.patch",
+    "untracked_root": "untracked",
+    "untracked_files": [],
+    "tracked_patch_bytes": 1511,
+    "untracked_bytes": 0,
+    "total_bytes": 1511,
+    "status": " M apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\n"
+  },
+  "task_digest": "ce059251a89aa7f8d0fe37ad9849768718157c5c7c1252f313de0fd38a965a2b",
+  "idle_timeout": 300,
+  "task_timeout": 3000,
+  "memory_limit_mb": 4096,
+  "attempt_id": "7cd6fd009ee36e6dd5664fac",
+  "daemon_version": "4.18.19"
+}
