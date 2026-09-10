@@ -1,14 +1,20 @@
 type RefreshIconButtonProps = {
   busy: boolean;
+  className?: string;
   label: string;
   onRefresh(): void;
 };
 
-export const RefreshIconButton = ({ busy, label, onRefresh }: RefreshIconButtonProps) => (
+export const RefreshIconButton = ({
+  busy,
+  className,
+  label,
+  onRefresh
+}: RefreshIconButtonProps) => (
   <button
     aria-busy={busy}
     aria-label={label}
-    className="icon-action runtime-refresh-action"
+    className={`icon-action runtime-refresh-action${className ? ` ${className}` : ''}`}
     disabled={busy}
     title={label}
     type="button"

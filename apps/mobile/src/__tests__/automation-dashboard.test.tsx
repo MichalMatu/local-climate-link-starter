@@ -228,6 +228,11 @@ describe('AutomationDashboardScreen', () => {
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
+    expect(screen.getByRole('tab', { name: 'Klimat' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.getByRole('tab', { name: 'Czas' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Szczegóły' })).toBeVisible();
   });
 
@@ -246,6 +251,11 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
+    expect(screen.getByRole('tab', { name: 'Czas' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.getByRole('tab', { name: 'Klimat' })).toBeDisabled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
     expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);
@@ -311,7 +321,7 @@ describe('AutomationDashboardScreen', () => {
     renderDashboard();
 
     expect(await screen.findByText('Offline')).toBeVisible();
-    expect(screen.getByText('Brak połączenia z Shelly.')).toBeVisible();
+    expect(screen.queryByText('Brak połączenia z Shelly.')).toBeNull();
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3);
   });
 });

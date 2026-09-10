@@ -1,3 +1,5 @@
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -50,10 +52,6 @@ const ClimateAutomationCard = ({
     snapshot?.plug?.relayState ??
     snapshot?.diagnostics.relayState;
 
-  const refresh = () => {
-    void Promise.all([query.refetch(), control.refetch()]);
-  };
-
   return (
     <article className="automation-card">
       <header className="automation-card__header">
@@ -98,11 +96,6 @@ const ClimateAutomationCard = ({
           </div>
           <h2>{installation.shelly.name}</h2>
         </div>
-        <RefreshIconButton
-          busy={query.isFetching || control.isFetching}
-          label={t('common.refresh')}
-          onRefresh={refresh}
-        />
       </header>
 
       <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>
@@ -128,10 +121,6 @@ const ClimateAutomationCard = ({
 
       <dl className="automation-summary">
         <div>
-          <dt>{t('dashboard.output')}</dt>
-          <dd>{relayState == null ? '—' : relayState ? 'ON' : 'OFF'}</dd>
-        </div>
-        <div>
           <dt>{t('dashboard.thresholds')}</dt>
           <dd>
             {installationThresholdSummary(
@@ -148,82 +137,72 @@ const ClimateAutomationCard = ({
       </dl>
 
       <footer className="automation-card__footer">
-        <span>
-          {query.isError
-            ? t('dashboard.readFailed')
-            : query.isFetching
-              ? t('dashboard.refreshing')
-              : t('dashboard.liveFromShelly')}
-        </span>
-        <div className="automation-card__actions">
-          <div className="automation-card__controls">
-            <div
-              className="automation-control-group"
-              role="group"
-              aria-label={t('detail.automation')}
-            >
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={
-                  controlsVerified && controlStatus?.automationMode === 'auto'
-                }
-                disabled={action.isPending || !controlsVerified}
-                onClick={() => {
-                  if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
-                }}
-              >
-                AUTO
-              </button>
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={manualControl}
-                disabled={action.isPending || !controlsVerified}
-                onClick={() => {
-                  if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
-                }}
-              >
-                MANUAL
-              </button>
-            </div>
-            <div
-              className="automation-control-group"
-              role="group"
-              aria-label={t('dashboard.output')}
-            >
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={manualControl && controlStatus?.relayOn === true}
-                disabled={action.isPending || !manualControl}
-                onClick={() => {
-                  if (!controlStatus?.relayOn) action.mutate('on');
-                }}
-              >
-                ON
-              </button>
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={manualControl && controlStatus?.relayOn === false}
-                disabled={action.isPending || !manualControl}
-                onClick={() => {
-                  if (controlStatus?.relayOn) action.mutate('off');
-                }}
-              >
-                OFF
-              </button>
-            </div>
-          </div>
-          <button
-            className="secondary-action"
-            type="button"
-            onClick={() => onOpen(installation.id)}
+        <div className="automation-card__controls">
+          <div
+            className="automation-control-group"
+            role="group"
+            aria-label={t('detail.automation')}
           >
-            {t('dashboard.openSystem')}
-          </button>
+            <button
+              className="automation-control-button"
+              type="button"
+              aria-pressed={controlsVerified && controlStatus?.automationMode === 'auto'}
+              disabled={action.isPending || !controlsVerified}
+              onClick={() => {
+                if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
+              }}
+            >
+              AUTO
+            </button>
+            <button
+              className="automation-control-button"
+              type="button"
+              aria-pressed={manualControl}
+              disabled={action.isPending || !controlsVerified}
+              onClick={() => {
+                if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
+              }}
+            >
+              MANUAL
+            </button>
+          </div>
+          <div
+            className="automation-relay-actions"
+            role="group"
+            aria-label={t('dashboard.output')}
+          >
+            <button
+              className="automation-relay-button"
+              type="button"
+              aria-pressed={relayState === true}
+              disabled={action.isPending || !manualControl}
+              onClick={() => {
+                if (!controlStatus?.relayOn) action.mutate('on');
+              }}
+            >
+              ON
+            </button>
+            <button
+              className="automation-relay-button"
+              type="button"
+              aria-pressed={relayState === false}
+              disabled={action.isPending || !manualControl}
+              onClick={() => {
+                if (controlStatus?.relayOn) action.mutate('off');
+              }}
+            >
+              OFF
+            </button>
+          </div>
         </div>
+        <button
+          className="automation-card__detail-link"
+          type="button"
+          onClick={() => onOpen(installation.id)}
+        >
+          <span>{t('dashboard.openSystem')}</span>
+          <span aria-hidden="true">›</span>
+        </button>
         {action.isError && (
           <span className="automation-control-error" role="alert">
             {t('detail.actionFailed')}
@@ -252,6 +231,36 @@ export const AutomationDashboardScreen = ({
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
+  const queryClient = useQueryClient();
+  const hasClimate = installations.some((installation) => installation.kind !== 'time');
+  const hasTime = installations.some((installation) => installation.kind === 'time');
+  const [activeKind, setActiveKind] = useState<'climate' | 'time'>(() =>
+    hasClimate ? 'climate' : 'time'
+  );
+
+  useEffect(() => {
+    if (activeKind === 'climate' && !hasClimate && hasTime) {
+      setActiveKind('time');
+    } else if (activeKind === 'time' && !hasTime && hasClimate) {
+      setActiveKind('climate');
+    }
+  }, [activeKind, hasClimate, hasTime]);
+
+  const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
+    const root = query.queryKey[0];
+    return (
+      root === 'installed-automation-diagnostics' ||
+      root === 'installed-automation-control' ||
+      root === 'time-automation-runtime'
+    );
+  };
+  const activeRefreshes = useIsFetching({ predicate: isDashboardRuntimeQuery });
+  const refreshAll = () => {
+    void queryClient.refetchQueries({ predicate: isDashboardRuntimeQuery });
+  };
+  const visibleInstallations = installations.filter((installation) =>
+    activeKind === 'time' ? installation.kind === 'time' : installation.kind !== 'time'
+  );
 
   return (
     <main className="demo-shell dashboard-shell">
@@ -259,17 +268,43 @@ export const AutomationDashboardScreen = ({
         <div>
           <h1>{t('dashboard.title')}</h1>
         </div>
-        <button
-          className="primary-action dashboard-add-action"
-          type="button"
-          onClick={onAddAutomation}
-        >
-          {t('dashboard.addAutomation')}
-        </button>
+        <RefreshIconButton
+          busy={activeRefreshes > 0}
+          className="dashboard-refresh-action"
+          label={t('common.refresh')}
+          onRefresh={refreshAll}
+        />
       </header>
 
+      <div
+        className="dashboard-kind-tabs"
+        role="tablist"
+        aria-label={t('dashboard.systemsLabel')}
+      >
+        <button
+          className="dashboard-kind-tab"
+          type="button"
+          role="tab"
+          aria-selected={activeKind === 'climate'}
+          disabled={!hasClimate}
+          onClick={() => setActiveKind('climate')}
+        >
+          {t('dashboard.climateTab')}
+        </button>
+        <button
+          className="dashboard-kind-tab"
+          type="button"
+          role="tab"
+          aria-selected={activeKind === 'time'}
+          disabled={!hasTime}
+          onClick={() => setActiveKind('time')}
+        >
+          {t('dashboard.timeTab')}
+        </button>
+      </div>
+
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
-        {installations.map((installation) => (
+        {visibleInstallations.map((installation) => (
           <AutomationCard
             key={installation.id}
             installation={installation}
@@ -277,6 +312,18 @@ export const AutomationDashboardScreen = ({
           />
         ))}
       </section>
+
+      <button
+        className="dashboard-fab"
+        type="button"
+        aria-label={t('dashboard.addAutomation')}
+        title={t('dashboard.addAutomation')}
+        onClick={onAddAutomation}
+      >
+        <svg aria-hidden="true" className="dashboard-fab__icon" viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
     </main>
   );
 };

@@ -95,6 +95,8 @@ export const pl = {
   },
   dashboard: {
     title: 'Twoje automatyki',
+    climateTab: 'Klimat',
+    timeTab: 'Czas',
     description: 'Podgląd tego, co aktualnie widzi i robi każde Shelly.',
     addAutomation: 'Dodaj automatykę',
     emptyTitle: 'Nie masz jeszcze zapisanej automatyki',

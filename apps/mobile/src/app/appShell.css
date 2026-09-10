@@ -6,12 +6,19 @@
   padding-right: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-sm));
 }
 
+.app-shell > .dashboard-shell > .dashboard-header {
+  padding-right: calc(
+    var(--lcl-size-control-min-height) + var(--lcl-size-control-min-height) +
+      var(--lcl-spacing-sm) + var(--lcl-spacing-sm)
+  );
+}
+
 .app-settings-trigger {
   align-items: center;
-  background: var(--lcl-color-surface);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  background: transparent;
+  border: var(--lcl-border-width-sm) solid transparent;
   border-radius: var(--lcl-radius-md);
-  box-shadow: var(--lcl-shadow-md);
+  box-shadow: none;
   color: var(--lcl-color-text);
   cursor: pointer;
   display: inline-flex;

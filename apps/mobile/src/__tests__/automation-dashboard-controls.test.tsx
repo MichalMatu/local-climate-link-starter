@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -69,12 +70,17 @@ describe('AutomationDashboardScreen controls', () => {
   });
 
   it('shows verified AUTO/MANUAL and ON/OFF controls and routes safe actions', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
+    });
     render(
       <I18nProvider>
-        <AutomationDashboardScreen
-          onAddAutomation={vi.fn()}
-          onOpenInstallation={vi.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <AutomationDashboardScreen
+            onAddAutomation={vi.fn()}
+            onOpenInstallation={vi.fn()}
+          />
+        </QueryClientProvider>
       </I18nProvider>
     );
 

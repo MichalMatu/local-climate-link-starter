@@ -1,7 +1,6 @@
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useTimeAutomationRuntime } from '../flows/time-automation/useTimeAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
-import { RefreshIconButton } from '../components/RefreshIconButton.js';
 
 type TimeAutomationCardProps = {
   installation: TimeInstalledAutomation;
@@ -50,11 +49,6 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
           </div>
           <h2>{installation.shelly.name}</h2>
         </div>
-        <RefreshIconButton
-          busy={query.isFetching}
-          label={t('common.refresh')}
-          onRefresh={() => void query.refetch()}
-        />
       </header>
 
       <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
@@ -84,22 +78,14 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
       </dl>
 
       <footer className="automation-card__footer">
-        <span>
-          {query.isError
-            ? t('dashboard.readFailed')
-            : query.isFetching
-              ? t('dashboard.refreshing')
-              : t('time.liveFromShelly')}
-        </span>
-        <div className="automation-card__actions">
-          <button
-            className="secondary-action"
-            type="button"
-            onClick={() => onOpen(installation.id)}
-          >
-            {t('dashboard.openSystem')}
-          </button>
-        </div>
+        <button
+          className="automation-card__detail-link"
+          type="button"
+          onClick={() => onOpen(installation.id)}
+        >
+          <span>{t('dashboard.openSystem')}</span>
+          <span aria-hidden="true">›</span>
+        </button>
       </footer>
     </article>
   );

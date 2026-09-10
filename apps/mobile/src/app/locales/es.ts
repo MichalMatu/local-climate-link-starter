@@ -96,6 +96,8 @@ export const es = {
   },
   dashboard: {
     title: 'Tus automatizaciones',
+    climateTab: 'Clima',
+    timeTab: 'Tiempo',
     description: 'Consulta lo que cada Shelly ve y hace ahora.',
     addAutomation: 'Añadir automatización',
     emptyTitle: 'Aún no hay automatizaciones guardadas',
