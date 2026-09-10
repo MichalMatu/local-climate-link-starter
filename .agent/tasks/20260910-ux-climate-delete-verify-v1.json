@@ -1,0 +1,23 @@
+{
+  "id": "20260910-ux-climate-delete-verify-v1",
+  "mode": "commands",
+  "work_branch": "work/ux-climate-delete-20260910",
+  "allow_write": true,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch --prune origin && git reset --hard origin/work/ux-climate-delete-20260910 && test \"$(git rev-parse HEAD)\" = \"db23a6bea9795c4dcf68c71e0ee653e30edc2922\" && git status --short",
+    "pnpm exec prettier --write apps/mobile/src/app/locales/installationDelete.ts apps/mobile/src/flows/installations/runtimeControl.ts apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/__tests__/climate-delete.test.tsx && pnpm format:check",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/climate-delete.test.tsx src/__tests__/automation-detail.test.tsx",
+    "pnpm --filter @lcl/mobile lint && pnpm --filter @lcl/mobile typecheck && pnpm --filter @lcl/mobile build",
+    "pnpm e2e:responsive",
+    "git diff --check && git status --short",
+    "git add apps/mobile/src/app/locales/installationDelete.ts apps/mobile/src/flows/installations/runtimeControl.ts apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/__tests__/climate-delete.test.tsx && (git diff --cached --quiet || git commit -m \"style(mobile): format climate delete flow\") && test -z \"$(git status --porcelain)\"",
+    "pnpm check",
+    "HUSKY=0 git push origin HEAD:work/ux-climate-delete-20260910 && echo VERIFIED_SHA=$(git rev-parse HEAD) && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-climate-delete-20260910)\""
+  ]
+}
