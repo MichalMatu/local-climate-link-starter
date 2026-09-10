@@ -1,0 +1,19 @@
+{
+  "id": "20260910-ux-dashboard-native-layout-v1",
+  "mode": "commands",
+  "work_branch": "work/ux-dashboard-target-20260910",
+  "allow_write": true,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune origin; git checkout -B work/ux-dashboard-target-20260910 origin/work/ux-dashboard-target-20260910; test \"$(git rev-parse HEAD)\" = \"a1545bf5a71f50d5f0c77e8022456b9bb04f044c\"; test -z \"$(git status --porcelain)\"",
+    "set -e; git show origin/agent-control:.agent/scripts/apply-dashboard-layout-v1.py > /tmp/apply-dashboard-layout-v1.py; python3 /tmp/apply-dashboard-layout-v1.py; pnpm exec prettier --write apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css; git diff --check",
+    "set -e; pnpm --filter @lcl/mobile lint; pnpm --filter @lcl/mobile typecheck; pnpm --filter @lcl/mobile test; pnpm --filter @lcl/mobile build",
+    "set -e; cd apps/mobile; pnpm exec cap sync android; cd android; ./gradlew assembleDebug; cd ../../..; adb -s RFCT70L7E8J install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; adb -s RFCT70L7E8J shell am force-stop com.localclimatelink.app; adb -s RFCT70L7E8J shell monkey -p com.localclimatelink.app -c android.intent.category.LAUNCHER 1; sleep 4; mkdir -p artifacts/ui-audit/physical-20260910; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/04-dashboard-native-layout-v1.png; test -s artifacts/ui-audit/physical-20260910/04-dashboard-native-layout-v1.png",
+    "set -e; git add apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css artifacts/ui-audit/physical-20260910/04-dashboard-native-layout-v1.png; git commit -m 'fix(mobile): compact dashboard layout'; HUSKY=0 git push origin HEAD:work/ux-dashboard-target-20260910; test -z \"$(git status --porcelain)\"; echo NATIVE_LAYOUT_SHA=$(git rev-parse HEAD)"
+  ]
+}
