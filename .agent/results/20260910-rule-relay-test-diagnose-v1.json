@@ -1,0 +1,89 @@
+{
+  "id": "20260910-rule-relay-test-diagnose-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/relay-test-diagnose-20260910",
+  "allow_write": false,
+  "started_at": "2026-09-10T04:41:59.739261+00:00",
+  "command_timeout": 300,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch --prune origin; git reset --hard origin/work/relay-test-diagnose-20260910; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test \"$(git rev-parse origin/main)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test -z \"$(git status --porcelain)\"",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   ff1be4d..0e09eec  agent-control -> origin/agent-control\nHEAD is now at 88b1923 fix(mobile): clarify automation detail hierarchy (#31)\n",
+      "elapsed_seconds": 1.305,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1.81,
+      "output_policy": "stream",
+      "captured_output_chars": 199,
+      "output_truncated": false,
+      "current_rss_mb": 1.81,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "python3 - <<'PY'\nimport json, time, urllib.parse, urllib.request\nBASE='http://192.168.0.16/rpc/'\nNAME='Local Climate Link Thermostat'\ndef rpc(method, **params):\n    url=BASE+method\n    if params:\n        url += '?' + urllib.parse.urlencode(params)\n    with urllib.request.urlopen(url, timeout=5) as r:\n        return json.loads(r.read().decode())\ndef output():\n    return bool(rpc('Switch.GetStatus', id=0).get('output'))\nscripts=rpc('Script.List').get('scripts', [])\nmanaged=[s for s in scripts if s.get('name') == NAME]\nassert len(managed)==1, managed\nsid=int(managed[0]['id'])\nprint('MANAGED_SCRIPT_ID='+str(sid), 'INITIAL_RUNNING='+str(bool(managed[0].get('running'))))\ndef pulse(label, script_running):\n    if script_running:\n        rpc('Script.Start', id=sid)\n        time.sleep(0.5)\n    else:\n        rpc('Script.Stop', id=sid)\n        time.sleep(0.2)\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.15)\n    assert output() is False\n    t0=time.monotonic()\n    rpc('Switch.Set', id=0, on=True)\n    samples=[]\n    for target in (0.0,0.05,0.10,0.25,0.50,1.00):\n        while time.monotonic()-t0 < target:\n            time.sleep(0.005)\n        samples.append((round(time.monotonic()-t0,3), output()))\n    rpc('Switch.Set', id=0, on=False)\n    time.sleep(0.15)\n    final=output()\n    print(label, 'SAMPLES='+json.dumps(samples), 'FINAL_OFF='+str(not final))\n    assert final is False\ntry:\n    pulse('SCRIPT_STOPPED', False)\n    pulse('SCRIPT_RUNNING', True)\nfinally:\n    try:\n        rpc('Script.Stop', id=sid)\n    finally:\n        rpc('Switch.Set', id=0, on=False)\n        time.sleep(0.15)\n        print('FINAL_RELAY_OFF='+str(not output()))\n        print('FINAL_SCRIPT_RUNNING='+str(bool(rpc('Script.GetStatus', id=sid).get('running'))))\n        assert output() is False\n        assert rpc('Script.GetStatus', id=sid).get('running') is not True\nPY",
+      "exit_code": 1,
+      "output": "MANAGED_SCRIPT_ID=1 INITIAL_RUNNING=True\nTraceback (most recent call last):\n  File \"<stdin>\", line 40, in <module>\n  File \"<stdin>\", line 24, in pulse\n  File \"<stdin>\", line 8, in rpc\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 189, in urlopen\n    return opener.open(url, data, timeout)\n           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 495, in open\n    response = meth(req, response)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 604, in http_response\n    response = self.parent.error(\n        'http', request, response, code, msg, hdrs)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 533, in error\n    return self._call_chain(*args)\n           ~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 466, in _call_chain\n    result = func(*args)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 613, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 500: Internal Server Error\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"<stdin>\", line 46, in <module>\n  File \"<stdin>\", line 8, in rpc\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 189, in urlopen\n    return opener.open(url, data, timeout)\n           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 495, in open\n    response = meth(req, response)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 604, in http_response\n    response = self.parent.error(\n        'http', request, response, code, msg, hdrs)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 533, in error\n    return self._call_chain(*args)\n           ~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 466, in _call_chain\n    result = func(*args)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 613, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 500: Internal Server Error\n",
+      "elapsed_seconds": 0.918,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 2.09,
+      "output_policy": "stream",
+      "captured_output_chars": 3007,
+      "output_truncated": false,
+      "current_rss_mb": 2.09,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.305
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.918
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.092
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.072
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-10T04:42:03.536632+00:00",
+  "task_digest": "32f8a0dd96af92811b3d032a7378e58621f558911d7909eefec80c299a98e2b4",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "attempt_id": "a323bd90c9c3a1281dabfed4",
+  "daemon_version": "4.18.19"
+}
