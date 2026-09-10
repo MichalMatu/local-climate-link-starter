@@ -1756,6 +1756,10 @@ select {
   align-items: flex-start;
 }
 
+.installation-detail-header > div {
+  min-width: 0;
+}
+
 .detail-back-link {
   background: transparent;
   border: 0;
@@ -1779,6 +1783,11 @@ select {
     auto-fit,
     minmax(min(100%, var(--lcl-size-card-column-min)), 1fr)
   );
+}
+
+.installation-detail-live,
+.installation-detail-recovery {
+  grid-column: 1 / -1;
 }
 
 .installation-section-heading {
@@ -1809,6 +1818,21 @@ select {
   color: var(--lcl-color-status-warning-text);
   margin: 0;
   padding: var(--lcl-spacing-md);
+}
+
+@media (max-width: 44rem) {
+  .installation-detail-header {
+    display: grid;
+    gap: var(--lcl-spacing-md);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .installation-detail-header > .runtime-refresh-action {
+    align-self: start;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
 }
 
 @media (max-width: 30rem) {
