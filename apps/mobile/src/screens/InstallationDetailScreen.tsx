@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
+import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
 import {
@@ -32,7 +33,9 @@ type InstallationDetailScreenProps = {
   onBack(): void;
 };
 
-const healthClass = (tone: 'ok' | 'warning' | 'offline') =>
+type DetailHealthTone = 'ok' | 'warning' | 'offline' | 'paused';
+
+const healthClass = (tone: DetailHealthTone) =>
   `automation-health automation-health--${tone === 'warning' ? 'attention' : tone}`;
 
 const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
@@ -168,12 +171,13 @@ const InstalledAutomationDetail = ({
   };
 
   let healthLabel = t('dashboard.health.loading');
-  let healthTone: 'ok' | 'warning' | 'offline' = 'warning';
+  let healthTone: DetailHealthTone = 'warning';
   if (recovery?.issue === 'offline') {
     healthLabel = t('dashboard.health.offline');
     healthTone = 'offline';
   } else if (recovery?.issue === 'script-stopped') {
     healthLabel = t('dashboard.health.paused');
+    healthTone = 'paused';
   } else if (recovery?.issue === 'ownership-problem') {
     healthLabel = t('dashboard.health.attention');
   } else if (recovery?.issue === 'sensor-missing') {
@@ -195,13 +199,20 @@ const InstalledAutomationDetail = ({
           <button className="detail-back-link" type="button" onClick={onBack}>
             ← {t('detail.backToDashboard')}
           </button>
-          <p className="automation-card__eyebrow">
-            {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
-          </p>
+          <div className="automation-status-row">
+            <span className={healthClass(healthTone)}>{healthLabel}</span>
+            <span className="automation-status-mode">
+              {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
+            </span>
+          </div>
           <h1>{installation.shelly.name}</h1>
           <p>{t('detail.description')}</p>
         </div>
-        <span className={healthClass(healthTone)}>{healthLabel}</span>
+        <RefreshIconButton
+          busy={diagnosticsQuery.isFetching || controlQuery.isFetching}
+          label={t('common.refresh')}
+          onRefresh={() => void refreshAll()}
+        />
       </header>
 
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
@@ -252,14 +263,6 @@ const InstalledAutomationDetail = ({
               <p className="automation-card__eyebrow">{t('detail.currentState')}</p>
               <h2>{t('detail.climateNow')}</h2>
             </div>
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={diagnosticsQuery.isFetching || controlQuery.isFetching}
-              onClick={() => void refreshAll()}
-            >
-              {t('common.refresh')}
-            </button>
           </div>
 
           <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>

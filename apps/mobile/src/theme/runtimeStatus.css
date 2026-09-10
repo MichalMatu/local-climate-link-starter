@@ -1,0 +1,33 @@
+.automation-card__identity {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+}
+
+.automation-status-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lcl-spacing-sm);
+}
+
+.automation-status-mode {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: 800;
+}
+
+.runtime-refresh-action {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 30rem) {
+  .automation-card__header {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+
+  .automation-card__identity {
+    flex: 1 1 auto;
+  }
+}

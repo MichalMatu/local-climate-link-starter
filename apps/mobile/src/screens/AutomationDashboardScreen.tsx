@@ -16,6 +16,7 @@ import {
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
+import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 
 type AutomationCardProps = {
@@ -43,42 +44,51 @@ const ClimateAutomationCard = ({
   return (
     <article className="automation-card">
       <header className="automation-card__header">
-        <div>
-          <p className="automation-card__eyebrow">
-            {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
-          </p>
+        <div className="automation-card__identity">
+          <div className="automation-status-row">
+            {query.isError ? (
+              controlFallback.data &&
+              installedAutomationScriptMatch(installation, controlFallback.data) ===
+                'matched' &&
+              controlFallback.data.automationMode === 'manual' ? (
+                <span className="automation-health automation-health--paused">
+                  {t('dashboard.health.paused')}
+                </span>
+              ) : controlFallback.data ? (
+                <span className="automation-health automation-health--attention">
+                  {t('dashboard.health.attention')}
+                </span>
+              ) : controlFallback.isPending ? (
+                <span className="automation-health automation-health--unknown">
+                  {t('dashboard.health.loading')}
+                </span>
+              ) : (
+                <span className="automation-health automation-health--offline">
+                  {t('dashboard.health.offline')}
+                </span>
+              )
+            ) : query.isPending ? (
+              <span className="automation-health automation-health--unknown">
+                {t('dashboard.health.loading')}
+              </span>
+            ) : (
+              <span
+                className={`automation-health automation-health--${health ?? 'unknown'}`}
+              >
+                {installationHealthLabel(health ?? 'unknown', t)}
+              </span>
+            )}
+            <span className="automation-status-mode">
+              {t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
+            </span>
+          </div>
           <h2>{installation.shelly.name}</h2>
         </div>
-        {query.isError ? (
-          controlFallback.data &&
-          installedAutomationScriptMatch(installation, controlFallback.data) ===
-            'matched' &&
-          controlFallback.data.automationMode === 'manual' ? (
-            <span className="automation-health automation-health--paused">
-              {t('dashboard.health.paused')}
-            </span>
-          ) : controlFallback.data ? (
-            <span className="automation-health automation-health--attention">
-              {t('dashboard.health.attention')}
-            </span>
-          ) : controlFallback.isPending ? (
-            <span className="automation-health automation-health--unknown">
-              {t('dashboard.health.loading')}
-            </span>
-          ) : (
-            <span className="automation-health automation-health--offline">
-              {t('dashboard.health.offline')}
-            </span>
-          )
-        ) : query.isPending ? (
-          <span className="automation-health automation-health--unknown">
-            {t('dashboard.health.loading')}
-          </span>
-        ) : (
-          <span className={`automation-health automation-health--${health ?? 'unknown'}`}>
-            {installationHealthLabel(health ?? 'unknown', t)}
-          </span>
-        )}
+        <RefreshIconButton
+          busy={query.isFetching}
+          label={t('common.refresh')}
+          onRefresh={() => void query.refetch()}
+        />
       </header>
 
       <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>
@@ -138,14 +148,6 @@ const ClimateAutomationCard = ({
             onClick={() => onOpen(installation.id)}
           >
             {t('dashboard.openSystem')}
-          </button>
-          <button
-            className="secondary-action"
-            type="button"
-            disabled={query.isFetching}
-            onClick={() => void query.refetch()}
-          >
-            {t('common.refresh')}
           </button>
         </div>
       </footer>
