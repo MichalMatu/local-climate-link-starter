@@ -5,6 +5,7 @@ import '@ionic/react/css/typography.css';
 import '@lcl/design-tokens/styles.css';
 import '@lcl/ui/styles.css';
 import './theme/theme.css';
+import './theme/runtimeStatus.css';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App.js';
 import { installRuntimeDiagnostics } from './app/runtimeDiagnostics.js';
