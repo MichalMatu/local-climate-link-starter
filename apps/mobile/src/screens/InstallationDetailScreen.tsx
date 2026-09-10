@@ -1,7 +1,14 @@
-import { ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
+import {
+  FeedbackPanel,
+  Modal,
+  ToastViewport,
+  type ToastMessage,
+  type ToastTone
+} from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
@@ -14,6 +21,7 @@ import {
 } from '../flows/installations/presentation.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
+  deleteInstalledAutomation,
   installedAutomationScriptMatch,
   pauseInstalledAutomation,
   resumeInstalledAutomation
@@ -118,6 +126,11 @@ const InstalledAutomationDetail = ({
   const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
+  const removeInstallation = useInstalledAutomationStore(
+    (state) => state.removeInstallation
+  );
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const deleteCopy = installationDeleteCopy[locale];
   const snapshot = diagnosticsQuery.isSuccess ? diagnosticsQuery.data : undefined;
   const control = controlQuery.data;
   const scriptMatch = control
@@ -164,6 +177,24 @@ const InstalledAutomationDetail = ({
       }
     },
     onError: () => pushToast('warning', t('detail.actionFailed'))
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteInstalledAutomation(installation),
+    onSuccess: () => {
+      queryClient.removeQueries({
+        queryKey: installedAutomationDiagnosticsQueryKey(installation),
+        exact: true
+      });
+      queryClient.removeQueries({
+        queryKey: installedAutomationControlQueryKey(installation),
+        exact: true
+      });
+      removeInstallation(installation.id);
+      setDeleteOpen(false);
+      onBack();
+    },
+    onError: () => pushToast('warning', deleteCopy.failed)
   });
 
   const refreshAll = async () => {
@@ -331,12 +362,12 @@ const InstalledAutomationDetail = ({
             </div>
           </dl>
 
-          {canToggleAutomation && recovery?.issue !== 'script-stopped' && (
-            <div className="installation-detail-actions">
+          <div className="installation-detail-actions">
+            {canToggleAutomation && recovery?.issue !== 'script-stopped' && (
               <button
                 className={isPaused ? 'primary-action' : 'secondary-action'}
                 type="button"
-                disabled={automationMutation.isPending}
+                disabled={automationMutation.isPending || deleteMutation.isPending}
                 onClick={() => automationMutation.mutate()}
               >
                 {automationMutation.isPending
@@ -345,12 +376,46 @@ const InstalledAutomationDetail = ({
                     ? t('detail.resume')
                     : t('detail.pause')}
               </button>
-            </div>
-          )}
+            )}
+            <button
+              className="secondary-action secondary-action--danger"
+              type="button"
+              disabled={automationMutation.isPending || deleteMutation.isPending}
+              onClick={() => setDeleteOpen(true)}
+            >
+              {deleteCopy.action}
+            </button>
+          </div>
         </article>
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
+
+      <Modal
+        actions={
+          <button
+            className="secondary-action secondary-action--danger"
+            type="button"
+            disabled={deleteMutation.isPending}
+            onClick={() => deleteMutation.mutate()}
+          >
+            {deleteMutation.isPending ? deleteCopy.busy : t('common.confirmDelete')}
+          </button>
+        }
+        busy={deleteMutation.isPending}
+        closeLabel={t('common.close')}
+        open={deleteOpen}
+        title={deleteCopy.title}
+        onClose={() => {
+          if (!deleteMutation.isPending) {
+            setDeleteOpen(false);
+          }
+        }}
+      >
+        <FeedbackPanel tone="warning" title={deleteCopy.action}>
+          {deleteCopy.detail}
+        </FeedbackPanel>
+      </Modal>
 
       <ToastViewport
         dismissLabel={t('toast.dismiss')}

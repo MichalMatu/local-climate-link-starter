@@ -1,7 +1,8 @@
-import { RpcShellyClient } from '@lcl/shelly-client';
+import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
 import {
   createShellyTransport,
   readShellyControlStatus,
+  readShellySetupStatus,
   unwrapShellyResult,
   type ShellyControlStatus
 } from '../hardware-setup/shellyRequests.js';
@@ -79,4 +80,51 @@ export const resumeInstalledAutomation = async (
     throw new Error('Shelly did not confirm a running automation.');
   }
   return controlStatus;
+};
+
+export const deleteInstalledAutomation = async (
+  installation: ClimateInstalledAutomation
+): Promise<void> => {
+  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
+  const relayId = installation.config.output.relayId;
+  const setup = await readShellySetupStatus(installation.shelly.baseUrl);
+  const targetScript = setup.scripts.find(
+    (script) => script.id === installation.script.id
+  );
+  const conflictingManagedScript = setup.scripts.find(
+    (script) =>
+      script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME &&
+      script.id !== installation.script.id
+  );
+
+  if (targetScript && targetScript.name !== LOCAL_CLIMATE_LINK_SCRIPT_NAME) {
+    throw new Error('Stored script id belongs to a different Shelly script.');
+  }
+  if (conflictingManagedScript) {
+    throw new Error('Shelly contains another Local Climate Link automation script.');
+  }
+
+  await forceRelayOffAndConfirm(client, relayId);
+
+  if (!targetScript) {
+    return;
+  }
+
+  if (targetScript.running) {
+    const stopResult = await client.stopScript(targetScript.id);
+    await forceRelayOffAndConfirm(client, relayId);
+    unwrapShellyResult(stopResult);
+  }
+
+  const deleteResult = await client.deleteScript(targetScript.id);
+  await forceRelayOffAndConfirm(client, relayId);
+  unwrapShellyResult(deleteResult);
+
+  const verified = await readShellySetupStatus(installation.shelly.baseUrl);
+  if (
+    verified.status.relayOn ||
+    verified.scripts.some((script) => script.id === installation.script.id)
+  ) {
+    throw new Error('Shelly did not confirm a safely deleted automation.');
+  }
 };
