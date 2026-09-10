@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-final-visual-audit-v2",
+  "task_digest": "bc4f5e63353c0bf0a419dda0303906bf860cf28880ea95b73f03b8a24c9bc27e",
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T04:25:07.700938+00:00",
+  "attempt_id": "e809352757b60a1cc15460d8",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 63031,
+  "updated_at": "2026-09-10T04:25:07.701038+00:00",
+  "pid": 63031
+}
