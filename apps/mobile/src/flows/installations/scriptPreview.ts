@@ -1,4 +1,4 @@
-import { readShellyAutomationScriptState } from '../hardware-setup/shellyRequests.js';
+import { readShellyManagedAutomationScriptCode } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 
 export const installedAutomationScriptSourceQueryKey = (
@@ -9,14 +9,10 @@ export const installedAutomationScriptSourceQueryKey = (
   installation.script.id
 ] as const;
 
-export const loadInstalledAutomationScriptSource = async (
+export const loadInstalledAutomationScriptSource = (
   installation: ClimateInstalledAutomation
-): Promise<string> => {
-  const state = await readShellyAutomationScriptState(installation.shelly.baseUrl);
-
-  if (state.script?.id !== installation.script.id || state.code === null) {
-    throw new Error('Shelly did not return the exact managed automation script.');
-  }
-
-  return state.code;
-};
+): Promise<string> =>
+  readShellyManagedAutomationScriptCode(
+    installation.shelly.baseUrl,
+    installation.script.id
+  );
