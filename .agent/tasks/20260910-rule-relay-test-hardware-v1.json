@@ -1,0 +1,18 @@
+{
+  "id": "20260910-rule-relay-test-hardware-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/fix-rule-relay-test-20260910",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 600,
+  "idle_timeout": 180,
+  "task_timeout": 900,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -e; git fetch --prune origin; git reset --hard origin/work/fix-rule-relay-test-20260910; test \"$(git rev-parse HEAD)\" = \"e25b697a8be828df9bcea6633e292bf5d769f973\"; test -z \"$(git status --porcelain)\"",
+    "pnpm --filter @lcl/shelly-client build",
+    "set -e; git show origin/agent-control:.agent/checks/20260910-relay-test-hardware.mjs > /tmp/lcl-relay-test-hardware.mjs; node /tmp/lcl-relay-test-hardware.mjs",
+    "test -z \"$(git status --porcelain)\""
+  ]
+}
