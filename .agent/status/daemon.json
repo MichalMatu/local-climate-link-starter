@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "daemon_version": "4.18.19",
+  "daemon_version": "4.18.20",
   "state": "idle",
-  "pid": 90749,
-  "updated_at": "2026-09-10T09:02:11.816976+00:00",
-  "self_revision": "8e04f75287630cb1db363f1b53c3c0b770e10dcc",
+  "pid": 1220,
+  "updated_at": "2026-09-10T09:08:02.728315+00:00",
+  "self_revision": "0bb99d790dbed19a528b4cb8ac238432134b5660",
   "poll_seconds": 15,
   "self_update_seconds": 60,
   "command_timeout_default": 900,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 90749,
-  "supervisor_pid": 88114,
-  "last_task_id": "20260910-ux-dashboard-native-controls-header-v1",
+  "worker_pid": 1220,
+  "supervisor_pid": 826,
   "execution_variant": "parallel"
 }
