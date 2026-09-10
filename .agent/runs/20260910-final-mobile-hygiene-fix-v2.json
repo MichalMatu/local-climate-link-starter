@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 3,
-  "command": "set -e; git show origin/agent-control:.agent/scripts/final-mobile-hygiene-fix-v1.py > /tmp/final-mobile-hygiene-fix-v1.py; python3 /tmp/final-mobile-hygiene-fix-v1.py; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/theme/theme.css scripts/quality/ux-gate.mjs; git diff --check; RAW_SVG=$(git grep -n '<svg' -- apps/mobile/src | grep -E '\\.tsx:' | grep -v '/__tests__/' || true); test -z \"$RAW_SVG\"; INLINE=$(git grep -n 'style={{' -- apps/mobile/src | grep -E '\\.tsx:' | grep -v '/__tests__/' || true); test -z \"$INLINE\"; GEAR=$(git grep -n 'SettingsGearIcon' -- apps/mobile/src || true); test -z \"$GEAR\"; pnpm quality:ux; pnpm --filter @lcl/mobile lint; pnpm --filter @lcl/mobile typecheck; pnpm --filter @lcl/mobile test -- hardware-setup; echo MOBILE_HYGIENE_OK",
-  "pid": 87722,
+  "command": "set -e; git add -A apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/components/icons/SettingsGearIcon.tsx apps/mobile/src/theme/theme.css scripts/quality/ux-gate.mjs; git commit -m \"refactor(mobile): enforce tokenized Tabler controls\"; git push -u origin HEAD:work/final-quality-audit-20260910; git fetch origin; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/final-quality-audit-20260910)\"; test -z \"$(git status --porcelain)\"; echo HYGIENE_SHA=$(git rev-parse HEAD)",
+  "pid": 88624,
   "timeout": 1200,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T18:05:30.328914+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T18:06:07.606146+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 3,
   "stage_phase": "commands",
   "task_id": "20260910-final-mobile-hygiene-fix-v2",
@@ -18,5 +18,5 @@
   "task_digest": "9cfd5387c671c545a64d1c61617118b0bfefca04afc0c0e6dd635cb8fe82518b",
   "daemon_version": "4.18.20",
   "daemon_pid": 87476,
-  "updated_at": "2026-09-10T18:05:30.404395+00:00"
+  "updated_at": "2026-09-10T18:06:07.689120+00:00"
 }
