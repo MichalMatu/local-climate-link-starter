@@ -69,7 +69,6 @@ export const ShellyLedSettingsCard = ({
     <article className="automation-card installation-detail-device-led">
       <div className="installation-section-heading">
         <div>
-          <p className="automation-card__eyebrow">{copy.eyebrow}</p>
           <h2>{copy.title}</h2>
         </div>
         <RefreshIconButton
@@ -78,8 +77,6 @@ export const ShellyLedSettingsCard = ({
           onRefresh={() => void settingsQuery.refetch()}
         />
       </div>
-
-      <p className="time-schedule-note">{copy.description}</p>
 
       {settingsQuery.isPending ? (
         <p className="time-schedule-note">{copy.loading}</p>
@@ -113,8 +110,6 @@ export const ShellyLedSettingsCard = ({
               </div>
             ) : null}
           </dl>
-
-          <p className="time-schedule-note">{copy.relayPresetHint}</p>
 
           <div className="installation-detail-actions">
             <button

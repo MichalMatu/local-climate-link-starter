@@ -326,10 +326,7 @@ const InstalledAutomationDetail = ({
 
         <article className="automation-card installation-detail-live">
           <div className="installation-section-heading">
-            <div>
-              <p className="automation-card__eyebrow">{t('detail.currentState')}</p>
-              <h2>{t('detail.climateNow')}</h2>
-            </div>
+            <h2>{t('detail.climateNow')}</h2>
           </div>
 
           <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>
@@ -368,17 +365,12 @@ const InstalledAutomationDetail = ({
                 )}
               </dd>
             </div>
-            <div>
-              <dt>{t('detail.source')}</dt>
-              <dd>{t('dashboard.liveFromShelly')}</dd>
-            </div>
           </dl>
         </article>
 
         <article className="automation-card installation-detail-config">
           <div className="installation-section-heading">
             <div>
-              <p className="automation-card__eyebrow">{t('detail.configuration')}</p>
               <h2>{t('detail.automation')}</h2>
             </div>
             <button

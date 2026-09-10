@@ -29,7 +29,7 @@
   right: var(--lcl-fluid-shell-padding);
   top: var(--lcl-fluid-shell-padding);
   width: var(--lcl-size-control-min-height);
-  z-index: 20;
+  z-index: var(--lcl-z-index-header);
 }
 
 .app-settings-trigger:hover,

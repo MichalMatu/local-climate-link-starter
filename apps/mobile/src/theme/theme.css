@@ -2058,7 +2058,7 @@ select {
 
 .installation-detail-grid {
   display: grid;
-  gap: var(--lcl-spacing-md);
+  gap: var(--lcl-spacing-sm);
   grid-template-columns: repeat(
     auto-fit,
     minmax(min(100%, var(--lcl-size-card-column-min)), 1fr)

@@ -186,10 +186,7 @@ export const TimeInstallationDetail = ({
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
         <article className="automation-card installation-detail-live">
           <div className="installation-section-heading">
-            <div>
-              <p className="automation-card__eyebrow">{t('detail.currentState')}</p>
-              <h2>{t('time.scheduleSummary')}</h2>
-            </div>
+            <h2>{t('time.scheduleSummary')}</h2>
           </div>
 
           <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
@@ -245,10 +242,7 @@ export const TimeInstallationDetail = ({
 
         <article className="automation-card installation-detail-config">
           <div className="installation-section-heading">
-            <div>
-              <p className="automation-card__eyebrow">{t('detail.configuration')}</p>
-              <h2>{t('time.detail.editTitle')}</h2>
-            </div>
+            <h2>{t('time.detail.editTitle')}</h2>
           </div>
 
           <div className="time-schedule-grid">
