@@ -1,85 +1,36 @@
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import {
+  IconAlertTriangle,
+  IconChevronRight,
+  IconClock,
+  IconDotsVertical,
+  IconPlus,
+  IconSettings,
+  IconTemperature
+} from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useTranslation } from '../app/i18n.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
 } from '../flows/installations/model.js';
-import { useInstalledAutomationStore } from '../flows/installations/store.js';
-import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
   formatInstallationMetric,
   installationHealthLabel,
   installationThresholdSummary
 } from '../flows/installations/presentation.js';
+import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
+import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import {
   useInstalledAutomationActions,
   useInstalledAutomationControl,
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
-import { useTranslation } from '../app/i18n.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import './AutomationDashboardScreen.css';
-
-type IconProps = { className?: string };
-
-const ThermometerIcon = ({ className }: IconProps) => (
-  <svg
-    aria-hidden="true"
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4 4 0 1 1-4 0Z" />
-    <path d="M12 9v6" />
-  </svg>
-);
-
-const ClockIcon = ({ className }: IconProps) => (
-  <svg
-    aria-hidden="true"
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="8" />
-    <path d="M12 7v5l3 2" />
-  </svg>
-);
-
-const SettingsIcon = ({ className }: IconProps) => (
-  <svg
-    aria-hidden="true"
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.55v-.1a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 3.75 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2V9.55h.05a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.86-2.86.06.06A1.7 1.7 0 0 0 8.15 3.75a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4.05v.05a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4H21v4.05h-.1a1.7 1.7 0 0 0-1.1.4 1.7 1.7 0 0 0-.4 1Z" />
-  </svg>
-);
-
-const DotsIcon = ({ className }: IconProps) => (
-  <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
-    <circle cx="12" cy="5" r="1.5" />
-    <circle cx="12" cy="12" r="1.5" />
-    <circle cx="12" cy="19" r="1.5" />
-  </svg>
-);
 
 const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
   const root = query.queryKey[0];
@@ -120,10 +71,34 @@ const ClimateAutomationCard = ({
     controlStatus?.relayOn ??
     snapshot?.plug?.relayState ??
     snapshot?.diagnostics.relayState;
-  const purposeLabel =
-    installation.config.rule.control.metric === 'humidity'
-      ? t('intent.humidity.context')
-      : t('intent.temperature.context');
+  const controlsHumidity = installation.config.rule.control.metric === 'humidity';
+  const purposeLabel = controlsHumidity
+    ? t('intent.humidity.context')
+    : t('intent.temperature.context');
+  const thresholdSummary = installationThresholdSummary(
+    installation,
+    snapshot?.diagnostics.lastEffectiveOnThreshold,
+    snapshot?.diagnostics.lastEffectiveOffThreshold
+  );
+
+  const primaryMetric = controlsHumidity
+    ? {
+        label: t('dashboard.humidity'),
+        value: formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')
+      }
+    : {
+        label: t('dashboard.temperature'),
+        value: formatInstallationMetric(snapshot?.diagnostics.lastTemp, '°C')
+      };
+  const secondaryMetric = controlsHumidity
+    ? {
+        label: t('dashboard.temperature'),
+        value: formatInstallationMetric(snapshot?.diagnostics.lastTemp, '°C')
+      }
+    : {
+        label: t('dashboard.humidity'),
+        value: formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')
+      };
 
   let warningLabel: string | null = null;
   let warningClass = 'attention';
@@ -146,18 +121,16 @@ const ClimateAutomationCard = ({
           className={`automation-card__leading-icon${
             automationRunning ? ' automation-card__leading-icon--active' : ''
           }`}
+          aria-hidden="true"
         >
-          <ThermometerIcon className="automation-card__leading-icon-svg" />
+          <IconTemperature className="automation-card__icon" />
         </span>
+
         <div className="automation-card__identity">
           <h2>{installation.shelly.name}</h2>
-          <p className="automation-card__purpose">{purposeLabel}</p>
-          {warningLabel && (
-            <span className={`automation-health automation-health--${warningClass}`}>
-              {warningLabel}
-            </span>
-          )}
+          <p>{purposeLabel}</p>
         </div>
+
         <div className="automation-card__header-actions">
           <button
             className="automation-master-switch"
@@ -178,115 +151,106 @@ const ClimateAutomationCard = ({
             title={t('dashboard.openSystem')}
             onClick={() => onOpen(installation.id)}
           >
-            <DotsIcon className="automation-card__menu-icon" />
+            <IconDotsVertical className="automation-card__menu-icon" />
           </button>
         </div>
       </header>
 
-      <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>
-        <div>
-          <span>{t('dashboard.temperature')}</span>
-          <strong>
-            {formatInstallationMetric(snapshot?.diagnostics.lastTemp, '°C')}
-          </strong>
+      <div className="automation-card__main" aria-label={t('dashboard.currentValues')}>
+        <div className="automation-card__primary-metric">
+          <span>{primaryMetric.label}</span>
+          <strong>{primaryMetric.value}</strong>
+          <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
+            {thresholdSummary}
+          </small>
         </div>
-        <div>
-          <span>{t('dashboard.humidity')}</span>
-          <strong>
-            {formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')}
-          </strong>
+
+        <div className="automation-card__secondary-metrics">
+          <div>
+            <span>{secondaryMetric.label}</span>
+            <strong>{secondaryMetric.value}</strong>
+          </div>
+          <div>
+            <span>{t('dashboard.vpd')}</span>
+            <strong>
+              {formatInstallationMetric(snapshot?.diagnostics.lastVpd, ' kPa', 2)}
+            </strong>
+          </div>
         </div>
-        <div>
-          <span>{t('dashboard.vpd')}</span>
-          <strong>
-            {formatInstallationMetric(snapshot?.diagnostics.lastVpd, ' kPa', 2)}
-          </strong>
+
+        <div
+          className="automation-control-group automation-card__mode-control"
+          role="group"
+          aria-label={t('detail.automation')}
+        >
+          <button
+            className="automation-control-button"
+            type="button"
+            aria-pressed={automationRunning}
+            disabled={action.isPending || !controlsVerified}
+            onClick={() => {
+              if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
+            }}
+          >
+            AUTO
+          </button>
+          <button
+            className="automation-control-button"
+            type="button"
+            aria-pressed={manualControl}
+            disabled={action.isPending || !controlsVerified}
+            onClick={() => {
+              if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
+            }}
+          >
+            MANUAL
+          </button>
         </div>
       </div>
 
-      <dl className="automation-summary">
-        <div>
-          <dt>{t('dashboard.thresholds')}</dt>
-          <dd>
-            {installationThresholdSummary(
-              installation,
-              snapshot?.diagnostics.lastEffectiveOnThreshold,
-              snapshot?.diagnostics.lastEffectiveOffThreshold
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt>{t('dashboard.sensor')}</dt>
-          <dd>{installation.config.sensor.displayName}</dd>
-        </div>
-      </dl>
+      <div
+        className="automation-relay-actions automation-card__relay-actions"
+        role="group"
+        aria-label={t('dashboard.output')}
+      >
+        <button
+          className="automation-relay-button"
+          type="button"
+          aria-pressed={relayState === true}
+          disabled={action.isPending || !manualControl}
+          onClick={() => {
+            if (!controlStatus?.relayOn) action.mutate('on');
+          }}
+        >
+          ON
+        </button>
+        <button
+          className="automation-relay-button"
+          type="button"
+          aria-pressed={relayState === false}
+          disabled={action.isPending || !manualControl}
+          onClick={() => {
+            if (controlStatus?.relayOn) action.mutate('off');
+          }}
+        >
+          OFF
+        </button>
+      </div>
 
       <footer className="automation-card__footer">
-        <div className="automation-card__controls">
-          <div
-            className="automation-control-group"
-            role="group"
-            aria-label={t('detail.automation')}
-          >
-            <button
-              className="automation-control-button"
-              type="button"
-              aria-pressed={automationRunning}
-              disabled={action.isPending || !controlsVerified}
-              onClick={() => {
-                if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
-              }}
-            >
-              AUTO
-            </button>
-            <button
-              className="automation-control-button"
-              type="button"
-              aria-pressed={manualControl}
-              disabled={action.isPending || !controlsVerified}
-              onClick={() => {
-                if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
-              }}
-            >
-              MANUAL
-            </button>
-          </div>
-          <div
-            className="automation-relay-actions"
-            role="group"
-            aria-label={t('dashboard.output')}
-          >
-            <button
-              className="automation-relay-button"
-              type="button"
-              aria-pressed={relayState === true}
-              disabled={action.isPending || !manualControl}
-              onClick={() => {
-                if (!controlStatus?.relayOn) action.mutate('on');
-              }}
-            >
-              ON
-            </button>
-            <button
-              className="automation-relay-button"
-              type="button"
-              aria-pressed={relayState === false}
-              disabled={action.isPending || !manualControl}
-              onClick={() => {
-                if (controlStatus?.relayOn) action.mutate('off');
-              }}
-            >
-              OFF
-            </button>
-          </div>
-        </div>
         <button
-          className="automation-card__detail-link"
+          className={`automation-card__status-link${
+            warningLabel ? ` automation-card__status-link--${warningClass}` : ''
+          }`}
           type="button"
+          aria-label={t('dashboard.openSystem')}
           onClick={() => onOpen(installation.id)}
         >
-          <span>{t('dashboard.openSystem')}</span>
-          <span aria-hidden="true">›</span>
+          <span className="automation-card__status-copy">
+            {warningLabel && <IconAlertTriangle aria-hidden="true" />}
+            <span>{warningLabel ?? t('dashboard.openSystem')}</span>
+          </span>
+          <IconChevronRight aria-hidden="true" />
         </button>
         {action.isError && (
           <span className="automation-control-error" role="alert">
@@ -355,9 +319,7 @@ export const AutomationDashboardScreen = ({
   return (
     <main className="demo-shell dashboard-shell">
       <header className="demo-header dashboard-header">
-        <div>
-          <h1>{t('dashboard.title')}</h1>
-        </div>
+        <h1>{t('dashboard.title')}</h1>
       </header>
 
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
@@ -371,13 +333,14 @@ export const AutomationDashboardScreen = ({
           ))
         ) : (
           <div className="dashboard-kind-empty" role="status">
-            <span className="dashboard-kind-empty__icon">
-              {activeKind === 'time' ? (
-                <ClockIcon className="dashboard-nav__icon" />
-              ) : (
-                <ThermometerIcon className="dashboard-nav__icon" />
-              )}
-            </span>
+            {activeKind === 'time' ? (
+              <IconClock className="dashboard-kind-empty__icon" aria-hidden="true" />
+            ) : (
+              <IconTemperature
+                className="dashboard-kind-empty__icon"
+                aria-hidden="true"
+              />
+            )}
             <strong>{t('dashboard.emptyCategory')}</strong>
           </div>
         )}
@@ -390,9 +353,7 @@ export const AutomationDashboardScreen = ({
         title={t('dashboard.addAutomation')}
         onClick={onAddAutomation}
       >
-        <svg aria-hidden="true" className="dashboard-fab__icon" viewBox="0 0 24 24">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
+        <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
       </button>
 
       <nav className="dashboard-bottom-nav" aria-label={t('dashboard.systemsLabel')}>
@@ -403,7 +364,7 @@ export const AutomationDashboardScreen = ({
           aria-current={activeKind === 'climate' ? 'page' : undefined}
           onClick={() => setActiveKind('climate')}
         >
-          <ThermometerIcon className="dashboard-nav__icon" />
+          <IconTemperature className="dashboard-nav__icon" aria-hidden="true" />
           <span>{t('dashboard.climateTab')}</span>
         </button>
         <button
@@ -413,16 +374,17 @@ export const AutomationDashboardScreen = ({
           aria-current={activeKind === 'time' ? 'page' : undefined}
           onClick={() => setActiveKind('time')}
         >
-          <ClockIcon className="dashboard-nav__icon" />
+          <IconClock className="dashboard-nav__icon" aria-hidden="true" />
           <span>{t('dashboard.timeTab')}</span>
         </button>
         <button
           className="dashboard-bottom-nav__item"
           type="button"
           aria-haspopup="dialog"
+          disabled={!onOpenSettings}
           onClick={() => onOpenSettings?.()}
         >
-          <SettingsIcon className="dashboard-nav__icon" />
+          <IconSettings className="dashboard-nav__icon" aria-hidden="true" />
           <span>{t('dashboard.settingsTab')}</span>
         </button>
       </nav>

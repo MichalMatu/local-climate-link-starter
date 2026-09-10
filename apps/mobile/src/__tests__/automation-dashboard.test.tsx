@@ -231,7 +231,6 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('55.2%')).toBeVisible();
     expect(screen.getByText('1.31 kPa')).toBeVisible();
     expect(screen.getByText('Salon')).toBeVisible();
-    expect(screen.getByText('Xiaomi salon')).toBeVisible();
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
