@@ -385,6 +385,25 @@ const requiredBox = async (locator: Locator) => {
   return box!;
 };
 
+const expectDetailHierarchy = async (page: Page) => {
+  const [gridBox, liveBox, headerBox, refreshBox] = await Promise.all([
+    requiredBox(page.locator('.installation-detail-grid')),
+    requiredBox(page.locator('.installation-detail-live')),
+    requiredBox(page.locator('.installation-detail-header')),
+    requiredBox(
+      page.locator('.installation-detail-header').getByRole('button', { name: 'Odśwież' })
+    )
+  ]);
+
+  expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
+  expect(refreshBox.width).toBeLessThanOrEqual(48);
+  expect(Math.abs(refreshBox.y - headerBox.y)).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(refreshBox.x + refreshBox.width - (headerBox.x + headerBox.width))
+  ).toBeLessThanOrEqual(2);
+};
+
 const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
   const row = button.locator(
     'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " action-row ")][1]'
@@ -561,6 +580,7 @@ for (const viewport of viewports) {
       page.getByRole('button', { name: 'Wstrzymaj automatykę' })
     ).toBeVisible();
     await expect(page.getByRole('button', { name: /Wróć do automatyk/ })).toBeVisible();
+    await expectDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
     expect(consoleProblems).toEqual([]);
@@ -648,6 +668,7 @@ for (const viewport of viewports) {
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
     await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();
+    await expectDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     expect(consoleProblems).toEqual([]);
   });
