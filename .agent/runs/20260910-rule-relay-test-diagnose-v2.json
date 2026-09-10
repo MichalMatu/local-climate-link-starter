@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-rule-relay-test-diagnose-v2",
+  "task_digest": "86d2dc48c6ce5aca21cbca542b49cc18746d89632610babc23bbb3e8deabed6b",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-10T04:42:46.119297+00:00",
+  "attempt_id": "2091d787f74d48e2d516e99b",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 77181,
+  "updated_at": "2026-09-10T04:42:46.119376+00:00",
+  "pid": 77181
+}
