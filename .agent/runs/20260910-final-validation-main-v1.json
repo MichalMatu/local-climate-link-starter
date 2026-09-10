@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 9,
-  "command": "set -e; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; test -x \"$ADB\"; DEVICES=\"$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1}' | sed '/^$/d')\"; test \"$DEVICES\" = \"RFCT70L7E8J\"; MODEL=\"$(\"$ADB\" -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\"; test \"$MODEL\" = \"SM-S906B\" -o \"$MODEL\" = \"SM_S906B\"; echo PHONE_DEVICE=$DEVICES MODEL=$MODEL",
-  "pid": 35353,
+  "command": "set -e; set -o pipefail; pnpm android:phone-alpha 2>&1 | tee /tmp/lcl-final-phone-alpha.log",
+  "pid": 35450,
   "timeout": 7200,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T03:51:28.605656+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-10T03:51:32.595682+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260910-final-validation-main-v1",
@@ -18,5 +18,5 @@
   "task_digest": "f2a5d558d76d064ae4c7623e6fc080a5d927f158d015aceba296474ff015f2f8",
   "daemon_version": "4.18.19",
   "daemon_pid": 31387,
-  "updated_at": "2026-09-10T03:51:28.641531+00:00"
+  "updated_at": "2026-09-10T03:51:32.663077+00:00"
 }
