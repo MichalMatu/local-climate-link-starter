@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-climate-detail-unify-recover-v5",
+  "task_digest": "ed5938cb5ea6643ba7db39797a3f5c6a78ce9ad5bf927ed12ed8dd71f340aec4",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T15:52:25.529314+00:00",
+  "attempt_id": "35ebcb377c40d446e4d1e030",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 56930,
+  "updated_at": "2026-09-10T15:52:25.529532+00:00",
+  "pid": 56930
+}
