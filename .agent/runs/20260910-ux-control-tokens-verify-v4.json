@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 10,
-  "command": "! grep -R --line-number --fixed-strings -- '--lcl-size-icon-sm' apps/mobile/src && grep -R --line-number --fixed-strings '<CodeIcon />' apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx && grep -R --line-number --fixed-strings 'dashboard-add-action' apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css && grep -R --line-number --fixed-strings -- '--lcl-size-control-icon-size' apps/mobile/src/app/appShell.css",
-  "pid": 91916,
+  "command": "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/theme/theme.css apps/mobile/src/app/appShell.css && pnpm format:check",
+  "pid": 91940,
   "timeout": 1200,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T03:11:43.851618+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-10T03:11:44.245325+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260910-ux-control-tokens-verify-v4",
@@ -18,5 +18,5 @@
   "task_digest": "29d788fa500f7875626485714db102e6b5b06339387597054b56a7105c47e037",
   "daemon_version": "4.18.19",
   "daemon_pid": 91711,
-  "updated_at": "2026-09-10T03:11:43.922791+00:00"
+  "updated_at": "2026-09-10T03:11:44.312273+00:00"
 }
