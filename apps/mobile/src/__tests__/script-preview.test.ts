@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createInstalledAutomation } from '../flows/installations/model.js';
 import { loadInstalledAutomationScriptSource } from '../flows/installations/scriptPreview.js';
 
-const readShellyAutomationScriptState = vi.hoisted(() => vi.fn());
+const readShellyManagedAutomationScriptCode = vi.hoisted(() => vi.fn());
 
 vi.mock('../flows/hardware-setup/shellyRequests.js', () => ({
-  readShellyAutomationScriptState
+  readShellyManagedAutomationScriptCode
 }));
 
 const installation = () => {
@@ -26,61 +26,21 @@ const installation = () => {
   });
 };
 
-const scriptState = (scriptId: number | null, code: string | null) => ({
-  script:
-    scriptId === null
-      ? null
-      : {
-          id: scriptId,
-          name: 'Local Climate Link Thermostat',
-          enable: true,
-          running: true
-        },
-  code,
-  status: {
-    relayOn: false,
-    automationMode: scriptId === null ? 'missing' : 'auto',
-    automationScriptId: scriptId,
-    firmwareId: null,
-    telemetry: {},
-    clock: { timeSynced: true }
-  }
-});
-
 describe('loadInstalledAutomationScriptSource', () => {
   beforeEach(() => {
-    readShellyAutomationScriptState.mockReset();
+    readShellyManagedAutomationScriptCode.mockReset();
   });
 
-  it('returns source only when Shelly reports the exact stored script id', async () => {
+  it('reads source using the exact stored Shelly script id', async () => {
     const saved = installation();
-    readShellyAutomationScriptState.mockResolvedValue(
-      scriptState(saved.script.id, '// deployed source')
-    );
+    readShellyManagedAutomationScriptCode.mockResolvedValue('// deployed source');
 
     await expect(loadInstalledAutomationScriptSource(saved)).resolves.toBe(
       '// deployed source'
     );
-    expect(readShellyAutomationScriptState).toHaveBeenCalledWith(saved.shelly.baseUrl);
-  });
-
-  it('rejects source from a different Local Climate Link script id', async () => {
-    const saved = installation();
-    readShellyAutomationScriptState.mockResolvedValue(
-      scriptState(saved.script.id + 1, '// wrong source')
-    );
-
-    await expect(loadInstalledAutomationScriptSource(saved)).rejects.toThrow(
-      'exact managed automation script'
-    );
-  });
-
-  it('rejects a missing deployed script', async () => {
-    const saved = installation();
-    readShellyAutomationScriptState.mockResolvedValue(scriptState(null, null));
-
-    await expect(loadInstalledAutomationScriptSource(saved)).rejects.toThrow(
-      'exact managed automation script'
+    expect(readShellyManagedAutomationScriptCode).toHaveBeenCalledWith(
+      saved.shelly.baseUrl,
+      saved.script.id
     );
   });
 });
