@@ -14,6 +14,7 @@ end = page.index('export const ShellySetupPage')
 block = page[start:end]
 
 for source, target in {
+    'const formatNullableMetric =': 'export const formatNullableMetric =',
     'const formatComponentState =': 'export const formatComponentState =',
     'const shellyCompatibilityBadge =': 'export const shellyCompatibilityBadge =',
     'const formatPlugPower =': 'export const formatPlugPower =',
@@ -82,6 +83,7 @@ page = page.replace(
     + "  formatClockTimestamp,\n"
     + "  formatClockUptime,\n"
     + "  formatComponentState,\n"
+    + "  formatNullableMetric,\n"
     + "  formatPlugEnergy,\n"
     + "  formatPlugPower,\n"
     + "  formatPlugVoltage,\n"
