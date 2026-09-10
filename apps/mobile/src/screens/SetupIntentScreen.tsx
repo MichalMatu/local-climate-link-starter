@@ -49,9 +49,7 @@ export const SetupIntentScreen = ({
 
       <header className="demo-header intent-header">
         <div>
-          <p className="demo-kicker">Local Climate Link</p>
           <h1>{t('intent.title')}</h1>
-          <p>{t('intent.description')}</p>
         </div>
       </header>
 
@@ -64,10 +62,12 @@ export const SetupIntentScreen = ({
               type="button"
               onClick={() => onSelect(choice.id)}
             >
-              <strong>{t(choice.titleKey)}</strong>
-              <span>{t(choice.descriptionKey)}</span>
+              <span className="intent-choice__copy">
+                <strong>{t(choice.titleKey)}</strong>
+                <span>{t(choice.descriptionKey)}</span>
+              </span>
               <span className="intent-choice__action" aria-hidden="true">
-                {t('intent.open')}
+                ›
               </span>
             </button>
           )

@@ -84,6 +84,7 @@ select {
 
 .intent-shell {
   align-content: center;
+  gap: var(--lcl-spacing-lg);
 }
 
 .intent-header {
@@ -92,7 +93,7 @@ select {
 
 .intent-choice-grid {
   display: grid;
-  gap: var(--lcl-spacing-md);
+  gap: var(--lcl-spacing-sm);
   grid-template-columns: repeat(
     auto-fit,
     minmax(min(100%, var(--lcl-size-card-column-min)), 1fr)
@@ -100,15 +101,17 @@ select {
 }
 
 .intent-choice {
+  align-items: center;
   background: var(--lcl-color-surface);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-lg);
-  box-shadow: var(--lcl-shadow-md);
+  box-shadow: none;
   color: var(--lcl-color-text);
   cursor: pointer;
   display: grid;
-  gap: var(--lcl-spacing-sm);
-  padding: var(--lcl-fluid-panel-padding);
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: var(--lcl-spacing-md);
   text-align: left;
 }
 
@@ -117,21 +120,29 @@ select {
   border-color: var(--lcl-color-accent);
 }
 
+.intent-choice__copy {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
 .intent-choice strong {
+  color: var(--lcl-color-text);
   font-size: var(--lcl-font-size-xl);
   line-height: var(--lcl-line-height-tight);
 }
 
-.intent-choice span {
+.intent-choice__copy > span {
   color: var(--lcl-color-text-muted);
-  line-height: var(--lcl-line-height-relaxed);
+  font-size: var(--lcl-font-size-sm);
+  line-height: var(--lcl-line-height-normal);
 }
 
 .intent-choice .intent-choice__action {
   color: var(--lcl-color-accent);
-  font-size: var(--lcl-font-size-sm);
+  font-size: var(--lcl-font-size-2xl);
   font-weight: 800;
-  margin-top: var(--lcl-spacing-sm);
+  line-height: 1;
 }
 
 .setup-context {
@@ -2010,14 +2021,22 @@ select {
 
 .installation-detail-shell {
   align-content: start;
+  gap: var(--lcl-spacing-md);
 }
 
 .installation-detail-header {
-  align-items: flex-start;
+  align-items: center;
 }
 
 .installation-detail-header > div {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
   min-width: 0;
+}
+
+.installation-detail-header h1 {
+  font-size: var(--lcl-font-size-2xl);
+  line-height: var(--lcl-line-height-tight);
 }
 
 .detail-back-link {
@@ -2027,7 +2046,8 @@ select {
   cursor: pointer;
   font: inherit;
   font-weight: 800;
-  margin: 0 0 var(--lcl-spacing-md);
+  margin: 0 0 var(--lcl-spacing-xs);
+  min-height: var(--lcl-size-compact-control-min-height);
   padding: 0;
 }
 
@@ -2038,7 +2058,7 @@ select {
 
 .installation-detail-grid {
   display: grid;
-  gap: var(--lcl-spacing-lg);
+  gap: var(--lcl-spacing-md);
   grid-template-columns: repeat(
     auto-fit,
     minmax(min(100%, var(--lcl-size-card-column-min)), 1fr)
@@ -2063,12 +2083,30 @@ select {
 
 .installation-detail-summary {
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  padding-top: var(--lcl-spacing-md);
+  padding-top: var(--lcl-spacing-sm);
 }
 
 .installation-detail-actions {
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  padding-top: var(--lcl-spacing-md);
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--lcl-size-action-min-width)), 1fr)
+  );
+  padding-top: var(--lcl-spacing-sm);
+  width: 100%;
+}
+
+.installation-detail-actions > * {
+  width: 100%;
+}
+
+.installation-detail-config .time-schedule-grid {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--lcl-size-form-column-min)), 1fr)
+  );
 }
 
 .installation-detail-note {
@@ -2077,7 +2115,7 @@ select {
   border-radius: var(--lcl-radius-md);
   color: var(--lcl-color-status-warning-text);
   margin: 0;
-  padding: var(--lcl-spacing-md);
+  padding: var(--lcl-spacing-sm);
 }
 
 @media (max-width: 44rem) {
@@ -2096,17 +2134,12 @@ select {
 }
 
 @media (max-width: 30rem) {
-  .automation-card__actions,
-  .installation-detail-actions,
-  .installation-section-heading {
+  .automation-card__actions {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .automation-card__actions .secondary-action,
-  .installation-detail-actions .primary-action,
-  .installation-detail-actions .secondary-action,
-  .installation-section-heading .secondary-action {
+  .automation-card__actions .secondary-action {
     width: 100%;
   }
 }

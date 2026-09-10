@@ -175,7 +175,6 @@ export const TimeInstallationDetail = ({
             <span className="automation-status-mode">{t('time.family')}</span>
           </div>
           <h1>{installation.shelly.name}</h1>
-          <p>{t('time.detail.description')}</p>
         </div>
         <RefreshIconButton
           busy={runtimeQuery.isFetching}

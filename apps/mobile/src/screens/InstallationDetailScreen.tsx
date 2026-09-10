@@ -274,7 +274,6 @@ const InstalledAutomationDetail = ({
             </span>
           </div>
           <h1>{installation.shelly.name}</h1>
-          <p>{t('detail.description')}</p>
         </div>
         <RefreshIconButton
           busy={diagnosticsQuery.isFetching || controlQuery.isFetching}

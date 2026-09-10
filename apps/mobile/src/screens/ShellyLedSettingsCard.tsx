@@ -1,6 +1,7 @@
 import { type ToastTone } from '@lcl/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '../app/i18n.js';
+import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import {
   applyInstalledShellyLedPreset,
   installedShellyLedSettingsQueryKey,
@@ -71,14 +72,11 @@ export const ShellyLedSettingsCard = ({
           <p className="automation-card__eyebrow">{copy.eyebrow}</p>
           <h2>{copy.title}</h2>
         </div>
-        <button
-          className="secondary-action"
-          type="button"
-          disabled={settingsQuery.isFetching}
-          onClick={() => void settingsQuery.refetch()}
-        >
-          {t('common.refresh')}
-        </button>
+        <RefreshIconButton
+          busy={settingsQuery.isFetching}
+          label={t('common.refresh')}
+          onRefresh={() => void settingsQuery.refetch()}
+        />
       </div>
 
       <p className="time-schedule-note">{copy.description}</p>
