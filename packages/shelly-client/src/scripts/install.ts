@@ -523,7 +523,7 @@ export class RpcShellyClient implements ShellyClient {
   async safeRelayTest(options?: {
     onDurationMs?: number;
   }): Promise<Result<RelayTestResult>> {
-    const onDurationMs = options?.onDurationMs ?? 100;
+    const onDurationMs = options?.onDurationMs ?? 500;
     let onCommandSent = false;
     let offCommandSent = false;
     let onError: ShellyClientError | undefined;
@@ -535,7 +535,30 @@ export class RpcShellyClient implements ShellyClient {
         onError = on.error;
       } else {
         onCommandSent = true;
-        await new Promise((resolve) => setTimeout(resolve, onDurationMs));
+        const onStatus = await this.transport.call<unknown>({
+          method: RPC_METHODS.SwitchGetStatus,
+          params: { id: 0 }
+        });
+        if (!onStatus.ok) {
+          onError = relayTestError(
+            `Relay ON state could not be confirmed. ${
+              onStatus.error.technicalMessage ?? onStatus.error.kind
+            }`
+          );
+        } else {
+          const parsedOn = switchStatusSchema.safeParse(onStatus.value);
+          if (!parsedOn.success) {
+            onError = relayTestError(
+              `Relay ON status was invalid. ${parsedOn.error.message}`
+            );
+          } else if (!parsedOn.data.output) {
+            onError = relayTestError(
+              'Relay did not reach ON state during the safe relay test.'
+            );
+          } else {
+            await new Promise((resolve) => setTimeout(resolve, onDurationMs));
+          }
+        }
       }
     } finally {
       const off = await this.setRelayOff();
