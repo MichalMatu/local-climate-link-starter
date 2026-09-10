@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 6,
-  "command": "set -e; bash scripts/android/ensure-alpha-signing.sh; pnpm --filter @lcl/mobile build; pnpm --filter @lcl/mobile exec cap sync android; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; printf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties; (cd apps/mobile/android && ./gradlew --no-daemon assembleDebug); test -f apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk",
-  "pid": 39696,
+  "command": "set -e; adb start-server >/dev/null; DEVICES=$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}'); test \"$DEVICES\" = \"RFCT70L7E8J\"; test \"$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\" = \"SM-S906B\"; adb -s RFCT70L7E8J install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; adb -s RFCT70L7E8J shell am start -W -n link.localclimate.app/.MainActivity | tee /tmp/lcl-dashboard-launch-v2.txt; grep -q 'Status: ok' /tmp/lcl-dashboard-launch-v2.txt; sleep 3; mkdir -p artifacts/ui-audit/physical-20260910; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/03-dashboard-polish-v2.png; test -s artifacts/ui-audit/physical-20260910/03-dashboard-polish-v2.png; echo PHONE_SCREENSHOT_OK",
+  "pid": 40062,
   "timeout": 1800,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T08:08:52.051006+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-10T08:09:06.669869+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260910-ux-dashboard-polish-v2",
@@ -18,5 +18,5 @@
   "task_digest": "751a2162669d80dfd326de44aa3d9f86a691bcaa55a79a7dd3d2ab4b715c96ca",
   "daemon_version": "4.18.19",
   "daemon_pid": 37933,
-  "updated_at": "2026-09-10T08:08:52.130346+00:00"
+  "updated_at": "2026-09-10T08:09:06.741757+00:00"
 }
