@@ -32,6 +32,7 @@ interface RecordingTransportOptions {
   failScriptList?: boolean;
   failOnCommand?: boolean;
   failOffCommand?: boolean;
+  forceRelayOffStatus?: boolean;
   scriptRunning?: boolean;
   scriptStatusErrors?: unknown[];
   switchStatus?: Record<string, unknown>;
@@ -200,7 +201,13 @@ class RecordingTransport implements ShellyRpcTransport {
       return { ok: true, value: null as TResponse };
     }
     if (request.method === RPC_METHODS.SwitchGetStatus) {
-      return { ok: true, value: { id: 0, output: this.relayOn } as TResponse };
+      return {
+        ok: true,
+        value: {
+          id: 0,
+          output: this.options.forceRelayOffStatus ? false : this.relayOn
+        } as TResponse
+      };
     }
 
     return { ok: true, value: {} as TResponse };
@@ -508,7 +515,7 @@ describe('RpcShellyClient', () => {
     expect(result.error.kind).toBe('script-upload-failed');
   });
 
-  it('safe relay test ends OFF', async () => {
+  it('safe relay test confirms ON before ending OFF', async () => {
     const transport = new RecordingTransport();
     const client = new RpcShellyClient(transport);
     const result = await client.safeRelayTest({ onDurationMs: 0 });
@@ -518,6 +525,26 @@ describe('RpcShellyClient', () => {
       return;
     }
     expect(result.value.finalRelayOn).toBe(false);
+    expect(transport.relayOn).toBe(false);
+    expect(transport.requests.map((request) => request.method)).toEqual([
+      RPC_METHODS.SwitchSet,
+      RPC_METHODS.SwitchGetStatus,
+      RPC_METHODS.SwitchSet,
+      RPC_METHODS.SwitchGetStatus
+    ]);
+  });
+
+  it('fails if the relay never reaches ON and still ends OFF', async () => {
+    const transport = new RecordingTransport({ forceRelayOffStatus: true });
+    const client = new RpcShellyClient(transport);
+    const result = await client.safeRelayTest({ onDurationMs: 0 });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      return;
+    }
+    expect(result.error.kind).toBe('relay-test-failed');
+    expect(result.error.technicalMessage).toContain('did not reach ON state');
     expect(transport.relayOn).toBe(false);
   });
 
