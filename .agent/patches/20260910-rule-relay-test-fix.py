@@ -4,7 +4,7 @@ install_path = Path("packages/shelly-client/src/scripts/install.ts")
 install = install_path.read_text()
 
 old_duration = "const onDurationMs = options?.onDurationMs ?? 100;"
-new_duration = "const onDurationMs = options?.onDurationMs ?? 1000;"
+new_duration = "const onDurationMs = options?.onDurationMs ?? 500;"
 if install.count(old_duration) != 1:
     raise SystemExit("expected exactly one relay test duration")
 install = install.replace(old_duration, new_duration)
