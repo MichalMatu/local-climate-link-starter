@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 8,
-  "command": "pnpm exec prettier --write apps/mobile/src/theme/theme.css apps/mobile/e2e/responsive.spec.ts && pnpm format:check",
-  "pid": 19545,
+  "command": "pnpm e2e:responsive",
+  "pid": 19651,
   "timeout": 1200,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T03:37:44.513331+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-10T03:37:49.149745+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260910-ux-detail-hierarchy-verify-v1",
@@ -18,5 +18,5 @@
   "task_digest": "c88ec4e3a57a0d75726c851aed98a87427f3140f6ab7b5942c8070ffe19b8535",
   "daemon_version": "4.18.19",
   "daemon_pid": 19363,
-  "updated_at": "2026-09-10T03:37:44.583163+00:00"
+  "updated_at": "2026-09-10T03:37:49.167734+00:00"
 }
