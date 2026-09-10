@@ -133,18 +133,6 @@ const ClimateAutomationCard = ({
 
         <div className="automation-card__header-actions">
           <button
-            className="automation-master-switch"
-            type="button"
-            role="switch"
-            aria-checked={automationRunning}
-            aria-label={automationRunning ? t('detail.pause') : t('detail.resume')}
-            title={automationRunning ? t('detail.pause') : t('detail.resume')}
-            disabled={action.isPending || !controlsVerified}
-            onClick={() => action.mutate(automationRunning ? 'manual' : 'auto')}
-          >
-            <span className="automation-master-switch__thumb" />
-          </button>
-          <button
             className="automation-card__menu"
             type="button"
             aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name}`}
