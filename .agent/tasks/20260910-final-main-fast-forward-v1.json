@@ -1,0 +1,16 @@
+{
+  "id": "20260910-final-main-fast-forward-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/final-quality-audit-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; BASE=b3b52d5b023d7051b8254cd778490e8e7b1af959; FINAL=377b7bf7a2bca37ab4371b42be82136c2b2aaf13; git fetch --prune origin; test \"$(git rev-parse origin/main)\" = \"$BASE\"; test \"$(git rev-parse origin/freeze/working-baseline-20260910)\" = \"$BASE\"; test \"$(git rev-parse origin/work/final-quality-audit-20260910)\" = \"$FINAL\"; git merge-base --is-ancestor origin/main \"$FINAL\"; echo MAIN_FAST_FORWARD_PRECHECK_OK",
+    "set -e; FINAL=377b7bf7a2bca37ab4371b42be82136c2b2aaf13; git push origin \"$FINAL\":main; git fetch origin main freeze/working-baseline-20260910; test \"$(git rev-parse origin/main)\" = \"$FINAL\"; test \"$(git rev-parse origin/freeze/working-baseline-20260910)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; echo MAIN_FAST_FORWARD_SHA=$(git rev-parse origin/main)"
+  ]
+}
