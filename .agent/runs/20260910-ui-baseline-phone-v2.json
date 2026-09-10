@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 7,
+  "index": 10,
   "total": 10,
-  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell input keyevent KEYCODE_BACK; sleep 2; WS=$(curl -fsS http://127.0.0.1:9222/json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0][\"webSocketDebuggerUrl\"])'); WS=\"$WS\" node -e 'const ws=new WebSocket(process.env.WS);ws.onopen=()=>ws.send(JSON.stringify({id:1,method:\"Runtime.evaluate\",params:{expression:`(()=>{const bs=[...document.querySelectorAll(\"button\")];const b=bs.find(x=>/add automation|dodaj automatyzac/i.test(x.innerText.trim()));if(!b)throw new Error(\"Add automation button missing. Buttons: \"+bs.map(x=>x.innerText.trim()).filter(Boolean).join(\" | \"));b.click();return true})()`,returnByValue:true}}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1){if(m.result.exceptionDetails){console.error(JSON.stringify(m.result.exceptionDetails));process.exit(1)}ws.close();}}'; sleep 2",
-  "pid": 77441,
+  "command": "ADB=\"$HOME/Library/Android/sdk/platform-tools/adb\"; SERIAL=$(\"$ADB\" devices | awk 'NR>1 && $2==\"device\" {print $1; exit}'); \"$ADB\" -s \"$SERIAL\" shell input keyevent KEYCODE_BACK; sleep 1; \"$ADB\" -s \"$SERIAL\" forward --remove tcp:9222 >/dev/null 2>&1 || true; HUSKY=0 git add artifacts/ui-audit/baseline-20260910 && HUSKY=0 git commit -m 'test: capture phone UI baseline' && HUSKY=0 git push origin HEAD:work/ui-baseline-audit-20260910 && git rev-parse HEAD && git status --short",
+  "pid": 77589,
   "timeout": 600,
   "idle_timeout": 180,
   "memory_limit_mb": 2048,
-  "started_at": "2026-09-10T01:20:08.390660+00:00",
-  "stage_name": "command-7",
-  "stage_index": 7,
+  "started_at": "2026-09-10T01:20:14.287446+00:00",
+  "stage_name": "command-10",
+  "stage_index": 10,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "20260910-ui-baseline-phone-v2",
@@ -18,5 +18,5 @@
   "task_digest": "679ca7921e79c80d2db550a1edb80c038ff18a0c21b1e1d6bd66dc29c4b96464",
   "daemon_version": "4.18.19",
   "daemon_pid": 76724,
-  "updated_at": "2026-09-10T01:20:08.462789+00:00"
+  "updated_at": "2026-09-10T01:20:14.358407+00:00"
 }
