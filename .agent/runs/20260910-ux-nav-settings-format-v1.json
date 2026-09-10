@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 4,
   "total": 7,
-  "command": "pnpm exec prettier --write apps/mobile/src/app/appShell.css",
-  "pid": 4116,
+  "command": "git diff --check && git status --short",
+  "pid": 4250,
   "timeout": 600,
   "idle_timeout": 180,
   "memory_limit_mb": 2048,
-  "started_at": "2026-09-10T01:50:59.831134+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T01:51:04.677101+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260910-ux-nav-settings-format-v1",
@@ -18,5 +18,5 @@
   "task_digest": "5054f0c2b2a0e113f8ff6466d1267c92ceba51f90124dc787211b6ae6a5b9a88",
   "daemon_version": "4.18.19",
   "daemon_pid": 3944,
-  "updated_at": "2026-09-10T01:50:59.921267+00:00"
+  "updated_at": "2026-09-10T01:51:04.746328+00:00"
 }
