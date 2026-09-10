@@ -35,6 +35,6 @@
 }
 
 .app-settings-trigger__icon {
-  height: var(--lcl-size-icon-sm);
-  width: var(--lcl-size-icon-sm);
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
 }

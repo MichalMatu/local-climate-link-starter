@@ -341,11 +341,6 @@ select {
   gap: var(--lcl-spacing-xs);
 }
 
-.rule-developer-actions .icon-action__svg {
-  height: var(--lcl-size-icon-sm);
-  width: var(--lcl-size-icon-sm);
-}
-
 .relay-toggle {
   min-width: var(--lcl-size-action-min-width);
 }
@@ -1571,6 +1566,10 @@ select {
 
 .dashboard-header {
   align-items: center;
+}
+
+.dashboard-add-action {
+  min-width: var(--lcl-size-action-min-width);
 }
 
 .dashboard-grid {

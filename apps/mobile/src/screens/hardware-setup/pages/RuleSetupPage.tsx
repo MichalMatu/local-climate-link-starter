@@ -9,6 +9,7 @@ import {
 } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
   useTranslation,
   type Translate,
@@ -85,19 +86,6 @@ const copyToClipboard = async (value: string): Promise<void> => {
   }
   await navigator.clipboard.writeText(value);
 };
-
-const GeneratedScriptIcon = () => (
-  <svg
-    aria-hidden="true"
-    className="icon-action__svg"
-    focusable="false"
-    viewBox="0 0 24 24"
-  >
-    <path d="m9 8-4 4 4 4" />
-    <path d="m15 8 4 4-4 4" />
-    <path d="m13 6-2 12" />
-  </svg>
-);
 
 const TrashIcon = () => (
   <svg
@@ -597,7 +585,7 @@ export const RuleSetupPage = ({
                 title={t('hardware.rule.scriptPreviewTitle')}
                 onClick={() => setIsScriptModalOpen(true)}
               >
-                <GeneratedScriptIcon />
+                <CodeIcon />
                 {t('hardware.rule.scriptPreview')}
               </button>
               <button
