@@ -545,6 +545,21 @@ export const cleanupStaleShellyBleDiscoveryScripts = async (
   return deleteBleDiscoveryScripts(client, scripts);
 };
 
+export const readShellyManagedAutomationScriptCode = async (
+  baseUrl: string,
+  scriptId: number
+): Promise<string> => {
+  const transport = createShellyTransport(baseUrl);
+  const scripts = await readScriptList(transport);
+  const script = scripts.find((candidate) => candidate.id === scriptId);
+
+  if (!script || script.name !== LOCAL_CLIMATE_LINK_SCRIPT_NAME) {
+    throw new Error('Shelly did not return the exact managed automation script.');
+  }
+
+  return readScriptCode(transport, scriptId);
+};
+
 export const readShellyAutomationScriptState = async (
   baseUrl: string
 ): Promise<ShellyAutomationScriptState> => {

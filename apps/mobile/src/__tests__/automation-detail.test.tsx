@@ -161,6 +161,9 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
         };
         break;
       }
+      case 'Script.GetCode':
+        result = { data: '// deployed exact source', left: 0 };
+        break;
       case 'Script.Stop':
         scriptRunning = false;
         result = null;
@@ -368,6 +371,28 @@ describe('InstallationDetailScreen', () => {
     expect(rpcMethods).toContain('Script.Start');
   });
 
+  it('shows the current deployed script for the saved climate automation', async () => {
+    const saved = installation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    const { rpcMethods } = installShellyFetchMock();
+
+    renderDetail(saved.id);
+
+    expect(await screen.findByText('Działa')).toBeVisible();
+    const showScript = screen.getByRole('button', {
+      name: 'Pokaż wdrożony skrypt'
+    });
+    expect(showScript).toBeEnabled();
+
+    fireEvent.click(showScript);
+
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Skrypt wdrożony w Shelly'
+    });
+    expect(await within(dialog).findByText('// deployed exact source')).toBeVisible();
+    expect(rpcMethods).toContain('Script.GetCode');
+  });
+
   it.each([
     {
       name: 'offline',
@@ -392,6 +417,11 @@ describe('InstallationDetailScreen', () => {
     renderDetail(saved.id);
 
     expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    if (options.scriptId === 2) {
+      expect(
+        screen.getByRole('button', { name: 'Pokaż wdrożony skrypt' })
+      ).toBeDisabled();
+    }
     const refresh = screen.getByRole('button', { name: 'Sprawdź ponownie' });
     expect(refresh).toBeVisible();
 
