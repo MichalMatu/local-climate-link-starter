@@ -3,6 +3,7 @@ import type { SetupIntent } from '../flows/setup-intent.js';
 
 type SetupIntentScreenProps = {
   onSelect(intent: SetupIntent): void;
+  onCancel?(): void;
 };
 
 const INTENT_CHOICES = [
@@ -28,11 +29,19 @@ const INTENT_CHOICES = [
   }
 ] as const;
 
-export const SetupIntentScreen = ({ onSelect }: SetupIntentScreenProps) => {
+export const SetupIntentScreen = ({ onSelect, onCancel }: SetupIntentScreenProps) => {
   const { t } = useTranslation();
 
   return (
     <main className="demo-shell intent-shell">
+      {onCancel && (
+        <div className="setup-context">
+          <button className="setup-context__back" type="button" onClick={onCancel}>
+            {t('common.cancel')}
+          </button>
+        </div>
+      )}
+
       <header className="demo-header intent-header">
         <div>
           <p className="demo-kicker">Local Climate Link</p>
