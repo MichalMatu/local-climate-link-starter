@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-ux-dashboard-native-controls-header-recover-v1",
+  "task_digest": "f23f08090f40c9b824235afdfd7c9855052bc794aefcc6fe0e2cb2e0300a984f",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T09:13:45.755884+00:00",
+  "attempt_id": "b453bdaa0a8133c3cdd7aabb",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 7316,
+  "updated_at": "2026-09-10T09:13:45.755995+00:00",
+  "pid": 7316
+}
