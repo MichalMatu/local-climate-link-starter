@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260910-ux-dashboard-polish-v2",
+  "task_digest": "751a2162669d80dfd326de44aa3d9f86a691bcaa55a79a7dd3d2ab4b715c96ca",
+  "idle_timeout": 600,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-10T08:07:50.134595+00:00",
+  "attempt_id": "707ddfa2971b92abb140e30d",
+  "daemon_version": "4.18.19",
+  "daemon_pid": 37933,
+  "updated_at": "2026-09-10T08:07:50.134884+00:00",
+  "pid": 37933
+}
