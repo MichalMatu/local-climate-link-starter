@@ -1,0 +1,16 @@
+{
+  "id": "20260910-final-branch-cleanup-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -eu; FINAL=377b7bf7a2bca37ab4371b42be82136c2b2aaf13; BASE=b3b52d5b023d7051b8254cd778490e8e7b1af959; git fetch --prune origin; test \"$(git rev-parse origin/main)\" = \"$FINAL\"; test \"$(git rev-parse origin/freeze/working-baseline-20260910)\" = \"$BASE\"; git rev-parse origin/agent-control >/dev/null; test \"$(git rev-parse origin/work/final-quality-audit-20260910)\" = \"$FINAL\"; test \"$(git rev-parse origin/work/ux-climate-detail-unify-20260910)\" = \"516342b5b3f078773cc23e51d7bd4eecfb08f528\"; test \"$(git rev-parse origin/work/ux-settings-page-20260910)\" = \"6144d8a07720e278118d4c3051c7a8042e214220\"; git merge-base --is-ancestor origin/work/ux-climate-detail-unify-20260910 origin/main; git merge-base --is-ancestor origin/work/ux-settings-page-20260910 origin/main; git merge-base --is-ancestor origin/work/final-quality-audit-20260910 origin/main; REMOTE=$(git config --get remote.origin.url); case \"$REMOTE\" in *MichalMatu/local-climate-link-starter*) ;; *) echo \"unexpected remote: $REMOTE\"; exit 2;; esac; echo FINAL_BRANCH_CLEANUP_GUARDS_OK",
+    "set -eu; git push origin --delete work/ux-climate-detail-unify-20260910 work/ux-settings-page-20260910 work/final-quality-audit-20260910; git fetch --prune origin; test \"$(git rev-parse origin/main)\" = \"377b7bf7a2bca37ab4371b42be82136c2b2aaf13\"; test \"$(git rev-parse origin/freeze/working-baseline-20260910)\" = \"b3b52d5b023d7051b8254cd778490e8e7b1af959\"; git rev-parse origin/agent-control >/dev/null; for b in work/ux-climate-detail-unify-20260910 work/ux-settings-page-20260910 work/final-quality-audit-20260910; do if git show-ref --verify --quiet \"refs/remotes/origin/$b\"; then echo \"branch still present: $b\"; exit 3; fi; done; COUNT=$(git for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | wc -l | tr -d ' '); test \"$COUNT\" = \"3\"; echo REMAINING_REMOTE_BRANCHES; git for-each-ref --format='%(refname:short)' refs/remotes/origin | sort; echo FINAL_BRANCH_CLEANUP_OK"
+  ]
+}
