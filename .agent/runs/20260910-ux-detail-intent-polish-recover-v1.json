@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 4,
-  "command": "set -e; git show origin/agent-control:.agent/scripts/apply-detail-intent-polish-v1.py > /tmp/apply-detail-intent-polish-v1.py; python3 /tmp/apply-detail-intent-polish-v1.py; pnpm exec prettier --write apps/mobile/src/screens/SetupIntentScreen.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/TimeInstallationDetail.tsx apps/mobile/src/screens/ShellyLedSettingsCard.tsx apps/mobile/src/theme/theme.css; git diff --check; pnpm quality:ux; pnpm --filter @lcl/mobile typecheck; test \"$(git diff --name-only | wc -l | tr -d ' ')\" = \"5\"; git diff --stat",
-  "pid": 86887,
+  "command": "set -e; adb start-server >/dev/null; test \"$(adb devices | awk 'NR>1 && $2==\"device\" {print $1}')\" = \"RFCT70L7E8J\"; test \"$(adb -s RFCT70L7E8J shell getprop ro.product.model | tr -d '\\r')\" = \"SM-S906B\"; git show origin/agent-control:.agent/scripts/cdp-open-app-screen-v2.mjs > /tmp/cdp-open-app-screen-v2.mjs; mkdir -p artifacts/ui-audit/physical-20260910; adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; adb -s RFCT70L7E8J shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 3; PID=$(adb -s RFCT70L7E8J shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; adb forward --remove tcp:9222 >/dev/null 2>&1 || true; adb forward tcp:9222 localabstract:webview_devtools_remote_$PID >/dev/null; for i in 1 2 3 4 5 6 7 8 9 10; do if curl -fsS http://127.0.0.1:9222/json > /tmp/lcl-pages.json; then break; fi; sleep 1; done; test -s /tmp/lcl-pages.json; node /tmp/cdp-open-app-screen-v2.mjs /tmp/lcl-pages.json intent; sleep 1; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/08-setup-intent-polish-v1.png; test -s artifacts/ui-audit/physical-20260910/08-setup-intent-polish-v1.png; adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; adb -s RFCT70L7E8J shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 3; PID=$(adb -s RFCT70L7E8J shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; adb forward --remove tcp:9222 >/dev/null 2>&1 || true; adb forward tcp:9222 localabstract:webview_devtools_remote_$PID >/dev/null; for i in 1 2 3 4 5 6 7 8 9 10; do if curl -fsS http://127.0.0.1:9222/json > /tmp/lcl-pages.json; then break; fi; sleep 1; done; test -s /tmp/lcl-pages.json; node /tmp/cdp-open-app-screen-v2.mjs /tmp/lcl-pages.json detail; sleep 1; adb -s RFCT70L7E8J exec-out screencap -p > artifacts/ui-audit/physical-20260910/09-installation-detail-polish-v1.png; test -s artifacts/ui-audit/physical-20260910/09-installation-detail-polish-v1.png; adb forward --remove tcp:9222 >/dev/null 2>&1 || true; echo PHONE_DETAIL_INTENT_SCREENSHOTS_OK",
+  "pid": 87035,
   "timeout": 1800,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-10T13:14:57.663951+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-10T13:15:03.990422+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 4,
   "stage_phase": "commands",
   "task_id": "20260910-ux-detail-intent-polish-recover-v1",
@@ -18,5 +18,5 @@
   "task_digest": "c473e27a826edeea0c8a6889c0420584a07a2bcf3ffe635cca36b2a03dcaa1e7",
   "daemon_version": "4.18.20",
   "daemon_pid": 86700,
-  "updated_at": "2026-09-10T13:14:57.742492+00:00"
+  "updated_at": "2026-09-10T13:15:04.059567+00:00"
 }
