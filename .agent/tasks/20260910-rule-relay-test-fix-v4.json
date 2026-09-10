@@ -1,0 +1,22 @@
+{
+  "id": "20260910-rule-relay-test-fix-v4",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/fix-rule-relay-test-20260910",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune origin; git reset --hard origin/work/fix-rule-relay-test-20260910; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test -z \"$(git status --porcelain)\"",
+    "git show origin/agent-control:.agent/patches/20260910-rule-relay-test-fix.py | python3",
+    "pnpm --filter @lcl/shelly-client test",
+    "pnpm --filter @lcl/shelly-client typecheck",
+    "git diff --check; git status --short; git diff -- packages/shelly-client/src/scripts/install.ts packages/shelly-client/src/__tests__/shelly-client.test.ts",
+    "git add packages/shelly-client/src/scripts/install.ts packages/shelly-client/src/__tests__/shelly-client.test.ts && git commit -m 'fix(shelly): verify relay test pulse'",
+    "pnpm check",
+    "set -e; git push origin work/fix-rule-relay-test-20260910; test -z \"$(git status --porcelain)\"; echo HEAD=$(git rev-parse HEAD); test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/fix-rule-relay-test-20260910)\""
+  ]
+}
