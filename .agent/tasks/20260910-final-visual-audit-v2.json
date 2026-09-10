@@ -1,0 +1,17 @@
+{
+  "id": "20260910-final-visual-audit-v2",
+  "mode": "commands",
+  "work_branch": "work/final-visual-audit-20260910",
+  "allow_write": true,
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "resources": [],
+  "command_timeout": 600,
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch --prune origin; git reset --hard origin/work/final-visual-audit-20260910; test \"$(git rev-parse HEAD)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test \"$(git rev-parse origin/main)\" = \"88b192366f3b52cc4fe7df5a205343b4fd8d9d0e\"; test -z \"$(git status --porcelain)\"",
+    "set -e; SRC=/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260910-final-visual-audit-v1/1789014085291689000-task-exit/untracked/artifacts/ui-audit/final-20260910; DST=artifacts/ui-audit/final-20260910; test -d \"$SRC\"; mkdir -p \"$DST\"; cp \"$SRC\"/*.png \"$DST\"/; python3 - <<'PY'\nfrom pathlib import Path\nfrom PIL import Image\np=Path('artifacts/ui-audit/final-20260910')\nexpected=['01-dashboard-climate.png','02-climate-detail.png','03-dashboard-time.png','04-time-detail.png','05-add-automation-intent.png','06-script-preview.png','07-physical-s22plus.png']\nfor name in expected:\n    f=p/name\n    assert f.is_file() and f.stat().st_size > 1000, (name, f.stat().st_size if f.exists() else None)\n    with Image.open(f) as im:\n        im.verify()\n        print(f'{name} bytes={f.stat().st_size}')\nassert sorted(x.name for x in p.glob('*.png')) == expected\nPY\n; test -z \"$(git diff --name-only)\"; test \"$(git status --porcelain)\" = \"?? artifacts/ui-audit/\"",
+    "set -e; git add artifacts/ui-audit/final-20260910; test \"$(git diff --cached --name-only | wc -l | tr -d ' ')\" = \"7\"; test -z \"$(git diff --cached --name-only | grep -v '^artifacts/ui-audit/final-20260910/.*\\.png$')\"; git commit -m \"test: capture final UI visual audit\"; test -z \"$(git status --porcelain)\"; HUSKY=0 git push origin HEAD:work/final-visual-audit-20260910; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/final-visual-audit-20260910)\"; echo VISUAL_AUDIT_SHA=$(git rev-parse HEAD)"
+  ]
+}
