@@ -1,0 +1,15 @@
+{
+  "id": "20260911-physical-manual-runtime-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/manual-runtime-mode-20260911",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/physical-manual-runtime-v1.sh > /tmp/physical-manual-runtime-v1.sh; sh /tmp/physical-manual-runtime-v1.sh"
+  ]
+}
