@@ -1,0 +1,15 @@
+{
+  "id": "20260911-inspect-current-android-ui",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/inspect-current-android-ui-20260911.sh > /tmp/inspect-current-android-ui-20260911.sh; sh /tmp/inspect-current-android-ui-20260911.sh"
+  ]
+}
