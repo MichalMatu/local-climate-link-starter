@@ -1,40 +1,38 @@
-# Local Climate Link — post-v2.0.9 product roadmap
+# Local Climate Link — post-v2.0.10 product roadmap
 
-Status: audited implementation plan after `v2.0.9` / **Stable Core v1**.
+Status: active product roadmap after the v2.0.10 runtime/detail/diagnostics tranche.
 
-Baseline commit:
+Current behavior-changing baseline:
 
 ```text
-b44899ba66b202ca05f48a8856a9871daee97832
+16d8627b9df050152a72f021e2ab3a228cffefb3
+feat(mobile): add installation controls and diagnostics
 ```
 
-This document is the canonical roadmap for the next product phase. It narrows the
-older broad extension list to the work that should happen before commercial
-packaging. `docs/plan.md` remains the MVP/history document.
+This document is the canonical roadmap for the next product phase. `docs/plan.md`
+remains historical MVP/design context; `docs/HANDOFF_NEXT_CHAT.md` carries the
+short current continuation state.
 
-## Implementation checkpoint — 2026-09-10 / v2.0.10 line
+## Implementation checkpoint — 2026-09-11 / v2.0.10
 
-The roadmap below records the rationale that led to the current architecture.
-The following enabling/product slices are now implemented and should be treated
-as the baseline rather than future work:
+The following slices are implemented baseline, not future work:
 
 - persistent per-installation identity/configuration,
-- intent-first entry and an installed-automation Dashboard,
+- intent-first entry and installed-automation dashboard,
 - stable per-installation detail management,
 - shared `Klimat / Czas / Ustawienia` bottom navigation and full-page Settings,
-- explicit AUTO/MANUAL + relay controls with exact-script safety checks,
+- explicit AUTO/MANUAL plus MANUAL-only relay ON/OFF with exact-script safety checks,
 - native Shelly schedule ownership for pure time automation,
-- progressive disclosure for advanced/service diagnostics,
+- progressive disclosure for installation-scoped developer diagnostics,
+- script/device resource diagnostics and 3-second modal-only auto-refresh,
+- current-value-only climate UI; chart/history persistence was intentionally removed,
 - completed physical-button validation preserving native momentary behavior.
 
-Near-term quality/product follow-ups should stay narrow: preserve truthful
-runtime telemetry when controller state changes, decide whether history data
-justifies a compact chart instead of fabricating/staling values, and continue
-reducing hardware-setup composition debt along the documented responsibility
-boundaries. Do not re-open the stable runtime safety model merely to simplify UI
-code.
+The next agreed product slice is **expanded Shelly LED configuration**. Keep it
+app-side through `PLUGS_UI`; do not re-open the stable climate runtime or add LED
+logic to the generated thermostat script.
 
-## Product direction
+## Product direction## Product direction
 
 Local Climate Link is no longer best described as only a thermostat. The stable
 core already supports four climate-control modes:
@@ -228,24 +226,42 @@ VPD controller.
 
 Treat LED and button work as two separate capabilities.
 
-### LED — safe first step
+### LED — next vertical slice
 
-Shelly Plug S Gen3 officially exposes `PLUGS_UI` configuration with `power`,
-`switch`, and `off` LED modes plus configurable RGB/brightness for relay ON/OFF.
-Start with app-side device configuration, not additional thermostat runtime
-logic.
+Shelly Plug S Gen3 exposes `PLUGS_UI` device configuration. The repository already
+has a working typed client and a basic installation-detail card, so this is now an
+incremental UX/capability expansion rather than a new subsystem.
 
-Useful first version:
+Current code state:
 
-- configure a predictable relay ON/OFF indication,
-- optionally disable the LED,
-- expose current LED mode in device settings/diagnostics.
+- `RpcShellyPlugsUiClient` reads/writes `PLUGS_UI`,
+- typed validation already covers modes `power`, `switch`, and `off`,
+- typed patches already support arbitrary relay ON/OFF RGB + brightness and
+  power-mode brightness,
+- `ShellyLedSettingsCard` displays the confirmed current mode/configuration,
+- `deviceLed.ts` currently narrows writes to two presets: `relay-state` and `off`.
 
-Do not promise dynamic flashing for low sensor battery, weak RSSI, or arbitrary
-runtime errors until a real-device test proves that repeated runtime LED control
-is practical and does not harm script size, memory, or reliability.
+Next implementation:
 
-### Button — hardware validation complete
+1. keep the existing client and query path; do not create a second LED backend,
+2. expand the installation-level wrapper from preset-only writes to a typed editable
+   configuration,
+3. expose mode selection (`switch`, `power`, `off`),
+4. in switch mode expose relay ON color + brightness and relay OFF color + brightness,
+5. in power mode expose brightness only,
+6. re-read `PLUGS_UI.GetConfig` after every write and render the confirmed device state,
+7. retain a compact relay-state preset only if it remains a useful shortcut rather than
+   becoming a parallel state model,
+8. keep unsupported firmware graceful and do not invent fallback values,
+9. add focused client/flow/UI tests, responsive E2E coverage, then a real Plug S Gen3
+   smoke test.
+
+Keep LED configuration separate from automation health. Do not infer script health from
+LED color and do not add dynamic RSSI/battery/error flashing in this slice. Night-mode
+configuration is also a separate follow-up unless a dedicated capability/schema audit
+explicitly brings it into scope.
+
+### Button — hardware validation complete### Button — hardware validation complete
 
 Real-hardware validation was completed on 2026-09-09 with Shelly Plug S Gen3
 model `S3PL-00112EU`, firmware `1.7.5` (test device `192.168.0.16`), and
@@ -304,22 +320,25 @@ management belongs.
 
 ## Implementation order
 
-Use this sequence:
+Completed baseline:
 
-1. Phase 0: persistent per-installation model.
-2. Intent-first UX shell and navigation.
-3. Dashboard backed by installed-system/runtime state.
-4. Per-Shelly / per-installation detail screen.
-5. Progressive disclosure of advanced and developer diagnostics.
-6. First automation expansion using native Shelly capabilities where possible.
-7. LED configuration.
-8. Physical-button hardware validation: complete; keep native momentary behavior
-   with no detached mode or long-press pause.
+1. persistent per-installation model,
+2. intent-first UX shell and navigation,
+3. dashboard backed by installed-system/runtime state,
+4. per-installation detail screen,
+5. progressive disclosure and scoped developer diagnostics,
+6. first automation expansion using native Shelly schedules,
+7. physical-button hardware validation with native momentary behavior preserved.
 
-The numbered product goals remain the six goals above; Phase 0 is an enabling
-architecture change, not an additional product feature.
+Next:
 
-## Main risks caught before implementation
+8. expanded Shelly LED configuration through `PLUGS_UI`, using the existing client and
+   installation detail without changing the climate runtime.
+
+After LED configuration is stable, re-audit the remaining product roadmap from actual
+user/hardware evidence instead of carrying old speculative TODOs forward.
+
+## Main risks caught before implementation## Main risks caught before implementation
 
 ### 1. Global setup draft is not a multi-installation model
 
@@ -336,12 +355,14 @@ Define ownership before adding schedules.
 Phone BLE and Shelly runtime may see different packet ages/RSSI/readings. Use the
 Shelly runtime as the primary installed-system status source.
 
-### 4. LED capability is narrower than the original idea
+### 4. LED capability should stay device-native
 
-Static relay-based RGB indication is documented. Arbitrary dynamic error flashes
-are a separate experiment, not a guaranteed feature.
+The client already supports static `PLUGS_UI` mode/color/brightness configuration; the
+current app wrapper is simply narrower than that capability. Expand the UI/wrapper,
+not the thermostat runtime. Dynamic error flashes and night-mode behavior remain
+separate experiments until explicitly audited and tested on hardware.
 
-### 5. Physical button is intentionally native-only on Plug S Gen3
+### 5. Physical button is intentionally native-only on Plug S Gen3### 5. Physical button is intentionally native-only on Plug S Gen3
 
 The firmware `1.7.5` hardware test did not expose a separate `button:0` component
 or a separate button `NotifyEvent`; websocket relay updates carried
