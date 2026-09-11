@@ -1,3 +1,4 @@
+import type { SensorSetupFlow } from '../pageContracts.js';
 import {
   DiagnosticRow,
   Modal,
@@ -23,7 +24,7 @@ const sensorProfileDisplayLabels = {
   tp357_custom_v1: 'TP357'
 } as const;
 
-type SensorDraftDevice = HardwarePageProps['flow']['sensorDevices'][number];
+type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
 
 const formatNullableMetric = (
   value: number | null | undefined,
@@ -96,7 +97,7 @@ const latestBatterySample = (
 };
 
 type SensorAddFormProps = {
-  flow: HardwarePageProps['flow'];
+  flow: SensorSetupFlow;
   showValidationErrors: boolean;
 };
 
@@ -175,7 +176,7 @@ const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
   );
 };
 
-export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
+export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) => {
   const { locale, t } = useTranslation();
   const [isAddSensorModalOpen, setIsAddSensorModalOpen] = useState(false);
   const [isPhoneBleScanModalOpen, setIsPhoneBleScanModalOpen] = useState(false);

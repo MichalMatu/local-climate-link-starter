@@ -18,19 +18,30 @@ export const formatDiagnosticNumber = (
 ): string =>
   value == null ? t('common.missing') : `${value.toFixed(fractionDigits)}${suffix}`;
 
-export const canInstallScript = (flow: HardwareSetupFlow): boolean =>
+export const canInstallScript = (
+  flow: Pick<
+    HardwareSetupFlow,
+    | 'selectedShelly'
+    | 'configState'
+    | 'isThresholdValid'
+    | 'isAdvancedSettingsValid'
+    | 'isVpdAssistValid'
+  >
+): boolean =>
   flow.selectedShelly !== null &&
   flow.configState.ok &&
   flow.isThresholdValid &&
   flow.isAdvancedSettingsValid &&
   flow.isVpdAssistValid;
 
-export const shellyAddressLabel = (flow: HardwareSetupFlow): string =>
-  flow.shellyBaseUrl ?? t('hardware.flow.inputShellyIp');
+export const shellyAddressLabel = (
+  flow: Pick<HardwareSetupFlow, 'shellyBaseUrl'>
+): string => flow.shellyBaseUrl ?? t('hardware.flow.inputShellyIp');
 
-export const runtimeAddressLabel = (flow: HardwareSetupFlow): string =>
-  flow.selectedSensor?.runtimeAddress ?? t('hardware.flow.selectThermometer');
+export const runtimeAddressLabel = (
+  flow: Pick<HardwareSetupFlow, 'selectedSensor'>
+): string => flow.selectedSensor?.runtimeAddress ?? t('hardware.flow.selectThermometer');
 
-export interface HardwarePageProps {
-  flow: HardwareSetupFlow;
+export interface HardwarePageProps<TFlow> {
+  flow: TFlow;
 }

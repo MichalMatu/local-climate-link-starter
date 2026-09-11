@@ -1,10 +1,11 @@
+import type { TimeScheduleSetupFlow } from '../pageContracts.js';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { useTimeAutomationSetupFlow } from '../../../flows/time-automation/useTimeAutomationSetupFlow.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
 
-type TimeScheduleSetupPageProps = HardwarePageProps & {
+type TimeScheduleSetupPageProps = HardwarePageProps<TimeScheduleSetupFlow> & {
   onInstalled?(): void;
 };
 

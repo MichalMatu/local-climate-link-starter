@@ -90,11 +90,6 @@ type SensorInputState =
   | { ok: true; device: SensorDraftDevice }
   | { ok: false; fieldErrors: { name?: string; mac?: string } };
 
-type ShellyAutomationScriptViewState = ShellyAutomationScriptState & {
-  deviceId: string;
-  updatedAtMs: number;
-};
-
 type LoadedShellyAutomationScriptState = Omit<
   ShellyAutomationScriptState,
   'script' | 'code'
@@ -282,8 +277,6 @@ export const useHardwareSetupFlow = () => {
   const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.99');
   const [shellyScanStopped, setShellyScanStopped] = useState(false);
   const shellyScanAbortControllerRef = useRef<AbortController | null>(null);
-  const [automationScriptState, setAutomationScriptState] =
-    useState<ShellyAutomationScriptViewState | null>(null);
   const [lastInstallState, setLastInstallState] = useState<HardwareInstallState | null>(
     null
   );
@@ -292,11 +285,6 @@ export const useHardwareSetupFlow = () => {
 
   const {
     shellyControlStates,
-    refreshShellyControlMutation,
-    turnRelayOnMutation,
-    turnRelayOffMutation,
-    setAutomationAutoMutation,
-    setAutomationManualMutation,
     refreshShellyControl,
     turnRelayOn,
     turnRelayOff,
@@ -687,11 +675,6 @@ export const useHardwareSetupFlow = () => {
     },
     onSuccess: ({ device, state, decoded }) => {
       const settings = decoded.settings;
-      setAutomationScriptState({
-        ...state,
-        deviceId: device.id,
-        updatedAtMs: Date.now()
-      });
       setShellyScriptIdDraft(device.id, String(state.script.id));
       upsertSensorDevice({
         id: settings.runtimeAddress,
@@ -729,13 +712,6 @@ export const useHardwareSetupFlow = () => {
     }),
     onSuccess: ({ device, status }) => {
       setShellyScriptIdDraft(device.id, '1');
-      setAutomationScriptState({
-        deviceId: device.id,
-        script: null,
-        code: null,
-        status,
-        updatedAtMs: Date.now()
-      });
       applyControlStatus(device, status, t('hardware.flow.scriptDeleted'));
     },
     onError: (error, device) => applyControlError(device, error)
@@ -979,16 +955,11 @@ export const useHardwareSetupFlow = () => {
     setMinChangeMinInput,
     maxOnHoursInput,
     setMaxOnHoursInput,
-    advancedSettingsValidation,
     isAdvancedSettingsValid: advancedSettingsValidation.isValid,
     shellyBaseUrl,
     configState,
-    currentScriptHash,
     isThresholdValid,
     isVpdAssistValid,
-    lastInstallState,
-    isLastInstallCurrent,
-    isSafeRelayTestComplete,
     canRunSafeRelayTest,
     setupStatus,
     diagnosticSnapshot,
@@ -1006,12 +977,6 @@ export const useHardwareSetupFlow = () => {
     stopShellyScan,
     resetShellyScan,
     shellyControlStates,
-    refreshShellyControlMutation,
-    turnRelayOnMutation,
-    turnRelayOffMutation,
-    setAutomationAutoMutation,
-    setAutomationManualMutation,
-    automationScriptState,
     loadAutomationScriptMutation,
     deleteAutomationScriptMutation,
     refreshShellyControl,

@@ -14,7 +14,7 @@ import {
 } from '../../../flows/hardware-setup/shellyRequests.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
-import type { HardwarePageProps } from '../helpers.js';
+import type { ShellySetupFlow } from '../pageContracts.js';
 
 export const formatNullableMetric = (
   value: number | null | undefined,
@@ -41,7 +41,7 @@ export const formatComponentState = (
 };
 
 export const shellyCompatibilityBadge = (
-  status: HardwarePageProps['flow']['setupStatus'],
+  status: ShellySetupFlow['setupStatus'],
   t: Translate
 ) => {
   if (!status) {
@@ -181,10 +181,10 @@ export const formatShellyScanEstimate = (
   }
 };
 
-type ShellyControlCardState = HardwarePageProps['flow']['shellyControlStates'][string];
+type ShellyControlCardState = ShellySetupFlow['shellyControlStates'][string];
 
 type ShellyAddFormProps = {
-  flow: HardwarePageProps['flow'];
+  flow: ShellySetupFlow;
   showValidationErrors: boolean;
 };
 

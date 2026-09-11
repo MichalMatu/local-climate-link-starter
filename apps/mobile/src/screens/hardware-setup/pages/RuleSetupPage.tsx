@@ -1,3 +1,4 @@
+import type { RuleSetupFlow } from '../pageContracts.js';
 import {
   FeedbackPanel,
   Modal,
@@ -88,9 +89,7 @@ const copyToClipboard = async (value: string): Promise<void> => {
   await navigator.clipboard.writeText(value);
 };
 
-const createAdvancedDraft = (
-  flow: HardwarePageProps['flow']
-): RuleAdvancedSettingsInput => ({
+const createAdvancedDraft = (flow: RuleSetupFlow): RuleAdvancedSettingsInput => ({
   vpdAssistEnabled: flow.vpdAssistEnabled,
   vpdTargetInput: flow.vpdTargetInput,
   rssiMinInput: flow.rssiMinInput,
@@ -165,7 +164,7 @@ const formatRuleSummary = ({
   });
 };
 
-type RuleSetupPageProps = HardwarePageProps & {
+type RuleSetupPageProps = HardwarePageProps<RuleSetupFlow> & {
   selectablePresets?: readonly RulePresetId[];
   onOpenDiagnostics?: () => void;
 };

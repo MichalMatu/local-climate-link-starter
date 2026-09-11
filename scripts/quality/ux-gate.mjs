@@ -56,6 +56,25 @@ const addFailure = (path, message) => {
   failures.push(`${path}: ${message}`);
 };
 
+const checkBottomNavigationShell = async () => {
+  const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
+    path.endsWith('.tsx')
+  );
+  for (const path of tsxPaths) {
+    const source = await readRepoFile(path);
+    if (
+      source.includes('<AppBottomNavigation') &&
+      source.includes('<main') &&
+      !source.includes('app-bottom-nav-shell')
+    ) {
+      addFailure(
+        path,
+        'screens rendering AppBottomNavigation must opt into app-bottom-nav-shell spacing'
+      );
+    }
+  }
+};
+
 const checkSavedShellyCardFeedback = async () => {
   const path = 'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx';
   const source = await readRepoFile(path);
@@ -548,6 +567,7 @@ const checkPackageRuntimeCopy = async () => {
   }
 };
 
+await checkBottomNavigationShell();
 await checkSavedShellyCardFeedback();
 await checkTokenizedCssCoverage();
 await checkTokenizedCss();

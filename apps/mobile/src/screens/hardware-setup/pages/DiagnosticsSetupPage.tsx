@@ -1,3 +1,4 @@
+import type { DiagnosticsSetupFlow } from '../pageContracts.js';
 import { DiagnosticRow, ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
@@ -11,16 +12,12 @@ import {
   type HardwarePageProps
 } from '../helpers.js';
 
-type DiagnosticTime = NonNullable<
-  HardwarePageProps['flow']['diagnosticSnapshot']
->['time'];
+type DiagnosticTime = NonNullable<DiagnosticsSetupFlow['diagnosticSnapshot']>['time'];
 
-type DiagnosticPlug = NonNullable<
-  HardwarePageProps['flow']['diagnosticSnapshot']
->['plug'];
+type DiagnosticPlug = NonNullable<DiagnosticsSetupFlow['diagnosticSnapshot']>['plug'];
 
 type DiagnosticDetails = NonNullable<
-  HardwarePageProps['flow']['diagnosticSnapshot']
+  DiagnosticsSetupFlow['diagnosticSnapshot']
 >['diagnostics'];
 
 const formatShellyTime = (
@@ -179,7 +176,9 @@ const DiagnosticSection = ({ title, children }: DiagnosticSectionProps) => (
   </section>
 );
 
-export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
+export const DiagnosticsSetupPage = ({
+  flow
+}: HardwarePageProps<DiagnosticsSetupFlow>) => {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [nowMs, setNowMs] = useState(() => Date.now());

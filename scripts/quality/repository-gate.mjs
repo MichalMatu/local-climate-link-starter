@@ -207,10 +207,100 @@ const checkDomainPackageBoundaries = async () => {
   }
 };
 
+const checkHardwareSetupArchitecture = async () => {
+  const orchestratorPath = 'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts';
+  const orchestrator = await readRepoFile(orchestratorPath);
+  const orchestratorLines = orchestrator.split('\n').length;
+  if (orchestratorLines > 1150) {
+    addFailure(
+      orchestratorPath,
+      `hardware setup orchestrator exceeds 1150 lines (${orchestratorLines}); extract a cohesive subsystem instead of growing the god-flow`
+    );
+  }
+
+  const returnStart = orchestrator.lastIndexOf('\n  return {');
+  const returnEnd = orchestrator.indexOf('\n  };', returnStart);
+  if (returnStart === -1 || returnEnd === -1) {
+    addFailure(orchestratorPath, 'cannot locate hardware setup public return surface');
+  } else {
+    const returnBody = orchestrator.slice(returnStart, returnEnd);
+    const publicFields = [
+      ...returnBody.matchAll(/^ {4}([A-Za-z_$][\w$]*)(?:,|:|$)/gm)
+    ].map((match) => match[1]);
+    if (publicFields.length > 110) {
+      addFailure(
+        orchestratorPath,
+        `hardware setup public API has ${publicFields.length} fields; keep page contracts narrow and remove internal-only return values`
+      );
+    }
+  }
+
+  for (const forbidden of [
+    'new CapacitorBleScanner',
+    'generateShellyBleDiscoveryScript()',
+    'const setShellyControlState =',
+    'setPvvxDeviceTime({'
+  ]) {
+    if (orchestrator.includes(forbidden)) {
+      addFailure(
+        orchestratorPath,
+        `subsystem implementation leaked back into the orchestrator: ${forbidden}`
+      );
+    }
+  }
+
+  const subsystemBudgets = {
+    'apps/mobile/src/flows/hardware-setup/useShellyControlFlow.ts': 350,
+    'apps/mobile/src/flows/hardware-setup/useShellyBleDiscoveryFlow.ts': 350,
+    'apps/mobile/src/flows/hardware-setup/usePhoneSensorFlow.ts': 350
+  };
+  for (const [path, maxLines] of Object.entries(subsystemBudgets)) {
+    const source = await readRepoFile(path);
+    const lines = source.split('\n').length;
+    if (lines > maxLines) {
+      addFailure(
+        path,
+        `extracted hardware subsystem exceeds ${maxLines} lines (${lines})`
+      );
+    }
+  }
+
+  const pageContracts = {
+    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 'ShellySetupFlow',
+    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx':
+      'ShellySetupFlow',
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 'SensorSetupFlow',
+    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 'RuleSetupFlow',
+    'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx':
+      'DiagnosticsSetupFlow',
+    'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx':
+      'TimeScheduleSetupFlow'
+  };
+  for (const [path, contract] of Object.entries(pageContracts)) {
+    const source = await readRepoFile(path);
+    if (!source.includes(contract)) {
+      addFailure(path, `hardware setup page must use the narrow ${contract} contract`);
+    }
+    if (source.includes('HardwareSetupFlow')) {
+      addFailure(
+        path,
+        'hardware setup page must not depend on the full HardwareSetupFlow'
+      );
+    }
+    if (source.includes("HardwarePageProps['flow']")) {
+      addFailure(
+        path,
+        'hardware setup page must not recover the full flow through HardwarePageProps'
+      );
+    }
+  }
+};
+
 await checkReleaseVersionConsistency();
 await checkWorkspaceDependencyCycles();
 await checkScreenBoundaries();
 await checkDomainPackageBoundaries();
+await checkHardwareSetupArchitecture();
 
 if (failures.length > 0) {
   console.error('Repository quality gate failed:');

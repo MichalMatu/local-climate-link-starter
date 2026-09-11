@@ -1,3 +1,4 @@
+import type { ShellySetupFlow } from '../pageContracts.js';
 import {
   DiagnosticRow,
   FeedbackPanel,
@@ -37,7 +38,7 @@ import { mutationError, shellyAddressLabel, type HardwarePageProps } from '../he
 type ShellyStatusModalSource = 'add' | 'recheck';
 const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';
 
-export const ShellySetupPage = ({ flow }: HardwarePageProps) => {
+export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) => {
   const { locale, t } = useTranslation();
   const shellyAddress = shellyAddressLabel(flow);
   const isShellyScanActive = flow.shellyScanMutation.isPending && !flow.shellyScanStopped;
