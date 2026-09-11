@@ -1,0 +1,61 @@
+{
+  "id": "20260911-merge-manual-runtime-main-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "started_at": "2026-09-11T05:40:54.075848+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/merge-manual-runtime-main-v1.sh > /tmp/merge-manual-runtime-main-v1.sh; sh /tmp/merge-manual-runtime-main-v1.sh",
+      "exit_code": 1,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch            agent-control -> FETCH_HEAD\n   9c0e4ed..eb690e4  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n   eb690e4..3f0aacb  agent-control -> origin/agent-control\nSwitched to and reset branch 'main'\nbranch 'main' set up to track 'origin/main'.\nYour branch is up to date with 'origin/main'.\nMerge made by the 'ort' strategy.\n apps/mobile/e2e/responsive.spec.ts                 |  13 +-\n .../automation-dashboard-controls.test.tsx         |   3 +-\n .../src/__tests__/automation-dashboard.test.tsx    |   2 +\n .../src/__tests__/automation-detail.test.tsx       |  20 ++-\n apps/mobile/src/__tests__/hardware-setup.test.tsx  |  31 ++++-\n apps/mobile/src/app/locales/de.ts                  |   7 +\n apps/mobile/src/app/locales/en.ts                  |   7 +\n apps/mobile/src/app/locales/es.ts                  |   7 +\n apps/mobile/src/app/locales/fr.ts                  |   7 +\n apps/mobile/src/app/locales/it.ts                  |   7 +\n apps/mobile/src/app/locales/pl.ts                  |   7 +\n apps/mobile/src/app/locales/ptBr.ts                |   7 +\n .../hardware-setup/resourceDiagnostics.test.ts     | 100 +++++++++++++\n .../flows/hardware-setup/resourceDiagnostics.ts    |  81 +++++++++++\n .../flows/hardware-setup/useHardwareSetupFlow.ts   |  35 ++++-\n .../src/flows/installations/healthRecovery.test.ts |  11 +-\n .../src/flows/installations/healthRecovery.ts      |   6 +-\n apps/mobile/src/flows/installations/relaySafety.ts |  13 ++\n .../src/flows/installations/runtimeControl.test.ts | 154 ++++++++-------------\n .../src/flows/installations/runtimeControl.ts      | 138 ++++++++++--------\n .../installations/runtimeModeTransport.test.ts     |  70 ++++++++++\n .../flows/installations/runtimeModeTransport.ts    |  61 ++++++++\n .../src/flows/installations/runtimeStatus.test.ts  |  78 +++++++++++\n .../src/flows/installations/runtimeStatus.ts       |  41 ++++++\n .../src/flows/installations/runtimeUpgrade.ts      |  87 ++++++++++++\n .../installations/useInstalledAutomationRuntime.ts |  27 +++-\n .../src/screens/AutomationDashboardScreen.tsx      |  10 +-\n .../src/screens/InstallationDetailScreen.tsx       |  62 +++------\n .../hardware-setup/pages/DiagnosticsSetupPage.tsx  |  58 +++++++-\n docs/architecture/refactor-boundaries.md           |   4 +\n docs/architecture/runtime-control.md               |  50 +++++++\n .../__tests__/__snapshots__/generator.test.ts.snap |   8 +-\n .../src/__tests__/manual-runtime.test.ts           | 141 +++++++++++++++++++\n packages/script-generator/src/shelly/config.ts     |   2 +-\n packages/script-generator/src/shelly/generate.ts   |   7 +-\n packages/shelly-client/src/model.ts                |   1 +\n 36 files changed, 1136 insertions(+), 227 deletions(-)\n create mode 100644 apps/mobile/src/flows/hardware-setup/resourceDiagnostics.test.ts\n create mode 100644 apps/mobile/src/flows/hardware-setup/resourceDiagnostics.ts\n create mode 100644 apps/mobile/src/flows/installations/relaySafety.ts\n create mode 100644 apps/mobile/src/flows/installations/runtimeModeTransport.test.ts\n create mode 100644 apps/mobile/src/flows/installations/runtimeModeTransport.ts\n create mode 100644 apps/mobile/src/flows/installations/runtimeStatus.test.ts\n create mode 100644 apps/mobile/src/flows/installations/runtimeStatus.ts\n create mode 100644 apps/mobile/src/flows/installations/runtimeUpgrade.ts\n create mode 100644 docs/architecture/runtime-control.md\n create mode 100644 packages/script-generator/src/__tests__/manual-runtime.test.ts\n\n> local-climate-link-starter@2.0.10 check:full /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> pnpm check && pnpm e2e:responsive\n\n\n> local-climate-link-starter@2.0.10 check /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build\n\n\n> local-climate-link-starter@2.0.10 format:check /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> prettier --check .\n\nChecking formatting...\n[warn] docs/HANDOFF_NEXT_CHAT.md\n[warn] Code style issues found in the above file. Run Prettier with --write to fix.\n ELIFECYCLE  Command failed with exit code 1.\n ELIFECYCLE  Command failed with exit code 1.\n ELIFECYCLE  Command failed with exit code 1.\n",
+      "elapsed_seconds": 7.476,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 665.52,
+      "output_policy": "stream",
+      "captured_output_chars": 4424,
+      "output_truncated": false,
+      "current_rss_mb": 665.52,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 7.476
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.142
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.082
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-11T05:41:03.402169+00:00",
+  "task_digest": "d30d3effc0a381e0d6d85e8d2ad4473be6ebcec78681f9757a61dd44e600b9d1",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "attempt_id": "a7c1a5af17c2fd524bb04416",
+  "daemon_version": "4.18.20"
+}
