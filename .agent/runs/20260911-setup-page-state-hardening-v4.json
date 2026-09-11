@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-setup-page-state-hardening-v4",
+  "task_digest": "1f63f6e217e4625095d1f58859c3fce2d2f95ddf5b92ed4621e8e2bc22bfa592",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T10:44:26.479042+00:00",
+  "attempt_id": "7e5bdeb6bb7969a1f9ad433c",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 25635,
+  "updated_at": "2026-09-11T10:44:26.479102+00:00",
+  "pid": 25635
+}
