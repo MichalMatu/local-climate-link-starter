@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-production-readiness-audit-v2",
+  "task_digest": "a2451ed5b14b8c195afee7c5143c9b3dea83631b0785189b047549641f4bcdf1",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T09:29:10.985057+00:00",
+  "attempt_id": "98c302e7fe6548b5a43fe5ed",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 30783,
+  "updated_at": "2026-09-11T09:29:10.985254+00:00",
+  "pid": 30783
+}
