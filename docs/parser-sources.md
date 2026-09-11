@@ -152,26 +152,14 @@ thermopro-ble and Theengs cover passive advertisement decoding only.
 They are still useful to validate current-value parsing, not stored-history reads.
 ```
 
-Implementation plan for TP357 stored history:
-
-```text
-1. Keep current TP357 card as live-advertisement only.
-2. Add TP357 history behind a separate GATT reader after protocol review.
-3. Start with "day" history only because it gives dense 24 h data and is enough for charts.
-4. Do not copy code blindly. If we adapt MIT protocol details from pasky/tp357,
-   preserve attribution in THIRD_PARTY_NOTICES and add fixture tests first.
-5. Reuse the same phone BLE radio lock used by PVVX history so scan and GATT do not overlap.
-6. If the TP357 GATT protocol differs between firmware revisions, keep history disabled
-   and show only live values until real-device captures confirm the command set.
-```
-
 Current implementation decision:
 
 ```text
-TP357 stored history is not enabled yet. Public references show that it is
-possible, but the sample ordering/time base and Android GATT behavior still need
-real-device validation. The mobile app therefore persists recent live TP357
-samples for charts, while Xiaomi/PVVX can manually fetch its supported memo history.
+TP357 stored history is not exposed by the mobile app. Local Climate Link uses
+passive advertisements for current TP357 values only. Xiaomi/PVVX memo history is
+also not surfaced in the app; the PVVX GATT path retained by the product is time
+synchronization. Historical plotting is intentionally delegated to thermometer-native
+software rather than duplicated in Local Climate Link.
 ```
 
 Implemented MatrixHub behavior:

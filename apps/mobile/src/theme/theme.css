@@ -1090,13 +1090,13 @@ select {
   overflow-wrap: anywhere;
 }
 
-.sensor-chart-stack {
+.sensor-metric-grid {
   display: grid;
   gap: var(--lcl-spacing-sm);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
 }
 
-.sensor-data-chart-card {
-  align-content: start;
+.sensor-data-metric-card {
   background: var(--lcl-color-surface-muted);
   border-radius: var(--lcl-radius-md);
   display: grid;
@@ -1104,39 +1104,24 @@ select {
   padding: var(--lcl-spacing-md);
 }
 
-.sensor-data-chart-card--empty {
-  align-content: center;
-  justify-items: center;
-  min-height: calc(var(--lcl-size-compact-control-min-height) + var(--lcl-spacing-2xl));
+.sensor-data-metric-card__label {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
 }
 
-.sensor-data-chart-card__value {
+.sensor-data-metric-card__value {
   color: var(--lcl-color-text);
   font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-sm));
   font-weight: 700;
   line-height: var(--lcl-line-height-tight);
 }
 
-.sensor-data-chart-card__value--empty {
+.sensor-data-metric-card--empty .sensor-data-metric-card__value,
+.sensor-data-metric-card__value--empty {
   color: var(--lcl-color-text-muted);
   font-size: var(--lcl-font-size-lg);
-  font-weight: var(--lcl-font-weight-semibold);
-  line-height: var(--lcl-line-height-compact);
   opacity: var(--lcl-opacity-muted);
-  text-align: center;
-}
-
-.sensor-data-chart-card .lcl-sparkline {
-  color: var(--lcl-color-status-ok-text);
-  height: calc(var(--lcl-size-compact-control-min-height) + var(--lcl-spacing-lg));
-}
-
-.sensor-data-chart-card--empty .lcl-sparkline {
-  display: none;
-}
-
-.sensor-data-chart-card .lcl-sparkline path {
-  stroke-width: var(--lcl-border-width-sm);
 }
 
 .icon-action-row {

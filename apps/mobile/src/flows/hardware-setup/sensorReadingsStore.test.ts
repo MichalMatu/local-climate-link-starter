@@ -1,72 +1,51 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  resetHardwareSetupReadingsStore,
+  useHardwareSetupReadingsStore
+} from './sensorReadingsStore.js';
 
 describe('hardware setup sensor readings store', () => {
-  beforeEach(() => {
-    window.localStorage.clear();
-    vi.resetModules();
-  });
+  beforeEach(() => resetHardwareSetupReadingsStore());
 
-  afterEach(() => {
-    window.localStorage.clear();
-    vi.resetModules();
-  });
-
-  it('persists and hydrates bounded sensor chart samples', async () => {
-    const firstStoreModule = await import('./sensorReadingsStore.js');
-
-    firstStoreModule.useHardwareSetupReadingsStore.getState().appendSensorReading({
+  it('keeps only the latest live state per sensor', () => {
+    const store = useHardwareSetupReadingsStore.getState();
+    store.appendSensorReading({
       sensorId: 'aa:bb:cc:dd:ee:ff',
       source: 'phone-scan',
       temperatureC: 21.5,
       humidityPct: 44,
-      rssi: -52,
       seenAtMs: 1000
+    });
+    useHardwareSetupReadingsStore.getState().appendSensorReading({
+      sensorId: 'aa:bb:cc:dd:ee:ff',
+      source: 'phone-scan',
+      temperatureC: 21.7,
+      rssi: -52,
+      seenAtMs: 2000
     });
 
     expect(
-      window.localStorage.getItem(firstStoreModule.HARDWARE_SETUP_READINGS_STORAGE_KEY)
-    ).toContain('AA:BB:CC:DD:EE:FF');
-
-    vi.resetModules();
-    const reloadedStoreModule = await import('./sensorReadingsStore.js');
-
-    expect(
-      reloadedStoreModule.useHardwareSetupReadingsStore.getState().samplesBySensorId[
-        'AA:BB:CC:DD:EE:FF'
-      ]
+      useHardwareSetupReadingsStore.getState().samplesBySensorId['AA:BB:CC:DD:EE:FF']
     ).toEqual([
       {
         sensorId: 'AA:BB:CC:DD:EE:FF',
         source: 'phone-scan',
-        temperatureC: 21.5,
+        temperatureC: 21.7,
         humidityPct: 44,
         rssi: -52,
-        seenAtMs: 1000
+        seenAtMs: 2000
       }
     ]);
   });
 
-  it('keeps only the newest chart samples per sensor', async () => {
-    const storeModule = await import('./sensorReadingsStore.js');
-
-    storeModule.useHardwareSetupReadingsStore.getState().appendSensorReadings(
-      'aa:bb:cc:dd:ee:ff',
-      Array.from({ length: 130 }, (_, index) => ({
-        sensorId: 'aa:bb:cc:dd:ee:ff',
-        source: 'phone-scan',
-        temperatureC: index,
-        humidityPct: 50,
-        seenAtMs: index
-      }))
-    );
-
-    const samples =
-      storeModule.useHardwareSetupReadingsStore.getState().samplesBySensorId[
-        'AA:BB:CC:DD:EE:FF'
-      ] ?? [];
-
-    expect(samples).toHaveLength(120);
-    expect(samples[0]?.temperatureC).toBe(10);
-    expect(samples.at(-1)?.temperatureC).toBe(129);
+  it('clears live state for a removed sensor', () => {
+    useHardwareSetupReadingsStore.getState().appendSensorReading({
+      sensorId: 'aa:bb:cc:dd:ee:ff',
+      source: 'phone-scan',
+      temperatureC: 21.5,
+      seenAtMs: 1000
+    });
+    useHardwareSetupReadingsStore.getState().clearSensorReadings('AA:BB:CC:DD:EE:FF');
+    expect(useHardwareSetupReadingsStore.getState().samplesBySensorId).toEqual({});
   });
 });

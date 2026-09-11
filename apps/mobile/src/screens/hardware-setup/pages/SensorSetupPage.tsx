@@ -1,7 +1,6 @@
 import {
   DiagnosticRow,
   Modal,
-  Sparkline,
   ToastViewport,
   type ToastMessage,
   type ToastTone
@@ -22,13 +21,6 @@ const sensorProfileLabels = {
 const sensorProfileDisplayLabels = {
   xiaomi_lywsd03mmc_bthome_v2: 'BTHome v2',
   tp357_custom_v1: 'TP357'
-} as const;
-
-const temperatureChartDomain = { minimumRange: 5 } as const;
-const humidityChartDomain = {
-  minimumRange: 20,
-  lowerBound: 0,
-  upperBound: 100
 } as const;
 
 type SensorDraftDevice = HardwarePageProps['flow']['sensorDevices'][number];
@@ -102,11 +94,6 @@ const latestBatterySample = (
 
   return null;
 };
-
-const sampleValues = (
-  samples: SensorReadingSample[],
-  metric: 'temperatureC' | 'humidityPct'
-): Array<number | undefined> => samples.map((sample) => sample[metric]);
 
 type SensorAddFormProps = {
   flow: HardwarePageProps['flow'];
@@ -200,8 +187,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
   const toastIdRef = useRef(0);
   const shownPhoneBleErrorRef = useRef<string | null>(null);
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
-  const isSensorGattPending =
-    flow.fetchPvvxHistoryMutation.isPending || flow.setPvvxTimeMutation.isPending;
+  const isSensorGattPending = flow.setPvvxTimeMutation.isPending;
   const shouldShowPhoneBleEmpty =
     flow.phoneBleScanMutation.isSuccess && flow.phoneBleScanCandidates.length === 0;
   const sensorSettingsDevice =
@@ -300,33 +286,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
       window.removeEventListener('focus', handleFocus);
     };
   }, [restartSavedSensorLiveScan, shouldRunSavedSensorLiveScan, stopSavedSensorLiveScan]);
-
-  useEffect(() => {
-    if (!flow.fetchPvvxHistoryMutation.isSuccess) {
-      return;
-    }
-
-    const sampleCount = flow.fetchPvvxHistoryMutation.data?.sampleCount ?? 0;
-    pushToast(
-      'ok',
-      t('hardware.sensor.pvvxHistoryLoadedTitle'),
-      t('hardware.sensor.pvvxHistoryLoadedDetail', { count: sampleCount })
-    );
-    flow.fetchPvvxHistoryMutation.reset();
-  }, [flow.fetchPvvxHistoryMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.fetchPvvxHistoryMutation.isError) {
-      return;
-    }
-
-    pushToast(
-      'warning',
-      t('hardware.sensor.pvvxFailedTitle'),
-      mutationError(flow.fetchPvvxHistoryMutation.error)
-    );
-    flow.fetchPvvxHistoryMutation.reset();
-  }, [flow.fetchPvvxHistoryMutation, pushToast, t]);
 
   useEffect(() => {
     if (!flow.setPvvxTimeMutation.isSuccess) {
@@ -655,19 +614,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                 <button
                   className="secondary-action"
                   type="button"
-                  disabled={flow.fetchPvvxHistoryMutation.isPending}
-                  title={t('hardware.sensor.pvvxHistoryTitle')}
-                  onClick={() =>
-                    flow.fetchPvvxHistoryMutation.mutate(sensorSettingsDevice)
-                  }
-                >
-                  {flow.fetchPvvxHistoryMutation.isPending
-                    ? t('hardware.sensor.pvvxHistoryLoading')
-                    : t('hardware.sensor.pvvxHistory')}
-                </button>
-                <button
-                  className="secondary-action"
-                  type="button"
                   disabled={flow.setPvvxTimeMutation.isPending}
                   title={t('hardware.sensor.pvvxSetTimeTitle')}
                   onClick={() => flow.setPvvxTimeMutation.mutate(sensorSettingsDevice)}
@@ -736,19 +682,22 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                   <IconSettings className="icon-action__svg" aria-hidden="true" />
                 </button>
               </div>
-              <div className="sensor-chart-stack">
+              <div className="sensor-metric-grid">
                 <div
                   className={
                     hasTemperatureData
-                      ? 'sensor-data-chart-card'
-                      : 'sensor-data-chart-card sensor-data-chart-card--empty'
+                      ? 'sensor-data-metric-card'
+                      : 'sensor-data-metric-card sensor-data-metric-card--empty'
                   }
                 >
+                  <span className="sensor-data-metric-card__label">
+                    {t('hardware.metrics.temperature')}
+                  </span>
                   <strong
                     className={
                       hasTemperatureData
-                        ? 'sensor-data-chart-card__value'
-                        : 'sensor-data-chart-card__value sensor-data-chart-card__value--empty'
+                        ? 'sensor-data-metric-card__value'
+                        : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
                     }
                   >
                     {formatNullableMetric(
@@ -758,26 +707,22 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                       t('common.missingData')
                     )}
                   </strong>
-                  <Sparkline
-                    label={t('hardware.sensor.temperatureChartLabel', {
-                      name: device.name
-                    })}
-                    domain={temperatureChartDomain}
-                    points={sampleValues(samples, 'temperatureC')}
-                  />
                 </div>
                 <div
                   className={
                     hasHumidityData
-                      ? 'sensor-data-chart-card'
-                      : 'sensor-data-chart-card sensor-data-chart-card--empty'
+                      ? 'sensor-data-metric-card'
+                      : 'sensor-data-metric-card sensor-data-metric-card--empty'
                   }
                 >
+                  <span className="sensor-data-metric-card__label">
+                    {t('hardware.metrics.humidity')}
+                  </span>
                   <strong
                     className={
                       hasHumidityData
-                        ? 'sensor-data-chart-card__value'
-                        : 'sensor-data-chart-card__value sensor-data-chart-card__value--empty'
+                        ? 'sensor-data-metric-card__value'
+                        : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
                     }
                   >
                     {formatNullableMetric(
@@ -787,13 +732,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps) => {
                       t('common.missingData')
                     )}
                   </strong>
-                  <Sparkline
-                    label={t('hardware.sensor.humidityChartLabel', {
-                      name: device.name
-                    })}
-                    domain={humidityChartDomain}
-                    points={sampleValues(samples, 'humidityPct')}
-                  />
                 </div>
               </div>
             </article>

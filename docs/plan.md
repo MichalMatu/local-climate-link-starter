@@ -133,50 +133,13 @@ hardware actions.
 
 ## Planned app extensions
 
-### Sensor history and charts
+### Sensor display policy
 
-The current Xiaomi/PVVX manual history fetch reads the latest saved memo samples
-by count, not by a user-facing time window. The first implementation reads 50
-samples, so the visible time span depends on the thermometer's configured memo
-recording interval.
-
-Planned improvements:
-
-- Make the history window explicit in the app, for example recent readings,
-  24 hours, 7 days, or all available PVVX memo records within a safe limit.
-- Store fetched Xiaomi/PVVX history locally per sensor, keyed by stable sensor
-  identity plus sample timestamp/index, so the app does not download and append
-  the same records repeatedly.
-- Add incremental sync: after the first full history fetch, fetch only newer records
-  where the PVVX protocol and device state allow it. If index-based incremental
-  reads are unreliable, deduplicate locally and keep the UI honest about the
-  refresh result.
-- Merge downloaded Xiaomi/PVVX history with live phone BLE packets, preserving
-  source metadata and avoiding duplicate chart points.
-- Replace the compact in-card sparklines with a proper chart modal when enough
-  data exists. The modal should support larger time ranges, clear axes/units,
-  temperature, humidity, battery/voltage where available, and later VPD derived
-  from temperature and humidity.
-- Keep the compact sensor cards focused on current readings and a small preview.
-  Detailed analysis belongs in the chart modal.
-
-### TP357 chart path
-
-TP357 support currently relies on live BLE packets and locally stored readings.
-Unlike Xiaomi/PVVX, the app does not yet have a confirmed TP357 history download
-path.
-
-Planned improvements:
-
-- Research and validate whether stock TP357 firmware exposes stored history over
-  BLE GATT in a way compatible with our app and licensing rules.
-- If stock TP357 history is not practical, keep TP357 charts based on phone-captured
-  rolling history from live packets, with clear UX that only readings seen by the
-  app are available.
-- If a custom TP357 firmware path becomes part of the product, document it as a
-  separate profile and keep parser/history logic separate from Xiaomi/PVVX.
-- Add tests for TP357 chart persistence, deduplication, and stale/live packet
-  merging before presenting TP357 charts as a reliable historical feature.
+The mobile app intentionally keeps sensor cards focused on current live readings.
+Historical plotting and local sample-history persistence are out of scope: supported
+thermometers already provide better native history views, while Local Climate Link
+needs only fresh values for setup, diagnostics, and automation control. Xiaomi/PVVX
+time synchronization remains available as a setup utility.
 
 ### Setup health checks and reliability testing
 

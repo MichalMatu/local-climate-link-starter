@@ -4,7 +4,6 @@ import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import {
   CapacitorBleGattClient,
   CapacitorBleScanner,
-  readPvvxMemoHistory,
   setPvvxDeviceTime,
   type BleScanner
 } from '@lcl/ble-core';
@@ -78,7 +77,6 @@ import {
 } from './phoneBleScan.js';
 import {
   sensorReadingFromCandidate,
-  sensorReadingFromMeasurement,
   useHardwareSetupReadingsStore
 } from './sensorReadingsStore.js';
 import {
@@ -196,11 +194,6 @@ type SafeRelayTestMutationResult = {
 };
 
 type SensorRuntimeSource = 'phone-scan' | 'shelly-scan';
-
-type PvvxHistoryMutationResult = {
-  device: SensorDraftDevice;
-  sampleCount: number;
-};
 
 type PvvxTimeMutationResult = {
   device: SensorDraftDevice;
@@ -356,9 +349,6 @@ export const useHardwareSetupFlow = () => {
   );
   const appendSensorReading = useHardwareSetupReadingsStore(
     (state) => state.appendSensorReading
-  );
-  const appendSensorReadings = useHardwareSetupReadingsStore(
-    (state) => state.appendSensorReadings
   );
   const clearSensorReadings = useHardwareSetupReadingsStore(
     (state) => state.clearSensorReadings
@@ -1338,31 +1328,6 @@ export const useHardwareSetupFlow = () => {
     });
   };
 
-  const fetchPvvxHistoryMutation = useMutation({
-    mutationFn: async (device: SensorDraftDevice): Promise<PvvxHistoryMutationResult> => {
-      if (device.profileId !== 'xiaomi_lywsd03mmc_bthome_v2') {
-        throw new Error(t('hardware.sensor.pvvxOnlyXiaomi'));
-      }
-      if (Capacitor.getPlatform() === 'web') {
-        throw new Error(t('hardware.sensor.pvvxMobileOnly'));
-      }
-
-      await preparePhoneGattConnection();
-      const gatt = new CapacitorBleGattClient();
-      const history = await readPvvxMemoHistory({
-        gatt,
-        deviceId: device.runtimeAddress,
-        sensorId: device.runtimeAddress,
-        count: 50
-      });
-      appendSensorReadings(
-        device.runtimeAddress,
-        history.measurements.map(sensorReadingFromMeasurement)
-      );
-      return { device, sampleCount: history.samples.length };
-    }
-  });
-
   const setPvvxTimeMutation = useMutation({
     mutationFn: async (device: SensorDraftDevice): Promise<PvvxTimeMutationResult> => {
       if (device.profileId !== 'xiaomi_lywsd03mmc_bthome_v2') {
@@ -1679,7 +1644,6 @@ export const useHardwareSetupFlow = () => {
     restartSavedSensorLiveScan,
     stopSavedSensorLiveScan,
     addDiscoveredSensor,
-    fetchPvvxHistoryMutation,
     setPvvxTimeMutation,
     installMutation,
     safeRelayTestMutation,

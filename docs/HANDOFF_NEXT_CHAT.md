@@ -68,7 +68,7 @@ Do not move or rewrite the frozen baseline.
 
 ## Active product goal
 
-Focus only on the climate automation lifecycle and diagnostics. Do not resume chart/history work unless explicitly requested.
+Focus only on the climate automation lifecycle and diagnostics. Sensor chart/history UI is intentionally removed; do not reintroduce it without an explicit product decision.
 
 The user chose this architecture:
 

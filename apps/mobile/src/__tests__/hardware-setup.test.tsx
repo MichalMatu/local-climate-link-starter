@@ -23,8 +23,6 @@ const phoneBleScannerMock = vi.hoisted(() => ({
 }));
 
 const pvvxGattMock = vi.hoisted(() => ({
-  historyCalls: 0,
-  stopCountAtHistoryStart: 0,
   timeCalls: 0,
   stopCountAtTimeStart: 0
 }));
@@ -136,31 +134,6 @@ vi.mock('@lcl/ble-core', async () => {
     ...(actual as object),
     CapacitorBleScanner: TestCapacitorBleScanner,
     CapacitorBleGattClient: class TestCapacitorBleGattClient {},
-    readPvvxMemoHistory: vi.fn(async ({ sensorId }: { sensorId: string }) => {
-      pvvxGattMock.historyCalls += 1;
-      pvvxGattMock.stopCountAtHistoryStart = phoneBleScannerMock.stopCount;
-      return {
-        samples: [
-          {
-            index: 1,
-            timestampSec: 1_700_000_000,
-            temperatureC: 22.4,
-            humidityPct: 48.1,
-            voltageV: 3.01
-          }
-        ],
-        measurements: [
-          {
-            sensorId,
-            source: 'pvvx-history',
-            temperatureC: 22.4,
-            humidityPct: 48.1,
-            voltageV: 3.01,
-            seenAtMs: 1_700_000_000_000
-          }
-        ]
-      };
-    }),
     setPvvxDeviceTime: vi.fn(async () => {
       pvvxGattMock.timeCalls += 1;
       pvvxGattMock.stopCountAtTimeStart = phoneBleScannerMock.stopCount;
@@ -398,8 +371,6 @@ describe('HardwareSetupScreen', () => {
     phoneBleScannerMock.failureMessage = null;
     phoneBleScannerMock.startCount = 0;
     phoneBleScannerMock.stopCount = 0;
-    pvvxGattMock.historyCalls = 0;
-    pvvxGattMock.stopCountAtHistoryStart = 0;
     pvvxGattMock.timeCalls = 0;
     pvvxGattMock.stopCountAtTimeStart = 0;
     setLocalePreference('system');
@@ -1653,12 +1624,6 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByText('MAC')).not.toBeInTheDocument();
     expect(screen.queryByText('Bateria')).not.toBeInTheDocument();
     expect(screen.queryByText('RSSI')).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('img', { name: 'Wykres temperatury: Xiaomi salon' })
-    ).toHaveClass('lcl-sparkline');
-    expect(
-      screen.getByRole('img', { name: 'Wykres wilgotności: Xiaomi salon' })
-    ).toHaveClass('lcl-sparkline');
     expect(screen.queryByText('Xiaomi/PVVX BTHome v2')).not.toBeInTheDocument();
     const sensorSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
     expect(within(sensorSettingsDialog).getByLabelText('Nazwa termometru')).toHaveValue(
@@ -1671,9 +1636,6 @@ describe('HardwareSetupScreen', () => {
     expect(within(sensorSettingsDialog).getByText('BTHome v2')).toBeInTheDocument();
     expect(within(sensorSettingsDialog).getByText('Bateria')).toBeInTheDocument();
     expect(within(sensorSettingsDialog).getByText('RSSI')).toBeInTheDocument();
-    expect(
-      within(sensorSettingsDialog).getByRole('button', { name: 'Pobierz historię' })
-    ).toHaveAttribute('title', 'Połącz z Xiaomi/PVVX i pobierz zapisane odczyty');
     expect(
       within(sensorSettingsDialog).getByRole('button', { name: 'Ustaw czas' })
     ).toHaveAttribute('title', 'Ustaw czas Xiaomi/PVVX zgodnie z telefonem');
@@ -2238,9 +2200,6 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('TP357 salon')).toBeInTheDocument();
     const tp357SettingsDialog = await openSensorSettingsDialog('TP357 salon');
     expect(within(tp357SettingsDialog).getByText('TP357')).toBeInTheDocument();
-    expect(
-      within(tp357SettingsDialog).queryByRole('button', { name: 'Pobierz historię' })
-    ).not.toBeInTheDocument();
     fireEvent.click(within(tp357SettingsDialog).getByRole('button', { name: 'Zamknij' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
@@ -2358,79 +2317,6 @@ describe('HardwareSetupScreen', () => {
     const sensorSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
     expect(within(sensorSettingsDialog).getByText('100%')).toBeInTheDocument();
     expect(within(sensorSettingsDialog).getByText('-72 dBm')).toBeInTheDocument();
-  });
-
-  it('pauses saved thermometer live scan before opening a Xiaomi PVVX GATT history session', async () => {
-    vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      sensorDevices: [
-        {
-          id: 'A4:C1:38:4F:24:CD',
-          name: 'Xiaomi salon',
-          runtimeAddress: 'A4:C1:38:4F:24:CD',
-          profileId: 'xiaomi_lywsd03mmc_bthome_v2'
-        }
-      ],
-      selectedSensorId: 'A4:C1:38:4F:24:CD'
-    });
-    renderHardwareSetup();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(await screen.findByText('21.3°C')).toBeInTheDocument();
-    expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1);
-
-    const sensorSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
-    fireEvent.click(
-      within(sensorSettingsDialog).getByRole('button', { name: 'Pobierz historię' })
-    );
-
-    await waitFor(
-      () => {
-        expect(pvvxGattMock.historyCalls).toBe(1);
-      },
-      { timeout: 3000 }
-    );
-    expect(pvvxGattMock.stopCountAtHistoryStart).toBeGreaterThan(0);
-    expect(await screen.findByText('Historia pobrana.')).toBeInTheDocument();
-    expect(screen.getByText('Dodano 1 odczytów do wykresów.')).toBeInTheDocument();
-    expect(screen.getByText('21.3°C')).toBeInTheDocument();
-    expect(screen.getByText('45.7%')).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('Wykres temperatury: Xiaomi salon').querySelector('path')
-    ).not.toBeNull();
-  });
-
-  it('keeps Xiaomi PVVX history manual while saved thermometer live scan is active', async () => {
-    vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      sensorDevices: [
-        {
-          id: 'A4:C1:38:4F:24:CD',
-          name: 'Xiaomi salon',
-          runtimeAddress: 'A4:C1:38:4F:24:CD',
-          profileId: 'xiaomi_lywsd03mmc_bthome_v2'
-        }
-      ],
-      selectedSensorId: 'A4:C1:38:4F:24:CD'
-    });
-    renderHardwareSetup();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(await screen.findByText('21.3°C')).toBeInTheDocument();
-    expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1);
-
-    await act(async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 1000));
-    });
-    expect(pvvxGattMock.historyCalls).toBe(0);
-    expect(pvvxGattMock.stopCountAtHistoryStart).toBe(0);
-    expect(screen.queryByText('Historia pobrana.')).not.toBeInTheDocument();
-    expect(screen.getByText('21.3°C')).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('Wykres temperatury: Xiaomi salon').querySelector('path')
-    ).not.toBeNull();
   });
 
   it('restarts saved thermometer live scan after app visibility resumes', async () => {

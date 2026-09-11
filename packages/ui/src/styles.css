@@ -484,26 +484,6 @@
   color: var(--lcl-color-status-danger-text);
 }
 
-.lcl-sparkline {
-  color: var(--lcl-color-accent);
-  display: block;
-  height: var(--lcl-size-compact-control-min-height);
-  width: 100%;
-}
-
-.lcl-sparkline path {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: var(--lcl-border-width-md);
-}
-
-.lcl-sparkline--empty {
-  color: var(--lcl-color-text-muted);
-  opacity: var(--lcl-opacity-muted);
-}
-
 .lcl-modal-backdrop {
   align-items: center;
   background: var(--lcl-color-overlay);
