@@ -290,20 +290,18 @@ select {
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-md);
   display: grid;
-  gap: var(--lcl-spacing-md);
-  padding: var(--lcl-spacing-md);
+  gap: var(--lcl-spacing-sm);
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
 }
 
 .rule-vpd-assist__header {
-  align-items: flex-start;
+  align-items: center;
   display: flex;
   gap: var(--lcl-spacing-md);
   justify-content: space-between;
 }
 
 .rule-vpd-assist__header > div {
-  display: grid;
-  gap: var(--lcl-spacing-xs);
   min-width: 0;
 }
 

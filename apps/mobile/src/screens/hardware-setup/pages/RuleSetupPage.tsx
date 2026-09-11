@@ -1,13 +1,7 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
-import {
-  FeedbackPanel,
-  Modal,
-  RuleSummaryCard,
-  ScriptPreview,
-  ToastViewport
-} from '@lcl/ui';
+import { FeedbackPanel, Modal, ScriptPreview, ToastViewport } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
-import { IconTrash } from '@tabler/icons-react';
+import { IconInfoCircle, IconTrash } from '@tabler/icons-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
@@ -15,13 +9,7 @@ import {
   type Translate,
   type TranslationKey
 } from '../../../app/i18n.js';
-import {
-  canInstallScript,
-  mutationError,
-  runtimeAddressLabel,
-  shellyAddressLabel,
-  type HardwarePageProps
-} from '../helpers.js';
+import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
 import {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS,
@@ -31,7 +19,14 @@ import {
 import { useToastQueue } from '../useToastQueue.js';
 
 type RuleDialogState =
-  'none' | 'script' | 'advanced' | 'delete' | 'install-block' | 'relay-test';
+  | 'none'
+  | 'summary'
+  | 'vpd-info'
+  | 'script'
+  | 'advanced'
+  | 'delete'
+  | 'install-block'
+  | 'relay-test';
 
 type RuleControlCopy = {
   labelKey: TranslationKey;
@@ -109,8 +104,8 @@ const formatRuleSummary = ({
   staleTimeoutMin,
   minChangeMin,
   maxOnHours,
-  shellyAddress,
-  sensorRuntimeAddress,
+  shellyName,
+  sensorName,
   vpdAssist,
   rssiMinDbm,
   t
@@ -123,8 +118,8 @@ const formatRuleSummary = ({
   staleTimeoutMin: number;
   minChangeMin: number;
   maxOnHours: number;
-  shellyAddress?: string | undefined;
-  sensorRuntimeAddress?: string | undefined;
+  shellyName?: string | undefined;
+  sensorName?: string | undefined;
   vpdAssist?: string | undefined;
   rssiMinDbm?: number | undefined;
   t: Translate;
@@ -138,11 +133,11 @@ const formatRuleSummary = ({
       ? t('hardware.rule.comparator.above')
       : t('hardware.rule.comparator.below');
   const actionName = `${actionLabel.charAt(0).toUpperCase()}${actionLabel.slice(1)}`;
-  const sensorLabel = sensorRuntimeAddress
-    ? t('hardware.rule.summarySensorNamed', { address: sensorRuntimeAddress })
+  const sensorLabel = sensorName
+    ? t('hardware.rule.summarySensorNamed', { address: sensorName })
     : t('hardware.rule.summarySensorDefault');
-  const shellyLabel = shellyAddress
-    ? t('hardware.rule.summaryShellyNamed', { address: shellyAddress })
+  const shellyLabel = shellyName
+    ? t('hardware.rule.summaryShellyNamed', { address: shellyName })
     : t('hardware.rule.summaryShellyDefault');
   const vpdCopy = vpdAssist ? t('hardware.rule.summaryVpd', { vpd: vpdAssist }) : '';
   const rssiCopy = Number.isFinite(rssiMinDbm)
@@ -183,7 +178,6 @@ export const RuleSetupPage = ({
     createAdvancedDraft(flow)
   );
   const thresholdErrorId = useId();
-  const vpdHintId = useId();
   const vpdErrorId = useId();
   const copy = RULE_PRESET_COPY[flow.rulePreset];
   const currentRule =
@@ -213,8 +207,8 @@ export const RuleSetupPage = ({
     staleTimeoutMin: Number.isFinite(staleTimeoutMin) ? staleTimeoutMin : 15,
     minChangeMin: Number.isFinite(minChangeMin) ? minChangeMin : 2,
     maxOnHours: Number.isFinite(maxOnHours) ? maxOnHours : 4,
-    shellyAddress: flow.selectedShelly ? shellyAddressLabel(flow) : undefined,
-    sensorRuntimeAddress: flow.selectedSensor ? runtimeAddressLabel(flow) : undefined,
+    shellyName: flow.selectedShelly?.name,
+    sensorName: flow.selectedSensor?.name,
     vpdAssist: vpdAssistLabel,
     rssiMinDbm:
       Number.isFinite(rssiMinDbm) &&
@@ -465,9 +459,17 @@ export const RuleSetupPage = ({
 
       <section className="rule-vpd-assist">
         <div className="rule-vpd-assist__header">
-          <div>
+          <div className="icon-action-row">
             <strong>{t('hardware.rule.vpdAssistTitle')}</strong>
-            <p>{t('hardware.rule.vpdAssistHint')}</p>
+            <button
+              aria-label={t('hardware.rule.vpdAssistHint')}
+              className="icon-action rule-summary-icon-action"
+              type="button"
+              title={t('hardware.rule.vpdAssistHint')}
+              onClick={() => setDialog('vpd-info')}
+            >
+              <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
+            </button>
           </div>
           <label className="toggle-row rule-vpd-assist__toggle">
             <input
@@ -485,9 +487,7 @@ export const RuleSetupPage = ({
           <label className={`field ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}>
             {t('hardware.rule.vpdTarget')}
             <input
-              aria-describedby={
-                flow.isVpdAssistValid ? vpdHintId : `${vpdHintId} ${vpdErrorId}`
-              }
+              aria-describedby={flow.isVpdAssistValid ? undefined : vpdErrorId}
               aria-invalid={!flow.isVpdAssistValid}
               max={RULE_ADVANCED_LIMITS.vpdTargetMax}
               min={RULE_ADVANCED_LIMITS.vpdTargetMin}
@@ -496,9 +496,6 @@ export const RuleSetupPage = ({
               value={flow.vpdTargetInput}
               onChange={(event) => flow.setVpdTargetInput(event.currentTarget.value)}
             />
-            <span className="field__hint" id={vpdHintId}>
-              {t('hardware.rule.vpdRangeHint')}
-            </span>
             {!flow.isVpdAssistValid && (
               <span className="field__error" id={vpdErrorId}>
                 {t('hardware.rule.range.kpa')}
@@ -508,9 +505,16 @@ export const RuleSetupPage = ({
         )}
       </section>
 
-      <RuleSummaryCard title={t('hardware.rule.summaryTitle')} summary={ruleSummary} />
-
       <div className="action-row rule-action-row">
+        <button
+          aria-label={t('hardware.rule.summaryTitle')}
+          className="icon-action rule-summary-icon-action"
+          type="button"
+          title={t('hardware.rule.summaryTitle')}
+          onClick={() => setDialog('summary')}
+        >
+          <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
+        </button>
         <button
           className="primary-action"
           type="button"
@@ -594,6 +598,25 @@ export const RuleSetupPage = ({
         </details>
       </div>
 
+      <Modal
+        closeLabel={t('common.close')}
+        open={dialog === 'summary'}
+        title={t('hardware.rule.summaryTitle')}
+        onClose={() => setDialog('none')}
+      >
+        <p>{ruleSummary}</p>
+      </Modal>
+      <Modal
+        closeLabel={t('common.close')}
+        open={dialog === 'vpd-info'}
+        title={t('hardware.rule.vpdAssistTitle')}
+        onClose={() => setDialog('none')}
+      >
+        <>
+          <p>{t('hardware.rule.vpdAssistHint')}</p>
+          <p>{t('hardware.rule.vpdRangeHint')}</p>
+        </>
+      </Modal>
       <Modal
         closeLabel={t('common.close')}
         open={dialog === 'install-block' && flow.installMutation.isError}

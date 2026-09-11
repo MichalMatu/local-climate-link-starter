@@ -302,9 +302,12 @@ const confirmRuleScriptDelete = async () => {
 };
 
 const getRuleSummary = () => {
-  const summary = screen.getByText('Podsumowanie reguły').closest('article');
-  expect(summary).not.toBeNull();
-  return summary!;
+  fireEvent.click(screen.getByRole('button', { name: 'Podsumowanie reguły' }));
+  const dialog = screen.getByRole('dialog', { name: 'Podsumowanie reguły' });
+  const snapshot = document.createElement('article');
+  snapshot.textContent = dialog.textContent;
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
+  return snapshot;
 };
 
 const addShellyThroughUi = async (name = 'Przedpokój') => {
@@ -1662,7 +1665,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('option', { name: 'Nawilżanie' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Osuszanie' })).toBeInTheDocument();
     expect(getRuleSummary()).toHaveTextContent(
-      'Gdy termometr A4:C1:38:4F:24:CD zniknie na 2 min albo Shelly http://192.168.0.20/ uruchomi się ponownie'
+      'Gdy termometr Xiaomi salon zniknie na 2 min albo Shelly Salon uruchomi się ponownie'
     );
     expect(getRuleSummary()).toHaveTextContent(
       'Po świeżym odczycie automatyka znów zastosuje tę regułę'
@@ -2206,7 +2209,7 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.getByLabelText('Termometr')).toHaveValue('C2:C0:00:30:64:01');
     expect(getRuleSummary()).toHaveTextContent(
-      'Gdy termometr C2:C0:00:30:64:01 zniknie na 2 min'
+      'Gdy termometr TP357 salon zniknie na 2 min'
     );
     expect(getRuleSummary()).not.toHaveTextContent('TP357, C2:C0:00:30:64:01');
     const scriptDialog = await openRuleScriptDialog();
@@ -2489,7 +2492,7 @@ describe('HardwareSetupScreen', () => {
       });
       fireEvent.click(within(advancedDialog).getByRole('button', { name: 'Zastosuj' }));
       expect(getRuleSummary()).toHaveTextContent(
-        'Gdy termometr A4:C1:38:4F:24:CD zniknie na 10 min albo Shelly http://192.168.0.20/ uruchomi się ponownie'
+        'Gdy termometr Xiaomi salon zniknie na 10 min albo Shelly Salon uruchomi się ponownie'
       );
       expect(getRuleSummary()).toHaveTextContent('Maksymalny czas pracy: 3 h');
       expect(getRuleSummary()).toHaveTextContent('Ponowne ON najwcześniej po 3 min');
