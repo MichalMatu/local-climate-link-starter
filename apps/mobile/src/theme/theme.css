@@ -55,6 +55,16 @@ select {
   justify-content: space-between;
 }
 
+.app-page-header {
+  align-items: center;
+  min-height: var(--lcl-size-control-min-height);
+}
+
+.app-page-header h1 {
+  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));
+  line-height: var(--lcl-line-height-tight);
+}
+
 .demo-header .lcl-status-badge {
   justify-self: start;
 }

@@ -96,12 +96,29 @@ export const InstallationDetailScreen = ({
             {t('detail.backToDashboard')}
           </button>
         </header>
+        <AppBottomNavigation
+          activeKind="climate"
+          onOpenClimate={() =>
+            onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
+          }
+          onOpenTime={() =>
+            onNavigateDashboard ? onNavigateDashboard('time') : onBack()
+          }
+          {...(onOpenSettings ? { onOpenSettings } : {})}
+        />
       </main>
     );
   }
 
   if (installation.kind === 'time') {
-    return <TimeInstallationDetail installation={installation} onBack={onBack} />;
+    return (
+      <TimeInstallationDetail
+        installation={installation}
+        onBack={onBack}
+        {...(onNavigateDashboard ? { onNavigateDashboard } : {})}
+        {...(onOpenSettings ? { onOpenSettings } : {})}
+      />
+    );
   }
 
   return (

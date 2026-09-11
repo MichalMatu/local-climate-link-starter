@@ -11,11 +11,20 @@ import {
 } from '../flows/installations/store.js';
 
 vi.mock('../screens/AutomationDashboardScreen.js', () => ({
-  AutomationDashboardScreen: ({ onAddAutomation }: { onAddAutomation(): void }) => (
+  AutomationDashboardScreen: ({
+    onAddAutomation,
+    onOpenSettings
+  }: {
+    onAddAutomation(kind: 'climate' | 'time'): void;
+    onOpenSettings?: () => void;
+  }) => (
     <main>
       <h1>dashboard-test</h1>
-      <button type="button" onClick={onAddAutomation}>
+      <button type="button" onClick={() => onAddAutomation('climate')}>
         add-automation-test
+      </button>
+      <button type="button" onClick={onOpenSettings}>
+        Ustawienia aplikacji
       </button>
     </main>
   )

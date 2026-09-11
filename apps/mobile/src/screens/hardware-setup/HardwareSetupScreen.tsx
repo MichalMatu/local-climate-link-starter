@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
+import {
+  AppBottomNavigation,
+  type AppNavigationKind
+} from '../../components/AppBottomNavigation.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import {
   defaultRulePresetForSetupIntent,
@@ -75,19 +79,27 @@ const setHashTab = (tabId: HardwareTabId) => {
 
 type HardwareSetupScreenProps = {
   setupIntent?: SetupIntent;
+  navigationKind?: AppNavigationKind;
   onBackToIntent?: () => void;
+  onNavigateDashboard?: (kind: AppNavigationKind) => void;
+  onOpenSettings?: () => void;
   onSetupComplete?: () => void;
 };
 
 export const HardwareSetupScreen = ({
   setupIntent,
+  navigationKind,
   onBackToIntent,
+  onNavigateDashboard,
+  onOpenSettings,
   onSetupComplete
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
   const { rulePreset, setRulePreset } = flow;
   const availableTabs = useMemo(() => availableTabsForIntent(setupIntent), [setupIntent]);
+  const activeNavigationKind =
+    navigationKind ?? (setupIntent === 'time' ? 'time' : 'climate');
   const [activeTab, setActiveTab] = useState<HardwareTabId>(() =>
     currentTabFromHash(availableTabs)
   );
@@ -156,7 +168,7 @@ export const HardwareSetupScreen = ({
   };
 
   return (
-    <main className="demo-shell hardware-shell">
+    <main className="demo-shell hardware-shell app-bottom-nav-shell">
       {setupIntent && onBackToIntent && (
         <div className="setup-context">
           <button className="setup-context__back" type="button" onClick={onBackToIntent}>
@@ -219,6 +231,15 @@ export const HardwareSetupScreen = ({
           </div>
           <DiagnosticsSetupPage flow={flow} />
         </>
+      )}
+
+      {onNavigateDashboard && (
+        <AppBottomNavigation
+          activeKind={activeNavigationKind}
+          onOpenClimate={() => onNavigateDashboard('climate')}
+          onOpenTime={() => onNavigateDashboard('time')}
+          {...(onOpenSettings ? { onOpenSettings } : {})}
+        />
       )}
     </main>
   );

@@ -1,18 +1,12 @@
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { IconSettings } from '@tabler/icons-react';
-import {
-  Suspense,
-  lazy,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode
-} from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
-import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import {
+  AppBottomNavigation,
+  type AppNavigationKind
+} from '../components/AppBottomNavigation.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
@@ -24,56 +18,67 @@ const HardwareSetupScreen = lazy(async () => {
   return { default: module.HardwareSetupScreen };
 });
 
-const RouteFallback = () => {
+type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
+type PrimaryAppRoute =
+  | { type: 'dashboard'; kind?: AppNavigationKind }
+  | { type: 'intent'; sourceKind: AppNavigationKind }
+  | { type: 'setup'; intent: SetupRouteIntent; sourceKind: AppNavigationKind }
+  | { type: 'installation'; installationId: string; kind: AppNavigationKind };
+type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
+
+type RouteFallbackProps = {
+  activeKind: AppNavigationKind;
+  onOpenClimate(): void;
+  onOpenTime(): void;
+  onOpenSettings(): void;
+};
+
+const RouteFallback = ({
+  activeKind,
+  onOpenClimate,
+  onOpenTime,
+  onOpenSettings
+}: RouteFallbackProps) => {
   const { t } = useTranslation();
 
   return (
-    <main className="demo-shell hardware-shell">
+    <main className="demo-shell hardware-shell app-bottom-nav-shell">
       <section className="demo-panel">
         <p role="status">{t('app.loadingConfigurator')}</p>
       </section>
+      <AppBottomNavigation
+        activeKind={activeKind}
+        onOpenClimate={onOpenClimate}
+        onOpenTime={onOpenTime}
+        onOpenSettings={onOpenSettings}
+      />
     </main>
   );
 };
 
-type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
-type PrimaryAppRoute =
-  | { type: 'intent' }
-  | { type: 'dashboard'; kind?: AppNavigationKind }
-  | { type: 'setup'; intent: SetupRouteIntent }
-  | { type: 'installation'; installationId: string };
-type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
-
-const resolveAndroidBackRoute = (
-  route: AppRoute,
-  hasInstallations: boolean
-): AppRoute | null => {
+const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'settings') {
     return route.returnTo;
   }
   if (route.type === 'installation') {
-    return { type: 'dashboard' };
+    return { type: 'dashboard', kind: route.kind };
   }
   if (route.type === 'setup') {
-    return { type: 'intent' };
+    return { type: 'intent', sourceKind: route.sourceKind };
   }
-  if (route.type === 'intent' && hasInstallations) {
-    return { type: 'dashboard' };
-  }
-  if (route.type === 'dashboard' && !hasInstallations) {
-    return { type: 'intent' };
+  if (route.type === 'intent') {
+    return { type: 'dashboard', kind: route.sourceKind };
   }
   return null;
 };
 
+const setupKindForIntent = (intent: SetupRouteIntent): AppNavigationKind =>
+  intent === 'time' ? 'time' : 'climate';
+
 export const AppRoutes = () => {
-  const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
-  const [route, setRoute] = useState<AppRoute>(() =>
-    installations.length > 0 ? { type: 'dashboard' } : { type: 'intent' }
-  );
+  const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
   const routeRef = useRef(route);
-  const hasInstallationsRef = useRef(installations.length > 0);
   const navigate = useCallback((nextRoute: AppRoute) => {
     routeRef.current = nextRoute;
     setRoute(nextRoute);
@@ -87,13 +92,6 @@ export const AppRoutes = () => {
   }, [navigate]);
 
   useEffect(() => {
-    hasInstallationsRef.current = installations.length > 0;
-    if (installations.length === 0 && routeRef.current.type === 'dashboard') {
-      navigate({ type: 'intent' });
-    }
-  }, [installations.length, navigate]);
-
-  useEffect(() => {
     if (Capacitor.getPlatform() !== 'android') {
       return;
     }
@@ -102,10 +100,7 @@ export const AppRoutes = () => {
     let removeListener: (() => Promise<void>) | undefined;
 
     void App.addListener('backButton', () => {
-      const nextRoute = resolveAndroidBackRoute(
-        routeRef.current,
-        hasInstallationsRef.current
-      );
+      const nextRoute = resolveAndroidBackRoute(routeRef.current);
       if (nextRoute === null) {
         void App.exitApp();
         return;
@@ -127,30 +122,14 @@ export const AppRoutes = () => {
     };
   }, [navigate]);
 
-  const selectIntent = (intent: SetupIntent) => {
+  const selectIntent = (intent: SetupIntent, sourceKind: AppNavigationKind) => {
     if (intent === 'manage') {
-      if (installations.length > 0) {
-        navigate({ type: 'dashboard' });
-      }
+      navigate({ type: 'dashboard', kind: sourceKind });
       return;
     }
-    navigate({ type: 'setup', intent });
+    const nextKind = setupKindForIntent(intent);
+    navigate({ type: 'setup', intent, sourceKind: nextKind });
   };
-
-  const withSettingsTrigger = (content: ReactNode) => (
-    <>
-      <button
-        className="app-settings-trigger"
-        type="button"
-        aria-label={t('settings.open')}
-        title={t('settings.open')}
-        onClick={openSettings}
-      >
-        <IconSettings className="app-settings-trigger__icon" aria-hidden="true" />
-      </button>
-      {content}
-    </>
-  );
 
   if (route.type === 'settings') {
     return (
@@ -162,30 +141,33 @@ export const AppRoutes = () => {
   }
 
   if (route.type === 'intent') {
-    return withSettingsTrigger(
+    return (
       <SetupIntentScreen
-        {...(installations.length > 0
-          ? { onCancel: () => navigate({ type: 'dashboard' }) }
-          : {})}
-        showManage={installations.length > 0}
-        onSelect={selectIntent}
+        activeKind={route.sourceKind}
+        onCancel={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
+        onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
+        onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
+        onOpenSettings={openSettings}
+        onSelect={(intent) => selectIntent(intent, route.sourceKind)}
       />
     );
   }
 
   if (route.type === 'dashboard') {
-    if (installations.length === 0) {
-      return withSettingsTrigger(
-        <SetupIntentScreen showManage={false} onSelect={selectIntent} />
-      );
-    }
     return (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
-        onAddAutomation={() => navigate({ type: 'intent' })}
-        onOpenInstallation={(installationId) =>
-          navigate({ type: 'installation', installationId })
-        }
+        onAddAutomation={(kind) => navigate({ type: 'intent', sourceKind: kind })}
+        onOpenInstallation={(installationId) => {
+          const installation = installations.find(
+            (candidate) => candidate.id === installationId
+          );
+          navigate({
+            type: 'installation',
+            installationId,
+            kind: installation?.kind === 'time' ? 'time' : 'climate'
+          });
+        }}
         onOpenSettings={openSettings}
       />
     );
@@ -195,19 +177,31 @@ export const AppRoutes = () => {
     return (
       <InstallationDetailScreen
         installationId={route.installationId}
-        onBack={() => navigate({ type: 'dashboard' })}
+        onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
         onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
         onOpenSettings={openSettings}
       />
     );
   }
 
-  return withSettingsTrigger(
-    <Suspense fallback={<RouteFallback />}>
+  return (
+    <Suspense
+      fallback={
+        <RouteFallback
+          activeKind={route.sourceKind}
+          onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
+          onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
+          onOpenSettings={openSettings}
+        />
+      }
+    >
       <HardwareSetupScreen
+        navigationKind={route.sourceKind}
         setupIntent={route.intent}
-        onBackToIntent={() => navigate({ type: 'intent' })}
-        onSetupComplete={() => navigate({ type: 'dashboard' })}
+        onBackToIntent={() => navigate({ type: 'intent', sourceKind: route.sourceKind })}
+        onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
+        onOpenSettings={openSettings}
+        onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
       />
     </Suspense>
   );

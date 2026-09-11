@@ -139,7 +139,7 @@ export const AppSettingsScreen = ({
 
   return (
     <main className="demo-shell app-settings-screen app-bottom-nav-shell">
-      <header className="demo-header app-settings-screen__header">
+      <header className="demo-header app-settings-screen__header app-page-header">
         <h1>{t('dashboard.settingsTab')}</h1>
       </header>
 

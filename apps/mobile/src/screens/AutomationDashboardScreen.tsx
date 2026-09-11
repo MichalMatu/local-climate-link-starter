@@ -262,7 +262,7 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
 
 type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
-  onAddAutomation(): void;
+  onAddAutomation(kind: AppNavigationKind): void;
   onOpenInstallation(installationId: string): void;
   onOpenSettings?: () => void;
 };
@@ -311,7 +311,7 @@ export const AutomationDashboardScreen = ({
 
   return (
     <main className="demo-shell dashboard-shell app-bottom-nav-shell">
-      <header className="demo-header dashboard-header">
+      <header className="demo-header dashboard-header app-page-header">
         <h1>{t('dashboard.title')}</h1>
       </header>
 
@@ -344,7 +344,7 @@ export const AutomationDashboardScreen = ({
         type="button"
         aria-label={t('dashboard.addAutomation')}
         title={t('dashboard.addAutomation')}
-        onClick={onAddAutomation}
+        onClick={() => onAddAutomation(activeKind)}
       >
         <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
       </button>

@@ -8,6 +8,10 @@ import {
 } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import {
+  AppBottomNavigation,
+  type AppNavigationKind
+} from '../components/AppBottomNavigation.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
@@ -40,11 +44,15 @@ const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'lo
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
   onBack(): void;
+  onNavigateDashboard?: (kind: AppNavigationKind) => void;
+  onOpenSettings?: () => void;
 };
 
 export const TimeInstallationDetail = ({
   installation,
-  onBack
+  onBack,
+  onNavigateDashboard,
+  onOpenSettings
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -164,12 +172,9 @@ export const TimeInstallationDetail = ({
   }).success;
 
   return (
-    <main className="demo-shell installation-detail-shell">
+    <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
       <header className="demo-header installation-detail-header">
         <div>
-          <button className="detail-back-link" type="button" onClick={onBack}>
-            ← {t('detail.backToDashboard')}
-          </button>
           <div className="automation-status-row">
             <span className={healthClass(runtimeState)}>{stateLabel}</span>
             <span className="automation-status-mode">{t('time.family')}</span>
@@ -298,6 +303,15 @@ export const TimeInstallationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
+
+      <AppBottomNavigation
+        activeKind="time"
+        onOpenClimate={() =>
+          onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
+        }
+        onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
+        {...(onOpenSettings ? { onOpenSettings } : {})}
+      />
 
       <Modal
         actions={

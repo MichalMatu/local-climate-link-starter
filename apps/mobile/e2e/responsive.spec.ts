@@ -429,7 +429,7 @@ const expectTimeDetailHierarchy = async (page: Page) => {
   expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
   expect(refreshBox.width).toBeLessThanOrEqual(48);
-  await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toHaveCount(0);
 };
 
 const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
@@ -675,6 +675,8 @@ for (const viewport of viewports) {
     const rpcState = await mockTimeShellyRpc(page);
     await page.goto('/');
 
+    await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+
     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
     await expect(
       page.getByRole('navigation', { name: 'Menu konfiguracji' })
@@ -700,6 +702,13 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Szczegóły' }).click();
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Czas', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    await expect(
+      page.getByRole('button', { name: 'Ustawienia', exact: true })
+    ).toBeVisible();
     await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();
     await expectTimeDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
@@ -722,6 +731,7 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   await seedDraft(page);
   const rpcState = await mockTimeShellyRpc(page);
   await page.goto('/');
+  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
   await page.getByRole('button', { name: /Sterować według czasu/ }).click();
   await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
   await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
@@ -751,8 +761,12 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   const deleteDialog = page.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
   await expect(deleteDialog).toBeVisible();
   await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();
-  await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
-  await expect(page.getByText('Nie masz jeszcze zapisanej automatyki')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Czas', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page'
+  );
 
   expect(rpcState.createCount).toBe(2);
   expect(rpcState.updateCount).toBeGreaterThanOrEqual(8);
@@ -779,11 +793,16 @@ for (const viewport of viewports) {
     await page.goto('/admin#shelly');
 
     await expect(page).toHaveTitle('Local Climate Link');
-    await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
+    await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
     await page.getByRole('button', { name: /Sterować temperaturą/ }).click();
     await expect(
       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Ustawienia', exact: true })
     ).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Shelly', exact: true })
@@ -891,6 +910,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await seedDraft(page);
   await mockShellyRpc(page);
   await page.goto('/admin#rule');
+  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
   await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
   await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
   await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
