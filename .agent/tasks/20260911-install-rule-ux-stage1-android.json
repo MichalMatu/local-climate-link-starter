@@ -1,0 +1,15 @@
+{
+  "id": "20260911-install-rule-ux-stage1-android",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/install-rule-ux-stage1-android-20260911.sh > /tmp/install-rule-ux-stage1-android-20260911.sh; sh /tmp/install-rule-ux-stage1-android-20260911.sh"
+  ]
+}
