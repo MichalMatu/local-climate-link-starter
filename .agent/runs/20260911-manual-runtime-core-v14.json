@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-manual-runtime-core-v14",
+  "task_digest": "620e58098417346181f123e6f0287095951e4d8bd66159baef5ec2a25b066e39",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T04:48:03.528958+00:00",
+  "attempt_id": "f9c8669f21ca588d3b454049",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 60211,
+  "updated_at": "2026-09-11T04:48:03.529013+00:00",
+  "pid": 60211
+}
