@@ -1,0 +1,61 @@
+{
+  "id": "20260911-installation-controls-diagnostics-v5",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/installation-controls-diagnostics-20260911",
+  "allow_write": true,
+  "started_at": "2026-09-11T07:14:03.939598+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/run-installation-controls-diagnostics-v5.sh > /tmp/run-installation-controls-diagnostics-v5.sh; sh /tmp/run-installation-controls-diagnostics-v5.sh",
+      "exit_code": 1,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   8c855f1b..0bdb163b  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n  File \"<stdin>\", line 29\n    anchor='''}\n              ^\nSyntaxError: unmatched '}'\n",
+      "elapsed_seconds": 1.813,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 2.02,
+      "output_policy": "stream",
+      "captured_output_chars": 372,
+      "output_truncated": false,
+      "current_rss_mb": 2.02,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 1.813
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.095
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.072
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-11T07:14:07.488484+00:00",
+  "task_digest": "493493416313bafe4941ddd045beb88b7de319d6f70658eefd1f58505d710354",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "attempt_id": "e8475a81f666c908b0d5dcdd",
+  "daemon_version": "4.18.20"
+}
