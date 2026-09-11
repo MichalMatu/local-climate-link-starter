@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260911-sensor-ux-polish-stage2-draft-v2",
   "task_digest": "61183572622b29ad18a16462e56654a8b4a01d9f7f1516a7fca8bf7025d536a5",
-  "idle_timeout": 900,
-  "task_timeout": 14400,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-11T15:41:49.037574+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-11T15:41:52.083047+00:00",
   "attempt_id": "500b6fb20ea4758c5a4b0ff2",
   "daemon_version": "4.18.20",
   "daemon_pid": 44663,
-  "updated_at": "2026-09-11T15:41:49.037633+00:00",
+  "updated_at": "2026-09-11T15:41:52.382157+00:00",
   "pid": 44663
 }
