@@ -27,8 +27,8 @@ ChatGPT plans; Local Agent executes deterministic commands/scripts. Never launch
 Latest behavior-changing implementation checkpoint pending final merge:
 
 ```text
-8012d21e57d27f07b070f3e64b3432eb7b4abe2e
-refactor(mobile): unify navigation and setup UX
+2f42db968fa241c0d904d549befeaad249f48e18
+refactor(mobile): centralize setup feedback state
 ```
 
 Frozen MANUAL-runtime rollback tag remains:
@@ -38,7 +38,7 @@ stable-20260911-manual-runtime
 4462a5246e06f7cebcb5808eace2d6278988e56e
 ```
 
-Remote branch cleanup state at this checkpoint: product work branches are gone; only `main`, `agent-control`, and the short-lived documentation cleanup branch created for this update are expected. No open pull requests were present before this cleanup.
+Remote branch cleanup state at this checkpoint: `work/production-readiness-hardening-20260911` is the only product work branch expected before final fast-forward into `main`; it must be removed after the merge.
 
 ## Completed and accepted product state
 
@@ -95,7 +95,24 @@ Completed and validated in `8012d21e57d27f07b070f3e64b3432eb7b4abe2e`:
 
 Validation for this tranche is green: mobile unit/integration suite, typecheck, lint, `quality:ux`, `quality:repo`, build and the full responsive Playwright matrix (**25/25**) all passed. No Shelly runtime, generated automation script, BLE ownership or LED behavior was changed by this UX tranche.
 
-Physical Samsung S22+ review is the next verification step after final merge/install.
+The production-readiness tranche is behavior-preserving for Shelly runtime/safety paths. After final merge, install the exact final `main` build as a release sanity check; no new physical Shelly behavior test is required unless runtime behavior changes.
+
+## Production-readiness hardening tranche (2026-09-11)
+
+Completed and validated through `2f42db968fa241c0d904d549befeaad249f48e18`:
+
+- removed the dead `DemoWizard`/demo flow, obsolete `manage` setup intent and stale locale copy,
+- kept visual tokenization centralized and strengthened UX gates so new mobile CSS cannot silently bypass the token system,
+- reduced `useHardwareSetupFlow` from roughly 1656 to 1021 lines by extracting cohesive Shelly control, Shelly-side BLE discovery and phone/sensor BLE subsystems,
+- reduced the hardware-setup public surface from roughly 119 to 108 fields and introduced typed per-page `Pick` contracts,
+- added repository ratchets that cap orchestrator/public-API growth and prevent pages from depending on the full setup flow,
+- replaced independent modal booleans on the largest setup pages with cohesive discriminated dialog state; local `useState` occurrences fell from about 16/8/7 to 4/3/3 for Shelly/Rule/Sensor,
+- centralized setup toast queue behavior, including diagnostics,
+- kept `packages/script-generator`, `packages/automation-core`, `packages/shelly-client` and installation runtime paths unchanged.
+
+Validation is green: formatting, lint, `quality:ux`, `quality:repo`, typecheck, all workspace tests, core coverage, build and responsive Playwright (**25/25**). Final read-only diff audit also passed with no TODO/FIXME/HACK, eslint disables, TypeScript suppressions, production `any`, or inline JSX styles.
+
+Large setup-page files may still contain substantial declarative JSX; do not split them merely to reduce line counts. Future extraction should follow a concrete responsibility boundary or measurable coupling problem.
 
 ## Next agreed vertical slice — Shelly LED configuration
 

@@ -2,11 +2,11 @@
 
 Status: active product roadmap after the v2.0.10 runtime/detail/diagnostics tranche.
 
-Current behavior-changing baseline:
+Current behavior-changing baseline pending final merge:
 
 ```text
-16d8627b9df050152a72f021e2ab3a228cffefb3
-feat(mobile): add installation controls and diagnostics
+2f42db968fa241c0d904d549befeaad249f48e18
+refactor(mobile): centralize setup feedback state
 ```
 
 This document is the canonical roadmap for the next product phase. `docs/plan.md`
@@ -18,7 +18,7 @@ short current continuation state.
 The following slices are implemented baseline, not future work:
 
 - persistent per-installation identity/configuration,
-- intent-first entry and installed-automation dashboard,
+- dashboard-first entry; Add automation opens only from the dashboard `+` action,
 - stable per-installation detail management,
 - shared `Klimat / Czas / Ustawienia` bottom navigation and full-page Settings,
 - explicit AUTO/MANUAL plus MANUAL-only relay ON/OFF with exact-script safety checks,
@@ -102,39 +102,22 @@ Do not build the new dashboard or per-Shelly screen until two independently
 configured Shelly entries can retain different sensor/rule configurations in
 app storage.
 
-## 1. Better UX — start from user intent
+## 1. Better UX — completed
 
-Replace the technical top-level mental model:
-
-```text
-Shelly -> Sensor -> Rule -> Diagnostics
-```
-
-with a task-oriented entry point such as:
-
-```text
-What do you want to do?
-- control temperature
-- control humidity
-- manage an existing automation
-```
+The app now uses a dashboard-first information architecture. Existing and new
+users land on the normal automation dashboard; the task-oriented setup picker is
+opened only from the dashboard `+` action and offers temperature, humidity, and
+time automation. Existing automations are managed from their dashboard/detail
+surfaces rather than through a duplicate `manage existing automation` setup path.
 
 Heating/cooling and humidifying/dehumidifying remain presets inside the relevant
-flow rather than primary navigation concepts.
+flow rather than primary navigation concepts. Global `Klimat / Czas / Ustawienia`
+navigation remains visible through setup while local setup tabs stay second-level.
 
-Do not force an already configured user through the setup wizard on every app
-launch. New users should enter setup; existing users should land on their
-systems/dashboard.
-
-Keep the current working setup operations and adapters. This phase is an
-information-architecture and composition change, not a rewrite of BLE, Shelly
-RPC, or script generation.
-
-### Re-audit warning
-
-The current setup pages are already large. Avoid replacing them with one new
-large wizard component. Extract small presentational steps and keep orchestration
-in the flow layer.
+The implementation reuses the existing BLE, Shelly RPC and script-generation
+adapters. The production-readiness hardening subsequently narrowed setup-page
+contracts and extracted cohesive flow subsystems instead of introducing a new
+wizard god-component.
 
 ## 2. Simple dashboard after configuration
 
