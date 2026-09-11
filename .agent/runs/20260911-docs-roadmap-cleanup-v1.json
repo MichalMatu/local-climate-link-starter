@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-docs-roadmap-cleanup-v1",
+  "task_digest": "5e085ee70e37e5c54b5c5f5d94064f3d42a4f7b34203fa5950fbfdf533db60e8",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T08:00:41.838870+00:00",
+  "attempt_id": "90ca25663599b8a0365fed81",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 23750,
+  "updated_at": "2026-09-11T08:00:41.839022+00:00",
+  "pid": 23750
+}
