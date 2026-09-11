@@ -193,6 +193,25 @@ const checkFeedbackContractPatterns = async () => {
     }
   }
 
+  const cohesiveDialogStatePaths = [
+    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx',
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
+    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx'
+  ];
+  for (const path of cohesiveDialogStatePaths) {
+    const source = await readRepoFile(path);
+    if (
+      /const \[is[A-Z][A-Za-z0-9]*ModalOpen,\s*setIs[A-Z][A-Za-z0-9]*ModalOpen\]\s*=\s*useState/.test(
+        source
+      )
+    ) {
+      addFailure(
+        path,
+        'setup pages with multiple dialogs must use one cohesive dialog state instead of independent modal booleans'
+      );
+    }
+  }
+
   const rulePath = 'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx';
   const ruleSource = await readRepoFile(rulePath);
 

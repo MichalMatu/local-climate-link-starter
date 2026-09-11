@@ -1,6 +1,6 @@
 import type { DiagnosticsSetupFlow } from '../pageContracts.js';
-import { DiagnosticRow, ToastViewport, type ToastMessage, type ToastTone } from '@lcl/ui';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { DiagnosticRow, ToastViewport } from '@lcl/ui';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   useTranslation,
   type Translate,
@@ -11,6 +11,7 @@ import {
   mutationError,
   type HardwarePageProps
 } from '../helpers.js';
+import { useToastQueue } from '../useToastQueue.js';
 
 type DiagnosticTime = NonNullable<DiagnosticsSetupFlow['diagnosticSnapshot']>['time'];
 
@@ -180,9 +181,8 @@ export const DiagnosticsSetupPage = ({
   flow
 }: HardwarePageProps<DiagnosticsSetupFlow>) => {
   const { t } = useTranslation();
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [nowMs, setNowMs] = useState(() => Date.now());
-  const toastIdRef = useRef(0);
+  const { dismissToast, pushToast, toasts } = useToastQueue('diagnostics-toast');
   const diagnostics = flow.diagnosticSnapshot?.diagnostics;
   const resources = flow.diagnosticResources;
   const shellyTime = flow.diagnosticSnapshot?.time;
@@ -194,18 +194,6 @@ export const DiagnosticsSetupPage = ({
     flow.diagnosticSnapshot?.sensor?.displayName ??
     flow.diagnosticSnapshot?.sensor?.runtimeAddress ??
     t('common.missing');
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
-
-  const pushToast = useCallback((tone: ToastTone, title: string, detail?: string) => {
-    toastIdRef.current += 1;
-    const id = `diagnostics-toast-${toastIdRef.current}`;
-    const toast: ToastMessage =
-      detail === undefined ? { id, tone, title } : { id, tone, title, detail };
-    setToasts((current) => [...current.slice(-2), toast]);
-  }, []);
-
   useEffect(() => {
     if (!flow.diagnosticMutation.isError) {
       return;
