@@ -1310,19 +1310,6 @@ select {
   flex: 0 0 auto;
 }
 
-.shelly-control-toolbar {
-  display: grid;
-  gap: var(--lcl-spacing-sm);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
-  margin-left: 0;
-  width: 100%;
-}
-
-.shelly-control-toolbar .secondary-action {
-  min-width: 0;
-  width: 100%;
-}
-
 .icon-action {
   align-items: center;
   background: transparent;
@@ -2379,4 +2366,85 @@ select {
 .shelly-state-strip strong {
   color: var(--lcl-color-text);
   font-weight: var(--lcl-font-weight-bold);
+}
+
+/* Shelly runtime controls aligned with the dashboard controls. */
+.shelly-ble-action {
+  align-items: center;
+  align-self: start;
+  background: transparent;
+  border: 0;
+  color: var(--lcl-color-accent);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  gap: var(--lcl-spacing-xs);
+  justify-content: flex-start;
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding: 0;
+  text-align: left;
+  width: fit-content;
+}
+
+.shelly-ble-action:disabled {
+  cursor: not-allowed;
+  opacity: var(--lcl-opacity-disabled);
+}
+
+.shelly-runtime-controls {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  width: 100%;
+}
+
+.shelly-mode-row {
+  align-items: center;
+  display: flex;
+  gap: var(--lcl-spacing-sm);
+  justify-content: space-between;
+}
+
+.shelly-saved-card .shelly-mode-control {
+  background: var(--lcl-color-surface-muted);
+  border: 0;
+  border-radius: var(--lcl-radius-round);
+  display: flex;
+  flex: 0 1 var(--lcl-size-action-min-width);
+  max-width: var(--lcl-size-action-min-width);
+  overflow: hidden;
+  width: 100%;
+}
+
+.shelly-saved-card .shelly-mode-control > * {
+  flex: 1 1 0;
+}
+
+.shelly-saved-card .shelly-mode-control .automation-control-button {
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-round);
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-xs);
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding: 0 var(--lcl-spacing-xs);
+}
+
+.shelly-saved-card .shelly-mode-control .automation-control-button[aria-pressed='true'] {
+  background: var(--lcl-color-accent);
+  color: var(--lcl-color-accent-contrast);
+}
+
+.shelly-relay-actions {
+  display: flex;
+  gap: var(--lcl-spacing-sm);
+  width: 100%;
+}
+
+.shelly-relay-actions > * {
+  flex: 1 1 0;
+}
+
+.shelly-saved-card .shelly-relay-actions .automation-relay-button {
+  min-height: var(--lcl-size-compact-control-min-height);
 }

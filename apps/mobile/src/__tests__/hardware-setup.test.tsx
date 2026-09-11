@@ -858,7 +858,8 @@ describe('HardwareSetupScreen', () => {
     ).toBeInTheDocument();
     expect(within(infoDialog).getByText('Scripts')).toBeInTheDocument();
     expect(within(infoDialog).getByText('Bluetooth')).toBeInTheDocument();
-    expect(within(savedPlugList).getByText('Przekaźnik')).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Przekaźnik')).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Tryb')).toBeInTheDocument();
     fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
     expect(
       screen.queryByRole('dialog', { name: 'Salon testowy' })
@@ -995,8 +996,8 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(savedPlugList).queryByRole('button', { name: 'http://192.168.0.20/' })
     ).not.toBeInTheDocument();
-    expect(within(savedPlugList).getByText('Przekaźnik')).toBeInTheDocument();
-    expect(within(savedPlugList).getByText('Tryb')).toBeInTheDocument();
+    expect(within(savedPlugList).queryByText('Przekaźnik')).not.toBeInTheDocument();
+    expect(within(savedPlugList).queryByText('Tryb')).not.toBeInTheDocument();
     const infoToggle = within(savedPlugList).getByRole('button', {
       name: 'Ustawienia gniazdka'
     });
@@ -1023,43 +1024,34 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(infoDialog).getByText('20260311-095902/1.7.5-g9979d16')
     ).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Przekaźnik')).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Tryb')).toBeInTheDocument();
     fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
 
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
+    const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
+    const manualButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
+    expect(autoButton).toHaveAttribute('aria-pressed', 'true');
+    expect(manualButton).toHaveAttribute('aria-pressed', 'false');
+
     const relayButton = within(actionRow).getByRole('button', { name: 'ON' });
-    expect(relayButton).toHaveClass('relay-toggle--off');
-    expect(relayButton).toHaveAttribute(
-      'title',
-      'Przekaźnik jest OFF. Kliknij ON, żeby włączyć.'
-    );
-    expect(
-      within(actionRow)
-        .getAllByRole('button')
-        .map((button) => button.textContent)
-        .filter(Boolean)
-    ).toEqual(['MANUAL', 'ON']);
-    expect(
-      within(actionRow).queryByRole('button', { name: 'Odśwież' })
-    ).not.toBeInTheDocument();
-    expect(within(actionRow).getByRole('button', { name: 'MANUAL' })).toHaveClass(
-      'automation-toggle--auto'
-    );
+    expect(relayButton).toBeDisabled();
+    fireEvent.click(manualButton);
+    await screen.findByText('Tryb MANUAL. Przekaźnik OFF.');
+    expect(relayButton).not.toBeDisabled();
 
     fireEvent.click(relayButton);
     await screen.findByText('Przekaźnik ON.');
     expect(within(savedPlugList).queryByText('Przekaźnik ON.')).not.toBeInTheDocument();
     const offButton = within(actionRow).getByRole('button', { name: 'OFF' });
-    expect(offButton).toHaveClass('relay-toggle--on');
-    expect(offButton).toHaveAttribute(
-      'title',
-      'Przekaźnik jest ON. Kliknij OFF, żeby wyłączyć.'
-    );
+    expect(offButton).toHaveAttribute('aria-pressed', 'false');
 
     fireEvent.click(offButton);
     await screen.findByText('Przekaźnik OFF.');
     expect(within(savedPlugList).queryByText('Przekaźnik OFF.')).not.toBeInTheDocument();
-    expect(within(actionRow).getByRole('button', { name: 'ON' })).toHaveClass(
-      'relay-toggle--off'
+    expect(within(actionRow).getByRole('button', { name: 'OFF' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
     );
 
     const switchParams = vi
@@ -1083,6 +1075,11 @@ describe('HardwareSetupScreen', () => {
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
 
+    const manualRelayButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
+    if (manualRelayButton.getAttribute('aria-pressed') !== 'true') {
+      fireEvent.click(manualRelayButton);
+      await screen.findByText('Tryb MANUAL. Przekaźnik OFF.');
+    }
     fireEvent.click(within(actionRow).getByRole('button', { name: 'ON' }));
     expect(await screen.findByText('Przekaźnik ON.')).toBeInTheDocument();
 
@@ -1112,15 +1109,16 @@ describe('HardwareSetupScreen', () => {
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
     const manualButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
-    expect(manualButton).toHaveClass('automation-toggle--auto');
+    expect(manualButton).toHaveAttribute('aria-pressed', 'false');
 
     fireEvent.click(manualButton);
     await screen.findByText('Tryb MANUAL. Przekaźnik OFF.');
     expect(
       within(savedPlugList).queryByText('Tryb MANUAL. Przekaźnik OFF.')
     ).not.toBeInTheDocument();
+    expect(manualButton).toHaveAttribute('aria-pressed', 'true');
     const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
-    expect(autoButton).toHaveClass('automation-toggle--manual');
+    expect(autoButton).toHaveAttribute('aria-pressed', 'false');
 
     fireEvent.click(autoButton);
     await screen.findByText('Tryb AUTO uruchomiony.');
@@ -1173,17 +1171,21 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).queryByText('Energia')).not.toBeInTheDocument();
 
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-    expect(within(actionRow).getByRole('button', { name: 'ON' })).toHaveClass(
-      'relay-toggle--unknown'
+    expect(within(actionRow).getByRole('button', { name: 'AUTO' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
     );
-    expect(
-      within(actionRow)
-        .getAllByRole('button')
-        .map((button) => button.textContent)
-        .filter(Boolean)
-    ).toEqual(['AUTO', 'ON']);
-    expect(within(actionRow).getByRole('button', { name: 'AUTO' })).toHaveClass(
-      'automation-toggle--unknown'
+    expect(within(actionRow).getByRole('button', { name: 'MANUAL' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(within(actionRow).getByRole('button', { name: 'ON' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(within(actionRow).getByRole('button', { name: 'OFF' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
     );
 
     expect(await within(savedPlugList).findByText('0.0 W')).toBeInTheDocument();
@@ -1299,7 +1301,7 @@ describe('HardwareSetupScreen', () => {
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
     const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
-    expect(autoButton).toHaveClass('automation-toggle--missing');
+    expect(autoButton).toHaveAttribute('aria-pressed', 'false');
 
     fireEvent.click(autoButton);
     await screen.findByText('Najpierw zapisz regułę dla tego gniazdka.');
@@ -2060,6 +2062,14 @@ describe('HardwareSetupScreen', () => {
 
   it('sets relay OFF before stopping a script during delete even when Script.Stop fails', async () => {
     const defaultFetch = vi.mocked(fetch);
+    await defaultFetch(new URL('http://192.168.0.20/rpc'), {
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        method: 'Switch.Set',
+        params: { id: 0, on: true }
+      })
+    });
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -2077,11 +2087,6 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     await addShellyThroughUi('Salon');
-    const savedPlugList = screen.getByLabelText('Dodane gniazdka');
-    const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-    fireEvent.click(within(actionRow).getByRole('button', { name: 'ON' }));
-    await screen.findByText('Przekaźnik ON.');
-
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
     await confirmRuleScriptDelete();
 

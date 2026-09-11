@@ -18,6 +18,7 @@ import {
   formatClockTimestamp,
   formatClockUptime,
   formatComponentState,
+  formatAutomationMode,
   formatNullableMetric,
   formatShellyScanEstimate,
   SavedShellyDeviceCard,
@@ -586,6 +587,20 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
               <DiagnosticRow
                 label={t('common.firmware')}
                 value={infoStatus?.firmwareId ?? t('common.missingData')}
+              />
+              <DiagnosticRow
+                label={t('hardware.metrics.relay')}
+                value={
+                  infoStatus
+                    ? infoStatus.relayOn
+                      ? 'ON'
+                      : 'OFF'
+                    : t('common.missingData')
+                }
+              />
+              <DiagnosticRow
+                label={t('hardware.metrics.mode')}
+                value={formatAutomationMode(infoStatus?.automationMode, t)}
               />
               <DiagnosticRow
                 label={t('hardware.metrics.wifiRssi')}
