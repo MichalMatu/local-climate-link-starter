@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-production-hygiene-hardening-v4",
+  "task_digest": "642485a1682900b0613415b6b2cdf679cd58225d5dcf990f4c95a0cccd0314d6",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T09:46:40.149761+00:00",
+  "attempt_id": "8283cd3ced77f9ced9f30f8f",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 52991,
+  "updated_at": "2026-09-11T09:46:40.149952+00:00",
+  "pid": 52991
+}
