@@ -1,6 +1,11 @@
 import type { ShellyClockStatus, ShellyComponentState } from '@lcl/shelly-client';
-import { IconRefresh, IconSettings } from '@tabler/icons-react';
-import { useId } from 'react';
+import {
+  IconBluetooth,
+  IconInfoCircle,
+  IconPencil,
+  IconTrash
+} from '@tabler/icons-react';
+import { useId, useState } from 'react';
 import {
   useTranslation,
   type Locale,
@@ -250,9 +255,10 @@ type SavedShellyDeviceCardProps = {
   onRelayOff: (device: ShellyDraftDevice) => void;
   onAutomationAuto: (device: ShellyDraftDevice) => void;
   onAutomationManual: (device: ShellyDraftDevice) => void;
-  onRefreshControl: (device: ShellyDraftDevice) => void;
-  onClockOpen: (device: ShellyDraftDevice) => void;
-  onSettingsOpen: (device: ShellyDraftDevice) => void;
+  onNameChange: (device: ShellyDraftDevice, value: string) => void;
+  onInfoOpen: (device: ShellyDraftDevice) => void;
+  onBleScan: (device: ShellyDraftDevice) => void;
+  onRemove: (device: ShellyDraftDevice) => void;
 };
 
 export const SavedShellyDeviceCard = ({
@@ -262,11 +268,13 @@ export const SavedShellyDeviceCard = ({
   onRelayOff,
   onAutomationAuto,
   onAutomationManual,
-  onRefreshControl,
-  onClockOpen,
-  onSettingsOpen
+  onNameChange,
+  onInfoOpen,
+  onBleScan,
+  onRemove
 }: SavedShellyDeviceCardProps) => {
   const { t } = useTranslation();
+  const [isEditingName, setIsEditingName] = useState(false);
   const controlStatus = controlState?.status ?? null;
   const pendingAction = controlState?.pendingAction ?? null;
   const isControlBusy = pendingAction !== null;
@@ -305,18 +313,83 @@ export const SavedShellyDeviceCard = ({
   const clock = controlStatus?.clock;
 
   return (
-    <article className="saved-list__item" aria-busy={isControlBusy || undefined}>
+    <article
+      className="saved-list__item shelly-saved-card"
+      aria-busy={isControlBusy || undefined}
+    >
       <div className="shelly-card-header">
-        <h3>{device.name}</h3>
-        <button
-          className="icon-action saved-list__settings-toggle"
-          type="button"
-          aria-label={t('hardware.shelly.settings')}
-          title={t('hardware.shelly.settings')}
-          onClick={() => onSettingsOpen(device)}
-        >
-          <IconSettings className="icon-action__svg" aria-hidden="true" />
-        </button>
+        {isEditingName ? (
+          <input
+            autoFocus
+            className="shelly-card-name-input"
+            aria-label={t('hardware.shelly.deviceNameLabel')}
+            type="text"
+            value={device.name}
+            onBlur={() => setIsEditingName(false)}
+            onChange={(event) => onNameChange(device, event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Escape') {
+                event.currentTarget.blur();
+              }
+            }}
+          />
+        ) : (
+          <div className="shelly-card-title-row">
+            <h3>{device.name}</h3>
+            <button
+              className="icon-action rule-summary-icon-action"
+              type="button"
+              aria-label={t('hardware.shelly.deviceNameLabel')}
+              title={t('hardware.shelly.deviceNameLabel')}
+              onClick={() => setIsEditingName(true)}
+            >
+              <IconPencil className="icon-action__svg" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+        <div className="shelly-card-actions">
+          <button
+            className="icon-action"
+            type="button"
+            aria-label={t('hardware.shelly.settings')}
+            title={t('hardware.shelly.settings')}
+            onClick={() => onInfoOpen(device)}
+          >
+            <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
+          </button>
+          <button
+            className="icon-action"
+            type="button"
+            disabled={isControlBusy}
+            aria-label={t('hardware.shelly.scanBleViaShellyTitle')}
+            title={t('hardware.shelly.scanBleViaShellyTitle')}
+            onClick={() => onBleScan(device)}
+          >
+            <IconBluetooth className="icon-action__svg" aria-hidden="true" />
+          </button>
+          <button
+            className="icon-action icon-action--danger"
+            type="button"
+            aria-label={t('hardware.shelly.deleteTitle')}
+            title={t('hardware.shelly.deleteTitle')}
+            onClick={() => onRemove(device)}
+          >
+            <IconTrash className="icon-action__svg" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
+      <div className="shelly-state-strip">
+        <span>
+          {t('hardware.metrics.relay')}{' '}
+          <strong>
+            {controlStatus ? (controlStatus.relayOn ? 'ON' : 'OFF') : t('common.missing')}
+          </strong>
+        </span>
+        <span>
+          {t('hardware.metrics.mode')}{' '}
+          <strong>{formatAutomationMode(automationMode ?? undefined, t)}</strong>
+        </span>
       </div>
 
       <div
@@ -326,29 +399,13 @@ export const SavedShellyDeviceCard = ({
         <span>{formatPlugPower(telemetry?.powerW, t)}</span>
         <span>{formatPlugVoltage(telemetry?.voltageV, t)}</span>
         <span>{formatPlugEnergy(telemetry?.energyWh, t)}</span>
-        <button
-          type="button"
-          title={t('hardware.shelly.clockStatusTitle')}
-          onClick={() => onClockOpen(device)}
-        >
-          {formatShellyClock(clock, t)}
-        </button>
+        <span>{formatShellyClock(clock, t)}</span>
       </div>
 
       <div
         className="control-action-row shelly-control-toolbar"
         aria-label={t('hardware.shelly.controlLabel', { name: device.name })}
       >
-        <button
-          className="icon-action"
-          type="button"
-          aria-label={t('common.refresh')}
-          disabled={isControlBusy}
-          title={t('hardware.shelly.refreshControlTitle')}
-          onClick={() => onRefreshControl(device)}
-        >
-          <IconRefresh className="icon-action__svg" aria-hidden="true" />
-        </button>
         <button
           className={automationToggleClass}
           type="button"

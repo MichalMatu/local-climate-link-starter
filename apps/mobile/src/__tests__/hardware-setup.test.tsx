@@ -328,11 +328,9 @@ const addShellyThroughUi = async (name = 'Przedpokój') => {
 };
 
 const openShellyBleScanFromSettings = async () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
-  const settingsDialog = await screen.findByRole('dialog', {
-    name: 'Ustawienia gniazdka'
-  });
-  fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Skanuj BLE' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
+  );
 };
 
 const addSensorThroughUi = async ({
@@ -834,50 +832,37 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByText('wybrane')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Wybierz' })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
-    const settingsDialog = await screen.findByRole('dialog', {
-      name: 'Ustawienia gniazdka'
-    });
-    fireEvent.change(within(settingsDialog).getByLabelText('Nazwa gniazdka'), {
-      target: { value: 'Salon testowy' }
-    });
-    expect(within(settingsDialog).getByLabelText('Nazwa gniazdka')).toHaveValue(
-      'Salon testowy'
+    const savedPlugList = screen.getByLabelText('Dodane gniazdka');
+    fireEvent.click(
+      within(savedPlugList).getByRole('button', { name: 'Nazwa gniazdka' })
     );
-    expect(
-      within(screen.getByLabelText('Dodane gniazdka')).getByText('Salon testowy')
-    ).toBeInTheDocument();
-    expect(within(settingsDialog).getByText('Adres IP')).toBeInTheDocument();
-    const settingsShellyPanelLink = within(settingsDialog).getByRole('link', {
-      name: 'Otwórz panel Shelly: http://192.168.0.20/'
-    });
-    expect(settingsShellyPanelLink).toHaveAttribute('href', 'http://192.168.0.20/');
-    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Sprawdź' }));
-    const recheckDialog = await screen.findByRole('dialog', {
-      name: 'Shelly sprawdzone'
-    });
-    const shellyPanelLink = within(recheckDialog).getByRole('link', {
+    const nameInput = within(savedPlugList).getByLabelText('Nazwa gniazdka');
+    fireEvent.change(nameInput, { target: { value: 'Salon testowy' } });
+    expect(nameInput).toHaveValue('Salon testowy');
+    fireEvent.blur(nameInput);
+    expect(within(savedPlugList).getByText('Salon testowy')).toBeInTheDocument();
+
+    fireEvent.click(
+      within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
+    );
+    const infoDialog = await screen.findByRole('dialog', { name: 'Salon testowy' });
+    expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
+    const shellyPanelLink = within(infoDialog).getByRole('link', {
       name: 'Otwórz panel Shelly: http://192.168.0.20/'
     });
     expect(shellyPanelLink).toHaveAttribute('href', 'http://192.168.0.20/');
     expect(shellyPanelLink).toHaveAttribute('target', '_blank');
     expect(shellyPanelLink).toHaveAttribute('rel', 'noreferrer noopener');
-    expect(within(recheckDialog).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
-    expect(within(recheckDialog).getByText('Scripts')).toBeInTheDocument();
-    expect(within(recheckDialog).getByText('Bluetooth')).toBeInTheDocument();
-    expect(within(recheckDialog).getByText('Przekaźnik')).toBeInTheDocument();
-
-    const statusBackdrop = document.querySelector('.lcl-modal-backdrop');
-    expect(statusBackdrop).not.toBeNull();
-    fireEvent.click(statusBackdrop!);
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('dialog', { name: 'Shelly sprawdzone' })
-      ).not.toBeInTheDocument()
-    );
     expect(
-      await screen.findByRole('dialog', { name: 'Ustawienia gniazdka' })
+      await within(infoDialog).findByText('S3PL-00112EU, gen 3')
     ).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Scripts')).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Bluetooth')).toBeInTheDocument();
+    expect(within(savedPlugList).getByText('Przekaźnik')).toBeInTheDocument();
+    fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
+    expect(
+      screen.queryByRole('dialog', { name: 'Salon testowy' })
+    ).not.toBeInTheDocument();
 
     const firstCallUrl = rawRequestUrl(vi.mocked(fetch).mock.calls[0]?.[0] as URL);
     expect(firstCallUrl.pathname).toBe('/__lcl_shelly_proxy');
@@ -1010,33 +995,35 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(savedPlugList).queryByRole('button', { name: 'http://192.168.0.20/' })
     ).not.toBeInTheDocument();
-    expect(within(savedPlugList).queryByText('Przekaźnik')).not.toBeInTheDocument();
-    expect(within(savedPlugList).queryByText('Automatyzacja')).not.toBeInTheDocument();
-    const settingsToggle = within(savedPlugList).getByRole('button', {
+    expect(within(savedPlugList).getByText('Przekaźnik')).toBeInTheDocument();
+    expect(within(savedPlugList).getByText('Tryb')).toBeInTheDocument();
+    const infoToggle = within(savedPlugList).getByRole('button', {
       name: 'Ustawienia gniazdka'
     });
-    expect(settingsToggle).toHaveAttribute('title', 'Ustawienia gniazdka');
-    fireEvent.click(settingsToggle);
-    const settingsDialog = await screen.findByRole('dialog', {
-      name: 'Ustawienia gniazdka'
-    });
-    expect(within(settingsDialog).getByText('Adres IP')).toBeInTheDocument();
-    expect(within(settingsDialog).getByText('http://192.168.0.20/')).toBeInTheDocument();
-    expect(within(settingsDialog).getByText('Firmware')).toBeInTheDocument();
+    expect(infoToggle).toHaveAttribute('title', 'Ustawienia gniazdka');
     expect(
-      within(settingsDialog).getByText('20260311-095902/1.7.5-g9979d16')
+      within(savedPlugList).getByRole('button', {
+        name: 'Skanuj termometry BLE przez to gniazdko'
+      })
     ).toBeInTheDocument();
     expect(
-      within(settingsDialog).getByRole('button', { name: 'Skanuj BLE' })
-    ).toHaveAttribute('title', 'Skanuj termometry BLE przez to gniazdko');
-    expect(within(settingsDialog).getByRole('button', { name: 'Usuń' })).toHaveClass(
-      'secondary-action--danger'
-    );
-    expect(within(settingsDialog).getByRole('button', { name: 'Usuń' })).toHaveAttribute(
-      'title',
-      'Usuń gniazdko tylko z aplikacji'
-    );
-    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Zamknij' }));
+      within(savedPlugList).getByRole('button', {
+        name: 'Usuń gniazdko tylko z aplikacji'
+      })
+    ).toHaveClass('icon-action--danger');
+    fireEvent.click(infoToggle);
+    const infoDialog = await screen.findByRole('dialog', { name: 'Przedpokój' });
+    expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
+    expect(
+      within(infoDialog).getByRole('link', {
+        name: 'Otwórz panel Shelly: http://192.168.0.20/'
+      })
+    ).toBeInTheDocument();
+    expect(within(infoDialog).getByText('Firmware')).toBeInTheDocument();
+    expect(
+      within(infoDialog).getByText('20260311-095902/1.7.5-g9979d16')
+    ).toBeInTheDocument();
+    fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
 
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
     const relayButton = within(actionRow).getByRole('button', { name: 'ON' });
@@ -1051,13 +1038,9 @@ describe('HardwareSetupScreen', () => {
         .map((button) => button.textContent)
         .filter(Boolean)
     ).toEqual(['MANUAL', 'ON']);
-    expect(within(actionRow).getByRole('button', { name: 'Odśwież' })).toHaveClass(
-      'icon-action'
-    );
-    expect(within(actionRow).getByRole('button', { name: 'Odśwież' })).toHaveAttribute(
-      'title',
-      'Odśwież stan gniazdka'
-    );
+    expect(
+      within(actionRow).queryByRole('button', { name: 'Odśwież' })
+    ).not.toBeInTheDocument();
     expect(within(actionRow).getByRole('button', { name: 'MANUAL' })).toHaveClass(
       'automation-toggle--auto'
     );
@@ -1212,11 +1195,9 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
     await addShellyThroughUi('Salon');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
-    const settingsDialog = await screen.findByRole('dialog', {
-      name: 'Ustawienia gniazdka'
-    });
-    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Usuń' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
+    );
 
     const dialog = await screen.findByRole('dialog', { name: 'Usunąć gniazdko?' });
     expect(within(dialog).getByText('Salon')).toBeInTheDocument();
@@ -1240,11 +1221,9 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
     await addShellyThroughUi('Salon');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
-    const settingsDialog = await screen.findByRole('dialog', {
-      name: 'Ustawienia gniazdka'
-    });
-    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Usuń' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
+    );
     const dialog = await screen.findByRole('dialog', { name: 'Usunąć gniazdko?' });
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Anuluj' }));
@@ -1265,11 +1244,9 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
     await addShellyThroughUi('Salon');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
-    const settingsDialog = await screen.findByRole('dialog', {
-      name: 'Ustawienia gniazdka'
-    });
-    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Usuń' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
+    );
 
     expect(
       await screen.findByRole('dialog', { name: 'Usunąć gniazdko?' })
@@ -1882,22 +1859,14 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('0.0 W')).toBeInTheDocument();
     expect(screen.getByText('230 V')).toBeInTheDocument();
     expect(screen.getByText('1.23 kWh')).toBeInTheDocument();
-    const clockButton = screen.getByRole('button', { name: '09:31' });
-    expect(clockButton).toHaveAttribute('title', 'Pokaż status czasu Shelly');
-
-    fireEvent.click(clockButton);
-
-    const clockDialog = await screen.findByRole('dialog', { name: 'Czas Shelly' });
-    expect(within(clockDialog).getByText('Salon')).toBeInTheDocument();
-    expect(within(clockDialog).getByText('09:31')).toBeInTheDocument();
-    expect(within(clockDialog).getByText('zsynchronizowany')).toBeInTheDocument();
-    expect(within(clockDialog).getByText('3 h 25 min')).toBeInTheDocument();
-    expect(within(clockDialog).getByRole('button', { name: 'Odśwież' })).toHaveAttribute(
-      'title',
-      'Odśwież czas i status gniazdka'
-    );
+    expect(screen.getByText('09:31')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
+    const infoDialog = await screen.findByRole('dialog', { name: 'Salon' });
+    expect(await within(infoDialog).findByText('zsynchronizowany')).toBeInTheDocument();
+    expect(within(infoDialog).getByText('3 h 25 min')).toBeInTheDocument();
+    expect(within(infoDialog).getByText('NTP')).toBeInTheDocument();
     expect(
-      within(clockDialog).queryByRole('button', { name: 'Ustaw z telefonu' })
+      within(infoDialog).queryByRole('button', { name: 'Odśwież' })
     ).not.toBeInTheDocument();
   });
 

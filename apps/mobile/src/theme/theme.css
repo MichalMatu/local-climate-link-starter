@@ -943,7 +943,7 @@ select {
   align-items: center;
   display: grid;
   gap: var(--lcl-spacing-sm);
-  grid-template-columns: minmax(0, 1fr) var(--lcl-size-control-min-height);
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .shelly-card-header h3 {
@@ -1313,7 +1313,7 @@ select {
 .shelly-control-toolbar {
   display: grid;
   gap: var(--lcl-spacing-sm);
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
   margin-left: 0;
   width: 100%;
 }
@@ -2339,4 +2339,44 @@ select {
 
 .sensor-card-details__wide {
   grid-column: 1 / -1;
+}
+
+/* Compact saved Shelly cards: UX polish 2026-09-11 */
+.shelly-saved-card {
+  gap: var(--lcl-spacing-sm);
+}
+
+.shelly-card-title-row,
+.shelly-card-actions {
+  align-items: center;
+  display: flex;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.shelly-card-title-row h3 {
+  min-width: 0;
+}
+
+.shelly-card-name-input {
+  min-height: var(--lcl-size-compact-control-min-height);
+  min-width: 0;
+  width: 100%;
+}
+
+.shelly-state-strip {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lcl-spacing-xs) var(--lcl-spacing-lg);
+}
+
+.shelly-state-strip span {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+}
+
+.shelly-state-strip strong {
+  color: var(--lcl-color-text);
+  font-weight: var(--lcl-font-weight-bold);
 }

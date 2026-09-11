@@ -7,53 +7,38 @@ import {
   ShellyCard,
   ToastViewport
 } from '@lcl/ui';
-import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { ShellySetupScanResult } from '../../../flows/hardware-setup/shellyRequests.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import {
-  formatAutomationMode,
   formatBleCandidateProfile,
   formatClockSyncState,
   formatClockTimestamp,
   formatClockUptime,
   formatComponentState,
   formatNullableMetric,
-  formatPlugEnergy,
-  formatPlugPower,
-  formatPlugVoltage,
-  formatShellyClock,
   formatShellyScanEstimate,
   SavedShellyDeviceCard,
   ShellyAddForm,
   shellyCompatibilityBadge
 } from './ShellySetupPresentation.js';
 import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
-import { mutationError, shellyAddressLabel, type HardwarePageProps } from '../helpers.js';
+import { mutationError, type HardwarePageProps } from '../helpers.js';
 import { useToastQueue } from '../useToastQueue.js';
 
-type ShellyStatusModalSource = 'add' | 'recheck';
 type ShellyDialogState =
   | { kind: 'none' }
   | { kind: 'add' }
   | { kind: 'scan'; returnToAdd: boolean }
-  | {
-      kind: 'status';
-      address: string | null;
-      source: ShellyStatusModalSource;
-      returnSettingsId: string | null;
-    }
   | { kind: 'ble'; device: ShellyDraftDevice }
-  | { kind: 'settings'; deviceId: string }
-  | { kind: 'clock'; deviceId: string }
+  | { kind: 'info'; deviceId: string }
   | { kind: 'remove'; device: ShellyDraftDevice };
 const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';
 
 export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) => {
   const { locale, t } = useTranslation();
-  const shellyAddress = shellyAddressLabel(flow);
   const isShellyScanActive = flow.shellyScanMutation.isPending && !flow.shellyScanStopped;
   const isAnyShellyCheckPending =
     flow.checkShellyMutation.isPending ||
@@ -65,37 +50,13 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
   const { dismissToast, dismissToastsWhere, pushToast, toasts } =
     useToastQueue('shelly-toast');
   const isAddShellyModalOpen = dialog.kind === 'add';
-  const isStatusModalOpen = dialog.kind === 'status';
   const isScanModalOpen = dialog.kind === 'scan';
   const isBleScanModalOpen = dialog.kind === 'ble';
   const bleScanShelly = dialog.kind === 'ble' ? dialog.device : null;
-  const settingsShellyId = dialog.kind === 'settings' ? dialog.deviceId : null;
-  const clockShellyId = dialog.kind === 'clock' ? dialog.deviceId : null;
+  const infoShellyId = dialog.kind === 'info' ? dialog.deviceId : null;
   const shellyDevicePendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
-  const statusModalAddress = dialog.kind === 'status' ? dialog.address : null;
-  const statusModalSource = dialog.kind === 'status' ? dialog.source : 'add';
-  const statusModalReturnSettingsId =
-    dialog.kind === 'status' ? dialog.returnSettingsId : null;
   const returnToAddAfterScan = dialog.kind === 'scan' && dialog.returnToAdd;
-  const settingsNameInputId = useId();
   const scanRangeErrorId = useId();
-  const activeShellyMutation =
-    statusModalSource === 'recheck'
-      ? flow.recheckShellyMutation
-      : flow.checkShellyMutation;
-  const isCheckingShelly = activeShellyMutation.isPending;
-  const shellyCheckError = activeShellyMutation.isError
-    ? activeShellyMutation.error
-    : null;
-  const modalTitle = isCheckingShelly
-    ? t('hardware.shelly.checkingModal')
-    : shellyCheckError
-      ? t('hardware.shelly.checkFailedTitle')
-      : t('hardware.shelly.checkedModal');
-  const statusModalShellyAddress = statusModalAddress ?? shellyAddress;
-  const statusModalShellyHref = /^https?:\/\//.test(statusModalShellyAddress)
-    ? statusModalShellyAddress
-    : undefined;
   const shellyScanEstimate = formatShellyScanEstimate(
     flow.shellyScanStartInput,
     flow.shellyScanEndInput,
@@ -131,22 +92,12 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     flow.refreshBleDiscoveryMutation.isPending ||
     flow.restartBleDiscoveryMutation.isPending ||
     flow.stopBleDiscoveryMutation.isPending;
-  const clockShelly =
-    clockShellyId === null
+  const infoShelly =
+    infoShellyId === null
       ? null
-      : (shellyDevices.find((device) => device.id === clockShellyId) ?? null);
-  const settingsShelly =
-    settingsShellyId === null
-      ? null
-      : (shellyDevices.find((device) => device.id === settingsShellyId) ?? null);
-  const clockControlState = clockShelly ? shellyControlStates[clockShelly.id] : undefined;
-  const settingsControlState = settingsShelly
-    ? shellyControlStates[settingsShelly.id]
-    : undefined;
-  const isSettingsControlBusy = settingsControlState?.pendingAction != null;
-  const settingsStatus = settingsControlState?.status;
-  const clockStatus = clockControlState?.status?.clock;
-  const isClockRefreshPending = clockControlState?.pendingAction === 'status';
+      : (shellyDevices.find((device) => device.id === infoShellyId) ?? null);
+  const infoControlState = infoShelly ? shellyControlStates[infoShelly.id] : undefined;
+  const infoStatus = infoControlState?.status;
   const shouldShowBleRestart = Boolean(
     flow.bleDiscoverySession && flow.bleDiscoverySnapshot?.running === false
   );
@@ -307,24 +258,6 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     });
   };
 
-  const closeStatusModal = () => {
-    if (isCheckingShelly) {
-      return;
-    }
-    flow.checkShellyMutation.reset();
-    flow.recheckShellyMutation.reset();
-    setDialog({ kind: 'none' });
-    if (statusModalReturnSettingsId) {
-      const canReturnToSettings = shellyDevices.some(
-        (device) => device.id === statusModalReturnSettingsId
-      );
-      if (canReturnToSettings) {
-        setDialog({ kind: 'settings', deviceId: statusModalReturnSettingsId });
-      }
-      return;
-    }
-  };
-
   const openAddShellyModal = () => {
     flow.checkShellyMutation.reset();
     setDidSubmitShellyAdd(false);
@@ -411,40 +344,20 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 
-  const recheckSavedShelly = (
-    device: ShellyDraftDevice,
-    options: { returnToSettings?: boolean } = {}
-  ) => {
-    setDialog({
-      kind: 'status',
-      address: device.baseUrl,
-      source: 'recheck',
-      returnSettingsId: options.returnToSettings ? device.id : null
-    });
+  const openInfoModal = (device: ShellyDraftDevice) => {
     flow.checkShellyMutation.reset();
-    flow.recheckShellyMutation.mutate(device, {
-      onSuccess: () => undefined
-    });
+    flow.recheckShellyMutation.reset();
+    setDialog({ kind: 'info', deviceId: device.id });
+    flow.recheckShellyMutation.mutate(device);
+  };
+
+  const closeInfoModal = () => {
+    flow.recheckShellyMutation.reset();
+    setDialog({ kind: 'none' });
   };
 
   const removeSavedShelly = (device: ShellyDraftDevice) => {
     setDialog({ kind: 'remove', device });
-  };
-
-  const openSettingsModal = (device: ShellyDraftDevice) => {
-    setDialog({ kind: 'settings', deviceId: device.id });
-  };
-
-  const closeSettingsModal = () => {
-    setDialog({ kind: 'none' });
-  };
-
-  const openClockModal = (device: ShellyDraftDevice) => {
-    setDialog({ kind: 'clock', deviceId: device.id });
-  };
-
-  const closeClockModal = () => {
-    setDialog({ kind: 'none' });
   };
 
   const confirmRemoveSavedShelly = () => {
@@ -640,244 +553,93 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
       </Modal>
 
       <Modal
+        busy={flow.recheckShellyMutation.isPending}
         closeLabel={t('common.close')}
-        description={settingsShelly?.name ?? ''}
-        open={settingsShelly !== null}
+        description={infoShelly?.baseUrl ?? ''}
+        open={infoShelly !== null}
         size="diagnostic"
-        title={t('hardware.shelly.settingsTitle')}
-        onClose={closeSettingsModal}
+        title={infoShelly?.name ?? t('hardware.shelly.settings')}
+        onClose={closeInfoModal}
       >
-        {settingsShelly && (
+        {infoShelly && (
           <div className="settings-modal-layout">
-            <label className="field">
-              {t('hardware.shelly.deviceNameLabel')}
-              <input
-                id={settingsNameInputId}
-                type="text"
-                value={settingsShelly.name}
-                onChange={(event) =>
-                  flow.setShellyDeviceName(settingsShelly.id, event.currentTarget.value)
-                }
-              />
-            </label>
+            {flow.recheckShellyMutation.isPending && (
+              <p>{t('hardware.shelly.localRpcConnecting')}</p>
+            )}
+            {flow.recheckShellyMutation.isError && (
+              <FeedbackPanel
+                tone="warning"
+                title={mutationError(flow.recheckShellyMutation.error)}
+              >
+                {t('hardware.shelly.checkFailedDetail')}
+              </FeedbackPanel>
+            )}
             <div className="status-stack">
               <DiagnosticRow
-                href={settingsShelly.baseUrl}
+                href={infoShelly.baseUrl}
                 label={t('hardware.shelly.addressSettings')}
                 linkLabel={t('hardware.shelly.openPanelLabel', {
-                  address: settingsShelly.baseUrl
+                  address: infoShelly.baseUrl
                 })}
-                value={settingsShelly.baseUrl}
+                value={infoShelly.baseUrl}
               />
               <DiagnosticRow
                 label={t('common.firmware')}
-                value={settingsStatus?.firmwareId ?? t('common.missingData')}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.relay')}
-                value={
-                  settingsStatus
-                    ? settingsStatus.relayOn
-                      ? 'ON'
-                      : 'OFF'
-                    : t('common.missingData')
-                }
-                tone={settingsStatus?.relayOn ? 'warning' : 'normal'}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.mode')}
-                value={formatAutomationMode(settingsStatus?.automationMode, t)}
-                tone={settingsStatus?.automationMode === 'missing' ? 'warning' : 'normal'}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.power')}
-                value={formatPlugPower(settingsStatus?.telemetry.powerW, t)}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.voltage')}
-                value={formatPlugVoltage(settingsStatus?.telemetry.voltageV, t)}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.energy')}
-                value={formatPlugEnergy(settingsStatus?.telemetry.energyWh, t)}
+                value={infoStatus?.firmwareId ?? t('common.missingData')}
               />
               <DiagnosticRow
                 label={t('hardware.metrics.wifiRssi')}
                 value={
-                  settingsStatus?.telemetry.wifiRssiDbm === undefined
+                  infoStatus?.telemetry.wifiRssiDbm === undefined
                     ? t('common.missing')
-                    : `${settingsStatus.telemetry.wifiRssiDbm} dBm`
+                    : `${infoStatus.telemetry.wifiRssiDbm} dBm`
                 }
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.clockShelly')}
-                value={formatShellyClock(settingsStatus?.clock, t)}
               />
               <DiagnosticRow
                 label={t('hardware.shelly.uptime')}
-                value={formatClockUptime(settingsStatus?.clock.uptimeSec, t)}
+                value={formatClockUptime(infoStatus?.clock.uptimeSec, t)}
+              />
+              <DiagnosticRow
+                label={t('hardware.shelly.clockSync')}
+                value={formatClockSyncState(infoStatus?.clock, t)}
+                tone={infoStatus?.clock.timeSynced ? 'normal' : 'warning'}
+              />
+              <DiagnosticRow
+                label="NTP"
+                value={formatClockTimestamp(
+                  infoStatus?.clock.lastSyncUnixTimeSec,
+                  locale,
+                  t
+                )}
               />
             </div>
-            <div
-              className="settings-action-stack"
-              aria-label={t('hardware.shelly.actionsLabel')}
-            >
-              <button
-                className="secondary-action"
-                type="button"
-                disabled={settingsShelly === null || isAnyShellyCheckPending}
-                title={t('hardware.shelly.checkSavedTitle')}
-                onClick={() => {
-                  closeSettingsModal();
-                  recheckSavedShelly(settingsShelly, { returnToSettings: true });
-                }}
-              >
-                {t('hardware.shelly.check')}
-              </button>
-              <button
-                className="secondary-action"
-                type="button"
-                disabled={
-                  settingsShelly === null ||
-                  isAnyShellyCheckPending ||
-                  isBleDiscoveryBusy ||
-                  isSettingsControlBusy
-                }
-                title={t('hardware.shelly.scanBleViaShellyTitle')}
-                onClick={() => {
-                  closeSettingsModal();
-                  openBleScanModal(settingsShelly);
-                }}
-              >
-                <IconBluetooth className="icon-action__svg" aria-hidden="true" />
-                {t('hardware.shelly.scanBle')}
-              </button>
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                disabled={settingsShelly === null}
-                title={t('hardware.shelly.deleteTitle')}
-                onClick={() => {
-                  closeSettingsModal();
-                  removeSavedShelly(settingsShelly);
-                }}
-              >
-                <IconTrash className="icon-action__svg" aria-hidden="true" />
-                {t('common.delete')}
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        closeLabel={t('common.close')}
-        description={clockShelly?.name ?? ''}
-        open={clockShelly !== null}
-        size="diagnostic"
-        title={t('hardware.shelly.clockTitle')}
-        actions={
-          <button
-            className="secondary-action"
-            type="button"
-            aria-busy={isClockRefreshPending || undefined}
-            disabled={clockShelly === null || isClockRefreshPending}
-            title={t('hardware.shelly.clockRefreshTitle')}
-            onClick={() => {
-              if (clockShelly) {
-                flow.refreshShellyControl(clockShelly);
-              }
-            }}
-          >
-            {isClockRefreshPending ? t('common.refreshing') : t('common.refresh')}
-          </button>
-        }
-        onClose={closeClockModal}
-      >
-        <div className="status-stack">
-          <DiagnosticRow
-            label={t('hardware.metrics.clock')}
-            value={formatShellyClock(clockStatus, t)}
-          />
-          <DiagnosticRow
-            label={t('hardware.shelly.clockSync')}
-            value={formatClockSyncState(clockStatus, t)}
-            tone={clockStatus?.timeSynced ? 'normal' : 'warning'}
-          />
-          <DiagnosticRow
-            label={t('hardware.shelly.uptime')}
-            value={formatClockUptime(clockStatus?.uptimeSec, t)}
-          />
-          <DiagnosticRow
-            label="NTP"
-            value={formatClockTimestamp(clockStatus?.lastSyncUnixTimeSec, locale, t)}
-          />
-        </div>
-      </Modal>
-
-      <Modal
-        busy={isCheckingShelly}
-        closeLabel={t('common.close')}
-        open={isStatusModalOpen}
-        title={modalTitle}
-        onClose={closeStatusModal}
-      >
-        {isCheckingShelly && <p>{t('hardware.shelly.localRpcConnecting')}</p>}
-        {shellyCheckError && (
-          <FeedbackPanel tone="warning" title={mutationError(shellyCheckError)}>
-            {t('hardware.shelly.checkFailedDetail')}
-          </FeedbackPanel>
-        )}
-        {!isCheckingShelly && !shellyCheckError && flow.setupStatus && (
-          <>
-            <div
-              className="status-stack"
-              aria-label={t('hardware.shelly.statusCheckResultLabel')}
-            >
-              {statusModalShellyHref ? (
-                <DiagnosticRow
-                  href={statusModalShellyHref}
-                  label={t('hardware.shelly.addressInputLabel')}
-                  linkLabel={t('hardware.shelly.openPanelLabel', {
-                    address: statusModalShellyAddress
-                  })}
-                  value={statusModalShellyAddress}
-                />
-              ) : (
-                <DiagnosticRow
-                  label={t('hardware.shelly.addressInputLabel')}
-                  value={statusModalShellyAddress}
+            {!flow.recheckShellyMutation.isPending &&
+              !flow.recheckShellyMutation.isError &&
+              flow.setupStatus && (
+                <ShellyCard
+                  name={infoShelly.name}
+                  model={`${flow.setupStatus.deviceInfo.model}, gen ${flow.setupStatus.deviceInfo.gen}`}
+                  badgeLabel={compatibilityBadge.label}
+                  badgeTone={compatibilityBadge.tone}
+                  rows={[
+                    {
+                      label: 'Scripts',
+                      value: formatComponentState(flow.setupStatus.status.scripts, t)
+                    },
+                    {
+                      label: 'Bluetooth',
+                      value: formatComponentState(flow.setupStatus.status.bluetooth, t)
+                    },
+                    {
+                      label: t('hardware.shelly.matter'),
+                      value: flow.setupStatus.status.matterEnabled
+                        ? t('common.enabled')
+                        : t('common.disabled')
+                    }
+                  ]}
                 />
               )}
-              <DiagnosticRow
-                label={t('hardware.metrics.relay')}
-                value={flow.setupStatus.status.relayOn ? 'ON' : 'OFF'}
-                tone={flow.setupStatus.status.relayOn ? 'warning' : 'normal'}
-              />
-            </div>
-            <ShellyCard
-              name="Shelly Plug S Gen3"
-              model={`${flow.setupStatus.deviceInfo.model}, gen ${flow.setupStatus.deviceInfo.gen}`}
-              badgeLabel={compatibilityBadge.label}
-              badgeTone={compatibilityBadge.tone}
-              rows={[
-                {
-                  label: 'Scripts',
-                  value: formatComponentState(flow.setupStatus.status.scripts, t)
-                },
-                {
-                  label: 'Bluetooth',
-                  value: formatComponentState(flow.setupStatus.status.bluetooth, t)
-                },
-                {
-                  label: t('hardware.shelly.matter'),
-                  value: flow.setupStatus.status.matterEnabled
-                    ? t('common.enabled')
-                    : t('common.disabled')
-                }
-              ]}
-            />
-          </>
+          </div>
         )}
       </Modal>
 
@@ -1004,11 +766,14 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
             device={device}
             onAutomationAuto={flow.setAutomationAuto}
             onAutomationManual={flow.setAutomationManual}
-            onClockOpen={openClockModal}
-            onRefreshControl={flow.refreshShellyControl}
+            onBleScan={openBleScanModal}
+            onInfoOpen={openInfoModal}
+            onNameChange={(savedDevice, value) =>
+              flow.setShellyDeviceName(savedDevice.id, value)
+            }
             onRelayOff={flow.turnRelayOff}
             onRelayOn={flow.turnRelayOn}
-            onSettingsOpen={openSettingsModal}
+            onRemove={removeSavedShelly}
           />
         ))}
       </div>
