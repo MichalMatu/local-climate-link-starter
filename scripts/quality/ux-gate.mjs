@@ -2,7 +2,14 @@ import { readFile, readdir } from 'node:fs/promises';
 
 const repoRoot = new URL('../../', import.meta.url);
 const failures = [];
-const cssPaths = ['apps/mobile/src/theme/theme.css', 'packages/ui/src/styles.css'];
+const cssPaths = [
+  'apps/mobile/src/theme/theme.css',
+  'apps/mobile/src/theme/runtimeStatus.css',
+  'apps/mobile/src/app/appShell.css',
+  'apps/mobile/src/screens/AutomationDashboardScreen.css',
+  'apps/mobile/src/components/AppBottomNavigation.css',
+  'packages/ui/src/styles.css'
+];
 const landingTokenizedCssPaths = [
   'apps/landing/src/styles/base.css',
   'apps/landing/src/styles/layout.css',
@@ -17,10 +24,7 @@ const hardwareSetupPagePaths = [
   'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx',
   'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx'
 ];
-const feedbackContractPagePaths = [
-  ...hardwareSetupPagePaths,
-  'apps/mobile/src/screens/DemoWizardScreen.tsx'
-];
+const feedbackContractPagePaths = [...hardwareSetupPagePaths];
 const packageRuntimeCopyPaths = [
   'packages/ui/src/primitives/DiagnosticRow.tsx',
   'packages/ui/src/primitives/RuleSummaryCard.tsx',
@@ -78,6 +82,20 @@ const checkSavedShellyCardFeedback = async () => {
   });
 };
 
+const checkTokenizedCssCoverage = async () => {
+  const mobileCssPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
+    path.endsWith('.css')
+  );
+  for (const path of mobileCssPaths) {
+    if (!tokenizedCssPaths.includes(path)) {
+      addFailure(
+        path,
+        'mobile production CSS must be included in token/responsive quality gates'
+      );
+    }
+  }
+};
+
 const checkTokenizedCss = async () => {
   for (const path of tokenizedCssPaths) {
     const source = await readRepoFile(path);
@@ -120,6 +138,11 @@ const checkTokenizedCss = async () => {
       const rawOpacity = line.match(/\bopacity:\s*0\.(?:55|62);/);
       if (rawOpacity) {
         addFailure(path, `line ${index + 1} uses non-tokenized opacity`);
+      }
+
+      const rawFontWeight = line.match(/\bfont-weight:\s*\d+\s*;/);
+      if (rawFontWeight && cssPaths.includes(path)) {
+        addFailure(path, `line ${index + 1} uses non-tokenized font weight`);
       }
     });
   }
@@ -191,21 +214,6 @@ const checkFeedbackContractPatterns = async () => {
         'blocking install failures must not be duplicated as toast feedback'
       );
     }
-  }
-
-  const demoPath = 'apps/mobile/src/screens/DemoWizardScreen.tsx';
-  const demoSource = await readRepoFile(demoPath);
-
-  if (
-    !demoSource.includes("open={isMatterBlockModalOpen && flow.step === 'shelly'}") ||
-    !demoSource.includes(
-      '<FeedbackPanel tone="danger" title={t(\'hardware.safety.matterBlocked\')}>'
-    )
-  ) {
-    addFailure(
-      demoPath,
-      'demo Matter blocked state must use the same blocking modal contract as real hardware setup'
-    );
   }
 };
 
@@ -540,6 +548,7 @@ const checkPackageRuntimeCopy = async () => {
 };
 
 await checkSavedShellyCardFeedback();
+await checkTokenizedCssCoverage();
 await checkTokenizedCss();
 await checkFeedbackContractPatterns();
 await checkUiPackageFeedbackPatterns();

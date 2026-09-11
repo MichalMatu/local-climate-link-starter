@@ -14,7 +14,7 @@
 .automation-status-mode {
   color: var(--lcl-color-text-muted);
   font-size: var(--lcl-font-size-sm);
-  font-weight: 800;
+  font-weight: var(--lcl-font-weight-bold);
 }
 
 .runtime-refresh-action {

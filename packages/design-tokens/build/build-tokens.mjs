@@ -60,7 +60,6 @@ const cssSource = [
   '',
   ":root[data-lcl-theme='light'] {",
   '  color-scheme: light;',
-  ...lightVariableLines,
   '}',
   '',
   ":root[data-lcl-theme='dark'] {",
