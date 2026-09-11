@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-production-readiness-docs-finalize",
+  "task_digest": "652ceac6fb9ebba711241f81f447cff8473808ca448dbf30ecc4560c363ec2ff",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T11:03:12.916311+00:00",
+  "attempt_id": "17ed1e16d0f2bf4ff8f419c5",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 58756,
+  "updated_at": "2026-09-11T11:03:12.916462+00:00",
+  "pid": 58756
+}
