@@ -5,9 +5,7 @@ import {
   InfoTooltip,
   Modal,
   ShellyCard,
-  ToastViewport,
-  type ToastMessage,
-  type ToastTone
+  ToastViewport
 } from '@lcl/ui';
 import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
@@ -34,8 +32,23 @@ import {
 } from './ShellySetupPresentation.js';
 import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
 import { mutationError, shellyAddressLabel, type HardwarePageProps } from '../helpers.js';
+import { useToastQueue } from '../useToastQueue.js';
 
 type ShellyStatusModalSource = 'add' | 'recheck';
+type ShellyDialogState =
+  | { kind: 'none' }
+  | { kind: 'add' }
+  | { kind: 'scan'; returnToAdd: boolean }
+  | {
+      kind: 'status';
+      address: string | null;
+      source: ShellyStatusModalSource;
+      returnSettingsId: string | null;
+    }
+  | { kind: 'ble'; device: ShellyDraftDevice }
+  | { kind: 'settings'; deviceId: string }
+  | { kind: 'clock'; deviceId: string }
+  | { kind: 'remove'; device: ShellyDraftDevice };
 const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';
 
 export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) => {
@@ -46,24 +59,24 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     flow.checkShellyMutation.isPending ||
     flow.recheckShellyMutation.isPending ||
     isShellyScanActive;
-  const [isAddShellyModalOpen, setIsAddShellyModalOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
-  const [isBleScanModalOpen, setIsBleScanModalOpen] = useState(false);
-  const [bleScanShelly, setBleScanShelly] = useState<ShellyDraftDevice | null>(null);
-  const [settingsShellyId, setSettingsShellyId] = useState<string | null>(null);
-  const [clockShellyId, setClockShellyId] = useState<string | null>(null);
-  const [shellyDevicePendingRemoval, setShellyDevicePendingRemoval] =
-    useState<ShellyDraftDevice | null>(null);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [statusModalAddress, setStatusModalAddress] = useState<string | null>(null);
-  const [statusModalSource, setStatusModalSource] =
-    useState<ShellyStatusModalSource>('add');
-  const [statusModalReturnSettingsId, setStatusModalReturnSettingsId] = useState<
-    string | null
-  >(null);
+  const [dialog, setDialog] = useState<ShellyDialogState>({ kind: 'none' });
   const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
   const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
+  const { dismissToast, dismissToastsWhere, pushToast, toasts } =
+    useToastQueue('shelly-toast');
+  const isAddShellyModalOpen = dialog.kind === 'add';
+  const isStatusModalOpen = dialog.kind === 'status';
+  const isScanModalOpen = dialog.kind === 'scan';
+  const isBleScanModalOpen = dialog.kind === 'ble';
+  const bleScanShelly = dialog.kind === 'ble' ? dialog.device : null;
+  const settingsShellyId = dialog.kind === 'settings' ? dialog.deviceId : null;
+  const clockShellyId = dialog.kind === 'clock' ? dialog.deviceId : null;
+  const shellyDevicePendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
+  const statusModalAddress = dialog.kind === 'status' ? dialog.address : null;
+  const statusModalSource = dialog.kind === 'status' ? dialog.source : 'add';
+  const statusModalReturnSettingsId =
+    dialog.kind === 'status' ? dialog.returnSettingsId : null;
+  const returnToAddAfterScan = dialog.kind === 'scan' && dialog.returnToAdd;
   const settingsNameInputId = useId();
   const scanRangeErrorId = useId();
   const activeShellyMutation =
@@ -138,36 +151,22 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     flow.bleDiscoverySession && flow.bleDiscoverySnapshot?.running === false
   );
   const pollBleDiscoveryRef = useRef<() => void>(() => undefined);
-  const toastIdRef = useRef(0);
   const shownBleStopErrorRef = useRef<string | null>(null);
   const shownControlFeedbackRef = useRef<Record<string, string>>({});
   const autoRefreshShellyIdsRef = useRef<Set<string>>(new Set());
-  const [returnToAddAfterScan, setReturnToAddAfterScan] = useState(false);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
-
-  const pushToast = useCallback((tone: ToastTone, title: string, detail?: string) => {
-    toastIdRef.current += 1;
-    const id = `shelly-toast-${toastIdRef.current}`;
-    const toast: ToastMessage =
-      detail === undefined ? { id, tone, title } : { id, tone, title, detail };
-    setToasts((current) => [...current.slice(-2), toast]);
-  }, []);
 
   const dismissShellyScanProgressToast = useCallback(() => {
     const scanningTitle = t('hardware.shelly.scanningIpRange');
-    setToasts((current) => current.filter((toast) => toast.title !== scanningTitle));
-  }, [t]);
+    dismissToastsWhere((toast) => toast.title === scanningTitle);
+  }, [dismissToastsWhere, t]);
 
   const dismissShellyScanToasts = useCallback(() => {
     const scanTitles = new Set([
       t('hardware.shelly.scanningIpRange'),
       t('hardware.shelly.scanStopped')
     ]);
-    setToasts((current) => current.filter((toast) => !scanTitles.has(toast.title)));
-  }, [t]);
+    dismissToastsWhere((toast) => scanTitles.has(toast.title));
+  }, [dismissToastsWhere, t]);
 
   useEffect(() => {
     const savedIds = new Set(shellyDevices.map((device) => device.id));
@@ -295,7 +294,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     flow.checkShellyMutation.mutate(undefined, {
       onSuccess: () => {
         setDidSubmitShellyAdd(false);
-        setIsAddShellyModalOpen(false);
+        setDialog({ kind: 'none' });
         pushToast('ok', t('hardware.shelly.added'));
       },
       onError: () => {
@@ -314,36 +313,34 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     }
     flow.checkShellyMutation.reset();
     flow.recheckShellyMutation.reset();
-    setIsStatusModalOpen(false);
+    setDialog({ kind: 'none' });
     if (statusModalReturnSettingsId) {
       const canReturnToSettings = shellyDevices.some(
         (device) => device.id === statusModalReturnSettingsId
       );
       if (canReturnToSettings) {
-        setSettingsShellyId(statusModalReturnSettingsId);
+        setDialog({ kind: 'settings', deviceId: statusModalReturnSettingsId });
       }
-      setStatusModalReturnSettingsId(null);
+      return;
     }
   };
 
   const openAddShellyModal = () => {
     flow.checkShellyMutation.reset();
     setDidSubmitShellyAdd(false);
-    setIsAddShellyModalOpen(true);
+    setDialog({ kind: 'add' });
   };
 
   const closeAddShellyModal = () => {
     flow.checkShellyMutation.reset();
     setDidSubmitShellyAdd(false);
-    setIsAddShellyModalOpen(false);
+    setDialog({ kind: 'none' });
   };
 
   const openScanModalFromAdd = () => {
     flow.resetShellyScan();
     setDidSubmitShellyScan(false);
-    setReturnToAddAfterScan(true);
-    setIsAddShellyModalOpen(false);
-    setIsScanModalOpen(true);
+    setDialog({ kind: 'scan', returnToAdd: true });
   };
 
   const closeScanModal = (options: { returnToAdd?: boolean } = {}) => {
@@ -351,13 +348,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     flow.resetShellyScan();
     dismissShellyScanToasts();
     setDidSubmitShellyScan(false);
-    setIsScanModalOpen(false);
-    if (shouldReturnToAdd) {
-      setIsAddShellyModalOpen(true);
-      setReturnToAddAfterScan(false);
-      return;
-    }
-    setReturnToAddAfterScan(false);
+    setDialog(shouldReturnToAdd ? { kind: 'add' } : { kind: 'none' });
   };
 
   const startShellyScan = () => {
@@ -393,8 +384,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
   const openBleScanModal = (device: ShellyDraftDevice) => {
     flow.resetBleDiscovery();
     shownBleStopErrorRef.current = null;
-    setBleScanShelly(device);
-    setIsBleScanModalOpen(true);
+    setDialog({ kind: 'ble', device });
     pushToast(
       'ok',
       t('hardware.shelly.scanningBle'),
@@ -408,7 +398,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
       return;
     }
     flow.stopBleDiscovery();
-    setIsBleScanModalOpen(false);
+    setDialog({ kind: 'none' });
   };
 
   const restartBleDiscovery = () => {
@@ -425,34 +415,36 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     device: ShellyDraftDevice,
     options: { returnToSettings?: boolean } = {}
   ) => {
-    setStatusModalAddress(device.baseUrl);
-    setStatusModalSource('recheck');
-    setStatusModalReturnSettingsId(options.returnToSettings ? device.id : null);
-    setIsStatusModalOpen(true);
+    setDialog({
+      kind: 'status',
+      address: device.baseUrl,
+      source: 'recheck',
+      returnSettingsId: options.returnToSettings ? device.id : null
+    });
     flow.checkShellyMutation.reset();
     flow.recheckShellyMutation.mutate(device, {
-      onSuccess: () => setIsStatusModalOpen(true)
+      onSuccess: () => undefined
     });
   };
 
   const removeSavedShelly = (device: ShellyDraftDevice) => {
-    setShellyDevicePendingRemoval(device);
+    setDialog({ kind: 'remove', device });
   };
 
   const openSettingsModal = (device: ShellyDraftDevice) => {
-    setSettingsShellyId(device.id);
+    setDialog({ kind: 'settings', deviceId: device.id });
   };
 
   const closeSettingsModal = () => {
-    setSettingsShellyId(null);
+    setDialog({ kind: 'none' });
   };
 
   const openClockModal = (device: ShellyDraftDevice) => {
-    setClockShellyId(device.id);
+    setDialog({ kind: 'clock', deviceId: device.id });
   };
 
   const closeClockModal = () => {
-    setClockShellyId(null);
+    setDialog({ kind: 'none' });
   };
 
   const confirmRemoveSavedShelly = () => {
@@ -461,7 +453,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
     }
 
     flow.removeShellyDevice(shellyDevicePendingRemoval.id);
-    setShellyDevicePendingRemoval(null);
+    setDialog({ kind: 'none' });
     pushToast('ok', t('hardware.shelly.removed'));
   };
 
@@ -642,7 +634,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
             {t('common.delete')}
           </button>
         }
-        onClose={() => setShellyDevicePendingRemoval(null)}
+        onClose={() => setDialog({ kind: 'none' })}
       >
         <p>{t('hardware.shelly.deleteDescription')}</p>
       </Modal>

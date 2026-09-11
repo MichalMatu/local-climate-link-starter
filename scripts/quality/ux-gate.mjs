@@ -198,8 +198,9 @@ const checkFeedbackContractPatterns = async () => {
 
   if (
     !ruleSource.includes(
-      'open={isInstallBlockModalOpen && flow.installMutation.isError}'
+      "open={dialog === 'install-block' && flow.installMutation.isError}"
     ) ||
+    !ruleSource.includes("setDialog('install-block');") ||
     !ruleSource.includes(
       '<FeedbackPanel tone="danger" title={mutationError(flow.installMutation.error)}>'
     )

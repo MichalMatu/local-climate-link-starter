@@ -1,13 +1,8 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import {
-  DiagnosticRow,
-  Modal,
-  ToastViewport,
-  type ToastMessage,
-  type ToastTone
-} from '@lcl/ui';
+import { useToastQueue } from '../useToastQueue.js';
+import { DiagnosticRow, Modal, ToastViewport } from '@lcl/ui';
 import { IconSettings } from '@tabler/icons-react';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
@@ -176,16 +171,22 @@ const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
   );
 };
 
+type SensorDialogState =
+  | { kind: 'none' }
+  | { kind: 'add' }
+  | { kind: 'ble' }
+  | { kind: 'settings'; deviceId: string }
+  | { kind: 'remove'; device: SensorDraftDevice };
+
 export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) => {
   const { locale, t } = useTranslation();
-  const [isAddSensorModalOpen, setIsAddSensorModalOpen] = useState(false);
-  const [isPhoneBleScanModalOpen, setIsPhoneBleScanModalOpen] = useState(false);
-  const [sensorSettingsId, setSensorSettingsId] = useState<string | null>(null);
-  const [sensorPendingRemoval, setSensorPendingRemoval] =
-    useState<SensorDraftDevice | null>(null);
+  const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
   const [didSubmitSensorAdd, setDidSubmitSensorAdd] = useState(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const toastIdRef = useRef(0);
+  const { dismissToast, pushToast, toasts } = useToastQueue('sensor-toast');
+  const isAddSensorModalOpen = dialog.kind === 'add';
+  const isPhoneBleScanModalOpen = dialog.kind === 'ble';
+  const sensorSettingsId = dialog.kind === 'settings' ? dialog.deviceId : null;
+  const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
   const shownPhoneBleErrorRef = useRef<string | null>(null);
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
   const isSensorGattPending = flow.setPvvxTimeMutation.isPending;
@@ -202,18 +203,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
     !isAddSensorModalOpen &&
     !isPhoneBleScanModalOpen &&
     !isSensorGattPending;
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
-
-  const pushToast = useCallback((tone: ToastTone, title: string, detail?: string) => {
-    toastIdRef.current += 1;
-    const id = `sensor-toast-${toastIdRef.current}`;
-    const toast: ToastMessage =
-      detail === undefined ? { id, tone, title } : { id, tone, title, detail };
-    setToasts((current) => [...current.slice(-2), toast]);
-  }, []);
 
   useEffect(() => {
     if (!flow.phoneBleScanMutation.isError) {
@@ -318,12 +307,12 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
   const closeAddSensorModal = () => {
     flow.resetPhoneBleScan();
     setDidSubmitSensorAdd(false);
-    setIsAddSensorModalOpen(false);
+    setDialog({ kind: 'none' });
   };
 
   const closePhoneBleScanModal = () => {
     flow.resetPhoneBleScan();
-    setIsPhoneBleScanModalOpen(false);
+    setDialog({ kind: 'none' });
   };
 
   const addSensor = () => {
@@ -340,7 +329,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
     flow.resetPhoneBleScan();
     shownPhoneBleErrorRef.current = null;
     setDidSubmitSensorAdd(false);
-    setIsAddSensorModalOpen(true);
+    setDialog({ kind: 'add' });
   };
 
   const startPhoneBleScan = () => {
@@ -350,8 +339,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
 
   const openPhoneBleScanModal = () => {
     setDidSubmitSensorAdd(false);
-    setIsAddSensorModalOpen(false);
-    setIsPhoneBleScanModalOpen(true);
+    setDialog({ kind: 'ble' });
     startPhoneBleScan();
   };
 
@@ -360,20 +348,13 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
     closePhoneBleScanModal();
   };
 
-  const removeSensor = (device: SensorDraftDevice) => {
-    setSensorPendingRemoval(device);
-  };
-
   const confirmRemoveSensor = () => {
     if (!sensorPendingRemoval) {
       return;
     }
 
     flow.removeSensorDevice(sensorPendingRemoval.id);
-    setSensorSettingsId((current) =>
-      current === sensorPendingRemoval.id ? null : current
-    );
-    setSensorPendingRemoval(null);
+    setDialog({ kind: 'none' });
     pushToast('ok', t('hardware.sensor.removed'));
   };
 
@@ -381,12 +362,11 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
     flow.sensorSamplesById[device.id.toUpperCase()] ?? [];
 
   const openSensorSettings = (device: SensorDraftDevice) => {
-    setSensorSettingsId(device.id);
+    setDialog({ kind: 'settings', deviceId: device.id });
   };
 
   const openRemoveFromSettings = (device: SensorDraftDevice) => {
-    setSensorSettingsId(null);
-    removeSensor(device);
+    setDialog({ kind: 'remove', device });
   };
 
   return (
@@ -561,7 +541,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
             </button>
           )
         }
-        onClose={() => setSensorSettingsId(null)}
+        onClose={() => setDialog({ kind: 'none' })}
       >
         {sensorSettingsDevice && (
           <div className="settings-modal-layout">
@@ -643,7 +623,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
             {t('common.delete')}
           </button>
         }
-        onClose={() => setSensorPendingRemoval(null)}
+        onClose={() => setDialog({ kind: 'none' })}
       >
         <p>{t('hardware.sensor.deleteDescription')}</p>
       </Modal>

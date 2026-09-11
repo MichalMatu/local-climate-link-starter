@@ -4,13 +4,11 @@ import {
   Modal,
   RuleSummaryCard,
   ScriptPreview,
-  ToastViewport,
-  type ToastMessage,
-  type ToastTone
+  ToastViewport
 } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
 import { IconTrash } from '@tabler/icons-react';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
   useTranslation,
@@ -30,6 +28,10 @@ import {
   type RuleAdvancedSettingsInput,
   validateRuleAdvancedSettings
 } from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
+import { useToastQueue } from '../useToastQueue.js';
+
+type RuleDialogState =
+  'none' | 'script' | 'advanced' | 'delete' | 'install-block' | 'relay-test';
 
 type RuleControlCopy = {
   labelKey: TranslationKey;
@@ -175,19 +177,14 @@ export const RuleSetupPage = ({
   onOpenDiagnostics
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
-  const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
-  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
-  const [isInstallBlockModalOpen, setIsInstallBlockModalOpen] = useState(false);
-  const [isRelayTestModalOpen, setIsRelayTestModalOpen] = useState(false);
+  const [dialog, setDialog] = useState<RuleDialogState>('none');
+  const { dismissToast, pushToast, toasts } = useToastQueue('rule-toast');
   const [advancedDraft, setAdvancedDraft] = useState<RuleAdvancedSettingsInput>(() =>
     createAdvancedDraft(flow)
   );
   const thresholdErrorId = useId();
   const vpdHintId = useId();
   const vpdErrorId = useId();
-  const toastIdRef = useRef(0);
   const copy = RULE_PRESET_COPY[flow.rulePreset];
   const currentRule =
     flow.configState.ok && flow.configState.config.rule.mode === flow.rulePreset
@@ -227,18 +224,6 @@ export const RuleSetupPage = ({
     t
   });
 
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
-
-  const pushToast = useCallback((tone: ToastTone, title: string, detail?: string) => {
-    toastIdRef.current += 1;
-    const id = `rule-toast-${toastIdRef.current}`;
-    const toast: ToastMessage =
-      detail === undefined ? { id, tone, title } : { id, tone, title, detail };
-    setToasts((current) => [...current.slice(-2), toast]);
-  }, []);
-
   const copyScript = useCallback(() => {
     if (!flow.configState.ok) {
       return;
@@ -256,7 +241,7 @@ export const RuleSetupPage = ({
   }, [flow.configState, pushToast, t]);
 
   useEffect(() => {
-    setIsDeleteConfirmModalOpen(false);
+    setDialog((current) => (current === 'delete' ? 'none' : current));
   }, [flow.selectedShellyId]);
 
   useEffect(() => {
@@ -295,7 +280,7 @@ export const RuleSetupPage = ({
     if (!flow.deleteAutomationScriptMutation.isSuccess) {
       return;
     }
-    setIsDeleteConfirmModalOpen(false);
+    setDialog('none');
     pushToast('ok', t('hardware.rule.deleteScriptDone'));
     flow.deleteAutomationScriptMutation.reset();
   }, [flow.deleteAutomationScriptMutation, pushToast, t]);
@@ -304,14 +289,14 @@ export const RuleSetupPage = ({
     if (!flow.installMutation.isError) {
       return;
     }
-    setIsInstallBlockModalOpen(true);
+    setDialog('install-block');
   }, [flow.installMutation.error, flow.installMutation.isError]);
 
   useEffect(() => {
     if (!flow.installMutation.isSuccess || !flow.canRunSafeRelayTest) {
       return;
     }
-    setIsRelayTestModalOpen(true);
+    setDialog('relay-test');
     flow.installMutation.reset();
   }, [flow.canRunSafeRelayTest, flow.installMutation]);
 
@@ -331,7 +316,7 @@ export const RuleSetupPage = ({
     if (!flow.safeRelayTestMutation.isSuccess) {
       return;
     }
-    setIsRelayTestModalOpen(false);
+    setDialog('none');
     pushToast('ok', t('hardware.ready'), t('hardware.rule.relayTestDone'));
     flow.safeRelayTestMutation.reset();
   }, [flow.safeRelayTestMutation, pushToast, t]);
@@ -352,7 +337,7 @@ export const RuleSetupPage = ({
 
   const openAdvancedModal = () => {
     setAdvancedDraft(createAdvancedDraft(flow));
-    setIsAdvancedModalOpen(true);
+    setDialog('advanced');
   };
 
   const resetAdvancedDraft = () => {
@@ -376,7 +361,7 @@ export const RuleSetupPage = ({
     flow.setStaleTimeoutMinInput(advancedDraft.staleTimeoutMinInput);
     flow.setMinChangeMinInput(advancedDraft.minChangeMinInput);
     flow.setMaxOnHoursInput(advancedDraft.maxOnHoursInput);
-    setIsAdvancedModalOpen(false);
+    setDialog('none');
   };
 
   const runSafeRelayTest = () => {
@@ -387,7 +372,7 @@ export const RuleSetupPage = ({
     if (flow.safeRelayTestMutation.isPending) {
       return;
     }
-    setIsRelayTestModalOpen(false);
+    setDialog('none');
   };
 
   return (
@@ -568,7 +553,7 @@ export const RuleSetupPage = ({
                 type="button"
                 disabled={!flow.configState.ok}
                 title={t('hardware.rule.scriptPreviewTitle')}
-                onClick={() => setIsScriptModalOpen(true)}
+                onClick={() => setDialog('script')}
               >
                 <CodeIcon />
                 {t('hardware.rule.scriptPreview')}
@@ -590,7 +575,7 @@ export const RuleSetupPage = ({
                 type="button"
                 disabled={!flow.selectedShelly || isScriptActionBusy}
                 title={t('hardware.rule.deleteScriptTitle')}
-                onClick={() => setIsDeleteConfirmModalOpen(true)}
+                onClick={() => setDialog('delete')}
               >
                 <IconTrash className="icon-action__svg" aria-hidden="true" />
                 {t('hardware.rule.deleteScriptFromShelly')}
@@ -611,10 +596,10 @@ export const RuleSetupPage = ({
 
       <Modal
         closeLabel={t('common.close')}
-        open={isInstallBlockModalOpen && flow.installMutation.isError}
+        open={dialog === 'install-block' && flow.installMutation.isError}
         title={t('hardware.rule.installBlockedTitle')}
         onClose={() => {
-          setIsInstallBlockModalOpen(false);
+          setDialog('none');
           flow.installMutation.reset();
         }}
       >
@@ -642,7 +627,7 @@ export const RuleSetupPage = ({
         busy={flow.safeRelayTestMutation.isPending}
         closeLabel={t('common.close')}
         dismissible={false}
-        open={isRelayTestModalOpen && flow.canRunSafeRelayTest}
+        open={dialog === 'relay-test' && flow.canRunSafeRelayTest}
         title={t('hardware.rule.relayTestTitle')}
         onClose={closeRelayTestModal}
       >
@@ -652,10 +637,10 @@ export const RuleSetupPage = ({
       </Modal>
       <Modal
         closeLabel={t('common.close')}
-        open={isScriptModalOpen && flow.configState.ok}
+        open={dialog === 'script' && flow.configState.ok}
         size="workspace"
         title={t('hardware.rule.scriptPreview')}
-        onClose={() => setIsScriptModalOpen(false)}
+        onClose={() => setDialog('none')}
       >
         {flow.configState.ok && (
           <ScriptPreview
@@ -686,11 +671,11 @@ export const RuleSetupPage = ({
         }
         busy={flow.deleteAutomationScriptMutation.isPending}
         closeLabel={t('common.close')}
-        open={isDeleteConfirmModalOpen}
+        open={dialog === 'delete'}
         title={t('hardware.rule.deleteScriptConfirmTitle')}
         onClose={() => {
           if (!flow.deleteAutomationScriptMutation.isPending) {
-            setIsDeleteConfirmModalOpen(false);
+            setDialog('none');
           }
         }}
       >
@@ -721,9 +706,9 @@ export const RuleSetupPage = ({
           </>
         }
         closeLabel={t('common.close')}
-        open={isAdvancedModalOpen}
+        open={dialog === 'advanced'}
         title={t('hardware.rule.advancedTitle')}
-        onClose={() => setIsAdvancedModalOpen(false)}
+        onClose={() => setDialog('none')}
       >
         <div className="advanced-settings">
           <section className="advanced-settings__section">
