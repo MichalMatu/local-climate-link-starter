@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-shelly-control-polish-stage4",
+  "task_digest": "9a2bd8852208fe4a9f517192228e511fc007488d5e62579861419bfb8b841272",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T17:00:42.008479+00:00",
+  "attempt_id": "340b0468f1a65bbf3048af0b",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 27670,
+  "updated_at": "2026-09-11T17:00:42.008615+00:00",
+  "pid": 27670
+}
