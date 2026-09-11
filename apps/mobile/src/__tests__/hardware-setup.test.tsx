@@ -361,9 +361,10 @@ const addSensorThroughUi = async ({
   ).not.toBeInTheDocument();
 };
 
-const openSensorSettingsDialog = async (name = 'Xiaomi salon') => {
-  fireEvent.click(screen.getByRole('button', { name: `Ustawienia termometru ${name}` }));
-  return screen.findByRole('dialog', { name: 'Ustawienia termometru' });
+const getSavedSensorCard = (name: string) => {
+  const card = screen.getByText(name).closest('article');
+  expect(card).not.toBeNull();
+  return card!;
 };
 
 describe('HardwareSetupScreen', () => {
@@ -1623,31 +1624,25 @@ describe('HardwareSetupScreen', () => {
     await addSensorThroughUi({ name: 'Xiaomi salon' });
 
     expect(screen.getByText('Xiaomi salon')).toBeInTheDocument();
-    expect(screen.queryByText('Nazwa termometru')).not.toBeInTheDocument();
-    expect(screen.queryByText('MAC')).not.toBeInTheDocument();
-    expect(screen.queryByText('Bateria')).not.toBeInTheDocument();
-    expect(screen.queryByText('RSSI')).not.toBeInTheDocument();
-    expect(screen.queryByText('Xiaomi/PVVX BTHome v2')).not.toBeInTheDocument();
-    const sensorSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
-    expect(within(sensorSettingsDialog).getByLabelText('Nazwa termometru')).toHaveValue(
+    const sensorCard = getSavedSensorCard('Xiaomi salon');
+    expect(within(sensorCard).getByText('MAC')).toBeInTheDocument();
+    expect(within(sensorCard).getByText('A4:C1:38:4F:24:CD')).toBeInTheDocument();
+    expect(within(sensorCard).getByText('BTHome v2')).toBeInTheDocument();
+    expect(within(sensorCard).getByText('Bateria')).toBeInTheDocument();
+    expect(within(sensorCard).getByText('RSSI')).toBeInTheDocument();
+    expect(
+      within(sensorCard).getByRole('button', {
+        name: 'Ustaw czas Xiaomi/PVVX zgodnie z telefonem'
+      })
+    ).toBeInTheDocument();
+    expect(
+      within(sensorCard).getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
+    ).toHaveClass('icon-action--danger');
+    fireEvent.click(within(sensorCard).getByRole('button', { name: 'Nazwa termometru' }));
+    expect(within(sensorCard).getByLabelText('Nazwa termometru')).toHaveValue(
       'Xiaomi salon'
     );
-    expect(within(sensorSettingsDialog).getByText('MAC')).toBeInTheDocument();
-    expect(
-      within(sensorSettingsDialog).getByText('A4:C1:38:4F:24:CD')
-    ).toBeInTheDocument();
-    expect(within(sensorSettingsDialog).getByText('BTHome v2')).toBeInTheDocument();
-    expect(within(sensorSettingsDialog).getByText('Bateria')).toBeInTheDocument();
-    expect(within(sensorSettingsDialog).getByText('RSSI')).toBeInTheDocument();
-    expect(
-      within(sensorSettingsDialog).getByRole('button', { name: 'Ustaw czas' })
-    ).toHaveAttribute('title', 'Ustaw czas Xiaomi/PVVX zgodnie z telefonem');
-    expect(
-      within(sensorSettingsDialog).getByRole('button', { name: 'Usuń' })
-    ).toHaveClass('secondary-action--danger');
-    fireEvent.click(
-      within(sensorSettingsDialog).getByRole('button', { name: 'Zamknij' })
-    );
+    fireEvent.blur(within(sensorCard).getByLabelText('Nazwa termometru'));
     expect(screen.queryByText('wybrane')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Wybierz' })).not.toBeInTheDocument();
 
@@ -1736,13 +1731,12 @@ describe('HardwareSetupScreen', () => {
     await addSensorThroughUi({ name: 'Xiaomi salon' });
 
     const savedSensorList = screen.getByLabelText('Dodane termometry');
-    expect(within(savedSensorList).queryByText('BTHome v2')).not.toBeInTheDocument();
+    expect(within(savedSensorList).getByText('BTHome v2')).toBeInTheDocument();
 
-    const settingsDialog = await openSensorSettingsDialog('Xiaomi salon');
-    expect(within(settingsDialog).getByText('BTHome v2')).toBeInTheDocument();
+    let sensorCard = getSavedSensorCard('Xiaomi salon');
     fireEvent.click(
-      within(settingsDialog).getByRole('button', {
-        name: 'Usuń'
+      within(sensorCard).getByRole('button', {
+        name: 'Usuń termometr tylko z aplikacji'
       })
     );
     const dialog = await screen.findByRole('dialog', { name: 'Usunąć termometr?' });
@@ -1759,10 +1753,10 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText('Xiaomi salon')).toBeInTheDocument();
 
-    const nextSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
+    sensorCard = getSavedSensorCard('Xiaomi salon');
     fireEvent.click(
-      within(nextSettingsDialog).getByRole('button', {
-        name: 'Usuń'
+      within(sensorCard).getByRole('button', {
+        name: 'Usuń termometr tylko z aplikacji'
       })
     );
     fireEvent.click(
@@ -2201,9 +2195,9 @@ describe('HardwareSetupScreen', () => {
     });
 
     expect(screen.getByText('TP357 salon')).toBeInTheDocument();
-    const tp357SettingsDialog = await openSensorSettingsDialog('TP357 salon');
-    expect(within(tp357SettingsDialog).getByText('TP357')).toBeInTheDocument();
-    fireEvent.click(within(tp357SettingsDialog).getByRole('button', { name: 'Zamknij' }));
+    expect(
+      within(getSavedSensorCard('TP357 salon')).getByText('TP357')
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
 
@@ -2287,12 +2281,9 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('Termometr 24:CD')).toBeInTheDocument();
     expect(screen.getByText('21.3°C')).toBeInTheDocument();
     expect(screen.getByText('45.7%')).toBeInTheDocument();
-    expect(screen.queryByText('100%')).not.toBeInTheDocument();
-    const sensorSettingsDialog = await openSensorSettingsDialog('Termometr 24:CD');
-    expect(
-      within(sensorSettingsDialog).getByText('A4:C1:38:4F:24:CD')
-    ).toBeInTheDocument();
-    expect(within(sensorSettingsDialog).getByText('100%')).toBeInTheDocument();
+    const sensorCard = getSavedSensorCard('Termometr 24:CD');
+    expect(within(sensorCard).getByText('A4:C1:38:4F:24:CD')).toBeInTheDocument();
+    expect(within(sensorCard).getByText('100%')).toBeInTheDocument();
   });
 
   it('refreshes saved thermometer cards from a foreground phone BLE scan', async () => {
@@ -2315,11 +2306,9 @@ describe('HardwareSetupScreen', () => {
 
     expect(await screen.findByText('21.3°C')).toBeInTheDocument();
     expect(screen.getByText('45.7%')).toBeInTheDocument();
-    expect(screen.queryByText('100%')).not.toBeInTheDocument();
-    expect(screen.queryByText('-72 dBm')).not.toBeInTheDocument();
-    const sensorSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
-    expect(within(sensorSettingsDialog).getByText('100%')).toBeInTheDocument();
-    expect(within(sensorSettingsDialog).getByText('-72 dBm')).toBeInTheDocument();
+    const sensorCard = getSavedSensorCard('Xiaomi salon');
+    expect(within(sensorCard).getByText('100%')).toBeInTheDocument();
+    expect(within(sensorCard).getByText('-72 dBm')).toBeInTheDocument();
   });
 
   it('restarts saved thermometer live scan after app visibility resumes', async () => {
@@ -2620,13 +2609,9 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     expect(screen.getByText('31.2°C')).toBeInTheDocument();
-    const sensorSettingsDialog = await openSensorSettingsDialog('Termometr 24:CD');
     expect(
-      within(sensorSettingsDialog).getByText('A4:C1:38:4F:24:CD')
+      within(getSavedSensorCard('Termometr 24:CD')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();
-    fireEvent.click(
-      within(sensorSettingsDialog).getByRole('button', { name: 'Zamknij' })
-    );
 
     await waitFor(() => {
       const rpcMethods = vi
@@ -2951,9 +2936,8 @@ describe('HardwareSetupScreen', () => {
     expect(within(addSensorDialog).getByLabelText('MAC termometru')).toHaveValue('');
     fireEvent.click(within(addSensorDialog).getByRole('button', { name: 'Zamknij' }));
     expect(screen.getByText('Xiaomi salon')).toBeInTheDocument();
-    const sensorSettingsDialog = await openSensorSettingsDialog('Xiaomi salon');
     expect(
-      within(sensorSettingsDialog).getByText('A4:C1:38:4F:24:CD')
+      within(getSavedSensorCard('Xiaomi salon')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();
   });
 

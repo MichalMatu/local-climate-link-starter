@@ -1,7 +1,7 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
-import { DiagnosticRow, Modal, ToastViewport } from '@lcl/ui';
-import { IconSettings } from '@tabler/icons-react';
+import { Modal, ToastViewport } from '@lcl/ui';
+import { IconClock, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
@@ -175,25 +175,22 @@ type SensorDialogState =
   | { kind: 'none' }
   | { kind: 'add' }
   | { kind: 'ble' }
-  | { kind: 'settings'; deviceId: string }
   | { kind: 'remove'; device: SensorDraftDevice };
 
 export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) => {
   const { locale, t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
+  const [editingSensorId, setEditingSensorId] = useState<string | null>(null);
   const [didSubmitSensorAdd, setDidSubmitSensorAdd] = useState(false);
   const { dismissToast, pushToast, toasts } = useToastQueue('sensor-toast');
   const isAddSensorModalOpen = dialog.kind === 'add';
   const isPhoneBleScanModalOpen = dialog.kind === 'ble';
-  const sensorSettingsId = dialog.kind === 'settings' ? dialog.deviceId : null;
   const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
   const shownPhoneBleErrorRef = useRef<string | null>(null);
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
   const isSensorGattPending = flow.setPvvxTimeMutation.isPending;
   const shouldShowPhoneBleEmpty =
     flow.phoneBleScanMutation.isSuccess && flow.phoneBleScanCandidates.length === 0;
-  const sensorSettingsDevice =
-    flow.sensorDevices.find((device) => device.id === sensorSettingsId) ?? null;
   const sensorDeviceCount = flow.sensorDevices.length;
   const startSavedSensorLiveScan = flow.startSavedSensorLiveScan;
   const restartSavedSensorLiveScan = flow.restartSavedSensorLiveScan;
@@ -361,14 +358,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
   const readingsForSensor = (device: SensorDraftDevice): SensorReadingSample[] =>
     flow.sensorSamplesById[device.id.toUpperCase()] ?? [];
 
-  const openSensorSettings = (device: SensorDraftDevice) => {
-    setDialog({ kind: 'settings', deviceId: device.id });
-  };
-
-  const openRemoveFromSettings = (device: SensorDraftDevice) => {
-    setDialog({ kind: 'remove', device });
-  };
-
   return (
     <section
       className="demo-panel sensor-setup-panel"
@@ -526,89 +515,6 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
         )}
       </Modal>
       <Modal
-        closeLabel={t('common.close')}
-        open={sensorSettingsDevice !== null}
-        title={t('hardware.sensor.settings')}
-        actions={
-          sensorSettingsDevice && (
-            <button
-              className="secondary-action secondary-action--danger"
-              type="button"
-              title={t('hardware.sensor.deleteTitle')}
-              onClick={() => openRemoveFromSettings(sensorSettingsDevice)}
-            >
-              {t('common.delete')}
-            </button>
-          )
-        }
-        onClose={() => setDialog({ kind: 'none' })}
-      >
-        {sensorSettingsDevice && (
-          <div className="settings-modal-layout">
-            <label className="field">
-              {t('hardware.sensor.nameLabel')}
-              <input
-                type="text"
-                value={sensorSettingsDevice.name}
-                onChange={(event) =>
-                  flow.setSensorDeviceName(
-                    sensorSettingsDevice.id,
-                    event.currentTarget.value
-                  )
-                }
-              />
-            </label>
-            <div className="status-stack">
-              <DiagnosticRow label="MAC" value={sensorSettingsDevice.runtimeAddress} />
-              <DiagnosticRow
-                label={t('hardware.sensor.typeLabel')}
-                value={sensorProfileDisplayLabels[sensorSettingsDevice.profileId]}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.lastMeasurement')}
-                value={formatSeenAt(
-                  latestSample(readingsForSensor(sensorSettingsDevice)),
-                  locale,
-                  t('common.missingData')
-                )}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.battery')}
-                value={formatBattery(
-                  latestBatterySample(readingsForSensor(sensorSettingsDevice)),
-                  t('common.missingData')
-                )}
-              />
-              <DiagnosticRow
-                label={t('common.rssi')}
-                value={formatNullableMetric(
-                  latestNumericSample(readingsForSensor(sensorSettingsDevice), 'rssi')
-                    ?.rssi,
-                  ' dBm',
-                  0,
-                  t('common.missingData')
-                )}
-              />
-            </div>
-            {sensorSettingsDevice.profileId === 'xiaomi_lywsd03mmc_bthome_v2' && (
-              <div className="settings-action-stack">
-                <button
-                  className="secondary-action"
-                  type="button"
-                  disabled={flow.setPvvxTimeMutation.isPending}
-                  title={t('hardware.sensor.pvvxSetTimeTitle')}
-                  onClick={() => flow.setPvvxTimeMutation.mutate(sensorSettingsDevice)}
-                >
-                  {flow.setPvvxTimeMutation.isPending
-                    ? t('hardware.sensor.pvvxTimeSetting')
-                    : t('hardware.sensor.pvvxSetTime')}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
-      <Modal
         closeLabel={t('common.cancel')}
         description={sensorPendingRemoval?.name ?? ''}
         open={sensorPendingRemoval !== null}
@@ -647,21 +553,68 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
             typeof humiditySample?.humidityPct === 'number' &&
             Number.isFinite(humiditySample.humidityPct);
 
+          const latest = latestSample(samples);
+          const batterySample = latestBatterySample(samples);
+          const rssiSample = latestNumericSample(samples, 'rssi');
+          const isEditing = editingSensorId === device.id;
+
           return (
             <article key={device.id} className="saved-list__item sensor-saved-card">
               <div className="sensor-card-header">
-                <h3 className="sensor-card-title">{device.name}</h3>
-                <button
-                  className="icon-action saved-list__settings-toggle"
-                  type="button"
-                  aria-label={t('hardware.sensor.settingsAria', {
-                    name: device.name
-                  })}
-                  title={t('hardware.sensor.settingsTitle')}
-                  onClick={() => openSensorSettings(device)}
-                >
-                  <IconSettings className="icon-action__svg" aria-hidden="true" />
-                </button>
+                {isEditing ? (
+                  <input
+                    autoFocus
+                    className="sensor-card-name-input"
+                    aria-label={t('hardware.sensor.nameLabel')}
+                    type="text"
+                    value={device.name}
+                    onBlur={() => setEditingSensorId(null)}
+                    onChange={(event) =>
+                      flow.setSensorDeviceName(device.id, event.currentTarget.value)
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === 'Escape') {
+                        event.currentTarget.blur();
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="sensor-card-title-row">
+                    <h3 className="sensor-card-title">{device.name}</h3>
+                    <button
+                      className="icon-action rule-summary-icon-action"
+                      type="button"
+                      aria-label={t('hardware.sensor.nameLabel')}
+                      title={t('hardware.sensor.nameLabel')}
+                      onClick={() => setEditingSensorId(device.id)}
+                    >
+                      <IconPencil className="icon-action__svg" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+                <div className="sensor-card-actions">
+                  {device.profileId === 'xiaomi_lywsd03mmc_bthome_v2' && (
+                    <button
+                      className="icon-action"
+                      type="button"
+                      disabled={flow.setPvvxTimeMutation.isPending}
+                      aria-label={t('hardware.sensor.pvvxSetTimeTitle')}
+                      title={t('hardware.sensor.pvvxSetTimeTitle')}
+                      onClick={() => flow.setPvvxTimeMutation.mutate(device)}
+                    >
+                      <IconClock className="icon-action__svg" aria-hidden="true" />
+                    </button>
+                  )}
+                  <button
+                    className="icon-action icon-action--danger"
+                    type="button"
+                    aria-label={t('hardware.sensor.deleteTitle')}
+                    title={t('hardware.sensor.deleteTitle')}
+                    onClick={() => setDialog({ kind: 'remove', device })}
+                  >
+                    <IconTrash className="icon-action__svg" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
               <div className="sensor-metric-grid">
                 <div
@@ -715,6 +668,35 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
                   </strong>
                 </div>
               </div>
+              <dl className="sensor-card-details">
+                <div>
+                  <dt>{t('hardware.sensor.typeLabel')}</dt>
+                  <dd>{sensorProfileDisplayLabels[device.profileId]}</dd>
+                </div>
+                <div>
+                  <dt>{t('hardware.metrics.battery')}</dt>
+                  <dd>{formatBattery(batterySample, t('common.missingData'))}</dd>
+                </div>
+                <div>
+                  <dt>{t('common.rssi')}</dt>
+                  <dd>
+                    {formatNullableMetric(
+                      rssiSample?.rssi,
+                      ' dBm',
+                      0,
+                      t('common.missingData')
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t('hardware.metrics.lastMeasurement')}</dt>
+                  <dd>{formatSeenAt(latest, locale, t('common.missingData'))}</dd>
+                </div>
+                <div className="sensor-card-details__wide">
+                  <dt>MAC</dt>
+                  <dd>{device.runtimeAddress}</dd>
+                </div>
+              </dl>
             </article>
           );
         })}

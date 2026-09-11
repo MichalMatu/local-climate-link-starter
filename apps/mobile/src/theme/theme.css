@@ -2275,3 +2275,68 @@ select {
   background: var(--lcl-color-accent);
   color: var(--lcl-color-accent-contrast);
 }
+
+/* Compact saved-device cards: UX polish 2026-09-11 */
+.sensor-saved-card {
+  gap: var(--lcl-spacing-sm);
+  padding: var(--lcl-spacing-md);
+}
+
+.sensor-card-header {
+  align-items: center;
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.sensor-card-title-row,
+.sensor-card-actions {
+  align-items: center;
+  display: flex;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.sensor-card-title-row h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sensor-card-name-input {
+  min-height: var(--lcl-size-compact-control-min-height);
+  min-width: 0;
+  width: 100%;
+}
+
+.sensor-card-details {
+  display: grid;
+  gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  margin: 0;
+}
+
+.sensor-card-details > div {
+  align-items: baseline;
+  display: flex;
+  gap: var(--lcl-spacing-xs);
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.sensor-card-details dt {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+}
+
+.sensor-card-details dd {
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.sensor-card-details__wide {
+  grid-column: 1 / -1;
+}
