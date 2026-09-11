@@ -1,0 +1,15 @@
+{
+  "id": "20260911-production-readiness-audit-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/run-production-readiness-audit-20260911.sh > /tmp/run-production-readiness-audit-20260911.sh; sh /tmp/run-production-readiness-audit-20260911.sh"
+  ]
+}
