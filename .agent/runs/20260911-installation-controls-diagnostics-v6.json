@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260911-installation-controls-diagnostics-v6",
   "task_digest": "39aad329eaa11deea04510d2f48c0da56782892f8653d18a5d6132227a1785a0",
-  "idle_timeout": 900,
-  "task_timeout": 7200,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-11T07:15:46.741486+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-11T07:15:50.218973+00:00",
   "attempt_id": "496cf3ea45c4ff84571eb76e",
   "daemon_version": "4.18.20",
   "daemon_pid": 52658,
-  "updated_at": "2026-09-11T07:15:46.741573+00:00",
+  "updated_at": "2026-09-11T07:15:50.457631+00:00",
   "pid": 52658
 }
