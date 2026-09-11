@@ -9,7 +9,6 @@ test -z "$(git status --porcelain)"
 python3 - <<'PY'
 from pathlib import Path
 import re
-from collections import Counter, defaultdict
 root=Path('.')
 mobile=root/'apps/mobile/src'
 prod_tsx=[p for p in mobile.rglob('*.tsx') if '__tests__' not in p.parts and not re.search(r'\.(test|spec)\.tsx$', p.name)]
@@ -20,7 +19,6 @@ polish_rx=re.compile(r'[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]')
 direct=[]
 for p in prod_tsx:
   for i,line in enumerate(p.read_text().splitlines(),1):
-    # Ignore translation keys/comments/import paths; report likely runtime copy only.
     if polish_rx.search(line) and not re.search(r"\bt\(['\"]", line):
       direct.append((p,i,line.strip()))
 print('PROD_DIRECT_POLISH_CANDIDATES=',len(direct))
@@ -53,8 +51,7 @@ body=flow[start:end] if start!=-1 and end!=-1 else ''
 entries=[]
 for line in body.splitlines()[1:]:
   s=line.strip().rstrip(',')
-  if s and not s.startswith('//') and not s.startswith('return') and not s in {'{','}'}:
-    # count only top-level-ish simple return fields
+  if s and not s.startswith('//') and not s.startswith('return') and s not in {'{','}'}:
     if re.match(r'^[A-Za-z_$][\w$]*(?::|$)',s): entries.append(s)
 print('HARDWARE_SETUP_FLOW_RETURN_FIELDS=',len(entries))
 for e in entries: print('  '+e)
@@ -85,7 +82,9 @@ for p in css:
 
 print('\n=== TOKEN GENERATOR DUPLICATION ===')
 gen=(root/'packages/design-tokens/build/build-tokens.mjs').read_text()
-print('EXPLICIT_LIGHT_REEMITS_BASE=', "...lightVariableLines," in gen[gen.find(\":root[data-lcl-theme='light']\"):])
+light_marker=":root[data-lcl-theme='light']"
+light_pos=gen.find(light_marker)
+print('EXPLICIT_LIGHT_REEMITS_BASE=', light_pos >= 0 and '...lightVariableLines,' in gen[light_pos:])
 print('LIGHT_VARIABLE_LINES_REFS=',gen.count('lightVariableLines'))
 
 print('\n=== QUALITY GATE COVERAGE GAPS ===')
