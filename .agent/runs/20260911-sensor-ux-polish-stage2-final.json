@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-sensor-ux-polish-stage2-final",
+  "task_digest": "7deba517cf25af88fe2ddab92490cbbc8940aacf4b1e2797ac8c33c45f6916b8",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T15:45:33.554137+00:00",
+  "attempt_id": "9666a55a7d9143b94bbf0114",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 48716,
+  "updated_at": "2026-09-11T15:45:33.554324+00:00",
+  "pid": 48716
+}
