@@ -28,11 +28,6 @@ export const es = {
       title: 'Controlar por horario',
       description: 'Enciende y apaga un dispositivo a horas elegidas sin usar sensor.',
       context: 'Control horario'
-    },
-    manage: {
-      title: 'Gestionar una automatización existente',
-      description: 'Abre dispositivos, reglas y diagnósticos guardados.',
-      context: 'Gestión de automatización'
     }
   },
   time: {
@@ -223,49 +218,6 @@ export const es = {
       copyDone: 'Informe de soporte copiado.',
       copyFailed: 'No se pudo copiar el informe de soporte.'
     }
-  },
-  demo: {
-    addKit: 'Añadir kit',
-    blockedInstall: 'Instalación bloqueada',
-    checkCompatibility: 'Comprobar demo',
-    checkCompatibilityTitle: 'Comprobar compatibilidad del Shelly de ejemplo',
-    compatibleShelly: 'El Shelly simulado es compatible.',
-    emptySensors: 'Todavía no se ha seleccionado ningún sensor.',
-    fakeUpload: 'Carga simulada',
-    install: 'Instalar demo',
-    installScript: 'Enviar script demo',
-    installScriptTitle: 'Enviar script al Shelly simulado',
-    installTitle: 'Ir al envío simulado del script',
-    loadingReadings: 'Cargando lecturas demo.',
-    loadingShelly: 'Comprobando enchufe demo.',
-    loadingSensors: 'Buscando sensores demo.',
-    matterScenario: 'Escenario demo: Matter ON',
-    noRealLan: 'El script va a un Shelly simulado. No se usa la LAN real.',
-    relayFailed: 'La prueba del relé falló. El enchufe quedó en OFF.',
-    relayFailedSummary: 'La prueba del relé no confirmó OFF.',
-    relayOkSummary: 'La prueba simulada del relé terminó en OFF.',
-    scan: 'Escanear demo',
-    scanTitle: 'Cargar lecturas BLE de ejemplo',
-    section: {
-      done: 'Estado',
-      install: 'Instalación',
-      relay: 'Prueba',
-      rule: 'Regla',
-      script: 'Script',
-      sensor: 'Sensores',
-      shelly: 'Enchufe',
-      start: 'Inicio'
-    },
-    selectSensorTitle: 'Seleccionar este termómetro para la regla demo',
-    startSetup: 'Configurar termostato local',
-    startTitle: 'Iniciar configuración del kit de ejemplo',
-    statusRuntimeAddress: 'Dirección runtime de Shelly',
-    statusRuntimeSuffix: 'simulada',
-    statusScriptDemo: 'demo en ejecución',
-    statusModeDemo: 'demo sin hardware',
-    uploadFailed: 'No se pudo enviar el script demo.',
-    usePhoneSetupOnly:
-      'El teléfono solo ayuda con la configuración. Después de instalar, Shelly funciona localmente.'
   },
   hardware: {
     ready: 'Listo — funciona localmente',

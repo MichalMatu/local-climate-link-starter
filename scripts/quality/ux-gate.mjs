@@ -22,7 +22,8 @@ const hardwareSetupPagePaths = [
   'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx',
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
   'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx',
-  'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx'
+  'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx',
+  'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx'
 ];
 const feedbackContractPagePaths = [...hardwareSetupPagePaths];
 const packageRuntimeCopyPaths = [

@@ -18,7 +18,7 @@ const HardwareSetupScreen = lazy(async () => {
   return { default: module.HardwareSetupScreen };
 });
 
-type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;
+type SetupRouteIntent = SetupIntent;
 type PrimaryAppRoute =
   | { type: 'dashboard'; kind?: AppNavigationKind }
   | { type: 'intent'; sourceKind: AppNavigationKind }
@@ -122,11 +122,7 @@ export const AppRoutes = () => {
     };
   }, [navigate]);
 
-  const selectIntent = (intent: SetupIntent, sourceKind: AppNavigationKind) => {
-    if (intent === 'manage') {
-      navigate({ type: 'dashboard', kind: sourceKind });
-      return;
-    }
+  const selectIntent = (intent: SetupIntent) => {
     const nextKind = setupKindForIntent(intent);
     navigate({ type: 'setup', intent, sourceKind: nextKind });
   };
@@ -148,7 +144,7 @@ export const AppRoutes = () => {
         onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
         onOpenSettings={openSettings}
-        onSelect={(intent) => selectIntent(intent, route.sourceKind)}
+        onSelect={selectIntent}
       />
     );
   }

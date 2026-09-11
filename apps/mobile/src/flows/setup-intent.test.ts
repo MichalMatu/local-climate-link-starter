@@ -11,17 +11,11 @@ describe('setup intent', () => {
       'humidifying',
       'dehumidifying'
     ]);
-    expect(rulePresetsForSetupIntent('manage')).toEqual([
-      'heating',
-      'cooling',
-      'humidifying',
-      'dehumidifying'
-    ]);
   });
 
   it('selects a safe default only when a new goal needs one', () => {
     expect(defaultRulePresetForSetupIntent('temperature')).toBe('heating');
     expect(defaultRulePresetForSetupIntent('humidity')).toBe('humidifying');
-    expect(defaultRulePresetForSetupIntent('manage')).toBeNull();
+    expect(defaultRulePresetForSetupIntent('time')).toBeNull();
   });
 });

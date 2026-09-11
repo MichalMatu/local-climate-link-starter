@@ -29,11 +29,6 @@ export const fr = {
       title: 'Contrôler selon l’heure',
       description: 'Allumer et éteindre un appareil aux heures choisies, sans capteur.',
       context: 'Contrôle horaire'
-    },
-    manage: {
-      title: 'Gérer une automatisation existante',
-      description: 'Ouvrez les appareils, règles et diagnostics enregistrés.',
-      context: 'Gestion de l’automatisation'
     }
   },
   time: {
@@ -228,49 +223,6 @@ export const fr = {
       copyDone: 'Rapport support copié.',
       copyFailed: 'Impossible de copier le rapport support.'
     }
-  },
-  demo: {
-    addKit: 'Ajouter le kit',
-    blockedInstall: 'Installation bloquée',
-    checkCompatibility: 'Vérifier la démo',
-    checkCompatibilityTitle: 'Vérifier la compatibilité du Shelly d’exemple',
-    compatibleShelly: 'Le faux Shelly est compatible.',
-    emptySensors: 'Aucun capteur sélectionné.',
-    fakeUpload: 'Envoi simulé',
-    install: 'Installer la démo',
-    installScript: 'Envoyer le script démo',
-    installScriptTitle: 'Envoyer le script au Shelly simulé',
-    installTitle: 'Passer à l’envoi simulé du script',
-    loadingReadings: 'Chargement des mesures de démo.',
-    loadingShelly: 'Vérification de la prise démo.',
-    loadingSensors: 'Recherche des capteurs de démo.',
-    matterScenario: 'Scénario démo : Matter ON',
-    noRealLan: 'Le script va vers un Shelly simulé. Le vrai LAN n’est pas utilisé.',
-    relayFailed: 'Le test du relais a échoué. La prise a été mise sur OFF.',
-    relayFailedSummary: 'Le test du relais n’a pas confirmé OFF.',
-    relayOkSummary: 'Le faux test du relais s’est terminé sur OFF.',
-    scan: 'Scanner la démo',
-    scanTitle: 'Charger des mesures BLE d’exemple',
-    section: {
-      done: 'Statut',
-      install: 'Installation',
-      relay: 'Test',
-      rule: 'Règle',
-      script: 'Script',
-      sensor: 'Capteurs',
-      shelly: 'Prise',
-      start: 'Début'
-    },
-    selectSensorTitle: 'Sélectionner ce thermomètre pour la règle démo',
-    startSetup: 'Configurer le thermostat local',
-    startTitle: 'Démarrer la configuration du kit d’exemple',
-    statusRuntimeAddress: 'Adresse runtime Shelly',
-    statusRuntimeSuffix: 'simulée',
-    statusScriptDemo: 'démo en cours',
-    statusModeDemo: 'démo sans matériel',
-    uploadFailed: 'Impossible d’envoyer le script démo.',
-    usePhoneSetupOnly:
-      'Le téléphone aide seulement à configurer. Après installation, Shelly fonctionne localement.'
   },
   hardware: {
     ready: 'Terminé — fonctionnement local',

@@ -1,3 +1,5 @@
+import { FeedbackPanel, Modal } from '@lcl/ui';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { useTimeAutomationSetupFlow } from '../../../flows/time-automation/useTimeAutomationSetupFlow.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
@@ -12,6 +14,13 @@ export const TimeScheduleSetupPage = ({
 }: TimeScheduleSetupPageProps) => {
   const { t } = useTranslation();
   const timeFlow = useTimeAutomationSetupFlow(flow.selectedShelly);
+  const [isInstallErrorOpen, setIsInstallErrorOpen] = useState(false);
+
+  useEffect(() => {
+    if (timeFlow.installMutation.isError) {
+      setIsInstallErrorOpen(true);
+    }
+  }, [timeFlow.installMutation.isError]);
 
   const install = async () => {
     try {
@@ -62,12 +71,6 @@ export const TimeScheduleSetupPage = ({
         {t('time.ownershipHint')}
       </p>
 
-      {timeFlow.installMutation.isError && (
-        <p className="feedback-panel feedback-panel--warning" role="alert">
-          {mutationError(timeFlow.installMutation.error)}
-        </p>
-      )}
-
       <div className="time-schedule-actions">
         <button
           className="primary-action"
@@ -82,6 +85,22 @@ export const TimeScheduleSetupPage = ({
           {timeFlow.installMutation.isPending ? t('time.installing') : t('time.install')}
         </button>
       </div>
+
+      <Modal
+        closeLabel={t('common.close')}
+        open={isInstallErrorOpen && timeFlow.installMutation.isError}
+        title={t('common.operationFailed')}
+        onClose={() => {
+          setIsInstallErrorOpen(false);
+          timeFlow.installMutation.reset();
+        }}
+      >
+        {timeFlow.installMutation.isError && (
+          <FeedbackPanel tone="danger" title={t('common.operationFailed')}>
+            {mutationError(timeFlow.installMutation.error)}
+          </FeedbackPanel>
+        )}
+      </Modal>
     </section>
   );
 };

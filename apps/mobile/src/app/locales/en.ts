@@ -28,11 +28,6 @@ export const en = {
       title: 'Control by time',
       description: 'Turn a device on and off at chosen times without a sensor.',
       context: 'Time control'
-    },
-    manage: {
-      title: 'Manage existing automation',
-      description: 'Open saved devices, rules, and diagnostics.',
-      context: 'Automation management'
     }
   },
   time: {
@@ -224,49 +219,6 @@ export const en = {
       copyDone: 'Support report copied.',
       copyFailed: 'Could not copy support report.'
     }
-  },
-  demo: {
-    addKit: 'Add kit',
-    blockedInstall: 'Install blocked',
-    checkCompatibility: 'Check demo',
-    checkCompatibilityTitle: 'Check example Shelly compatibility',
-    compatibleShelly: 'Fake Shelly is compatible.',
-    emptySensors: 'No sensor selected yet.',
-    fakeUpload: 'Fake upload',
-    install: 'Install demo',
-    installScript: 'Send demo script',
-    installScriptTitle: 'Send script to the simulated Shelly',
-    installTitle: 'Go to simulated script upload',
-    loadingReadings: 'Loading demo readings.',
-    loadingShelly: 'Checking demo plug.',
-    loadingSensors: 'Searching demo sensors.',
-    matterScenario: 'Demo scenario: Matter ON',
-    noRealLan: 'The script goes to simulated Shelly. The real LAN is not used.',
-    relayFailed: 'Relay test failed. The plug was switched OFF.',
-    relayFailedSummary: 'Relay test did not confirm OFF.',
-    relayOkSummary: 'Fake relay test ended OFF.',
-    scan: 'Scan demo',
-    scanTitle: 'Load example BLE readings',
-    section: {
-      done: 'Status',
-      install: 'Install',
-      relay: 'Test',
-      rule: 'Rule',
-      script: 'Script',
-      sensor: 'Sensors',
-      shelly: 'Plug',
-      start: 'Start'
-    },
-    selectSensorTitle: 'Select this thermometer for the demo rule',
-    startSetup: 'Configure local thermostat',
-    startTitle: 'Start example kit setup',
-    statusRuntimeAddress: 'Shelly runtime address',
-    statusRuntimeSuffix: 'simulated',
-    statusScriptDemo: 'running demo',
-    statusModeDemo: 'demo without hardware',
-    uploadFailed: 'Could not upload demo script.',
-    usePhoneSetupOnly:
-      'The phone only helps with setup. After installation, Shelly runs locally.'
   },
   hardware: {
     ready: 'Done — running locally',

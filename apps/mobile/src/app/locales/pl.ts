@@ -26,11 +26,6 @@ export const pl = {
       title: 'Sterować według czasu',
       description: 'Włączaj i wyłączaj urządzenie o wybranych godzinach, bez czujnika.',
       context: 'Sterowanie według czasu'
-    },
-    manage: {
-      title: 'Zarządzać istniejącą automatyką',
-      description: 'Otwórz zapisane urządzenia, reguły i diagnostykę.',
-      context: 'Zarządzanie automatyką'
     }
   },
   time: {
@@ -223,49 +218,6 @@ export const pl = {
       copyDone: 'Skopiowano raport wsparcia.',
       copyFailed: 'Nie udało się skopiować raportu wsparcia.'
     }
-  },
-  demo: {
-    addKit: 'Dodaj zestaw',
-    blockedInstall: 'Instalacja zablokowana',
-    checkCompatibility: 'Sprawdź demo',
-    checkCompatibilityTitle: 'Sprawdź przykładową kompatybilność Shelly',
-    compatibleShelly: 'Fake Shelly jest zgodne.',
-    emptySensors: 'Nie wybrano jeszcze czujnika.',
-    fakeUpload: 'Fake upload',
-    install: 'Zainstaluj demo',
-    installScript: 'Wyślij skrypt demo',
-    installScriptTitle: 'Wyślij skrypt do symulowanego Shelly',
-    installTitle: 'Przejdź do symulowanej wysyłki skryptu',
-    loadingReadings: 'Ładowanie odczytów demo.',
-    loadingShelly: 'Sprawdzam gniazdko demo.',
-    loadingSensors: 'Szukam czujników demo.',
-    matterScenario: 'Scenariusz demo: Matter ON',
-    noRealLan: 'Skrypt trafia do symulowanego Shelly. Prawdziwy LAN nie jest używany.',
-    relayFailed: 'Test przekaźnika nie powiódł się. Gniazdko zostało wyłączone.',
-    relayFailedSummary: 'Relay test did not confirm OFF.',
-    relayOkSummary: 'Fake relay test ended OFF.',
-    scan: 'Skanuj demo',
-    scanTitle: 'Wczytaj przykładowe odczyty BLE',
-    section: {
-      done: 'Status',
-      install: 'Instalacja',
-      relay: 'Test',
-      rule: 'Reguła',
-      script: 'Skrypt',
-      sensor: 'Czujniki',
-      shelly: 'Gniazdko',
-      start: 'Start'
-    },
-    selectSensorTitle: 'Wybierz ten termometr do reguły demo',
-    startSetup: 'Skonfiguruj lokalny termostat',
-    startTitle: 'Rozpocznij konfigurację przykładowego zestawu',
-    statusRuntimeAddress: 'Adres Shelly runtime',
-    statusRuntimeSuffix: 'symulowany',
-    statusScriptDemo: 'uruchomiony demo',
-    statusModeDemo: 'demo bez hardware',
-    uploadFailed: 'Nie udało się wysłać skryptu demo.',
-    usePhoneSetupOnly:
-      'Telefon pomaga tylko w konfiguracji. Po instalacji Shelly działa lokalnie.'
   },
   hardware: {
     ready: 'Gotowe — działa lokalnie',
