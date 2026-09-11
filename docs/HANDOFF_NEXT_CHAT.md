@@ -24,11 +24,11 @@ ChatGPT plans; Local Agent executes deterministic commands/scripts. Never launch
 
 ## Current product baseline
 
-Last behavior-changing `main` commit before this documentation cleanup:
+Latest behavior-changing implementation checkpoint pending final merge:
 
 ```text
-16d8627b9df050152a72f021e2ab3a228cffefb3
-feat(mobile): add installation controls and diagnostics
+8012d21e57d27f07b070f3e64b3432eb7b4abe2e
+refactor(mobile): unify navigation and setup UX
 ```
 
 Frozen MANUAL-runtime rollback tag remains:
@@ -45,7 +45,7 @@ Remote branch cleanup state at this checkpoint: product work branches are gone; 
 The current v2.0.10 line now includes:
 
 - persistent per-installation identity/configuration,
-- intent-first entry, dashboard, stable installation detail and shared bottom navigation,
+- dashboard-first entry with Add automation opened only from `+`, stable installation detail and shared bottom navigation,
 - climate AUTO/MANUAL runtime mode where the managed Shelly script stays running in both modes,
 - MANUAL-only direct relay ON/OFF using the verified existing safety path,
 - native Shelly schedules for pure time automation,
@@ -75,6 +75,27 @@ The exact `16d8627b...` Android build was installed on the Samsung S22+ and open
 ### STOPPED / MISSING
 
 These are maintenance/failure states, not aliases for MANUAL. Normal AUTO/MANUAL switching must not use `Script.Stop`/`Script.Start`.
+
+## Navigation UX consistency tranche (2026-09-11)
+
+Completed and validated in `8012d21e57d27f07b070f3e64b3432eb7b4abe2e`:
+
+- zero-installation state now stays on the normal `Twoje automatyki` dashboard instead of auto-opening setup,
+- the Add automation intent picker opens only from the dashboard `+` action,
+- removing the final automation returns to the empty dashboard rather than reopening setup,
+- the legacy global top-right Settings trigger was removed; app Settings are entered through the shared bottom navigation,
+- Add automation and hardware setup retain the global `Klimat / Czas / Ustawienia` navigation while preserving their local setup tabs,
+- the Add automation picker no longer exposes the obsolete `Zarządzaj istniejącą automatyką` choice,
+- the source dashboard tab is preserved when opening/cancelling Add automation,
+- time-installation detail now follows the same global bottom-navigation pattern as climate detail and no longer uses the legacy text `Wróć do automatyki` action,
+- the installation-not-found state also exposes the shared bottom navigation,
+- Android Back is consistent: setup → intent → dashboard → app exit,
+- page-title sizing for the intent picker now follows the normal app-page hierarchy instead of the oversized hero heading,
+- device-specific Shelly settings controls remain unchanged and are intentionally distinct from app-level Settings.
+
+Validation for this tranche is green: mobile unit/integration suite, typecheck, lint, `quality:ux`, `quality:repo`, build and the full responsive Playwright matrix (**25/25**) all passed. No Shelly runtime, generated automation script, BLE ownership or LED behavior was changed by this UX tranche.
+
+Physical Samsung S22+ review is the next verification step after final merge/install.
 
 ## Next agreed vertical slice — Shelly LED configuration
 
