@@ -1,274 +1,370 @@
 # Local Climate Link — next chat handoff
 
-Updated: 2026-09-10
+Updated: 2026-09-11 06:35 CEST
 
-This file is the canonical handoff for continuing the current physical-phone E2E/freeze work in a fresh ChatGPT window.
+This is the canonical continuation handoff for the current MANUAL/AUTO runtime-mode work. Read it before changing code.
 
-## Hard binding
+## Hard repository binding and execution model
 
 Work only on:
 
 - repository: `MichalMatu/local-climate-link-starter`
 - repository id: `local-climate-link-starter`
 - Local Agent binding: `e75c77cb-7589-4452-94b2-decc97ff85a1`
-- Local Agent chat: `chat-a8988eef`
+- current Local Agent chat: `chat-904f15d6` (a new ChatGPT window may receive a different `LA_CHAT`; use the bridge-injected value for that new conversation)
 - Local Agent control branch: `agent-control`
 - managed clone: `/Users/michal/agent-workspace/repos/local-climate-link-starter/work`
 
-Every Local Agent task created from this work must contain:
+Every Local Agent task created by this work must contain exactly:
 
 ```json
-"agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
-"resources": []
+"agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1"
 ```
 
-Never infer, inspect, queue, cancel, or execute work for another repository. Check `.agent/status/daemon.json` before editing or queueing work. Do not overlap edits with an active Local Agent task on the same branch.
+Never infer, substitute, inspect, queue, cancel, or execute work for another repository.
 
-## Canonical code state before handoff docs
+Execution rules:
 
-The product code tested in this E2E session is:
+- ChatGPT is the planner; Local Agent executes deterministic commands/scripts only.
+- Never invoke, delegate to, or launch local Codex from a Local Agent task.
+- Before editing the same work branch, read `.agent/status/daemon.json` and ensure no active task owns it.
+- For hybrid GitHub + Local Agent work, verify the exact committed SHA before local validation.
+- If a Local Agent task is active and healthy, do not poll every 30 seconds; use at least 2 minutes and normally 5–10 minutes for builds/tests.
+- If exact evidence proves an active task cannot succeed, cancel that exact task through repository task control rather than waiting for timeout.
+- Follow the Local Agent Chat Bridge hard-binding header injected into the conversation. Bridge controls such as `[LAB:NEXT=2m]`, `[LAB:NEXT=10m]`, `[LAB:PAUSE]`, `[LAB:RESUME]` are conversation-scoped and must never change the global Master switch.
+- Follow the repository's `AGENTS.md` plus Local Agent operating rules referenced by the bridge (`docs/AUTONOMOUS_CHAT_LOOP.md`, `docs/OPERATIONS.md`).
+
+## Exact repository state at handoff
+
+Stable product baseline and current `main` before this documentation commit:
 
 ```text
-main = 771b23456cf7b3fafe62cba3263e1f8f7118580b
+377b7bf7a2bca37ab4371b42be82136c2b2aaf13
+refactor(mobile): remove redundant settings triggers
 ```
 
-That commit is the merged Android phone-alpha signing stabilization.
-
-The handoff docs themselves are documentation-only commits after that tested product SHA. Before any freeze/version change, distinguish the tested product SHA from later documentation-only main commits and verify the exact diff.
-
-Frozen tag `v2.0.9` must never move:
+Feature work branch:
 
 ```text
-tag object = 90378921a79ed3ecb43013e322d27629bf15db64
-commit     = b44899ba66b202ca05f48a8856a9871daee97832
+work/manual-runtime-mode-20260911
 ```
 
-Latest version sequence observed locally on 2026-09-10:
+At the time of this handoff that branch still points to exactly the same product baseline SHA:
 
 ```text
-v2.0.9
-v2.0.8
-v2.0.7
-v2.0.6
-v2.0.5
-v2.0.4
-v2.0.3
-v2.0.2
-v2.0.1
-v2.0.0
-v1.0
+377b7bf7a2bca37ab4371b42be82136c2b2aaf13
 ```
 
-The natural next patch candidate is `2.0.10` / Android `versionCode 20010`, but verify release conventions and all version occurrences before writing the bump.
+Important: there is currently **no committed/pushed MANUAL-live feature implementation on the work branch**. The Local Agent V1–V11 attempts reset the local workspace to the exact baseline before applying deterministic patch scripts; failed attempts did not push a feature commit. Do not assume source changes visible in a failed Local Agent result exist on the remote work branch.
 
-## Physical test hardware
-
-Phone:
-
-- Samsung SM-S906B / Galaxy S22+
-- Android 16 / API 36
-- ADB serial `RFCT70L7E8J`
-- package `link.localclimate.app`
-- currently tested alpha signer SHA-256:
-  `2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76`
-
-Phone-alpha policy is permanent for this project:
-
-- use `pnpm android:phone-alpha`
-- the command must first attempt `adb uninstall link.localclimate.app`
-- app data/permissions are intentionally deleted on each fresh phone-alpha install
-- do not ask for confirmation again
-- alpha signing stays separate from release/Play signing
-
-Real Shelly used in this session:
-
-- `Shelly Plug S Gen3`
-- `http://192.168.0.16/`
-- model `S3PL-00112EU`
-- generation 3
-- installed climate script id `1`
-- script name `Local Climate Link Thermostat`
-
-Real BLE candidates observed during Shelly-side discovery included:
-
-- TP357 `F7:5F:8D:0F:76:20`, around `24.5°C / 71.0%`, RSSI about `-73 dBm`
-- Xiaomi/PVVX BTHome sensor ending `24:CD`; this was the sensor saved into the climate installation and was reporting about `24.6°C / 59.6–59.7%`
-
-## Current installed climate automation
-
-The real climate happy path was installed successfully on the Shelly.
-
-Configuration used:
-
-- mode: Heating
-- sensor: Xiaomi/PVVX BTHome sensor `...24:CD`
-- ON threshold: `19°C`
-- OFF threshold: `20°C`
-- VPD assist: OFF
-
-Expected/last safe physical state:
-
-- climate script `running=true`
-- relay `OFF`
-- `Schedule.List = {"jobs":[], "rev":0}`
-- dashboard can reach the real Shelly and shows `Working` after fresh runtime data arrives
-
-Do not change VPD behavior merely because dashboard VPD displays `—` with assist disabled. The generated runtime intentionally keeps `lastVpd=null` when VPD assist is disabled. The user explicitly decided that configurable VPD ranges should remain as they are.
-
-## Physical E2E completed
-
-The following are PASS unless otherwise noted.
-
-### Navigation / Android Back
-
-- root goal -> first-level Back for temperature
-- root goal -> first-level Back for humidity
-- root goal -> first-level Back for time
-- root goal -> first-level Back for manage existing automation
-- temperature setup Back
-- root Android Back exits/backgrounds app as intended
-
-Add Plug modal/native Back behavior also unwinds correctly. Samsung IME instrumentation was inconclusive (`mInputShown=false` while input view state was ambiguous), so do not claim a separate keyboard PASS and do not spend more time on it unless a user-visible keyboard bug appears.
-
-### Shelly discovery/setup
-
-- real LAN discovery found `192.168.0.16`
-- device identity/model/gen read successfully
-- Shelly saved into app draft
-- live plug status read successfully
-- real BLE discovery via Shelly found candidates
-- BLE discovery safe-off/cleanup restored climate automation to AUTO/running and relay OFF
-- Xiaomi/PVVX sensor saved into draft
-- Sensors page showed live temperature/humidity
-- Rule page had valid Shelly + sensor selection and enabled Send
-
-### Climate install/runtime/dashboard
-
-- `Send` installed/replaced only the Local Climate Link-owned thermostat script
-- installed script id 1 is running
-- relay remained OFF with 24.6°C and heating thresholds 19/20°C
-- app retained installation across restart before destructive reinstall
-- dashboard showed `Working`, temperature, humidity, relay OFF and thresholds
-- `Details` screen showed live configuration and controls
-- raw `/script/1/diag` matched UI behavior
-
-### Pause/resume
-
-- `Pause automation` stopped the script and confirmed relay OFF
-- current resume label is `Start automation`, not the older harness expectation `Resume automation`
-- `Start automation` restored `running=true`
-- relay remained OFF
-
-Immediately after restarting the script, UI may transiently show `Unknown` until a fresh BLE/runtime sample arrives. Do not treat that transient as failure by itself.
-
-### Shelly LED
-
-Real reversible roundtrip PASS:
-
-1. backed up full `PLUGS_UI.GetConfig`
-2. `Turn LED off` -> `leds.mode=off`
-3. `Show ON/OFF` -> switch mode, ON green, OFF red
-4. climate script stayed running and relay stayed OFF
-5. restored the original full LED config exactly
-
-Original observed LED config had switch mode, ON green, OFF black, 100% brightness; do not assume the preset matches the user's original state.
-
-### Time automation ownership protection
-
-On the same Shelly that owns the climate automation:
-
-- opened `Control by time`
-- selected/retained the real Shelly
-- default times `08:00 / 20:00`
-- clicked `Save schedule to Shelly`
-- UI correctly blocked with:
-  `This output is already owned by climate automation. Remove it before creating a time schedule.`
-- `Schedule.List` stayed unchanged and empty
-- climate script stayed running
-- relay stayed OFF
-
-This is a valid ownership-conflict E2E. Do not delete the working climate automation solely to force a second time-schedule happy path on the only real Shelly.
-
-### Offline Shelly recovery
-
-Reversible phone-only test PASS:
-
-- exact `lcl.installedAutomations.v1` localStorage payload backed up
-- climate installation base URL temporarily changed to TEST-NET `http://192.0.2.1/`
-- dashboard correctly showed `Offline` and `Cannot reach Shelly.`
-- original localStorage payload restored
-- dashboard returned to `Working` with real temperature/humidity and relay OFF
-- physical climate script remained running and relay OFF throughout
-
-### Script-stopped recovery
-
-Already covered physically by Pause -> Start automation. Do not duplicate the same mutation under another test name unless new evidence requires it.
-
-## Intentionally not claimed PASS
-
-### Stale sensor physical failure
-
-Not physically forced in this session. Do not call it PASS. The runtime has stale fail-safe OFF coverage in deterministic/generated-runtime tests, but no need was found to disable BLE or otherwise disturb the live hardware just to manufacture stale data before freeze.
-
-### Purely visual Android QA
-
-DOM/CDP/native process evidence is not equivalent to human visual inspection. Do not claim visual polish PASS for edge-to-edge/insets/keyboard/layout unless actually observed or captured appropriately.
-
-## Final preflight already completed
-
-Local Agent task:
+Frozen known-good branch remains:
 
 ```text
-20260909-freeze-preflight-version-check-v1
+freeze/working-baseline-20260910
+b3b52d5b023d7051b8254cd778490e8e7b1af959
 ```
 
-Result: `done`.
+Do not move or rewrite the frozen baseline.
 
-Verified:
+## Active product goal
 
-- `origin/main` was the tested product SHA `771b23456cf7b3fafe62cba3263e1f8f7118580b`
-- `v2.0.9` tag object and peeled commit exactly matched the frozen values above
-- `pnpm install --frozen-lockfile` passed
-- `pnpm check:full` passed
-- repo ended clean
+Focus only on the climate automation lifecycle and diagnostics. Do not resume chart/history work unless explicitly requested.
 
-One probe inside that preflight attempted `rg` and reported `rg: command not found`; this did not fail the task because the probe was informational. Do not rely on ripgrep being installed in the Local Agent macOS environment; use `git grep`, `grep`, or another available tool when locating version strings.
+The user chose this architecture:
 
-## Immediate next work
+### AUTO
 
-Continue from here, not from an older audit/plan.
+- managed climate script remains RUNNING
+- BLE scanner/runtime remains RUNNING
+- `/script/<id>/diag` remains live
+- automatic relay decisions are allowed
 
-1. Re-read `.agent/status/daemon.json` first and verify exact repo/binding.
-2. Fetch current `main` and compare it with tested product SHA. Account for the documentation-only handoff commits before deciding what exact SHA to freeze.
-3. Determine every authoritative version location without `rg`. At minimum inspect:
-   - root `package.json`
-   - `apps/mobile/android/app/build.gradle`
-   - any mobile package/app metadata or release scripts that encode `2.0.9` / `20009`
-4. Make the smallest consistent version bump, expected candidate `2.0.10` / `20010`, without moving `v2.0.9`.
-5. Run full verification on the exact bump commit:
-   - `pnpm install --frozen-lockfile`
-   - `pnpm check:full`
-6. Run final destructive physical install on that exact commit:
-   - `pnpm android:phone-alpha`
-   - verify uninstall happened first
-   - verify exactly one authorized ADB device
-   - verify installed version/code/signer and app PID
-7. Because clean install deletes app state, run a short fresh-install phone smoke. Do not assume the old localStorage installation survives.
-8. Independently verify the Shelly still has the climate script running and relay state known/safe after the phone data reset. Phone uninstall must not remove the Shelly-side runtime.
-9. Verify GitHub CI for the exact freeze SHA.
-10. Only then create a new immutable version/tag according to repository release conventions. Never move `v2.0.9`.
-11. Update `docs/testing/hardware-matrix.md` with the dated September 2026 physical-phone E2E evidence before calling the release fully documented.
+### MANUAL
 
-If the version bump changes only metadata, do not reopen already-passed physical flows unless the build/install smoke reveals a regression.
+- managed climate script still remains RUNNING
+- BLE scanner/runtime still remains RUNNING
+- `/diag` remains live, so temperature/humidity/VPD telemetry keeps updating
+- automatic relay decisions are blocked inside the runtime
+- direct phone ON/OFF control is allowed only in verified MANUAL mode
+
+### STOPPED
+
+- means the script process is actually stopped/crashed/maintenance state
+- it is not another name for MANUAL
+
+### MISSING
+
+- exact managed script is absent/mismatched
+
+The runtime mode is intentionally in-memory and defaults to AUTO after a normal runtime restart. Do not add KVS persistence unless explicitly requested.
+
+## Runtime-mode transport and safety design
+
+The accepted design uses Shelly's existing `Script.Eval` RPC against the exact stored managed script id.
+
+Generated runtime state uses a compact flag:
+
+```text
+R.m = 0  -> AUTO
+R.m = 1  -> MANUAL
+```
+
+Mode read expression:
+
+```js
+typeof R==="object"&&typeof R.m==="number"?R.m:-1
+```
+
+Interpretation:
+
+- `0` => AUTO, supported
+- `1` => MANUAL, supported
+- `-1` or other => old/unsupported runtime; treat it as AUTO + unsupported capability, never invent MANUAL
+
+`/diag` is telemetry-only. Do not duplicate runtime mode into the diagnostic payload.
+
+AUTO -> MANUAL safety boundary:
+
+1. verify exact managed running runtime; upgrade old 0.1 runtime if needed
+2. set `R.m=1` using `Script.Eval` before manual relay access
+3. clear debounce/hit/internal relay bookkeeping
+4. force relay OFF and confirm OFF
+5. generated automation output path is gated by `R.m`
+6. if an old AUTO `Switch.Set` callback completes after MANUAL wins, callback must issue corrective OFF
+7. verify exact live MANUAL + capability + physical relay OFF
+
+MANUAL -> AUTO:
+
+1. require exact live supported MANUAL
+2. force and confirm relay OFF while still MANUAL
+3. clear transient runtime bookkeeping and set `R.m=0`
+4. verify exact live AUTO + relay OFF
+5. next BLE measurement may automate normally
+
+Normal AUTO/MANUAL changes must not use `Script.Stop`/`Script.Start`. Those remain valid for install/update/recovery/delete/maintenance and temporary BLE discovery only.
+
+Legacy 0.1 live runtime migration:
+
+- old running runtime reports unsupported via the `-1` expression
+- first control-mode action should safely upgrade it in place using current stored configuration
+- require exact managed ownership and preserve script id when safe
+- force OFF before/after the upgrade
+- persist new script hash/update time only after successful upgrade
+- an actually stopped old runtime is ambiguous and should go through explicit recovery rather than silently guessing MANUAL
+
+## Local Agent implementation history
+
+Work was repeatedly rebuilt from exact baseline through deterministic scripts on `agent-control`.
+
+V1–V8 were patch-application/test-harness iterations and failed before a feature commit.
+
+V9 reached real generator/runtime tests:
+
+- 68/69 initially passed
+- only stale `md:0` / `/diag` mode assertions remained
+
+V10:
+
+- semantic MANUAL/AUTO runtime tests: 69/69 PASS
+- failed only strict Xiaomi generated-code budget: 4548 B > 4500 B
+
+V11 introduced a tiny shared `Switch.Set` helper without relaxing the size budget.
+
+V11 evidence:
+
+- `manual-runtime.test.ts`: PASS
+- `runtime-matrix.test.ts`: PASS
+- semantic runtime total: 69/69 PASS
+- `generator.test.ts`: 25/25 PASS
+- Xiaomi 4500-byte budget: PASS
+- generator snapshots updated successfully in the local task workspace
+- core mobile runtime tests passed:
+  - `runtimeModeTransport.test.ts`
+  - `runtimeStatus.test.ts`
+  - `runtimeControl.test.ts`
+  - `healthRecovery.test.ts`
+  - `runtimeDiagnostics.test.ts`
+
+V11 then failed on three UI tests before commit/push:
+
+1. `automation-dashboard-controls.test.tsx`
+   - mock reports MANUAL but lacks the new `runtimeModeSupported` capability
+   - UI therefore correctly treats it as requiring attention
+   - update the test mock/expectation to the new contract; do not weaken production verification
+
+2. `automation-detail.test.tsx` — pause/resume case
+   - old fetch mock does not implement `Script.Eval`
+   - old test still expects `Script.Stop` / `Script.Start` and old pause/start toasts
+   - update the mock to model a running script plus `R.m` transitions through `Script.Eval`
+   - assert script remains running in MANUAL and telemetry remains available
+
+3. `automation-detail.test.tsx` — deployed-script display case
+   - runtime verification fails before enabling the button because the old mock lacks the new live-mode RPC contract
+   - fix the mock, not the production ownership check
+
+After those UI tests are corrected, rerun the full V11/V12 quality pipeline and only commit/push if everything is green.
+
+Useful existing agent-control files include the V11 runner and earlier patch scripts. Prefer fixing the smallest deterministic failure instead of starting another broad rewrite.
+
+## Real hardware resource measurement — completed
+
+Read-only Local Agent task:
+
+```text
+20260911-measure-shelly-script-resources-v1
+status: done
+```
+
+Hardware reached successfully:
+
+- phone: Samsung Galaxy S22+ / `SM-S906B`
+- ADB serial: `RFCT70L7E8J`
+- Shelly id: `shellyplugsg3-e4b063d7f530`
+- Shelly model: `S3PL-00112EU`
+- generation: 3
+- firmware: `20260311-095902/1.7.5-g9979d16`
+
+Observed Shelly state during measurement:
+
+```text
+SCRIPT_COUNT=1
+MANAGED_SCRIPT_COUNT=1
+SCRIPT_ID=1
+SCRIPT_RUNNING_LIST=false
+SCRIPT_RUNNING=False
+SCRIPT_MEM_FREE=25116
+SCRIPT_CPU=0
+SYS_RAM_SIZE=259128
+SYS_RAM_FREE=96180
+SYS_FS_SIZE=917504
+SYS_FS_FREE=450560
+SYS_UPTIME=56530
+SCRIPT_CODE_BYTES=3674
+SCRIPT_META=g: 0.1.0
+SCRIPT_META=m: tp357-minimal
+SCRIPT_META=h: lcl-d88ac1de
+```
+
+Because the currently installed 0.1 script was physically stopped during this measurement, `Script.GetStatus` did not expose meaningful `mem_used` / `mem_peak`. `mem_free=25116` was still available. Repeat the resource measurement after installing/running the new MANUAL-live 0.2 runtime so all script memory fields are populated.
+
+The strict 4500/4000 generated-code tests are repository regression budgets, not a known Shelly hard code-size limit. Do not relax them merely to make a test pass, but also do not trade away safety/functionality for arbitrary bytes if real resource evidence later shows comfortable margins.
+
+## BLE discovery resource behavior — confirmed from code
+
+The user remembered correctly that automation and Shelly-side BLE discovery are not intended to run concurrently.
+
+Current lifecycle in `shellyRequests.ts` / `useHardwareSetupFlow.ts`:
+
+1. force relay OFF
+2. remove stale discovery scripts
+3. if the managed automation script is running, stop it temporarily
+4. install/start a separate temporary BLE discovery script
+5. perform discovery
+6. stop and delete the temporary discovery script
+7. restart the managed automation only if it had been running before discovery
+
+So the discovery script is a separate temporary script id, not an in-place rewrite of the automation slot, but the two JS runtimes do not intentionally compete for the shared script memory pool at the same time.
+
+Do not change this lifecycle as part of the MANUAL-mode task unless evidence requires it.
+
+## New requested diagnostics addition
+
+The user explicitly wants script/device resource information visible in the phone diagnostics UI.
+
+Add it without increasing the generated thermostat runtime payload. The phone can query Shelly RPC directly.
+
+Desired sources:
+
+### `Script.GetStatus` for the exact managed script id
+
+Expose when available:
+
+- `running`
+- `mem_used`
+- `mem_peak`
+- `mem_free`
+- `cpu` (firmware-dependent/optional)
+
+### `Sys.GetStatus`
+
+Expose useful whole-device memory context, at minimum:
+
+- `ram_size`
+- `ram_free`
+
+Optional filesystem values may be shown only if they fit the existing diagnostics UX cleanly; do not create a large new subsystem for them.
+
+Implementation direction:
+
+- query these from the phone/app, not from generated `/diag`
+- keep the generated `/diag` telemetry schema unchanged
+- parse optional firmware-dependent fields defensively
+- failure of resource telemetry should not make otherwise-valid climate telemetry/control unusable
+- show the values in the existing `DiagnosticsSetupPage` Runtime/Shelly diagnostics groups rather than creating a new god component
+- use small formatter/helper functions for bytes / percentages
+- add focused schema/request tests plus screen/UI assertions
+- resource refresh should be part of the existing diagnostics refresh, not a high-frequency polling loop
+
+The existing diagnostics UI is in:
+
+```text
+apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx
+```
+
+Existing diagnostics flow/state originates in:
+
+```text
+apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
+apps/mobile/src/flows/hardware-setup/shellyRequests.ts
+apps/mobile/src/flows/hardware-setup/schemas.ts
+```
+
+Do not put `mem_used/mem_peak/mem_free` into the generated thermostat `/diag` payload.
+
+## Immediate continuation plan
+
+1. Read `.agent/status/daemon.json` and verify repository/binding before any work.
+2. Confirm the remote work branch is still exact baseline unless a later task has committed something.
+3. Continue from V11, not from V1 and not from the old September-10 release/freeze handoff.
+4. Correct only the three stale UI mocks/expectations described above.
+5. Integrate read-only `Script.GetStatus` + `Sys.GetStatus` into the existing phone diagnostics flow with focused tests and clean separation.
+6. Keep MANUAL-live architecture and generated `/diag` telemetry-only.
+7. Run targeted tests first, then the complete generator/mobile/quality/build/Playwright pipeline on one exact committed SHA.
+8. Only after all source validation is green, install the exact build on the Samsung S22+ and physically validate the real migration from installed 0.1 runtime to 0.2:
+   - script stays running in MANUAL
+   - `R.m=1` through `Script.Eval`
+   - relay confirmed OFF on mode boundary
+   - temperature/humidity/VPD telemetry remains live in MANUAL
+   - resource diagnostics show real `mem_used`, `mem_peak`, `mem_free`, optional CPU and device RAM
+   - returning AUTO gives `R.m=0`, relay OFF boundary, script still running
+9. Leave physical output OFF unless a manual-ON test is truly required; if ON is tested, immediately return it OFF.
+10. Inspect the final feature diff before merging `main`; keep `freeze/working-baseline-20260910` untouched.
+
+## Validation expectations after the next committed feature SHA exists
+
+At minimum run via Local Agent against the exact commit:
+
+```sh
+pnpm --filter @lcl/script-generator test
+pnpm --filter @lcl/mobile test
+pnpm --filter @lcl/mobile lint
+pnpm --filter @lcl/mobile typecheck
+pnpm quality:repo
+pnpm quality:ux
+pnpm --filter @lcl/mobile build
+pnpm --filter @lcl/mobile exec playwright test
+```
+
+Also run `git diff --check` and audit that normal user AUTO/MANUAL paths contain no `Script.Stop`/`Script.Start` regression.
 
 ## Change philosophy
 
 - evidence-driven
 - small, clean, low-risk/high-gain changes
+- no god objects
+- good separation of runtime transport, safety logic, UI/query state and presentation
 - no speculative refactors
-- no backward-compatibility scaffolding unless explicitly requested
-- no code change merely because a test harness expected an old UI label
-- fix harness assumptions before blaming the product
+- do not weaken ownership/safety checks to make stale tests green
+- fix mocks/tests when the accepted runtime contract changed
+- preserve strict generated-code budgets unless real evidence justifies a deliberate change
 - keep final physical relay state explicit and known
-
-Read `AGENTS.md` before code changes. Treat this handoff as execution state, not as a replacement for repository rules.
