@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-navigation-ux-consistency-v3",
+  "task_digest": "12ea5f680eff302c2b539e16a7d1d2ddf5b76b6ef71f26fe06190c944f6b3eb3",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T08:44:22.443371+00:00",
+  "attempt_id": "a9288365a520f7c95ca460aa",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 78660,
+  "updated_at": "2026-09-11T08:44:22.443486+00:00",
+  "pid": 78660
+}
