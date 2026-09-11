@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-remove-sensor-charts-v5",
+  "task_digest": "15e710fd89a6b9d6ed41e12816d696045da9ba523e52a31ad5b6653859281ada",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T06:07:01.063558+00:00",
+  "attempt_id": "be7e767c5bbeeffc9ebfb012",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 64566,
+  "updated_at": "2026-09-11T06:07:01.063721+00:00",
+  "pid": 64566
+}
