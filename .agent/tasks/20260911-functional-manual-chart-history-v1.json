@@ -1,0 +1,19 @@
+{
+  "id": "20260911-functional-manual-chart-history-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 1200,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -eu; FINAL=377b7bf7a2bca37ab4371b42be82136c2b2aaf13; git fetch --prune origin; test \"$(git rev-parse origin/main)\" = \"$FINAL\"; git checkout --detach \"$FINAL\" >/dev/null; test -z \"$(git status --porcelain)\"; echo HISTORY_AUDIT_SHA=$(git rev-parse HEAD)",
+    "set -eu; echo '=== CHART_RELATED_FILES_NOW ==='; git ls-files | grep -Ei '(spark|chart|history|reading)' || true; echo '=== SPARKLINE_PICKAXE_ALL ==='; git log --all --date=iso --pretty='format:%H %ad %s' -S'Sparkline' -- apps/mobile/src packages/ui/src || true; echo '=== CHART_REGEX_HISTORY ==='; git log --all --date=iso --pretty='format:%H %ad %s' -G'(Sparkline|sparkline|chart|Chart|samplesBySensorId|sensorReadings)' -- apps/mobile/src packages/ui/src || true",
+    "set -eu; echo '=== DASHBOARD_HISTORY_FILES ==='; git log --all --date=iso --name-status --pretty='format:COMMIT %H %ad %s' -- apps/mobile/src/screens apps/mobile/src/routes apps/mobile/src/App.tsx | grep -Ei '^(COMMIT|[AMD].*(Dashboard|Installation|Sensor|Climate|Home|AppRoutes|App\\.tsx))' || true; echo '=== DASHBOARD_SPARKLINE_PICKAXE ==='; git log --all --date=iso --pretty='format:%H %ad %s' -S'Sparkline' -- apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens || true",
+    "set -eu; SHAS=$(git log --all --format='%H' -G'(Sparkline|sparkline|chart|Chart)' -- apps/mobile/src packages/ui/src | head -20); for s in $SHAS; do echo \"=== SHOW $s ===\"; git show --format='COMMIT %H%nDATE %ad%nSUBJECT %s%nBODY %b' --date=iso --stat --oneline \"$s\"; git show --format= --unified=4 \"$s\" -- apps/mobile/src packages/ui/src | grep -E -C 5 '(Sparkline|sparkline|chart|Chart|samplesBySensorId|sensorReadings)' || true; done",
+    "set -eu; echo '=== MANUAL_TELEMETRY_COUPLING ==='; git grep -n -E 'pauseInstalledAutomation|stopScript|removeQueries|fetchInstalledAutomationDiagnostics|registerEndpoint\\(\"diag\"|BLE.Scanner' -- apps/mobile/src packages/script-generator/src | head -200; echo MANUAL_CHART_HISTORY_AUDIT_OK"
+  ]
+}
