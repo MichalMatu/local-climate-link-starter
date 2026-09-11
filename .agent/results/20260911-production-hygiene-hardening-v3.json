@@ -1,0 +1,77 @@
+{
+  "id": "20260911-production-hygiene-hardening-v3",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/production-readiness-hardening-20260911",
+  "allow_write": true,
+  "started_at": "2026-09-11T09:44:48.726491+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/run-production-hygiene-hardening-v3-20260911.sh > /tmp/run-production-hygiene-hardening-v3-20260911.sh; sh /tmp/run-production-hygiene-hardening-v3-20260911.sh",
+      "exit_code": 1,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   0355fba2..ed96c4a4  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/production-readiness-hardening-20260911 -> FETCH_HEAD\nSwitched to and reset branch 'work/production-readiness-hardening-20260911'\nproperty intent not found\n",
+      "elapsed_seconds": 2.161,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1.55,
+      "output_policy": "stream",
+      "captured_output_chars": 420,
+      "output_truncated": false,
+      "current_rss_mb": 1.55,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 2.161
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": " M apps/mobile/src/app/locales/de.ts\n M apps/mobile/src/flows/setup-intent.test.ts\n M apps/mobile/src/flows/setup-intent.ts\n M apps/mobile/src/routes/AppRoutes.tsx\n",
+    "elapsed_seconds": 0.098
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "diff --git a/apps/mobile/src/app/locales/de.ts b/apps/mobile/src/app/locales/de.ts\nindex f37f91b4..2e9bd61e 100644\n--- a/apps/mobile/src/app/locales/de.ts\n+++ b/apps/mobile/src/app/locales/de.ts\n@@ -29,11 +29,6 @@ export const de = {\n       description: 'Ein Gerät zu gewählten Zeiten ohne Sensor ein- und ausschalten.',\n       context: 'Zeitsteuerung'\n     },\n-    manage: {\n-      title: 'Bestehende Automation verwalten',\n-      description: 'Gespeicherte Geräte, Regeln und Diagnose öffnen.',\n-      context: 'Automationsverwaltung'\n-    }\n   },\n   time: {\n     family: 'Tageszeitplan',\n@@ -226,50 +221,6 @@ export const de = {\n       copyFailed: 'Support-Bericht konnte nicht kopiert werden.'\n     }\n   },\n-  demo: {\n-    addKit: 'Set hinzufügen',\n-    blockedInstall: 'Installation blockiert',\n-    checkCompatibility: 'Demo prüfen',\n-    checkCompatibilityTitle: 'Beispiel-Shelly auf Kompatibilität prüfen',\n-    compatibleShelly: 'Fake-Shelly ist kompatibel.',\n-    emptySensors: 'Noch kein Sensor ausgewählt.',\n-    fakeUpload: 'Fake-Upload',\n-    install: 'Demo installieren',\n-    installScript: 'Demo-Skript senden',\n-    installScriptTitle: 'Skript an den simulierten Shelly senden',\n-    installTitle: 'Zur simulierten Skriptübertragung wechseln',\n-    loadingReadings: 'Demo-Messwerte werden geladen.',\n-    loadingShelly: 'Demo-Steckdose wird geprüft.',\n-    loadingSensors: 'Demo-Sensoren werden gesucht.',\n-    matterScenario: 'Demo-Szenario: Matter ON',\n-    noRealLan:\n-      'Das Skript geht an einen simulierten Shelly. Das echte LAN wird nicht genutzt.',\n-    relayFailed: 'Relaistest fehlgeschlagen. Die Steckdose wurde ausgeschaltet.',\n-    relayFailedSummary: 'Relaistest hat OFF nicht bestätigt.',\n-    relayOkSummary: 'Fake-Relaistest endete mit OFF.',\n-    scan: 'Demo scannen',\n-    scanTitle: 'Beispielhafte BLE-Messwerte laden',\n-    section: {\n-      done: 'Status',\n-      install: 'Installation',\n-      relay: 'Test',\n-      rule: 'Regel',\n-      script: 'Skript',\n-      sensor: 'Sensoren',\n-      shelly: 'Steckdose',\n-      start: 'Start'\n-    },\n-    selectSensorTitle: 'Dieses Thermometer für die Demo-Regel auswählen',\n-    startSetup: 'Lokalen Thermostat konfigurieren',\n-    startTitle: 'Einrichtung des Beispiel-Sets starten',\n-    statusRuntimeAddress: 'Shelly-Laufzeitadresse',\n-    statusRuntimeSuffix: 'simuliert',\n-    statusScriptDemo: 'Demo läuft',\n-    statusModeDemo: 'Demo ohne Hardware',\n-    uploadFailed: 'Demo-Skript konnte nicht gesendet werden.',\n-    usePhoneSetupOnly:\n-      'Das Telefon hilft nur bei der Einrichtung. Nach der Installation läuft Shelly lokal.'\n-  },\n   hardware: {\n     ready: 'Fertig — läuft lokal',\n     nav: {\ndiff --git a/apps/mobile/src/flows/setup-intent.test.ts b/apps/mobile/src/flows/setup-intent.test.ts\nindex f7772be6..716948a5 100644\n--- a/apps/mobile/src/flows/setup-intent.test.ts\n+++ b/apps/mobile/src/flows/setup-intent.test.ts\n@@ -11,17 +11,11 @@ describe('setup intent', () => {\n       'humidifying',\n       'dehumidifying'\n     ]);\n-    expect(rulePresetsForSetupIntent('manage')).toEqual([\n-      'heating',\n-      'cooling',\n-      'humidifying',\n-      'dehumidifying'\n-    ]);\n   });\n \n   it('selects a safe default only when a new goal needs one', () => {\n     expect(defaultRulePresetForSetupIntent('temperature')).toBe('heating');\n     expect(defaultRulePresetForSetupIntent('humidity')).toBe('humidifying');\n-    expect(defaultRulePresetForSetupIntent('manage')).toBeNull();\n+    expect(defaultRulePresetForSetupIntent('time')).toBeNull();\n   });\n });\ndiff --git a/apps/mobile/src/flows/setup-intent.ts b/apps/mobile/src/flows/setup-intent.ts\nindex 83276a6d..6ba97b6b 100644\n--- a/apps/mobile/src/flows/setup-intent.ts\n+++ b/apps/mobile/src/flows/setup-intent.ts\n@@ -1,6 +1,6 @@\n import type { RulePresetId } from '@lcl/automation-core';\n \n-export type SetupIntent = 'temperature' | 'humidity' | 'time' | 'manage';\n+export type SetupIntent = 'temperature' | 'humidity' | 'time';\n \n const TEMPERATURE_PRESETS: readonly RulePresetId[] = ['heating', 'cooling'];\n const HUMIDITY_PRESETS: readonly RulePresetId[] = ['humidifying', 'dehumidifying'];\n@@ -18,7 +18,6 @@ export const rulePresetsForSetupIntent = (\n     case 'humidity':\n       return HUMIDITY_PRESETS;\n     case 'time':\n-    case 'manage':\n     case null:\n     case undefined:\n       return ALL_PRESETS;\n@@ -34,7 +33,6 @@ export const defaultRulePresetForSetupIntent = (\n     case 'humidity':\n       return 'humidifying';\n     case 'time':\n-    case 'manage':\n       return null;\n   }\n };\ndiff --git a/apps/mobile/src/routes/AppRoutes.tsx b/apps/mobile/src/routes/AppRoutes.tsx\nindex d74ea8ce..06a2e7b8 100644\n--- a/apps/mobile/src/routes/AppRoutes.tsx\n+++ b/apps/mobile/src/routes/AppRoutes.tsx\n@@ -18,7 +18,7 @@ const HardwareSetupScreen = lazy(async () => {\n   return { default: module.HardwareSetupScreen };\n });\n \n-type SetupRouteIntent = Exclude<SetupIntent, 'manage'>;\n+type SetupRouteIntent = SetupIntent;\n type PrimaryAppRoute =\n   | { type: 'dashboard'; kind?: AppNavigationKind }\n   | { type: 'intent'; sourceKind: AppNavigationKind }\n@@ -123,10 +123,6 @@ export const AppRoutes = () => {\n   }, [navigate]);\n \n   const selectIntent = (intent: SetupIntent, sourceKind: AppNavigationKind) => {\n-    if (intent === 'manage') {\n-      navigate({ type: 'dashboard', kind: sourceKind });\n-      return;\n-    }\n     const nextKind = setupKindForIntent(intent);\n     navigate({ type: 'setup', intent, sourceKind: nextKind });\n   };\n",
+    "elapsed_seconds": 0.028
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-11T09:44:52.632076+00:00",
+  "workspace_checkpoint": {
+    "version": 2,
+    "task_id": "20260911-production-hygiene-hardening-v3",
+    "reason": "task-exit",
+    "created_at": "2026-09-11T09:44:53.069182+00:00",
+    "base_head": "4056035148a54d8b040eeda8bd7ce43d744e7765",
+    "work_branch": "work/production-readiness-hardening-20260911",
+    "path": "/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260911-production-hygiene-hardening-v3/1789119892911990000-task-exit",
+    "tracked_patch": "tracked.patch",
+    "untracked_root": "untracked",
+    "untracked_files": [],
+    "tracked_patch_bytes": 5776,
+    "untracked_bytes": 0,
+    "total_bytes": 5776,
+    "status": " M apps/mobile/src/app/locales/de.ts\n M apps/mobile/src/flows/setup-intent.test.ts\n M apps/mobile/src/flows/setup-intent.ts\n M apps/mobile/src/routes/AppRoutes.tsx\n"
+  },
+  "task_digest": "d2a655b4ffcab8ff9e162d48ab47c5e9faa615db84ee1a5827fcdaa73fa10acc",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "688bc9aa2c9743f60b8ca58e",
+  "daemon_version": "4.18.20"
+}
