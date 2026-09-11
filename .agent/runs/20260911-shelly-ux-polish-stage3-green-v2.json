@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-shelly-ux-polish-stage3-green-v2",
+  "task_digest": "87cf3c77ce75b81aa855ad7c0180b528959bd8f674aec3848d84d3a801b8708f",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T16:12:19.812347+00:00",
+  "attempt_id": "1d8b8f87a314e7f5d00bb20a",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 80745,
+  "updated_at": "2026-09-11T16:12:19.812405+00:00",
+  "pid": 80745
+}
