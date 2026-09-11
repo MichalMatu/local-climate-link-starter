@@ -67,6 +67,10 @@ const ClimateAutomationCard = ({
     ? installedAutomationScriptMatch(installation, controlStatus)
     : null;
   const controlsVerified = controlMatch === 'matched';
+  const runtimeControllable =
+    controlsVerified &&
+    (controlStatus?.automationMode === 'auto' ||
+      controlStatus?.automationMode === 'manual');
   const automationRunning = controlsVerified && controlStatus?.automationMode === 'auto';
   const manualControl = controlsVerified && controlStatus?.automationMode === 'manual';
   const relayState =
@@ -112,7 +116,7 @@ const ClimateAutomationCard = ({
   } else if (health !== null && health !== 'ok') {
     warningLabel = installationHealthLabel(health, t);
     warningClass = health;
-  } else if (control.isError || (query.isError && !manualControl)) {
+  } else if (control.isError || query.isError) {
     warningLabel = t('dashboard.health.attention');
   }
 
@@ -177,7 +181,7 @@ const ClimateAutomationCard = ({
             className="automation-control-button"
             type="button"
             aria-pressed={automationRunning}
-            disabled={action.isPending || !controlsVerified}
+            disabled={action.isPending || !runtimeControllable}
             onClick={() => {
               if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
             }}
@@ -188,7 +192,7 @@ const ClimateAutomationCard = ({
             className="automation-control-button"
             type="button"
             aria-pressed={manualControl}
-            disabled={action.isPending || !controlsVerified}
+            disabled={action.isPending || !runtimeControllable}
             onClick={() => {
               if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
             }}

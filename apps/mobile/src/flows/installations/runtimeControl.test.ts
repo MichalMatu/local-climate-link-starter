@@ -1,16 +1,19 @@
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import type * as ShellyClientModule from '@lcl/shelly-client';
-import type * as ShellyRequestsModule from '../hardware-setup/shellyRequests.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type * as RuntimeModeModule from './runtimeModeTransport.js';
+import type * as RuntimeStatusModule from './runtimeStatus.js';
+import type * as RuntimeUpgradeModule from './runtimeUpgrade.js';
 import { createInstalledAutomation } from './model.js';
 
 const mocks = vi.hoisted(() => ({
-  stopScript: vi.fn(),
-  startScript: vi.fn(),
   setRelayOn: vi.fn(),
   setRelayOff: vi.fn(),
   getStatus: vi.fn(),
-  readControlStatus: vi.fn()
+  readStatus: vi.fn(),
+  setRuntimeMode: vi.fn(),
+  ensureCurrent: vi.fn(),
+  recoverRuntime: vi.fn()
 }));
 
 vi.mock('@lcl/shelly-client', async (importOriginal) => {
@@ -18,8 +21,6 @@ vi.mock('@lcl/shelly-client', async (importOriginal) => {
   return {
     ...actual,
     RpcShellyClient: vi.fn(() => ({
-      stopScript: mocks.stopScript,
-      startScript: mocks.startScript,
       setRelayOn: mocks.setRelayOn,
       setRelayOff: mocks.setRelayOff,
       getStatus: mocks.getStatus
@@ -27,12 +28,22 @@ vi.mock('@lcl/shelly-client', async (importOriginal) => {
   };
 });
 
-vi.mock('../hardware-setup/shellyRequests.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof ShellyRequestsModule>();
+vi.mock('./runtimeModeTransport.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof RuntimeModeModule>();
+  return { ...actual, setInstalledAutomationRuntimeMode: mocks.setRuntimeMode };
+});
+
+vi.mock('./runtimeStatus.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof RuntimeStatusModule>();
+  return { ...actual, readInstalledAutomationControlStatus: mocks.readStatus };
+});
+
+vi.mock('./runtimeUpgrade.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof RuntimeUpgradeModule>();
   return {
     ...actual,
-    createShellyTransport: vi.fn(() => ({})),
-    readShellyControlStatus: mocks.readControlStatus
+    ensureInstalledAutomationRuntimeCurrent: mocks.ensureCurrent,
+    recoverInstalledAutomationRuntime: mocks.recoverRuntime
   };
 });
 
@@ -49,130 +60,81 @@ const installation = createInstalledAutomation({
   baseUrl: 'http://192.168.0.20/',
   scriptId: 7,
   scriptHash: 'hash',
-  config: createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2', 'heating'),
+  config: createDefaultShellyThermostatConfig(),
   nowMs: 1000
 });
 
-const controlStatus = (
-  automationMode: 'auto' | 'manual' | 'missing',
-  automationScriptId: number | null,
-  relayOn = false
-) => ({
+const status = (mode: 'auto' | 'manual' | 'stopped' | 'missing', relayOn = false) => ({
   relayOn,
-  automationMode,
-  automationScriptId,
+  automationMode: mode,
+  automationScriptId: mode === 'missing' ? null : 7,
   firmwareId: '1.0.0',
   telemetry: {},
-  clock: { timeSynced: false }
+  clock: { timeSynced: false },
+  runtimeModeSupported: mode === 'auto' || mode === 'manual'
 });
 
 describe('installed automation runtime control', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.stopScript.mockResolvedValue({ ok: true, value: null });
-    mocks.startScript.mockResolvedValue({ ok: true, value: null });
     mocks.setRelayOn.mockResolvedValue({ ok: true, value: null });
     mocks.setRelayOff.mockResolvedValue({ ok: true, value: null });
     mocks.getStatus.mockResolvedValue({ ok: true, value: { relayOn: false } });
   });
 
-  it('matches control state by the stored script id', () => {
-    expect(installedAutomationScriptMatch(installation, controlStatus('auto', 7))).toBe(
-      'matched'
-    );
-    expect(
-      installedAutomationScriptMatch(installation, controlStatus('missing', null))
-    ).toBe('missing');
-    expect(installedAutomationScriptMatch(installation, controlStatus('auto', 8))).toBe(
-      'mismatch'
+  it('matches ownership only by the stored script id', () => {
+    expect(installedAutomationScriptMatch(installation, status('auto'))).toBe('matched');
+    expect(installedAutomationScriptMatch(installation, status('missing'))).toBe(
+      'missing'
     );
   });
 
-  it('pauses by stopping the exact script, forcing relay OFF and confirming manual state', async () => {
-    mocks.readControlStatus.mockResolvedValue(controlStatus('manual', 7, false));
+  it('enters MANUAL through the live runtime without Script.Stop', async () => {
+    mocks.ensureCurrent.mockResolvedValue({
+      installation,
+      status: status('auto'),
+      upgraded: false
+    });
+    mocks.readStatus.mockResolvedValue(status('manual'));
 
     const result = await pauseInstalledAutomation(installation);
 
-    expect(mocks.stopScript).toHaveBeenCalledWith(7);
-    expect(mocks.setRelayOff).toHaveBeenCalledTimes(2);
-    expect(mocks.setRelayOff).toHaveBeenCalledWith({ relayId: 0 });
-    expect(mocks.getStatus).toHaveBeenCalledTimes(2);
-    expect(result.automationMode).toBe('manual');
-    expect(result.relayOn).toBe(false);
+    expect(mocks.setRuntimeMode).toHaveBeenCalledWith(installation, 'manual');
+    expect(result.status.automationMode).toBe('manual');
+    expect(result.status.relayOn).toBe(false);
   });
 
-  it('still attempts and confirms relay OFF when Script.Stop fails', async () => {
-    mocks.stopScript.mockResolvedValue({
-      ok: false,
-      error: { kind: 'rpc', message: 'stop failed' }
+  it('returns to AUTO through the live runtime without Script.Start', async () => {
+    mocks.ensureCurrent.mockResolvedValue({
+      installation,
+      status: status('manual'),
+      upgraded: false
     });
-    mocks.readControlStatus.mockResolvedValue(controlStatus('auto', 7, false));
-
-    await expect(pauseInstalledAutomation(installation)).rejects.toThrow();
-    expect(mocks.setRelayOff).toHaveBeenCalledTimes(2);
-    expect(mocks.setRelayOff).toHaveBeenCalledWith({ relayId: 0 });
-    expect(mocks.getStatus).toHaveBeenCalledTimes(2);
-  });
-
-  it('does not stop the script when relay OFF cannot be confirmed first', async () => {
-    mocks.getStatus.mockResolvedValueOnce({ ok: true, value: { relayOn: true } });
-
-    await expect(pauseInstalledAutomation(installation)).rejects.toThrow(
-      'Shelly relay did not confirm OFF.'
-    );
-    expect(mocks.stopScript).not.toHaveBeenCalled();
-    expect(mocks.setRelayOff).toHaveBeenCalledTimes(1);
-  });
-
-  it('resumes from a known OFF state and confirms the stored script is running', async () => {
-    mocks.readControlStatus
-      .mockResolvedValueOnce(controlStatus('manual', 7, false))
-      .mockResolvedValueOnce(controlStatus('auto', 7, false));
+    mocks.readStatus.mockResolvedValue(status('auto'));
 
     const result = await resumeInstalledAutomation(installation);
 
-    expect(mocks.setRelayOff).toHaveBeenCalledWith({ relayId: 0 });
-    expect(mocks.startScript).toHaveBeenCalledWith(7);
-    expect(result.automationMode).toBe('auto');
+    expect(mocks.setRuntimeMode).toHaveBeenCalledWith(installation, 'auto');
+    expect(result.status.automationMode).toBe('auto');
+    expect(result.status.relayOn).toBe(false);
   });
 
-  it('rejects pause when the stored script id no longer matches Shelly', async () => {
-    mocks.readControlStatus.mockResolvedValue(controlStatus('auto', 8, false));
-
-    await expect(pauseInstalledAutomation(installation)).rejects.toThrow(
-      'Stored automation script does not match Shelly.'
-    );
-    expect(mocks.stopScript).not.toHaveBeenCalled();
-    expect(mocks.setRelayOff).not.toHaveBeenCalled();
-  });
-
-  it('rejects resume when the stored script id no longer matches Shelly', async () => {
-    mocks.readControlStatus.mockResolvedValue(controlStatus('manual', 8, false));
-
-    await expect(resumeInstalledAutomation(installation)).rejects.toThrow(
-      'Stored automation script does not match Shelly.'
-    );
-    expect(mocks.startScript).not.toHaveBeenCalled();
-    expect(mocks.setRelayOff).not.toHaveBeenCalled();
-  });
-
-  it('allows direct relay ON only while the matched automation is manual and verifies it', async () => {
-    mocks.readControlStatus
-      .mockResolvedValueOnce(controlStatus('manual', 7, false))
-      .mockResolvedValueOnce(controlStatus('manual', 7, true));
+  it('keeps direct relay control gated by a live MANUAL runtime', async () => {
+    mocks.readStatus
+      .mockResolvedValueOnce(status('manual', false))
+      .mockResolvedValueOnce(status('manual', true));
 
     const result = await setInstalledAutomationRelayState(installation, true);
 
     expect(mocks.setRelayOn).toHaveBeenCalledWith({ relayId: 0 });
-    expect(result.relayOn).toBe(true);
-    expect(result.automationMode).toBe('manual');
+    expect(result.status.relayOn).toBe(true);
   });
 
-  it('rejects direct relay control while automation is running', async () => {
-    mocks.readControlStatus.mockResolvedValue(controlStatus('auto', 7, false));
+  it('rejects direct relay control when the process is actually stopped', async () => {
+    mocks.readStatus.mockResolvedValue(status('stopped'));
 
     await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
-      'Manual relay control requires a paused automation.'
+      'live MANUAL automation runtime'
     );
     expect(mocks.setRelayOn).not.toHaveBeenCalled();
   });

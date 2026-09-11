@@ -1,4 +1,4 @@
-import type { ShellyAutomationMode } from '../hardware-setup/shellyRequests.js';
+import type { InstalledAutomationControlMode } from './runtimeStatus.js';
 import type { InstalledAutomationHealth } from './runtimeDiagnostics.js';
 import type { InstalledAutomationScriptMatch } from './runtimeControl.js';
 
@@ -16,7 +16,7 @@ type InstallationRecoveryInput = {
   diagnosticsError: boolean;
   controlError: boolean;
   scriptMatch: InstalledAutomationScriptMatch | null;
-  automationMode: ShellyAutomationMode | null;
+  automationMode: InstalledAutomationControlMode | null;
   runtimeHealth: InstalledAutomationHealth | null;
 };
 
@@ -35,7 +35,7 @@ export const installationRecoveryState = ({
     return { issue: 'ownership-problem', action: 'refresh' };
   }
 
-  if (scriptMatch === 'matched' && automationMode === 'manual') {
+  if (scriptMatch === 'matched' && automationMode === 'stopped') {
     return { issue: 'script-stopped', action: 'resume' };
   }
 

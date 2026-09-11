@@ -57,6 +57,7 @@ const seedDraft = async (page: Page) => {
 const mockShellyRpc = async (page: Page) => {
   let scriptRunning = true;
   let relayOn = true;
+  let runtimeMode = 0;
 
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -107,7 +108,7 @@ const mockShellyRpc = async (page: Page) => {
     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
       id?: number | string;
       method?: string;
-      params?: { id?: number; on?: boolean };
+      params?: { id?: number; on?: boolean; code?: string };
     };
     let result: unknown = {};
     switch (requestBody.method) {
@@ -154,6 +155,16 @@ const mockShellyRpc = async (page: Page) => {
           ]
         };
         break;
+      case 'Script.Eval': {
+        const code = requestBody.params?.code ?? '';
+        if (code.includes('R.m=1')) {
+          runtimeMode = 1;
+        } else if (code.includes('R.m=0')) {
+          runtimeMode = 0;
+        }
+        result = { result: String(runtimeMode) };
+        break;
+      }
       case 'Script.Stop':
         scriptRunning = false;
         result = null;

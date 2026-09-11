@@ -88,6 +88,7 @@ type ShellyFetchMockOptions = {
 const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
   let scriptRunning = true;
   let relayOn = true;
+  let runtimeMode = 0;
   const rpcMethods: string[] = [];
 
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -108,7 +109,7 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
     const body = JSON.parse(String(init?.body ?? '{}')) as {
       id?: number | string;
       method?: string;
-      params?: { id?: number; on?: boolean };
+      params?: { id?: number; on?: boolean; code?: string };
     };
     if (body.method) {
       rpcMethods.push(body.method);
@@ -171,6 +172,16 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
       case 'Script.GetCode':
         result = { data: '// deployed exact source', left: 0 };
         break;
+      case 'Script.Eval': {
+        const code = body.params?.code ?? '';
+        if (code.includes('R.m=1')) {
+          runtimeMode = 1;
+        } else if (code.includes('R.m=0')) {
+          runtimeMode = 0;
+        }
+        result = { result: String(runtimeMode) };
+        break;
+      }
       case 'Script.Stop':
         scriptRunning = false;
         result = null;
@@ -392,14 +403,17 @@ describe('InstallationDetailScreen', () => {
     ).toBeVisible();
     await waitFor(() => expect(manual).toHaveAttribute('aria-pressed', 'true'));
     expect(screen.queryByRole('heading', { name: 'Skrypt zatrzymany' })).toBeNull();
-    expect(rpcMethods).toContain('Script.Stop');
+    expect(rpcMethods).toContain('Script.Eval');
+    expect(rpcMethods).not.toContain('Script.Stop');
+    expect(screen.getByText('21.4°C')).toBeVisible();
     expect(rpcMethods).toContain('Switch.Set');
 
     fireEvent.click(auto);
 
     expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
     await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
-    expect(rpcMethods).toContain('Script.Start');
+    expect(rpcMethods).not.toContain('Script.Start');
+    expect(screen.getByText('21.4°C')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
     expect(onNavigateDashboard).toHaveBeenCalledWith('time');

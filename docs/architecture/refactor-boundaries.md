@@ -46,3 +46,7 @@ The audit also checks for `TODO/FIXME/HACK`, `@ts-ignore`, broad `eslint-disable
 debug `console.log/debug`, and `as any` escape hatches in production paths.
 Structural refactoring is only accepted when lint, typecheck, tests and the
 repository/UX quality gates remain green.
+
+## Climate runtime control boundary
+
+AUTO/MANUAL is an in-process runtime state. Keep transport, status interpretation, relay safety, upgrade/recovery, and React synchronization in their dedicated modules documented in `runtime-control.md`; do not fold them into `useHardwareSetupFlow`, Dashboard, or Installation Detail.

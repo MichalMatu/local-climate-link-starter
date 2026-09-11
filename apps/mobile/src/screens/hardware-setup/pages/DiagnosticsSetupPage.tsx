@@ -88,6 +88,13 @@ const formatEnergy = (value: number | null | undefined, missingLabel: string): s
   return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
+const formatBytes = (value: number | null | undefined, missingLabel: string): string => {
+  if (value == null) {
+    return missingLabel;
+  }
+  return value < 1024 ? `${Math.round(value)} B` : `${(value / 1024).toFixed(1)} KiB`;
+};
+
 const formatPlugRelay = (
   plug: DiagnosticPlug | undefined,
   missingLabel: string
@@ -178,6 +185,7 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const toastIdRef = useRef(0);
   const diagnostics = flow.diagnosticSnapshot?.diagnostics;
+  const resources = flow.diagnosticResources;
   const shellyTime = flow.diagnosticSnapshot?.time;
   const script = flow.diagnosticSnapshot?.script;
   const plug = flow.diagnosticSnapshot?.plug;
@@ -247,12 +255,20 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
         <button
           className="secondary-action diagnostics-refresh-button"
           type="button"
-          aria-busy={flow.diagnosticMutation.isPending || undefined}
-          disabled={flow.diagnosticShelly === null || flow.diagnosticMutation.isPending}
+          aria-busy={
+            flow.diagnosticMutation.isPending ||
+            flow.diagnosticResourceMutation.isPending ||
+            undefined
+          }
+          disabled={
+            flow.diagnosticShelly === null ||
+            flow.diagnosticMutation.isPending ||
+            flow.diagnosticResourceMutation.isPending
+          }
           title={t('hardware.diagnostics.actionRefreshTitle')}
-          onClick={() => flow.diagnosticMutation.mutate(undefined)}
+          onClick={() => flow.refreshDiagnostics()}
         >
-          {flow.diagnosticMutation.isPending
+          {flow.diagnosticMutation.isPending || flow.diagnosticResourceMutation.isPending
             ? t('hardware.diagnostics.fetching')
             : t('hardware.diagnostics.actionRefresh')}
         </button>
@@ -396,6 +412,32 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
               value={script?.configHash ?? t('common.missing')}
             />
             <DiagnosticRow
+              label={t('hardware.diagnostics.scriptRpcState')}
+              value={
+                resources?.script?.running === true
+                  ? 'RUNNING'
+                  : resources?.script?.running === false
+                    ? 'STOPPED'
+                    : t('common.missing')
+              }
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.scriptMemUsed')}
+              value={formatBytes(resources?.script?.memUsedBytes, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.scriptMemPeak')}
+              value={formatBytes(resources?.script?.memPeakBytes, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.scriptMemFree')}
+              value={formatBytes(resources?.script?.memFreeBytes, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.scriptCpu')}
+              value={formatDiagnosticNumber(resources?.script?.cpuPercent, '%', 1)}
+            />
+            <DiagnosticRow
               label={t('hardware.metrics.snapshotAge')}
               value={formatSnapshotAge(
                 flow.diagnosticFetchedAtMs,
@@ -438,6 +480,14 @@ export const DiagnosticsSetupPage = ({ flow }: HardwarePageProps) => {
             <DiagnosticRow
               label={t('hardware.metrics.plugTemperature')}
               value={formatDiagnosticNumber(plug?.deviceTemperatureC, '°C')}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.deviceRamFree')}
+              value={formatBytes(resources?.system?.ramFreeBytes, t('common.missing'))}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.deviceRamTotal')}
+              value={formatBytes(resources?.system?.ramSizeBytes, t('common.missing'))}
             />
           </DiagnosticGroup>
         </div>

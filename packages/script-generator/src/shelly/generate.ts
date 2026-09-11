@@ -75,8 +75,8 @@ const renderRuntimeParser = (config: ShellyThermostatConfig): string =>
 const renderRuntimeState = (config: ShellyThermostatConfig): string =>
   config.sensor.profileId === 'xiaomi_lywsd03mmc_bthome_v2' ||
   config.rule.vpdAssist.enabled
-    ? 'var R={ls:null,l:0,t:null,h:null,tt:null,ht:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,sa:0};'
-    : 'var R={ls:null,l:0,t:null,h:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,sa:0};';
+    ? 'var R={ls:null,l:0,t:null,h:null,tt:null,ht:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,m:0,sa:0};'
+    : 'var R={ls:null,l:0,t:null,h:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,m:0,sa:0};';
 
 const renderMeasurementHelper = (config: ShellyThermostatConfig): string => {
   const commonDecision =
@@ -105,7 +105,8 @@ ${renderRuntimeState(config)}
 function nw(){return Shelly.getUptimeMs();}
 function na(a){if(a===undefined||a===null)return"";var s=String(a).toUpperCase(),o="";for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c!==":"&&c!=="-")o+=c;}return o;}
 function fv(o,k){return o&&o[k]!==undefined?o[k]:null;}
-function sw(o,rs,f){var n=nw(),ch=R.on!=o;if(o&&!f&&ch&&n-R.lc<C.c){R.rs="mc";return;}Shelly.call("Switch.Set",{id:C.i,on:o},function(r,e){if(e){R.rs="se";Shelly.call("Switch.Set",{id:C.i,on:false});R.on=false;return;}R.on=o;R.rs=rs;if(ch)R.lc=n;R.os=o?n:null;});}
+function s(o,c){Shelly.call("Switch.Set",{id:C.i,on:o},c)}
+function sw(o,q,f){if(R.m)return;var n=nw(),c=R.on!=o;if(o&&!f&&c&&n-R.lc<C.c){R.rs="mc";return;}s(o,function(r,e){if(R.m)return s(false);if(e){R.rs="se";s(false);R.on=false;return;}R.on=o;R.rs=q;if(c)R.lc=n;R.os=o?n:null;});}
 function stale(){var n=nw();if(R.ls===null||n-R.ls>C.s){R.ds="st";R.nh=0;R.fh=0;sw(false,"st",true);return;}if(R.on&&R.os!==null&&n-R.os>=C.x){R.nh=0;R.fh=0;sw(false,"mx",true);}}
 ${renderThresholdHelper(config)}
 ${renderMeasurementHelper(config)}

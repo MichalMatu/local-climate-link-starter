@@ -27,9 +27,7 @@ import {
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
   deleteInstalledAutomation,
-  installedAutomationScriptMatch,
-  pauseInstalledAutomation,
-  resumeInstalledAutomation
+  installedAutomationScriptMatch
 } from '../flows/installations/runtimeControl.js';
 import {
   installedAutomationScriptSourceQueryKey,
@@ -41,6 +39,7 @@ import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
   installedAutomationControlQueryKey,
   installedAutomationDiagnosticsQueryKey,
+  useInstalledAutomationActions,
   useInstalledAutomationControl,
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
@@ -140,6 +139,7 @@ const InstalledAutomationDetail = ({
   const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
+  const automationAction = useInstalledAutomationActions(installation);
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
@@ -173,38 +173,10 @@ const InstalledAutomationDetail = ({
     automationMode: control?.automationMode ?? null,
     runtimeHealth
   });
-  const visibleRecovery =
-    recovery?.issue === 'script-stopped' && isPaused ? null : recovery;
+  const visibleRecovery = recovery;
   const recoveryCopy = visibleRecovery
     ? installationHealthCopy[locale].issues[visibleRecovery.issue]
     : null;
-
-  const automationMutation = useMutation({
-    mutationFn: () =>
-      isPaused
-        ? resumeInstalledAutomation(installation)
-        : pauseInstalledAutomation(installation),
-    onSuccess: async (nextControl) => {
-      queryClient.setQueryData(
-        installedAutomationControlQueryKey(installation),
-        nextControl
-      );
-      if (nextControl.automationMode === 'manual') {
-        queryClient.removeQueries({
-          queryKey: installedAutomationDiagnosticsQueryKey(installation),
-          exact: true
-        });
-        pushToast('ok', t('detail.pauseSuccess'));
-      } else {
-        await queryClient.invalidateQueries({
-          queryKey: installedAutomationDiagnosticsQueryKey(installation),
-          exact: true
-        });
-        pushToast('ok', t('detail.resumeSuccess'));
-      }
-    },
-    onError: () => pushToast('warning', t('detail.actionFailed'))
-  });
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteInstalledAutomation(installation),
@@ -285,18 +257,20 @@ const InstalledAutomationDetail = ({
                 type="button"
                 disabled={
                   visibleRecovery.action === 'resume'
-                    ? automationMutation.isPending
+                    ? automationAction.isPending
                     : diagnosticsQuery.isFetching || controlQuery.isFetching
                 }
                 onClick={() => {
                   if (visibleRecovery.action === 'resume') {
-                    automationMutation.mutate();
+                    automationAction.mutate('recover', {
+                      onSuccess: () => pushToast('ok', t('detail.resumeSuccess'))
+                    });
                     return;
                   }
                   void refreshAll();
                 }}
               >
-                {visibleRecovery.action === 'resume' && automationMutation.isPending
+                {visibleRecovery.action === 'resume' && automationAction.isPending
                   ? t('detail.changingState')
                   : visibleRecovery.action === 'refresh' &&
                       (diagnosticsQuery.isFetching || controlQuery.isFetching)
@@ -395,11 +369,15 @@ const InstalledAutomationDetail = ({
                 aria-pressed={control?.automationMode === 'auto'}
                 disabled={
                   !canToggleAutomation ||
-                  automationMutation.isPending ||
+                  automationAction.isPending ||
                   deleteMutation.isPending
                 }
                 onClick={() => {
-                  if (isPaused) automationMutation.mutate();
+                  if (isPaused) {
+                    automationAction.mutate('auto', {
+                      onSuccess: () => pushToast('ok', t('detail.resumeSuccess'))
+                    });
+                  }
                 }}
               >
                 AUTO
@@ -410,11 +388,15 @@ const InstalledAutomationDetail = ({
                 aria-pressed={isPaused}
                 disabled={
                   !canToggleAutomation ||
-                  automationMutation.isPending ||
+                  automationAction.isPending ||
                   deleteMutation.isPending
                 }
                 onClick={() => {
-                  if (control?.automationMode === 'auto') automationMutation.mutate();
+                  if (control?.automationMode === 'auto') {
+                    automationAction.mutate('manual', {
+                      onSuccess: () => pushToast('ok', t('detail.pauseSuccess'))
+                    });
+                  }
                 }}
               >
                 MANUAL
@@ -423,7 +405,7 @@ const InstalledAutomationDetail = ({
             <button
               className="secondary-action secondary-action--danger"
               type="button"
-              disabled={automationMutation.isPending || deleteMutation.isPending}
+              disabled={automationAction.isPending || deleteMutation.isPending}
               onClick={() => setDeleteOpen(true)}
             >
               {deleteCopy.action}

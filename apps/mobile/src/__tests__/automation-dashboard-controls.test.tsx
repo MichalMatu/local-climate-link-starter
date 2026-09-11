@@ -18,7 +18,7 @@ const runtimeMocks = vi.hoisted(() => ({
 vi.mock('../flows/installations/useInstalledAutomationRuntime.js', () => ({
   useInstalledAutomationDiagnostics: () => ({
     data: undefined,
-    isError: true,
+    isError: false,
     isPending: false,
     isFetching: false,
     refetch: runtimeMocks.diagnosticsRefetch
@@ -27,6 +27,7 @@ vi.mock('../flows/installations/useInstalledAutomationRuntime.js', () => ({
     data: {
       relayOn: false,
       automationMode: 'manual',
+      runtimeModeSupported: true,
       automationScriptId: 7,
       firmwareId: '1.0.0',
       telemetry: {},

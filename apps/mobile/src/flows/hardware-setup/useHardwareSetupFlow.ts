@@ -63,6 +63,10 @@ import {
   unwrapShellyResult
 } from './shellyRequests.js';
 import {
+  readShellyResourceDiagnostics,
+  type ShellyResourceDiagnostics
+} from './resourceDiagnostics.js';
+import {
   useHardwareSetupDraftStore,
   type SensorDraftDevice,
   type ShellyDraftDevice
@@ -368,6 +372,8 @@ export const useHardwareSetupFlow = () => {
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
   const [diagnosticSnapshot, setDiagnosticSnapshot] =
     useState<HardwareDiagnosticSnapshot | null>(null);
+  const [diagnosticResources, setDiagnosticResources] =
+    useState<ShellyResourceDiagnostics | null>(null);
   const [diagnosticFetchedAtMs, setDiagnosticFetchedAtMs] = useState<number | null>(null);
   const [shellyScanStartInput, setShellyScanStartInput] = useState('192.168.0.1');
   const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.99');
@@ -401,6 +407,7 @@ export const useHardwareSetupFlow = () => {
 
   const clearDiagnosticSnapshot = () => {
     setDiagnosticSnapshot(null);
+    setDiagnosticResources(null);
     setDiagnosticFetchedAtMs(null);
   };
 
@@ -1406,6 +1413,27 @@ export const useHardwareSetupFlow = () => {
     }
   });
 
+  const diagnosticResourceMutation = useMutation<
+    ShellyResourceDiagnostics,
+    Error,
+    number | undefined
+  >({
+    mutationFn: async (
+      scriptId = Math.trunc(toNumberOrFallback(diagnosticShelly?.scriptIdInput ?? '1', 1))
+    ): Promise<ShellyResourceDiagnostics> => {
+      if (!diagnosticShelly) {
+        throw new Error(t('hardware.flow.noSelectedDiagnosticShelly'));
+      }
+      return readShellyResourceDiagnostics(diagnosticShelly.baseUrl, scriptId);
+    },
+    onSuccess: (resources) => setDiagnosticResources(resources)
+  });
+
+  const refreshDiagnostics = (scriptId?: number) => {
+    diagnosticMutation.mutate(scriptId);
+    diagnosticResourceMutation.mutate(scriptId);
+  };
+
   const installMutation = useMutation({
     mutationFn: async (): Promise<HardwareInstallMutationResult> => {
       if (!configState.ok) {
@@ -1494,7 +1522,7 @@ export const useHardwareSetupFlow = () => {
     },
     onSuccess: ({ install }) => {
       setSafeRelayTestState(install);
-      diagnosticMutation.mutate(install.scriptId);
+      refreshDiagnostics(install.scriptId);
     }
   });
 
@@ -1599,6 +1627,7 @@ export const useHardwareSetupFlow = () => {
     canRunSafeRelayTest,
     setupStatus,
     diagnosticSnapshot,
+    diagnosticResources,
     diagnosticFetchedAtMs,
     checkShellyMutation,
     recheckShellyMutation,
@@ -1654,7 +1683,9 @@ export const useHardwareSetupFlow = () => {
     setPvvxTimeMutation,
     installMutation,
     safeRelayTestMutation,
-    diagnosticMutation
+    diagnosticMutation,
+    diagnosticResourceMutation,
+    refreshDiagnostics
   };
 };
 
