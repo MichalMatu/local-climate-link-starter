@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-installation-controls-diagnostics-v3",
+  "task_digest": "4082a1d0516cc2341e086769cca8e82e540c739706e5e6a8c3717ddda9f680eb",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T07:06:28.192876+00:00",
+  "attempt_id": "9766c416495ebde4484ef9ed",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 39532,
+  "updated_at": "2026-09-11T07:06:28.192970+00:00",
+  "pid": 39532
+}
