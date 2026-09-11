@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.18.20",
-  "state": "idle",
-  "pid": 52991,
-  "updated_at": "2026-09-11T09:47:12.424289+00:00",
+  "state": "running",
+  "pid": 55409,
+  "updated_at": "2026-09-11T09:48:56.498869+00:00",
   "self_revision": "0bb99d790dbed19a528b4cb8ac238432134b5660",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -14,7 +14,7 @@
   "task_timeout_default": 1800,
   "task_timeout_max": 21600,
   "memory_limit_mb_default": 4096,
-  "current_task_id": null,
+  "current_task_id": "20260911-production-hygiene-hardening-v5",
   "current_attempt_id": null,
   "current_task_digest": null,
   "repository_id": "local-climate-link-starter",
@@ -23,8 +23,8 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 52991,
+  "worker_pid": 55409,
   "supervisor_pid": 36982,
-  "last_task_id": "20260911-production-hygiene-hardening-v4",
+  "active_resources": [],
   "execution_variant": "parallel"
 }
