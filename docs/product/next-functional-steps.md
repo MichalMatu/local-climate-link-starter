@@ -32,7 +32,7 @@ The next agreed product slice is **expanded Shelly LED configuration**. Keep it
 app-side through `PLUGS_UI`; do not re-open the stable climate runtime or add LED
 logic to the generated thermostat script.
 
-## Product direction## Product direction
+## Product direction
 
 Local Climate Link is no longer best described as only a thermostat. The stable
 core already supports four climate-control modes:
@@ -261,7 +261,7 @@ LED color and do not add dynamic RSSI/battery/error flashing in this slice. Nigh
 configuration is also a separate follow-up unless a dedicated capability/schema audit
 explicitly brings it into scope.
 
-### Button — hardware validation complete### Button — hardware validation complete
+### Button — hardware validation complete
 
 Real-hardware validation was completed on 2026-09-09 with Shelly Plug S Gen3
 model `S3PL-00112EU`, firmware `1.7.5` (test device `192.168.0.16`), and
@@ -338,7 +338,7 @@ Next:
 After LED configuration is stable, re-audit the remaining product roadmap from actual
 user/hardware evidence instead of carrying old speculative TODOs forward.
 
-## Main risks caught before implementation## Main risks caught before implementation
+## Main risks caught before implementation
 
 ### 1. Global setup draft is not a multi-installation model
 
@@ -362,7 +362,7 @@ current app wrapper is simply narrower than that capability. Expand the UI/wrapp
 not the thermostat runtime. Dynamic error flashes and night-mode behavior remain
 separate experiments until explicitly audited and tested on hardware.
 
-### 5. Physical button is intentionally native-only on Plug S Gen3### 5. Physical button is intentionally native-only on Plug S Gen3
+### 5. Physical button is intentionally native-only on Plug S Gen3
 
 The firmware `1.7.5` hardware test did not expose a separate `button:0` component
 or a separate button `NotifyEvent`; websocket relay updates carried
