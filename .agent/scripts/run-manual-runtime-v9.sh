@@ -1,0 +1,141 @@
+#!/bin/sh
+set -eu
+BASE=377b7bf7a2bca37ab4371b42be82136c2b2aaf13
+BRANCH=work/manual-runtime-mode-20260911
+
+git fetch --prune origin
+git checkout -B "$BRANCH" "origin/$BRANCH"
+git reset --hard "$BASE"
+git clean -fd
+test "$(git rev-parse HEAD)" = "$BASE"
+test -z "$(git status --porcelain)"
+
+# Rebuild deterministically from the approved baseline.
+git show origin/agent-control:.agent/scripts/implement-manual-runtime-mode-v2.py \
+  | sed 's/replace(detail, "automationMutation.isPending", "automationAction.isPending", count=6)/replace(detail, "automationMutation.isPending", "automationAction.isPending", count=5)/' \
+  > /tmp/manual-v2.py
+python3 /tmp/manual-v2.py
+
+git show origin/agent-control:.agent/scripts/fix-manual-runtime-v4.py > /tmp/manual-v4.py
+python3 /tmp/manual-v4.py
+
+git show origin/agent-control:.agent/scripts/fix-manual-runtime-v5.py > /tmp/manual-v5.py
+python3 - <<'PY'
+from pathlib import Path
+p = Path('/tmp/manual-v5.py')
+s = p.read_text()
+
+# 1. Runtime mode symbol rename must be global in generated source.
+s = s.replace(
+    'replace(generate, "R.md", "R.m")',
+    'write(generate, read(generate).replace("R.md", "R.m"))',
+    1,
+)
+
+# 2. stale()/max-on already route through sw(); remove obsolete cleanup block.
+start_marker = '# stale()/max-on may still update diagnostic state'
+end_marker = '# Remove the mode copy from diagnostics.'
+start = s.index(start_marker)
+end = s.index(end_marker, start)
+s = s[:start] + '# stale()/max-on already flow through the authoritative sw() guard.\n\n' + s[end:]
+
+# 3. The v4 harness already uses mutable nowMs. Rename the runtime symbol globally
+# in the test, keep the corrected BTHome packet length, and remove only obsolete
+# mode-in-diagnostics assertions. Do not try to re-create nowMs or add another tick.
+s = s.replace(
+    'replace(manual_test, "R.md", "R.m")',
+    'write(manual_test, read(manual_test).replace("R.md", "R.m"))',
+    1,
+)
+
+old_now = '''replace(
+    manual_test,
+    "const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_000_000);",
+    "let nowMs = 1_000_000;\\n    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);",
+)
+'''
+if old_now not in s:
+    raise SystemExit('v9 could not locate obsolete nowSpy transformation')
+s = s.replace(old_now, '', 1)
+
+old_tick = '''replace(
+    manual_test,
+    "      runtime.runtime.setMode(0);\\n      expect(runtime.physicalRelayOn()).toBe(false);\\n\\n      runtime.scan(18, 50);",
+    "      runtime.runtime.setMode(0);\\n      expect(runtime.physicalRelayOn()).toBe(false);\\n      nowMs += 10;\\n\\n      runtime.scan(18, 50);",
+)'''
+if old_tick not in s:
+    raise SystemExit('v9 could not locate obsolete AUTO tick transformation')
+s = s.replace(old_tick, '', 1)
+
+p.write_text(s)
+PY
+python3 /tmp/manual-v5.py
+
+# Runtime mode is owned only by Script.Eval; diagnostics stay telemetry-only.
+git checkout "$BASE" -- apps/mobile/src/flows/hardware-setup/schemas.ts
+python3 - <<'PY'
+from pathlib import Path
+p = Path('docs/architecture/runtime-control.md')
+s = p.read_text()
+s = s.replace(
+    'The diagnostic payload exposes compact `md: 0 | 1`. Older runtimes omit `md`; the app treats those as upgradeable rather than inventing a manual state.',
+    'Runtime mode is read with `Script.Eval` from compact runtime state `R.m`. Older runtimes do not define `R.m`; the app treats those as upgradeable rather than inventing a manual state. `/diag` stays telemetry-only.'
+)
+s = s.replace('`R.md = 1`', '`R.m = 1`').replace('`R.md = 0`', '`R.m = 0`')
+p.write_text(s)
+PY
+
+pnpm exec prettier --write \
+  packages/script-generator/src/shelly/config.ts \
+  packages/script-generator/src/shelly/generate.ts \
+  packages/script-generator/src/__tests__/manual-runtime.test.ts \
+  apps/mobile/src/flows/installations/relaySafety.ts \
+  apps/mobile/src/flows/installations/runtimeModeTransport.ts \
+  apps/mobile/src/flows/installations/runtimeModeTransport.test.ts \
+  apps/mobile/src/flows/installations/runtimeStatus.ts \
+  apps/mobile/src/flows/installations/runtimeStatus.test.ts \
+  apps/mobile/src/flows/installations/runtimeUpgrade.ts \
+  apps/mobile/src/flows/installations/runtimeControl.ts \
+  apps/mobile/src/flows/installations/runtimeControl.test.ts \
+  apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts \
+  apps/mobile/src/flows/installations/healthRecovery.ts \
+  apps/mobile/src/flows/installations/healthRecovery.test.ts \
+  apps/mobile/src/screens/AutomationDashboardScreen.tsx \
+  apps/mobile/src/screens/InstallationDetailScreen.tsx \
+  docs/architecture/runtime-control.md \
+  docs/architecture/refactor-boundaries.md \
+  docs/HANDOFF_NEXT_CHAT.md
+
+git diff --check
+
+# 1) Runtime semantics first.
+pnpm --filter @lcl/script-generator exec vitest run \
+  src/__tests__/manual-runtime.test.ts \
+  src/__tests__/runtime-matrix.test.ts
+
+# 2) Generator invariants and strict byte budgets; update snapshots only after
+# semantic tests pass.
+pnpm --filter @lcl/script-generator exec vitest run src/__tests__/generator.test.ts -u
+
+# 3) App transport/status/safety/recovery and UI behaviour.
+pnpm --filter @lcl/mobile exec vitest run \
+  src/flows/installations/runtimeModeTransport.test.ts \
+  src/flows/installations/runtimeStatus.test.ts \
+  src/flows/installations/runtimeControl.test.ts \
+  src/flows/installations/healthRecovery.test.ts \
+  src/flows/installations/runtimeDiagnostics.test.ts \
+  src/__tests__/automation-dashboard-controls.test.tsx \
+  src/__tests__/automation-detail.test.tsx
+
+pnpm --filter @lcl/script-generator typecheck
+pnpm --filter @lcl/mobile typecheck
+pnpm --filter @lcl/mobile lint
+pnpm quality:repo
+pnpm quality:ux
+
+git diff --check
+git status --short
+git add -A
+git commit -m "feat(climate): keep telemetry live in manual mode"
+git push -u origin HEAD:"$BRANCH"
+echo MANUAL_RUNTIME_V9_SHA=$(git rev-parse HEAD)
