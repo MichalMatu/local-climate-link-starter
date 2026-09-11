@@ -44,6 +44,8 @@ const controlRpcResult = (method: string | undefined): unknown => {
           }
         ]
       };
+    case 'Script.Eval':
+      return { result: '0' };
     default:
       return {};
   }

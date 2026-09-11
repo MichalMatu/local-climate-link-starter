@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ClimateInstalledAutomation } from './model.js';
-import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
 import {
   pauseInstalledAutomation,
   readInstalledAutomationControlStatus,
+  recoverInstalledAutomation,
   resumeInstalledAutomation,
   setInstalledAutomationRelayState
 } from './runtimeControl.js';
+import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
+import { useInstalledAutomationStore } from './store.js';
 
 const installationQueryIdentity = (installation: ClimateInstalledAutomation) =>
   [
@@ -60,12 +62,16 @@ export const useInstalledAutomationControl = (
     refetchOnReconnect: true
   });
 
-export type InstalledAutomationControlAction = 'auto' | 'manual' | 'on' | 'off';
+export type InstalledAutomationControlAction =
+  'auto' | 'manual' | 'on' | 'off' | 'recover';
 
 export const useInstalledAutomationActions = (
   installation: ClimateInstalledAutomation
 ) => {
   const queryClient = useQueryClient();
+  const upsertInstallation = useInstalledAutomationStore(
+    (state) => state.upsertInstallation
+  );
 
   return useMutation({
     mutationFn: (action: InstalledAutomationControlAction) => {
@@ -78,12 +84,23 @@ export const useInstalledAutomationActions = (
           return setInstalledAutomationRelayState(installation, true);
         case 'off':
           return setInstalledAutomationRelayState(installation, false);
+        case 'recover':
+          return recoverInstalledAutomation(installation);
       }
     },
-    onSuccess: (status) => {
-      queryClient.setQueryData(installedAutomationControlQueryKey(installation), status);
+    onSuccess: ({ installation: nextInstallation, status }) => {
+      if (
+        nextInstallation.script.hash !== installation.script.hash ||
+        nextInstallation.updatedAtMs !== installation.updatedAtMs
+      ) {
+        upsertInstallation(nextInstallation);
+      }
+      queryClient.setQueryData(
+        installedAutomationControlQueryKey(nextInstallation),
+        status
+      );
       void queryClient.invalidateQueries({
-        queryKey: installedAutomationDiagnosticsQueryKey(installation)
+        queryKey: installedAutomationDiagnosticsQueryKey(nextInstallation)
       });
     }
   });

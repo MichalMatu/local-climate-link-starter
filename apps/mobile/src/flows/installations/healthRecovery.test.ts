@@ -24,9 +24,18 @@ describe('installationRecoveryState', () => {
     expect(
       installationRecoveryState({
         ...healthyInput,
-        automationMode: 'manual'
+        automationMode: 'stopped'
       })
     ).toEqual({ issue: 'script-stopped', action: 'resume' });
+  });
+
+  it('keeps intentional MANUAL mode out of recovery', () => {
+    expect(
+      installationRecoveryState({
+        ...healthyInput,
+        automationMode: 'manual'
+      })
+    ).toBeNull();
   });
 
   it('maps stale runtime data to missing fresh sensor data without changing configuration', () => {

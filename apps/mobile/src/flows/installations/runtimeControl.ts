@@ -1,18 +1,33 @@
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
 import {
   createShellyTransport,
-  readShellyControlStatus,
   readShellySetupStatus,
-  unwrapShellyResult,
-  type ShellyControlStatus
+  unwrapShellyResult
 } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
+import { forceRelayOffAndConfirm } from './relaySafety.js';
+import { setInstalledAutomationRuntimeMode } from './runtimeModeTransport.js';
+import {
+  readInstalledAutomationControlStatus,
+  type InstalledAutomationControlStatus
+} from './runtimeStatus.js';
+import {
+  ensureInstalledAutomationRuntimeCurrent,
+  recoverInstalledAutomationRuntime
+} from './runtimeUpgrade.js';
+
+export { readInstalledAutomationControlStatus } from './runtimeStatus.js';
 
 export type InstalledAutomationScriptMatch = 'matched' | 'missing' | 'mismatch';
 
+export type InstalledAutomationActionResult = {
+  installation: ClimateInstalledAutomation;
+  status: InstalledAutomationControlStatus;
+};
+
 export const installedAutomationScriptMatch = (
   installation: ClimateInstalledAutomation,
-  status: ShellyControlStatus
+  status: Pick<InstalledAutomationControlStatus, 'automationScriptId'>
 ): InstalledAutomationScriptMatch => {
   if (status.automationScriptId === null) {
     return 'missing';
@@ -20,13 +35,9 @@ export const installedAutomationScriptMatch = (
   return status.automationScriptId === installation.script.id ? 'matched' : 'mismatch';
 };
 
-export const readInstalledAutomationControlStatus = (
-  installation: ClimateInstalledAutomation
-): Promise<ShellyControlStatus> => readShellyControlStatus(installation.shelly.baseUrl);
-
 const requireMatchedInstalledAutomation = async (
   installation: ClimateInstalledAutomation
-): Promise<ShellyControlStatus> => {
+): Promise<InstalledAutomationControlStatus> => {
   const status = await readInstalledAutomationControlStatus(installation);
   if (installedAutomationScriptMatch(installation, status) !== 'matched') {
     throw new Error('Stored automation script does not match Shelly.');
@@ -34,87 +45,99 @@ const requireMatchedInstalledAutomation = async (
   return status;
 };
 
-const forceRelayOffAndConfirm = async (
-  client: RpcShellyClient,
-  relayId: number
-): Promise<void> => {
-  unwrapShellyResult(await client.setRelayOff({ relayId }));
-  const shellyStatus = unwrapShellyResult(await client.getStatus());
-  if (shellyStatus.relayOn) {
-    throw new Error('Shelly relay did not confirm OFF.');
+const verifyModeWithRelayOff = async (
+  installation: ClimateInstalledAutomation,
+  expectedMode: 'auto' | 'manual'
+): Promise<InstalledAutomationControlStatus> => {
+  const status = await requireMatchedInstalledAutomation(installation);
+  if (status.automationMode !== expectedMode || !status.runtimeModeSupported) {
+    throw new Error(`Shelly did not confirm ${expectedMode.toUpperCase()} runtime mode.`);
   }
+  if (status.relayOn) {
+    throw new Error(
+      `Shelly did not confirm relay OFF while entering ${expectedMode.toUpperCase()}.`
+    );
+  }
+  return status;
 };
 
 export const pauseInstalledAutomation = async (
   installation: ClimateInstalledAutomation
-): Promise<ShellyControlStatus> => {
-  const relayId = installation.config.output.relayId;
-  await requireMatchedInstalledAutomation(installation);
-  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
-
-  // Never stop the controller while its output is still ON: if a later OFF RPC
-  // failed, stopping first could leave an energized relay without automation.
-  await forceRelayOffAndConfirm(client, relayId);
-  const stopResult = await client.stopScript(installation.script.id);
-
-  // Close the race where the script could reassert the relay between the first
-  // OFF confirmation and Script.Stop. This also runs when Script.Stop reports
-  // an RPC failure because Result errors are unwrapped only after the second OFF.
-  await forceRelayOffAndConfirm(client, relayId);
-  unwrapShellyResult(stopResult);
-
-  const controlStatus = await readShellyControlStatus(installation.shelly.baseUrl);
+): Promise<InstalledAutomationActionResult> => {
+  const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
   if (
-    installedAutomationScriptMatch(installation, controlStatus) !== 'matched' ||
-    controlStatus.automationMode !== 'manual' ||
-    controlStatus.relayOn
+    prepared.status.automationMode !== 'auto' &&
+    prepared.status.automationMode !== 'manual'
   ) {
-    throw new Error('Shelly did not confirm a safely paused automation.');
+    throw new Error('Automation runtime is not available for MANUAL mode.');
   }
-  return controlStatus;
+
+  const nextInstallation = prepared.installation;
+  await setInstalledAutomationRuntimeMode(nextInstallation, 'manual');
+  const client = new RpcShellyClient(
+    createShellyTransport(nextInstallation.shelly.baseUrl)
+  );
+  const relayId = nextInstallation.config.output.relayId;
+
+  // Mode is blocked first, so no new automatic decision may be emitted. Two
+  // confirmed OFF passes close an already in-flight Switch.Set from AUTO.
+  await forceRelayOffAndConfirm(client, relayId);
+  await forceRelayOffAndConfirm(client, relayId);
+
+  return {
+    installation: nextInstallation,
+    status: await verifyModeWithRelayOff(nextInstallation, 'manual')
+  };
 };
 
 export const resumeInstalledAutomation = async (
   installation: ClimateInstalledAutomation
-): Promise<ShellyControlStatus> => {
-  const initialStatus = await requireMatchedInstalledAutomation(installation);
-  if (initialStatus.automationMode !== 'manual') {
-    throw new Error('Automation must be paused before it can be resumed.');
+): Promise<InstalledAutomationActionResult> => {
+  const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
+  if (prepared.status.automationMode !== 'manual') {
+    throw new Error('Automation must be in MANUAL before it can return to AUTO.');
   }
 
-  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
-  unwrapShellyResult(
-    await client.setRelayOff({ relayId: installation.config.output.relayId })
+  const nextInstallation = prepared.installation;
+  const client = new RpcShellyClient(
+    createShellyTransport(nextInstallation.shelly.baseUrl)
   );
-  unwrapShellyResult(await client.startScript(installation.script.id));
+  await forceRelayOffAndConfirm(client, nextInstallation.config.output.relayId);
+  await setInstalledAutomationRuntimeMode(nextInstallation, 'auto');
 
-  const controlStatus = await requireMatchedInstalledAutomation(installation);
-  if (controlStatus.automationMode !== 'auto') {
-    throw new Error('Shelly did not confirm a running automation.');
-  }
-  return controlStatus;
+  return {
+    installation: nextInstallation,
+    status: await verifyModeWithRelayOff(nextInstallation, 'auto')
+  };
+};
+
+export const recoverInstalledAutomation = async (
+  installation: ClimateInstalledAutomation
+): Promise<InstalledAutomationActionResult> => {
+  const recovered = await recoverInstalledAutomationRuntime(installation);
+  return { installation: recovered.installation, status: recovered.status };
 };
 
 export const setInstalledAutomationRelayState = async (
   installation: ClimateInstalledAutomation,
   on: boolean
-): Promise<ShellyControlStatus> => {
+): Promise<InstalledAutomationActionResult> => {
   const initialStatus = await requireMatchedInstalledAutomation(installation);
-  if (initialStatus.automationMode !== 'manual') {
-    throw new Error('Manual relay control requires a paused automation.');
+  if (initialStatus.automationMode !== 'manual' || !initialStatus.runtimeModeSupported) {
+    throw new Error('Manual relay control requires a live MANUAL automation runtime.');
   }
 
-  const relayId = installation.config.output.relayId;
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
+  const relayId = installation.config.output.relayId;
   unwrapShellyResult(
     on ? await client.setRelayOn({ relayId }) : await client.setRelayOff({ relayId })
   );
 
   const verified = await requireMatchedInstalledAutomation(installation);
   if (verified.automationMode !== 'manual' || verified.relayOn !== on) {
-    throw new Error(`Shelly did not confirm relay ${on ? 'ON' : 'OFF'} in manual mode.`);
+    throw new Error(`Shelly did not confirm relay ${on ? 'ON' : 'OFF'} in MANUAL mode.`);
   }
-  return verified;
+  return { installation, status: verified };
 };
 
 export const deleteInstalledAutomation = async (
@@ -140,7 +163,6 @@ export const deleteInstalledAutomation = async (
   }
 
   await forceRelayOffAndConfirm(client, relayId);
-
   if (!targetScript) {
     return;
   }

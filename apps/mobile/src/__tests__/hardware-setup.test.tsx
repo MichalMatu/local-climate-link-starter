@@ -562,9 +562,13 @@ describe('HardwareSetupScreen', () => {
             return rpcResult({
               id: 4,
               running: true,
-              mem_used: 12,
-              mem_free: 34
+              mem_used: 12_288,
+              mem_peak: 16_384,
+              mem_free: 25_116,
+              cpu: 0.3
             });
+          case 'Sys.GetStatus':
+            return rpcResult({ ram_size: 259_128, ram_free: 96_180 });
           default:
             return rpcResult({});
         }
@@ -3147,6 +3151,29 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('Dane BLE')).toBeInTheDocument();
     expect(screen.getByText('Przekaźnik reguły')).toBeInTheDocument();
     expect(screen.getAllByText('OFF').length).toBeGreaterThanOrEqual(2);
+    await waitFor(() =>
+      expect(
+        screen.getByText('Stan skryptu RPC').closest('.lcl-diagnostic-row')
+      ).toHaveTextContent('RUNNING')
+    );
+    expect(
+      screen.getByText('JS użyte teraz').closest('.lcl-diagnostic-row')
+    ).toHaveTextContent('12.0 KiB');
+    expect(screen.getByText('JS peak').closest('.lcl-diagnostic-row')).toHaveTextContent(
+      '16.0 KiB'
+    );
+    expect(screen.getByText('JS wolne').closest('.lcl-diagnostic-row')).toHaveTextContent(
+      '24.5 KiB'
+    );
+    expect(
+      screen.getByText('CPU skryptu').closest('.lcl-diagnostic-row')
+    ).toHaveTextContent('0.3%');
+    expect(
+      screen.getByText('RAM Shelly wolny').closest('.lcl-diagnostic-row')
+    ).toHaveTextContent('93.9 KiB');
+    expect(
+      screen.getByText('RAM Shelly razem').closest('.lcl-diagnostic-row')
+    ).toHaveTextContent('253.1 KiB');
   });
 
   it('shows a neutral BLE data state when a helper packet follows a valid rule value', async () => {

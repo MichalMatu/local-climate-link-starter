@@ -112,7 +112,7 @@ R.m = 1  -> MANUAL
 Mode read expression:
 
 ```js
-typeof R==="object"&&typeof R.m==="number"?R.m:-1
+typeof R === 'object' && typeof R.m === 'number' ? R.m : -1;
 ```
 
 Interpretation:
