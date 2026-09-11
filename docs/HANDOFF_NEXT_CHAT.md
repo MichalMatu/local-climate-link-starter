@@ -368,3 +368,13 @@ Also run `git diff --check` and audit that normal user AUTO/MANUAL paths contain
 - fix mocks/tests when the accepted runtime contract changed
 - preserve strict generated-code budgets unless real evidence justifies a deliberate change
 - keep final physical relay state explicit and known
+
+## Installation detail controls + scoped diagnostics (2026-09-11)
+
+Current feature branch: `work/installation-controls-diagnostics-20260911`.
+
+This tranche adds verified MANUAL-only relay `ON/OFF` to the climate installation detail by reusing the existing `useInstalledAutomationActions` / `setInstalledAutomationRelayState` safety path. It also adds a direct installation-scoped `Diagnostyka` modal.
+
+The modal intentionally omits the normal summary data already visible on the detail cards (climate temperature/humidity/VPD, thresholds and output summary). It shows technical runtime/resource, BLE freshness/battery/RSSI and Shelly electrical/device telemetry. Resource data reuses `readShellyResourceDiagnostics` (`Script.GetStatus` + `Sys.GetStatus`) and the existing `/script/<id>/diag` query.
+
+Diagnostics uses a 3-second refresh interval only while the modal observer is enabled, with `refetchIntervalInBackground: false`; manual refresh remains available. The generic 30-second dashboard/detail polling remains unchanged. LED configuration is explicitly out of scope for this tranche.

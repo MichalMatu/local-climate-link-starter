@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { readShellyResourceDiagnostics } from '../hardware-setup/resourceDiagnostics.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import {
   pauseInstalledAutomation,
@@ -9,6 +10,13 @@ import {
 } from './runtimeControl.js';
 import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
 import { useInstalledAutomationStore } from './store.js';
+
+const DEFAULT_RUNTIME_REFRESH_MS = 30_000;
+
+type RuntimeQueryOptions = {
+  enabled?: boolean;
+  refetchInterval?: number | false;
+};
 
 const installationQueryIdentity = (installation: ClimateInstalledAutomation) =>
   [
@@ -27,6 +35,14 @@ export const installedAutomationDiagnosticsQueryKey = (
     ...installationQueryIdentity(installation)
   ] as const;
 
+export const installedAutomationResourceDiagnosticsQueryKey = (
+  installation: ClimateInstalledAutomation
+) =>
+  [
+    'installed-automation-resource-diagnostics',
+    ...installationQueryIdentity(installation)
+  ] as const;
+
 export const installedAutomationControlQueryKey = (
   installation: ClimateInstalledAutomation
 ) =>
@@ -34,14 +50,32 @@ export const installedAutomationControlQueryKey = (
 
 export const useInstalledAutomationDiagnostics = (
   installation: ClimateInstalledAutomation,
-  options: { enabled?: boolean } = {}
+  options: RuntimeQueryOptions = {}
 ) =>
   useQuery({
     queryKey: installedAutomationDiagnosticsQueryKey(installation),
     queryFn: () => fetchInstalledAutomationDiagnostics(installation),
     enabled: options.enabled ?? true,
     retry: false,
-    refetchInterval: 30_000,
+    refetchInterval: options.refetchInterval ?? DEFAULT_RUNTIME_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
+  });
+
+export const useInstalledAutomationResourceDiagnostics = (
+  installation: ClimateInstalledAutomation,
+  options: RuntimeQueryOptions = {}
+) =>
+  useQuery({
+    queryKey: installedAutomationResourceDiagnosticsQueryKey(installation),
+    queryFn: () =>
+      readShellyResourceDiagnostics(installation.shelly.baseUrl, installation.script.id),
+    enabled: options.enabled ?? true,
+    retry: false,
+    refetchInterval: options.refetchInterval ?? DEFAULT_RUNTIME_REFRESH_MS,
+    refetchIntervalInBackground: false,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
@@ -56,7 +90,8 @@ export const useInstalledAutomationControl = (
     queryFn: () => readInstalledAutomationControlStatus(installation),
     enabled: options.enabled ?? true,
     retry: false,
-    refetchInterval: 30_000,
+    refetchInterval: DEFAULT_RUNTIME_REFRESH_MS,
+    refetchIntervalInBackground: false,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
@@ -101,6 +136,9 @@ export const useInstalledAutomationActions = (
       );
       void queryClient.invalidateQueries({
         queryKey: installedAutomationDiagnosticsQueryKey(nextInstallation)
+      });
+      void queryClient.invalidateQueries({
+        queryKey: installedAutomationResourceDiagnosticsQueryKey(nextInstallation)
       });
     }
   });

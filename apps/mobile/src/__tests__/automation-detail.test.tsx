@@ -172,6 +172,18 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
       case 'Script.GetCode':
         result = { data: '// deployed exact source', left: 0 };
         break;
+      case 'Script.GetStatus':
+        result = {
+          running: scriptRunning,
+          mem_used: 2660,
+          mem_peak: 6804,
+          mem_free: 22442,
+          cpu: 15.2
+        };
+        break;
+      case 'Sys.GetStatus':
+        result = { ram_size: 259128, ram_free: 90000 };
+        break;
       case 'Script.Eval': {
         const code = body.params?.code ?? '';
         if (code.includes('R.m=1')) {
@@ -389,9 +401,17 @@ describe('InstallationDetailScreen', () => {
       document.querySelectorAll('.installation-detail-shell svg:not(.tabler-icon)')
     ).toHaveLength(0);
 
-    const auto = screen.getByRole('button', { name: 'AUTO' });
-    const manual = screen.getByRole('button', { name: 'MANUAL' });
+    const automationCard = screen
+      .getByRole('heading', { name: 'Automatyka' })
+      .closest('article');
+    expect(automationCard).not.toBeNull();
+    const auto = within(automationCard!).getByRole('button', { name: 'AUTO' });
+    const manual = within(automationCard!).getByRole('button', { name: 'MANUAL' });
+    const relayOnButton = within(automationCard!).getByRole('button', { name: 'ON' });
+    const relayOffButton = within(automationCard!).getByRole('button', { name: 'OFF' });
     await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
+    expect(relayOnButton).toBeDisabled();
+    expect(relayOffButton).toBeDisabled();
 
     fireEvent.click(manual);
 
@@ -402,6 +422,13 @@ describe('InstallationDetailScreen', () => {
       )
     ).toBeVisible();
     await waitFor(() => expect(manual).toHaveAttribute('aria-pressed', 'true'));
+    await waitFor(() => expect(relayOnButton).toBeEnabled());
+    expect(relayOffButton).toBeEnabled();
+    expect(relayOffButton).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(relayOnButton);
+    await waitFor(() => expect(relayOnButton).toHaveAttribute('aria-pressed', 'true'));
+    fireEvent.click(relayOffButton);
+    await waitFor(() => expect(relayOffButton).toHaveAttribute('aria-pressed', 'true'));
     expect(screen.queryByRole('heading', { name: 'Skrypt zatrzymany' })).toBeNull();
     expect(rpcMethods).toContain('Script.Eval');
     expect(rpcMethods).not.toContain('Script.Stop');
@@ -420,6 +447,39 @@ describe('InstallationDetailScreen', () => {
     expect(onBack).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens scoped technical diagnostics without duplicating the installation summary', async () => {
+    const saved = installation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    const { rpcMethods } = installShellyFetchMock();
+    renderDetail(saved.id);
+    expect(await screen.findByText('21.4°C')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka · Salon' });
+    expect(await within(dialog).findByText('JS użyte teraz')).toBeVisible();
+    expect(within(dialog).getByText('CPU skryptu')).toBeVisible();
+    expect(within(dialog).getByText('RAM Shelly wolny')).toBeInTheDocument();
+    expect(within(dialog).getByText('Bateria')).toBeInTheDocument();
+    expect(within(dialog).getByText('RSSI')).toBeInTheDocument();
+    expect(within(dialog).queryByText('Temperatura', { exact: true })).toBeNull();
+    expect(within(dialog).queryByText('Wilgotność', { exact: true })).toBeNull();
+    expect(within(dialog).queryByText('VPD', { exact: true })).toBeNull();
+    expect(
+      within(dialog).queryByText('Aktywne progi ON / OFF', { exact: true })
+    ).toBeNull();
+    expect(within(dialog).queryByText('Wyjście', { exact: true })).toBeNull();
+    await waitFor(() => expect(rpcMethods).toContain('Script.GetStatus'));
+    expect(rpcMethods).toContain('Sys.GetStatus');
+    const before = rpcMethods.filter((method) => method === 'Script.GetStatus').length;
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Odśwież' }));
+    await waitFor(() =>
+      expect(
+        rpcMethods.filter((method) => method === 'Script.GetStatus').length
+      ).toBeGreaterThan(before)
+    );
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
+    expect(screen.queryByRole('dialog', { name: 'Diagnostyka · Salon' })).toBeNull();
   });
 
   it('shows the current deployed script for the saved climate automation', async () => {

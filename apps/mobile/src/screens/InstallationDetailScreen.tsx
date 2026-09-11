@@ -34,11 +34,14 @@ import {
   loadInstalledAutomationScriptSource
 } from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import { InstallationDiagnosticsModal } from './InstallationDiagnosticsModal.js';
+import { InstallationRuntimeControls } from './InstallationRuntimeControls.js';
 import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
   installedAutomationControlQueryKey,
   installedAutomationDiagnosticsQueryKey,
+  installedAutomationResourceDiagnosticsQueryKey,
   useInstalledAutomationActions,
   useInstalledAutomationControl,
   useInstalledAutomationDiagnostics
@@ -144,6 +147,7 @@ const InstalledAutomationDetail = ({
     (state) => state.removeInstallation
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [scriptOpen, setScriptOpen] = useState(false);
   const deleteCopy = installationDeleteCopy[locale];
   const scriptCopy = installationScriptPreviewCopy[locale];
@@ -189,6 +193,10 @@ const InstalledAutomationDetail = ({
         queryKey: installedAutomationControlQueryKey(installation),
         exact: true
       });
+      queryClient.removeQueries({
+        queryKey: installedAutomationResourceDiagnosticsQueryKey(installation),
+        exact: true
+      });
       queryClient.removeQueries({ queryKey: scriptQueryKey, exact: true });
       removeInstallation(installation.id);
       setDeleteOpen(false);
@@ -227,7 +235,7 @@ const InstalledAutomationDetail = ({
       : t('intent.temperature.context');
 
   return (
-    <main className="demo-shell installation-detail-shell">
+    <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
       <header className="demo-header installation-detail-header">
         <div>
           <h1>{installation.shelly.name}</h1>
@@ -357,60 +365,44 @@ const InstalledAutomationDetail = ({
             </div>
           </dl>
 
-          <div className="installation-detail-actions installation-detail-mode-actions">
-            <div
-              className="automation-control-group installation-detail-mode-control"
-              role="group"
-              aria-label={t('detail.automation')}
-            >
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={control?.automationMode === 'auto'}
-                disabled={
-                  !canToggleAutomation ||
-                  automationAction.isPending ||
-                  deleteMutation.isPending
-                }
-                onClick={() => {
-                  if (isPaused) {
-                    automationAction.mutate('auto', {
-                      onSuccess: () => pushToast('ok', t('detail.resumeSuccess'))
-                    });
-                  }
-                }}
-              >
-                AUTO
-              </button>
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={isPaused}
-                disabled={
-                  !canToggleAutomation ||
-                  automationAction.isPending ||
-                  deleteMutation.isPending
-                }
-                onClick={() => {
-                  if (control?.automationMode === 'auto') {
-                    automationAction.mutate('manual', {
-                      onSuccess: () => pushToast('ok', t('detail.pauseSuccess'))
-                    });
-                  }
-                }}
-              >
-                MANUAL
-              </button>
-            </div>
-            <button
-              className="secondary-action secondary-action--danger"
-              type="button"
-              disabled={automationAction.isPending || deleteMutation.isPending}
-              onClick={() => setDeleteOpen(true)}
-            >
-              {deleteCopy.action}
-            </button>
-          </div>
+          <InstallationRuntimeControls
+            actionBusy={automationAction.isPending}
+            automationMode={control?.automationMode ?? null}
+            canToggleAutomation={canToggleAutomation}
+            deleteBusy={deleteMutation.isPending}
+            deleteLabel={deleteCopy.action}
+            relayState={relayState}
+            onAuto={() => {
+              if (isPaused) {
+                automationAction.mutate('auto', {
+                  onSuccess: () => pushToast('ok', t('detail.resumeSuccess'))
+                });
+              }
+            }}
+            onManual={() => {
+              if (control?.automationMode === 'auto') {
+                automationAction.mutate('manual', {
+                  onSuccess: () => pushToast('ok', t('detail.pauseSuccess'))
+                });
+              }
+            }}
+            onRelayOn={() => {
+              if (relayState !== true) {
+                automationAction.mutate('on', {
+                  onError: () => pushToast('warning', t('detail.actionFailed'))
+                });
+              }
+            }}
+            onRelayOff={() => {
+              if (relayState !== false) {
+                automationAction.mutate('off', {
+                  onError: () => pushToast('warning', t('detail.actionFailed'))
+                });
+              }
+            }}
+            onOpenDiagnostics={() => setDiagnosticsOpen(true)}
+            onDelete={() => setDeleteOpen(true)}
+          />
         </article>
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
@@ -423,6 +415,12 @@ const InstalledAutomationDetail = ({
         }
         onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
         {...(onOpenSettings ? { onOpenSettings } : {})}
+      />
+
+      <InstallationDiagnosticsModal
+        installation={installation}
+        open={diagnosticsOpen}
+        onClose={() => setDiagnosticsOpen(false)}
       />
 
       <Modal

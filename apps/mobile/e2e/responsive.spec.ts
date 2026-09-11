@@ -644,7 +644,10 @@ test('installed automation detail safely pauses and resumes on phone', async ({
     page.getByText('Automatyka zatrzymana, wyjście potwierdzone jako OFF.')
   ).toBeVisible();
   await expect(manual).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByText('OFF', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'OFF', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
 
   await auto.click();
   await expect(page.getByText('Automatyka uruchomiona.')).toBeVisible();

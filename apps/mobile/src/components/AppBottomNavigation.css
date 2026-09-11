@@ -8,6 +8,12 @@
   );
 }
 
+.app-bottom-nav-shell .lcl-toast-viewport {
+  bottom: calc(
+    var(--app-bottom-nav-height) + var(--lcl-spacing-lg) + env(safe-area-inset-bottom)
+  );
+}
+
 .app-bottom-nav {
   align-items: stretch;
   background: var(--lcl-color-surface);
