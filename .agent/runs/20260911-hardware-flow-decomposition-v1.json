@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-hardware-flow-decomposition-v1",
+  "task_digest": "152a398de9abbcce227e83a1dcb4c1dc20e2d78186f1bd59721a6ad2826cf031",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T10:06:03.338607+00:00",
+  "attempt_id": "626bfd85e3a4dcae171da321",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 75815,
+  "updated_at": "2026-09-11T10:06:03.338725+00:00",
+  "pid": 75815
+}
