@@ -8,6 +8,13 @@ This note keeps the current UI review decisions small and explicit so later pass
 2. Sensor list: tighten card spacing, keep the useful readings/settings visible, add a small rename pencil near the device name, use a trash icon for delete, and avoid an accordion for the normal saved-item view.
 3. Shelly list: remove redundant refresh/check presentation, surface useful data directly, replace wordy actions with compact icons where clear, consolidate technical explanation into one info modal, and remove only genuine duplicate data.
 
+## Next small polish
+
+- Sensor loading layout: reserve the final temperature/humidity reading slots from the first render so saved sensor cards do not grow when live values arrive. Prefer stable placeholders such as `— °C` and `— %` over an arbitrary card min-height.
+- Shelly BLE scanner loading state: keep the current full-screen modal for now, but give the empty scanning state a centered progress indicator with a short `Trwa skanowanie…` message and a small note that discovered thermometers will appear there.
+- Remove the redundant start-scan toast once the modal itself clearly communicates active scanning. Keep toasts for errors and meaningful completion/attention states.
+- Do not convert BLE scanning to a standalone routed page yet. Revisit that only if the scanner grows into a richer workflow such as filtering, multi-select, device details, saved results, or additional configuration.
+
 ## Explicitly deferred
 
 - VPD algorithm redesign. The runtime currently uses fixed assist margins of 0.25 C for temperature and 2 percentage points for humidity. Audit whether these should derive from the rule hysteresis or become advanced configuration; do not change them during the UI polish pass.
