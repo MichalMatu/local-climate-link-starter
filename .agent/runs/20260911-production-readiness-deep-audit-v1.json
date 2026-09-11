@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260911-production-readiness-deep-audit-v1",
+  "task_digest": "ee5e3e9852c8583afc01e2fd4df6aea66228e0a7bb794e0bc7715eff3a14148d",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-11T10:35:24.057728+00:00",
+  "attempt_id": "4b0263e83938dc2dd38db658",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 17221,
+  "updated_at": "2026-09-11T10:35:24.057783+00:00",
+  "pid": 17221
+}
