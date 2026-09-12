@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8d1-harden-architecture-boundaries",
+  "task_digest": "2bfb67d1c46a0a69af826ff4d34dd9ad5ba8bf505dbd2a3f41da98483ed3fdb8",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T13:20:33.726506+00:00",
+  "attempt_id": "3b3ec623c6911fb0c69a23ab",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 96424,
+  "updated_at": "2026-09-12T13:20:33.726828+00:00",
+  "pid": 96424
+}
