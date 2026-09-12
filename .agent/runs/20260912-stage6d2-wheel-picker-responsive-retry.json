@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6d2-wheel-picker-responsive-retry",
+  "task_digest": "96ee65b3b991362911962d9ddf8fdad6b170eb77d9b1083ae72996277e7713df",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T07:33:42.955315+00:00",
+  "attempt_id": "17283d96e683a733b1e63295",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 48624,
+  "updated_at": "2026-09-12T07:33:42.955474+00:00",
+  "pid": 48624
+}
