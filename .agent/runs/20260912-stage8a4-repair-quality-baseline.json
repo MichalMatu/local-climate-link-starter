@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8a4-repair-quality-baseline",
+  "task_digest": "64934e40983df7e1c3540dd6e709ae66f85a60cdad3029c20c73848683374a8b",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T10:12:49.650052+00:00",
+  "attempt_id": "28ccbb3eef92a7826ed3a3e1",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 45425,
+  "updated_at": "2026-09-12T10:12:49.650119+00:00",
+  "pid": 45425
+}
