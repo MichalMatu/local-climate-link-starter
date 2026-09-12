@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8b4r-extract-install-flow",
+  "task_digest": "2edb63ce0b1f9cc594a5c4bd72d35102e575b3506af0394dde73b860c8f981f0",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T11:37:42.060416+00:00",
+  "attempt_id": "e8d2b1d504a92c0f01787501",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 76496,
+  "updated_at": "2026-09-12T11:37:42.060468+00:00",
+  "pid": 76496
+}
