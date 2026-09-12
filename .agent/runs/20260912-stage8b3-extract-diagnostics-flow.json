@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8b3-extract-diagnostics-flow",
+  "task_digest": "a97a2182de37b89801fdcfdbac4ee3726b3ae7badd7abe8cfb8f425763bafff0",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T11:19:37.662652+00:00",
+  "attempt_id": "941bb98c4ce9257171c4d096",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 51217,
+  "updated_at": "2026-09-12T11:19:37.662705+00:00",
+  "pid": 51217
+}
