@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6b-add-fab-time-picker",
+  "task_digest": "5648332891d73af34fcd42cb06a4e453bb3fd11efe41b5fdf06ea56e5a0b294c",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T05:41:03.045884+00:00",
+  "attempt_id": "c735b8b5dcbb392689611e07",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 23776,
+  "updated_at": "2026-09-12T05:41:03.045941+00:00",
+  "pid": 23776
+}
