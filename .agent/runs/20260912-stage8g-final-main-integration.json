@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8g-final-main-integration",
+  "task_digest": "2dd45b233783cd04be6f92b2825793be73afb3547b73e23a82a33eed79e53cec",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T14:07:06.902543+00:00",
+  "attempt_id": "a5105791bbe7ba98e1ea88eb",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 77939,
+  "updated_at": "2026-09-12T14:07:06.902679+00:00",
+  "pid": 77939
+}
