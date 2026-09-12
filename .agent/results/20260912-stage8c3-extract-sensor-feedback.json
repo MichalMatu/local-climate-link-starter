@@ -1,0 +1,79 @@
+{
+  "id": "20260912-stage8c3-extract-sensor-feedback",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/ux-polish-20260911",
+  "allow_write": true,
+  "started_at": "2026-09-12T12:42:28.795860+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/stage8c3-extract-sensor-feedback-20260912.sh > /tmp/lcl-stage8c3.sh && bash /tmp/lcl-stage8c3.sh",
+      "exit_code": 1,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   477dd250..7d3b8530  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/ux-polish-20260911 -> FETCH_HEAD\n * branch              agent-control -> FETCH_HEAD\nHEAD is now at 32e31848 Extract Shelly setup feedback orchestration\nSwitched to and reset branch 'work/ux-polish-20260911'\nbranch 'work/ux-polish-20260911' set up to track 'origin/work/ux-polish-20260911'.\nYour branch is up to date with 'origin/work/ux-polish-20260911'.\napps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts 37ms (unchanged)\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx 43ms (unchanged)\n\n RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile\n\n(node:49482) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/__tests__/hardware-setup.test.tsx (58 tests) 23916ms\n   ✓ HardwareSetupScreen > allows rule install when Shelly.GetStatus omits Scripts but Script.List works  2029ms\n   ✓ HardwareSetupScreen > shows saved Shelly controls and sends relay ON/OFF commands  500ms\n   ✓ HardwareSetupScreen > does not replay Shelly control toasts after returning to the Shelly page  382ms\n   ✓ HardwareSetupScreen > switches saved Shelly automation between MANUAL and AUTO safely  368ms\n   ✓ HardwareSetupScreen > requires the real hardware safe relay test after script upload before ready state  2706ms\n   ✓ HardwareSetupScreen > removes a stale BLE discovery script before saving the rule  1493ms\n   ✓ HardwareSetupScreen > loads a Shelly script into the rule form and deletes it from the main screen  522ms\n   ✓ HardwareSetupScreen > does not replay rule success toasts after returning to the rule page  3149ms\n   ✓ HardwareSetupScreen > runs a Shelly-side BLE scanner from a saved plug and adds a found thermometer  1619ms\n   ✓ HardwareSetupScreen > removes a stale BLE discovery script before starting a new Shelly BLE scan  1695ms\n   ✓ HardwareSetupScreen > cleans up Shelly BLE discovery when the user switches tabs mid-scan  1697ms\n   ✓ HardwareSetupScreen > cleans up Shelly BLE discovery on pagehide  1720ms\n   ✓ HardwareSetupScreen > keeps BLE scan refresh errors out of the visible UI  1537ms\n   ✓ HardwareSetupScreen > does not restart automation when the BLE scanner cannot be stopped  1499ms\n\n Test Files  1 passed (1)\n      Tests  58 passed (58)\n   Start at  14:42:34\n   Duration  25.63s (transform 458ms, setup 112ms, collect 838ms, tests 23.92s, environment 399ms, prepare 63ms)\n\n\n> local-climate-link-starter@2.0.10 check /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build\n\n\n> local-climate-link-starter@2.0.10 format:check /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> prettier --check .\n\nChecking formatting...\nAll matched files use Prettier code style!\n\n> local-climate-link-starter@2.0.10 lint /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> pnpm -r lint\n\nScope: 10 of 11 workspace projects\npackages/automation-core lint$ eslint .\npackages/device-profiles lint$ eslint .\npackages/design-tokens lint$ eslint .\npackages/diagnostics lint$ eslint .\npackages/design-tokens lint: Done\npackages/device-profiles lint: Done\npackages/diagnostics lint: Done\npackages/automation-core lint: Done\napps/landing lint$ eslint .\npackages/ble-core lint$ eslint .\npackages/script-generator lint$ eslint .\npackages/shelly-client lint$ eslint .\npackages/script-generator lint: Done\napps/landing lint: Done\npackages/ui lint$ eslint .\npackages/ble-core lint: Done\npackages/shelly-client lint: Done\npackages/ui lint: Done\napps/mobile lint$ eslint .\napps/mobile lint: /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\napps/mobile lint:   9:10  error  'mutationError' is defined but never used  @typescript-eslint/no-unused-vars\napps/mobile lint: ✖ 1 problem (1 error, 0 warnings)\napps/mobile lint: Failed\n/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile:\n ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @lcl/mobile@2.0.10 lint: `eslint .`\nExit status 1\n ELIFECYCLE  Command failed with exit code 1.\n ELIFECYCLE  Command failed with exit code 1.\n",
+      "elapsed_seconds": 39.634,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1111.7,
+      "output_policy": "stream",
+      "captured_output_chars": 4603,
+      "output_truncated": false,
+      "current_rss_mb": 496.31,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 39.634
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": " M apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n?? apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts\n",
+    "elapsed_seconds": 0.124
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "diff --git a/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx b/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\nindex c2445688..8b7d9daf 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n@@ -2,12 +2,13 @@ import type { SensorSetupFlow } from '../pageContracts.js';\n import { useToastQueue } from '../useToastQueue.js';\n import { Modal, ToastViewport } from '@lcl/ui';\n import { IconClock, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';\n-import { useEffect, useId, useRef, useState } from 'react';\n+import { useId, useState } from 'react';\n import { useTranslation } from '../../../app/i18n.js';\n import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';\n import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';\n import { mutationError } from '../helpers.js';\n import type { HardwarePageProps } from '../helpers.js';\n+import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';\n \n const sensorProfileLabels = {\n   xiaomi_lywsd03mmc_bthome_v2: 'Xiaomi/PVVX BTHome v2',\n@@ -186,120 +187,23 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>\n   const isAddSensorModalOpen = dialog.kind === 'add';\n   const isPhoneBleScanModalOpen = dialog.kind === 'ble';\n   const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;\n-  const shownPhoneBleErrorRef = useRef<string | null>(null);\n   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;\n   const isSensorGattPending = flow.setPvvxTimeMutation.isPending;\n   const shouldShowPhoneBleEmpty =\n     flow.phoneBleScanMutation.isSuccess && flow.phoneBleScanCandidates.length === 0;\n   const sensorDeviceCount = flow.sensorDevices.length;\n-  const startSavedSensorLiveScan = flow.startSavedSensorLiveScan;\n-  const restartSavedSensorLiveScan = flow.restartSavedSensorLiveScan;\n-  const stopSavedSensorLiveScan = flow.stopSavedSensorLiveScan;\n   const shouldRunSavedSensorLiveScan =\n     sensorDeviceCount > 0 &&\n     !isAddSensorModalOpen &&\n     !isPhoneBleScanModalOpen &&\n     !isSensorGattPending;\n \n-  useEffect(() => {\n-    if (!flow.phoneBleScanMutation.isError) {\n-      return;\n-    }\n-\n-    const message = mutationError(flow.phoneBleScanMutation.error);\n-    if (shownPhoneBleErrorRef.current === message) {\n-      return;\n-    }\n-\n-    shownPhoneBleErrorRef.current = message;\n-    pushToast('warning', t('hardware.sensor.phoneBleFailedTitle'), message);\n-    flow.phoneBleScanMutation.reset();\n-  }, [flow.phoneBleScanMutation, pushToast, t]);\n-\n-  useEffect(() => {\n-    if (!shouldRunSavedSensorLiveScan) {\n-      stopSavedSensorLiveScan();\n-      return;\n-    }\n-\n-    startSavedSensorLiveScan();\n-    return () => stopSavedSensorLiveScan();\n-  }, [shouldRunSavedSensorLiveScan, startSavedSensorLiveScan, stopSavedSensorLiveScan]);\n-\n-  useEffect(() => {\n-    let resumeTimer: ReturnType<typeof setTimeout> | null = null;\n-\n-    const clearResumeTimer = () => {\n-      if (resumeTimer !== null) {\n-        clearTimeout(resumeTimer);\n-        resumeTimer = null;\n-      }\n-    };\n-\n-    const scheduleResume = () => {\n-      if (!shouldRunSavedSensorLiveScan) {\n-        return;\n-      }\n-\n-      clearResumeTimer();\n-      resumeTimer = setTimeout(() => {\n-        resumeTimer = null;\n-        void restartSavedSensorLiveScan();\n-      }, 250);\n-    };\n-\n-    const handleVisibilityChange = () => {\n-      if (document.visibilityState === 'hidden') {\n-        clearResumeTimer();\n-        stopSavedSensorLiveScan();\n-        return;\n-      }\n-\n-      scheduleResume();\n-    };\n-\n-    const handleFocus = () => {\n-      if (document.visibilityState !== 'hidden') {\n-        scheduleResume();\n-      }\n-    };\n-\n-    document.addEventListener('visibilitychange', handleVisibilityChange);\n-    window.addEventListener('focus', handleFocus);\n-\n-    return () => {\n-      clearResumeTimer();\n-      document.removeEventListener('visibilitychange', handleVisibilityChange);\n-      window.removeEventListener('focus', handleFocus);\n-    };\n-  }, [restartSavedSensorLiveScan, shouldRunSavedSensorLiveScan, stopSavedSensorLiveScan]);\n-\n-  useEffect(() => {\n-    if (!flow.setPvvxTimeMutation.isSuccess) {\n-      return;\n-    }\n-\n-    pushToast(\n-      'ok',\n-      flow.setPvvxTimeMutation.data?.acknowledged\n-        ? t('hardware.sensor.pvvxTimeSetTitle')\n-        : t('hardware.sensor.pvvxTimeSentTitle')\n-    );\n-    flow.setPvvxTimeMutation.reset();\n-  }, [flow.setPvvxTimeMutation, pushToast, t]);\n-\n-  useEffect(() => {\n-    if (!flow.setPvvxTimeMutation.isError) {\n-      return;\n-    }\n-\n-    pushToast(\n-      'warning',\n-      t('hardware.sensor.pvvxFailedTitle'),\n-      mutationError(flow.setPvvxTimeMutation.error)\n-    );\n-    flow.setPvvxTimeMutation.reset();\n-  }, [flow.setPvvxTimeMutation, pushToast, t]);\n+  const { resetPhoneBleError } = useSensorSetupFeedback({\n+    flow,\n+    shouldRunSavedSensorLiveScan,\n+    pushToast,\n+    t\n+  });\n \n   const closeAddSensorModal = () => {\n     flow.resetPhoneBleScan();\n@@ -324,13 +228,13 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>\n \n   const openAddSensorModal = () => {\n     flow.resetPhoneBleScan();\n-    shownPhoneBleErrorRef.current = null;\n+    resetPhoneBleError();\n     setDidSubmitSensorAdd(false);\n     setDialog({ kind: 'add' });\n   };\n \n   const startPhoneBleScan = () => {\n-    shownPhoneBleErrorRef.current = null;\n+    resetPhoneBleError();\n     flow.startPhoneBleScan();\n   };\n \n",
+    "elapsed_seconds": 0.03
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-12T12:43:10.222272+00:00",
+  "workspace_checkpoint": {
+    "version": 2,
+    "task_id": "20260912-stage8c3-extract-sensor-feedback",
+    "reason": "task-exit",
+    "created_at": "2026-09-12T12:43:10.597368+00:00",
+    "base_head": "32e318484446bc34388e247b62be4639bf18d086",
+    "work_branch": "work/ux-polish-20260911",
+    "path": "/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260912-stage8c3-extract-sensor-feedback/1789216990441253000-task-exit",
+    "tracked_patch": "tracked.patch",
+    "untracked_root": "untracked",
+    "untracked_files": [
+      "apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts"
+    ],
+    "tracked_patch_bytes": 5698,
+    "untracked_bytes": 3495,
+    "total_bytes": 9193,
+    "status": " M apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n?? apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts\n"
+  },
+  "task_digest": "8a7574c0e603ebd0a065f28aabf6139592e970a46cfb370a07fbb4336410971a",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "attempt_id": "2e090ed4d92c500850357109",
+  "daemon_version": "4.18.20"
+}
