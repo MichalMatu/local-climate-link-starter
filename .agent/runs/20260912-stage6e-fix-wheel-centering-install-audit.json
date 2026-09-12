@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6e-fix-wheel-centering-install-audit",
+  "task_digest": "400faa52444f64ce242a19d3af54d56afc530725b7f9ffd52fc691bb83e7c4c3",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T07:40:21.982636+00:00",
+  "attempt_id": "598ac32936c13ea46494039d",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 59182,
+  "updated_at": "2026-09-12T07:40:21.982799+00:00",
+  "pid": 59182
+}
