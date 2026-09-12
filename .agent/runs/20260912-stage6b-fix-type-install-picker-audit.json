@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6b-fix-type-install-picker-audit",
+  "task_digest": "a3f981d47e7e426f4601251766480e6dd679fb5fd2b4a428f83eb51bc02db792",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T06:09:52.047133+00:00",
+  "attempt_id": "0f8c16ece161a3d4b69f79e7",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 51123,
+  "updated_at": "2026-09-12T06:09:52.047324+00:00",
+  "pid": 51123
+}
