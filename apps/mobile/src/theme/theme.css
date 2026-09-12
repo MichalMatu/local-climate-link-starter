@@ -2578,3 +2578,83 @@ select {
 .shelly-saved-card .shelly-relay-actions .automation-relay-button {
   min-height: var(--lcl-size-compact-control-min-height);
 }
+
+/* Stage 6D: lightweight in-app wheel picker avoids Android's radial clock dialog. */
+.time-schedule-time-button {
+  appearance: none;
+  line-height: 1;
+}
+
+.time-wheel-picker {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  margin: 0 auto;
+  max-width: 22rem;
+  width: 100%;
+}
+
+.time-wheel-column-shell {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.time-wheel-column-label {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  text-align: center;
+}
+
+.time-wheel-column {
+  -webkit-overflow-scrolling: touch;
+  height: 15rem;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 24%,
+    black 76%,
+    transparent 100%
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: 6rem;
+  scrollbar-width: none;
+  scroll-snap-type: y mandatory;
+}
+
+.time-wheel-column::-webkit-scrollbar {
+  display: none;
+}
+
+.time-wheel-option {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text-muted);
+  cursor: pointer;
+  display: flex;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--lcl-font-size-xl);
+  height: 3rem;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--lcl-spacing-sm);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  width: 100%;
+}
+
+.time-wheel-option[data-selected='true'] {
+  background: var(--lcl-color-surface-muted);
+  color: var(--lcl-color-text);
+  font-size: var(--lcl-font-size-2xl);
+  font-weight: var(--lcl-font-weight-bold);
+}
+
+.time-wheel-option:focus-visible {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: calc(-1 * var(--lcl-border-width-md));
+}
