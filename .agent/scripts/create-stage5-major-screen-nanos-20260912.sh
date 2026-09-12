@@ -30,7 +30,11 @@ done
   git add "$OUT_DIR"
   if ! git diff --cached --quiet; then
     git commit -m "Create Stage 5 UI audit nanothumbnails" >/dev/null
-    git push origin HEAD:agent-control >/dev/null
+    if ! git push origin HEAD:agent-control >/dev/null 2>&1; then
+      git fetch origin agent-control >/dev/null
+      git rebase origin/agent-control >/dev/null
+      git push origin HEAD:agent-control >/dev/null
+    fi
   fi
   echo "AUDIT_CONTROL_SHA=$(git rev-parse HEAD)"
 )
