@@ -17,6 +17,7 @@ import {
   validateRuleAdvancedSettings
 } from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
 import { useToastQueue } from '../useToastQueue.js';
+import { RuleAdvancedSettingsModal } from './RuleAdvancedSettingsModal.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 type RuleControlCopy = {
@@ -618,165 +619,14 @@ export const RuleSetupPage = ({
           {t('hardware.rule.deleteScriptConfirmDetail')}
         </FeedbackPanel>
       </Modal>
-      <Modal
-        actions={
-          <>
-            <button
-              className="secondary-action"
-              type="button"
-              title={t('hardware.rule.advancedDefaultsTitle')}
-              onClick={resetAdvancedDraft}
-            >
-              {t('common.default')}
-            </button>
-            <button
-              className="primary-action"
-              type="button"
-              disabled={!advancedDraftValidation.isValid}
-              title={t('hardware.rule.advancedApplyTitle')}
-              onClick={applyAdvancedDraft}
-            >
-              {t('common.apply')}
-            </button>
-          </>
-        }
-        closeLabel={t('common.close')}
+      <RuleAdvancedSettingsModal
+        draft={advancedDraft}
         open={dialog === 'advanced'}
-        title={t('hardware.rule.advancedTitle')}
+        onApply={applyAdvancedDraft}
+        onChange={updateAdvancedDraft}
         onClose={() => setDialog('none')}
-      >
-        <div className="advanced-settings">
-          <section className="advanced-settings__section">
-            <div className="field-row">
-              <label
-                className={`field ${
-                  advancedDraftValidation.isMinChangeMinValid ? '' : 'field--invalid'
-                }`}
-              >
-                {t('hardware.rule.minChangeLabel')}
-                <input
-                  aria-describedby={
-                    advancedDraftValidation.isMinChangeMinValid
-                      ? undefined
-                      : 'advanced-min-change-error'
-                  }
-                  aria-invalid={!advancedDraftValidation.isMinChangeMinValid}
-                  max={RULE_ADVANCED_LIMITS.minChangeMinMax}
-                  min={RULE_ADVANCED_LIMITS.minChangeMinMin}
-                  step="0.25"
-                  type="number"
-                  value={advancedDraft.minChangeMinInput}
-                  onChange={(event) =>
-                    updateAdvancedDraft({
-                      minChangeMinInput: event.currentTarget.value
-                    })
-                  }
-                />
-                {!advancedDraftValidation.isMinChangeMinValid && (
-                  <span className="field__error" id="advanced-min-change-error">
-                    {t('hardware.rule.range.minChange')}
-                  </span>
-                )}
-              </label>
-              <label
-                className={`field ${
-                  advancedDraftValidation.isMaxOnHoursValid ? '' : 'field--invalid'
-                }`}
-              >
-                {t('hardware.rule.maxOnHoursLabel')}
-                <input
-                  aria-describedby={
-                    advancedDraftValidation.isMaxOnHoursValid
-                      ? undefined
-                      : 'advanced-max-on-error'
-                  }
-                  aria-invalid={!advancedDraftValidation.isMaxOnHoursValid}
-                  max={RULE_ADVANCED_LIMITS.maxOnHoursMax}
-                  min={RULE_ADVANCED_LIMITS.maxOnHoursMin}
-                  step="0.25"
-                  type="number"
-                  value={advancedDraft.maxOnHoursInput}
-                  onChange={(event) =>
-                    updateAdvancedDraft({ maxOnHoursInput: event.currentTarget.value })
-                  }
-                />
-                {!advancedDraftValidation.isMaxOnHoursValid && (
-                  <span className="field__error" id="advanced-max-on-error">
-                    {t('hardware.rule.range.maxOn')}
-                  </span>
-                )}
-              </label>
-            </div>
-            <div className="advanced-settings__readonly">
-              <span>{t('hardware.rule.bootBehavior')}</span>
-              <strong>{t('hardware.rule.bootBehaviorValue')}</strong>
-            </div>
-          </section>
-
-          <section className="advanced-settings__section">
-            <div className="field-row">
-              <label
-                className={`field ${
-                  advancedDraftValidation.isStaleTimeoutValid ? '' : 'field--invalid'
-                }`}
-              >
-                {t('hardware.rule.staleTimeoutLabel')}
-                <input
-                  aria-describedby={
-                    advancedDraftValidation.isStaleTimeoutValid
-                      ? undefined
-                      : 'advanced-stale-error'
-                  }
-                  aria-invalid={!advancedDraftValidation.isStaleTimeoutValid}
-                  max={RULE_ADVANCED_LIMITS.staleTimeoutMinMax}
-                  min={RULE_ADVANCED_LIMITS.staleTimeoutMinMin}
-                  step="1"
-                  type="number"
-                  value={advancedDraft.staleTimeoutMinInput}
-                  onChange={(event) =>
-                    updateAdvancedDraft({
-                      staleTimeoutMinInput: event.currentTarget.value
-                    })
-                  }
-                />
-                {!advancedDraftValidation.isStaleTimeoutValid && (
-                  <span className="field__error" id="advanced-stale-error">
-                    {t('hardware.rule.range.stale')}
-                  </span>
-                )}
-              </label>
-              <label
-                className={`field ${
-                  advancedDraftValidation.isRssiMinValid ? '' : 'field--invalid'
-                }`}
-              >
-                {t('hardware.rule.rssiMinLabel')}
-                <input
-                  aria-describedby={
-                    advancedDraftValidation.isRssiMinValid
-                      ? undefined
-                      : 'advanced-rssi-error'
-                  }
-                  aria-invalid={!advancedDraftValidation.isRssiMinValid}
-                  max={RULE_ADVANCED_LIMITS.rssiMinMax}
-                  min={RULE_ADVANCED_LIMITS.rssiMinMin}
-                  step="1"
-                  type="number"
-                  value={advancedDraft.rssiMinInput}
-                  onChange={(event) =>
-                    updateAdvancedDraft({ rssiMinInput: event.currentTarget.value })
-                  }
-                />
-                {!advancedDraftValidation.isRssiMinValid && (
-                  <span className="field__error" id="advanced-rssi-error">
-                    {t('hardware.rule.range.rssi')}
-                  </span>
-                )}
-              </label>
-            </div>
-          </section>
-        </div>
-      </Modal>
+        onReset={resetAdvancedDraft}
+      />
       <ToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
