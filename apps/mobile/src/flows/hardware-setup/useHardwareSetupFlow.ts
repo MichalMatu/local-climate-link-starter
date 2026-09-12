@@ -4,34 +4,16 @@ import {
   decodeShellyThermostatScript,
   type DecodedShellyThermostatScript
 } from '@lcl/script-generator';
-import {
-  createInstallPlan,
-  hashScriptCode,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  RpcShellyClient,
-  RpcShellyScheduleClient,
-  type RelayTestResult,
-  type ShellyInstallResult
-} from '@lcl/shelly-client';
+import { LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
 import { useMemo, useState } from 'react';
 import { t } from '../../app/i18n.js';
-import {
-  createInstalledAutomation,
-  findRelayOwnerConflict,
-  type InstalledAutomation
-} from '../installations/model.js';
-import { useInstalledAutomationStore } from '../installations/store.js';
-import { findScheduleRelayConflict } from '../time-automation/runtime.js';
 import type { HardwareSetupStatus } from './schemas.js';
 import {
-  cleanupStaleShellyBleDiscoveryScripts,
-  createShellyTransport,
   deleteShellyAutomationScript,
   readShellyAutomationScriptState,
   readShellySetupStatus,
   type ShellyAutomationScriptState,
-  type ShellyControlStatus,
-  unwrapShellyResult
+  type ShellyControlStatus
 } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 import { useHardwareSetupReadingsStore } from './sensorReadingsStore.js';
@@ -41,6 +23,7 @@ import {
   deriveSensorInputState,
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
+import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
 import { useHardwareDiagnosticsFlow } from './useHardwareDiagnosticsFlow.js';
 import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
@@ -71,23 +54,6 @@ type ShellyAutomationScriptLoadMutationResult = {
 type ShellyAutomationDeleteMutationResult = {
   device: ShellyDraftDevice;
   status: ShellyControlStatus;
-};
-
-type HardwareInstallState = {
-  shellyId: string;
-  scriptId: number;
-  scriptHash: string;
-};
-
-type HardwareInstallMutationResult = {
-  install: ShellyInstallResult;
-  installation: InstalledAutomation;
-  shellyDraftId: string;
-};
-
-type SafeRelayTestMutationResult = {
-  install: HardwareInstallState;
-  relayTest: RelayTestResult;
 };
 
 const numberInput = (value: number): string => String(Number(value.toFixed(4)));
@@ -196,18 +162,7 @@ export const useHardwareSetupFlow = () => {
   const clearSensorReadings = useHardwareSetupReadingsStore(
     (state) => state.clearSensorReadings
   );
-  const installedAutomations = useInstalledAutomationStore(
-    (state) => state.installations
-  );
-  const upsertInstalledAutomation = useInstalledAutomationStore(
-    (state) => state.upsertInstallation
-  );
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
-  const [lastInstallState, setLastInstallState] = useState<HardwareInstallState | null>(
-    null
-  );
-  const [safeRelayTestState, setSafeRelayTestState] =
-    useState<HardwareInstallState | null>(null);
 
   const {
     shellyControlStates,
@@ -339,26 +294,19 @@ export const useHardwareSetupFlow = () => {
         vpdTargetInput
       ]
     );
-  const currentScriptHash = useMemo(
-    () =>
-      configState.ok
-        ? hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${configState.script}`)
-        : null,
-    [configState]
-  );
-  const isLastInstallCurrent =
-    lastInstallState !== null &&
-    selectedShelly !== null &&
-    currentScriptHash !== null &&
-    lastInstallState.shellyId === selectedShelly.id &&
-    lastInstallState.scriptHash === currentScriptHash;
-  const isSafeRelayTestComplete =
-    safeRelayTestState !== null &&
-    selectedShelly !== null &&
-    currentScriptHash !== null &&
-    safeRelayTestState.shellyId === selectedShelly.id &&
-    safeRelayTestState.scriptHash === currentScriptHash;
-  const canRunSafeRelayTest = isLastInstallCurrent && !isSafeRelayTestComplete;
+
+  const {
+    canRunSafeRelayTest,
+    installMutation,
+    safeRelayTestMutation,
+    resetInstallState
+  } = useClimateAutomationInstallFlow({
+    selectedShelly,
+    configState,
+    isThresholdValid,
+    isVpdAssistValid,
+    refreshDiagnostics
+  });
 
   const checkShellyMutation = useMutation({
     mutationFn: async (): Promise<ShellyCheckMutationResult> => {
@@ -450,8 +398,7 @@ export const useHardwareSetupFlow = () => {
       setStaleTimeoutMinInput(numberInput(settings.staleTimeoutSec / 60));
       setMinChangeMinInput(numberInput(settings.minChangeMs / 60_000));
       setMaxOnHoursInput(numberInput(settings.maxOnMs / 3_600_000));
-      setLastInstallState(null);
-      setSafeRelayTestState(null);
+      resetInstallState();
       clearDiagnosticSnapshot();
       applyControlStatus(device, state.status, null);
     },
@@ -480,111 +427,17 @@ export const useHardwareSetupFlow = () => {
     deleteAutomationScriptMutation.mutate(device);
   };
 
-  const installMutation = useMutation({
-    mutationFn: async (): Promise<HardwareInstallMutationResult> => {
-      if (!configState.ok) {
-        throw new Error(configState.error);
-      }
-      if (!isThresholdValid) {
-        throw new Error(t('hardware.flow.thresholdOrderInvalid'));
-      }
-      if (!isVpdAssistValid) {
-        throw new Error(t('hardware.flow.vpdInvalid'));
-      }
-      if (!selectedShelly) {
-        throw new Error(t('hardware.flow.noSelectedShelly'));
-      }
-
-      const shelly = selectedShelly;
-      const config = configState.config;
-      await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
-      const transport = createShellyTransport(shelly.baseUrl);
-      const client = new RpcShellyClient(transport);
-      const scheduleClient = new RpcShellyScheduleClient(transport);
-      const deviceInfo = unwrapShellyResult(await client.getDeviceInfo());
-      const deviceId = deviceInfo.id?.trim();
-      if (!deviceId) {
-        throw new Error(t('hardware.flow.shellyIdentityMissing'));
-      }
-      if (
-        findRelayOwnerConflict({
-          installations: installedAutomations,
-          deviceId,
-          relayId: config.output.relayId,
-          requestedKind: 'climate'
-        })
-      ) {
-        throw new Error(t('hardware.flow.relayOwnedByTimeAutomation'));
-      }
-      const schedules = unwrapShellyResult(await scheduleClient.list());
-      if (findScheduleRelayConflict(schedules.jobs, config.output.relayId)) {
-        throw new Error(t('hardware.flow.relayOwnedByNativeSchedule'));
-      }
-      const install = unwrapShellyResult(
-        await client.installScript(createInstallPlan(configState.script))
-      );
-      return {
-        install,
-        installation: createInstalledAutomation({
-          shelly: deviceInfo,
-          shellyName: shelly.name,
-          baseUrl: shelly.baseUrl,
-          scriptId: install.scriptId,
-          scriptHash: install.scriptHash,
-          config
-        }),
-        shellyDraftId: shelly.id
-      };
-    },
-    onSuccess: ({ install, installation, shellyDraftId }) => {
-      setShellyScriptIdDraft(shellyDraftId, String(install.scriptId));
-      upsertInstalledAutomation(installation);
-      setLastInstallState({
-        shellyId: shellyDraftId,
-        scriptId: install.scriptId,
-        scriptHash: install.scriptHash
-      });
-      setSafeRelayTestState(null);
-    }
-  });
-
-  const safeRelayTestMutation = useMutation({
-    mutationFn: async (): Promise<SafeRelayTestMutationResult> => {
-      if (!selectedShelly) {
-        throw new Error(t('hardware.flow.noSelectedShelly'));
-      }
-      if (!isLastInstallCurrent || !lastInstallState) {
-        throw new Error(t('hardware.flow.installFirst'));
-      }
-      const client = new RpcShellyClient(createShellyTransport(selectedShelly.baseUrl));
-      const relayTest = unwrapShellyResult(await client.safeRelayTest());
-      if (relayTest.finalRelayOn) {
-        throw new Error(t('hardware.flow.relayOffNotConfirmed'));
-      }
-      return {
-        install: lastInstallState,
-        relayTest
-      };
-    },
-    onSuccess: ({ install }) => {
-      setSafeRelayTestState(install);
-      refreshDiagnostics(install.scriptId);
-    }
-  });
-
   const selectShellyDevice = (id: string) => {
     selectShellyDeviceDraft(id);
     setSetupStatus(null);
     clearDiagnosticSnapshot();
-    setLastInstallState(null);
-    setSafeRelayTestState(null);
+    resetInstallState();
   };
 
   const selectSensorDevice = (id: string) => {
     selectSensorDeviceDraft(id);
     clearDiagnosticSnapshot();
-    setLastInstallState(null);
-    setSafeRelayTestState(null);
+    resetInstallState();
   };
 
   const setDiagnosticShellyId = (id: string) => {
@@ -597,16 +450,14 @@ export const useHardwareSetupFlow = () => {
     removeShellyControlState(id);
     setSetupStatus(null);
     clearDiagnosticSnapshot();
-    setLastInstallState(null);
-    setSafeRelayTestState(null);
+    resetInstallState();
   };
 
   const removeSensorDevice = (id: string) => {
     removeSensorDeviceDraft(id);
     clearSensorReadings(id);
     clearDiagnosticSnapshot();
-    setLastInstallState(null);
-    setSafeRelayTestState(null);
+    resetInstallState();
   };
 
   return {
