@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8c4-extract-rule-advanced-modal",
+  "task_digest": "eef502ce37630745a5e88cbb3aa9d328dc23d810b4cb707c6082b1a8f7033997",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T13:08:41.531247+00:00",
+  "attempt_id": "daa189cbca1dbc823e27e6e8",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 80020,
+  "updated_at": "2026-09-12T13:08:41.531337+00:00",
+  "pid": 80020
+}
