@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6e2-corrected-wheel-audit",
+  "task_digest": "aa6c0937d66e457a2638ac061af745362ed9fd79e245a57ccbabc08ae81107ac",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T07:56:10.571977+00:00",
+  "attempt_id": "3a99c52032b4e15d02359e98",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 75634,
+  "updated_at": "2026-09-12T07:56:10.572182+00:00",
+  "pid": 75634
+}
