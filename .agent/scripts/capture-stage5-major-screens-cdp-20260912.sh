@@ -188,14 +188,14 @@ capture setup-shelly-add-modal
 click_text 'Zamknij'
 wait_selector '.setup-top-nav'
 click_selector '.setup-top-nav__item' 1
-wait_selector '.sensor-setup-page'
+wait_selector '.sensor-setup-panel'
 capture setup-sensor
 click_text 'Dodaj termometr'
 wait_selector '.lcl-modal'
 capture setup-sensor-add-modal
 click_text 'Zamknij'
 click_selector '.setup-top-nav__item' 2
-wait_selector '.rule-setup-page'
+wait_selector '.field-row'
 capture setup-rule
 
 printf 'APP_PID=%s\nSOCKET=%s\nWS_URL=%s\n' "$PID" "$SOCKET" "$WS_URL" > "$TMP_DIR/meta.txt"
