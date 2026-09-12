@@ -1,0 +1,200 @@
+
+> local-climate-link-starter@2.0.10 test /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> pnpm -r test
+
+Scope: 10 of 11 workspace projects
+packages/design-tokens test$ vitest run --passWithNoTests
+packages/automation-core test$ vitest run
+packages/device-profiles test$ vitest run --passWithNoTests
+packages/diagnostics test$ vitest run
+packages/design-tokens test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/design-tokens
+packages/automation-core test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/automation-core
+packages/diagnostics test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/diagnostics
+packages/device-profiles test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/device-profiles
+packages/design-tokens test: No test files found, exiting with code 0
+packages/design-tokens test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+packages/design-tokens test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+packages/design-tokens test: Done
+packages/automation-core test:  ✓ src/__tests__/threshold-matrix.test.ts (64 tests) 12ms
+packages/automation-core test:  ✓ src/__tests__/heating.test.ts (17 tests) 5ms
+packages/automation-core test:  Test Files  2 passed (2)
+packages/automation-core test:       Tests  81 passed (81)
+packages/automation-core test:    Start at  11:28:48
+packages/automation-core test:    Duration  1.17s (transform 102ms, setup 0ms, collect 155ms, tests 17ms, environment 0ms, prepare 256ms)
+packages/device-profiles test:  ✓ src/__tests__/profiles.test.ts (2 tests) 4ms
+packages/diagnostics test:  ✓ src/__tests__/redaction.test.ts (2 tests) 4ms
+packages/device-profiles test:  Test Files  1 passed (1)
+packages/device-profiles test:       Tests  2 passed (2)
+packages/device-profiles test:    Start at  11:28:48
+packages/device-profiles test:    Duration  1.26s (transform 59ms, setup 0ms, collect 101ms, tests 4ms, environment 0ms, prepare 112ms)
+packages/diagnostics test:  Test Files  1 passed (1)
+packages/diagnostics test:       Tests  2 passed (2)
+packages/diagnostics test:    Start at  11:28:48
+packages/diagnostics test:    Duration  1.26s (transform 57ms, setup 0ms, collect 60ms, tests 4ms, environment 0ms, prepare 116ms)
+packages/automation-core test: Done
+packages/device-profiles test: Done
+packages/diagnostics test: Done
+apps/landing test$ vitest run
+packages/script-generator test$ vitest run
+packages/shelly-client test$ vitest run
+packages/ble-core test$ vitest run
+packages/ble-core test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/ble-core
+packages/script-generator test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/script-generator
+packages/shelly-client test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/shelly-client
+apps/landing test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/landing
+packages/ble-core test:  ✓ src/__tests__/pvvx.test.ts (6 tests) 8ms
+packages/ble-core test:  ✓ src/__tests__/capacitor-privacy.test.ts (1 test) 3ms
+packages/ble-core test:  ✓ src/__tests__/bthome.test.ts (16 tests) 14ms
+packages/ble-core test:  ✓ src/__tests__/capacitor.test.ts (7 tests) 68ms
+packages/ble-core test:  Test Files  4 passed (4)
+packages/ble-core test:       Tests  30 passed (30)
+packages/ble-core test:    Start at  11:28:50
+packages/ble-core test:    Duration  1.80s (transform 174ms, setup 0ms, collect 790ms, tests 94ms, environment 0ms, prepare 749ms)
+packages/shelly-client test:  ✓ src/__tests__/schedules.test.ts (3 tests) 4ms
+packages/shelly-client test:  ✓ src/__tests__/plugsUi.test.ts (3 tests) 14ms
+packages/script-generator test:  ✓ src/__tests__/manual-runtime.test.ts (2 tests) 47ms
+packages/script-generator test:  ✓ src/__tests__/runtime-matrix.test.ts (67 tests) 62ms
+packages/script-generator test:  ✓ src/__tests__/generator.test.ts (25 tests) 74ms
+packages/script-generator test:  Test Files  3 passed (3)
+packages/script-generator test:       Tests  94 passed (94)
+packages/script-generator test:    Start at  11:28:50
+packages/script-generator test:    Duration  2.02s (transform 335ms, setup 0ms, collect 999ms, tests 183ms, environment 0ms, prepare 960ms)
+packages/ble-core test: Done
+packages/ui test$ vitest run --passWithNoTests
+packages/script-generator test: Done
+packages/ui test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/ui
+packages/ui test: No test files found, exiting with code 0
+packages/ui test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+packages/ui test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+packages/ui test: Done
+apps/landing test:  ✓ src/page.test.tsx (21 tests) 188ms
+apps/landing test:  Test Files  1 passed (1)
+apps/landing test:       Tests  21 passed (21)
+apps/landing test:    Start at  11:28:50
+apps/landing test:    Duration  3.10s (transform 104ms, setup 97ms, collect 198ms, tests 188ms, environment 963ms, prepare 263ms)
+apps/landing test: Done
+packages/shelly-client test:  ✓ src/__tests__/shelly-client.test.ts (40 tests) 5619ms
+packages/shelly-client test:    ✓ RpcShellyClient > sends the expected RPC request shape during script install  448ms
+packages/shelly-client test:    ✓ RpcShellyClient > installs the BLE discovery script without enabling run on boot  405ms
+packages/shelly-client test:    ✓ RpcShellyClient > reuses an existing script, backs up code, and stops it before upload  1510ms
+packages/shelly-client test:    ✓ RpcShellyClient > uses byte offsets when backing up existing non-ASCII script code  404ms
+packages/shelly-client test:    ✓ RpcShellyClient > uploads script code in 1024-byte chunks by default  608ms
+packages/shelly-client test:    ✓ RpcShellyClient > allows install when GetStatus omits Scripts but Script.List works  405ms
+packages/shelly-client test:    ✓ RpcShellyClient > fails install when Script.GetStatus does not confirm running  405ms
+packages/shelly-client test:    ✓ RpcShellyClient > can stop and start scripts and control relay state  405ms
+packages/shelly-client test:    ✓ FetchShellyRpcTransport > supports RpcShellyClient install flow with Shelly-style params envelopes  405ms
+packages/shelly-client test:  Test Files  3 passed (3)
+packages/shelly-client test:       Tests  46 passed (46)
+packages/shelly-client test:    Start at  11:28:50
+packages/shelly-client test:    Duration  7.51s (transform 211ms, setup 0ms, collect 624ms, tests 5.64s, environment 0ms, prepare 926ms)
+packages/shelly-client test: Done
+apps/mobile test$ vitest run --passWithNoTests
+apps/mobile test:  RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile
+apps/mobile test: (node:77734) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77731) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77736) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77737) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77732) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77735) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77733) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/__tests__/devConsole.test.tsx (3 tests) 248ms
+apps/mobile test:  ✓ src/__tests__/automation-dashboard-controls.test.tsx (1 test) 105ms
+apps/mobile test:  ✓ src/__tests__/automation-dashboard.test.tsx (6 tests) 599ms
+apps/mobile test:  ✓ src/__tests__/app-routes.test.tsx (8 tests) 806ms
+apps/mobile test:    ✓ AppRoutes navigation shell > opens time setup directly from the Time plus and returns to Time dashboard  367ms
+apps/mobile test: (node:77778) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77788) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/__tests__/modal.test.tsx (3 tests) 75ms
+apps/mobile test: (node:77801) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/__tests__/climate-delete.test.tsx (3 tests) 1650ms
+apps/mobile test:    ✓ climate automation delete > deletes only the exact managed script and leaves the relay OFF  556ms
+apps/mobile test:    ✓ climate automation delete > removes the local entry only after Shelly confirms deletion  634ms
+apps/mobile test:    ✓ climate automation delete > keeps the local entry when Shelly deletion fails  460ms
+apps/mobile test: (node:77811) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/__tests__/navigation-settings-regression.test.tsx (2 tests) 127ms
+apps/mobile test:  ✓ src/__tests__/appSettings.test.tsx (1 test) 121ms
+apps/mobile test:  ✓ src/__tests__/automation-detail.test.tsx (8 tests) 2131ms
+apps/mobile test:    ✓ InstallationDetailScreen > shows Shelly runtime and safely pauses and resumes the exact installed script  833ms
+apps/mobile test:    ✓ InstallationDetailScreen > manages a native daily schedule end to end without a climate script owner  930ms
+apps/mobile test:  ✓ src/__tests__/shelly-led-settings.test.tsx (2 tests) 111ms
+apps/mobile test: (node:77831) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/installations/store.test.ts (2 tests) 66ms
+apps/mobile test: (node:77839) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/__tests__/i18n.test.ts (9 tests) 57ms
+apps/mobile test: (node:77841) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77842) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77846) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/time-automation/runtime.test.ts (9 tests) 36ms
+apps/mobile test:  ✓ src/__tests__/shelly-script-code.test.ts (2 tests) 33ms
+apps/mobile test: (node:77845) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/__tests__/script-preview.test.ts (1 test) 21ms
+apps/mobile test:  ✓ src/flows/installations/repository.test.ts (5 tests) 7ms
+apps/mobile test: (node:77855) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/installations/runtimeModeTransport.test.ts (3 tests) 5ms
+apps/mobile test: (node:77862) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/hardware-setup/resourceDiagnostics.test.ts (3 tests) 14ms
+apps/mobile test: (node:77869) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77868) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77873) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/installations/runtimeControl.test.ts (5 tests) 5ms
+apps/mobile test:  ✓ src/flows/time-automation/config.test.ts (3 tests) 6ms
+apps/mobile test:  ✓ src/flows/installations/healthRecovery.test.ts (6 tests) 2ms
+apps/mobile test: (node:77874) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/installations/runtimeDiagnostics.test.ts (4 tests) 3ms
+apps/mobile test: (node:77897) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/installations/model.test.ts (3 tests) 2ms
+apps/mobile test: (node:77902) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/installations/runtimeStatus.test.ts (3 tests) 3ms
+apps/mobile test: (node:77912) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test: (node:77911) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+apps/mobile test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/mobile test:  ✓ src/flows/setup-intent.test.ts (2 tests) 2ms
+apps/mobile test:  ✓ src/flows/hardware-setup/sensorReadingsStore.test.ts (2 tests) 2ms
+apps/mobile test:  ✓ src/__tests__/hardware-setup.test.tsx (58 tests) 25050ms
+apps/mobile test:    ✓ HardwareSetupScreen > renders hardware setup as logical pages with a top menu  302ms
+apps/mobile test:    ✓ HardwareSetupScreen > allows rule install when Shelly.GetStatus omits Scripts but Script.List works  2068ms
+apps/mobile test:    ✓ HardwareSetupScreen > shows saved Shelly controls and sends relay ON/OFF commands  693ms
+apps/mobile test:    ✓ HardwareSetupScreen > does not replay Shelly control toasts after returning to the Shelly page  460ms
+apps/mobile test:    ✓ HardwareSetupScreen > switches saved Shelly automation between MANUAL and AUTO safely  395ms
+apps/mobile test:    ✓ HardwareSetupScreen > requires the real hardware safe relay test after script upload before ready state  2699ms
+apps/mobile test:    ✓ HardwareSetupScreen > removes a stale BLE discovery script before saving the rule  1482ms
+apps/mobile test:    ✓ HardwareSetupScreen > loads a Shelly script into the rule form and deletes it from the main screen  506ms
+apps/mobile test:    ✓ HardwareSetupScreen > does not replay rule success toasts after returning to the rule page  3104ms
+apps/mobile test:    ✓ HardwareSetupScreen > switches between humidity rule modes and copies the generated script  446ms
+apps/mobile test:    ✓ HardwareSetupScreen > runs a Shelly-side BLE scanner from a saved plug and adds a found thermometer  1601ms
+apps/mobile test:    ✓ HardwareSetupScreen > removes a stale BLE discovery script before starting a new Shelly BLE scan  1726ms
+apps/mobile test:    ✓ HardwareSetupScreen > cleans up Shelly BLE discovery when the user switches tabs mid-scan  1705ms
+apps/mobile test:    ✓ HardwareSetupScreen > cleans up Shelly BLE discovery on pagehide  1671ms
+apps/mobile test:    ✓ HardwareSetupScreen > keeps BLE scan refresh errors out of the visible UI  1492ms
+apps/mobile test:    ✓ HardwareSetupScreen > does not restart automation when the BLE scanner cannot be stopped  1506ms
+apps/mobile test:  Test Files  27 passed (27)
+apps/mobile test:       Tests  157 passed (157)
+apps/mobile test:    Start at  11:28:58
+apps/mobile test:    Duration  27.86s (transform 1.55s, setup 4.34s, collect 8.49s, tests 31.29s, environment 16.38s, prepare 2.99s)
+apps/mobile test: Done

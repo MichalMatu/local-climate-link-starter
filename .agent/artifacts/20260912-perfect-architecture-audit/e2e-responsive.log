@@ -1,0 +1,430 @@
+
+> local-climate-link-starter@2.0.10 e2e:responsive /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> playwright test -c apps/mobile/playwright.config.ts
+
+
+Running 25 tests using 2 workers
+
+  ✓   1 apps/mobile/e2e/led-settings.spec.ts:300:3 › PLUGS_UI LED detail visual audit 360x800 (910ms)
+  ✓   2 apps/mobile/e2e/responsive.spec.ts:576:3 › installed automation dashboard shows Shelly runtime on phone-small (916ms)
+  ✓   3 apps/mobile/e2e/led-settings.spec.ts:300:3 › PLUGS_UI LED detail visual audit 390x844 (583ms)
+  ✓   4 apps/mobile/e2e/responsive.spec.ts:576:3 › installed automation dashboard shows Shelly runtime on phone (588ms)
+  ✓   6 apps/mobile/e2e/responsive.spec.ts:576:3 › installed automation dashboard shows Shelly runtime on phone-large (534ms)
+  ✓   5 apps/mobile/e2e/led-settings.spec.ts:300:3 › PLUGS_UI LED detail visual audit 412x915 (541ms)
+  ✓   7 apps/mobile/e2e/responsive.spec.ts:576:3 › installed automation dashboard shows Shelly runtime on tablet (526ms)
+  ✓   8 apps/mobile/e2e/led-settings.spec.ts:300:3 › PLUGS_UI LED detail visual audit tablet (530ms)
+  ✓   9 apps/mobile/e2e/responsive.spec.ts:576:3 › installed automation dashboard shows Shelly runtime on desktop (570ms)
+  ✓  10 apps/mobile/e2e/led-settings.spec.ts:318:1 › PLUGS_UI LED relay-state and off presets work end to end (664ms)
+  ✓  12 apps/mobile/e2e/led-settings.spec.ts:341:1 › unsupported PLUGS_UI is a stable non-error device state (445ms)
+  ✓  13 apps/mobile/e2e/led-settings.spec.ts:358:1 › time installation exposes the same device-level LED settings (370ms)
+  ✓  11 apps/mobile/e2e/responsive.spec.ts:620:1 › installed automation detail safely pauses and resumes on phone (1.0s)
+  ✘  14 apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone-small (30.0s)
+  ✘  15 apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone (30.2s)
+  ✘  16 apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone-large (30.2s)
+  ✘  17 apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on tablet (30.1s)
+  ✘  18 apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on desktop (30.2s)
+  ✘  19 apps/mobile/e2e/responsive.spec.ts:719:1 › daily time automation completes pause, resume, edit and delete lifecycle (30.2s)
+  ✘  20 apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone-small (6.5s)
+  ✘  21 apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone (6.4s)
+  ✘  22 apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone-large (6.5s)
+  ✘  23 apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on tablet (6.3s)
+  ✘  24 apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on desktop (6.5s)
+  ✘  25 apps/mobile/e2e/responsive.spec.ts:895:1 › rule page switches humidity modes, enables VPD assist, and copies the generated script (6.3s)
+
+
+  1) apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone-small 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Sterować według czasu/ })
+
+
+      678 |     await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+      679 |
+    > 680 |     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+          |                                                                       ^
+      681 |     await expect(
+      682 |       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+      683 |     ).toBeVisible();
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:680:71
+
+    Error Context: apps/mobile/test-results/responsive-daily-time-auto-75212--and-renders-on-phone-small/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-daily-time-auto-75212--and-renders-on-phone-small/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-daily-time-auto-75212--and-renders-on-phone-small/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Sterować według czasu/ })
+
+
+      678 |     await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+      679 |
+    > 680 |     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+          |                                                                       ^
+      681 |     await expect(
+      682 |       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+      683 |     ).toBeVisible();
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:680:71
+
+    Error Context: apps/mobile/test-results/responsive-daily-time-auto-12e34-stalls-and-renders-on-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-daily-time-auto-12e34-stalls-and-renders-on-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-daily-time-auto-12e34-stalls-and-renders-on-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone-large 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Sterować według czasu/ })
+
+
+      678 |     await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+      679 |
+    > 680 |     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+          |                                                                       ^
+      681 |     await expect(
+      682 |       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+      683 |     ).toBeVisible();
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:680:71
+
+    Error Context: apps/mobile/test-results/responsive-daily-time-auto-ed1cc--and-renders-on-phone-large/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-daily-time-auto-ed1cc--and-renders-on-phone-large/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-daily-time-auto-ed1cc--and-renders-on-phone-large/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on tablet 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Sterować według czasu/ })
+
+
+      678 |     await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+      679 |
+    > 680 |     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+          |                                                                       ^
+      681 |     await expect(
+      682 |       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+      683 |     ).toBeVisible();
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:680:71
+
+    Error Context: apps/mobile/test-results/responsive-daily-time-auto-92254-talls-and-renders-on-tablet/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-daily-time-auto-92254-talls-and-renders-on-tablet/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-daily-time-auto-92254-talls-and-renders-on-tablet/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on desktop 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Sterować według czasu/ })
+
+
+      678 |     await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+      679 |
+    > 680 |     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+          |                                                                       ^
+      681 |     await expect(
+      682 |       page.getByRole('navigation', { name: 'Menu konfiguracji' })
+      683 |     ).toBeVisible();
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:680:71
+
+    Error Context: apps/mobile/test-results/responsive-daily-time-auto-78208-alls-and-renders-on-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-daily-time-auto-78208-alls-and-renders-on-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-daily-time-auto-78208-alls-and-renders-on-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) apps/mobile/e2e/responsive.spec.ts:719:1 › daily time automation completes pause, resume, edit and delete lifecycle 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Sterować według czasu/ })
+
+
+      733 |   await page.goto('/');
+      734 |   await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    > 735 |   await page.getByRole('button', { name: /Sterować według czasu/ }).click();
+          |                                                                     ^
+      736 |   await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
+      737 |   await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
+      738 |   await page.getByRole('button', { name: 'Szczegóły' }).click();
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:735:69
+
+    Error Context: apps/mobile/test-results/responsive-daily-time-auto-beab5-e-edit-and-delete-lifecycle/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-daily-time-auto-beab5-e-edit-and-delete-lifecycle/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-daily-time-auto-beab5-e-edit-and-delete-lifecycle/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone-small 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+    Expected: 1
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+        14 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      387 |   const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+      388 |   const relayAction = shellyControls.getByRole('button', { name: /^(ON|OFF)$/ });
+    > 389 |   await expect(relayAction).toHaveCount(1);
+          |                             ^
+      390 |   await expect(relayAction).toBeVisible();
+      391 | };
+      392 |
+        at expectRelayActionVisible (/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:389:29)
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:823:11
+
+    Error Context: apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone ─
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+    Expected: 1
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+        14 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      387 |   const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+      388 |   const relayAction = shellyControls.getByRole('button', { name: /^(ON|OFF)$/ });
+    > 389 |   await expect(relayAction).toHaveCount(1);
+          |                             ^
+      390 |   await expect(relayAction).toBeVisible();
+      391 | };
+      392 |
+        at expectRelayActionVisible (/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:389:29)
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:823:11
+
+    Error Context: apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone-large 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+    Expected: 1
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+        14 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      387 |   const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+      388 |   const relayAction = shellyControls.getByRole('button', { name: /^(ON|OFF)$/ });
+    > 389 |   await expect(relayAction).toHaveCount(1);
+          |                             ^
+      390 |   await expect(relayAction).toBeVisible();
+      391 | };
+      392 |
+        at expectRelayActionVisible (/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:389:29)
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:823:11
+
+    Error Context: apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on tablet 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+    Expected: 1
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+        14 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      387 |   const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+      388 |   const relayAction = shellyControls.getByRole('button', { name: /^(ON|OFF)$/ });
+    > 389 |   await expect(relayAction).toHaveCount(1);
+          |                             ^
+      390 |   await expect(relayAction).toBeVisible();
+      391 | };
+      392 |
+        at expectRelayActionVisible (/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:389:29)
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:823:11
+
+    Error Context: apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on desktop 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+    Expected: 1
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByLabel('Sterowanie Shelly Plug S Gen3').getByRole('button', { name: /^(ON|OFF)$/ })
+        14 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      387 |   const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
+      388 |   const relayAction = shellyControls.getByRole('button', { name: /^(ON|OFF)$/ });
+    > 389 |   await expect(relayAction).toHaveCount(1);
+          |                             ^
+      390 |   await expect(relayAction).toBeVisible();
+      391 | };
+      392 |
+        at expectRelayActionVisible (/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:389:29)
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:823:11
+
+    Error Context: apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) apps/mobile/e2e/responsive.spec.ts:895:1 › rule page switches humidity modes, enables VPD assist, and copies the generated script 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Nawilżanie włączy się poniżej 45\.0%/)
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByText(/Nawilżanie włączy się poniżej 45\.0%/)
+
+
+      920 |   await expect(page.getByLabel('Włącz poniżej %')).toHaveValue('45');
+      921 |   await expect(page.getByLabel('Wyłącz powyżej %')).toHaveValue('55');
+    > 922 |   await expect(page.getByText(/Nawilżanie włączy się poniżej 45\.0%/)).toBeVisible();
+          |                                                                        ^
+      923 |   await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
+      924 |   let scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
+      925 |   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"m":1');
+        at /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile/e2e/responsive.spec.ts:922:72
+
+    Error Context: apps/mobile/test-results/responsive-rule-page-switc-82de4-copies-the-generated-script/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/mobile/test-results/responsive-rule-page-switc-82de4-copies-the-generated-script/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/mobile/test-results/responsive-rule-page-switc-82de4-copies-the-generated-script/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12 failed
+    apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone-small 
+    apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone ─
+    apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on phone-large 
+    apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on tablet 
+    apps/mobile/e2e/responsive.spec.ts:662:3 › daily time automation installs and renders on desktop 
+    apps/mobile/e2e/responsive.spec.ts:719:1 › daily time automation completes pause, resume, edit and delete lifecycle 
+    apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone-small 
+    apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone ──
+    apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on phone-large 
+    apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on tablet ─
+    apps/mobile/e2e/responsive.spec.ts:779:3 › hardware setup has no horizontal overflow on desktop 
+    apps/mobile/e2e/responsive.spec.ts:895:1 › rule page switches humidity modes, enables VPD assist, and copies the generated script 
+  13 passed (3.9m)
+ ELIFECYCLE  Command failed with exit code 1.

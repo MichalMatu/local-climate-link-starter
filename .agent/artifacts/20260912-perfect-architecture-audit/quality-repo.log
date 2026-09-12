@@ -1,0 +1,5 @@
+
+> local-climate-link-starter@2.0.10 quality:repo /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> node scripts/quality/repository-gate.mjs
+
+Repository quality gate passed.

@@ -1,0 +1,25 @@
+
+> local-climate-link-starter@2.0.10 typecheck /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> pnpm -r typecheck
+
+Scope: 10 of 11 workspace projects
+packages/design-tokens typecheck$ tsc -p tsconfig.json --noEmit
+packages/automation-core typecheck$ tsc -p tsconfig.json --noEmit
+packages/device-profiles typecheck$ tsc -p tsconfig.json --noEmit
+packages/diagnostics typecheck$ tsc -p tsconfig.json --noEmit
+packages/design-tokens typecheck: Done
+packages/diagnostics typecheck: Done
+packages/device-profiles typecheck: Done
+packages/automation-core typecheck: Done
+apps/landing typecheck$ tsc -p tsconfig.json --noEmit
+packages/ble-core typecheck$ tsc -p tsconfig.json --noEmit
+packages/script-generator typecheck$ tsc -p tsconfig.json --noEmit
+packages/shelly-client typecheck$ tsc -p tsconfig.json --noEmit
+packages/ble-core typecheck: Done
+packages/ui typecheck$ tsc -p tsconfig.json --noEmit
+apps/landing typecheck: Done
+packages/script-generator typecheck: Done
+packages/shelly-client typecheck: Done
+packages/ui typecheck: Done
+apps/mobile typecheck$ tsc -p tsconfig.json --noEmit
+apps/mobile typecheck: Done

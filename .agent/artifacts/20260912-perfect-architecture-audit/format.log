@@ -1,0 +1,6 @@
+
+> local-climate-link-starter@2.0.10 format:check /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!

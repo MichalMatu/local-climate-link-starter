@@ -1,0 +1,65 @@
+
+> local-climate-link-starter@2.0.10 test:coverage:core /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> pnpm --filter @lcl/automation-core test:coverage && pnpm --filter @lcl/script-generator test:coverage
+
+
+> @lcl/automation-core@1.0.0 test:coverage /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/automation-core
+> vitest run --coverage
+
+
+ RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/automation-core
+      Coverage enabled with v8
+
+ ✓ src/__tests__/heating.test.ts (17 tests) 3ms
+ ✓ src/__tests__/threshold-matrix.test.ts (64 tests) 8ms
+
+ Test Files  2 passed (2)
+      Tests  81 passed (81)
+   Start at  11:29:27
+   Duration  441ms (transform 50ms, setup 0ms, collect 86ms, tests 11ms, environment 0ms, prepare 139ms)
+
+ % Coverage report from v8
+----------------|---------|----------|---------|---------|-------------------
+File            | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------------|---------|----------|---------|---------|-------------------
+All files       |     100 |      100 |     100 |     100 |                   
+ src            |     100 |      100 |     100 |     100 |                   
+  index.ts      |     100 |      100 |     100 |     100 |                   
+  model.ts      |     100 |      100 |     100 |     100 |                   
+ src/failsafe   |     100 |      100 |     100 |     100 |                   
+  index.ts      |     100 |      100 |     100 |     100 |                   
+ src/simulator  |     100 |      100 |     100 |     100 |                   
+  simulate.ts   |     100 |      100 |     100 |     100 |                   
+ src/thermostat |     100 |      100 |     100 |     100 |                   
+  heating.ts    |     100 |      100 |     100 |     100 |                   
+----------------|---------|----------|---------|---------|-------------------
+
+> @lcl/script-generator@1.0.0 test:coverage /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/script-generator
+> vitest run --coverage
+
+
+ RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/packages/script-generator
+      Coverage enabled with v8
+
+ ✓ src/__tests__/manual-runtime.test.ts (2 tests) 16ms
+ ✓ src/__tests__/generator.test.ts (25 tests) 38ms
+ ✓ src/__tests__/runtime-matrix.test.ts (67 tests) 41ms
+
+ Test Files  3 passed (3)
+      Tests  94 passed (94)
+   Start at  11:29:28
+   Duration  759ms (transform 123ms, setup 0ms, collect 337ms, tests 94ms, environment 1ms, prepare 305ms)
+
+ % Coverage report from v8
+--------------|---------|----------|---------|---------|-------------------
+File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+--------------|---------|----------|---------|---------|-------------------
+All files     |     100 |      100 |     100 |     100 |                   
+ src          |     100 |      100 |     100 |     100 |                   
+  index.ts    |     100 |      100 |     100 |     100 |                   
+ src/shelly   |     100 |      100 |     100 |     100 |                   
+  config.ts   |     100 |      100 |     100 |     100 |                   
+  decode.ts   |     100 |      100 |     100 |     100 |                   
+  generate.ts |     100 |      100 |     100 |     100 |                   
+  hash.ts     |     100 |      100 |     100 |     100 |                   
+--------------|---------|----------|---------|---------|-------------------

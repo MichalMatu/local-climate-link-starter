@@ -1,0 +1,55 @@
+
+> local-climate-link-starter@2.0.10 build /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> pnpm -r build
+
+Scope: 10 of 11 workspace projects
+packages/design-tokens build$ node build/build-tokens.mjs && tsc -p tsconfig.build.json
+packages/automation-core build$ tsc -p tsconfig.build.json
+packages/device-profiles build$ tsc -p tsconfig.build.json
+packages/diagnostics build$ tsc -p tsconfig.build.json
+packages/automation-core build: Done
+packages/diagnostics build: Done
+packages/device-profiles build: Done
+packages/design-tokens build: Done
+apps/landing build$ tsc -p tsconfig.build.json --noEmit && vite build
+packages/ble-core build$ tsc -p tsconfig.build.json
+packages/script-generator build$ tsc -p tsconfig.build.json
+packages/shelly-client build$ tsc -p tsconfig.build.json
+packages/script-generator build: Done
+packages/ui build$ tsc -p tsconfig.build.json
+packages/ble-core build: Done
+packages/shelly-client build: Done
+apps/landing build: vite v7.3.6 building client environment for production...
+apps/landing build: transforming...
+apps/landing build: ✓ 31 modules transformed.
+packages/ui build: Done
+apps/landing build: rendering chunks...
+apps/landing build: computing gzip size...
+apps/landing build: dist/index.html                   1.17 kB │ gzip:  0.55 kB
+apps/landing build: dist/assets/index-B5EPP1W5.css   20.10 kB │ gzip:  4.33 kB
+apps/landing build: dist/assets/index-DrrPjyFi.js   225.14 kB │ gzip: 71.09 kB
+apps/landing build: ✓ built in 574ms
+apps/landing build: Done
+apps/mobile build$ tsc -p tsconfig.build.json --noEmit && vite build
+apps/mobile build: vite v7.3.6 building client environment for production...
+apps/mobile build: transforming...
+apps/mobile build: ✓ 6417 modules transformed.
+apps/mobile build: rendering chunks...
+apps/mobile build: computing gzip size...
+apps/mobile build: dist/index.html                                1.61 kB │ gzip:  0.56 kB
+apps/mobile build: dist/assets/vendor-ionic-react-DgBR_I0J.css   13.54 kB │ gzip:  3.35 kB
+apps/mobile build: dist/assets/lcl-ui-Qhd423aB.css               19.16 kB │ gzip:  3.25 kB
+apps/mobile build: dist/assets/index-qZi94g2o.css                61.54 kB │ gzip:  7.66 kB
+apps/mobile build: dist/assets/_commonjsHelpers-CqkleIqs.js       0.12 kB │ gzip:  0.13 kB
+apps/mobile build: dist/assets/preload-helper-BXl3LOEh.js         1.11 kB │ gzip:  0.65 kB
+apps/mobile build: dist/assets/lcl-ui-DVNCtlBa.js                 5.56 kB │ gzip:  2.04 kB
+apps/mobile build: dist/assets/vendor-capacitor-Dz-8_eBV.js       8.64 kB │ gzip:  3.49 kB
+apps/mobile build: dist/assets/vendor-misc-mtA2gi9w.js           21.18 kB │ gzip:  5.85 kB
+apps/mobile build: dist/assets/vendor-query-S9-YqtEK.js          35.74 kB │ gzip: 10.59 kB
+apps/mobile build: dist/assets/lcl-domain-BBD_8-qC.js            51.45 kB │ gzip: 15.61 kB
+apps/mobile build: dist/assets/vendor-state-o7WQzVcG.js          55.94 kB │ gzip: 12.97 kB
+apps/mobile build: dist/assets/HardwareSetupScreen-BFdqS2IJ.js   96.98 kB │ gzip: 23.66 kB
+apps/mobile build: dist/assets/vendor-react-kdQ1lfBM.js         192.42 kB │ gzip: 60.27 kB
+apps/mobile build: dist/assets/index-Bm_La6dY.js                267.89 kB │ gzip: 72.21 kB
+apps/mobile build: ✓ built in 2.65s
+apps/mobile build: Done

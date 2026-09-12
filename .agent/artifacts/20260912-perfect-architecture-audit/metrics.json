@@ -1,0 +1,2567 @@
+{
+  "currentVersion": "2.0.10",
+  "counts": {
+    "files": 485,
+    "codeFiles": 216,
+    "docFiles": 59
+  },
+  "largestCode": [
+    {
+      "file": "apps/mobile/src/__tests__/hardware-setup.test.tsx",
+      "lines": 3190,
+      "imports": 14,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "scripts/hardware/shelly-soak-logger.ts",
+      "lines": 1286,
+      "imports": 2,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/shelly-client/src/__tests__/shelly-client.test.ts",
+      "lines": 1047,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts",
+      "lines": 1022,
+      "imports": 19,
+      "exports": 4,
+      "hooks": {
+        "useState": 9,
+        "useEffect": 0,
+        "useMemo": 11,
+        "useCallback": 0,
+        "useRef": 1,
+        "useMutation": 9,
+        "useQuery": 0
+      },
+      "hookTotal": 30
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "lines": 995,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/landing/src/content.ts",
+      "lines": 991,
+      "imports": 0,
+      "exports": 10,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/script-generator/src/__tests__/generator.test.ts",
+      "lines": 892,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx",
+      "lines": 877,
+      "imports": 10,
+      "exports": 3,
+      "hooks": {
+        "useState": 2,
+        "useEffect": 9,
+        "useMemo": 0,
+        "useCallback": 1,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 12
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx",
+      "lines": 765,
+      "imports": 12,
+      "exports": 3,
+      "hooks": {
+        "useState": 3,
+        "useEffect": 6,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 4,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 13
+    },
+    {
+      "file": "scripts/hardware/shelly-real-matrix.ts",
+      "lines": 716,
+      "imports": 3,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/shellyRequests.ts",
+      "lines": 706,
+      "imports": 4,
+      "exports": 68,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx",
+      "lines": 702,
+      "imports": 10,
+      "exports": 3,
+      "hooks": {
+        "useState": 3,
+        "useEffect": 5,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 1,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 9
+    },
+    {
+      "file": "apps/mobile/src/app/locales/pl.ts",
+      "lines": 692,
+      "imports": 0,
+      "exports": 4,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/fr.ts",
+      "lines": 690,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/de.ts",
+      "lines": 685,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/it.ts",
+      "lines": 684,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/es.ts",
+      "lines": 682,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/ptBr.ts",
+      "lines": 679,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/en.ts",
+      "lines": 678,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/shelly-client/src/scripts/install.ts",
+      "lines": 630,
+      "imports": 3,
+      "exports": 8,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "scripts/quality/ux-gate.mjs",
+      "lines": 612,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-detail.test.tsx",
+      "lines": 608,
+      "imports": 10,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/script-generator/src/shelly/generate.ts",
+      "lines": 565,
+      "imports": 3,
+      "exports": 7,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/InstallationDetailScreen.tsx",
+      "lines": 513,
+      "imports": 21,
+      "exports": 3,
+      "hooks": {
+        "useState": 4,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 2,
+        "useRef": 1,
+        "useMutation": 1,
+        "useQuery": 1
+      },
+      "hookTotal": 9
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx",
+      "lines": 491,
+      "imports": 6,
+      "exports": 3,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 2,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 3
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-domain-BBD_8-qC.js",
+      "lines": 469,
+      "imports": 3,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/time-automation/runtime.ts",
+      "lines": 447,
+      "imports": 4,
+      "exports": 35,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx",
+      "lines": 433,
+      "imports": 9,
+      "exports": 45,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 1
+    },
+    {
+      "file": "packages/automation-core/src/__tests__/threshold-matrix.test.ts",
+      "lines": 421,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/e2e/led-settings.spec.ts",
+      "lines": 371,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/AutomationDashboardScreen.tsx",
+      "lines": 361,
+      "imports": 15,
+      "exports": 3,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 1,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 2
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-dashboard.test.tsx",
+      "lines": 354,
+      "imports": 9,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/automation-core/src/__tests__/heating.test.ts",
+      "lines": 353,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/TimeInstallationDetail.tsx",
+      "lines": 351,
+      "imports": 12,
+      "exports": 3,
+      "hooks": {
+        "useState": 4,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 2,
+        "useRef": 1,
+        "useMutation": 4,
+        "useQuery": 0
+      },
+      "hookTotal": 11
+    },
+    {
+      "file": "apps/mobile/src/flows/time-automation/runtime.test.ts",
+      "lines": 346,
+      "imports": 5,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/setupDraftStore.ts",
+      "lines": 334,
+      "imports": 5,
+      "exports": 15,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/automation-core/src/thermostat/heating.ts",
+      "lines": 326,
+      "imports": 1,
+      "exports": 19,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "scripts/quality/repository-gate.mjs",
+      "lines": 312,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "scripts/hardware/shelly-install-thermostat.ts",
+      "lines": 309,
+      "imports": 2,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/useShellyControlFlow.ts",
+      "lines": 291,
+      "imports": 7,
+      "exports": 8,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 2,
+        "useRef": 0,
+        "useMutation": 5,
+        "useQuery": 0
+      },
+      "hookTotal": 8
+    },
+    {
+      "file": "packages/ble-core/src/__tests__/bthome.test.ts",
+      "lines": 283,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/ble-core/src/adapters/capacitor.ts",
+      "lines": 272,
+      "imports": 2,
+      "exports": 6,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/InstallationDiagnosticsModal.tsx",
+      "lines": 269,
+      "imports": 6,
+      "exports": 6,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 1,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 2
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx",
+      "lines": 269,
+      "imports": 6,
+      "exports": 3,
+      "hooks": {
+        "useState": 4,
+        "useEffect": 1,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 5
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/usePhoneSensorFlow.ts",
+      "lines": 265,
+      "imports": 10,
+      "exports": 3,
+      "hooks": {
+        "useState": 2,
+        "useEffect": 0,
+        "useMemo": 1,
+        "useCallback": 5,
+        "useRef": 2,
+        "useMutation": 2,
+        "useQuery": 0
+      },
+      "hookTotal": 12
+    },
+    {
+      "file": "apps/mobile/src/app/AppSettingsScreen.tsx",
+      "lines": 260,
+      "imports": 9,
+      "exports": 4,
+      "hooks": {
+        "useState": 4,
+        "useEffect": 1,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 5
+    },
+    {
+      "file": "apps/mobile/src/__tests__/climate-delete.test.tsx",
+      "lines": 259,
+      "imports": 10,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/ble-core/src/parsers/tp357.ts",
+      "lines": 258,
+      "imports": 1,
+      "exports": 6,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/shelly-client/src/rpc/fetch.ts",
+      "lines": 253,
+      "imports": 1,
+      "exports": 5,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx",
+      "lines": 249,
+      "imports": 10,
+      "exports": 3,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 5,
+        "useMemo": 2,
+        "useCallback": 0,
+        "useRef": 2,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 10
+    }
+  ],
+  "godCandidates": [
+    {
+      "file": "apps/mobile/src/__tests__/hardware-setup.test.tsx",
+      "lines": 3190,
+      "imports": 14,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts",
+      "lines": 1022,
+      "imports": 19,
+      "exports": 4,
+      "hooks": {
+        "useState": 9,
+        "useEffect": 0,
+        "useMemo": 11,
+        "useCallback": 0,
+        "useRef": 1,
+        "useMutation": 9,
+        "useQuery": 0
+      },
+      "hookTotal": 30
+    },
+    {
+      "file": "scripts/hardware/shelly-soak-logger.ts",
+      "lines": 1286,
+      "imports": 2,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx",
+      "lines": 877,
+      "imports": 10,
+      "exports": 3,
+      "hooks": {
+        "useState": 2,
+        "useEffect": 9,
+        "useMemo": 0,
+        "useCallback": 1,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 12
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx",
+      "lines": 765,
+      "imports": 12,
+      "exports": 3,
+      "hooks": {
+        "useState": 3,
+        "useEffect": 6,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 4,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 13
+    },
+    {
+      "file": "packages/shelly-client/src/__tests__/shelly-client.test.ts",
+      "lines": 1047,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "lines": 995,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/landing/src/content.ts",
+      "lines": 991,
+      "imports": 0,
+      "exports": 10,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx",
+      "lines": 702,
+      "imports": 10,
+      "exports": 3,
+      "hooks": {
+        "useState": 3,
+        "useEffect": 5,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 1,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 9
+    },
+    {
+      "file": "packages/script-generator/src/__tests__/generator.test.ts",
+      "lines": 892,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/InstallationDetailScreen.tsx",
+      "lines": 513,
+      "imports": 21,
+      "exports": 3,
+      "hooks": {
+        "useState": 4,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 2,
+        "useRef": 1,
+        "useMutation": 1,
+        "useQuery": 1
+      },
+      "hookTotal": 9
+    },
+    {
+      "file": "scripts/hardware/shelly-real-matrix.ts",
+      "lines": 716,
+      "imports": 3,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/shellyRequests.ts",
+      "lines": 706,
+      "imports": 4,
+      "exports": 68,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/fr.ts",
+      "lines": 690,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/pl.ts",
+      "lines": 692,
+      "imports": 0,
+      "exports": 4,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/de.ts",
+      "lines": 685,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/it.ts",
+      "lines": 684,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/es.ts",
+      "lines": 682,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/ptBr.ts",
+      "lines": 679,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/app/locales/en.ts",
+      "lines": 678,
+      "imports": 1,
+      "exports": 3,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-detail.test.tsx",
+      "lines": 608,
+      "imports": 10,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "packages/shelly-client/src/scripts/install.ts",
+      "lines": 630,
+      "imports": 3,
+      "exports": 8,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "scripts/quality/ux-gate.mjs",
+      "lines": 612,
+      "imports": 1,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx",
+      "lines": 491,
+      "imports": 6,
+      "exports": 3,
+      "hooks": {
+        "useState": 1,
+        "useEffect": 2,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 3
+    },
+    {
+      "file": "packages/script-generator/src/shelly/generate.ts",
+      "lines": 565,
+      "imports": 3,
+      "exports": 7,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-domain-BBD_8-qC.js",
+      "lines": 469,
+      "imports": 3,
+      "exports": 0,
+      "hooks": {
+        "useState": 0,
+        "useEffect": 0,
+        "useMemo": 0,
+        "useCallback": 0,
+        "useRef": 0,
+        "useMutation": 0,
+        "useQuery": 0
+      },
+      "hookTotal": 0
+    }
+  ],
+  "longFunctions": [
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts",
+      "name": "useHardwareSetupFlow",
+      "start": 160,
+      "end": 1019,
+      "lines": 860,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx",
+      "name": "ShellySetupPage",
+      "start": 45,
+      "end": 764,
+      "lines": 720,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx",
+      "name": "RuleSetupPage",
+      "start": 169,
+      "end": 876,
+      "lines": 708,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx",
+      "name": "SensorSetupPage",
+      "start": 180,
+      "end": 701,
+      "lines": 522,
+      "params": 1
+    },
+    {
+      "file": "packages/script-generator/src/shelly/generate.ts",
+      "name": "generateShellyBleDiscoveryScript",
+      "start": 133,
+      "end": 564,
+      "lines": 432,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-domain-BBD_8-qC.js",
+      "name": "Rr",
+      "start": 42,
+      "end": 468,
+      "lines": 427,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/InstallationDetailScreen.tsx",
+      "name": "InstalledAutomationDetail",
+      "start": 149,
+      "end": 512,
+      "lines": 364,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx",
+      "name": "DiagnosticsSetupPage",
+      "start": 180,
+      "end": 490,
+      "lines": 311,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/TimeInstallationDetail.tsx",
+      "name": "TimeInstallationDetail",
+      "start": 51,
+      "end": 350,
+      "lines": 300,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/useShellyControlFlow.ts",
+      "name": "useShellyControlFlow",
+      "start": 57,
+      "end": 290,
+      "lines": 234,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx",
+      "name": "TimeScheduleSetupPage",
+      "start": 49,
+      "end": 268,
+      "lines": 220,
+      "params": 1
+    },
+    {
+      "file": "scripts/hardware/shelly-soak-logger.ts",
+      "name": "main",
+      "start": 1069,
+      "end": 1283,
+      "lines": 215,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/usePhoneSensorFlow.ts",
+      "name": "usePhoneSensorFlow",
+      "start": 54,
+      "end": 264,
+      "lines": 211,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/AutomationDashboardScreen.tsx",
+      "name": "ClimateAutomationCard",
+      "start": 51,
+      "end": 254,
+      "lines": 204,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/InstallationDiagnosticsModal.tsx",
+      "name": "InstallationDiagnosticsModal",
+      "start": 71,
+      "end": 268,
+      "lines": 198,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/app/AppSettingsScreen.tsx",
+      "name": "AppSettingsScreen",
+      "start": 67,
+      "end": 259,
+      "lines": 193,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/app/DevCommandPalette.tsx",
+      "name": "DevCommandPalette",
+      "start": 49,
+      "end": 237,
+      "lines": 189,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx",
+      "name": "SavedShellyDeviceCard",
+      "start": 264,
+      "end": 432,
+      "lines": 169,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx",
+      "name": "HardwareSetupScreen",
+      "start": 89,
+      "end": 248,
+      "lines": 160,
+      "params": 1
+    },
+    {
+      "file": "packages/shelly-client/src/scripts/install.ts",
+      "name": "installScript",
+      "start": 304,
+      "end": 459,
+      "lines": 156,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/flows/hardware-setup/useShellyBleDiscoveryFlow.ts",
+      "name": "useShellyBleDiscoveryFlow",
+      "start": 28,
+      "end": 177,
+      "lines": 150,
+      "params": 0
+    },
+    {
+      "file": "packages/ui/src/primitives/Modal.tsx",
+      "name": "Modal",
+      "start": 37,
+      "end": 185,
+      "lines": 149,
+      "params": 1
+    },
+    {
+      "file": "scripts/hardware/shelly-real-matrix.ts",
+      "name": "run",
+      "start": 565,
+      "end": 713,
+      "lines": 149,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "name": "mockShellyRpc",
+      "start": 57,
+      "end": 193,
+      "lines": 137,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/routes/AppRoutes.tsx",
+      "name": "AppRoutes",
+      "start": 80,
+      "end": 216,
+      "lines": 137,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/e2e/led-settings.spec.ts",
+      "name": "mockShelly",
+      "start": 114,
+      "end": 248,
+      "lines": 135,
+      "params": 3
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-detail.test.tsx",
+      "name": "installShellyFetchMock",
+      "start": 88,
+      "end": 218,
+      "lines": 131,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "name": "mockTimeShellyRpc",
+      "start": 195,
+      "end": 324,
+      "lines": 130,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "name": "handleRpc",
+      "start": 62,
+      "end": 189,
+      "lines": 128,
+      "params": 1
+    },
+    {
+      "file": "packages/shelly-client/src/__tests__/shelly-client.test.ts",
+      "name": "call",
+      "start": 89,
+      "end": 214,
+      "lines": 126,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/e2e/led-settings.spec.ts",
+      "name": "handleRpc",
+      "start": 122,
+      "end": 244,
+      "lines": 123,
+      "params": 1
+    },
+    {
+      "file": "packages/ble-core/src/parsers/bthome.ts",
+      "name": "parseBthomeV2Payload",
+      "start": 72,
+      "end": 194,
+      "lines": 123,
+      "params": 2
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "name": "handleRpc",
+      "start": 207,
+      "end": 319,
+      "lines": 113,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/flows/time-automation/runtime.ts",
+      "name": "updateDailyTimeAutomation",
+      "start": 308,
+      "end": 417,
+      "lines": 110,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/screens/ShellyLedSettingsCard.tsx",
+      "name": "ShellyLedSettingsCard",
+      "start": 26,
+      "end": 132,
+      "lines": 107,
+      "params": 1
+    },
+    {
+      "file": "packages/ble-core/src/adapters/capacitor.ts",
+      "name": "startScan",
+      "start": 163,
+      "end": 266,
+      "lines": 104,
+      "params": 1
+    },
+    {
+      "file": "scripts/hardware/shelly-soak-logger.ts",
+      "name": "maybeCycleRelayThresholds",
+      "start": 506,
+      "end": 608,
+      "lines": 103,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-detail.test.tsx",
+      "name": "installTimeShellyFetchMock",
+      "start": 231,
+      "end": 330,
+      "lines": 100,
+      "params": 0
+    },
+    {
+      "file": "scripts/hardware/shelly-soak-logger.ts",
+      "name": "updateSummary",
+      "start": 868,
+      "end": 960,
+      "lines": 93,
+      "params": 5
+    },
+    {
+      "file": "apps/mobile/src/screens/AutomationDashboardScreen.tsx",
+      "name": "AutomationDashboardScreen",
+      "start": 270,
+      "end": 360,
+      "lines": 91,
+      "params": 1
+    },
+    {
+      "file": "scripts/hardware/shelly-soak-logger.ts",
+      "name": "parseSample",
+      "start": 770,
+      "end": 860,
+      "lines": 91,
+      "params": 2
+    },
+    {
+      "file": "apps/mobile/src/screens/InstallationRuntimeControls.tsx",
+      "name": "InstallationRuntimeControls",
+      "start": 19,
+      "end": 108,
+      "lines": 90,
+      "params": 1
+    },
+    {
+      "file": "packages/shelly-client/src/scripts/install.ts",
+      "name": "safeRelayTest",
+      "start": 523,
+      "end": 612,
+      "lines": 90,
+      "params": 1
+    },
+    {
+      "file": "scripts/quality/repository-gate.mjs",
+      "name": "checkHardwareSetupArchitecture",
+      "start": 210,
+      "end": 297,
+      "lines": 88,
+      "params": 0
+    },
+    {
+      "file": "scripts/quality/ux-gate.mjs",
+      "name": "checkFeedbackContractPatterns",
+      "start": 171,
+      "end": 258,
+      "lines": 88,
+      "params": 0
+    },
+    {
+      "file": "apps/mobile/src/flows/time-automation/useTimeAutomationSetupFlow.ts",
+      "name": "useTimeAutomationSetupFlow",
+      "start": 36,
+      "end": 122,
+      "lines": 87,
+      "params": 1
+    },
+    {
+      "file": "packages/automation-core/src/thermostat/heating.ts",
+      "name": "evaluateThresholdDecision",
+      "start": 241,
+      "end": 325,
+      "lines": 85,
+      "params": 1
+    },
+    {
+      "file": "apps/mobile/src/__tests__/climate-delete.test.tsx",
+      "name": "installShellyDeleteMock",
+      "start": 86,
+      "end": 169,
+      "lines": 84,
+      "params": 1
+    }
+  ],
+  "fanIn": [
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-react-kdQ1lfBM.js",
+      "count": 6
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/preload-helper-BXl3LOEh.js",
+      "count": 5
+    },
+    {
+      "file": "apps/landing/src/content.ts",
+      "count": 3
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/_commonjsHelpers-CqkleIqs.js",
+      "count": 3
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-capacitor-Dz-8_eBV.js",
+      "count": 3
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-misc-mtA2gi9w.js",
+      "count": 3
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-state-o7WQzVcG.js",
+      "count": 3
+    },
+    {
+      "file": "apps/landing/src/page.tsx",
+      "count": 2
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-domain-BBD_8-qC.js",
+      "count": 2
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-ui-DVNCtlBa.js",
+      "count": 2
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-query-S9-YqtEK.js",
+      "count": 2
+    },
+    {
+      "file": "apps/landing/src/sections.tsx",
+      "count": 1
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/index-Bm_La6dY.js",
+      "count": 1
+    },
+    {
+      "file": ".lcl-architecture-audit-analyze.mjs",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/main.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/page.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/test/setup.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/vite-env.d.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/vite.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/vitest.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/HardwareSetupScreen-BFdqS2IJ.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/cordova.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/cordova_plugins.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/capacitor.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/e2e/led-settings.spec.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/playwright.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/app-routes.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/appSettings.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-dashboard-controls.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-dashboard.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-detail.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/climate-delete.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/devConsole.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/hardware-setup.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/i18n.test.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/modal.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/navigation-settings-regression.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/script-preview.test.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/shelly-led-settings.test.tsx",
+      "count": 0
+    }
+  ],
+  "fanOut": [
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/HardwareSetupScreen-BFdqS2IJ.js",
+      "count": 10
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/index-Bm_La6dY.js",
+      "count": 9
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-domain-BBD_8-qC.js",
+      "count": 3
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-misc-mtA2gi9w.js",
+      "count": 3
+    },
+    {
+      "file": "apps/landing/src/page.test.tsx",
+      "count": 2
+    },
+    {
+      "file": "apps/landing/src/page.tsx",
+      "count": 2
+    },
+    {
+      "file": "apps/landing/src/main.tsx",
+      "count": 1
+    },
+    {
+      "file": "apps/landing/src/sections.tsx",
+      "count": 1
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/lcl-ui-DVNCtlBa.js",
+      "count": 1
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-capacitor-Dz-8_eBV.js",
+      "count": 1
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-query-S9-YqtEK.js",
+      "count": 1
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-react-kdQ1lfBM.js",
+      "count": 1
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/vendor-state-o7WQzVcG.js",
+      "count": 1
+    },
+    {
+      "file": ".lcl-architecture-audit-analyze.mjs",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/content.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/test/setup.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/src/vite-env.d.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/vite.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/landing/vitest.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/_commonjsHelpers-CqkleIqs.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/preload-helper-BXl3LOEh.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/cordova.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/cordova_plugins.js",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/capacitor.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/e2e/led-settings.spec.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/e2e/responsive.spec.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/playwright.config.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/app-routes.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/appSettings.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-dashboard-controls.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-dashboard.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/automation-detail.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/climate-delete.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/devConsole.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/hardware-setup.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/i18n.test.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/modal.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/navigation-settings-regression.test.tsx",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/script-preview.test.ts",
+      "count": 0
+    },
+    {
+      "file": "apps/mobile/src/__tests__/shelly-led-settings.test.tsx",
+      "count": 0
+    }
+  ],
+  "cycles": [],
+  "todos": [
+    {
+      "file": ".lcl-architecture-audit-analyze.mjs",
+      "line": 34,
+      "text": "src.split(/\\r?\\n/).forEach((line,i)=>{if(/\\b(TODO|FIXME|HACK|XXX)\\b/i.test(line)) todos.push({file:f,line:i+1,text:line.trim().slice(0,240)});});"
+    },
+    {
+      "file": ".lcl-architecture-audit-analyze.mjs",
+      "line": 36,
+      "text": "for(const f of docs){const src=read(f);src.split(/\\r?\\n/).forEach((line,i)=>{if(/\\b(TODO|FIXME|HACK|XXX|WIP)\\b/i.test(line)) todos.push({file:f,line:i+1,text:line.trim().slice(0,240)});});}"
+    },
+    {
+      "file": "apps/landing/src/content.ts",
+      "line": 913,
+      "text": "question: 'O telefone precisa ficar ligado o tempo todo?',"
+    },
+    {
+      "file": "apps/mobile/android/app/src/main/assets/public/assets/index-Bm_La6dY.js",
+      "line": 2,
+      "text": "import{r as f,j as a,c as ma}from\"./vendor-react-kdQ1lfBM.js\";/* empty css                           */import{D as k,M as we,F as Re,T as Ct,S as pa}from\"./lcl-ui-DVNCtlBa.js\";import{u as re,a as ye,b as J,Q as ha,c as ya}from\"./vendor-quer"
+    },
+    {
+      "file": "apps/mobile/src/app/locales/es.ts",
+      "line": 86,
+      "text": "deleteFailed: 'No se pudo eliminar de forma segura todo el horario.',"
+    },
+    {
+      "file": "AGENTS.md",
+      "line": 285,
+      "text": "- No explicit `any` unless a comment explains why and an issue/TODO is added."
+    },
+    {
+      "file": "docs/HANDOFF_NEXT_CHAT.md",
+      "line": 113,
+      "text": "Validation is green: formatting, lint, `quality:ux`, `quality:repo`, typecheck, all workspace tests, core coverage, build and responsive Playwright (**25/25**). Final read-only diff audit also passed with no TODO/FIXME/HACK, eslint disables"
+    },
+    {
+      "file": "docs/HANDOFF_NEXT_CHAT.md",
+      "line": 172,
+      "text": "Do not create another TODO/continue file for LED work; update the two canonical files above instead."
+    },
+    {
+      "file": "docs/architecture/refactor-boundaries.md",
+      "line": 45,
+      "text": "The audit also checks for `TODO/FIXME/HACK`, `@ts-ignore`, broad `eslint-disable`,"
+    }
+  ],
+  "brokenDocLinks": [],
+  "versionRefs": [
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "README.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/error-context.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/error-context.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/error-context.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/error-context.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/error-context.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/error-context.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/SANDBOX_EXECUTION_FLOW.md",
+      "version": "10.12.4"
+    },
+    {
+      "file": "docs/SANDBOX_EXECUTION_FLOW.md",
+      "version": "10.12.4"
+    },
+    {
+      "file": "docs/parser-sources.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/parser-sources.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/plan.md",
+      "version": "1.0.0"
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "version": "2.0.9"
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "version": "2.0.9"
+    },
+    {
+      "file": "docs/prompts/continue-e2e-freeze.md",
+      "version": "2.0.9"
+    },
+    {
+      "file": "docs/prompts/continue-e2e-freeze.md",
+      "version": "2.0.9"
+    },
+    {
+      "file": "docs/prompts/continue-e2e-freeze.md",
+      "version": "2.0.0"
+    },
+    {
+      "file": "docs/prompts/continue-e2e-freeze.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/prompts/continue-e2e-freeze.md",
+      "version": "2.0.9"
+    },
+    {
+      "file": "docs/prompts/local-climate-link-next-audit.md",
+      "version": "2.0.7"
+    },
+    {
+      "file": "docs/release/android-phone-alpha.md",
+      "version": "2.0.8"
+    },
+    {
+      "file": "docs/release/pre-commercial-hardening.md",
+      "version": "2.0.5"
+    },
+    {
+      "file": "docs/release/pre-commercial-hardening.md",
+      "version": "2.0.9"
+    },
+    {
+      "file": "docs/release/pre-commercial-hardening.md",
+      "version": "8.9.1"
+    },
+    {
+      "file": "docs/release/pre-commercial-hardening.md",
+      "version": "8.11.1"
+    },
+    {
+      "file": "docs/release/pre-commercial-hardening.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "2.0.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "2.0.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "192.168.0"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.2.3"
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "version": "1.7.5"
+    },
+    {
+      "file": "packages/script-generator/README.md",
+      "version": "1.2.3"
+    }
+  ],
+  "docs": [
+    {
+      "file": "AGENTS.md",
+      "lines": 1102
+    },
+    {
+      "file": "docs/testing/hardware-matrix.md",
+      "lines": 387
+    },
+    {
+      "file": "docs/product/next-functional-steps.md",
+      "lines": 374
+    },
+    {
+      "file": "docs/development/repository-guide.md",
+      "lines": 331
+    },
+    {
+      "file": "docs/parser-sources.md",
+      "lines": 305
+    },
+    {
+      "file": "docs/implementation/vertical-slices.md",
+      "lines": 300
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--42657-tal-overflow-on-phone-small/error-context.md",
+      "lines": 288
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--9e8b5-tal-overflow-on-phone-large/error-context.md",
+      "lines": 288
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--aef79-izontal-overflow-on-desktop/error-context.md",
+      "lines": 288
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c0511-rizontal-overflow-on-tablet/error-context.md",
+      "lines": 288
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-hardware-setup--c9c01-orizontal-overflow-on-phone/error-context.md",
+      "lines": 288
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-daily-time-auto-12e34-stalls-and-renders-on-phone/error-context.md",
+      "lines": 259
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-daily-time-auto-75212--and-renders-on-phone-small/error-context.md",
+      "lines": 259
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-daily-time-auto-78208-alls-and-renders-on-desktop/error-context.md",
+      "lines": 259
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-daily-time-auto-92254-talls-and-renders-on-tablet/error-context.md",
+      "lines": 259
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-daily-time-auto-beab5-e-edit-and-delete-lifecycle/error-context.md",
+      "lines": 259
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-daily-time-auto-ed1cc--and-renders-on-phone-large/error-context.md",
+      "lines": 259
+    },
+    {
+      "file": "apps/mobile/test-results/responsive-rule-page-switc-82de4-copies-the-generated-script/error-context.md",
+      "lines": 251
+    },
+    {
+      "file": "docs/release/pre-commercial-hardening.md",
+      "lines": 235
+    },
+    {
+      "file": "docs/plan.md",
+      "lines": 225
+    },
+    {
+      "file": "docs/troubleshooting/mvp.md",
+      "lines": 217
+    },
+    {
+      "file": "docs/implementation/adapter-contracts.md",
+      "lines": 212
+    },
+    {
+      "file": "docs/SANDBOX_EXECUTION_FLOW.md",
+      "lines": 205
+    },
+    {
+      "file": "docs/architecture/overview.md",
+      "lines": 205
+    },
+    {
+      "file": "docs/HANDOFF_NEXT_CHAT.md",
+      "lines": 200
+    },
+    {
+      "file": "docs/release/google-play.md",
+      "lines": 117
+    },
+    {
+      "file": "docs/code-review-checklist.md",
+      "lines": 112
+    },
+    {
+      "file": "docs/prompts/local-climate-link-next-audit.md",
+      "lines": 100
+    },
+    {
+      "file": "docs/release/store-readiness.md",
+      "lines": 86
+    },
+    {
+      "file": "README.md",
+      "lines": 84
+    },
+    {
+      "file": "docs/prompts/continue-e2e-freeze.md",
+      "lines": 81
+    },
+    {
+      "file": "docs/marketing/landing-page.md",
+      "lines": 78
+    },
+    {
+      "file": "docs/compatibility/sensors.md",
+      "lines": 75
+    },
+    {
+      "file": "legal/THIRD_PARTY_NOTICES.md",
+      "lines": 71
+    },
+    {
+      "file": "docs/security/230v-safety.md",
+      "lines": 70
+    },
+    {
+      "file": "docs/implementation/platform-permissions.md",
+      "lines": 68
+    },
+    {
+      "file": "legal/privacy-mvp.md",
+      "lines": 59
+    },
+    {
+      "file": "docs/adr/ADR-0001-ionic-react-capacitor-typescript.md",
+      "lines": 55
+    },
+    {
+      "file": "docs/architecture/refactor-boundaries.md",
+      "lines": 53
+    },
+    {
+      "file": "docs/adr/ADR-0004-design-tokens-from-day-one.md",
+      "lines": 51
+    },
+    {
+      "file": "docs/architecture/runtime-control.md",
+      "lines": 51
+    },
+    {
+      "file": "docs/adr/ADR-0002-phone-configurator-shelly-runtime.md",
+      "lines": 49
+    },
+    {
+      "file": "docs/adr/ADR-0003-shelly-first-mvp.md",
+      "lines": 45
+    },
+    {
+      "file": "docs/adr/ADR-0005-no-cloud-ha-mqtt-default-flow.md",
+      "lines": 45
+    },
+    {
+      "file": "docs/prompts/initial-codex-task.md",
+      "lines": 43
+    },
+    {
+      "file": "apps/landing/README.md",
+      "lines": 42
+    },
+    {
+      "file": "docs/ux-polish-backlog.md",
+      "lines": 42
+    },
+    {
+      "file": "packages/script-generator/README.md",
+      "lines": 41
+    },
+    {
+      "file": "docs/compatibility/outputs.md",
+      "lines": 39
+    },
+    {
+      "file": "docs/release/android-phone-alpha.md",
+      "lines": 36
+    },
+    {
+      "file": "packages/shelly-client/README.md",
+      "lines": 30
+    },
+    {
+      "file": "assets/play-store/README.md",
+      "lines": 27
+    },
+    {
+      "file": "examples/shelly-scripts/README.md",
+      "lines": 25
+    },
+    {
+      "file": "packages/ble-core/README.md",
+      "lines": 24
+    },
+    {
+      "file": "packages/ui/README.md",
+      "lines": 23
+    },
+    {
+      "file": "packages/design-tokens/README.md",
+      "lines": 22
+    },
+    {
+      "file": "packages/automation-core/README.md",
+      "lines": 21
+    },
+    {
+      "file": "packages/device-profiles/README.md",
+      "lines": 20
+    },
+    {
+      "file": "packages/diagnostics/README.md",
+      "lines": 20
+    }
+  ]
+}

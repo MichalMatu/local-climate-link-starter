@@ -1,0 +1,25 @@
+
+> local-climate-link-starter@2.0.10 lint /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+> pnpm -r lint
+
+Scope: 10 of 11 workspace projects
+packages/design-tokens lint$ eslint .
+packages/device-profiles lint$ eslint .
+packages/automation-core lint$ eslint .
+packages/diagnostics lint$ eslint .
+packages/design-tokens lint: Done
+packages/device-profiles lint: Done
+packages/diagnostics lint: Done
+packages/automation-core lint: Done
+packages/script-generator lint$ eslint .
+packages/shelly-client lint$ eslint .
+packages/ble-core lint$ eslint .
+apps/landing lint$ eslint .
+apps/landing lint: Done
+packages/ui lint$ eslint .
+packages/script-generator lint: Done
+packages/shelly-client lint: Done
+packages/ble-core lint: Done
+packages/ui lint: Done
+apps/mobile lint$ eslint .
+apps/mobile lint: Done
