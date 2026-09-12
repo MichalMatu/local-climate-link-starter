@@ -1,0 +1,12 @@
+{
+  "bodyText": "Twoje automatyki\nShelly Plug S Gen3\n\nSterowanie temperaturą\n\nTemperatura\n23.9°C\n19°C / 20°C\nWilgotność\n66.0%\nVPD\n—\nAUTO\nMANUAL\nON\nOFF\nKlimat\nCzas\nUstawienia",
+  "href": "https://localhost/",
+  "climateCardMetrics": [
+    "23.9°C",
+    "66.0%",
+    "—"
+  ],
+  "detailMetrics": [],
+  "sensorCards": [],
+  "activeTab": ""
+}

@@ -1,0 +1,23 @@
+{
+  "bodyText": "Zmień cel\nSterowanie temperaturą\nShelly\nTermometry\nReguła\nThermometer 76:20\nTemperatura\n23.9°C\nWilgotność\n66.0%\nTyp\nTP357\nBateria\n34%\nRSSI\n-61 dBm\nOstatni pomiar\n11:08\nMAC\nF7:5F:8D:0F:76:20\nKlimat\nCzas\nUstawienia",
+  "href": "https://localhost/#sensor",
+  "climateCardMetrics": [],
+  "detailMetrics": [],
+  "sensorCards": [
+    {
+      "name": "Thermometer 76:20",
+      "metrics": [
+        "23.9°C",
+        "66.0%"
+      ],
+      "details": [
+        "TP357",
+        "34%",
+        "-61 dBm",
+        "11:08",
+        "F7:5F:8D:0F:76:20"
+      ]
+    }
+  ],
+  "activeTab": "Termometry"
+}

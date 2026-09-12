@@ -1,0 +1,8 @@
+{
+  "bodyText": "Zmień cel\nSterowanie temperaturą\nShelly\nTermometry\nReguła\nShelly Plug S Gen3\n35.4 W\n246 V\n24.63 kWh\n11:08\nSkanuj termometry BLE przez to gniazdko\nAUTO\nMANUAL\nON\nOFF\nKlimat\nCzas\nUstawienia",
+  "href": "https://localhost/#shelly",
+  "climateCardMetrics": [],
+  "detailMetrics": [],
+  "sensorCards": [],
+  "activeTab": "Shelly"
+}

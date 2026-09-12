@@ -1,0 +1,12 @@
+{
+  "bodyText": "Shelly Plug S Gen3\n\nSterowanie temperaturą\n\nKlimat teraz\nTemperatura\n23.9°C\nWilgotność\n66.0%\nVPD\n—\nWyjście\nON\nAktywne progi ON / OFF\n19°C / 20°C\nAutomatyka\nTryb\nGrzanie\nProgi ON / OFF\n19°C / 20°C\nCzujnik\nThermometer 76:20\nAUTO\nMANUAL\nON\nOFF\nDiagnostyka\nUsuń automatykę\nLED gniazdka\nTryb LED\nStan przekaźnika\nON\nRGB 0/100/0 · 100%\nOFF\nRGB 100/0/0 · 100%\nSygnalizuj ON/OFF\nWyłącz LED\nKlimat\nCzas\nUstawienia",
+  "href": "https://localhost/",
+  "climateCardMetrics": [],
+  "detailMetrics": [
+    "23.9°C",
+    "66.0%",
+    "—"
+  ],
+  "sensorCards": [],
+  "activeTab": ""
+}

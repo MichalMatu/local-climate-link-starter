@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "climate:shellyplugsg3-e4b063d7f530:0",
+  "shelly": {
+    "deviceId": "shellyplugsg3-e4b063d7f530",
+    "name": "Shelly Plug S Gen3",
+    "baseUrl": "http://192.168.0.16/",
+    "model": "S3PL-00112EU",
+    "gen": 3
+  },
+  "installedAtMs": 1789144664248,
+  "updatedAtMs": 1789144664248,
+  "kind": "climate",
+  "script": {
+    "id": 1,
+    "hash": "lcl-86f2afc8"
+  },
+  "config": {
+    "version": 1,
+    "sensor": {
+      "profileId": "tp357_custom_v1",
+      "sensorId": "sensor-f75f8d0f7620",
+      "runtimeAddress": "F7:5F:8D:0F:76:20",
+      "displayName": "Thermometer 76:20",
+      "parserValidated": true
+    },
+    "output": {
+      "profileId": "shelly_plug_s_gen3",
+      "relayId": 0
+    },
+    "rule": {
+      "mode": "heating",
+      "control": {
+        "metric": "temperature",
+        "direction": "below",
+        "onThreshold": 19,
+        "offThreshold": 20
+      },
+      "vpdAssist": {
+        "enabled": false,
+        "targetKpa": 1.2
+      },
+      "staleTimeoutSec": 120,
+      "minChangeMs": 120000,
+      "maxOnMs": 14400000,
+      "rssiMin": -85,
+      "consecutiveHits": 2,
+      "failSafe": "off",
+      "bootState": "off"
+    },
+    "diagnostics": {
+      "enabled": true
+    }
+  }
+}
