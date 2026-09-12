@@ -7,6 +7,7 @@ import {
   ShellyCard,
   ToastViewport
 } from '@lcl/ui';
+import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
@@ -37,7 +38,14 @@ type ShellyDialogState =
   | { kind: 'remove'; device: ShellyDraftDevice };
 const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';
 
-export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) => {
+type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {
+  enableBleDiscovery?: boolean;
+};
+
+export const ShellySetupPage = ({
+  flow,
+  enableBleDiscovery = true
+}: ShellySetupPageProps) => {
   const { locale, t } = useTranslation();
   const isShellyScanActive = flow.shellyScanMutation.isPending && !flow.shellyScanStopped;
   const isAnyShellyCheckPending =
@@ -320,17 +328,15 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
 
   return (
     <section className="demo-panel" aria-label={t('hardware.shelly.regionLabel')}>
-      <div className="action-row add-device-action-row">
-        <button
-          className="secondary-action"
-          type="button"
-          aria-label={t('hardware.shelly.add')}
-          title={t('hardware.shelly.addTitle')}
-          onClick={openAddShellyModal}
-        >
-          {t('hardware.shelly.add')}
-        </button>
-      </div>
+      <button
+        className="primary-action setup-add-fab"
+        type="button"
+        aria-label={t('hardware.shelly.add')}
+        title={t('hardware.shelly.addTitle')}
+        onClick={openAddShellyModal}
+      >
+        <IconPlus className="setup-add-fab__icon" aria-hidden="true" />
+      </button>
 
       <Modal
         busy={flow.checkShellyMutation.isPending}
@@ -736,7 +742,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>
             device={device}
             onAutomationAuto={flow.setAutomationAuto}
             onAutomationManual={flow.setAutomationManual}
-            onBleScan={openBleScanModal}
+            {...(enableBleDiscovery ? { onBleScan: openBleScanModal } : {})}
             onInfoOpen={openInfoModal}
             onNameChange={(savedDevice, value) =>
               flow.setShellyDeviceName(savedDevice.id, value)

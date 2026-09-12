@@ -257,7 +257,7 @@ type SavedShellyDeviceCardProps = {
   onAutomationManual: (device: ShellyDraftDevice) => void;
   onNameChange: (device: ShellyDraftDevice, value: string) => void;
   onInfoOpen: (device: ShellyDraftDevice) => void;
-  onBleScan: (device: ShellyDraftDevice) => void;
+  onBleScan?: (device: ShellyDraftDevice) => void;
   onRemove: (device: ShellyDraftDevice) => void;
 };
 
@@ -341,16 +341,18 @@ export const SavedShellyDeviceCard = ({
         <span>{formatShellyClock(clock, t)}</span>
       </div>
 
-      <button
-        className="shelly-ble-action"
-        type="button"
-        disabled={isControlBusy}
-        title={t('hardware.shelly.scanBleViaShellyTitle')}
-        onClick={() => onBleScan(device)}
-      >
-        <IconBluetooth className="icon-action__svg" aria-hidden="true" />
-        <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-      </button>
+      {onBleScan && (
+        <button
+          className="shelly-ble-action"
+          type="button"
+          disabled={isControlBusy}
+          title={t('hardware.shelly.scanBleViaShellyTitle')}
+          onClick={() => onBleScan(device)}
+        >
+          <IconBluetooth className="icon-action__svg" aria-hidden="true" />
+          <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
+        </button>
+      )}
 
       <div
         className="shelly-runtime-controls"

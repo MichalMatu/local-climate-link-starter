@@ -1,7 +1,7 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { Modal, ToastViewport } from '@lcl/ui';
-import { IconClock, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconClock, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
@@ -363,17 +363,15 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
       className="demo-panel sensor-setup-panel"
       aria-label={t('hardware.nav.sensorTitle')}
     >
-      <div className="action-row add-device-action-row">
-        <button
-          className="secondary-action"
-          type="button"
-          aria-label={t('hardware.sensor.add')}
-          title={t('hardware.sensor.addTitle')}
-          onClick={openAddSensorModal}
-        >
-          {t('hardware.sensor.add')}
-        </button>
-      </div>
+      <button
+        className="primary-action setup-add-fab"
+        type="button"
+        aria-label={t('hardware.sensor.add')}
+        title={t('hardware.sensor.addTitle')}
+        onClick={openAddSensorModal}
+      >
+        <IconPlus className="setup-add-fab__icon" aria-hidden="true" />
+      </button>
 
       <Modal
         closeLabel={t('common.close')}

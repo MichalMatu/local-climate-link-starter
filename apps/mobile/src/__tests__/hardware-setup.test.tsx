@@ -576,9 +576,9 @@ describe('HardwareSetupScreen', () => {
     expect(
       screen.queryByRole('heading', { name: 'Gniazdka Shelly' })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Dodaj gniazdko' })).toHaveTextContent(
-      'Dodaj gniazdko'
-    );
+    const addShellyButton = screen.getByRole('button', { name: 'Dodaj gniazdko' });
+    expect(addShellyButton).toHaveClass('setup-add-fab');
+    expect(addShellyButton.querySelector('.setup-add-fab__icon')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Dodaj gniazdko' })).toHaveAttribute(
       'title',
       'Dodaj nowe gniazdko Shelly'
@@ -617,9 +617,9 @@ describe('HardwareSetupScreen', () => {
     );
     expect(screen.getByRole('region', { name: 'Termometry BLE' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Termometry' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Dodaj termometr' })).toHaveTextContent(
-      'Dodaj termometr'
-    );
+    const addSensorFabButton = screen.getByRole('button', { name: 'Dodaj termometr' });
+    expect(addSensorFabButton).toHaveClass('setup-add-fab');
+    expect(addSensorFabButton.querySelector('.setup-add-fab__icon')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Dodaj termometr' })).toHaveAttribute(
       'title',
       'Dodaj termometr BLE'

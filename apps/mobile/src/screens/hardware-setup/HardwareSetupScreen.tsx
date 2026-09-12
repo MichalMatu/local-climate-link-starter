@@ -197,7 +197,9 @@ export const HardwareSetupScreen = ({
         ))}
       </nav>
 
-      {activeTab === 'shelly' && <ShellySetupPage flow={flow} />}
+      {activeTab === 'shelly' && (
+        <ShellySetupPage flow={flow} enableBleDiscovery={setupIntent !== 'time'} />
+      )}
       {setupIntent !== 'time' && activeTab === 'sensor' && (
         <SensorSetupPage flow={flow} />
       )}

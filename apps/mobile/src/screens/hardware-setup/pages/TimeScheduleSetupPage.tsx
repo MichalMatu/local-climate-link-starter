@@ -45,23 +45,26 @@ export const TimeScheduleSetupPage = ({
       <div className="time-schedule-device">
         <span>{t('time.device')}</span>
         <strong>{flow.selectedShelly?.name ?? t('time.noDevice')}</strong>
-        {flow.selectedShelly && <small>{flow.selectedShelly.baseUrl}</small>}
       </div>
 
       <div className="time-schedule-grid">
         <label className="field-stack">
           <span>{t('time.onTime')}</span>
           <input
+            className="time-schedule-time-input"
             type="time"
             value={timeFlow.onTime}
+            onClick={(event) => event.currentTarget.showPicker?.()}
             onChange={(event) => timeFlow.setOnTime(event.target.value)}
           />
         </label>
         <label className="field-stack">
           <span>{t('time.offTime')}</span>
           <input
+            className="time-schedule-time-input"
             type="time"
             value={timeFlow.offTime}
+            onClick={(event) => event.currentTarget.showPicker?.()}
             onChange={(event) => timeFlow.setOffTime(event.target.value)}
           />
         </label>
