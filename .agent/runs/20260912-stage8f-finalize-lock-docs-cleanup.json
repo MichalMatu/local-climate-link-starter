@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8f-finalize-lock-docs-cleanup",
+  "task_digest": "a2ef191de9a0e52feca01ac7e8a1854869f5ca13d64a6ab296344dc41951c0e6",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T13:55:01.113489+00:00",
+  "attempt_id": "1c793fd757f41604030b0227",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 43954,
+  "updated_at": "2026-09-12T13:55:01.113664+00:00",
+  "pid": 43954
+}
