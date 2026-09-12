@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { scanShellySetupUrls, type ShellySetupScanOutcome } from './shellyRequests.js';
 import type { ShellyDraftDevice } from './setupDraftStore.js';
 import { createIpv4RangeScanUrls, normalizeShellyUrl } from './validation.js';
@@ -29,18 +29,17 @@ export const useShellySetupScanFlow = (shellyDevices: ShellyDraftDevice[]) => {
   const [shellyScanStopped, setShellyScanStopped] = useState(false);
   const shellyScanAbortControllerRef = useRef<AbortController | null>(null);
 
-  const scanBaseUrls = useMemo(
-    () =>
-      buildUnsavedShellyScanUrls(shellyDevices, shellyScanStartInput, shellyScanEndInput),
-    [shellyDevices, shellyScanEndInput, shellyScanStartInput]
-  );
-
   const shellyScanMutation = useMutation({
     mutationFn: async (): Promise<ShellySetupScanOutcome> => {
       setShellyScanStopped(false);
       const controller = new AbortController();
       shellyScanAbortControllerRef.current = controller;
       try {
+        const scanBaseUrls = buildUnsavedShellyScanUrls(
+          shellyDevices,
+          shellyScanStartInput,
+          shellyScanEndInput
+        );
         return await scanShellySetupUrls({
           baseUrls: scanBaseUrls,
           signal: controller.signal
