@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8c0r-page-complexity-audit",
+  "task_digest": "e58d7a001457d5f9c81c198752210bcfec9efa9d818f4919de2f04a9409909f3",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T11:58:15.921133+00:00",
+  "attempt_id": "e7e3c3358923afc9b67c868f",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 96609,
+  "updated_at": "2026-09-12T11:58:15.921190+00:00",
+  "pid": 96609
+}
