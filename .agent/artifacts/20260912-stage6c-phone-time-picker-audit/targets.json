@@ -1,0 +1,9 @@
+[ {
+   "description": "{\"attached\":true,\"empty\":false,\"height\":2227,\"never_attached\":false,\"screenX\":0,\"screenY\":74,\"visible\":true,\"width\":1080}",
+   "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@ab2b45f747698e3e257953c05806de6461b43263/inspector.html?ws=127.0.0.1:9228/devtools/page/434A62BF5E4F916B0D3B77D1788A5220",
+   "id": "434A62BF5E4F916B0D3B77D1788A5220",
+   "title": "Local Climate Link",
+   "type": "page",
+   "url": "https://localhost/",
+   "webSocketDebuggerUrl": "ws://127.0.0.1:9228/devtools/page/434A62BF5E4F916B0D3B77D1788A5220"
+} ]

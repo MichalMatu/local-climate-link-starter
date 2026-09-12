@@ -1,0 +1,2 @@
+  mCurrentFocus=Window{3ff7a7a u0 link.localclimate.app/link.localclimate.app.MainActivity}
+  mFocusedApp=ActivityRecord{93182696 u0 link.localclimate.app/.MainActivity t842}

@@ -1,0 +1,9 @@
+APP_PID=18800
+SOCKET=webview_devtools_remote_18800
+WS_URL=ws://127.0.0.1:9228/devtools/page/434A62BF5E4F916B0D3B77D1788A5220
+MODEL=SM-S906B
+PACKAGE_PATH=package:/data/app/~~vtIcw0jcIqM7taWAFyguuQ==/link.localclimate.app-wU5yPxiX2P6VD6WglNKtVQ==/base.apk
+CANDIDATE=060d5990ca5e68709ab883e6a83137754e34fa22
+Physical size: 1080x2340
+Physical density: 450
+Override density: 420
