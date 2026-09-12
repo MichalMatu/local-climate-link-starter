@@ -1,0 +1,7 @@
+APP_PID=30839
+SOCKET=webview_devtools_remote_30839
+TARGET_COUNT=1
+TARGET_0_TYPE=page
+TARGET_0_TITLE=Local Climate Link
+TARGET_0_URL=https://localhost/
+TARGET_0_HAS_WS=1

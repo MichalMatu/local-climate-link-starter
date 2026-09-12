@@ -1,0 +1,9 @@
+{
+   "Android-Package": "link.localclimate.app",
+   "Browser": "Chrome/151.0.7922.202",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (Linux; Android 16; SM-S906B Build/BP2A.250605.031.A3; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/151.0.7922.202 Mobile Safari/537.36",
+   "V8-Version": "15.1.206.21",
+   "WebKit-Version": "537.36 (@ab2b45f747698e3e257953c05806de6461b43263)",
+   "webSocketDebuggerUrl": "ws://127.0.0.1:9223/devtools/browser"
+}
