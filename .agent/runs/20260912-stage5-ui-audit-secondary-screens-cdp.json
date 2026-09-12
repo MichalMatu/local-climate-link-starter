@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage5-ui-audit-secondary-screens-cdp",
+  "task_digest": "0503900fd4819ada47d8cecebb5dcc4189f1e22f696f4fec73155f29dc2fd7da",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-12T05:26:34.074246+00:00",
+  "attempt_id": "b93574aadb52a0f81460ab2a",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 9267,
+  "updated_at": "2026-09-12T05:26:34.074302+00:00",
+  "pid": 9267
+}
