@@ -1688,10 +1688,7 @@ select {
 .time-schedule-grid {
   display: grid;
   gap: var(--lcl-spacing-md);
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(min(100%, var(--lcl-size-form-column-min)), 1fr)
-  );
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
 }
 
 .time-schedule-grid .field-stack {
@@ -2290,10 +2287,7 @@ select {
 }
 
 .installation-detail-config .time-schedule-grid {
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(min(100%, var(--lcl-size-form-column-min)), 1fr)
-  );
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
 }
 
 .installation-detail-note {
