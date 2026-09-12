@@ -168,6 +168,7 @@ export const pl = {
     refresh: 'Odśwież',
     refreshing: 'Odświeżam',
     rssi: 'RSSI',
+    select: 'Wybierz',
     send: 'Wyślij',
     sending: 'Wysyłam',
     test: 'Przetestuj',

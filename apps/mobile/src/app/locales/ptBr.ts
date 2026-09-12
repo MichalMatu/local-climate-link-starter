@@ -168,6 +168,7 @@ export const ptBr = {
     refresh: 'Atualizar',
     refreshing: 'Atualizando',
     rssi: 'RSSI',
+    select: 'Selecionar',
     send: 'Enviar',
     sending: 'Enviando',
     test: 'Testar',

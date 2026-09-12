@@ -169,6 +169,7 @@ export const en = {
     refresh: 'Refresh',
     refreshing: 'Refreshing',
     rssi: 'RSSI',
+    select: 'Select',
     send: 'Send',
     sending: 'Sending',
     test: 'Test',

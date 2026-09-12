@@ -10,7 +10,7 @@ export interface ModalProps {
   busy?: boolean;
   dismissible?: boolean;
   initialFocus?: ModalInitialFocus;
-  size?: 'default' | 'diagnostic' | 'workspace';
+  size?: 'default' | 'diagnostic' | 'task' | 'workspace';
   children: ReactNode;
   headerActions?: ReactNode;
   actions?: ReactNode;

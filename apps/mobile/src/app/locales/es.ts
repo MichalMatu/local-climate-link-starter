@@ -168,6 +168,7 @@ export const es = {
     refresh: 'Actualizar',
     refreshing: 'Actualizando',
     rssi: 'RSSI',
+    select: 'Seleccionar',
     send: 'Enviar',
     sending: 'Enviando',
     test: 'Probar',

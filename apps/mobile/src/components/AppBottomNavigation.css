@@ -2,6 +2,7 @@
   --app-bottom-nav-height: calc(
     var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)
   );
+  --app-toast-bottom-gap: var(--lcl-spacing-xs);
   padding-bottom: calc(
     var(--app-bottom-nav-height) + var(--lcl-spacing-2xl) +
       var(--lcl-fluid-shell-padding) + env(safe-area-inset-bottom)
@@ -10,7 +11,8 @@
 
 .app-bottom-nav-shell .lcl-toast-viewport {
   bottom: calc(
-    var(--app-bottom-nav-height) + var(--lcl-spacing-lg) + env(safe-area-inset-bottom)
+    var(--app-bottom-nav-height) + var(--app-toast-bottom-gap) +
+      env(safe-area-inset-bottom)
   );
 }
 

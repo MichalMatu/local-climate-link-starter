@@ -173,6 +173,7 @@ export const fr = {
     refresh: 'Actualiser',
     refreshing: 'Actualisation',
     rssi: 'RSSI',
+    select: 'Sélectionner',
     send: 'Envoyer',
     sending: 'Envoi',
     test: 'Tester',

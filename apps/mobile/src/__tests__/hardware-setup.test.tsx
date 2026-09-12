@@ -592,9 +592,11 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(shellyAddDialog).getByPlaceholderText('http://192.168.x.x')
     ).toBeInTheDocument();
-    expect(
-      within(shellyAddDialog).getByRole('button', { name: 'Skanuj sieć' })
-    ).toHaveAttribute('title', 'Szukaj gniazdek Shelly w lokalnej sieci');
+    const shellyScanSummary = within(shellyAddDialog).getByText('Skanuj sieć', {
+      selector: 'summary'
+    });
+    expect(shellyScanSummary).toBeVisible();
+    expect(shellyScanSummary.closest('details')).not.toHaveAttribute('open');
     expect(
       within(shellyAddDialog).getByRole('button', { name: 'Dodaj' })
     ).toHaveAttribute('title', 'Dodaj to sprawdzone gniazdko do aplikacji');
@@ -1316,15 +1318,13 @@ describe('HardwareSetupScreen', () => {
     expect(rpcMethods).not.toContain('Script.Start');
   });
 
-  it('scans the local network from a modal and directly adds a found Shelly', async () => {
+  it('scans the local network inside the add task and fills the form before adding', async () => {
     renderHardwareSetup();
 
-    const addDialog = await openShellyAddDialog();
-    fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
+    const dialog = await openShellyAddDialog();
+    fireEvent.change(within(dialog).getByLabelText('Nazwa gniazdka'), {
       target: { value: 'Salon' }
     });
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.99');
 
@@ -1334,17 +1334,22 @@ describe('HardwareSetupScreen', () => {
     expect(within(dialog).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
     fireEvent.click(
       within(dialog).getByRole('button', {
-        name: 'Dodaj gniazdko http://192.168.0.20/'
+        name: 'Wybierz: http://192.168.0.20/'
       })
     );
 
-    expect(
-      screen.queryByRole('dialog', { name: 'Skanuj sieć Shelly' })
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
+    expect(within(dialog).getByLabelText('Nazwa gniazdka')).toHaveValue('Salon');
+    expect(within(dialog).getByLabelText('Adres IP Shelly')).toHaveValue(
+      'http://192.168.0.20/'
+    );
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Dodaj' }));
+
+    expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
     expect(
       screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
     ).not.toBeInTheDocument();
-    expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
     expect(within(savedPlugList).getByText('Salon')).toBeInTheDocument();
   });
@@ -1396,8 +1401,7 @@ describe('HardwareSetupScreen', () => {
     vi.mocked(fetch).mockClear();
 
     const addDialog = await openShellyAddDialog();
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
+    const dialog = addDialog;
     fireEvent.change(within(dialog).getByLabelText('Od'), {
       target: { value: '192.168.0.19' }
     });
@@ -1425,8 +1429,7 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     const addDialog = await openShellyAddDialog();
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
+    const dialog = addDialog;
 
     const tooltipButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu Shelly'
@@ -1463,93 +1466,71 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('uses the scan result action to add the Shelly without reopening the form', async () => {
+  it('uses the scan result action to populate the add form before final add', async () => {
     renderHardwareSetup();
 
-    const addDialog = await openShellyAddDialog();
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
+    const dialog = await openShellyAddDialog();
+    fireEvent.change(within(dialog).getByLabelText('Nazwa gniazdka'), {
+      target: { value: '' }
+    });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
     await within(dialog).findByText('http://192.168.0.20/');
 
     fireEvent.click(
       within(dialog).getByRole('button', {
-        name: 'Dodaj gniazdko http://192.168.0.20/'
+        name: 'Wybierz: http://192.168.0.20/'
       })
     );
 
+    expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
+    expect(within(dialog).getByLabelText('Nazwa gniazdka')).toHaveValue('S3PL-00112EU');
+    expect(within(dialog).getByLabelText('Adres IP Shelly')).toHaveValue(
+      'http://192.168.0.20/'
+    );
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Dodaj' }));
     expect(
-      screen.queryByRole('dialog', { name: 'Skanuj sieć Shelly' })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Ustawienia gniazdka' })
+      await screen.findByRole('button', { name: 'Ustawienia gniazdka' })
     ).toBeInTheDocument();
   });
 
-  it('stops an active Shelly scan from the modal button', async () => {
+  it('stops an active Shelly scan from the inline task control', async () => {
     const abortableFetch = createAbortableFetchMock();
     vi.stubGlobal('fetch', abortableFetch.fetchImpl);
     renderHardwareSetup();
 
-    const addDialog = await openShellyAddDialog();
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
+    const dialog = await openShellyAddDialog();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
 
     const stopButton = await within(dialog).findByRole('button', { name: 'Stop skanu' });
     fireEvent.click(stopButton);
 
-    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
-    expect(
-      within(toastRegion).getByText('Skan zatrzymany.').closest('[role="status"]')
-    ).not.toBeNull();
-    expect(within(dialog).queryByText('Skan zatrzymany.')).not.toBeInTheDocument();
-    expect(abortableFetch.getAbortCount()).toBeGreaterThan(0);
+    await waitFor(() => expect(abortableFetch.getAbortCount()).toBeGreaterThan(0));
     expect(within(dialog).getByRole('button', { name: 'Rozpocznij skan' })).toBeEnabled();
     expect(
       within(dialog).queryByRole('button', { name: 'Stop skanu' })
     ).not.toBeInTheDocument();
+    expect(screen.queryByText('Skan zatrzymany.')).not.toBeInTheDocument();
     expect(
       within(dialog).queryByText(/Nie znalazłem gniazdka Shelly/i)
     ).not.toBeInTheDocument();
   });
 
-  it('stops an active Shelly scan when closing the modal', async () => {
+  it('stops an active Shelly scan when closing the add task', async () => {
     const abortableFetch = createAbortableFetchMock();
     vi.stubGlobal('fetch', abortableFetch.fetchImpl);
     renderHardwareSetup();
 
-    const addDialog = await openShellyAddDialog();
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Skanuj sieć' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Skanuj sieć Shelly' });
+    const dialog = await openShellyAddDialog();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
     await within(dialog).findByRole('button', { name: 'Stop skanu' });
-
-    const backdrop = document.querySelector('.lcl-modal-backdrop');
-    expect(backdrop).not.toBeNull();
-    fireEvent.click(backdrop!);
-    expect(
-      screen.getByRole('dialog', { name: 'Skanuj sieć Shelly' })
-    ).toBeInTheDocument();
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
 
     await waitFor(() => expect(abortableFetch.getAbortCount()).toBeGreaterThan(0));
     expect(
-      screen.queryByRole('dialog', { name: 'Skanuj sieć Shelly' })
+      screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
     ).not.toBeInTheDocument();
-    const reopenedAddDialog = await screen.findByRole('dialog', {
-      name: 'Dodaj gniazdko'
-    });
-    expect(
-      within(reopenedAddDialog).getByRole('button', { name: 'Skanuj sieć' })
-    ).toBeEnabled();
-    expect(
-      within(reopenedAddDialog).getByRole('button', { name: 'Dodaj' })
-    ).toBeEnabled();
   });
 
   it('shows a friendly message when the address does not return Shelly JSON', async () => {

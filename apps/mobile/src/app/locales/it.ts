@@ -170,6 +170,7 @@ export const it = {
     refresh: 'Aggiorna',
     refreshing: 'Aggiornamento',
     rssi: 'RSSI',
+    select: 'Seleziona',
     send: 'Invia',
     sending: 'Invio',
     test: 'Test',

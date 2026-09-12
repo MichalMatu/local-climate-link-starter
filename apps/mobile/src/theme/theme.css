@@ -1128,7 +1128,6 @@ select {
 .sensor-data-metric-card--empty .sensor-data-metric-card__value,
 .sensor-data-metric-card__value--empty {
   color: var(--lcl-color-text-muted);
-  font-size: var(--lcl-font-size-lg);
   opacity: var(--lcl-opacity-muted);
 }
 
@@ -1372,6 +1371,85 @@ select {
   stroke-linejoin: round;
   stroke-width: var(--lcl-border-width-md);
   width: var(--lcl-size-control-icon-size);
+}
+
+.shelly-network-scan {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  margin-top: var(--lcl-spacing-sm);
+}
+
+.shelly-network-scan > summary {
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  font-weight: var(--lcl-font-weight-bold);
+  list-style-position: inside;
+  min-height: var(--lcl-size-control-min-height);
+  padding: var(--lcl-spacing-md) 0;
+}
+
+.shelly-network-scan__body {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  padding-bottom: var(--lcl-spacing-sm);
+}
+
+.shelly-network-scan__hint {
+  align-items: center;
+  color: var(--lcl-color-text-muted);
+  display: flex;
+  font-size: var(--lcl-font-size-sm);
+  gap: var(--lcl-spacing-sm);
+  justify-content: space-between;
+}
+
+.shelly-network-scan__actions {
+  gap: var(--lcl-spacing-sm);
+}
+
+.scan-loading-state {
+  align-content: center;
+  align-items: center;
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  justify-items: center;
+  min-height: min(42dvh, 18rem);
+  padding: var(--lcl-spacing-xl) var(--lcl-spacing-md);
+  text-align: center;
+}
+
+.scan-loading-state--compact {
+  min-height: 9rem;
+  padding-block: var(--lcl-spacing-lg);
+}
+
+.scan-loading-state strong {
+  color: var(--lcl-color-text);
+  font-size: var(--lcl-font-size-lg);
+}
+
+.scan-loading-state p {
+  max-width: var(--lcl-size-prose-max-width);
+}
+
+.scan-loading-state__spinner {
+  animation: lcl-scan-spin 0.85s linear infinite;
+  border: var(--lcl-border-width-md) solid var(--lcl-color-border);
+  border-radius: 50%;
+  border-top-color: var(--lcl-color-accent);
+  height: calc(var(--lcl-size-control-icon-size) + var(--lcl-spacing-md));
+  width: calc(var(--lcl-size-control-icon-size) + var(--lcl-spacing-md));
+}
+
+@keyframes lcl-scan-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-loading-state__spinner {
+    animation: none;
+  }
 }
 
 .ble-candidate-list {

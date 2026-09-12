@@ -496,6 +496,7 @@
 }
 
 .lcl-modal-backdrop--diagnostic,
+.lcl-modal-backdrop--task,
 .lcl-modal-backdrop--workspace {
   padding: var(--lcl-spacing-sm);
 }
@@ -529,6 +530,7 @@
 }
 
 .lcl-modal--diagnostic .lcl-modal__body,
+.lcl-modal--task .lcl-modal__body,
 .lcl-modal--workspace .lcl-modal__body {
   align-content: start;
 }
@@ -611,11 +613,13 @@
   }
 
   .lcl-modal-backdrop--diagnostic,
+  .lcl-modal-backdrop--task,
   .lcl-modal-backdrop--workspace {
     align-items: stretch;
   }
 
   .lcl-modal--diagnostic,
+  .lcl-modal--task,
   .lcl-modal--workspace {
     height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
   }

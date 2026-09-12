@@ -378,6 +378,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
       <Modal
         closeLabel={t('common.close')}
         open={isAddSensorModalOpen}
+        size="task"
         title={t('hardware.sensor.add')}
         headerActions={
           <button
@@ -409,6 +410,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
         busy={isPhoneBleScanPending}
         closeLabel={t('common.close')}
         open={isPhoneBleScanModalOpen}
+        size="task"
         title={t('hardware.sensor.phoneBleTitle')}
         actions={
           isPhoneBleScanPending ? (
@@ -638,7 +640,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
                       temperatureSample?.temperatureC,
                       '°C',
                       1,
-                      t('common.missingData')
+                      '— °C'
                     )}
                   </strong>
                 </div>
@@ -659,12 +661,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
                         : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
                     }
                   >
-                    {formatNullableMetric(
-                      humiditySample?.humidityPct,
-                      '%',
-                      1,
-                      t('common.missingData')
-                    )}
+                    {formatNullableMetric(humiditySample?.humidityPct, '%', 1, '— %')}
                   </strong>
                 </div>
               </div>
