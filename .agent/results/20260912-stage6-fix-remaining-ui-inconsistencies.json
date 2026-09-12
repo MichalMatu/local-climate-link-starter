@@ -1,0 +1,77 @@
+{
+  "id": "20260912-stage6-fix-remaining-ui-inconsistencies",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "agent-control",
+  "allow_write": true,
+  "started_at": "2026-09-12T05:36:47.578430+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "sh .agent/scripts/ux-polish-stage6-audit-fixes-20260912.sh",
+      "exit_code": 254,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/ux-polish-20260911 -> FETCH_HEAD\n * branch              agent-control -> FETCH_HEAD\n   4c93a29c..692d18ba  agent-control -> origin/agent-control\nSwitched to branch 'work/ux-polish-20260911'\nYour branch is up to date with 'origin/work/ux-polish-20260911'.\nundefined\n ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command \"prettier\" not found\n",
+      "elapsed_seconds": 2.418,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 278.98,
+      "output_policy": "stream",
+      "captured_output_chars": 421,
+      "output_truncated": false,
+      "current_rss_mb": 278.98,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 2.418
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": " M apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx\n M apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n M apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\n M apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\n M apps/mobile/src/theme/theme.css\n",
+    "elapsed_seconds": 0.148
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "diff --git a/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx b/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx\nindex f6657e2d..199c749b 100644\n--- a/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx\n@@ -197,7 +197,9 @@ export const HardwareSetupScreen = ({\n         ))}\n       </nav>\n \n-      {activeTab === 'shelly' && <ShellySetupPage flow={flow} />}\n+      {activeTab === 'shelly' && (\n+        <ShellySetupPage flow={flow} enableBleDiscovery={setupIntent !== 'time'} />\n+      )}\n       {setupIntent !== 'time' && activeTab === 'sensor' && (\n         <SensorSetupPage flow={flow} />\n       )}\ndiff --git a/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx b/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\nindex 99bd5dd0..74485bce 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n@@ -37,7 +37,14 @@ type ShellyDialogState =\n   | { kind: 'remove'; device: ShellyDraftDevice };\n const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';\n \n-export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) => {\n+type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {\n+  enableBleDiscovery?: boolean;\n+};\n+\n+export const ShellySetupPage = ({\n+  flow,\n+  enableBleDiscovery = true\n+}: ShellySetupPageProps) => {\n   const { locale, t } = useTranslation();\n   const isShellyScanActive = flow.shellyScanMutation.isPending && !flow.shellyScanStopped;\n   const isAnyShellyCheckPending =\n@@ -736,7 +743,7 @@ export const ShellySetupPage = ({ flow }: HardwarePageProps<ShellySetupFlow>) =>\n             device={device}\n             onAutomationAuto={flow.setAutomationAuto}\n             onAutomationManual={flow.setAutomationManual}\n-            onBleScan={openBleScanModal}\n+            onBleScan={enableBleDiscovery ? openBleScanModal : undefined}\n             onInfoOpen={openInfoModal}\n             onNameChange={(savedDevice, value) =>\n               flow.setShellyDeviceName(savedDevice.id, value)\ndiff --git a/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx b/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\nindex 4082f8f2..e0290d8d 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\n@@ -257,7 +257,7 @@ type SavedShellyDeviceCardProps = {\n   onAutomationManual: (device: ShellyDraftDevice) => void;\n   onNameChange: (device: ShellyDraftDevice, value: string) => void;\n   onInfoOpen: (device: ShellyDraftDevice) => void;\n-  onBleScan: (device: ShellyDraftDevice) => void;\n+  onBleScan?: (device: ShellyDraftDevice) => void;\n   onRemove: (device: ShellyDraftDevice) => void;\n };\n \n@@ -341,16 +341,18 @@ export const SavedShellyDeviceCard = ({\n         <span>{formatShellyClock(clock, t)}</span>\n       </div>\n \n-      <button\n-        className=\"shelly-ble-action\"\n-        type=\"button\"\n-        disabled={isControlBusy}\n-        title={t('hardware.shelly.scanBleViaShellyTitle')}\n-        onClick={() => onBleScan(device)}\n-      >\n-        <IconBluetooth className=\"icon-action__svg\" aria-hidden=\"true\" />\n-        <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>\n-      </button>\n+      {onBleScan && (\n+        <button\n+          className=\"shelly-ble-action\"\n+          type=\"button\"\n+          disabled={isControlBusy}\n+          title={t('hardware.shelly.scanBleViaShellyTitle')}\n+          onClick={() => onBleScan(device)}\n+        >\n+          <IconBluetooth className=\"icon-action__svg\" aria-hidden=\"true\" />\n+          <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>\n+        </button>\n+      )}\n \n       <div\n         className=\"shelly-runtime-controls\"\ndiff --git a/apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx b/apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\nindex 393f5f63..663c83ae 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\n@@ -45,7 +45,6 @@ export const TimeScheduleSetupPage = ({\n       <div className=\"time-schedule-device\">\n         <span>{t('time.device')}</span>\n         <strong>{flow.selectedShelly?.name ?? t('time.noDevice')}</strong>\n-        {flow.selectedShelly && <small>{flow.selectedShelly.baseUrl}</small>}\n       </div>\n \n       <div className=\"time-schedule-grid\">\ndiff --git a/apps/mobile/src/theme/theme.css b/apps/mobile/src/theme/theme.css\nindex 14adfd52..71094a45 100644\n--- a/apps/mobile/src/theme/theme.css\n+++ b/apps/mobile/src/theme/theme.css\n@@ -1570,6 +1570,10 @@ select {\n     width: 100%;\n   }\n \n+  .add-device-action-row .secondary-action {\n+    width: auto;\n+  }\n+\n   .control-action-row {\n     flex: 1 1 var(--lcl-size-action-min-width);\n   }\n@@ -1670,7 +1674,7 @@ select {\n .time-schedule-grid {\n   display: grid;\n   gap: var(--lcl-spacing-md);\n-  grid-template-columns: repeat(3, minmax(0, 1fr));\n+  grid-template-columns: repeat(2, minmax(0, 1fr));\n }\n \n .time-schedule-note {\n",
+    "elapsed_seconds": 0.019
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-12T05:37:00.833146+00:00",
+  "workspace_checkpoint": {
+    "version": 2,
+    "task_id": "20260912-stage6-fix-remaining-ui-inconsistencies",
+    "reason": "task-exit",
+    "created_at": "2026-09-12T05:37:01.205706+00:00",
+    "base_head": "a7b08d97f88750247823d8393ed53a26c90034d9",
+    "work_branch": "work/ux-polish-20260911",
+    "path": "/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260912-stage6-fix-remaining-ui-inconsistencies/1789191421070771000-task-exit",
+    "tracked_patch": "tracked.patch",
+    "untracked_root": "untracked",
+    "untracked_files": [],
+    "tracked_patch_bytes": 5566,
+    "untracked_bytes": 0,
+    "total_bytes": 5566,
+    "status": " M apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx\n M apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n M apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\n M apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\n M apps/mobile/src/theme/theme.css\n"
+  },
+  "task_digest": "dc5059603722240f3be7e584badd2bfa5b7a31a260ed9babfb7283e39646069d",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "dc7c2db0d29b390aeb83e76d",
+  "daemon_version": "4.18.20"
+}
