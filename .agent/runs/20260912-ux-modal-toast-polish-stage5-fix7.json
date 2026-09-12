@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-ux-modal-toast-polish-stage5-fix7",
+  "task_digest": "821071f9df0cdfe91f89a509b8c1f5559206818309c523b76220453872194ce6",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T03:52:44.867332+00:00",
+  "attempt_id": "ed7c16046ff5f04ec553bdad",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 96929,
+  "updated_at": "2026-09-12T03:52:44.867398+00:00",
+  "pid": 96929
+}
