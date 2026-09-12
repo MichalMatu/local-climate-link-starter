@@ -1,0 +1,89 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Twoje automatyki\nBrak automatyzacji\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Dodaj automatykę",
+      "title": "Dodaj automatykę",
+      "role": null,
+      "className": "dashboard-fab",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 339,
+        "y": 720,
+        "width": 56,
+        "height": 56
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

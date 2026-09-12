@@ -1,0 +1,8 @@
+MODEL=SM-S906B
+CANDIDATE=ac1d2c900467be4330a09567f286a6c364072c9a
+APP_PID=4831
+SOCKET=webview_devtools_remote_4831
+WS_URL=ws://127.0.0.1:9232/devtools/page/C4539BEEF10DB83736501E62827B8595
+Physical size: 1080x2340
+Physical density: 450
+Override density: 420
