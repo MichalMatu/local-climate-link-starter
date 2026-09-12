@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage5-ui-audit-dashboard-thumbnail",
+  "task_digest": "7fed5682b48e5e4587d559bd6f9955aad0710eb265555a1f9c942285969de5c1",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-12T04:18:46.626694+00:00",
+  "attempt_id": "98f996b17d676bc6dd488bcb",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 37310,
+  "updated_at": "2026-09-12T04:18:46.626973+00:00",
+  "pid": 37310
+}
