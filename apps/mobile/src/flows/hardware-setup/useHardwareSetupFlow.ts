@@ -1,11 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
+import type { RulePresetId } from '@lcl/automation-core';
 import {
-  createDefaultShellyThermostatConfig,
   decodeShellyThermostatScript,
-  generateShellyThermostatScript,
-  type DecodedShellyThermostatScript,
-  type ShellyThermostatConfig
+  type DecodedShellyThermostatScript
 } from '@lcl/script-generator';
 import {
   createInstallPlan,
@@ -49,24 +46,19 @@ import {
   readShellyResourceDiagnostics,
   type ShellyResourceDiagnostics
 } from './resourceDiagnostics.js';
-import {
-  useHardwareSetupDraftStore,
-  type SensorDraftDevice,
-  type ShellyDraftDevice
-} from './setupDraftStore.js';
+import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 import { useHardwareSetupReadingsStore } from './sensorReadingsStore.js';
 import {
   createIpv4RangeScanUrls,
-  formatSensorId,
-  normalizeRuntimeAddress,
   normalizeShellyUrl,
   toNumberOrFallback
 } from './validation.js';
+import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {
-  DEFAULT_RULE_ADVANCED_SETTINGS,
-  parseRuleAdvancedSettings,
-  validateRuleAdvancedSettings
-} from './ruleAdvancedSettings.js';
+  deriveClimateRuleState,
+  deriveSensorInputState,
+  deriveShellyInputState
+} from './ruleConfigDerivation.js';
 import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import {
@@ -74,21 +66,9 @@ import {
   useShellyControlFlow
 } from './useShellyControlFlow.js';
 
-type ConfigState =
-  | { ok: true; config: ShellyThermostatConfig; script: string }
-  | { ok: false; error: string };
-
 type ShellyCheckMutationResult = HardwareSetupStatus & {
   checkedDevice: ShellyDraftDevice;
 };
-
-type ShellyInputState =
-  | { ok: true; baseUrl: string; name: string }
-  | { ok: false; fieldErrors: { name?: string; url?: string } };
-
-type SensorInputState =
-  | { ok: true; device: SensorDraftDevice }
-  | { ok: false; fieldErrors: { name?: string; mac?: string } };
 
 type LoadedShellyAutomationScriptState = Omit<
   ShellyAutomationScriptState,
@@ -362,63 +342,20 @@ export const useHardwareSetupFlow = () => {
     return baseUrls;
   }, [shellyDevices]);
 
-  const shellyInputState = useMemo((): ShellyInputState => {
-    const fieldErrors: { name?: string; url?: string } = {};
-    const name = shellyNameInput.trim();
-    if (name.length === 0) {
-      fieldErrors.name = t('hardware.validation.shellyNameRequired');
-    }
+  const shellyInputState = useMemo(
+    () => deriveShellyInputState({ shellyNameInput, shellyUrlInput }),
+    [shellyNameInput, shellyUrlInput]
+  );
 
-    let baseUrl = '';
-    try {
-      baseUrl = normalizeShellyUrl(shellyUrlInput);
-    } catch (error) {
-      fieldErrors.url =
-        error instanceof Error ? error.message : t('hardware.validation.shellyIpFormat');
-    }
-
-    if (fieldErrors.name || fieldErrors.url) {
-      return { ok: false, fieldErrors };
-    }
-
-    return { ok: true, baseUrl, name };
-  }, [shellyNameInput, shellyUrlInput]);
-
-  const sensorInputState = useMemo((): SensorInputState => {
-    const fieldErrors: { name?: string; mac?: string } = {};
-    const name = sensorNameInput.trim();
-    if (name.length === 0) {
-      fieldErrors.name = t('hardware.validation.sensorNameRequired');
-    }
-
-    let runtimeAddress = '';
-    if (sensorMacInput.trim().length === 0) {
-      fieldErrors.mac = t('hardware.validation.sensorMacRequired');
-    } else {
-      try {
-        runtimeAddress = normalizeRuntimeAddress(sensorMacInput);
-      } catch (error) {
-        fieldErrors.mac =
-          error instanceof Error
-            ? error.message
-            : t('hardware.validation.sensorMacFormat');
-      }
-    }
-
-    if (fieldErrors.name || fieldErrors.mac) {
-      return { ok: false, fieldErrors };
-    }
-
-    return {
-      ok: true,
-      device: {
-        id: runtimeAddress,
-        name,
-        runtimeAddress,
-        profileId: sensorProfileInput
-      }
-    };
-  }, [sensorMacInput, sensorNameInput, sensorProfileInput]);
+  const sensorInputState = useMemo(
+    () =>
+      deriveSensorInputState({
+        sensorMacInput,
+        sensorNameInput,
+        sensorProfileInput
+      }),
+    [sensorMacInput, sensorNameInput, sensorProfileInput]
+  );
 
   const addSensorDraft = () => {
     if (sensorInputState.ok) {
@@ -426,119 +363,34 @@ export const useHardwareSetupFlow = () => {
     }
   };
 
-  const advancedSettingsValidation = useMemo(
-    () =>
-      validateRuleAdvancedSettings({
-        vpdAssistEnabled,
-        vpdTargetInput,
-        rssiMinInput,
-        staleTimeoutMinInput,
+  const { advancedSettingsValidation, configState, isThresholdValid, isVpdAssistValid } =
+    useMemo(
+      () =>
+        deriveClimateRuleState({
+          selectedSensor,
+          rulePreset,
+          onThresholdInput,
+          offThresholdInput,
+          vpdAssistEnabled,
+          vpdTargetInput,
+          rssiMinInput,
+          staleTimeoutMinInput,
+          minChangeMinInput,
+          maxOnHoursInput
+        }),
+      [
+        maxOnHoursInput,
         minChangeMinInput,
-        maxOnHoursInput
-      }),
-    [
-      maxOnHoursInput,
-      minChangeMinInput,
-      rssiMinInput,
-      staleTimeoutMinInput,
-      vpdAssistEnabled,
-      vpdTargetInput
-    ]
-  );
-
-  const configState: ConfigState = useMemo(() => {
-    try {
-      if (!selectedSensor) {
-        throw new Error(t('hardware.flow.noSelectedSensor'));
-      }
-      if (!advancedSettingsValidation.isValid) {
-        throw new Error(t('hardware.flow.advancedOptionsInvalid'));
-      }
-      const base = createDefaultShellyThermostatConfig(
-        selectedSensor.profileId,
-        rulePreset
-      );
-      const advancedSettings = parseRuleAdvancedSettings({
-        vpdAssistEnabled,
-        vpdTargetInput,
+        offThresholdInput,
+        onThresholdInput,
         rssiMinInput,
+        rulePreset,
+        selectedSensor,
         staleTimeoutMinInput,
-        minChangeMinInput,
-        maxOnHoursInput
-      });
-      const config: ShellyThermostatConfig = {
-        ...base,
-        sensor: {
-          ...base.sensor,
-          sensorId: formatSensorId(
-            selectedSensor.profileId,
-            selectedSensor.runtimeAddress
-          ),
-          runtimeAddress: selectedSensor.runtimeAddress,
-          displayName: selectedSensor.name
-        },
-        rule: {
-          ...base.rule,
-          control: {
-            ...base.rule.control,
-            onThreshold: toNumberOrFallback(
-              onThresholdInput,
-              base.rule.control.onThreshold
-            ),
-            offThreshold: toNumberOrFallback(
-              offThresholdInput,
-              base.rule.control.offThreshold
-            )
-          },
-          vpdAssist: {
-            enabled: vpdAssistEnabled,
-            targetKpa: advancedSettings.vpdTargetKpa
-          },
-          staleTimeoutSec: advancedSettings.staleTimeoutSec,
-          minChangeMs: advancedSettings.minChangeMs,
-          maxOnMs: advancedSettings.maxOnMs,
-          rssiMin: advancedSettings.rssiMin
-        }
-      };
-
-      return {
-        ok: true,
-        config,
-        script: generateShellyThermostatScript(config)
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error: error instanceof Error ? error.message : t('hardware.flow.configInvalid')
-      };
-    }
-  }, [
-    advancedSettingsValidation.isValid,
-    maxOnHoursInput,
-    minChangeMinInput,
-    offThresholdInput,
-    onThresholdInput,
-    rssiMinInput,
-    rulePreset,
-    selectedSensor,
-    staleTimeoutMinInput,
-    vpdAssistEnabled,
-    vpdTargetInput
-  ]);
-
-  const isThresholdValid = useMemo(() => {
-    const onThreshold = Number(onThresholdInput);
-    const offThreshold = Number(offThresholdInput);
-    if (!Number.isFinite(onThreshold) || !Number.isFinite(offThreshold)) {
-      return false;
-    }
-    const direction = defaultRuleForPreset(rulePreset).control.direction;
-    return direction === 'below'
-      ? onThreshold < offThreshold
-      : onThreshold > offThreshold;
-  }, [offThresholdInput, onThresholdInput, rulePreset]);
-
-  const isVpdAssistValid = advancedSettingsValidation.isVpdTargetValid;
+        vpdAssistEnabled,
+        vpdTargetInput
+      ]
+    );
   const currentScriptHash = useMemo(
     () =>
       configState.ok
