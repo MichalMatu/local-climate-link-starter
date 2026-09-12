@@ -1,0 +1,61 @@
+{
+  "id": "20260912-trace-sensor-data-refresh-flow",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/ux-polish-20260911",
+  "allow_write": true,
+  "started_at": "2026-09-12T09:04:06.051486+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/trace-sensor-data-refresh-flow-20260912.sh > /tmp/lcl-sensor-refresh.sh && sh /tmp/lcl-sensor-refresh.sh",
+      "exit_code": 1,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   198849c0..6cb62ecf  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/ux-polish-20260911 -> FETCH_HEAD\n * branch              agent-control -> FETCH_HEAD\nSwitched to and reset branch 'work/ux-polish-20260911'\n* daemon not running; starting now at tcp:5037\n* daemon started successfully\nargs: [-p, link.localclimate.app, -c, android.intent.category.LAUNCHER, 1]\n arg: \"-p\"\n arg: \"link.localclimate.app\"\n arg: \"-c\"\n arg: \"android.intent.category.LAUNCHER\"\n arg: \"1\"\ndata=\"link.localclimate.app\"\ndata=\"android.intent.category.LAUNCHER\"\nfile:///private/tmp/lcl-sensor-refresh.qJAcwQ/cdp.mjs:37\n  throw new Error(`Timeout waiting for ${expression}`);\n        ^\n\nError: Timeout waiting for Boolean(document.querySelector(\".shelly-setup-panel\"))\n    at waitUntil (file:///private/tmp/lcl-sensor-refresh.qJAcwQ/cdp.mjs:37:9)\n    at async file:///private/tmp/lcl-sensor-refresh.qJAcwQ/cdp.mjs:45:12\n\nNode.js v26.3.0\n",
+      "elapsed_seconds": 32.592,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 64.14,
+      "output_policy": "stream",
+      "captured_output_chars": 1101,
+      "output_truncated": false,
+      "current_rss_mb": 53.03,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 32.592
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.105
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.074
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-12T09:04:40.491467+00:00",
+  "task_digest": "511dc3008e8453b148bc39c2aa1363567d15b17aa381331c0667188d436aefe2",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "f34ccf659d91dee9cb1a89e6",
+  "daemon_version": "4.18.20"
+}
