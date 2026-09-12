@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage5-ui-audit-major-screens-cdp-fix1",
+  "task_digest": "0f1e4647de118186a67813e57b4dc466f979d7acc6872afcf0c2b8b4bffe4f35",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-12T05:02:09.242915+00:00",
+  "attempt_id": "8d06f0aef237b9e9f50ff537",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 85675,
+  "updated_at": "2026-09-12T05:02:09.243017+00:00",
+  "pid": 85675
+}
