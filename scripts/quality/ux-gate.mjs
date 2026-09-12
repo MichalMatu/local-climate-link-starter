@@ -213,16 +213,20 @@ const checkFeedbackContractPatterns = async () => {
   }
 
   const rulePath = 'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx';
+  const ruleFeedbackPath =
+    'apps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts';
   const ruleSource = await readRepoFile(rulePath);
+  const ruleFeedbackSource = await readRepoFile(ruleFeedbackPath);
 
   if (
     !ruleSource.includes(
       "open={dialog === 'install-block' && flow.installMutation.isError}"
     ) ||
-    !ruleSource.includes("setDialog('install-block');") ||
     !ruleSource.includes(
       '<FeedbackPanel tone="danger" title={mutationError(flow.installMutation.error)}>'
-    )
+    ) ||
+    !ruleSource.includes('useRuleSetupFeedback({ flow, pushToast, setDialog, t });') ||
+    !ruleFeedbackSource.includes("setDialog('install-block');")
   ) {
     addFailure(
       rulePath,
@@ -231,26 +235,28 @@ const checkFeedbackContractPatterns = async () => {
   }
 
   const installErrorEffectEndMarker =
-    '}, [flow.installMutation.error, flow.installMutation.isError]);';
-  const installErrorEffectEndIndex = ruleSource.indexOf(installErrorEffectEndMarker);
+    '}, [flow.installMutation.error, flow.installMutation.isError, setDialog]);';
+  const installErrorEffectEndIndex = ruleFeedbackSource.indexOf(
+    installErrorEffectEndMarker
+  );
   const installErrorEffectStartIndex =
     installErrorEffectEndIndex === -1
       ? -1
-      : ruleSource.lastIndexOf('useEffect(() => {', installErrorEffectEndIndex);
+      : ruleFeedbackSource.lastIndexOf('useEffect(() => {', installErrorEffectEndIndex);
 
   if (installErrorEffectStartIndex === -1 || installErrorEffectEndIndex === -1) {
     addFailure(
-      rulePath,
+      ruleFeedbackPath,
       'cannot find installMutation.isError effect for feedback-contract verification'
     );
   } else {
-    const installErrorEffectSource = ruleSource.slice(
+    const installErrorEffectSource = ruleFeedbackSource.slice(
       installErrorEffectStartIndex,
       installErrorEffectEndIndex + installErrorEffectEndMarker.length
     );
     if (installErrorEffectSource.includes('pushToast(')) {
       addFailure(
-        rulePath,
+        ruleFeedbackPath,
         'blocking install failures must not be duplicated as toast feedback'
       );
     }

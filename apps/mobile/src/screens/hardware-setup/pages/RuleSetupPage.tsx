@@ -2,7 +2,7 @@ import type { RuleSetupFlow } from '../pageContracts.js';
 import { FeedbackPanel, Modal, ScriptPreview, ToastViewport } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
 import { IconInfoCircle, IconTrash } from '@tabler/icons-react';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
   useTranslation,
@@ -17,16 +17,7 @@ import {
   validateRuleAdvancedSettings
 } from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
 import { useToastQueue } from '../useToastQueue.js';
-
-type RuleDialogState =
-  | 'none'
-  | 'summary'
-  | 'vpd-info'
-  | 'script'
-  | 'advanced'
-  | 'delete'
-  | 'install-block'
-  | 'relay-test';
+import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 type RuleControlCopy = {
   labelKey: TranslationKey;
@@ -234,86 +225,7 @@ export const RuleSetupPage = ({
       );
   }, [flow.configState, pushToast, t]);
 
-  useEffect(() => {
-    setDialog((current) => (current === 'delete' ? 'none' : current));
-  }, [flow.selectedShellyId]);
-
-  useEffect(() => {
-    if (!flow.loadAutomationScriptMutation.isError) {
-      return;
-    }
-    pushToast(
-      'warning',
-      t('hardware.rule.readScriptFailedTitle'),
-      mutationError(flow.loadAutomationScriptMutation.error)
-    );
-    flow.loadAutomationScriptMutation.reset();
-  }, [flow.loadAutomationScriptMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.loadAutomationScriptMutation.isSuccess) {
-      return;
-    }
-    pushToast('ok', t('hardware.rule.loadScriptDone'));
-    flow.loadAutomationScriptMutation.reset();
-  }, [flow.loadAutomationScriptMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.deleteAutomationScriptMutation.isError) {
-      return;
-    }
-    pushToast(
-      'warning',
-      t('hardware.rule.deleteScriptFailedTitle'),
-      mutationError(flow.deleteAutomationScriptMutation.error)
-    );
-    flow.deleteAutomationScriptMutation.reset();
-  }, [flow.deleteAutomationScriptMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.deleteAutomationScriptMutation.isSuccess) {
-      return;
-    }
-    setDialog('none');
-    pushToast('ok', t('hardware.rule.deleteScriptDone'));
-    flow.deleteAutomationScriptMutation.reset();
-  }, [flow.deleteAutomationScriptMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.installMutation.isError) {
-      return;
-    }
-    setDialog('install-block');
-  }, [flow.installMutation.error, flow.installMutation.isError]);
-
-  useEffect(() => {
-    if (!flow.installMutation.isSuccess || !flow.canRunSafeRelayTest) {
-      return;
-    }
-    setDialog('relay-test');
-    flow.installMutation.reset();
-  }, [flow.canRunSafeRelayTest, flow.installMutation]);
-
-  useEffect(() => {
-    if (!flow.safeRelayTestMutation.isError) {
-      return;
-    }
-    pushToast(
-      'warning',
-      t('hardware.rule.relayTestFailedTitle'),
-      mutationError(flow.safeRelayTestMutation.error)
-    );
-    flow.safeRelayTestMutation.reset();
-  }, [flow.safeRelayTestMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.safeRelayTestMutation.isSuccess) {
-      return;
-    }
-    setDialog('none');
-    pushToast('ok', t('hardware.ready'), t('hardware.rule.relayTestDone'));
-    flow.safeRelayTestMutation.reset();
-  }, [flow.safeRelayTestMutation, pushToast, t]);
+  useRuleSetupFeedback({ flow, pushToast, setDialog, t });
 
   const loadScriptFromShelly = () => {
     if (!flow.selectedShelly) {
