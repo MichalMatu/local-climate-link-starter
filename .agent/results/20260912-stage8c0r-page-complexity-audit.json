@@ -1,0 +1,60 @@
+{
+  "id": "20260912-stage8c0r-page-complexity-audit",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/ux-polish-20260911",
+  "allow_write": false,
+  "started_at": "2026-09-12T11:58:15.921159+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/stage8c0-page-complexity-audit-20260912.sh > /tmp/lcl-stage8c0r.sh && bash /tmp/lcl-stage8c0r.sh",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   1c3140b4..8d8228b1  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/ux-polish-20260911 -> FETCH_HEAD\nHEAD is now at f3912147 Extract climate automation install flow\nSwitched to and reset branch 'work/ux-polish-20260911'\nbranch 'work/ux-polish-20260911' set up to track 'origin/work/ux-polish-20260911'.\nYour branch is up to date with 'origin/work/ux-polish-20260911'.\nSTAGE8C0_PAGE_AUDIT=1\nHEAD=f39121476685416fc93662891e62dc4d53342c10\nFILE=apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx LINES=764 IMPORTS=12 HOOKS=8 HOOK_DETAIL={'useState': 2, 'useEffect': 6, 'useMemo': 0, 'useCallback': 0, 'useMutation': 0, 'useRef': 0} MODALS=0 ALERTS=0 COMPONENT_DEFS=2\nFILE=apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx LINES=432 IMPORTS=9 HOOKS=1 HOOK_DETAIL={'useState': 1, 'useEffect': 0, 'useMemo': 0, 'useCallback': 0, 'useMutation': 0, 'useRef': 0} MODALS=0 ALERTS=0 COMPONENT_DEFS=2\nFILE=apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx LINES=876 IMPORTS=10 HOOKS=10 HOOK_DETAIL={'useState': 0, 'useEffect': 9, 'useMemo': 0, 'useCallback': 1, 'useMutation': 0, 'useRef': 0} MODALS=0 ALERTS=0 COMPONENT_DEFS=3\nFILE=apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx LINES=701 IMPORTS=10 HOOKS=6 HOOK_DETAIL={'useState': 1, 'useEffect': 5, 'useMemo': 0, 'useCallback': 0, 'useMutation': 0, 'useRef': 0} MODALS=0 ALERTS=0 COMPONENT_DEFS=2\nFILE=apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx LINES=490 IMPORTS=6 HOOKS=3 HOOK_DETAIL={'useState': 1, 'useEffect': 2, 'useMemo': 0, 'useCallback': 0, 'useMutation': 0, 'useRef': 0} MODALS=0 ALERTS=0 COMPONENT_DEFS=3\nFILE=apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx LINES=248 IMPORTS=10 HOOKS=7 HOOK_DETAIL={'useState': 0, 'useEffect': 5, 'useMemo': 2, 'useCallback': 0, 'useMutation': 0, 'useRef': 0} MODALS=0 ALERTS=0 COMPONENT_DEFS=3\nFILE=apps/mobile/src/screens/InstallationDetailScreen.tsx LINES=512 IMPORTS=21 HOOKS=7 HOOK_DETAIL={'useState': 3, 'useEffect': 0, 'useMemo': 0, 'useCallback': 2, 'useMutation': 1, 'useRef': 1} MODALS=0 ALERTS=0 COMPONENT_DEFS=2\n--- QUALITY GATE HARDWARE FLOW / PAGE CONTRACT RULES ---\n211:  const orchestratorPath = 'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts';\n214:  if (orchestratorLines > 1150) {\n217:      `hardware setup orchestrator exceeds 1150 lines (${orchestratorLines}); extract a cohesive subsystem instead of growing the god-flow`\n253:    'apps/mobile/src/flows/hardware-setup/useShellyControlFlow.ts': 350,\n254:    'apps/mobile/src/flows/hardware-setup/useShellyBleDiscoveryFlow.ts': 350,\n255:    'apps/mobile/src/flows/hardware-setup/usePhoneSensorFlow.ts': 350\n268:  const pageContracts = {\n269:    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 'ShellySetupFlow',\n270:    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx':\n272:    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 'SensorSetupFlow',\n273:    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 'RuleSetupFlow',\n274:    'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx':\n276:    'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx':\n279:  for (const [path, contract] of Object.entries(pageContracts)) {\n--- TRACKED HARDWARE SETUP PAGE FILES ---\napps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\napps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\n",
+      "elapsed_seconds": 2.376,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 18.41,
+      "output_policy": "stream",
+      "captured_output_chars": 3959,
+      "output_truncated": false,
+      "current_rss_mb": 18.41,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 2.376
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.102
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.091
+  },
+  "finished_at": "2026-09-12T11:58:20.230659+00:00",
+  "task_digest": "e58d7a001457d5f9c81c198752210bcfec9efa9d818f4919de2f04a9409909f3",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "attempt_id": "e7e3c3358923afc9b67c868f",
+  "daemon_version": "4.18.20"
+}
