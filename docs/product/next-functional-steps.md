@@ -1,17 +1,24 @@
 # Local Climate Link — post-v2.0.10 product roadmap
 
-Status: active product roadmap after the v2.0.10 runtime/detail/diagnostics tranche.
+Status: active product roadmap after the completed v2.0.10 runtime/detail/diagnostics and UX/architecture cleanup tranches.
 
-Current behavior-changing baseline pending final merge:
+Frozen user-accepted application baseline:
 
 ```text
-2f42db968fa241c0d904d549befeaad249f48e18
-refactor(mobile): centralize setup feedback state
+8173f0851adc77222fc3e98b02113ff28f7119fd
+Use contextual setup back label
+stable-20260912-v2.0.10-ux-polish
 ```
 
 This document is the canonical roadmap for the next product phase. `docs/plan.md`
 remains historical MVP/design context; `docs/HANDOFF_NEXT_CHAT.md` carries the
 short current continuation state.
+
+## Closure checkpoint — 2026-09-12 / v2.0.10 UX + architecture
+
+The 2026-09-12 cleanup is completed baseline, not future work. It added contextual Climate/Time setup entry, the custom HH/MM schedule picker, compact device setup surfaces, render-safe LAN scan validation, cohesive feedback/lifecycle hooks, focused install/diagnostic/scan flows, architecture regression budgets, and current architecture documentation. The exact frozen application SHA passed `pnpm check:full` and was manually verified by the user on Samsung SM-S906B.
+
+`main` remains intentionally untouched until the user explicitly requests integration; the stable tag above preserves the accepted application tree independently of later documentation-only commits.
 
 ## Implementation checkpoint — 2026-09-11 / v2.0.10
 

@@ -1,6 +1,6 @@
 # Local Climate Link — next chat handoff
 
-Updated: 2026-09-11
+Updated: 2026-09-12
 
 This is the canonical continuation handoff. Read it before changing code.
 
@@ -20,49 +20,66 @@ Every Local Agent task must contain exactly:
 "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1"
 ```
 
-ChatGPT plans; Local Agent executes deterministic commands/scripts. Never launch local Codex from a Local Agent task. Before editing a work branch, read `.agent/status/daemon.json` and proceed only when the repository/binding match and the worker is idle.
+ChatGPT plans; Local Agent executes deterministic commands/scripts. Never launch local Codex from a Local Agent task. Before editing the work branch, read `.agent/status/daemon.json` and proceed only when repository, binding and task state match.
 
-## Current product baseline
+## Frozen accepted application baseline
 
-Latest behavior-changing implementation checkpoint pending final merge:
-
-```text
-2f42db968fa241c0d904d549befeaad249f48e18
-refactor(mobile): centralize setup feedback state
-```
-
-Frozen MANUAL-runtime rollback tag remains:
+The exact application build accepted by the user on the physical Samsung SM-S906B is:
 
 ```text
-stable-20260911-manual-runtime
-4462a5246e06f7cebcb5808eace2d6278988e56e
+8173f0851adc77222fc3e98b02113ff28f7119fd
+Use contextual setup back label
 ```
 
-Remote branch cleanup state at this checkpoint: `work/production-readiness-hardening-20260911` is the only product work branch expected before final fast-forward into `main`; it must be removed after the merge.
+It is frozen by the annotated tag:
 
-## Completed and accepted product state
+```text
+stable-20260912-v2.0.10-ux-polish
+```
 
-The current v2.0.10 line now includes:
+Do not move or recreate that tag. It is the rollback point for the completed v2.0.10 UX/architecture cleanup.
 
-- persistent per-installation identity/configuration,
-- dashboard-first entry with Add automation opened only from `+`, stable installation detail and shared bottom navigation,
-- climate AUTO/MANUAL runtime mode where the managed Shelly script stays running in both modes,
-- MANUAL-only direct relay ON/OFF using the verified existing safety path,
-- native Shelly schedules for pure time automation,
-- current-value climate UI without sensor chart/history persistence,
-- installation-scoped diagnostics with runtime/resource, BLE health and Shelly electrical/system telemetry,
-- diagnostics auto-refresh every 3 seconds only while the modal is open; background polling is disabled and manual refresh remains available,
-- responsive bottom-navigation/toast spacing verified by Playwright,
-- native Shelly physical-button behavior preserved as `momentary` with no detached/long-press ownership added by Local Climate Link.
+`main` intentionally remains the previously accepted safe baseline until the user explicitly requests a merge/fast-forward. Do not merge this work branch into `main` implicitly.
 
-The exact `16d8627b...` Android build was installed on the Samsung S22+ and opened successfully. The user physically reviewed the new installation-detail controls and diagnostics UX and accepted this tranche.
+## Completed 2026-09-12 UX and architecture pass
+
+The completed tranche includes:
+
+- compact Shelly and sensor setup surfaces with round `+` add actions,
+- climate-only Add automation choices on the Climate dashboard,
+- direct Time setup from the Time dashboard without an intermediate intent chooser,
+- contextual setup back label: `Zmień cel` for climate flows and `Anuluj` for direct Time setup,
+- two-field ON/OFF daily schedule editor with the custom HH/MM wheel picker,
+- no raw Shelly URL/IP on the normal schedule surface,
+- preserved sensor readings when switching setup tabs; fresh process launch waits for the next BLE advertisement by design,
+- render-safe LAN scan input: incomplete IP ranges no longer throw while the user is typing,
+- setup feedback/lifecycle orchestration extracted from the largest pages,
+- advanced rule settings extracted into a focused modal component,
+- `useHardwareSetupFlow.ts` reduced to a composing façade of roughly 575 lines,
+- `ShellySetupPage.tsx`, `SensorSetupPage.tsx` and `RuleSetupPage.tsx` reduced to cohesive page composition,
+- architecture regression budgets added to `pnpm quality:repo`,
+- current architecture documented in `docs/architecture/refactor-boundaries.md`.
+
+No algorithm redesign was included in this pass. The VPD assist keeps its existing behavior and safety semantics.
+
+## Final validation state
+
+Before closure, the exact accepted application SHA passed:
+
+- `pnpm check:full`, including format, lint, UX/repository quality gates, typecheck, all workspace tests, core coverage, build and responsive Playwright,
+- responsive Playwright matrix: 25/25,
+- production-code hygiene audit for TODO/FIXME/HACK, `@ts-ignore`, unnecessary `as any` and debug console calls,
+- relative documentation-link audit,
+- physical Android install/cold-start path on Samsung SM-S906B.
+
+The automated final phone script initially stopped because the clean install selected English while the assertion expected Polish text. Build/install succeeded and this was not an application regression. The user then manually verified the final UI flow on the physical phone and confirmed it works.
 
 ## Runtime invariants that must not regress
 
 ### AUTO
 
 - exact managed climate script remains running,
-- BLE runtime and `/script/<id>/diag` remain live,
+- BLE runtime and diagnostics remain live,
 - automatic relay decisions are allowed.
 
 ### MANUAL
@@ -76,117 +93,46 @@ The exact `16d8627b...` Android build was installed on the Samsung S22+ and open
 
 These are maintenance/failure states, not aliases for MANUAL. Normal AUTO/MANUAL switching must not use `Script.Stop`/`Script.Start`.
 
-## Navigation UX consistency tranche (2026-09-11)
+## Architecture boundaries
 
-Completed and validated in `8012d21e57d27f07b070f3e64b3432eb7b4abe2e`:
+Keep these responsibilities separate:
 
-- zero-installation state now stays on the normal `Twoje automatyki` dashboard instead of auto-opening setup,
-- the Add automation intent picker opens only from the dashboard `+` action,
-- removing the final automation returns to the empty dashboard rather than reopening setup,
-- the legacy global top-right Settings trigger was removed; app Settings are entered through the shared bottom navigation,
-- Add automation and hardware setup retain the global `Klimat / Czas / Ustawienia` navigation while preserving their local setup tabs,
-- the Add automation picker no longer exposes the obsolete `Zarządzaj istniejącą automatyką` choice,
-- the source dashboard tab is preserved when opening/cancelling Add automation,
-- time-installation detail now follows the same global bottom-navigation pattern as climate detail and no longer uses the legacy text `Wróć do automatyki` action,
-- the installation-not-found state also exposes the shared bottom navigation,
-- Android Back is consistent: setup → intent → dashboard → app exit,
-- page-title sizing for the intent picker now follows the normal app-page hierarchy instead of the oversized hero heading,
-- device-specific Shelly settings controls remain unchanged and are intentionally distinct from app-level Settings.
+- `useHardwareSetupFlow.ts` composes narrow hardware capabilities; it must not regain low-level transport, scan, diagnostics or install implementations,
+- `useShellySetupScanFlow.ts` owns LAN scan execution and validation timing,
+- `useHardwareDiagnosticsFlow.ts` owns diagnostics/resource snapshots,
+- `useClimateAutomationInstallFlow.ts` owns install/conflict handling and safe relay testing,
+- `useShellyControlFlow.ts`, `useShellyBleDiscoveryFlow.ts` and `usePhoneSensorFlow.ts` remain device lifecycle boundaries,
+- setup-page feedback hooks own transient lifecycle/toast/error orchestration,
+- page components own page-level composition and user intent, not transport implementation.
 
-Validation for this tranche is green: mobile unit/integration suite, typecheck, lint, `quality:ux`, `quality:repo`, build and the full responsive Playwright matrix (**25/25**) all passed. No Shelly runtime, generated automation script, BLE ownership or LED behavior was changed by this UX tranche.
+Line-count budgets in `scripts/quality/repository-gate.mjs` are regression alarms, not refactor targets. Split code only at a real responsibility boundary.
 
-The production-readiness tranche is behavior-preserving for Shelly runtime/safety paths. After final merge, install the exact final `main` build as a release sanity check; no new physical Shelly behavior test is required unless runtime behavior changes.
+## Branch state after cleanup
 
-## Production-readiness hardening tranche (2026-09-11)
+Keep:
 
-Completed and validated through `2f42db968fa241c0d904d549befeaad249f48e18`:
+- `main` — safe baseline; unchanged by this cleanup,
+- `work/ux-polish-20260911` — completed v2.0.10 UX/architecture work and current documentation,
+- `agent-control` — Local Agent control/evidence branch.
 
-- removed the dead `DemoWizard`/demo flow, obsolete `manage` setup intent and stale locale copy,
-- kept visual tokenization centralized and strengthened UX gates so new mobile CSS cannot silently bypass the token system,
-- reduced `useHardwareSetupFlow` from roughly 1656 to 1021 lines by extracting cohesive Shelly control, Shelly-side BLE discovery and phone/sensor BLE subsystems,
-- reduced the hardware-setup public surface from roughly 119 to 108 fields and introduced typed per-page `Pick` contracts,
-- added repository ratchets that cap orchestrator/public-API growth and prevent pages from depending on the full setup flow,
-- replaced independent modal booleans on the largest setup pages with cohesive discriminated dialog state; local `useState` occurrences fell from about 16/8/7 to 4/3/3 for Shelly/Rule/Sensor,
-- centralized setup toast queue behavior, including diagnostics,
-- kept `packages/script-generator`, `packages/automation-core`, `packages/shelly-client` and installation runtime paths unchanged.
-
-Validation is green: formatting, lint, `quality:ux`, `quality:repo`, typecheck, all workspace tests, core coverage, build and responsive Playwright (**25/25**). Final read-only diff audit also passed with no TODO/FIXME/HACK, eslint disables, TypeScript suppressions, production `any`, or inline JSX styles.
-
-Large setup-page files may still contain substantial declarative JSX; do not split them merely to reduce line counts. Future extraction should follow a concrete responsibility boundary or measurable coupling problem.
-
-## Next agreed vertical slice — Shelly LED configuration
-
-This is the next product task unless the user explicitly changes priority.
-
-### Current implementation
-
-`apps/mobile/src/screens/ShellyLedSettingsCard.tsx` already reads `PLUGS_UI` and shows the current LED mode. For `switch` mode it displays relay ON/OFF RGB + brightness; for `power` mode it displays brightness.
-
-`apps/mobile/src/flows/installations/deviceLed.ts` currently exposes only two write presets:
-
-- `relay-state`
-- `off`
-
-`packages/shelly-client/src/plugsUi.ts` already validates and writes more than the wrapper exposes:
-
-- modes `power`, `switch`, `off`,
-- arbitrary `switch:0` ON RGB + brightness,
-- arbitrary `switch:0` OFF RGB + brightness,
-- power-mode brightness.
-
-Therefore the next slice should expand the app/device wrapper and UX; it should not create a second RPC client or add LED logic to the generated climate script.
-
-### Target scope
-
-1. Preimplementation audit the existing LED card, `deviceLed.ts`, `plugsUi.ts`, tests and the current Shelly Plug S Gen3 behavior before editing.
-2. Add editable LED configuration using the existing `PLUGS_UI.SetConfig` path:
-   - LED mode: `switch`, `power`, `off`,
-   - relay ON color and brightness in switch mode,
-   - relay OFF color and brightness in switch mode,
-   - power-mode brightness when that mode is selected.
-3. Keep quick presets only if they improve UX; do not let presets become a parallel state model.
-4. After every write, re-read the exact Shelly configuration and display the confirmed device state.
-5. Keep unsupported/older firmware graceful: read-only unsupported state, no fake defaults and no broken installation detail.
-6. Keep the UI compact and consistent with the current installation-detail pattern; avoid another large god component or a second settings system.
-7. Add focused Shelly-client validation tests, installation-flow tests, UI tests and responsive E2E coverage.
-8. Finish with a real Shelly Plug S Gen3 smoke test and restore a deliberate final LED state.
-
-### Explicit non-goals for the first LED expansion
-
-- no thermostat-script LED ownership,
-- no dynamic error flashing based on RSSI/battery/runtime reasons,
-- no coupling between LED state and proof that automation is healthy,
-- no physical-button behavior changes,
-- no speculative night-mode UI unless a separate capability/schema audit explicitly brings it into scope.
+The old Stage 1/checkpoint branches from this pass are obsolete because they are strict ancestors of the completed work branch and are removed during final cleanup.
 
 ## Canonical planning documents
 
 Use these roles consistently:
 
-- `docs/HANDOFF_NEXT_CHAT.md` — current continuation state and the next concrete task,
-- `docs/product/next-functional-steps.md` — canonical active product roadmap,
-- `docs/plan.md` — historical MVP/design context only,
+- `docs/HANDOFF_NEXT_CHAT.md` — current continuation state,
+- `docs/product/next-functional-steps.md` — active product roadmap,
+- `docs/ux-polish-backlog.md` — only remaining/deferred UX follow-ups after the completed pass,
+- `docs/plan.md` — historical MVP/design context,
 - `docs/architecture/` and `docs/adr/` — current architecture and decisions,
-- `docs/implementation/` — durable implementation contracts/history, not a task backlog.
+- `docs/implementation/` — durable implementation contracts/history.
 
-Do not create another TODO/continue file for LED work; update the two canonical files above instead.
+Do not create another continuation/TODO document unless one of these roles genuinely cannot hold the information.
 
-## Validation expectations for the next code slice
+## Next product work
 
-At minimum:
-
-```sh
-pnpm --filter @lcl/shelly-client test
-pnpm --filter @lcl/mobile test
-pnpm --filter @lcl/mobile lint
-pnpm --filter @lcl/mobile typecheck
-pnpm quality:repo
-pnpm quality:ux
-pnpm --filter @lcl/mobile build
-pnpm e2e:responsive
-```
-
-Also run `git diff --check`, inspect the final diff before merge, and keep the generated climate script untouched unless the task explicitly changes runtime behavior.
+No new product slice is started by this closure. The current roadmap still identifies expanded Shelly LED configuration through the existing `PLUGS_UI` client as the next candidate vertical slice. Re-audit that scope before implementation and keep it app/device-native; do not add LED ownership to the generated climate script.
 
 ## Change philosophy
 
@@ -194,6 +140,6 @@ Also run `git diff --check`, inspect the final diff before merge, and keep the g
 - small, clean, low-risk/high-gain changes,
 - no god objects,
 - no duplicate state/RPC paths,
-- preserve the stable runtime safety model,
-- prefer device-native Shelly features for device UI such as LED configuration,
-- keep user-facing UI calm and service diagnostics progressively disclosed.
+- preserve runtime safety semantics,
+- prefer device-native Shelly features,
+- keep normal user UI calm and diagnostics progressively disclosed.
