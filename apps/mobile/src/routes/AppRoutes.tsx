@@ -64,7 +64,9 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     return { type: 'dashboard', kind: route.kind };
   }
   if (route.type === 'setup') {
-    return { type: 'intent', sourceKind: route.sourceKind };
+    return route.intent === 'time'
+      ? { type: 'dashboard', kind: 'time' }
+      : { type: 'intent', sourceKind: route.sourceKind };
   }
   if (route.type === 'intent') {
     return { type: 'dashboard', kind: route.sourceKind };
@@ -153,7 +155,11 @@ export const AppRoutes = () => {
     return (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
-        onAddAutomation={(kind) => navigate({ type: 'intent', sourceKind: kind })}
+        onAddAutomation={(kind) =>
+          kind === 'time'
+            ? navigate({ type: 'setup', intent: 'time', sourceKind: 'time' })
+            : navigate({ type: 'intent', sourceKind: 'climate' })
+        }
         onOpenInstallation={(installationId) => {
           const installation = installations.find(
             (candidate) => candidate.id === installationId
@@ -194,7 +200,13 @@ export const AppRoutes = () => {
       <HardwareSetupScreen
         navigationKind={route.sourceKind}
         setupIntent={route.intent}
-        onBackToIntent={() => navigate({ type: 'intent', sourceKind: route.sourceKind })}
+        onBackToIntent={() =>
+          navigate(
+            route.intent === 'time'
+              ? { type: 'dashboard', kind: 'time' }
+              : { type: 'intent', sourceKind: route.sourceKind }
+          )
+        }
         onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
         onOpenSettings={openSettings}
         onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}

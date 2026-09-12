@@ -150,14 +150,14 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować temperaturą/ })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować wilgotnością/ })).toBeVisible();
-    expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
+    expect(screen.queryByRole('button', { name: /Sterować według czasu/ })).toBeNull();
     expect(
       screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     ).toBeNull();
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
   });
 
-  it('returns from Add automation to the dashboard tab that opened it', () => {
+  it('opens time setup directly from the Time plus and returns to Time dashboard', async () => {
     renderRoutes();
     fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
     expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
@@ -165,11 +165,9 @@ describe('AppRoutes navigation shell', () => {
       'page'
     );
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
+    expect(await screen.findByText('mock-setup-time')).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
       'aria-current',
@@ -226,12 +224,11 @@ describe('AppRoutes navigation shell', () => {
     );
   });
 
-  it('opens the selected goal, keeps global nav in setup, and completes to dashboard', async () => {
+  it('completes direct Time setup back to the Time dashboard', async () => {
     renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    act(() => addClimateInstallation('setup-complete'));
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
