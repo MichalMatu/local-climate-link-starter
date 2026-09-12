@@ -1,0 +1,9 @@
+{
+  "id": "20260912-stage6b-add-fab-time-picker",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "agent-control",
+  "allow_write": true,
+  "resources": [],
+  "commands": ["true"]
+}
