@@ -18,7 +18,7 @@ short current continuation state.
 
 The 2026-09-12 cleanup is completed baseline, not future work. It added contextual Climate/Time setup entry, the custom HH/MM schedule picker, compact device setup surfaces, render-safe LAN scan validation, cohesive feedback/lifecycle hooks, focused install/diagnostic/scan flows, architecture regression budgets, and current architecture documentation. The exact frozen application SHA passed `pnpm check:full` and was manually verified by the user on Samsung SM-S906B.
 
-`main` remains intentionally untouched until the user explicitly requests integration; the stable tag above preserves the accepted application tree independently of later documentation-only commits.
+`main` contains this completed baseline. The stable tag above preserves the exact user-accepted application tree independently of later documentation-only commits on `main`.
 
 ## Implementation checkpoint — 2026-09-11 / v2.0.10
 

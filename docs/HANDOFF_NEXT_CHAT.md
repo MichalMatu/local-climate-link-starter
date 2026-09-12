@@ -39,7 +39,7 @@ stable-20260912-v2.0.10-ux-polish
 
 Do not move or recreate that tag. It is the rollback point for the completed v2.0.10 UX/architecture cleanup.
 
-`main` intentionally remains the previously accepted safe baseline until the user explicitly requests a merge/fast-forward. Do not merge this work branch into `main` implicitly.
+`main` now contains the completed v2.0.10 UX/architecture cleanup. The stable tag above remains the immutable rollback point for the exact user-accepted application build, while later documentation-only commits may sit above it on `main`.
 
 ## Completed 2026-09-12 UX and architecture pass
 
@@ -111,11 +111,10 @@ Line-count budgets in `scripts/quality/repository-gate.mjs` are regression alarm
 
 Keep:
 
-- `main` — safe baseline; unchanged by this cleanup,
-- `work/ux-polish-20260911` — completed v2.0.10 UX/architecture work and current documentation,
+- `main` — integrated v2.0.10 UX/architecture baseline and canonical product branch,
 - `agent-control` — Local Agent control/evidence branch.
 
-The old Stage 1/checkpoint branches from this pass are obsolete because they are strict ancestors of the completed work branch and are removed during final cleanup.
+The completed `work/ux-polish-20260911` branch and the older Stage 1/checkpoint branches are obsolete after the fast-forward and are removed. Start future product work from the current `main` on a new task-specific branch.
 
 ## Canonical planning documents
 
