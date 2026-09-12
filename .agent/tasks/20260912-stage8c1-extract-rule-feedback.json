@@ -1,0 +1,15 @@
+{
+  "id": "20260912-stage8c1-extract-rule-feedback",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/ux-polish-20260911",
+  "allow_write": true,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/stage8c1-extract-rule-feedback-20260912.sh > /tmp/lcl-stage8c1.sh && bash /tmp/lcl-stage8c1.sh"
+  ],
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096
+}
