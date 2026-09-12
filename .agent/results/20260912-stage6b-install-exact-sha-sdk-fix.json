@@ -1,0 +1,61 @@
+{
+  "id": "20260912-stage6b-install-exact-sha-sdk-fix",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/ux-polish-20260911",
+  "allow_write": true,
+  "started_at": "2026-09-12T06:42:12.581974+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/install-stage6b-exact-sha-sdk-fix-20260912.sh > /tmp/install-stage6b-exact-sha-sdk-fix-20260912.sh; sh /tmp/install-stage6b-exact-sha-sdk-fix-20260912.sh",
+      "exit_code": 1,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   e79c5fd3..5d8a115d  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/ux-polish-20260911 -> FETCH_HEAD\n * branch              agent-control -> FETCH_HEAD\n   5d8a115d..251181f3  agent-control -> origin/agent-control\nSwitched to and reset branch 'work/ux-polish-20260911'\n",
+      "elapsed_seconds": 2.556,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 22.61,
+      "output_policy": "stream",
+      "captured_output_chars": 464,
+      "output_truncated": false,
+      "current_rss_mb": 22.61,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 2.556
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.129
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.075
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-12T06:42:17.026407+00:00",
+  "task_digest": "46f57965766014c52d946c70b4df1d4fb88602da4949b13ab1fc127b4fffeb25",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "b1bb3d7556c9bc1b59699a96",
+  "daemon_version": "4.18.20"
+}
