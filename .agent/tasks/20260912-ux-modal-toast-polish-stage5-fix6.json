@@ -1,0 +1,15 @@
+{
+  "id": "20260912-ux-modal-toast-polish-stage5-fix6",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/ux-modal-toast-polish-stage5-fix6-20260912.sh > /tmp/ux-modal-toast-polish-stage5-fix6-20260912.sh; sh /tmp/ux-modal-toast-polish-stage5-fix6-20260912.sh"
+  ]
+}
