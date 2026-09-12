@@ -5,5 +5,11 @@
   "work_branch": "agent-control",
   "allow_write": true,
   "resources": [],
-  "commands": ["true"]
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "sh .agent/scripts/ux-polish-stage6b-add-fab-time-picker-20260912.sh"
+  ]
 }
