@@ -1,0 +1,1818 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/#schedule",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Zmień cel\nSterowanie według czasu\nShelly\nHarmonogram\n\nAutomatyka czasowa\n\nUstaw godziny ON i OFF\n\nShelly wykona harmonogram lokalnie, bez telefonu i bez chmury.\n\nUrządzenie\nShelly Plug S Gen3\nWłącz o08:00\nWyłącz o20:00\n\nGodziny używają lokalnego zegara Shelly. Instalacja wymaga zsynchronizowanego czasu urządzenia.\n\nTen harmonogram będzie jedynym właścicielem przekaźnika. Nie można łączyć go z automatyką klimatu na tym samym wyjściu.\n\nZapisz harmonogram w Shelly\nWłącz o\nHH\n00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\nMM\n00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48\n49\n50\n51\n52\n53\n54\n55\n56\n57\n58\n59\nWybierz\nAnuluj\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "Zmień cel",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 71,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Shelly",
+      "ariaLabel": null,
+      "title": "Gniazdka Shelly i sterowanie",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 21,
+        "y": 81,
+        "width": 185,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Harmonogram",
+      "ariaLabel": null,
+      "title": "Ustaw godziny włączenia i wyłączenia",
+      "role": null,
+      "className": "setup-top-nav__item setup-top-nav__item--active",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 206,
+        "y": 81,
+        "width": 185,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "08:00",
+      "ariaLabel": "Włącz o: 08:00",
+      "title": null,
+      "role": null,
+      "className": "time-schedule-time-input time-schedule-time-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 407,
+        "width": 167,
+        "height": 68
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "20:00",
+      "ariaLabel": "Wyłącz o: 20:00",
+      "title": null,
+      "role": null,
+      "className": "time-schedule-time-input time-schedule-time-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 212,
+        "y": 407,
+        "width": 167,
+        "height": 68
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "Zapisz harmonogram w Shelly",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "primary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 651,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "00",
+      "ariaLabel": "HH 00",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": -203,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "01",
+      "ariaLabel": "HH 01",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": -155,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "02",
+      "ariaLabel": "HH 02",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": -107,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 9,
+      "tag": "button",
+      "text": "03",
+      "ariaLabel": "HH 03",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": -59,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 10,
+      "tag": "button",
+      "text": "04",
+      "ariaLabel": "HH 04",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": -11,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 11,
+      "tag": "button",
+      "text": "05",
+      "ariaLabel": "HH 05",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 37,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 12,
+      "tag": "button",
+      "text": "06",
+      "ariaLabel": "HH 06",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 85,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 13,
+      "tag": "button",
+      "text": "07",
+      "ariaLabel": "HH 07",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 133,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 14,
+      "tag": "button",
+      "text": "08",
+      "ariaLabel": "HH 08",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 30,
+        "y": 181,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 15,
+      "tag": "button",
+      "text": "09",
+      "ariaLabel": "HH 09",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 229,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 16,
+      "tag": "button",
+      "text": "10",
+      "ariaLabel": "HH 10",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 277,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 17,
+      "tag": "button",
+      "text": "11",
+      "ariaLabel": "HH 11",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 325,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 18,
+      "tag": "button",
+      "text": "12",
+      "ariaLabel": "HH 12",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 373,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 19,
+      "tag": "button",
+      "text": "13",
+      "ariaLabel": "HH 13",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 421,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 20,
+      "tag": "button",
+      "text": "14",
+      "ariaLabel": "HH 14",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 469,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 21,
+      "tag": "button",
+      "text": "15",
+      "ariaLabel": "HH 15",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 517,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 22,
+      "tag": "button",
+      "text": "16",
+      "ariaLabel": "HH 16",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 565,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 23,
+      "tag": "button",
+      "text": "17",
+      "ariaLabel": "HH 17",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 613,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 24,
+      "tag": "button",
+      "text": "18",
+      "ariaLabel": "HH 18",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 661,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 25,
+      "tag": "button",
+      "text": "19",
+      "ariaLabel": "HH 19",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 709,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 26,
+      "tag": "button",
+      "text": "20",
+      "ariaLabel": "HH 20",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 757,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 27,
+      "tag": "button",
+      "text": "21",
+      "ariaLabel": "HH 21",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 805,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 28,
+      "tag": "button",
+      "text": "22",
+      "ariaLabel": "HH 22",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 853,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 29,
+      "tag": "button",
+      "text": "23",
+      "ariaLabel": "HH 23",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 30,
+        "y": 901,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 30,
+      "tag": "button",
+      "text": "00",
+      "ariaLabel": "MM 00",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 212,
+        "y": 181,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 31,
+      "tag": "button",
+      "text": "01",
+      "ariaLabel": "MM 01",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 229,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 32,
+      "tag": "button",
+      "text": "02",
+      "ariaLabel": "MM 02",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 277,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 33,
+      "tag": "button",
+      "text": "03",
+      "ariaLabel": "MM 03",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 325,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 34,
+      "tag": "button",
+      "text": "04",
+      "ariaLabel": "MM 04",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 373,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 35,
+      "tag": "button",
+      "text": "05",
+      "ariaLabel": "MM 05",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 421,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 36,
+      "tag": "button",
+      "text": "06",
+      "ariaLabel": "MM 06",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 469,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 37,
+      "tag": "button",
+      "text": "07",
+      "ariaLabel": "MM 07",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 517,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 38,
+      "tag": "button",
+      "text": "08",
+      "ariaLabel": "MM 08",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 565,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 39,
+      "tag": "button",
+      "text": "09",
+      "ariaLabel": "MM 09",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 613,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 40,
+      "tag": "button",
+      "text": "10",
+      "ariaLabel": "MM 10",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 661,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 41,
+      "tag": "button",
+      "text": "11",
+      "ariaLabel": "MM 11",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 709,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 42,
+      "tag": "button",
+      "text": "12",
+      "ariaLabel": "MM 12",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 757,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 43,
+      "tag": "button",
+      "text": "13",
+      "ariaLabel": "MM 13",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 805,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 44,
+      "tag": "button",
+      "text": "14",
+      "ariaLabel": "MM 14",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 853,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 45,
+      "tag": "button",
+      "text": "15",
+      "ariaLabel": "MM 15",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 901,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 46,
+      "tag": "button",
+      "text": "16",
+      "ariaLabel": "MM 16",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 949,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 47,
+      "tag": "button",
+      "text": "17",
+      "ariaLabel": "MM 17",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 997,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 48,
+      "tag": "button",
+      "text": "18",
+      "ariaLabel": "MM 18",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1045,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 49,
+      "tag": "button",
+      "text": "19",
+      "ariaLabel": "MM 19",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1093,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 50,
+      "tag": "button",
+      "text": "20",
+      "ariaLabel": "MM 20",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1141,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 51,
+      "tag": "button",
+      "text": "21",
+      "ariaLabel": "MM 21",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1189,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 52,
+      "tag": "button",
+      "text": "22",
+      "ariaLabel": "MM 22",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1237,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 53,
+      "tag": "button",
+      "text": "23",
+      "ariaLabel": "MM 23",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1285,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 54,
+      "tag": "button",
+      "text": "24",
+      "ariaLabel": "MM 24",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1333,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 55,
+      "tag": "button",
+      "text": "25",
+      "ariaLabel": "MM 25",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1381,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 56,
+      "tag": "button",
+      "text": "26",
+      "ariaLabel": "MM 26",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1429,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 57,
+      "tag": "button",
+      "text": "27",
+      "ariaLabel": "MM 27",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1477,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 58,
+      "tag": "button",
+      "text": "28",
+      "ariaLabel": "MM 28",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1525,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 59,
+      "tag": "button",
+      "text": "29",
+      "ariaLabel": "MM 29",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1573,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 60,
+      "tag": "button",
+      "text": "30",
+      "ariaLabel": "MM 30",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1621,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 61,
+      "tag": "button",
+      "text": "31",
+      "ariaLabel": "MM 31",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1669,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 62,
+      "tag": "button",
+      "text": "32",
+      "ariaLabel": "MM 32",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1717,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 63,
+      "tag": "button",
+      "text": "33",
+      "ariaLabel": "MM 33",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1765,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 64,
+      "tag": "button",
+      "text": "34",
+      "ariaLabel": "MM 34",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1813,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 65,
+      "tag": "button",
+      "text": "35",
+      "ariaLabel": "MM 35",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1861,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 66,
+      "tag": "button",
+      "text": "36",
+      "ariaLabel": "MM 36",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1909,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 67,
+      "tag": "button",
+      "text": "37",
+      "ariaLabel": "MM 37",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 1957,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 68,
+      "tag": "button",
+      "text": "38",
+      "ariaLabel": "MM 38",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2005,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 69,
+      "tag": "button",
+      "text": "39",
+      "ariaLabel": "MM 39",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2053,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 70,
+      "tag": "button",
+      "text": "40",
+      "ariaLabel": "MM 40",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2101,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 71,
+      "tag": "button",
+      "text": "41",
+      "ariaLabel": "MM 41",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2149,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 72,
+      "tag": "button",
+      "text": "42",
+      "ariaLabel": "MM 42",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2197,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 73,
+      "tag": "button",
+      "text": "43",
+      "ariaLabel": "MM 43",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2245,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 74,
+      "tag": "button",
+      "text": "44",
+      "ariaLabel": "MM 44",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2293,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 75,
+      "tag": "button",
+      "text": "45",
+      "ariaLabel": "MM 45",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2341,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 76,
+      "tag": "button",
+      "text": "46",
+      "ariaLabel": "MM 46",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2389,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 77,
+      "tag": "button",
+      "text": "47",
+      "ariaLabel": "MM 47",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2437,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 78,
+      "tag": "button",
+      "text": "48",
+      "ariaLabel": "MM 48",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2485,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 79,
+      "tag": "button",
+      "text": "49",
+      "ariaLabel": "MM 49",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2533,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 80,
+      "tag": "button",
+      "text": "50",
+      "ariaLabel": "MM 50",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2581,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 81,
+      "tag": "button",
+      "text": "51",
+      "ariaLabel": "MM 51",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2629,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 82,
+      "tag": "button",
+      "text": "52",
+      "ariaLabel": "MM 52",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2677,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 83,
+      "tag": "button",
+      "text": "53",
+      "ariaLabel": "MM 53",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2725,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 84,
+      "tag": "button",
+      "text": "54",
+      "ariaLabel": "MM 54",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2773,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 85,
+      "tag": "button",
+      "text": "55",
+      "ariaLabel": "MM 55",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2821,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 86,
+      "tag": "button",
+      "text": "56",
+      "ariaLabel": "MM 56",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2869,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 87,
+      "tag": "button",
+      "text": "57",
+      "ariaLabel": "MM 57",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2917,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 88,
+      "tag": "button",
+      "text": "58",
+      "ariaLabel": "MM 58",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 2965,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 89,
+      "tag": "button",
+      "text": "59",
+      "ariaLabel": "MM 59",
+      "title": null,
+      "role": null,
+      "className": "time-wheel-option",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 212,
+        "y": 3013,
+        "width": 170,
+        "height": 48
+      },
+      "visible": true
+    },
+    {
+      "index": 90,
+      "tag": "button",
+      "text": "Wybierz",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "primary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 25,
+        "y": 728,
+        "width": 362,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 91,
+      "tag": "button",
+      "text": "Anuluj",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "lcl-modal__close",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 25,
+        "y": 780,
+        "width": 362,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 92,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 93,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 94,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/#schedule",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Zmień cel\nSterowanie według czasu\nShelly\nHarmonogram\n\nAutomatyka czasowa\n\nUstaw godziny ON i OFF\n\nShelly wykona harmonogram lokalnie, bez telefonu i bez chmury.\n\nUrządzenie\nShelly Plug S Gen3\nWłącz o08:00\nWyłącz o20:00\n\nGodziny używają lokalnego zegara Shelly. Instalacja wymaga zsynchronizowanego czasu urządzenia.\n\nTen harmonogram będzie jedynym właścicielem przekaźnika. Nie można łączyć go z automatyką klimatu na tym samym wyjściu.\n\nZapisz harmonogram w Shelly\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "Zmień cel",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 71,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Shelly",
+      "ariaLabel": null,
+      "title": "Gniazdka Shelly i sterowanie",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 21,
+        "y": 81,
+        "width": 185,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Harmonogram",
+      "ariaLabel": null,
+      "title": "Ustaw godziny włączenia i wyłączenia",
+      "role": null,
+      "className": "setup-top-nav__item setup-top-nav__item--active",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 206,
+        "y": 81,
+        "width": 185,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "08:00",
+      "ariaLabel": "Włącz o: 08:00",
+      "title": null,
+      "role": null,
+      "className": "time-schedule-time-input time-schedule-time-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 407,
+        "width": 167,
+        "height": 68
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "20:00",
+      "ariaLabel": "Wyłącz o: 20:00",
+      "title": null,
+      "role": null,
+      "className": "time-schedule-time-input time-schedule-time-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 212,
+        "y": 407,
+        "width": 167,
+        "height": 68
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "Zapisz harmonogram w Shelly",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "primary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 651,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}
