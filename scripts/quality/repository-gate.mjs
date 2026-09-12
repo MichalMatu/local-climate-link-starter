@@ -211,10 +211,11 @@ const checkHardwareSetupArchitecture = async () => {
   const orchestratorPath = 'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts';
   const orchestrator = await readRepoFile(orchestratorPath);
   const orchestratorLines = orchestrator.split('\n').length;
-  if (orchestratorLines > 1150) {
+  const orchestratorBudget = 650;
+  if (orchestratorLines > orchestratorBudget) {
     addFailure(
       orchestratorPath,
-      `hardware setup orchestrator exceeds 1150 lines (${orchestratorLines}); extract a cohesive subsystem instead of growing the god-flow`
+      `hardware setup orchestrator exceeds ${orchestratorBudget} lines (${orchestratorLines}); extract a cohesive subsystem instead of growing the god-flow`
     );
   }
 
@@ -261,6 +262,29 @@ const checkHardwareSetupArchitecture = async () => {
       addFailure(
         path,
         `extracted hardware subsystem exceeds ${maxLines} lines (${lines})`
+      );
+    }
+  }
+
+  const compositionBudgets = {
+    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 700,
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 650,
+    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 675,
+    'apps/mobile/src/screens/hardware-setup/pages/useShellySetupFeedback.ts': 200,
+    'apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts': 200,
+    'apps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts': 180,
+    'apps/mobile/src/screens/hardware-setup/pages/RuleAdvancedSettingsModal.tsx': 220,
+    'apps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.ts': 350,
+    'apps/mobile/src/flows/hardware-setup/useHardwareDiagnosticsFlow.ts': 350,
+    'apps/mobile/src/flows/hardware-setup/useClimateAutomationInstallFlow.ts': 350
+  };
+  for (const [path, maxLines] of Object.entries(compositionBudgets)) {
+    const source = await readRepoFile(path);
+    const lines = source.split('\n').length;
+    if (lines > maxLines) {
+      addFailure(
+        path,
+        `hardware setup responsibility boundary exceeds ${maxLines} lines (${lines}); keep the extracted responsibility cohesive instead of regrowing a god object`
       );
     }
   }

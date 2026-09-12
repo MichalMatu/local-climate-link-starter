@@ -1,52 +1,94 @@
 # Refactor boundaries
 
-This document captures responsibility hotspots found during the v2.0.10 final
-quality audit. File size is a signal, not a refactor goal by itself.
+This document records the responsibility boundaries established during the v2.0.10
+architecture and code-cleanliness audit. File size is a warning signal, not a
+refactor goal by itself. A file should be split only when it owns more than one
+cohesive responsibility or when its public surface is becoming difficult to reason
+about and test.
 
-## Current outcome
+## Hardware setup outcome
 
-`ShellySetupPage.tsx` was the clearest UI composition hotspot. Pure formatting,
-add-form rendering and the saved Shelly card were extracted into
-`ShellySetupPresentation.tsx`, reducing the parent from roughly 1426 to about
-1030 lines without moving Shelly/BLE mutations or changing behavior.
+The hardware setup façade remains `flows/hardware-setup/useHardwareSetupFlow.ts`,
+but it is now a composer rather than the implementation home for every hardware
+operation. It is roughly 575 lines, down from more than 1000 lines at the start of
+this cleanup and from about 1660 lines in the earlier audit history.
 
-The remaining largest orchestration hotspot is
-`flows/hardware-setup/useHardwareSetupFlow.ts` (about 1660 lines in the audit).
-It coordinates roughly twenty hardware mutations across Shelly control, LAN
-scan, temporary Shelly BLE discovery, phone BLE, PVVX GATT, installation and
-diagnostics. Because several paths enforce OFF-first cleanup and exact runtime
-ownership, a broad line-count-driven split is higher risk than leaving this seam
-intact.
+Cohesive capabilities now own their implementation details:
 
-## Preferred future extractions
+- `ruleConfigDerivation.ts` derives validated Shelly, sensor and climate-rule state.
+- `useShellySetupScanFlow.ts` owns LAN scan state, cancellation and scan execution.
+- `useHardwareDiagnosticsFlow.ts` owns script diagnostics and resource snapshots.
+- `useClimateAutomationInstallFlow.ts` owns install/conflict handling and the safe
+  relay test.
+- `useShellyControlFlow.ts`, `useShellyBleDiscoveryFlow.ts` and
+  `usePhoneSensorFlow.ts` remain the transport/device lifecycle boundaries.
 
-Extract one responsibility at a time, with the existing public
-`HardwareSetupFlow` contract preserved until callers/tests are migrated:
+The façade may coordinate these capabilities and expose the compatibility surface
+needed by narrow page contracts, but low-level transport, scan, diagnostic,
+installation or BLE implementation must not migrate back into it.
 
-1. saved Shelly status/control mutations and feedback acknowledgement,
-2. Shelly BLE discovery session lifecycle and cleanup,
-3. phone BLE live scan plus PVVX GATT coordination,
-4. installation + safe relay test + diagnostic orchestration.
+## Setup page composition
 
-Each extraction must keep cleanup ordering, exact-script/relay ownership and
-existing hardware regression tests intact. Do not combine these structural
-changes with new product behavior.
+The largest setup pages were reduced without changing their page contracts:
 
-## UI/design-system guardrails
+- `ShellySetupPage.tsx` is about 658 lines; presentation lives in
+  `ShellySetupPresentation.tsx` and lifecycle/feedback orchestration in
+  `useShellySetupFeedback.ts`.
+- `SensorSetupPage.tsx` is about 604 lines; BLE/live-reading lifecycle and transient
+  feedback live in `useSensorSetupFeedback.ts`.
+- `RuleSetupPage.tsx` is about 638 lines; mutation feedback lives in
+  `useRuleSetupFeedback.ts` and advanced settings rendering lives in
+  `RuleAdvancedSettingsModal.tsx`.
 
-Production mobile TSX uses Tabler icon components for standard action icons and
-must not contain hand-authored `<svg>` or ad-hoc inline `style={{...}}` blocks.
-Reusable dimensions/colors belong in generated `--lcl-*` tokens or shared
-classes. `pnpm quality:ux` enforces these constraints, and `pnpm tokens:build`
-must not modify generated outputs when the repository is clean.
+These parent pages still own page-level composition, local dialog intent and user
+interaction wiring. Extracted helpers/hooks own one named responsibility and must
+not become generic dumping grounds.
+
+## Regression budgets
+
+`pnpm quality:repo` enforces headroom above the current sizes for the hardware
+setup façade, the three largest setup pages and their extracted responsibility
+modules. These limits are regression alarms, not targets to optimize toward. If a
+limit is approached, first inspect responsibility growth; do not mechanically
+shuffle lines into arbitrary files just to satisfy the gate.
+
+The same gate keeps screen/client boundaries, domain-package boundaries, narrow
+page contracts and existing subsystem budgets intact. `pnpm quality:ux` continues
+to enforce the feedback/modal and design-system contracts.
+
+## Safety-sensitive boundaries
+
+Cleanup ordering and exact ownership are architectural behavior, not formatting:
+
+- relay control must retain OFF-first safety semantics,
+- climate/time ownership conflicts must be checked before installation,
+- temporary Shelly BLE discovery must be cleaned up before managed automation is
+  resumed or installed,
+- blocking install failures remain modal feedback rather than transient toasts,
+- invalid LAN scan input must be validated when starting a scan, not allowed to
+  throw during React render.
+
+Structural refactors must preserve these rules and the existing hardware regression
+tests.
+
+## What not to split by size alone
+
+Locale dictionaries, focused hardware scripts and large regression/E2E test files
+can legitimately be large data- or scenario-oriented files. They are not God
+objects merely because their line count is high. Split them only when a concrete
+maintenance or responsibility boundary justifies it.
 
 ## Audit hygiene
 
-The audit also checks for `TODO/FIXME/HACK`, `@ts-ignore`, broad `eslint-disable`,
-debug `console.log/debug`, and `as any` escape hatches in production paths.
-Structural refactoring is only accepted when lint, typecheck, tests and the
-repository/UX quality gates remain green.
+Production code must remain free of accidental `TODO/FIXME/HACK`, `@ts-ignore`,
+broad `eslint-disable`, debug `console.log/debug` and unnecessary `as any` escape
+hatches. Architecture cleanup is accepted only when formatting, lint, repository
+and UX quality gates, typecheck, tests, coverage, build and responsive E2E remain
+green.
 
 ## Climate runtime control boundary
 
-AUTO/MANUAL is an in-process runtime state. Keep transport, status interpretation, relay safety, upgrade/recovery, and React synchronization in their dedicated modules documented in `runtime-control.md`; do not fold them into `useHardwareSetupFlow`, Dashboard, or Installation Detail.
+AUTO/MANUAL is an in-process runtime state. Keep transport, status interpretation,
+relay safety, upgrade/recovery and React synchronization in the dedicated modules
+documented in `runtime-control.md`; do not fold them into
+`useHardwareSetupFlow`, Dashboard or Installation Detail.
