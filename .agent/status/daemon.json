@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.20",
   "state": "idle",
-  "pid": 51544,
-  "updated_at": "2026-09-12T04:32:09.493634+00:00",
+  "pid": 53832,
+  "updated_at": "2026-09-12T04:33:52.653112+00:00",
   "self_revision": "3914aedf1143a4cc8713d38d9f3961e086f5e343",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 51544,
-  "supervisor_pid": 40994,
-  "last_task_id": "20260912-stage5-ui-audit-dashboard-b64-export",
+  "worker_pid": 53832,
+  "supervisor_pid": 53487,
   "execution_variant": "parallel"
 }
