@@ -1,0 +1,5 @@
+Physical size: 1080x2340
+Physical density: 450
+Override density: 420
+  mCurrentFocus=Window{53638b9 u0 link.localclimate.app/link.localclimate.app.MainActivity}
+PACKAGE_PATH=package:/data/app/~~9dvkfgqP26fEsDiX9O5wbA==/link.localclimate.app-EIOtLk9fnzWbU0YVfHA9Sw==/base.apk
