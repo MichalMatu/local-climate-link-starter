@@ -1,0 +1,60 @@
+{
+  "id": "20260912-stage5-ui-audit-dashboard-micro-b64-export",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "started_at": "2026-09-12T04:36:33.903473+00:00",
+  "command_timeout": 1800,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -e; git fetch origin agent-control; git show origin/agent-control:.agent/scripts/export-stage5-dashboard-micro-b64-20260912.sh > /tmp/export-stage5-dashboard-micro-b64-20260912.sh; sh /tmp/export-stage5-dashboard-micro-b64-20260912.sh",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   41750cc2..861e50e1  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\nDASHBOARD_MICRO_B64_LINES=7\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   861e50e1..1d0dc238  agent-control -> origin/agent-control\nPreparing worktree (detached HEAD 1d0dc238)\nTo https://github.com/MichalMatu/local-climate-link-starter.git\n   1d0dc238..a8a6e98d  HEAD -> agent-control\nAUDIT_CONTROL_SHA=a8a6e98d73e95f9d03a148cf793b020dc4d3496c\nDASHBOARD_MICRO_B64=.agent/artifacts/20260912-stage5-ui-audit-initial/dashboard-micro.b64.txt\nSTAGE5_DASHBOARD_MICRO_B64_EXPORT=1\n",
+      "elapsed_seconds": 5.067,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 28.48,
+      "output_policy": "stream",
+      "captured_output_chars": 831,
+      "output_truncated": false,
+      "current_rss_mb": 28.48,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 5.067
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.099
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.107
+  },
+  "finished_at": "2026-09-12T04:36:40.882185+00:00",
+  "task_digest": "89624b0ba73c30a81f62c0113c919dc8ca0644d58ca51eac95957c47a72a1389",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 2048,
+  "attempt_id": "25ab671ca01402e6187b95a3",
+  "daemon_version": "4.18.20"
+}
