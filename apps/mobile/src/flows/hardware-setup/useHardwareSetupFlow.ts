@@ -15,7 +15,7 @@ import {
   type RelayTestResult,
   type ShellyInstallResult
 } from '@lcl/shelly-client';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
   createInstalledAutomation,
@@ -36,10 +36,8 @@ import {
   fetchShellyJson,
   readShellyAutomationScriptState,
   readShellySetupStatus,
-  scanShellySetupUrls,
   type ShellyAutomationScriptState,
   type ShellyControlStatus,
-  type ShellySetupScanOutcome,
   unwrapShellyResult
 } from './shellyRequests.js';
 import {
@@ -48,11 +46,7 @@ import {
 } from './resourceDiagnostics.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 import { useHardwareSetupReadingsStore } from './sensorReadingsStore.js';
-import {
-  createIpv4RangeScanUrls,
-  normalizeShellyUrl,
-  toNumberOrFallback
-} from './validation.js';
+import { toNumberOrFallback } from './validation.js';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {
   deriveClimateRuleState,
@@ -61,6 +55,7 @@ import {
 } from './ruleConfigDerivation.js';
 import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
+import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
 import {
   shellyControlStatusFromSetupStatus,
   useShellyControlFlow
@@ -253,10 +248,6 @@ export const useHardwareSetupFlow = () => {
   const [diagnosticResources, setDiagnosticResources] =
     useState<ShellyResourceDiagnostics | null>(null);
   const [diagnosticFetchedAtMs, setDiagnosticFetchedAtMs] = useState<number | null>(null);
-  const [shellyScanStartInput, setShellyScanStartInput] = useState('192.168.0.1');
-  const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.99');
-  const [shellyScanStopped, setShellyScanStopped] = useState(false);
-  const shellyScanAbortControllerRef = useRef<AbortController | null>(null);
   const [lastInstallState, setLastInstallState] = useState<HardwareInstallState | null>(
     null
   );
@@ -302,6 +293,17 @@ export const useHardwareSetupFlow = () => {
     addDiscoveredSensor,
     setPvvxTimeMutation
   } = usePhoneSensorFlow(sensorDevices);
+  const {
+    shellyScanStartInput,
+    setShellyScanStartInput,
+    shellyScanEndInput,
+    setShellyScanEndInput,
+    shellyScanStopped,
+    shellyScanMutation,
+    startShellyScan,
+    stopShellyScan,
+    resetShellyScan
+  } = useShellySetupScanFlow(shellyDevices);
 
   const clearDiagnosticSnapshot = () => {
     setDiagnosticSnapshot(null);
@@ -330,18 +332,6 @@ export const useHardwareSetupFlow = () => {
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
-  const savedShellyScanBaseUrls = useMemo(() => {
-    const baseUrls = new Set<string>();
-    for (const device of shellyDevices) {
-      try {
-        baseUrls.add(normalizeShellyUrl(device.baseUrl));
-      } catch {
-        baseUrls.add(device.baseUrl);
-      }
-    }
-    return baseUrls;
-  }, [shellyDevices]);
-
   const shellyInputState = useMemo(
     () => deriveShellyInputState({ shellyNameInput, shellyUrlInput }),
     [shellyNameInput, shellyUrlInput]
@@ -461,51 +451,6 @@ export const useHardwareSetupFlow = () => {
       setSetupStatus(null);
     }
   });
-
-  const shellyScanMutation = useMutation({
-    mutationFn: async (): Promise<ShellySetupScanOutcome> => {
-      setShellyScanStopped(false);
-      const controller = new AbortController();
-      shellyScanAbortControllerRef.current = controller;
-      try {
-        const baseUrls = createIpv4RangeScanUrls(
-          shellyScanStartInput,
-          shellyScanEndInput
-        ).filter((baseUrl) => !savedShellyScanBaseUrls.has(baseUrl));
-        return await scanShellySetupUrls({
-          baseUrls,
-          signal: controller.signal
-        });
-      } finally {
-        if (shellyScanAbortControllerRef.current === controller) {
-          shellyScanAbortControllerRef.current = null;
-        }
-      }
-    }
-  });
-
-  const startShellyScan = () => {
-    setShellyScanStopped(false);
-    shellyScanMutation.mutate();
-  };
-
-  const stopShellyScan = () => {
-    const controller = shellyScanAbortControllerRef.current;
-    if (!controller || controller.signal.aborted) {
-      return false;
-    }
-    setShellyScanStopped(true);
-    controller.abort();
-    shellyScanAbortControllerRef.current = null;
-    shellyScanMutation.reset();
-    return true;
-  };
-
-  const resetShellyScan = () => {
-    stopShellyScan();
-    setShellyScanStopped(false);
-    shellyScanMutation.reset();
-  };
 
   const loadAutomationScriptMutation = useMutation({
     mutationFn: async (
