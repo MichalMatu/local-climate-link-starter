@@ -1,0 +1,260 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/#sensor",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Zmień cel\nSterowanie temperaturą\nShelly\nTermometry\nReguła\nDodaj termometr\nSkanuj BLE telefonem\nF7:5F:8D:0F:76:20\nTP357\nRSSI\n-56 dBm\nTemp.\n23.4°C\nWilg.\n68.0%\nJuż zapisany\nStop skanu\nZamknij\nThermometer 76:20\nTemperatura\n23.4°C\nWilgotność\n68.0%\nTyp\nTP357\nBateria\n34%\nRSSI\n-56 dBm\nOstatni pomiar\n07:26\nMAC\nF7:5F:8D:0F:76:20\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "Zmień cel",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 71,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Shelly",
+      "ariaLabel": null,
+      "title": "Gniazdka Shelly i sterowanie",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 21,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Termometry",
+      "ariaLabel": null,
+      "title": "Termometry BLE",
+      "role": null,
+      "className": "setup-top-nav__item setup-top-nav__item--active",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 144,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "Reguła",
+      "ariaLabel": null,
+      "title": "Progi i wysyłka reguły do Shelly",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 267,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "Dodaj termometr",
+      "ariaLabel": "Dodaj termometr",
+      "title": "Dodaj termometr BLE",
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 163,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "Już zapisany",
+      "ariaLabel": null,
+      "title": "Ten termometr jest już zapisany w aplikacji",
+      "role": null,
+      "className": "secondary-action ble-candidate-action",
+      "disabled": true,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 38,
+        "y": 144,
+        "width": 336,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Stop skanu",
+      "ariaLabel": null,
+      "title": "Zatrzymaj skan BLE w telefonie",
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 25,
+        "y": 728,
+        "width": 362,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "Zamknij",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "lcl-modal__close",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 25,
+        "y": 780,
+        "width": 362,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Nazwa termometru",
+      "title": "Nazwa termometru",
+      "role": null,
+      "className": "icon-action rule-summary-icon-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 231,
+        "y": 236,
+        "width": 40,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 9,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Usuń termometr tylko z aplikacji",
+      "title": "Usuń termometr tylko z aplikacji",
+      "role": null,
+      "className": "icon-action icon-action--danger",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 325,
+        "y": 236,
+        "width": 40,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 10,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 11,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 12,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

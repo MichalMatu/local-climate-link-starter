@@ -1,0 +1,203 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Shelly Plug S Gen3\n\nSterowanie temperaturą\n\nKlimat teraz\nTemperatura\n23.4°C\nWilgotność\n68.0%\nVPD\n—\nWyjście\nON\nAktywne progi ON / OFF\n19°C / 20°C\nAutomatyka\nTryb\nGrzanie\nProgi ON / OFF\n19°C / 20°C\nCzujnik\nThermometer 76:20\nAUTO\nMANUAL\nON\nOFF\nDiagnostyka\nUsuń automatykę\nLED gniazdka\n\nOdczytuję ustawienia LED…\n\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Pokaż wdrożony skrypt",
+      "title": "Pokaż wdrożony skrypt",
+      "role": null,
+      "className": "icon-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 342,
+        "y": 296,
+        "width": 40,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "AUTO",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-control-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 29,
+        "y": 450,
+        "width": 177,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "MANUAL",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-control-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 206,
+        "y": 450,
+        "width": 177,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "ON",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-control-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 29,
+        "y": 506,
+        "width": 177,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "OFF",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-control-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 206,
+        "y": 506,
+        "width": 177,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "Diagnostyka",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 29,
+        "y": 563,
+        "width": 173,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Usuń automatykę",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "secondary-action secondary-action--danger",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 210,
+        "y": 563,
+        "width": 173,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 9,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

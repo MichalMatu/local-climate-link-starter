@@ -1,0 +1,6 @@
+installation-detail
+setup-shelly-ble-modal
+setup-sensor-ble-modal
+setup-diagnostics
+setup-time-shelly
+setup-time-schedule

@@ -1,0 +1,203 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/#diagnostics",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Zmień cel\nSterowanie temperaturą\nShelly\nTermometry\nReguła\nWróć do reguły\nDiagnostyka deweloperska\n\nSurowy stan skryptu, BLE i Shelly. Używaj tylko do diagnostyki i serwisu.\n\nGniazdko Shelly\nWybierz gniazdko Shelly.\nShelly Plug S Gen3\nOdśwież diagnostykę\n\nOdświeżanie wymaga wgranego skryptu Local Climate Link uruchomionego w AUTO.\n\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "Zmień cel",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 71,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Shelly",
+      "ariaLabel": null,
+      "title": "Gniazdka Shelly i sterowanie",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 21,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Termometry",
+      "ariaLabel": null,
+      "title": "Termometry BLE",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 144,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "Reguła",
+      "ariaLabel": null,
+      "title": "Progi i wysyłka reguły do Shelly",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 267,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "Wróć do reguły",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 29,
+        "y": 159,
+        "width": 109,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "select",
+      "text": "Wybierz gniazdko Shelly. Shelly Plug S Gen3",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 343,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Odśwież diagnostykę",
+      "ariaLabel": null,
+      "title": "Pobierz aktualny stan skryptu i przekaźnika z Shelly",
+      "role": null,
+      "className": "secondary-action diagnostics-refresh-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 403,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 9,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}
