@@ -47,13 +47,13 @@ Release page (always points to the newest published version):
 https://github.com/MichalMatu/local-climate-link-starter/releases/latest
 ```
 
-Direct assets for the current published release (v2.0.8):
+Direct assets for the current published release (v2.0.10):
 
-- [Android APK v2.0.8](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.8/local-climate-link-v2.0.8-android-release.apk)
+- [Android APK v2.0.10](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.apk)
   for direct installation on Android.
-- [Android App Bundle v2.0.8](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.8/local-climate-link-v2.0.8-android-release.aab)
+- [Android App Bundle v2.0.10](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.aab)
   for Play Store/internal testing workflows.
-- [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.8/local-climate-link-v2.0.8-sha256.txt)
+- [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-sha256.txt)
   for file verification.
 
 iOS installation files are not published yet.
