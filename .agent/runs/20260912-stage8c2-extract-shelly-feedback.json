@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8c2-extract-shelly-feedback",
+  "task_digest": "e493fb5639fb4c82fe4a50657171f072b1f6acdda6b7905d1376de134cb16b6e",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T12:34:26.111399+00:00",
+  "attempt_id": "53a10662086ea77e1d9a354e",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 37786,
+  "updated_at": "2026-09-12T12:34:26.111888+00:00",
+  "pid": 37786
+}
