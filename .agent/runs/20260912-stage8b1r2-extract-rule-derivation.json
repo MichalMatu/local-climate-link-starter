@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8b1r2-extract-rule-derivation",
+  "task_digest": "01587704cff6412fa88d1577f25e1ffb3dcb11eeba3630cee059fb340dc77bcc",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T10:40:24.882157+00:00",
+  "attempt_id": "fbafd32ac92bd5609b42c6d1",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 85370,
+  "updated_at": "2026-09-12T10:40:24.882326+00:00",
+  "pid": 85370
+}
