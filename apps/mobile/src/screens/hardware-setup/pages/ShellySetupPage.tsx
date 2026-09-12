@@ -8,7 +8,7 @@ import {
   ToastViewport
 } from '@lcl/ui';
 import { IconPlus } from '@tabler/icons-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { ShellySetupScanResult } from '../../../flows/hardware-setup/shellyRequests.js';
@@ -29,6 +29,7 @@ import {
 import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
 import { useToastQueue } from '../useToastQueue.js';
+import { useShellySetupFeedback } from './useShellySetupFeedback.js';
 
 type ShellyDialogState =
   | { kind: 'none' }
@@ -71,8 +72,6 @@ export const ShellySetupPage = ({
   const scanResults = flow.shellyScanMutation.data?.results ?? [];
   const shellyControlStates = flow.shellyControlStates;
   const shellyDevices = flow.shellyDevices;
-  const refreshShellyControl = flow.refreshShellyControl;
-  const acknowledgeShellyControlFeedback = flow.acknowledgeShellyControlFeedback;
   const isScanStopped =
     flow.shellyScanStopped || flow.shellyScanMutation.data?.stopped === true;
   const shouldShowEmptyScanResult =
@@ -106,117 +105,12 @@ export const ShellySetupPage = ({
   const shouldShowBleRestart = Boolean(
     flow.bleDiscoverySession && flow.bleDiscoverySnapshot?.running === false
   );
-  const pollBleDiscoveryRef = useRef<() => void>(() => undefined);
-  const shownBleStopErrorRef = useRef<string | null>(null);
-  const shownControlFeedbackRef = useRef<Record<string, string>>({});
-  const autoRefreshShellyIdsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    const savedIds = new Set(shellyDevices.map((device) => device.id));
-    autoRefreshShellyIdsRef.current.forEach((deviceId) => {
-      if (!savedIds.has(deviceId)) {
-        autoRefreshShellyIdsRef.current.delete(deviceId);
-      }
-    });
-
-    shellyDevices.forEach((device) => {
-      const controlState = shellyControlStates[device.id];
-      if (
-        controlState?.status ||
-        controlState?.pendingAction ||
-        autoRefreshShellyIdsRef.current.has(device.id)
-      ) {
-        return;
-      }
-
-      autoRefreshShellyIdsRef.current.add(device.id);
-      refreshShellyControl(device);
-    });
-  }, [refreshShellyControl, shellyControlStates, shellyDevices]);
-
-  useEffect(() => {
-    Object.entries(shellyControlStates).forEach(([deviceId, controlState]) => {
-      const message = controlState.error ?? controlState.message;
-      if (!message || controlState.updatedAtMs === null) {
-        return;
-      }
-
-      const feedbackKey = `${controlState.updatedAtMs}:${message}`;
-      if (shownControlFeedbackRef.current[deviceId] === feedbackKey) {
-        return;
-      }
-
-      shownControlFeedbackRef.current[deviceId] = feedbackKey;
-      pushToast(controlState.error ? 'warning' : 'ok', message);
-      acknowledgeShellyControlFeedback(deviceId, controlState.updatedAtMs, message);
-    });
-  }, [acknowledgeShellyControlFeedback, pushToast, shellyControlStates]);
-
-  useEffect(() => {
-    if (!flow.stopBleDiscoveryMutation.isError) {
-      return;
-    }
-
-    const message = mutationError(flow.stopBleDiscoveryMutation.error);
-    if (shownBleStopErrorRef.current === message) {
-      return;
-    }
-
-    shownBleStopErrorRef.current = message;
-    pushToast('warning', t('hardware.shelly.bleScannerCloseFailedTitle'), message);
-    flow.stopBleDiscoveryMutation.reset();
-  }, [flow.stopBleDiscoveryMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.shellyScanMutation.isError) {
-      return;
-    }
-    pushToast(
-      'warning',
-      t('hardware.shelly.scanNetworkFailedTitle'),
-      mutationError(flow.shellyScanMutation.error)
-    );
-    flow.shellyScanMutation.reset();
-  }, [flow.shellyScanMutation, pushToast, t]);
-  useEffect(() => {
-    if (!flow.startBleDiscoveryMutation.isError) {
-      return;
-    }
-    pushToast(
-      'warning',
-      t('hardware.shelly.bleScannerStartFailedTitle'),
-      mutationError(flow.startBleDiscoveryMutation.error)
-    );
-    flow.startBleDiscoveryMutation.reset();
-  }, [flow.startBleDiscoveryMutation, pushToast, t]);
-
-  pollBleDiscoveryRef.current = () => {
-    if (
-      !flow.bleDiscoverySession ||
-      flow.bleDiscoverySnapshot?.running === false ||
-      flow.startBleDiscoveryMutation.isPending ||
-      flow.refreshBleDiscoveryMutation.isPending ||
-      flow.restartBleDiscoveryMutation.isPending ||
-      flow.refreshBleDiscoveryMutation.isError ||
-      flow.restartBleDiscoveryMutation.isError ||
-      flow.stopBleDiscoveryMutation.isPending
-    ) {
-      return;
-    }
-    flow.refreshBleDiscovery();
-  };
-
-  useEffect(() => {
-    if (!isBleScanModalOpen || !flow.bleDiscoverySession) {
-      return undefined;
-    }
-
-    const intervalId = window.setInterval(() => {
-      pollBleDiscoveryRef.current();
-    }, 4000);
-
-    return () => window.clearInterval(intervalId);
-  }, [flow.bleDiscoverySession, isBleScanModalOpen]);
+  const { resetBleStopError } = useShellySetupFeedback({
+    flow,
+    isBleScanModalOpen,
+    pushToast,
+    t
+  });
 
   const checkShelly = () => {
     setDidSubmitShellyAdd(true);
@@ -278,7 +172,7 @@ export const ShellySetupPage = ({
 
   const openBleScanModal = (device: ShellyDraftDevice) => {
     flow.resetBleDiscovery();
-    shownBleStopErrorRef.current = null;
+    resetBleStopError();
     setDialog({ kind: 'ble', device });
     flow.startBleDiscovery(device);
   };
