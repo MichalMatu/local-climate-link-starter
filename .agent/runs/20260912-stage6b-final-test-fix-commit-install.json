@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6b-final-test-fix-commit-install",
+  "task_digest": "04e93f13f1f1e53998b1f1bbcb55a4eb5bd13bf0b0a191ce45dc4e1f7b3c2689",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T06:24:58.317689+00:00",
+  "attempt_id": "ad8c41747c16a9071e1685c3",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 65247,
+  "updated_at": "2026-09-12T06:24:58.318035+00:00",
+  "pid": 65247
+}
