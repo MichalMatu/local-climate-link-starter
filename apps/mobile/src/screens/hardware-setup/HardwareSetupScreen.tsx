@@ -172,7 +172,7 @@ export const HardwareSetupScreen = ({
       {setupIntent && onBackToIntent && (
         <div className="setup-context">
           <button className="setup-context__back" type="button" onClick={onBackToIntent}>
-            {t('intent.back')}
+            {setupIntent === 'time' ? t('common.cancel') : t('intent.back')}
           </button>
           <strong>{t(`intent.${setupIntent}.context`)}</strong>
         </div>
