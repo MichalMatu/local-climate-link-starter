@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage6-fix-remaining-ui-inconsistencies",
+  "task_digest": "dc5059603722240f3be7e584badd2bfa5b7a31a260ed9babfb7283e39646069d",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T05:36:47.578401+00:00",
+  "attempt_id": "dc7c2db0d29b390aeb83e76d",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 19140,
+  "updated_at": "2026-09-12T05:36:47.578462+00:00",
+  "pid": 19140
+}
