@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8c35-fix-shelly-scan-render-validation",
+  "task_digest": "952d5bc12ec2e45eacb57168498351f8ddbdb76e5ffe8c59eea94e81404e0ac6",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T12:59:49.335076+00:00",
+  "attempt_id": "71bde70c100abc31853c1e68",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 68219,
+  "updated_at": "2026-09-12T12:59:49.335212+00:00",
+  "pid": 68219
+}
