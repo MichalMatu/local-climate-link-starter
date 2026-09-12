@@ -1,0 +1,184 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Twoje automatyki\nShelly Plug S Gen3\n\nSterowanie temperaturą\n\nTemperatura\n23.5°C\n19°C / 20°C\nWilgotność\n67.0%\nVPD\n—\nAUTO\nMANUAL\nON\nOFF\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Szczegóły: Shelly Plug S Gen3",
+      "title": "Szczegóły",
+      "role": null,
+      "className": "automation-card__menu",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 338,
+        "y": 86,
+        "width": 44,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "AUTO",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-control-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 254,
+        "y": 169,
+        "width": 64,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "MANUAL",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-control-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 318,
+        "y": 169,
+        "width": 64,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "ON",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-relay-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 29,
+        "y": 237,
+        "width": 173,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "OFF",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "automation-relay-button",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 210,
+        "y": 237,
+        "width": 173,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Dodaj automatykę",
+      "title": "Dodaj automatykę",
+      "role": null,
+      "className": "dashboard-fab",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 339,
+        "y": 720,
+        "width": 56,
+        "height": 56
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

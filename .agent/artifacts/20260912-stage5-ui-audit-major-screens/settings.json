@@ -1,0 +1,317 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Ustawienia\nJęzyk\nSystem\nPolski\nEnglish\nDeutsch\nEspañol\nFrançais\nItaliano\nPortuguês\nWygląd\nSystem\nJasny\nCiemny\nDiagnostyka\n0 zapisanych\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "System",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 29,
+        "y": 116,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Polski",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice app-settings__choice--active",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 150,
+        "y": 116,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "English",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 270,
+        "y": 116,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "Deutsch",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 29,
+        "y": 164,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "Español",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 150,
+        "y": 164,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "Français",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 270,
+        "y": 164,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Italiano",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 29,
+        "y": 212,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "button",
+      "text": "Português",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 150,
+        "y": 212,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "button",
+      "text": "System",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 29,
+        "y": 321,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 9,
+      "tag": "button",
+      "text": "Jasny",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice app-settings__choice--active",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "true",
+      "rect": {
+        "x": 150,
+        "y": 321,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 10,
+      "tag": "button",
+      "text": "Ciemny",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": "false",
+      "rect": {
+        "x": 270,
+        "y": 321,
+        "width": 112,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 11,
+      "tag": "summary",
+      "text": "Diagnostyka 0 zapisanych",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "app-settings__diagnostics-summary",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 17,
+        "y": 387,
+        "width": 377,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 12,
+      "tag": "button",
+      "text": "Kopiuj raport wsparcia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 29,
+        "y": 502,
+        "width": 353,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 13,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 14,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 15,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

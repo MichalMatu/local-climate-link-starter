@@ -1,0 +1,6 @@
+APP_PID=9263
+SOCKET=webview_devtools_remote_9263
+WS_URL=ws://127.0.0.1:9224/devtools/page/6D43CDFD0ACCDA4F18DA89579C51BDB8
+Physical size: 1080x2340
+Physical density: 450
+Override density: 420

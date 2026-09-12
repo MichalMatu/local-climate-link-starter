@@ -1,0 +1,450 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/#rule",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Zmień cel\nSterowanie temperaturą\nShelly\nTermometry\nReguła\nGniazdko Shelly\nWybierz gniazdko Shelly.\nShelly Plug S Gen3\nTermometr\nDodaj i wybierz termometr.\nThermometer 76:20\nTryb reguły\nGrzanie\nChłodzenie\nWłącz poniżej °C\nWyłącz powyżej °C\nVPD assist\nwyłączone\nWyślij\nZaawansowane\nNarzędzia deweloperskie\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "Zmień cel",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 71,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Shelly",
+      "ariaLabel": null,
+      "title": "Gniazdka Shelly i sterowanie",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 21,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Termometry",
+      "ariaLabel": null,
+      "title": "Termometry BLE",
+      "role": null,
+      "className": "setup-top-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 144,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "Reguła",
+      "ariaLabel": null,
+      "title": "Progi i wysyłka reguły do Shelly",
+      "role": null,
+      "className": "setup-top-nav__item setup-top-nav__item--active",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 267,
+        "y": 81,
+        "width": 123,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "select",
+      "text": "Wybierz gniazdko Shelly. Shelly Plug S Gen3",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 184,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "select",
+      "text": "Dodaj i wybierz termometr. Thermometer 76:20",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 264,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "select",
+      "text": "Grzanie Chłodzenie",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 345,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 7,
+      "tag": "input",
+      "text": "",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 426,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 8,
+      "tag": "input",
+      "text": "",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 503,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 9,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Opcjonalnie koryguje punkt pracy w obrębie ustawionych progów. Nie zmienia limitów bezpieczeństwa.",
+      "title": "Opcjonalnie koryguje punkt pracy w obrębie ustawionych progów. Nie zmienia limitów bezpieczeństwa.",
+      "role": null,
+      "className": "icon-action rule-summary-icon-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 128,
+        "y": 571,
+        "width": 40,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 10,
+      "tag": "input",
+      "text": "",
+      "ariaLabel": "VPD assist",
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 46,
+        "y": 623,
+        "width": 18,
+        "height": 18
+      },
+      "visible": true
+    },
+    {
+      "index": 11,
+      "tag": "button",
+      "text": "",
+      "ariaLabel": "Podsumowanie reguły",
+      "title": "Podsumowanie reguły",
+      "role": null,
+      "className": "icon-action rule-summary-icon-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 338,
+        "y": 666,
+        "width": 40,
+        "height": 40
+      },
+      "visible": true
+    },
+    {
+      "index": 12,
+      "tag": "button",
+      "text": "Wyślij",
+      "ariaLabel": null,
+      "title": "Wyślij aktualną regułę do Shelly",
+      "role": null,
+      "className": "primary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 33,
+        "y": 718,
+        "width": 345,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 13,
+      "tag": "summary",
+      "text": "Zaawansowane",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 34,
+        "y": 779,
+        "width": 343,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 14,
+      "tag": "button",
+      "text": "Otwórz opcje zaawansowane",
+      "ariaLabel": null,
+      "title": "Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa",
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 46,
+        "y": 906,
+        "width": 319,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 15,
+      "tag": "summary",
+      "text": "Narzędzia deweloperskie",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 34,
+        "y": 832,
+        "width": 343,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 16,
+      "tag": "button",
+      "text": "Podgląd Shelly Script",
+      "ariaLabel": null,
+      "title": "Pokaż wygenerowany Shelly Script",
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 46,
+        "y": 959,
+        "width": 319,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 17,
+      "tag": "button",
+      "text": "Wczytaj z Shelly",
+      "ariaLabel": null,
+      "title": "Odczytaj skrypt Local Climate Link z Shelly i wypełnij formularz",
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 46,
+        "y": 1015,
+        "width": 319,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 18,
+      "tag": "button",
+      "text": "Usuń z Shelly",
+      "ariaLabel": null,
+      "title": "Usuń skrypt Local Climate Link z Shelly",
+      "role": null,
+      "className": "secondary-action secondary-action--danger",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 46,
+        "y": 1071,
+        "width": 319,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 19,
+      "tag": "button",
+      "text": "Otwórz diagnostykę techniczną",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "secondary-action",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 46,
+        "y": 1127,
+        "width": 319,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 20,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 947,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 21,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 947,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 22,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 947,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

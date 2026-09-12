@@ -1,0 +1,146 @@
+{
+  "title": "Local Climate Link",
+  "href": "https://localhost/",
+  "viewport": {
+    "width": 411,
+    "height": 848,
+    "dpr": 2.625,
+    "scrollY": 0
+  },
+  "bodyText": "Anuluj\nCo chcesz zrobić?\nSterować temperaturą\nGrzanie albo chłodzenie na podstawie termometru BLE.\n›\nSterować wilgotnością\nNawilżanie albo osuszanie na podstawie czujnika BLE.\n›\nSterować według czasu\nWłączaj i wyłączaj urządzenie o wybranych godzinach, bez czujnika.\n›\nKlimat\nCzas\nUstawienia",
+  "elements": [
+    {
+      "index": 0,
+      "tag": "button",
+      "text": "Anuluj",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "setup-context__back",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 46,
+        "height": 44
+      },
+      "visible": true
+    },
+    {
+      "index": 1,
+      "tag": "button",
+      "text": "Sterować temperaturą Grzanie albo chłodzenie na podstawie termometru BLE. ›",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "intent-choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 136,
+        "width": 379,
+        "height": 68
+      },
+      "visible": true
+    },
+    {
+      "index": 2,
+      "tag": "button",
+      "text": "Sterować wilgotnością Nawilżanie albo osuszanie na podstawie czujnika BLE. ›",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "intent-choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 213,
+        "width": 379,
+        "height": 68
+      },
+      "visible": true
+    },
+    {
+      "index": 3,
+      "tag": "button",
+      "text": "Sterować według czasu Włączaj i wyłączaj urządzenie o wybranych godzinach, bez czujnika. ›",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "intent-choice",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 289,
+        "width": 379,
+        "height": 88
+      },
+      "visible": true
+    },
+    {
+      "index": 4,
+      "tag": "button",
+      "text": "Klimat",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": "page",
+      "ariaPressed": null,
+      "rect": {
+        "x": 16,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 5,
+      "tag": "button",
+      "text": "Czas",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 143,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    },
+    {
+      "index": 6,
+      "tag": "button",
+      "text": "Ustawienia",
+      "ariaLabel": null,
+      "title": null,
+      "role": null,
+      "className": "dashboard-bottom-nav__item app-bottom-nav__item",
+      "disabled": false,
+      "ariaCurrent": null,
+      "ariaPressed": null,
+      "rect": {
+        "x": 269,
+        "y": 793,
+        "width": 126,
+        "height": 51
+      },
+      "visible": true
+    }
+  ]
+}

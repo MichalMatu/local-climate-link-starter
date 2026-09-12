@@ -1,0 +1,9 @@
+dashboard-climate
+dashboard-time
+settings
+setup-intent
+setup-shelly
+setup-shelly-add-modal
+setup-sensor
+setup-sensor-add-modal
+setup-rule
