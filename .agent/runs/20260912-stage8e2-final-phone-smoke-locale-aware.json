@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8e2-final-phone-smoke-locale-aware",
+  "task_digest": "f258404c6fbba488ae3dce70840fdbe3a3726f268dd073c1fc87ffac79d52c26",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T13:43:46.355587+00:00",
+  "attempt_id": "49480d8f872781274a1c715d",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 31351,
+  "updated_at": "2026-09-12T13:43:46.355745+00:00",
+  "pid": 31351
+}
