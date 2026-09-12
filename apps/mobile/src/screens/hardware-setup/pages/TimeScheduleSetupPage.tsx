@@ -34,8 +34,14 @@ const centerWheelOption = (
   if (!option || !wheel || typeof wheel.scrollTo !== 'function') {
     return;
   }
+  const optionRect = option.getBoundingClientRect();
+  const wheelRect = wheel.getBoundingClientRect();
   wheel.scrollTo({
-    top: option.offsetTop - (wheel.clientHeight - option.clientHeight) / 2,
+    top:
+      wheel.scrollTop +
+      optionRect.top -
+      wheelRect.top -
+      (wheel.clientHeight - optionRect.height) / 2,
     behavior
   });
 };
@@ -113,7 +119,7 @@ export const TimeScheduleSetupPage = ({
     } else {
       setDraftMinute(value);
     }
-    centerWheelOption(kind, value, 'smooth');
+    centerWheelOption(kind, value);
   };
 
   const applyTime = () => {
