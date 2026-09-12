@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8c1-extract-rule-feedback",
+  "task_digest": "c0d5e0a711945ba8dce520d03102b2e19ce055610069325d456d7b6694efee3e",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T12:11:51.829080+00:00",
+  "attempt_id": "0df828e9c683bed6671c9af5",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 9276,
+  "updated_at": "2026-09-12T12:11:51.829188+00:00",
+  "pid": 9276
+}
