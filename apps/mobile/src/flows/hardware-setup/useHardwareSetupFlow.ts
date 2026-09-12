@@ -8,10 +8,8 @@ import {
   createInstallPlan,
   hashScriptCode,
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  RPC_METHODS,
   RpcShellyClient,
   RpcShellyScheduleClient,
-  scriptStatusSchema,
   type RelayTestResult,
   type ShellyInstallResult
 } from '@lcl/shelly-client';
@@ -24,35 +22,26 @@ import {
 } from '../installations/model.js';
 import { useInstalledAutomationStore } from '../installations/store.js';
 import { findScheduleRelayConflict } from '../time-automation/runtime.js';
-import {
-  diagnosticSnapshotSchema,
-  type HardwareDiagnosticSnapshot,
-  type HardwareSetupStatus
-} from './schemas.js';
+import type { HardwareSetupStatus } from './schemas.js';
 import {
   cleanupStaleShellyBleDiscoveryScripts,
   createShellyTransport,
   deleteShellyAutomationScript,
-  fetchShellyJson,
   readShellyAutomationScriptState,
   readShellySetupStatus,
   type ShellyAutomationScriptState,
   type ShellyControlStatus,
   unwrapShellyResult
 } from './shellyRequests.js';
-import {
-  readShellyResourceDiagnostics,
-  type ShellyResourceDiagnostics
-} from './resourceDiagnostics.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 import { useHardwareSetupReadingsStore } from './sensorReadingsStore.js';
-import { toNumberOrFallback } from './validation.js';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {
   deriveClimateRuleState,
   deriveSensorInputState,
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
+import { useHardwareDiagnosticsFlow } from './useHardwareDiagnosticsFlow.js';
 import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
@@ -102,35 +91,6 @@ type SafeRelayTestMutationResult = {
 };
 
 const numberInput = (value: number): string => String(Number(value.toFixed(4)));
-
-const diagnosticScriptStatusMessage = async (
-  baseUrl: string,
-  scriptId: number
-): Promise<string | null> => {
-  const response = await createShellyTransport(baseUrl).call<unknown>({
-    method: RPC_METHODS.ScriptGetStatus,
-    params: { id: scriptId }
-  });
-  if (!response.ok) {
-    return null;
-  }
-
-  const parsed = scriptStatusSchema.safeParse(unwrapShellyResult(response));
-  if (
-    !parsed.success ||
-    parsed.data.running === true ||
-    (parsed.data.running === undefined &&
-      parsed.data.error === undefined &&
-      parsed.data.errors === undefined)
-  ) {
-    return null;
-  }
-
-  const status = parsed.data.errors?.map(String).join(', ') || 'stopped';
-  return status.includes('out_of_memory')
-    ? t('hardware.diagnostics.scriptOutOfMemory')
-    : t('hardware.diagnostics.scriptNotRunning', { status });
-};
 
 export const useHardwareSetupFlow = () => {
   const shellyNameInput = useHardwareSetupDraftStore((state) => state.shellyNameInput);
@@ -243,11 +203,6 @@ export const useHardwareSetupFlow = () => {
     (state) => state.upsertInstallation
   );
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
-  const [diagnosticSnapshot, setDiagnosticSnapshot] =
-    useState<HardwareDiagnosticSnapshot | null>(null);
-  const [diagnosticResources, setDiagnosticResources] =
-    useState<ShellyResourceDiagnostics | null>(null);
-  const [diagnosticFetchedAtMs, setDiagnosticFetchedAtMs] = useState<number | null>(null);
   const [lastInstallState, setLastInstallState] = useState<HardwareInstallState | null>(
     null
   );
@@ -305,12 +260,6 @@ export const useHardwareSetupFlow = () => {
     resetShellyScan
   } = useShellySetupScanFlow(shellyDevices);
 
-  const clearDiagnosticSnapshot = () => {
-    setDiagnosticSnapshot(null);
-    setDiagnosticResources(null);
-    setDiagnosticFetchedAtMs(null);
-  };
-
   const updateShellyUrlInput = (value: string) => {
     setShellyUrlInputDraft(value);
     setSetupStatus(null);
@@ -329,6 +278,15 @@ export const useHardwareSetupFlow = () => {
     () => shellyDevices.find((device) => device.id === diagnosticShellyId) ?? null,
     [diagnosticShellyId, shellyDevices]
   );
+  const {
+    diagnosticSnapshot,
+    diagnosticResources,
+    diagnosticFetchedAtMs,
+    clearDiagnosticSnapshot,
+    diagnosticMutation,
+    diagnosticResourceMutation,
+    refreshDiagnostics
+  } = useHardwareDiagnosticsFlow(diagnosticShelly);
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
@@ -520,58 +478,6 @@ export const useHardwareSetupFlow = () => {
 
   const deleteAutomationScript = (device: ShellyDraftDevice) => {
     deleteAutomationScriptMutation.mutate(device);
-  };
-
-  const fetchDiagnostics = async (
-    scriptId = Math.trunc(toNumberOrFallback(diagnosticShelly?.scriptIdInput ?? '1', 1))
-  ): Promise<HardwareDiagnosticSnapshot> => {
-    if (!diagnosticShelly) {
-      throw new Error(t('hardware.flow.noSelectedDiagnosticShelly'));
-    }
-    const endpoint = new URL(`/script/${scriptId}/diag`, diagnosticShelly.baseUrl);
-    try {
-      const payload = await fetchShellyJson(endpoint, 5000);
-      const parsed = diagnosticSnapshotSchema.safeParse(payload);
-      if (!parsed.success) {
-        throw new Error(parsed.error.message);
-      }
-      return parsed.data;
-    } catch {
-      const scriptStatusMessage = await diagnosticScriptStatusMessage(
-        diagnosticShelly.baseUrl,
-        scriptId
-      ).catch(() => null);
-      throw new Error(scriptStatusMessage ?? t('hardware.diagnostics.readFailed'));
-    }
-  };
-
-  const diagnosticMutation = useMutation({
-    mutationFn: fetchDiagnostics,
-    onSuccess: (snapshot) => {
-      setDiagnosticSnapshot(snapshot);
-      setDiagnosticFetchedAtMs(Date.now());
-    }
-  });
-
-  const diagnosticResourceMutation = useMutation<
-    ShellyResourceDiagnostics,
-    Error,
-    number | undefined
-  >({
-    mutationFn: async (
-      scriptId = Math.trunc(toNumberOrFallback(diagnosticShelly?.scriptIdInput ?? '1', 1))
-    ): Promise<ShellyResourceDiagnostics> => {
-      if (!diagnosticShelly) {
-        throw new Error(t('hardware.flow.noSelectedDiagnosticShelly'));
-      }
-      return readShellyResourceDiagnostics(diagnosticShelly.baseUrl, scriptId);
-    },
-    onSuccess: (resources) => setDiagnosticResources(resources)
-  });
-
-  const refreshDiagnostics = (scriptId?: number) => {
-    diagnosticMutation.mutate(scriptId);
-    diagnosticResourceMutation.mutate(scriptId);
   };
 
   const installMutation = useMutation({
