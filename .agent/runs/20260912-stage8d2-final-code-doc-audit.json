@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260912-stage8d2-final-code-doc-audit",
+  "task_digest": "de65e5b0b95b09b56f2e2d37004cbd164c117d1f930f8609d3cb960bf985c3a1",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-12T13:29:50.302060+00:00",
+  "attempt_id": "7bb844375af4d013d3d399ec",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 8983,
+  "updated_at": "2026-09-12T13:29:50.302113+00:00",
+  "pid": 8983
+}
