@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-rule-product-services-v2",
+  "task_digest": "70326bae0d28521a17044b8a3294032147d4292c36a9a0fa90e145eec4b575cb",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T22:01:57.036309+00:00",
+  "attempt_id": "f04a437bafd923329a67f7ca",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 68281,
+  "updated_at": "2026-09-13T22:01:57.036592+00:00",
+  "pid": 68281
+}
