@@ -1,0 +1,15 @@
+{
+  "id": "20260913-plug-management-foundation-v4",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": true,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-plug-management-foundation-v3.sh > /tmp/lcl-plug-management-foundation-v3.sh && set +e; bash /tmp/lcl-plug-management-foundation-v3.sh; rc=$?; set -e; test $rc -ne 0; test -f apps/mobile/src/flows/devices/plugs/usePlugManagementFlow.test.tsx; python3 -c \"from pathlib import Path; p=Path('apps/mobile/src/flows/devices/plugs/usePlugManagementFlow.test.tsx'); s=p.read_text(); s=s.replace(\\\"import { createDeviceRuleRegistries } from '../../registry/devicesAndRules.js';\\\\n\\\", \\\"import type * as DeviceRuleRegistriesModule from '../../registry/devicesAndRules.js';\\\\n\\\", 1); s=s.replace(\\\"const actual = await vi.importActual<typeof import('../../registry/devicesAndRules.js')>(\\\", \\\"const actual = await vi.importActual<typeof DeviceRuleRegistriesModule>(\\\", 1); p.write_text(s)\"; pnpm exec prettier --write apps/mobile/src/flows/devices/plugs/usePlugManagementFlow.test.tsx; git diff --check; pnpm --dir apps/mobile exec eslint src/flows/devices/plugs/usePlugManagementFlow.test.tsx; git add apps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.ts apps/mobile/src/flows/devices/plugs/usePlugManagementFlow.ts apps/mobile/src/flows/devices/plugs/usePlugManagementFlow.test.tsx docs/implementation/device-rule-decoupling-progress.md; git commit -m 'Add independent plug management flow'; git push origin HEAD:work/device-rule-decoupling-20260913; test -z \"$(git status --porcelain)\"; echo PLUG_MANAGEMENT_HEAD=$(git rev-parse HEAD)"
+  ],
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096
+}
