@@ -1,0 +1,15 @@
+{
+  "id": "20260913-local-codex-worktree-audit",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "commands": [
+    "set -eu; echo '=== EXECUTOR ==='; pwd; echo '=== WORKTREES ==='; git worktree list --porcelain; echo '=== WORKTREE AUDIT ==='; git worktree list --porcelain | sed -n 's/^worktree //p' | while IFS= read -r wt; do echo \"--- WORKTREE: $wt ---\"; git -C \"$wt\" status --short --branch || true; echo 'HEAD:'; git -C \"$wt\" rev-parse HEAD || true; echo 'BRANCH:'; git -C \"$wt\" branch --show-current || true; echo 'RECENT:'; git -C \"$wt\" log --oneline --decorate -5 || true; echo 'UNSTAGED_NAME_STATUS:'; git -C \"$wt\" diff --name-status || true; echo 'STAGED_NAME_STATUS:'; git -C \"$wt\" diff --cached --name-status || true; echo 'DIFF_STAT:'; git -C \"$wt\" diff --stat || true; echo 'STAGED_STAT:'; git -C \"$wt\" diff --cached --stat || true; done"
+  ],
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096
+}
