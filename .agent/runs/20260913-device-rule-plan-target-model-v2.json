@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-device-rule-plan-target-model-v2",
+  "task_digest": "6900e83dc430c015b6b77893531b2c1aec839bc7ed76842aa701412d06b08e01",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T19:41:20.510412+00:00",
+  "attempt_id": "f38aae89e20a49e953bd7dee",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 97108,
+  "updated_at": "2026-09-13T19:41:20.510548+00:00",
+  "pid": 97108
+}
