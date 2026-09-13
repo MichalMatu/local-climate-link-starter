@@ -214,3 +214,27 @@ Android phone. Validated Shelly Plug S Gen3, firmware 1.7.5, Matter disabled.
 - This checkpoint intentionally does not claim the rule persistence/runtime cutover; `InstalledAutomation` remains until later phases.
 
 Exact next step: convert the Rules product path and rule creation to the dedicated rule/device registries, then remove the remaining `InstalledAutomation` and device-draft coupling in runtime setup.
+
+### Runtime mode correction — continuation from `83f889a4`
+
+- Recorded the user's Local Agent-only execution rule in `AGENTS.md`: no Codex CLI
+  and no nested AI agents. Work uses concrete local checkout commands/scripts.
+- Extracted one shared `R.m` protocol. Setup controls now read and write live mode;
+  stopped processes are reported as stopped, not MANUAL. Direct setup relay
+  commands require live MANUAL.
+- BLE discovery keeps the climate process suspended in MANUAL, verifies OFF, then
+  restores the prior mode after exact discovery cleanup and scanner restart.
+  This avoids a MANUAL -> boot AUTO -> MANUAL interval entirely.
+- Added eight regressions for mode preservation, stopped runtime, unknown mode,
+  duplicate scripts, renamed discovery id and failed AUTO restoration. Updated
+  current UI mocks/assertions to the real `Script.Eval` contract.
+- Removed browser-only timer access from the shared network reader so the same
+  implementation can run in the local hardware smoke.
+- Added `scripts/hardware/runtime-mode-smoke.ts` (explicit endpoint/device id).
+  Both MANUAL and AUTO discovery paths passed on the real development plug.
+  Final relay **OFF**, climate/discovery test scripts removed.
+- Localized updated mode/discovery help in all seven supported locales.
+
+The Rules registry/product cutover remains the next major implementation step;
+this runtime correction does not claim removal of `InstalledAutomation` or the
+hardware draft device collections. Full checkpoint checks are recorded below.

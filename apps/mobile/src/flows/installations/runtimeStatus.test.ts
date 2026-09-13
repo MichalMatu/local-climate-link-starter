@@ -32,7 +32,7 @@ const installation = createInstalledAutomation({
 });
 
 const baseStatus = (
-  automationMode: 'auto' | 'manual' | 'missing',
+  automationMode: 'auto' | 'manual' | 'stopped' | 'missing',
   scriptId: number | null
 ) => ({
   relayOn: false,
@@ -67,7 +67,7 @@ describe('installed automation runtime status', () => {
   });
 
   it('separates an actually stopped script from intentional MANUAL', async () => {
-    mocks.readControlStatus.mockResolvedValue(baseStatus('manual', 7));
+    mocks.readControlStatus.mockResolvedValue(baseStatus('stopped', 7));
 
     const status = await readInstalledAutomationControlStatus(installation);
 

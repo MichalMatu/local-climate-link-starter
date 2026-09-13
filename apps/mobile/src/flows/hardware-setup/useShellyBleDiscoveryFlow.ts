@@ -1,6 +1,8 @@
+import { runPlugOperation } from '../devices/plugs/operations.js';
+import type { ClimateRuntimeMode } from '../runtime/modeProtocol.js';
 import { useMutation } from '@tanstack/react-query';
 import { generateShellyBleDiscoveryScript } from '@lcl/script-generator';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { BleDiscoverySnapshot } from './schemas.js';
 import {
@@ -17,7 +19,7 @@ export type BleDiscoverySession = {
   baseUrl: string;
   discoveryScriptId: number;
   automationScriptId: number | null;
-  automationWasRunning: boolean;
+  automationMode: ClimateRuntimeMode | null;
 };
 
 type StartBleDiscoveryResult = {
@@ -26,60 +28,65 @@ type StartBleDiscoveryResult = {
 };
 
 export const useShellyBleDiscoveryFlow = () => {
+  const cleanupRef = useRef<{
+    session: BleDiscoverySession;
+    promise: Promise<void>;
+  } | null>(null);
   const [bleDiscoverySession, setBleDiscoverySession] =
     useState<BleDiscoverySession | null>(null);
   const [bleDiscoverySnapshot, setBleDiscoverySnapshot] =
     useState<BleDiscoverySnapshot | null>(null);
 
   const startBleDiscoveryMutation = useMutation({
-    mutationFn: async (device: ShellyDraftDevice): Promise<StartBleDiscoveryResult> => {
-      let preparation: Awaited<ReturnType<typeof prepareShellyBleDiscovery>> | null =
-        null;
-      let discoveryScriptId: number | null = null;
+    mutationFn: (device: ShellyDraftDevice): Promise<StartBleDiscoveryResult> =>
+      runPlugOperation(device.id, async () => {
+        let preparation: Awaited<ReturnType<typeof prepareShellyBleDiscovery>> | null =
+          null;
+        let discoveryScriptId: number | null = null;
 
-      try {
-        preparation = await prepareShellyBleDiscovery(device.baseUrl);
-        const installResult = await installShellyBleDiscoveryScript(
-          device.baseUrl,
-          generateShellyBleDiscoveryScript()
-        );
-        discoveryScriptId = installResult.scriptId;
-        const session: BleDiscoverySession = {
-          shellyId: device.id,
-          baseUrl: device.baseUrl,
-          discoveryScriptId: installResult.scriptId,
-          automationScriptId: preparation.automationScriptId,
-          automationWasRunning: preparation.automationWasRunning
-        };
-        const snapshot = await readShellyBleDiscoverySnapshot(
-          device.baseUrl,
-          installResult.scriptId
-        );
+        try {
+          preparation = await prepareShellyBleDiscovery(device.baseUrl);
+          const installResult = await installShellyBleDiscoveryScript(
+            device.baseUrl,
+            generateShellyBleDiscoveryScript()
+          );
+          discoveryScriptId = installResult.scriptId;
+          const session: BleDiscoverySession = {
+            shellyId: device.id,
+            baseUrl: device.baseUrl,
+            discoveryScriptId: installResult.scriptId,
+            automationScriptId: preparation.automationScriptId,
+            automationMode: preparation.automationMode
+          };
+          const snapshot = await readShellyBleDiscoverySnapshot(
+            device.baseUrl,
+            installResult.scriptId
+          );
 
-        return { session, snapshot };
-      } catch (error) {
-        if (preparation) {
-          try {
-            await stopShellyBleDiscovery(device.baseUrl, {
-              discoveryScriptId,
-              automationScriptId: preparation.automationScriptId,
-              restartAutomation: preparation.automationWasRunning
-            });
-          } catch (cleanupError) {
-            const message =
-              error instanceof Error
-                ? error.message
-                : t('hardware.flow.bleScanStartFailed');
-            const cleanupMessage =
-              cleanupError instanceof Error
-                ? cleanupError.message
-                : t('hardware.flow.bleScanCleanupFailed');
-            throw new Error(`${message} ${cleanupMessage}`);
+          return { session, snapshot };
+        } catch (error) {
+          if (preparation) {
+            try {
+              await stopShellyBleDiscovery(device.baseUrl, {
+                discoveryScriptId,
+                automationScriptId: preparation.automationScriptId,
+                automationMode: preparation.automationMode
+              });
+            } catch (cleanupError) {
+              const message =
+                error instanceof Error
+                  ? error.message
+                  : t('hardware.flow.bleScanStartFailed');
+              const cleanupMessage =
+                cleanupError instanceof Error
+                  ? cleanupError.message
+                  : t('hardware.flow.bleScanCleanupFailed');
+              throw new Error(`${message} ${cleanupMessage}`);
+            }
           }
+          throw error;
         }
-        throw error;
-      }
-    },
+      }),
     onSuccess: ({ session, snapshot }) => {
       setBleDiscoverySession(session);
       setBleDiscoverySnapshot(snapshot);
@@ -105,13 +112,22 @@ export const useShellyBleDiscoveryFlow = () => {
   });
 
   const stopBleDiscoveryMutation = useMutation({
-    mutationFn: async (session: BleDiscoverySession): Promise<void> =>
-      stopShellyBleDiscovery(session.baseUrl, {
-        discoveryScriptId: session.discoveryScriptId,
-        automationScriptId: session.automationScriptId,
-        restartAutomation: session.automationWasRunning
-      }),
-    onSuccess: () => setBleDiscoverySession(null)
+    mutationFn: (session: BleDiscoverySession): Promise<void> => {
+      if (cleanupRef.current?.session === session) return cleanupRef.current.promise;
+      const promise = runPlugOperation(session.shellyId, () =>
+        stopShellyBleDiscovery(session.baseUrl, {
+          discoveryScriptId: session.discoveryScriptId,
+          automationScriptId: session.automationScriptId,
+          automationMode: session.automationMode
+        })
+      );
+      cleanupRef.current = { session, promise };
+      return promise;
+    },
+    onSuccess: () => setBleDiscoverySession(null),
+    onError: () => {
+      cleanupRef.current = null;
+    }
   });
 
   const startBleDiscovery = (device: ShellyDraftDevice) => {

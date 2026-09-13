@@ -303,7 +303,8 @@ export const it = {
       apPanelHelp:
         'Se ti connetti direttamente al Wi-Fi Shelly, il pannello di solito è su {url}.',
       automationAutoTitle: 'Automazione attiva. Tocca MANUAL per fermarla.',
-      automationManualTitle: 'Automazione ferma. Tocca AUTO per avviarla.',
+      automationManualTitle:
+        'Modalità MANUAL. Le letture restano attive. Seleziona AUTO per riprendere la regola.',
       automationMissingTitle:
         'Nessuna regola salvata. Tocca AUTO per vedere il prossimo passaggio.',
       automationUnknownTitle:
@@ -365,9 +366,9 @@ export const it = {
       scanBleAgain: 'Scansiona di nuovo',
       scanBleAgainTitle: 'Riavvia scanner BLE su questo Shelly',
       scanBleInfoLabel: 'Informazioni scansione BLE',
-      scanBleInfoTitle: 'Automazione ferma durante la scansione',
+      scanBleInfoTitle: 'Il relè resta spento durante la scansione',
       scanBleInfo:
-        'Shelly eseguirà uno script scanner BLE separato. Il relè sarà messo su OFF e, al termine, riavvierò l’automazione se era attiva.',
+        'Durante la scansione il relè resta spento. Al termine viene ripristinata la modalità AUTO o MANUAL precedente.',
       scanBleStartFailed: 'Impossibile avviare scanner BLE su Shelly.',
       scanBleStartFailedDetail:
         'Tocca Scansiona di nuovo. Se l’errore ritorna, controlla Bluetooth in Shelly o riavvia la presa.',

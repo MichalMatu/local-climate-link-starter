@@ -16,6 +16,11 @@ const INTENT_CHOICES = [
     id: 'humidity',
     titleKey: 'intent.humidity.title',
     descriptionKey: 'intent.humidity.description'
+  },
+  {
+    id: 'time',
+    titleKey: 'intent.time.title',
+    descriptionKey: 'intent.time.description'
   }
 ] as const;
 

@@ -44,20 +44,15 @@ vi.mock(import('@capacitor/core'), async (importOriginal) => {
 vi.mock('../screens/InstallationDetailScreen.js', () => ({
   InstallationDetailScreen: ({
     installationId,
-    onBack,
-    onNavigateDashboard
+    onBack
   }: {
     installationId: string;
     onBack: () => void;
-    onNavigateDashboard?: (kind: 'climate' | 'time') => void;
   }) => (
     <section>
       <p>{`mock-installation-${installationId}`}</p>
       <button type="button" onClick={onBack}>
         mock-dashboard-back
-      </button>
-      <button type="button" onClick={() => onNavigateDashboard?.('time')}>
-        mock-dashboard-time
       </button>
     </section>
   )
@@ -191,7 +186,7 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować temperaturą/ })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować wilgotnością/ })).toBeVisible();
-    expect(screen.queryByRole('button', { name: /Sterować według czasu/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
     expect(
       screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     ).toBeNull();
@@ -223,11 +218,29 @@ describe('AppRoutes navigation shell', () => {
     await waitFor(() => expect(nativeAppMocks.removeListener).toHaveBeenCalled());
   });
 
+  it('opens time setup from the shared add flow and returns through intent on Android', async () => {
+    nativeAppMocks.getPlatform.mockReturnValue('android');
+    renderRoutes();
+    await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
+    expect(await screen.findByText('mock-setup-time')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
+    act(() => nativeAppMocks.fireBack());
+    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    act(() => nativeAppMocks.fireBack());
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+  });
+
   it('opens an installed system by stable id and returns to its dashboard', () => {
     const installation = addClimateInstallation('detail');
     renderRoutes();
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   });

@@ -28,6 +28,14 @@ Repositories are the only storage boundary. New keys are `lcl.plugs.v1`,
 Store factories inject current reference readers, avoiding store import cycles.
 Storage failure cannot be reported as successful persistence.
 
+### Discovery mode preservation
+
+Keep the climate process running in MANUAL during temporary BLE discovery, with
+verified relay OFF. Restore the previously read AUTO/MANUAL mode after discovery
+cleanup. The generated runtime's default AUTO boot must never be used as a
+MANUAL restoration path. This implementation was validated with both generated
+scripts running together on the development Shelly Plug S Gen3 (firmware 1.7.5).
+
 ## Consequences
 
 Devices can outlive rules and endpoints resolve from the current plug record.

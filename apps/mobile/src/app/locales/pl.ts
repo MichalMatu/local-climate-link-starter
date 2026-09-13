@@ -302,7 +302,7 @@ export const pl = {
         'Jeśli łączysz się bezpośrednio z Wi-Fi Shelly, panel zwykle działa pod {url}.',
       automationAutoTitle: 'Automatyzacja działa. Kliknij MANUAL, żeby zatrzymać.',
       automationManualTitle:
-        'Automatyzacja jest zatrzymana. Kliknij AUTO, żeby uruchomić.',
+        'Tryb MANUAL. Odczyty pozostają aktywne. Wybierz AUTO, aby wznowić regułę.',
       automationMissingTitle:
         'Brak zapisanej reguły. Kliknij AUTO, żeby zobaczyć wymagany krok.',
       automationUnknownTitle:
@@ -365,9 +365,9 @@ export const pl = {
       scanBleAgain: 'Skanuj ponownie',
       scanBleAgainTitle: 'Ponownie uruchom skaner BLE na tym Shelly',
       scanBleInfoLabel: 'Informacja o skanowaniu BLE',
-      scanBleInfoTitle: 'Na czas skanowania zatrzymuję automatyzację',
+      scanBleInfoTitle: 'Na czas skanowania przekaźnik pozostaje OFF',
       scanBleInfo:
-        'Shelly uruchomi osobny skrypt skanera BLE. Przekaźnik zostanie ustawiony na OFF, a po zakończeniu skanu wznowię automatyzację, jeśli była uruchomiona.',
+        'Podczas skanowania przekaźnik pozostaje OFF. Po zakończeniu przywrócę wcześniejszy tryb AUTO lub MANUAL.',
       scanBleStartFailed: 'Nie udało się uruchomić skanera BLE na Shelly.',
       scanBleStartFailedDetail:
         'Kliknij Skanuj ponownie. Jeśli błąd wróci, sprawdź Bluetooth w Shelly albo zrestartuj gniazdko.',

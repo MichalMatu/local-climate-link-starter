@@ -1024,16 +1024,16 @@ Reject or refactor these patterns:
 
 ## 27. Working method for Codex
 
-### Execution routing: GitHub-first, Sandbox-first, Local Agent fallback
+### Execution routing: Local Agent only
 
-- Prefer **GitHub-first** for source changes when the exact diff can be applied directly and normal CI can verify it. Keep changes small and reviewable.
-- Prefer the **ChatGPT sandbox** as the default execution environment for software-only work: restore the known Library environment, build, run tests, serve the web/demo app, exercise flows, and inspect screenshots there.
-- For every UX/UI change, perform a **visual sandbox audit before declaring the change done**. Automated tests alone are not enough when the result can be inspected visually.
-- The visual audit should cover the relevant screens and states at representative phone viewports (`360x800`, `390x844`, `412x915`) and at least one wider/tablet viewport when the layout can expand.
-- Check responsiveness, spacing, alignment, typography, visual hierarchy, colors and contrast, design-token usage, component/style consistency, wrapping, clipping/overflow, modal/footer placement, touch-target sizing, and loading/empty/error/success states.
-- Use screenshots plus `pnpm e2e:responsive`/Playwright where practical. Iterate `code -> sandbox render -> visual review -> fix -> rerun` until the inspected UI is clean.
-- Do not use Local Agent for work the sandbox can reproduce. Use **Local Agent** only for local/native/hardware requirements the sandbox cannot faithfully exercise, such as physical Shelly/BLE behavior, Android/iOS native UI and permissions, USB/serial, signing, or device-only network conditions.
-- If a UX issue cannot be reproduced in the sandbox, document the gap and hand only that remaining validation to Local Agent or a physical device.
+- Execute repository changes and tests only through Local Agent using concrete
+  scripts and local checkout commands.
+- Never run Codex CLI (`codex`, `codex exec`) or launch another AI agent inside
+  Local Agent. Do not delegate this work to nested agents.
+- Inspect command results and diffs before considering a checkpoint verified.
+- For UX changes, render and inspect representative local Playwright viewports
+  (`360x800`, `390x844`, `412x915`, and tablet), then validate native-only behavior
+  on the connected phone. Record the environment used and remaining gaps.
 
 For every task:
 

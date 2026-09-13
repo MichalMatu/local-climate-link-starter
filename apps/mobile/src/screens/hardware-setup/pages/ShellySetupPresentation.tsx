@@ -104,6 +104,8 @@ export const formatAutomationMode = (
       return 'AUTO';
     case 'manual':
       return 'MANUAL';
+    case 'stopped':
+      return t('hardware.status.stopped');
     case 'missing':
       return t('hardware.rule.values.noScript');
     default:

@@ -302,7 +302,7 @@ export const es = {
         'Si te conectas directamente al Wi-Fi de Shelly, el panel suele estar en {url}.',
       automationAutoTitle: 'La automatización funciona. Pulsa MANUAL para detenerla.',
       automationManualTitle:
-        'La automatización está detenida. Pulsa AUTO para iniciarla.',
+        'Modo MANUAL. Las lecturas siguen activas. Selecciona AUTO para reanudar la regla.',
       automationMissingTitle:
         'No hay regla guardada. Pulsa AUTO para ver el siguiente paso necesario.',
       automationUnknownTitle:
@@ -364,9 +364,9 @@ export const es = {
       scanBleAgain: 'Escanear de nuevo',
       scanBleAgainTitle: 'Reiniciar escáner BLE en este Shelly',
       scanBleInfoLabel: 'Información de escaneo BLE',
-      scanBleInfoTitle: 'La automatización se detiene durante el escaneo',
+      scanBleInfoTitle: 'El relé permanece apagado durante el escaneo',
       scanBleInfo:
-        'Shelly ejecutará un script separado de escaneo BLE. El relé se pondrá en OFF y, al terminar, reanudaré la automatización si estaba activa.',
+        'El relé permanece apagado durante el escaneo. Al terminar se restaura el modo AUTO o MANUAL anterior.',
       scanBleStartFailed: 'No se pudo iniciar el escáner BLE en Shelly.',
       scanBleStartFailedDetail:
         'Pulsa Escanear de nuevo. Si el error vuelve, comprueba Bluetooth en Shelly o reinicia el enchufe.',

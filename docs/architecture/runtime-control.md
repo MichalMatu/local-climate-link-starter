@@ -48,3 +48,24 @@ A running pre-mode runtime has diagnostics but no `md`. On the first control-mod
 ### Resource diagnostics
 
 The phone reads `Script.GetStatus` for the exact managed script id and `Sys.GetStatus` directly over Shelly RPC during the normal diagnostics refresh. Script `running`, `mem_used`, `mem_peak`, `mem_free`, optional CPU, and device `ram_size` / `ram_free` therefore add no code or state to the generated thermostat runtime. `/diag` remains telemetry-only. Resource parsing is best-effort and independent from climate telemetry, so missing firmware-dependent fields or a failed resource RPC do not disable otherwise-valid diagnostics or control.
+
+## Temporary BLE discovery
+
+Discovery suspends automatic relay decisions by setting the exact running climate
+runtime to `R.m = 1`, then verifies OFF twice. The climate process stays running;
+the separate discovery script temporarily owns the shared BLE scanner. Cleanup
+removes the exact discovery script, restarts climate BLE scanning with `bs()` and
+restores the mode read before suspension. A previously stopped climate script
+remains stopped.
+
+This avoids booting a MANUAL runtime through its default AUTO initialization.
+Duplicate managed climate scripts or an unreadable mode block discovery. If mode
+restoration cannot be verified, cleanup stops the exact managed climate runtime,
+confirms OFF and reports a recovery error. It never deletes a renamed/unrelated
+script. A physical Shelly Plug S Gen3 on firmware 1.7.5 passed both mode-preservation
+paths with the climate and discovery scripts running concurrently.
+
+The shared `flows/runtime/modeProtocol.ts` contains the `R.m` wire contract.
+`readShellyControlStatus` reads mode from that contract for running scripts and
+reports `stopped` separately. Ordinary AUTO/MANUAL changes do not start or stop
+scripts in either the setup or installed-rule controls.

@@ -301,7 +301,8 @@ export const en = {
       apPanelHelp:
         'If you connect directly to Shelly Wi-Fi, the panel usually works at {url}.',
       automationAutoTitle: 'Automation is running. Click MANUAL to stop it.',
-      automationManualTitle: 'Automation is stopped. Click AUTO to start it.',
+      automationManualTitle:
+        'MANUAL mode. Readings stay active. Select AUTO to resume the rule.',
       automationMissingTitle: 'No saved rule. Click AUTO to see the required next step.',
       automationUnknownTitle: 'Automation state is unknown. Click AUTO to check.',
       bleDisabled: 'Bluetooth/BLE is disabled on this Shelly.',
@@ -361,9 +362,9 @@ export const en = {
       scanBleAgain: 'Scan again',
       scanBleAgainTitle: 'Restart BLE scanner on this Shelly',
       scanBleInfoLabel: 'BLE scanning information',
-      scanBleInfoTitle: 'Automation is stopped during scan',
+      scanBleInfoTitle: 'Relay stays OFF during scanning',
       scanBleInfo:
-        'Shelly will run a separate BLE scanner script. The relay will be set to OFF, and after scan ends I will resume automation if it was running.',
+        'The relay stays OFF while scanning. Afterwards, the previous AUTO or MANUAL mode is restored.',
       scanBleStartFailed: 'Could not start BLE scanner on Shelly.',
       scanBleStartFailedDetail:
         'Click Scan again. If the error returns, check Bluetooth in Shelly or restart the plug.',

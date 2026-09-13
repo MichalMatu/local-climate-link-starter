@@ -13,9 +13,6 @@ export type InstalledAutomationControlStatus = Omit<
   runtimeModeSupported: boolean;
 };
 
-const nonRunningMode = (status: ShellyControlStatus): InstalledAutomationControlMode =>
-  status.automationMode === 'manual' ? 'stopped' : status.automationMode;
-
 export const readInstalledAutomationControlStatus = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationControlStatus> => {
@@ -23,11 +20,11 @@ export const readInstalledAutomationControlStatus = async (
   if (
     status.automationScriptId === null ||
     status.automationScriptId !== installation.script.id ||
-    status.automationMode !== 'auto'
+    (status.automationMode !== 'auto' && status.automationMode !== 'manual')
   ) {
     return {
       ...status,
-      automationMode: nonRunningMode(status),
+      automationMode: status.automationMode,
       runtimeModeSupported: false
     };
   }

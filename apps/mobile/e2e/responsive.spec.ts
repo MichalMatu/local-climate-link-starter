@@ -434,7 +434,7 @@ const expectClimateDetailHierarchy = async (page: Page) => {
     page.locator('.installation-detail-header .runtime-refresh-action')
   ).toHaveCount(0);
   await expect(page.locator('.app-bottom-nav')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
     'aria-current',
     'page'
   );
@@ -695,8 +695,8 @@ for (const viewport of viewports) {
     const rpcState = await mockTimeShellyRpc(page);
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Czas', exact: true }).click();
     await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    await page.getByRole('button', { name: /Sterować według czasu/ }).click();
 
     await expect(page.getByRole('button', { name: /Sterować według czasu/ })).toHaveCount(
       0
@@ -704,7 +704,11 @@ for (const viewport of viewports) {
     await expect(
       page.getByRole('navigation', { name: 'Menu konfiguracji' })
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Termometry' })).toHaveCount(0);
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Menu konfiguracji' })
+        .getByRole('button', { name: 'Termometry' })
+    ).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Reguła' })).toHaveCount(0);
     await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
     await expect(
@@ -725,10 +729,9 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Szczegóły' }).click();
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Czas', exact: true })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
+    await expect(
+      page.getByRole('button', { name: 'Reguły', exact: true })
+    ).toHaveAttribute('aria-current', 'page');
     await expect(
       page.getByRole('button', { name: 'Ustawienia', exact: true })
     ).toBeVisible();
@@ -754,8 +757,8 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   await seedDraft(page);
   const rpcState = await mockTimeShellyRpc(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Czas', exact: true }).click();
   await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+  await page.getByRole('button', { name: /Sterować według czasu/ }).click();
   await expect(page.getByRole('button', { name: /Sterować według czasu/ })).toHaveCount(
     0
   );
@@ -789,7 +792,7 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();
   await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Czas', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Reguły', exact: true })).toHaveAttribute(
     'aria-current',
     'page'
   );
@@ -865,10 +868,15 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Zamknij' }).click();
 
     for (const tab of tabs) {
-      await page.getByRole('button', { name: tab, exact: true }).click();
+      await page
+        .getByRole('navigation', { name: 'Menu konfiguracji' })
+        .getByRole('button', { name: tab, exact: true })
+        .click();
       if (tab === 'Termometry') {
         await expect(
-          page.getByRole('button', { name: 'Termometry', exact: true })
+          page
+            .getByRole('navigation', { name: 'Menu konfiguracji' })
+            .getByRole('button', { name: 'Termometry', exact: true })
         ).toHaveAttribute('aria-current', 'page');
         await expect(page.getByRole('region', { name: 'Termometry BLE' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Dodaj termometr' })).toBeVisible();

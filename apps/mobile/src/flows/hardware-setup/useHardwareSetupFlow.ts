@@ -28,10 +28,7 @@ import { useHardwareDiagnosticsFlow } from './useHardwareDiagnosticsFlow.js';
 import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
-import {
-  shellyControlStatusFromSetupStatus,
-  useShellyControlFlow
-} from './useShellyControlFlow.js';
+import { useShellyControlFlow } from './useShellyControlFlow.js';
 
 type ShellyCheckMutationResult = HardwareSetupStatus & {
   checkedDevice: ShellyDraftDevice;
@@ -335,11 +332,7 @@ export const useHardwareSetupFlow = () => {
     onSuccess: (status) => {
       setSetupStatus(status);
       upsertShellyDevice(status.checkedDevice);
-      applyControlStatus(
-        status.checkedDevice,
-        shellyControlStatusFromSetupStatus(status),
-        null
-      );
+      refreshShellyControl(status.checkedDevice);
     },
     onError: () => {
       setSetupStatus(null);
@@ -351,7 +344,7 @@ export const useHardwareSetupFlow = () => {
       readShellySetupStatus(device.baseUrl),
     onSuccess: (status, device) => {
       setSetupStatus(status);
-      applyControlStatus(device, shellyControlStatusFromSetupStatus(status), null);
+      refreshShellyControl(device);
     },
     onError: () => {
       setSetupStatus(null);

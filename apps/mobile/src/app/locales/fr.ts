@@ -308,7 +308,7 @@ export const fr = {
       automationAutoTitle:
         'L’automatisation fonctionne. Clique sur MANUAL pour l’arrêter.',
       automationManualTitle:
-        'L’automatisation est arrêtée. Clique sur AUTO pour la démarrer.',
+        'Mode MANUAL. Les mesures restent actives. Sélectionnez AUTO pour reprendre la règle.',
       automationMissingTitle:
         'Aucune règle enregistrée. Clique sur AUTO pour voir l’étape nécessaire.',
       automationUnknownTitle:
@@ -371,9 +371,9 @@ export const fr = {
       scanBleAgain: 'Scanner à nouveau',
       scanBleAgainTitle: 'Redémarrer le scanner BLE sur ce Shelly',
       scanBleInfoLabel: 'Information sur le scan BLE',
-      scanBleInfoTitle: 'L’automatisation est arrêtée pendant le scan',
+      scanBleInfoTitle: 'Le relais reste éteint pendant le scan',
       scanBleInfo:
-        'Shelly exécutera un script séparé de scanner BLE. Le relais sera mis sur OFF et, après le scan, je relancerai l’automatisation si elle était active.',
+        'Le relais reste éteint pendant le scan. Ensuite, le mode AUTO ou MANUAL précédent est rétabli.',
       scanBleStartFailed: 'Impossible de démarrer le scanner BLE sur Shelly.',
       scanBleStartFailedDetail:
         'Clique sur Scanner à nouveau. Si l’erreur revient, vérifie Bluetooth dans Shelly ou redémarre la prise.',

@@ -1,8 +1,9 @@
+import { readClimateMode, writeClimateMode } from '../runtime/modeProtocol.js';
+import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
 import { useMutation } from '@tanstack/react-query';
-import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
+import { RpcShellyClient } from '@lcl/shelly-client';
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
-import type { HardwareSetupStatus } from './schemas.js';
 import {
   createShellyTransport,
   readShellyControlStatus,
@@ -33,26 +34,6 @@ const createInitialShellyControlState = (): ShellyControlViewState => ({
   message: null,
   updatedAtMs: null
 });
-
-export const shellyControlStatusFromSetupStatus = (
-  status: HardwareSetupStatus
-): ShellyControlStatus => {
-  const automationScript =
-    status.scripts.find((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME) ??
-    null;
-  return {
-    relayOn: status.status.relayOn,
-    automationMode: automationScript
-      ? automationScript.running
-        ? 'auto'
-        : 'manual'
-      : 'missing',
-    automationScriptId: automationScript?.id ?? null,
-    firmwareId: status.deviceInfo.firmwareId ?? null,
-    telemetry: status.status.telemetry,
-    clock: status.status.clock
-  };
-};
 
 export const useShellyControlFlow = () => {
   const [shellyControlStates, setShellyControlStates] = useState<
@@ -128,6 +109,9 @@ export const useShellyControlFlow = () => {
       device: ShellyDraftDevice
     ): Promise<ShellyControlMutationResult> => {
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
+      const current = await readShellyControlStatus(device.baseUrl);
+      if (current.automationMode !== 'manual')
+        throw new Error('Manual relay control requires a live MANUAL runtime.');
       unwrapShellyResult(await client.setRelayOn());
       return {
         device,
@@ -150,7 +134,10 @@ export const useShellyControlFlow = () => {
       device: ShellyDraftDevice
     ): Promise<ShellyControlMutationResult> => {
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
-      unwrapShellyResult(await client.setRelayOff());
+      const current = await readShellyControlStatus(device.baseUrl);
+      if (current.automationMode !== 'manual')
+        throw new Error('Manual relay control requires a live MANUAL runtime.');
+      await forceRelayOffAndConfirm(client, 0);
       return {
         device,
         status: await readShellyControlStatus(device.baseUrl)
@@ -174,7 +161,11 @@ export const useShellyControlFlow = () => {
       const currentStatus = await readShellyControlStatus(device.baseUrl);
       const scriptId = requireAutomationScript(currentStatus);
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
-      unwrapShellyResult(await client.startScript(scriptId));
+      const transport = createShellyTransport(device.baseUrl);
+      if ((await readClimateMode(transport, scriptId)) !== 'manual')
+        throw new Error('AUTO requires a verified live MANUAL runtime.');
+      await forceRelayOffAndConfirm(client, 0);
+      await writeClimateMode(transport, scriptId, 'auto');
       return {
         device,
         status: await readShellyControlStatus(device.baseUrl)
@@ -198,10 +189,10 @@ export const useShellyControlFlow = () => {
       const currentStatus = await readShellyControlStatus(device.baseUrl);
       const scriptId = requireAutomationScript(currentStatus);
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
-      const stopResult = await client.stopScript(scriptId);
-      const offResult = await client.setRelayOff();
-      unwrapShellyResult(offResult);
-      unwrapShellyResult(stopResult);
+      const transport = createShellyTransport(device.baseUrl);
+      await writeClimateMode(transport, scriptId, 'manual');
+      await forceRelayOffAndConfirm(client, 0);
+      await forceRelayOffAndConfirm(client, 0);
       return {
         device,
         status: await readShellyControlStatus(device.baseUrl)

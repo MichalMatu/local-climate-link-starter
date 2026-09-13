@@ -1,9 +1,15 @@
 import {
+  readClimateMode,
+  writeClimateMode,
+  type ClimateRuntimeMode
+} from '../runtime/modeProtocol.js';
+import {
   LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   FetchShellyRpcTransport,
   RPC_METHODS,
   RpcShellyClient,
+  RpcShellyInventoryClient,
   createBleDiscoveryInstallPlan,
   type Result,
   type ShellyClientError,
@@ -38,7 +44,7 @@ export const SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS = 3000;
 const BLE_DISCOVERY_ENDPOINT_TIMEOUT_MS = 5000;
 
 const shouldUseShellyDevProxy = (): boolean =>
-  import.meta.env.DEV &&
+  import.meta.env?.DEV &&
   typeof window !== 'undefined' &&
   window.location.protocol.startsWith('http');
 
@@ -200,10 +206,10 @@ export type ScanShellySetupUrlsOptions = {
 
 export type ShellyBleDiscoveryPreparation = {
   automationScriptId: number | null;
-  automationWasRunning: boolean;
+  automationMode: ClimateRuntimeMode | null;
 };
 
-export type ShellyAutomationMode = 'auto' | 'manual' | 'missing';
+export type ShellyAutomationMode = 'auto' | 'manual' | 'stopped' | 'missing';
 
 export type ShellyControlStatus = {
   relayOn: boolean;
@@ -234,7 +240,7 @@ export const fetchShellyJson = async (
   timeoutMs: number
 ): Promise<unknown> => {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await createShellyFetch(timeoutMs)(targetUrl, {
       signal: controller.signal
@@ -252,7 +258,7 @@ export const fetchShellyJson = async (
       throw new Error(SHELLY_INVALID_RESPONSE_MESSAGE);
     }
   } finally {
-    window.clearTimeout(timeout);
+    globalThis.clearTimeout(timeout);
   }
 };
 
@@ -287,8 +293,14 @@ const readScriptList = async (
   return parsedScripts.data.scripts;
 };
 
-const findAutomationScript = (scripts: ScriptListEntry[]): ScriptListEntry | null =>
-  scripts.find((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME) ?? null;
+const findAutomationScript = (scripts: ScriptListEntry[]): ScriptListEntry | null => {
+  const managed = scripts.filter(
+    (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
+  );
+  if (managed.length > 1)
+    throw new Error('Multiple managed climate scripts require cleanup in Plugs.');
+  return managed[0] ?? null;
+};
 
 const findBleDiscoveryScripts = (scripts: ScriptListEntry[]): ScriptListEntry[] =>
   scripts.filter(
@@ -343,18 +355,19 @@ const deleteBleDiscoveryScripts = async (
   return deletedCount;
 };
 
-const toControlStatus = (
+const toControlStatus = async (
   deviceInfo: ShellyDeviceInfo,
   status: HardwareSetupStatus['status'],
-  scripts: ScriptListEntry[]
-): ShellyControlStatus => {
+  scripts: ScriptListEntry[],
+  transport: FetchShellyRpcTransport
+): Promise<ShellyControlStatus> => {
   const automationScript = findAutomationScript(scripts);
   return {
     relayOn: status.relayOn,
     automationMode: automationScript
       ? automationScript.running
-        ? 'auto'
-        : 'manual'
+        ? ((await readClimateMode(transport, automationScript.id)) ?? 'auto')
+        : 'stopped'
       : 'missing',
     automationScriptId: automationScript?.id ?? null,
     firmwareId: deviceInfo.firmwareId ?? null,
@@ -498,24 +511,40 @@ export const scanShellySetupUrls = async ({
   };
 };
 
+const confirmDiscoveryOff = async (
+  client: RpcShellyClient,
+  transport: FetchShellyRpcTransport
+): Promise<void> => {
+  unwrapShellyResult(await client.setRelayOff());
+  const relay = unwrapShellyResult(
+    await new RpcShellyInventoryClient(transport).readRelay()
+  );
+  if (relay.output) throw new Error('Relay OFF was not confirmed.');
+};
+
 export const prepareShellyBleDiscovery = async (
   baseUrl: string
 ): Promise<ShellyBleDiscoveryPreparation> => {
   const transport = createShellyTransport(baseUrl);
   const client = new RpcShellyClient(transport);
-  unwrapShellyResult(await client.setRelayOff());
-
   const scripts = await readScriptList(transport);
-  await deleteBleDiscoveryScripts(client, scripts);
-  const automationScript = findAutomationScript(scripts);
-  if (automationScript?.running) {
-    unwrapShellyResult(await client.stopScript(automationScript.id));
+  const automation = findAutomationScript(scripts);
+  const mode = automation?.running
+    ? await readClimateMode(transport, automation.id)
+    : null;
+  if (automation?.running && mode === null)
+    throw new Error('Climate runtime does not expose a verified control mode.');
+  if (automation?.running) await writeClimateMode(transport, automation.id, 'manual');
+  try {
+    await confirmDiscoveryOff(client, transport);
+    await confirmDiscoveryOff(client, transport);
+    await deleteBleDiscoveryScripts(client, scripts);
+  } catch (error) {
+    // Preparation failed: remain suspended and OFF, never guess a recovery mode.
+    await confirmDiscoveryOff(client, transport);
+    throw error;
   }
-
-  return {
-    automationScriptId: automationScript?.id ?? null,
-    automationWasRunning: automationScript?.running ?? false
-  };
+  return { automationScriptId: automation?.id ?? null, automationMode: mode };
 };
 
 export const readShellyControlStatus = async (
@@ -532,7 +561,8 @@ export const readShellyControlStatus = async (
   return toControlStatus(
     unwrapShellyResult(deviceInfo),
     unwrapShellyResult(status),
-    scripts
+    scripts,
+    transport
   );
 };
 
@@ -575,10 +605,11 @@ export const readShellyAutomationScriptState = async (
   return {
     script: automationScript,
     code: automationScript ? await readScriptCode(transport, automationScript.id) : null,
-    status: toControlStatus(
+    status: await toControlStatus(
       unwrapShellyResult(deviceInfo),
       unwrapShellyResult(status),
-      scripts
+      scripts,
+      transport
     )
   };
 };
@@ -671,35 +702,64 @@ export const stopShellyBleDiscovery = async (
   options: {
     discoveryScriptId: number | null;
     automationScriptId: number | null;
-    restartAutomation: boolean;
+    automationMode: ClimateRuntimeMode | null;
   }
 ): Promise<void> => {
-  const client = new RpcShellyClient(createShellyTransport(baseUrl));
-  let stopError: Error | null = null;
-  let discoveryStopped = options.discoveryScriptId === null;
-
-  if (options.discoveryScriptId !== null) {
-    try {
-      unwrapShellyResult(await client.stopScript(options.discoveryScriptId));
-      discoveryStopped = true;
-      unwrapShellyResult(await client.deleteScript(options.discoveryScriptId));
-    } catch (error) {
-      stopError =
-        error instanceof Error
-          ? error
-          : new Error(t('hardware.shelly.deleteScannerFailed'));
+  const transport = createShellyTransport(baseUrl);
+  const client = new RpcShellyClient(transport);
+  try {
+    if (options.discoveryScriptId !== null) {
+      const scripts = await readScriptList(transport);
+      const discovery = scripts.find((script) => script.id === options.discoveryScriptId);
+      if (discovery && discovery.name !== LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME)
+        throw new Error('Discovery script identity changed.');
+      if (discovery) {
+        unwrapShellyResult(await client.stopScript(discovery.id));
+        unwrapShellyResult(await client.deleteScript(discovery.id));
+      }
+      const remaining = await readScriptList(transport);
+      if (remaining.some((script) => script.id === options.discoveryScriptId))
+        throw new Error('Discovery script removal was not confirmed.');
     }
-  }
-
-  if (
-    options.restartAutomation &&
-    options.automationScriptId !== null &&
-    discoveryStopped
-  ) {
-    unwrapShellyResult(await client.startScript(options.automationScriptId));
-  }
-
-  if (stopError) {
-    throw stopError;
+    await confirmDiscoveryOff(client, transport);
+    if (options.automationScriptId !== null && options.automationMode !== null) {
+      const scripts = await readScriptList(transport);
+      const automation = findAutomationScript(scripts);
+      if (
+        !automation ||
+        automation.id !== options.automationScriptId ||
+        !automation.running
+      )
+        throw new Error('Suspended climate runtime is missing or stopped.');
+      if ((await readClimateMode(transport, automation.id)) !== 'manual')
+        throw new Error('Climate runtime suspension was not preserved.');
+      // The process stays running throughout discovery. Restart its BLE scan only,
+      // then restore the prior mode without ever booting a MANUAL runtime in AUTO.
+      unwrapShellyResult(
+        await transport.call<unknown>({
+          method: RPC_METHODS.ScriptEval,
+          params: { id: automation.id, code: 'bs();R.m' }
+        })
+      );
+      await writeClimateMode(transport, automation.id, options.automationMode);
+      if ((await readClimateMode(transport, automation.id)) !== options.automationMode)
+        throw new Error('Climate runtime mode restoration was not confirmed.');
+    }
+  } catch (error) {
+    if (options.automationScriptId !== null && options.automationMode !== null) {
+      const scripts = await readScriptList(transport);
+      const exact = scripts.find(
+        (script) =>
+          script.id === options.automationScriptId &&
+          script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
+      );
+      if (exact?.running) {
+        // Stop only the exact managed runtime on failed restoration so OFF remains
+        // stable even if a mode RPC failed after applying AUTO.
+        unwrapShellyResult(await client.stopScript(exact.id));
+      }
+    }
+    await confirmDiscoveryOff(client, transport);
+    throw error;
   }
 };

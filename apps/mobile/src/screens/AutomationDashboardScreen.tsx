@@ -2,15 +2,13 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
-  IconClock,
   IconDotsVertical,
   IconPlus,
   IconTemperature
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import type { AutomationCategory } from '../flows/rules/navigation.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -258,24 +256,17 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
   );
 
 type AutomationDashboardScreenProps = {
-  initialKind?: AutomationCategory;
-  onAddAutomation(kind: AutomationCategory): void;
+  onAddAutomation(): void;
   onOpenInstallation(installationId: string): void;
 };
 
 export const AutomationDashboardScreen = ({
-  initialKind,
   onAddAutomation,
   onOpenInstallation
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
   const queryClient = useQueryClient();
-  const hasClimate = installations.some((installation) => installation.kind !== 'time');
-  const hasTime = installations.some((installation) => installation.kind === 'time');
-  const [activeKind] = useState<AutomationCategory>(
-    () => initialKind ?? (hasTime && !hasClimate ? 'time' : 'climate')
-  );
 
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
@@ -300,10 +291,6 @@ export const AutomationDashboardScreen = ({
     };
   }, [queryClient]);
 
-  const visibleInstallations = installations.filter((installation) =>
-    activeKind === 'time' ? installation.kind === 'time' : installation.kind !== 'time'
-  );
-
   return (
     <main className="demo-shell dashboard-shell app-bottom-nav-shell">
       <header className="demo-header dashboard-header app-page-header">
@@ -311,8 +298,8 @@ export const AutomationDashboardScreen = ({
       </header>
 
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
-        {visibleInstallations.length > 0 ? (
-          visibleInstallations.map((installation) => (
+        {installations.length > 0 ? (
+          installations.map((installation) => (
             <AutomationCard
               key={installation.id}
               installation={installation}
@@ -321,14 +308,7 @@ export const AutomationDashboardScreen = ({
           ))
         ) : (
           <div className="dashboard-kind-empty" role="status">
-            {activeKind === 'time' ? (
-              <IconClock className="dashboard-kind-empty__icon" aria-hidden="true" />
-            ) : (
-              <IconTemperature
-                className="dashboard-kind-empty__icon"
-                aria-hidden="true"
-              />
-            )}
+            <IconTemperature className="dashboard-kind-empty__icon" aria-hidden="true" />
             <strong>{t('dashboard.emptyCategory')}</strong>
           </div>
         )}
@@ -339,7 +319,7 @@ export const AutomationDashboardScreen = ({
         type="button"
         aria-label={t('dashboard.addAutomation')}
         title={t('dashboard.addAutomation')}
-        onClick={() => onAddAutomation(activeKind)}
+        onClick={onAddAutomation}
       >
         <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
       </button>

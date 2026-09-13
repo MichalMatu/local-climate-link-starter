@@ -163,6 +163,8 @@ import {
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
 
+const activeQueryClients: QueryClient[] = [];
+
 const renderHardwareSetup = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -171,6 +173,7 @@ const renderHardwareSetup = () => {
     }
   });
 
+  activeQueryClients.push(queryClient);
   return render(
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
@@ -381,6 +384,8 @@ describe('HardwareSetupScreen', () => {
     window.history.replaceState(null, '', '/');
     let relayOn = false;
     let thermostatRunning = true;
+    let runtimeMode = 0;
+    let discoveryPresent = false;
     let thermostatDeleted = false;
     let thermostatCode = createStoredThermostatScript();
     vi.stubGlobal(
@@ -476,20 +481,33 @@ describe('HardwareSetupScreen', () => {
             return rpcResult({ jobs: [], rev: 0 });
           case 'Script.List':
             return rpcResult({
-              scripts: thermostatDeleted
-                ? []
-                : [
-                    {
-                      id: 1,
-                      name: 'Local Climate Link Thermostat',
-                      enable: true,
-                      running: thermostatRunning
-                    }
-                  ]
+              scripts: [
+                ...(thermostatDeleted
+                  ? []
+                  : [
+                      {
+                        id: 1,
+                        name: 'Local Climate Link Thermostat',
+                        enable: true,
+                        running: thermostatRunning
+                      }
+                    ]),
+                ...(discoveryPresent
+                  ? [
+                      {
+                        id: 4,
+                        name: 'Local Climate Link BLE Discovery',
+                        enable: false,
+                        running: true
+                      }
+                    ]
+                  : [])
+              ]
             });
           case 'Script.GetCode':
             return rpcResult({ data: thermostatCode, left: 0 });
           case 'Script.Create':
+            discoveryPresent = true;
             return rpcResult({ id: 4 });
           case 'Script.PutCode': {
             const params = body.params as { append?: boolean; code?: string } | undefined;
@@ -502,10 +520,19 @@ describe('HardwareSetupScreen', () => {
           }
           case 'Script.SetConfig':
             return rpcResult({});
+          case 'Script.Eval': {
+            const params = body.params as { id?: number; code?: string } | undefined;
+            if (params?.id !== 1 || !thermostatRunning)
+              return jsonResponse({ error: { message: 'Runtime not running' } });
+            if (params.code?.includes('R.m=1')) runtimeMode = 1;
+            if (params.code?.includes('R.m=0')) runtimeMode = 0;
+            return rpcResult({ result: String(runtimeMode) });
+          }
           case 'Script.Start': {
             const params = body.params as { id?: number } | undefined;
             if (params?.id === 1) {
               thermostatRunning = true;
+              runtimeMode = 0;
             }
             return rpcResult({});
           }
@@ -518,6 +545,7 @@ describe('HardwareSetupScreen', () => {
           }
           case 'Script.Delete': {
             const params = body.params as { id?: number } | undefined;
+            if (params?.id === 4) discoveryPresent = false;
             if (params?.id === 1) {
               thermostatDeleted = true;
               thermostatRunning = false;
@@ -549,8 +577,17 @@ describe('HardwareSetupScreen', () => {
     );
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    await waitFor(
+      () => {
+        expect(activeQueryClients.every((client) => client.isMutating() === 0)).toBe(
+          true
+        );
+      },
+      { timeout: 10000 }
+    );
+    activeQueryClients.splice(0).forEach((client) => client.clear());
     setLocalePreference('system');
     setThemeMode('system');
     document.documentElement.removeAttribute('data-lcl-theme');
@@ -1131,18 +1168,28 @@ describe('HardwareSetupScreen', () => {
     const controlCalls = vi
       .mocked(fetch)
       .mock.calls.map((call) => requestBody(call[1]))
-      .filter((body) =>
-        ['Script.Stop', 'Script.Start', 'Switch.Set'].includes(body.method ?? '')
-      );
+      .filter((body) => ['Script.Eval', 'Switch.Set'].includes(body.method ?? ''));
 
     expect(controlCalls).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ method: 'Script.Stop', params: { id: 1 } }),
+        expect.objectContaining({
+          method: 'Script.Eval',
+          params: expect.objectContaining({
+            id: 1,
+            code: expect.stringContaining('R.m=1')
+          })
+        }),
         expect.objectContaining({
           method: 'Switch.Set',
           params: { id: 0, on: false }
         }),
-        expect.objectContaining({ method: 'Script.Start', params: { id: 1 } })
+        expect.objectContaining({
+          method: 'Script.Eval',
+          params: expect.objectContaining({
+            id: 1,
+            code: expect.stringContaining('R.m=0')
+          })
+        })
       ])
     );
   });
@@ -2527,7 +2574,7 @@ describe('HardwareSetupScreen', () => {
       within(dialog).getByRole('button', { name: 'Informacja o skanowaniu BLE' })
     ).toBeInTheDocument();
     expect(within(dialog).getByRole('tooltip')).toHaveTextContent(
-      'Shelly uruchomi osobny skrypt skanera BLE. Przekaźnik zostanie ustawiony na OFF, a po zakończeniu skanu wznowię automatyzację, jeśli była uruchomiona.'
+      'Podczas skanowania przekaźnik pozostaje OFF. Po zakończeniu przywrócę wcześniejszy tryb AUTO lub MANUAL.'
     );
     expect(
       within(dialog).queryByRole('button', { name: 'Rozpocznij skan BLE' })
@@ -2583,7 +2630,7 @@ describe('HardwareSetupScreen', () => {
           'Script.Delete'
         ])
       );
-      expect(rpcMethods.filter((method) => method === 'Script.Stop')).toHaveLength(2);
+      expect(rpcMethods.filter((method) => method === 'Script.Stop')).toHaveLength(1);
       expect(rpcMethods.filter((method) => method === 'Script.Delete')).toHaveLength(1);
     });
   });
@@ -2671,33 +2718,37 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
 
-    await waitFor(() => {
-      const rpcBodies = vi
-        .mocked(fetch)
-        .mock.calls.map((call) => requestBody(call[1]))
-        .filter((body) => body.method);
-      expect(
-        rpcBodies.some(
-          (body) =>
-            body.method === 'Script.Stop' &&
-            (body.params as { id?: number } | undefined)?.id === 4
-        )
-      ).toBe(true);
-      expect(
-        rpcBodies.some(
-          (body) =>
-            body.method === 'Script.Delete' &&
-            (body.params as { id?: number } | undefined)?.id === 4
-        )
-      ).toBe(true);
-      expect(
-        rpcBodies.some(
-          (body) =>
-            body.method === 'Script.Start' &&
-            (body.params as { id?: number } | undefined)?.id === 1
-        )
-      ).toBe(true);
-    });
+    await waitFor(
+      () => {
+        const rpcBodies = vi
+          .mocked(fetch)
+          .mock.calls.map((call) => requestBody(call[1]))
+          .filter((body) => body.method);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Stop' &&
+              (body.params as { id?: number } | undefined)?.id === 4
+          )
+        ).toBe(true);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Delete' &&
+              (body.params as { id?: number } | undefined)?.id === 4
+          )
+        ).toBe(true);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Eval' &&
+              (body.params as { id?: number; code?: string } | undefined)?.id === 1 &&
+              (body.params as { code?: string } | undefined)?.code?.includes('bs()')
+          )
+        ).toBe(true);
+      },
+      { timeout: 3000 }
+    );
     expect(
       screen.queryByRole('dialog', { name: 'Skanuj termometry BLE' })
     ).not.toBeInTheDocument();
@@ -2716,26 +2767,30 @@ describe('HardwareSetupScreen', () => {
 
     window.dispatchEvent(new Event('pagehide'));
 
-    await waitFor(() => {
-      const rpcBodies = vi
-        .mocked(fetch)
-        .mock.calls.map((call) => requestBody(call[1]))
-        .filter((body) => body.method);
-      expect(
-        rpcBodies.some(
-          (body) =>
-            body.method === 'Script.Delete' &&
-            (body.params as { id?: number } | undefined)?.id === 4
-        )
-      ).toBe(true);
-      expect(
-        rpcBodies.some(
-          (body) =>
-            body.method === 'Script.Start' &&
-            (body.params as { id?: number } | undefined)?.id === 1
-        )
-      ).toBe(true);
-    });
+    await waitFor(
+      () => {
+        const rpcBodies = vi
+          .mocked(fetch)
+          .mock.calls.map((call) => requestBody(call[1]))
+          .filter((body) => body.method);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Delete' &&
+              (body.params as { id?: number } | undefined)?.id === 4
+          )
+        ).toBe(true);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Eval' &&
+              (body.params as { id?: number; code?: string } | undefined)?.id === 1 &&
+              (body.params as { code?: string } | undefined)?.code?.includes('bs()')
+          )
+        ).toBe(true);
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('keeps BLE scan refresh errors out of the visible UI', async () => {
