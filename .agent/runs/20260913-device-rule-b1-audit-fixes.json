@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-device-rule-b1-audit-fixes",
+  "task_digest": "83c7bc7a36fde4f8d7f68807cb9ec2c3e689993836b21e03d239e20e14bbf4d5",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T08:19:24.932308+00:00",
+  "attempt_id": "d47f36d065ddeccdbe012670",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 42484,
+  "updated_at": "2026-09-13T08:19:24.932397+00:00",
+  "pid": 42484
+}
