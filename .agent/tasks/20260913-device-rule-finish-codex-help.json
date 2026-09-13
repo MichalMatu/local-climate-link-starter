@@ -1,0 +1,15 @@
+{
+  "id": "20260913-device-rule-finish-codex-help",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-device-rule-finish-codex-help.sh > /tmp/lcl-device-rule-finish-codex-help.sh && bash /tmp/lcl-device-rule-finish-codex-help.sh"
+  ],
+  "resources": [],
+  "command_timeout": 120,
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "memory_limit_mb": 1024
+}
