@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-device-rule-finish-capability-probe",
+  "task_digest": "65134c6298155494a80ef14a738b8079abed719e1f4beaf9a44d1aaa941bfbc2",
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "memory_limit_mb": 1024,
+  "started_at": "2026-09-13T17:38:43.186436+00:00",
+  "attempt_id": "a0d81578125d5c5eee916989",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 69412,
+  "updated_at": "2026-09-13T17:38:43.186572+00:00",
+  "pid": 69412
+}
