@@ -1,0 +1,15 @@
+{
+  "id": "20260913-plug-management-foundation-retry",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": true,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-plug-management-foundation-retry.sh > /tmp/lcl-plug-management-foundation-retry.sh && bash /tmp/lcl-plug-management-foundation-retry.sh"
+  ],
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096
+}
