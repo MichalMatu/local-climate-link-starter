@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-rule-product-cutover-v2",
+  "task_digest": "02e3f6e9775217917088b409518adc6c632753dbc36a1b61031d418640573970",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T22:32:42.940826+00:00",
+  "attempt_id": "8e9999b9775cd2f3203200a0",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 90819,
+  "updated_at": "2026-09-13T22:32:42.940989+00:00",
+  "pid": 90819
+}
