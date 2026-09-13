@@ -1343,20 +1343,14 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     expect(screen.queryByText('brak reguły')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Najpierw zapisz regułę dla tego gniazdka.')
-    ).not.toBeInTheDocument();
 
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
     const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
+    const manualButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
     expect(autoButton).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(autoButton);
-    await screen.findByText('Najpierw zapisz regułę dla tego gniazdka.');
-    expect(
-      within(savedPlugList).queryByText('Najpierw zapisz regułę dla tego gniazdka.')
-    ).not.toBeInTheDocument();
+    expect(autoButton).toBeDisabled();
+    expect(manualButton).toBeDisabled();
 
     const rpcMethods = vi
       .mocked(fetch)

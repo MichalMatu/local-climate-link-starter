@@ -31,6 +31,37 @@ describe('rule schedule', () => {
     });
   });
 
+  it('fails closed for malformed clock input and invalid windows', () => {
+    expect(
+      isRuleScheduleActive(
+        { windows: [{ days: [1], start: '08:00', end: '10:00' }] },
+        1,
+        'not-a-time'
+      )
+    ).toBe(false);
+    expect(
+      isRuleScheduleActive(
+        { windows: [{ days: [1], start: 'bad', end: '10:00' }] },
+        1,
+        '09:00'
+      )
+    ).toBe(false);
+    expect(
+      isRuleScheduleActive(
+        { windows: [{ days: [1], start: '08:00', end: 'bad' }] },
+        1,
+        '09:00'
+      )
+    ).toBe(false);
+    expect(
+      isRuleScheduleActive(
+        { windows: [{ days: [1], start: '08:00', end: '08:00' }] },
+        1,
+        '08:00'
+      )
+    ).toBe(false);
+  });
+
   it('evaluates same-day and cross-midnight windows using the starting weekday', () => {
     const schedule: RuleSchedule = {
       windows: [

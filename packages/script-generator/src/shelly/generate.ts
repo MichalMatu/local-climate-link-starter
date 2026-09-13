@@ -43,14 +43,11 @@ const createRuntimeConfig = (config: ShellyThermostatConfig, hash: string) => {
   if (!config.schedule) return base;
   return {
     ...base,
-    tw: config.schedule.windows.map((window) => {
-      const start = parseRuleClockMinutes(window.start);
-      const end = parseRuleClockMinutes(window.end);
-      if (start === null || end === null) {
-        throw new Error('Validated rule schedule contains an invalid clock time.');
-      }
-      return [window.days, start, end];
-    })
+    tw: config.schedule.windows.map((window) => [
+      window.days,
+      parseRuleClockMinutes(window.start)!,
+      parseRuleClockMinutes(window.end)!
+    ])
   };
 };
 
