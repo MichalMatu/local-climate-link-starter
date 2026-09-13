@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-rule-lifecycle-cutover-audit",
+  "task_digest": "9f9c09c2c1d49b768e7154e6d811a19254c38037cf6044820d236665400286b9",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T21:01:32.885928+00:00",
+  "attempt_id": "a7fc8980bb29c440a24f985b",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 3409,
+  "updated_at": "2026-09-13T21:01:32.885996+00:00",
+  "pid": 3409
+}
