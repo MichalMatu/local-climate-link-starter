@@ -1,0 +1,9 @@
+{
+  "event": "invalid_task_rejected",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "updated_at": "2026-09-13T17:39:32.774079+00:00",
+  "task_id": "20260913-device-rule-finish-codex-help",
+  "daemon_version": "4.18.20",
+  "pid": 70195
+}
