@@ -1,0 +1,14 @@
+{
+  "id": "20260914-rule-editor-cutover-v4-diagnose",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "printf 'HEAD=' && git rev-parse HEAD && echo '--- STATUS ---' && git status --short && echo '--- RULE EDITOR TEST ---' && pnpm --filter @lcl/mobile exec vitest run src/__tests__/rule-editor.test.tsx --reporter=verbose"
+  ]
+}
