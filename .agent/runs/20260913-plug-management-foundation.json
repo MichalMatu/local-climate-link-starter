@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-plug-management-foundation",
+  "task_digest": "a8f05531c11661230e88d88833189dfc20ab8b62e9f33d1e4bf1abb57355c094",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T08:31:41.844294+00:00",
+  "attempt_id": "54ac99fa77a724ee0decb784",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 70964,
+  "updated_at": "2026-09-13T08:31:41.844346+00:00",
+  "pid": 70964
+}
