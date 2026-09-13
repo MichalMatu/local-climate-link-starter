@@ -155,6 +155,7 @@ export const ptBr = {
     copy: 'Copiar',
     default: 'Padrões',
     delete: 'Excluir',
+    edit: 'Editar',
     diagnostics: 'Diagnóstico',
     disabled: 'desativado',
     enabled: 'ativado',

@@ -160,6 +160,7 @@ export const fr = {
     copy: 'Copier',
     default: 'Valeurs par défaut',
     delete: 'Supprimer',
+    edit: 'Modifier',
     diagnostics: 'Diagnostic',
     disabled: 'désactivé',
     enabled: 'activé',

@@ -155,6 +155,7 @@ export const es = {
     copy: 'Copiar',
     default: 'Valores predeterminados',
     delete: 'Eliminar',
+    edit: 'Editar',
     diagnostics: 'Diagnóstico',
     disabled: 'desactivado',
     enabled: 'activado',

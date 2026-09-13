@@ -42,11 +42,22 @@ vi.mock(import('@capacitor/core'), async (importOriginal) => {
 });
 
 vi.mock('../screens/rules/RuleDetailScreen.js', () => ({
-  RuleDetailScreen: ({ ruleId, onBack }: { ruleId: string; onBack: () => void }) => (
+  RuleDetailScreen: ({
+    ruleId,
+    onBack,
+    onEdit
+  }: {
+    ruleId: string;
+    onBack: () => void;
+    onEdit?: () => void;
+  }) => (
     <section>
       <p>{`mock-rule-${ruleId}`}</p>
       <button type="button" onClick={onBack}>
         mock-dashboard-back
+      </button>
+      <button type="button" onClick={onEdit}>
+        mock-edit-rule
       </button>
     </section>
   )
@@ -60,22 +71,24 @@ vi.mock('../screens/devices/SensorManagementScreen.js', () => ({
   SensorManagementScreen: () => <section>mock-sensors</section>
 }));
 
-vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
-  HardwareSetupScreen: ({
-    setupIntent,
-    onBackToIntent,
-    onSetupComplete
+vi.mock('../screens/rules/RuleEditorScreen.js', () => ({
+  RuleEditorScreen: ({
+    intent,
+    ruleId,
+    onCancel,
+    onComplete
   }: {
-    setupIntent?: SetupIntent;
-    onBackToIntent?: () => void;
-    onSetupComplete?: () => void;
+    intent?: SetupIntent;
+    ruleId?: string;
+    onCancel: () => void;
+    onComplete: (ruleId: string) => void;
   }) => (
     <section>
-      <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
-      <button type="button" onClick={onBackToIntent}>
+      <p>{ruleId ? `mock-edit-${ruleId}` : `mock-setup-${intent ?? 'none'}`}</p>
+      <button type="button" onClick={onCancel}>
         mock-back
       </button>
-      <button type="button" onClick={onSetupComplete}>
+      <button type="button" onClick={() => onComplete(ruleId ?? 'created-rule')}>
         mock-complete
       </button>
     </section>
@@ -228,6 +241,10 @@ describe('AppRoutes navigation shell', () => {
     const rule = addClimateRule();
     renderRoutes();
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon climate' }));
+    expect(screen.getByText(`mock-rule-${rule.id}`)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-edit-rule' }));
+    expect(screen.getByText(`mock-edit-${rule.id}`)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
     expect(screen.getByText(`mock-rule-${rule.id}`)).toBeVisible();
     expect(screen.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
       'aria-current',

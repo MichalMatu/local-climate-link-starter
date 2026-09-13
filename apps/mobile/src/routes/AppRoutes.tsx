@@ -1,6 +1,6 @@
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import {
@@ -13,11 +13,7 @@ import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 import { PlugManagementScreen } from '../screens/devices/PlugManagementScreen.js';
 import { SensorManagementScreen } from '../screens/devices/SensorManagementScreen.js';
 import { RuleDetailScreen } from '../screens/rules/RuleDetailScreen.js';
-
-const HardwareSetupScreen = lazy(async () => {
-  const module = await import('../screens/hardware-setup/HardwareSetupScreen.js');
-  return { default: module.HardwareSetupScreen };
-});
+import { RuleEditorScreen } from '../screens/rules/RuleEditorScreen.js';
 
 type PrimaryAppRoute =
   | { type: 'dashboard' }
@@ -25,7 +21,8 @@ type PrimaryAppRoute =
   | { type: 'sensors' }
   | { type: 'intent' }
   | { type: 'setup'; intent: SetupIntent }
-  | { type: 'rule'; ruleId: string };
+  | { type: 'rule'; ruleId: string }
+  | { type: 'rule-edit'; ruleId: string };
 type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
@@ -34,6 +31,8 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
       return route.returnTo;
     case 'setup':
       return { type: 'intent' };
+    case 'rule-edit':
+      return { type: 'rule', ruleId: route.ruleId };
     case 'rule':
     case 'intent':
     case 'plugs':
@@ -114,14 +113,23 @@ export const AppRoutes = () => {
           <RuleDetailScreen
             ruleId={route.ruleId}
             onBack={() => navigate({ type: 'dashboard' })}
+            onEdit={() => navigate({ type: 'rule-edit', ruleId: route.ruleId })}
           />
         );
       case 'setup':
         return (
-          <HardwareSetupScreen
-            setupIntent={route.intent}
-            onBackToIntent={() => navigate({ type: 'intent' })}
-            onSetupComplete={() => navigate({ type: 'dashboard' })}
+          <RuleEditorScreen
+            intent={route.intent}
+            onCancel={() => navigate({ type: 'intent' })}
+            onComplete={(ruleId) => navigate({ type: 'rule', ruleId })}
+          />
+        );
+      case 'rule-edit':
+        return (
+          <RuleEditorScreen
+            ruleId={route.ruleId}
+            onCancel={() => navigate({ type: 'rule', ruleId: route.ruleId })}
+            onComplete={(ruleId) => navigate({ type: 'rule', ruleId })}
           />
         );
     }

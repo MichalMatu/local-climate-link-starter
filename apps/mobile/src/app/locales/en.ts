@@ -156,6 +156,7 @@ export const en = {
     copy: 'Copy',
     default: 'Defaults',
     delete: 'Delete',
+    edit: 'Edit',
     diagnostics: 'Diagnostics',
     disabled: 'disabled',
     enabled: 'enabled',

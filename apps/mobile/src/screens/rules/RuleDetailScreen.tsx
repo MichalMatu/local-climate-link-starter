@@ -14,9 +14,10 @@ import './RuleDetailScreen.css';
 type RuleDetailScreenProps = {
   ruleId: string;
   onBack(): void;
+  onEdit?(): void;
 };
 
-export const RuleDetailScreen = ({ ruleId, onBack }: RuleDetailScreenProps) => {
+export const RuleDetailScreen = ({ ruleId, onBack, onEdit }: RuleDetailScreenProps) => {
   const { t } = useTranslation();
   const { rule, plug, runtime, action } = useRuleRuntime(ruleId);
   const sensor = useSensorStore((state) =>
@@ -141,6 +142,11 @@ export const RuleDetailScreen = ({ ruleId, onBack }: RuleDetailScreenProps) => {
         </article>
 
         <article className="automation-card rule-detail-card">
+          {onEdit && (
+            <button className="secondary-action" type="button" onClick={onEdit}>
+              {t('common.edit')}
+            </button>
+          )}
           <button
             className="secondary-action secondary-action--danger"
             type="button"

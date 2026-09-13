@@ -155,6 +155,7 @@ export const pl = {
     copy: 'Kopiuj',
     default: 'Domyślne',
     delete: 'Usuń',
+    edit: 'Edytuj',
     diagnostics: 'Diagnostyka',
     disabled: 'wyłączone',
     enabled: 'włączone',
