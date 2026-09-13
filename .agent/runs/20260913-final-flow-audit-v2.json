@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-final-flow-audit-v2",
+  "task_digest": "fb6369ea8fe993c4c3bd00bb04b7648a349a0705d02925139f73b29bb80edbb2",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T19:12:17.469531+00:00",
+  "attempt_id": "01aeebe23da65f37774b6366",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 50982,
+  "updated_at": "2026-09-13T19:12:17.469584+00:00",
+  "pid": 50982
+}
