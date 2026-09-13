@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-plug-management-foundation-retry",
+  "task_digest": "5c5f12edb3090e5bd3ac57b0db20e3b383f2deb894b4116a48c48f0efff5fddf",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T08:33:13.854074+00:00",
+  "attempt_id": "1779f06952d35e33ee88d25c",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 72779,
+  "updated_at": "2026-09-13T08:33:13.854183+00:00",
+  "pid": 72779
+}
