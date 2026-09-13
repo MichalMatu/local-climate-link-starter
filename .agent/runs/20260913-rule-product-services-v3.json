@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 1,
+  "index": 2,
   "total": 2,
-  "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-rule-product-services-v2.sh > /tmp/lcl-rule-product-services-v3-base.sh && (bash /tmp/lcl-rule-product-services-v3-base.sh || true)",
-  "pid": 74713,
+  "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-rule-product-services-repair-v3.sh > /tmp/lcl-rule-product-services-repair-v3.sh && bash /tmp/lcl-rule-product-services-repair-v3.sh",
+  "pid": 74892,
   "timeout": 7200,
   "idle_timeout": 1200,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-13T22:11:44.097305+00:00",
-  "stage_name": "command-1",
-  "stage_index": 1,
+  "started_at": "2026-09-13T22:11:51.123073+00:00",
+  "stage_name": "command-2",
+  "stage_index": 2,
   "stage_total": 2,
   "stage_phase": "commands",
   "task_id": "20260913-rule-product-services-v3",
@@ -18,5 +18,5 @@
   "task_digest": "f5e4ee699cd1d81bc2c3ae175258e6947e5fa72066b23af629876b7ceef0ac76",
   "daemon_version": "4.18.20",
   "daemon_pid": 74593,
-  "updated_at": "2026-09-13T22:11:44.097557+00:00"
+  "updated_at": "2026-09-13T22:11:51.210044+00:00"
 }
