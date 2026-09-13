@@ -4,9 +4,14 @@ Branch: `work/device-rule-decoupling-20260913`. Do not merge to `main`.
 
 ## Current checkpoint
 
-Phase A implemented and focused checks passed. This document is part of
-its implementation commit (find its SHA with `git log --oneline -- this-file`).
-Parent HEAD before implementation: `7eebee4b5a68293039dd2cfa86c4e14a778a0236`. The next checkpoint records the concrete implementation SHA.
+HEAD entering this checkpoint: `a3da0a14` (Phase A). Phase B1 adds the independently
+reviewable plug runtime services and hardware smoke; standalone UI and product
+cutover remain outstanding. This document is updated in the B1 implementation
+commit; its SHA is recorded by the next checkpoint.
+
+Completed implementation commit:
+
+- `a3da0a14` — Phase A: independent device/rule models, persistence and ownership.
 
 ## Completed work
 
@@ -26,6 +31,20 @@ Parent HEAD before implementation: `7eebee4b5a68293039dd2cfa86c4e14a778a0236`. T
   for extracted helpers without compatibility re-exports.
 - ADR-0006 records the approved architecture.
 
+## Phase B1 services
+
+- `shelly-client/inventory.ts`: validated method inventory, all exact script ids and
+  Switch.GetStatus (no default OFF for missing data).
+- Plug registration checks device identity/profile and relay status without calling
+  Scripts/BLE/schedules. Runtime inventory distinguishes absent APIs from failed RPCs.
+- Direct unowned ON/OFF verifies physical identity, ownership and actual output.
+  Failed command verification forces and rereads OFF.
+- Orphan cleanup protects owned and unrelated scripts, checks exact name/id again
+  after stopping, deletes only that id, then verifies absence and OFF.
+- `scripts/hardware/device-rule-plug-smoke.ts` exercises these services against the
+  explicitly selected development device. Requires SHELLY_URL + SHELLY_DEVICE_ID;
+  refuses to remove pre-existing scripts or schedules.
+
 ## Verification
 
 - Installed locked dependencies with `pnpm install --frozen-lockfile`; no dependency
@@ -34,6 +53,7 @@ Parent HEAD before implementation: `7eebee4b5a68293039dd2cfa86c4e14a778a0236`. T
 - New ownership tests: 11 passed.
 - Existing time config/runtime tests: 12 passed.
 - Script generator: 94 passed, including snapshots and runtime matrix.
+- B1 plug service tests: 15 passed. Shelly client: 49 passed (3 new inventory tests).
 - Mobile typecheck, workspace lint, `pnpm quality:repo` and `pnpm quality:ux` passed after final fixes.
 - `pnpm build` passed for all workspaces. `pnpm format:check` passed after formatting
   the supplied plan (format-only baseline issue) and a new test file.
@@ -43,20 +63,33 @@ Parent HEAD before implementation: `7eebee4b5a68293039dd2cfa86c4e14a778a0236`. T
 
 ## Hardware and visual state
 
-No hardware mutation in Phase A; relay state was not read or changed.
+2026-09-13 Phase B1 service smoke passed on local Shelly Plug S Gen3, firmware 1.7.5:
+
+- stored a plug in an isolated registry with zero rules;
+- actual ON verified, actual OFF verified;
+- installed a disposable generated LCL climate script, listed its exact orphan id;
+- raw ON was blocked while the orphan was present;
+- deleted exact orphan, verified absence, registry still contained the plug;
+- final `Switch.GetStatus` explicitly verified **OFF**, no test scripts left.
+
+Command: `SHELLY_URL=<local endpoint> SHELLY_DEVICE_ID=<verified physical id> pnpm exec tsx scripts/hardware/device-rule-plug-smoke.ts`.
+This is service-level hardware validation, **not** an app UI/route acceptance test.
+Plan scenarios 3–9 and complete app-based scenarios 1–2 remain outstanding.
+
 No UI changes or visual audit yet. No callable ChatGPT execution sandbox is exposed
 in this session; software checks use the supplied local workspace. Phase B/C must
 record the responsive visual audit and any unavailable sandbox validation explicitly.
 
 ## Remaining work and exact next step
 
-1. Finish Phase A checks and commit this coherent foundation; record its SHA here.
+1. Finish B1 checks and commit this coherent service slice; record its SHA here.
 2. Phase B: inspect full Shelly/Sensor pages and adjacent tests, extract dedicated
    management flows, replace device ownership in the hardware draft with new
    registries (no fallback readers), add standalone routes and lifecycle wrappers.
-3. Add live plug registration/status/inventory, direct unowned ON/OFF and exact
-   orphan cleanup services with focused tests. Verify device id at the current
-   endpoint before mutation. Keep raw control away from climate AUTO owners.
+3. Wire the tested B1 services to those flows, resolving the latest registry records
+   at each operation; serialize mutations per physical plug (including future rule
+   deployment) and invalidate endpoint-sensitive queries. Keep raw control away
+   from climate AUTO owners.
 4. Phase C: four-item navigation, Rules dashboard and existing-device selectors;
    migrate Android back behavior and all locales/E2E fixtures.
 5. Phase D: move climate/time runtime callers to resolved rule references, preserve

@@ -7,6 +7,7 @@ Public API:
 - `ShellyClient`
 - `FetchShellyRpcTransport`
 - `RpcShellyClient`
+- `RpcShellyInventoryClient` — validated method/script inventories and exact relay-0 status
 - `FakeShellyClient`
 - `RPC_METHODS`
 - `createInstallPlan`
