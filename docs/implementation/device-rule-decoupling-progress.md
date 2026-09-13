@@ -182,3 +182,24 @@ Checkpoint verification completed:
   this checkpoint made no relay changes and makes no claim about its current state.
 - Existing responsive E2E verifies regression behavior only; it does not constitute
   acceptance of the outstanding standalone screens or rule cutover.
+
+### Hardware follow-up — management checkpoint `2b0777aa`
+
+2026-09-13, user supplied the current development plug endpoint and connected
+Android phone. Validated Shelly Plug S Gen3, firmware 1.7.5, Matter disabled.
+
+- Initial smoke correctly refused a pre-existing script. Inventory contained only
+  the running `Local Climate Link Thermostat` at exact id 1 and no schedules.
+- Under standing developer-artifact authority, removed that exact LCL script using
+  the validated orphan-removal service; confirmed absence and relay OFF.
+- Reran `device-rule-plug-smoke.ts` through the new management service: registration
+  with zero rules, actual relay ON, actual relay OFF, generated orphan inventory,
+  blocked raw ON while orphan existed, exact orphan removal and preserved plug
+  registry all passed.
+- Final `Switch.GetStatus`: **OFF**. No scripts or schedules remain.
+- ADB connected to Samsung SM-S906B. Installed app version 2.0.10 starts; Bluetooth
+  SCAN and CONNECT permissions are granted. Inspected a native screenshot: existing
+  Climate/Time navigation remains and the old installed entry reports attention
+  after its disposable runtime script was removed.
+- No APK update or app-data reset performed. This is hardware service validation
+  and native baseline inspection, not acceptance of the unfinished product cutover.
