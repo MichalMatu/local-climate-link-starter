@@ -1,7 +1,7 @@
 import { RPC_METHODS } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
 import { climate, plug, time } from '../../registry/fixtures.test-support.js';
-import { createDailyScheduleJob } from '../../time-automation/scheduleJobs.js';
+import { createRuleScheduleJob } from '../../rules/timeSchedule.js';
 import { readPlugRuntime } from './inventory.js';
 import { checkPlugRegistration } from './registration.js';
 import { deleteOrphanClimateScript, setUnownedPlugRelay } from './runtime.js';
@@ -86,7 +86,7 @@ describe('standalone plug services', () => {
     );
     setScripts([]);
     setJobs([
-      { id: 11, ...createDailyScheduleJob({ ...time.config, relayId: 0 }, true) }
+      { id: 11, ...createRuleScheduleJob(time.config.schedule.windows[0]!, 0, 'on') }
     ]);
     expect((await setUnownedPlugRelay({ plug, rules: [], on: true, clients })).ok).toBe(
       false

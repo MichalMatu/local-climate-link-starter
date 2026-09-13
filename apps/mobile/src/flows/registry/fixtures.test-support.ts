@@ -34,6 +34,7 @@ export const climate = climateRuleSchema.parse({
   relayId: 0,
   sensorId: sensor.id,
   config: { rule: config.rule, diagnostics: config.diagnostics },
+  schedule: null,
   deployment: null,
   createdAtMs: 2,
   updatedAtMs: 2
@@ -45,7 +46,11 @@ export const time = timeRuleSchema.parse({
   name: 'Morning',
   plugId: plug.id,
   relayId: 0,
-  config: { onTime: '08:00', offTime: '20:00' },
+  config: {
+    schedule: {
+      windows: [{ days: [0, 1, 2, 3, 4, 5, 6], start: '08:00', end: '20:00' }]
+    }
+  },
   deployment: null,
   createdAtMs: 2,
   updatedAtMs: 2

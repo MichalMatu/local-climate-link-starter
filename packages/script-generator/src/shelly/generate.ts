@@ -1,3 +1,4 @@
+import { parseRuleClockMinutes } from '@lcl/automation-core';
 import { GENERATOR_VERSION, normalizeConfig } from './config.js';
 import type { ShellyThermostatConfig } from './config.js';
 import { configHash, stableStringify } from './hash.js';
@@ -20,24 +21,38 @@ const runtimeModeForConfig = (
     ? 'tp357-minimal'
     : 'xiaomi-bthome-minimal';
 
-const createRuntimeConfig = (config: ShellyThermostatConfig, hash: string) => ({
-  a: compactAddress(config.sensor.runtimeAddress),
-  fa: config.sensor.runtimeAddress,
-  n: config.sensor.displayName,
-  k: hash,
-  i: config.output.relayId,
-  r: config.rule.rssiMin,
-  on: config.rule.control.onThreshold,
-  off: config.rule.control.offThreshold,
-  d: config.rule.control.direction === 'above' ? 1 : 0,
-  m: config.rule.control.metric === 'humidity' ? 1 : 0,
-  h: config.rule.consecutiveHits,
-  c: config.rule.minChangeMs,
-  s: config.rule.staleTimeoutSec * 1000,
-  x: config.rule.maxOnMs,
-  v: config.version,
-  vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0
-});
+const createRuntimeConfig = (config: ShellyThermostatConfig, hash: string) => {
+  const base = {
+    a: compactAddress(config.sensor.runtimeAddress),
+    fa: config.sensor.runtimeAddress,
+    n: config.sensor.displayName,
+    k: hash,
+    i: config.output.relayId,
+    r: config.rule.rssiMin,
+    on: config.rule.control.onThreshold,
+    off: config.rule.control.offThreshold,
+    d: config.rule.control.direction === 'above' ? 1 : 0,
+    m: config.rule.control.metric === 'humidity' ? 1 : 0,
+    h: config.rule.consecutiveHits,
+    c: config.rule.minChangeMs,
+    s: config.rule.staleTimeoutSec * 1000,
+    x: config.rule.maxOnMs,
+    v: config.version,
+    vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0
+  };
+  if (!config.schedule) return base;
+  return {
+    ...base,
+    tw: config.schedule.windows.map((window) => {
+      const start = parseRuleClockMinutes(window.start);
+      const end = parseRuleClockMinutes(window.end);
+      if (start === null || end === null) {
+        throw new Error('Validated rule schedule contains an invalid clock time.');
+      }
+      return [window.days, start, end];
+    })
+  };
+};
 
 const renderThresholdHelper = (config: ShellyThermostatConfig): string => {
   if (!config.rule.vpdAssist.enabled) {
@@ -72,6 +87,12 @@ const renderRuntimeParser = (config: ShellyThermostatConfig): string =>
     ? renderTp357MinimalParser()
     : renderBthomeMinimalParser();
 
+const renderScheduleWindowHelper = (config: ShellyThermostatConfig): string => {
+  if (!config.schedule) return '';
+
+  return `function aw(){var y=Shelly.getComponentStatus("sys");if(!y||y.time===null||y.time===undefined||y.unixtime===null||y.unixtime===undefined)return-1;var q=String(y.time).split(":"),hh,mm;if(q.length<2)return-1;hh=Number(q[0]);mm=Number(q[1]);if(hh<0||hh>23||mm<0||mm>59)return-1;var lm=hh*60+mm,u=y.unixtime%86400;if(u<0)u+=86400;var um=Math.floor(u/60),z=lm-um;while(z<-720)z+=1440;while(z>840)z-=1440;var ld=Math.floor((Math.floor(y.unixtime/60)+z)/1440),d=(ld+4)%7;if(d<0)d+=7;for(var j=0;j<C.tw.length;j++){var w=C.tw[j],ds=w[0],a=w[1],b=w[2];if(a<b){if(ds.indexOf(d)>=0&&lm>=a&&lm<b)return 1;}else{var p=(d+6)%7;if((ds.indexOf(d)>=0&&lm>=a)||(ds.indexOf(p)>=0&&lm<b))return 1;}}return 0;}`;
+};
+
 const renderRuntimeState = (config: ShellyThermostatConfig): string =>
   config.sensor.profileId === 'xiaomi_lywsd03mmc_bthome_v2' ||
   config.rule.vpdAssist.enabled
@@ -79,7 +100,11 @@ const renderRuntimeState = (config: ShellyThermostatConfig): string =>
     : 'var R={ls:null,l:0,t:null,h:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,m:0,sa:0};';
 
 const renderMeasurementHelper = (config: ShellyThermostatConfig): string => {
+  const scheduleGuard = config.schedule
+    ? 'var W=aw();if(!R.m&&W<=0){R.ds=W<0?"nt":"tw";sw(false,W<0?"nt":"tw",true);return;}'
+    : '';
   const commonDecision =
+    scheduleGuard +
     'R.ds="ok";var T=th(t,h);R.eo=T.o;R.ef=T.f;R.vp=C.vp?vd(t,h):null;var go=C.d?v>T.o:v<T.o,stop=C.d?v<T.f:v>T.f,gr=C.d?"ab":"bl",sr=C.d?"bl":"ab";if(go){R.nh++;R.fh=0;if(R.nh<C.h){sw(R.on,gr+"h",false);return;}sw(true,gr,false);return;}if(stop){R.fh++;R.nh=0;sw(false,sr,false);return;}R.nh=0;R.fh=0;sw(R.on,"ib",false);';
 
   if (config.sensor.profileId === 'xiaomi_lywsd03mmc_bthome_v2') {
@@ -103,11 +128,12 @@ export const generateShellyThermostatScript = (input: unknown): string => {
   const body = `var C=${cfgJson};
 ${renderRuntimeState(config)}
 function nw(){return Shelly.getUptimeMs();}
+${renderScheduleWindowHelper(config)}
 function na(a){if(a===undefined||a===null)return"";var s=String(a).toUpperCase(),o="";for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c!==":"&&c!=="-")o+=c;}return o;}
 function fv(o,k){return o&&o[k]!==undefined?o[k]:null;}
 function s(o,c){Shelly.call("Switch.Set",{id:C.i,on:o},c)}
 function sw(o,q,f){if(R.m)return;var n=nw(),c=R.on!=o;if(o&&!f&&c&&n-R.lc<C.c){R.rs="mc";return;}s(o,function(r,e){if(R.m)return s(false);if(e){R.rs="se";s(false);R.on=false;return;}R.on=o;R.rs=q;if(c)R.lc=n;R.os=o?n:null;});}
-function stale(){var n=nw();if(R.ls===null||n-R.ls>C.s){R.ds="st";R.nh=0;R.fh=0;sw(false,"st",true);return;}if(R.on&&R.os!==null&&n-R.os>=C.x){R.nh=0;R.fh=0;sw(false,"mx",true);}}
+function stale(){${config.schedule ? 'var W=aw();if(!R.m&&W<=0){R.ds=W<0?"nt":"tw";R.nh=0;R.fh=0;sw(false,W<0?"nt":"tw",true);return;}' : ''}var n=nw();if(R.ls===null||n-R.ls>C.s){R.ds="st";R.nh=0;R.fh=0;sw(false,"st",true);return;}if(R.on&&R.os!==null&&n-R.os>=C.x){R.nh=0;R.fh=0;sw(false,"mx",true);}}
 ${renderThresholdHelper(config)}
 ${renderMeasurementHelper(config)}
 ${renderRuntimeParser(config)}

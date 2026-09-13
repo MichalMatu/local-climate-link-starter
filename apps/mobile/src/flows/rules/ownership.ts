@@ -1,4 +1,3 @@
-import { createDailyScheduleJob, jobMatches } from '../time-automation/scheduleJobs.js';
 import {
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   type ShellyScheduleJob
@@ -6,6 +5,7 @@ import {
 import { normalizePlugId, type SavedPlug } from '../devices/plugs/model.js';
 import { scheduleJobControlsRelay } from '../time-automation/scheduleOwnership.js';
 import type { AutomationRule } from './model.js';
+import { expectedTimeRulePair, ruleScheduleJobMatches } from './timeSchedule.js';
 
 export type LiveScript = { id: number; name: string; running: boolean };
 export type RelayInventory =
@@ -36,8 +36,6 @@ export type RelayOwnership = {
   attention: Extract<RelayConflict, { kind: 'stale-deployment-metadata' }>[];
 };
 
-// Only a complete inventory for the current physical device and endpoint may
-// release an owner. An offline read is never evidence of a missing deployment.
 export const resolveRelayOwnership = ({
   plug,
   relayId,
@@ -72,6 +70,7 @@ export const resolveRelayOwnership = ({
       attention
     };
   }
+
   const managedScripts = inventory.scripts.filter(
     (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
   );
@@ -98,38 +97,48 @@ export const resolveRelayOwnership = ({
           if (script) conflicts.push(issue);
         }
       } else {
-        const { onJobId, offJobId } = rule.deployment;
-        const present = inventory.schedules.filter(
-          (job) => job.id === onJobId || job.id === offJobId
-        );
-        missing = present.length === 0;
-        const config = { ...rule.config, relayId: rule.relayId };
-        const matched =
-          jobMatches(
-            present.find((job) => job.id === onJobId) ?? null,
-            createDailyScheduleJob(config, true)
-          ) &&
-          jobMatches(
-            present.find((job) => job.id === offJobId) ?? null,
-            createDailyScheduleJob(config, false)
-          );
-        if (!matched) {
-          const issue = {
+        const pairs = rule.deployment.pairs;
+        let presentCount = 0;
+        let allMatch = true;
+        for (const pair of pairs) {
+          ownedJobIds.add(pair.onJobId);
+          ownedJobIds.add(pair.offJobId);
+          const onJob =
+            inventory.schedules.find((job) => job.id === pair.onJobId) ?? null;
+          const offJob =
+            inventory.schedules.find((job) => job.id === pair.offJobId) ?? null;
+          if (onJob) presentCount += 1;
+          if (offJob) presentCount += 1;
+          const expected = expectedTimeRulePair(rule, pair.windowIndex);
+          if (
+            !ruleScheduleJobMatches(onJob, expected.on) ||
+            !ruleScheduleJobMatches(offJob, expected.off)
+          ) {
+            allMatch = false;
+          }
+        }
+        const expectedCount = pairs.length * 2;
+        missing = presentCount === 0;
+        if (!allMatch) {
+          const issue: Extract<RelayConflict, { kind: 'stale-deployment-metadata' }> = {
             kind: 'stale-deployment-metadata',
             ruleId: rule.id,
-            remote: missing ? 'missing' : present.length === 1 ? 'partial' : 'mismatch'
-          } as const;
+            remote: missing
+              ? 'missing'
+              : presentCount < expectedCount
+                ? 'partial'
+                : 'mismatch'
+          };
           attention.push(issue);
           if (!missing) conflicts.push(issue);
         }
-        // These ids are still protected by their rule even when the jobs drift.
-        ownedJobIds.add(onJobId);
-        ownedJobIds.add(offJobId);
       }
     }
-    if (!missing && rule.id !== editingRuleId)
+    if (!missing && rule.id !== editingRuleId) {
       conflicts.push({ kind: 'saved-rule-owner', ruleId: rule.id });
+    }
   }
+
   for (const script of managedScripts) {
     const owner = rules.find(
       (rule) =>
@@ -137,18 +146,20 @@ export const resolveRelayOwnership = ({
         rule.plugId === plug.id &&
         rule.deployment?.scriptId === script.id
     );
-    if (!owner)
+    if (!owner) {
       conflicts.push({ kind: 'orphan-managed-climate-script', scriptId: script.id });
-    else if (owner.id !== editingRuleId)
+    } else if (owner.id !== editingRuleId) {
       conflicts.push({
         kind: 'owned-live-climate-script',
         scriptId: script.id,
         ruleId: owner.id
       });
+    }
   }
   for (const job of jobs) {
-    if (!ownedJobIds.has(job.id))
+    if (!ownedJobIds.has(job.id)) {
       conflicts.push({ kind: 'unmanaged-native-schedule', jobId: job.id });
+    }
   }
   return { status: conflicts.length ? 'blocked' : 'no-conflict', conflicts, attention };
 };

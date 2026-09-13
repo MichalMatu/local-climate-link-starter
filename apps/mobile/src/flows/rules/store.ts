@@ -36,7 +36,10 @@ export const createRuleStore = (
             existing.sensorId !== rule.sensorId);
         const desiredConfigChanged =
           existing.kind === rule.kind &&
-          JSON.stringify(existing.config) !== JSON.stringify(rule.config);
+          (JSON.stringify(existing.config) !== JSON.stringify(rule.config) ||
+            (existing.kind === 'climate' &&
+              rule.kind === 'climate' &&
+              JSON.stringify(existing.schedule) !== JSON.stringify(rule.schedule)));
         if (bindingChanged || desiredConfigChanged) {
           return {
             ok: false,

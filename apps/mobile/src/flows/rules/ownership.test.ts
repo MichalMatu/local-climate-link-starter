@@ -1,9 +1,9 @@
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
 import { describe, expect, it } from 'vitest';
 import { climate, plug, time } from '../registry/fixtures.test-support.js';
-import { createDailyScheduleJob } from '../time-automation/scheduleJobs.js';
-import type { AutomationRule } from './model.js';
+import type { AutomationRule, TimeRule } from './model.js';
 import { resolveRelayOwnership, type RelayInventory } from './ownership.js';
+import { createRuleScheduleJob, expectedTimeRulePair } from './timeSchedule.js';
 
 const script = { id: 7, name: LOCAL_CLIMATE_LINK_SCRIPT_NAME, running: true };
 const climateDeployed = {
@@ -14,10 +14,14 @@ const climateDeployed = {
     safetyTest: { status: 'pending' as const }
   }
 };
-const timeDeployed = { ...time, deployment: { onJobId: 8, offJobId: 9 } };
+const timeDeployed: TimeRule = {
+  ...time,
+  deployment: { pairs: [{ windowIndex: 0, onJobId: 8, offJobId: 9 }] }
+};
+const expectedTime = expectedTimeRulePair(timeDeployed, 0);
 const jobs = [
-  { id: 8, ...createDailyScheduleJob({ ...time.config, relayId: 0 }, true) },
-  { id: 9, ...createDailyScheduleJob({ ...time.config, relayId: 0 }, false) }
+  { id: 8, ...expectedTime.on },
+  { id: 9, ...expectedTime.off }
 ];
 const inventory = (
   patch: Partial<Extract<RelayInventory, { status: 'verified' }>> = {}
@@ -130,20 +134,26 @@ describe('relay ownership', () => {
         [],
         inventory({
           schedules: [
-            { id: 1, ...createDailyScheduleJob({ ...time.config, relayId: 1 }, true) }
+            {
+              id: 1,
+              ...createRuleScheduleJob(time.config.schedule.windows[0]!, 1, 'on')
+            }
           ]
         })
       ).status
     ).toBe('no-conflict');
   });
 
-  it('allows only the exact schedule pair when editing its rule', () => {
+  it('allows only every exact schedule pair when editing its rule', () => {
     expect(resolve([timeDeployed], inventory({ schedules: jobs }), time.id).status).toBe(
       'no-conflict'
     );
     expect(
       resolve([timeDeployed], inventory({ schedules: jobs })).conflicts
-    ).toContainEqual({ kind: 'saved-rule-owner', ruleId: time.id });
+    ).toContainEqual({
+      kind: 'saved-rule-owner',
+      ruleId: time.id
+    });
     expect(
       resolve([timeDeployed], inventory({ schedules: [jobs[0]!] }), time.id).conflicts
     ).toContainEqual({
@@ -161,6 +171,44 @@ describe('relay ownership', () => {
       kind: 'stale-deployment-metadata',
       ruleId: time.id,
       remote: 'mismatch'
+    });
+  });
+
+  it('tracks every pair for a multi-window time deployment', () => {
+    const multi: TimeRule = {
+      ...time,
+      config: {
+        schedule: {
+          windows: [
+            { days: [1, 2, 3, 4, 5], start: '08:00', end: '10:00' },
+            { days: [6, 0], start: '09:00', end: '11:00' }
+          ]
+        }
+      },
+      deployment: {
+        pairs: [
+          { windowIndex: 0, onJobId: 20, offJobId: 21 },
+          { windowIndex: 1, onJobId: 22, offJobId: 23 }
+        ]
+      }
+    };
+    const schedules = multi.deployment!.pairs.flatMap((pair) => {
+      const expected = expectedTimeRulePair(multi, pair.windowIndex);
+      return [
+        { id: pair.onJobId, ...expected.on },
+        { id: pair.offJobId, ...expected.off }
+      ];
+    });
+    expect(resolve([multi], inventory({ schedules }), multi.id).status).toBe(
+      'no-conflict'
+    );
+    expect(
+      resolve([multi], inventory({ schedules: schedules.slice(0, -1) }), multi.id)
+        .conflicts
+    ).toContainEqual({
+      kind: 'stale-deployment-metadata',
+      ruleId: multi.id,
+      remote: 'partial'
     });
   });
 

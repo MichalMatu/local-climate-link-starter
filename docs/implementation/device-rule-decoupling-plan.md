@@ -291,8 +291,11 @@ type TimeRule = {
     schedule: RuleSchedule;
   };
   deployment: null | {
-    onJobId: number;
-    offJobId: number;
+    pairs: Array<{
+      windowIndex: number;
+      onJobId: number;
+      offJobId: number;
+    }>;
   };
   createdAtMs: number;
   updatedAtMs: number;
@@ -303,7 +306,7 @@ The current UI may initially expose only one every-day time window, but persiste
 
 For a climate rule, `schedule: null` means climate control is unrestricted by time. When a schedule is present, its windows are OR conditions: the climate algorithm may control the relay only inside an active window. Outside all active windows the required state is OFF. If local time cannot be trusted while a climate time constraint is enabled, fail closed to OFF and surface runtime attention rather than guessing.
 
-For a standalone time rule, the schedule is the primary automation and should continue to compile/deploy to native Shelly schedule resources when supported. Do not create those native schedule jobs for a climate rule's time constraint.
+For a standalone time rule, the schedule is the primary automation and should continue to compile/deploy to native Shelly schedule resources when supported. Do not create those native schedule jobs for a climate rule's time constraint. Each normalized time-rule window owns one exact ON/OFF native schedule pair; deployment metadata stores every pair so multi-window cleanup and drift detection remain exact.
 
 Do not duplicate the full plug snapshot in every rule. Resolve `plugId` through the plug store. Resolve `sensorId` through the sensor store.
 

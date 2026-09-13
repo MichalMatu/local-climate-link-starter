@@ -170,6 +170,7 @@ describe('independent device and rule registries', () => {
       displayName: 'Renamed',
       runtimeAddress: sensor.runtimeAddress
     });
+    expect(config.ok && config.value.schedule).toBeNull();
   });
 
   it.each(['pending', 'failed', 'verified'] as const)(
@@ -277,12 +278,28 @@ describe('independent device and rule registries', () => {
     expect(
       automationRuleSchema.safeParse({
         ...time,
-        config: { onTime: '08:00', offTime: '08:00' }
+        config: {
+          schedule: { windows: [{ days: [1], start: '08:00', end: '08:00' }] }
+        }
       }).success
     ).toBe(false);
     expect(
-      automationRuleSchema.safeParse({ ...time, deployment: { onJobId: 4, offJobId: 4 } })
-        .success
+      automationRuleSchema.safeParse({
+        ...time,
+        deployment: { pairs: [{ windowIndex: 0, onJobId: 4, offJobId: 4 }] }
+      }).success
+    ).toBe(false);
+    expect(
+      automationRuleSchema.safeParse({
+        ...climate,
+        schedule: { windows: [{ days: [1, 1], start: '08:00', end: '09:00' }] }
+      }).success
+    ).toBe(false);
+    expect(
+      automationRuleSchema.safeParse({
+        ...time,
+        deployment: { pairs: [{ windowIndex: 1, onJobId: 4, offJobId: 5 }] }
+      }).success
     ).toBe(false);
   });
 });

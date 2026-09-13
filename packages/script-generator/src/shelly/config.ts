@@ -1,9 +1,13 @@
-import { climateSettingsSchema } from './climateSettings.js';
-import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
+import {
+  defaultRuleForPreset,
+  normalizeRuleSchedule,
+  type RulePresetId
+} from '@lcl/automation-core';
 import { outputProfileIdSchema, sensorProfileIdSchema } from '@lcl/device-profiles';
 import { z } from 'zod';
+import { climateSettingsSchema } from './climateSettings.js';
 
-export const GENERATOR_VERSION = '0.2.0';
+export const GENERATOR_VERSION = '0.3.0';
 
 const shellyRuntimeAddressSchema = z
   .string()
@@ -11,10 +15,40 @@ const shellyRuntimeAddressSchema = z
   .regex(/^([0-9a-f]{2}:){5}[0-9a-f]{2}$/i, 'Invalid Shelly runtime address.')
   .transform((value) => value.toUpperCase());
 
+const clockTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const generatorWeekdaySchema = z.union([
+  z.literal(0),
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(4),
+  z.literal(5),
+  z.literal(6)
+]);
+
+const generatorTimeWindowSchema = z
+  .object({
+    days: z
+      .array(generatorWeekdaySchema)
+      .min(1)
+      .max(7)
+      .refine((days) => new Set(days).size === days.length),
+    start: z.string().regex(clockTimePattern),
+    end: z.string().regex(clockTimePattern)
+  })
+  .strict()
+  .refine((window) => window.start !== window.end, { path: ['end'] });
+
+const generatorScheduleSchema = z
+  .object({ windows: z.array(generatorTimeWindowSchema).min(1).max(16) })
+  .strict()
+  .transform((schedule) => normalizeRuleSchedule(schedule));
+
 export const shellyThermostatConfigSchema = climateSettingsSchema
   .innerType()
   .extend({
     version: z.literal(1),
+    schedule: generatorScheduleSchema.nullable().default(null),
     sensor: z.object({
       profileId: sensorProfileIdSchema,
       sensorId: z.string().min(1),
@@ -47,6 +81,7 @@ export const createDefaultShellyThermostatConfig = (
 
   return {
     version: 1,
+    schedule: null,
     sensor: {
       profileId: sensorProfileId,
       sensorId:

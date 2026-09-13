@@ -70,6 +70,7 @@ export const resolveClimateGeneratorConfig = (
   const parsed = shellyThermostatConfigSchema.safeParse({
     version: 1,
     ...rule.config,
+    schedule: rule.schedule,
     sensor: {
       profileId: sensor.profileId,
       sensorId: sensor.id,
