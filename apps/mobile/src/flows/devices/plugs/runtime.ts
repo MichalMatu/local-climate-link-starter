@@ -40,6 +40,8 @@ export const setUnownedPlugRelay = async ({
       ok: false,
       error: { kind: 'relay-owned', conflicts: initial.value.ownership.conflicts }
     };
+  const currentIdentity = await verifyPlugIdentity(plug, clients);
+  if (!currentIdentity.ok) return currentIdentity;
   const command = fromShellyResult(
     on
       ? await clients.device.setRelayOn({ relayId: 0 })
@@ -110,6 +112,8 @@ export const deleteOrphanClimateScript = async ({
   ) {
     return { ok: false, error: { kind: 'script-unconfirmed' } };
   }
+  const currentIdentity = await verifyPlugIdentity(plug, clients);
+  if (!currentIdentity.ok) return currentIdentity;
   const deleted = fromShellyResult(await clients.device.deleteScript(scriptId));
   const finalOff = await forceOff(plug, clients);
   if (!finalOff.ok) return finalOff;

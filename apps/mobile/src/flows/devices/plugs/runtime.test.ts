@@ -208,6 +208,19 @@ describe('standalone plug services', () => {
     expect(clients.device.setRelayOff).not.toHaveBeenCalled();
   });
 
+  it('re-verifies physical identity immediately before direct relay mutation', async () => {
+    const { clients } = fixture();
+    vi.mocked(clients.device.getDeviceInfo)
+      .mockResolvedValueOnce(ok({ id: plug.id, model: plug.model, gen: plug.gen }))
+      .mockResolvedValueOnce(ok({ id: 'different', model: plug.model, gen: plug.gen }));
+    expect(await setUnownedPlugRelay({ plug, rules: [], on: true, clients })).toEqual({
+      ok: false,
+      error: { kind: 'identity-mismatch' }
+    });
+    expect(clients.device.setRelayOn).not.toHaveBeenCalled();
+    expect(clients.device.setRelayOff).not.toHaveBeenCalled();
+  });
+
   it('an unconfirmed ON command forces and verifies OFF', async () => {
     const { clients, calls, isOn } = fixture();
     const original = clients.device.setRelayOn;
@@ -284,6 +297,20 @@ describe('exact orphan script removal', () => {
       expect(clients.device.deleteScript).not.toHaveBeenCalled();
     }
   );
+
+  it('re-verifies physical identity immediately before deleting an orphan script', async () => {
+    const { clients, setScripts } = fixture();
+    setScripts([{ ...script, running: false }]);
+    vi.mocked(clients.device.getDeviceInfo)
+      .mockResolvedValueOnce(ok({ id: plug.id, model: plug.model, gen: plug.gen }))
+      .mockResolvedValueOnce(ok({ id: plug.id, model: plug.model, gen: plug.gen }))
+      .mockResolvedValueOnce(ok({ id: 'different', model: plug.model, gen: plug.gen }));
+    expect(
+      await deleteOrphanClimateScript({ plug, rules: [], scriptId: 7, clients })
+    ).toEqual({ ok: false, error: { kind: 'identity-mismatch' } });
+    expect(clients.device.deleteScript).not.toHaveBeenCalled();
+    expect(clients.device.setRelayOff).toHaveBeenCalledTimes(1);
+  });
 
   it('does not delete an id renamed during cleanup', async () => {
     const { clients, setScripts } = fixture();

@@ -9,9 +9,10 @@ reviewable plug runtime services and hardware smoke; standalone UI and product
 cutover remain outstanding. This document is updated in the B1 implementation
 commit; its SHA is recorded by the next checkpoint.
 
-Completed implementation commit:
+Completed implementation commits:
 
 - `a3da0a14` — Phase A: independent device/rule models, persistence and ownership.
+- `0a1452c2` — Phase B1: standalone plug runtime services and hardware smoke.
 
 ## Completed work
 
@@ -79,6 +80,22 @@ Plan scenarios 3–9 and complete app-based scenarios 1–2 remain outstanding.
 No UI changes or visual audit yet. No callable ChatGPT execution sandbox is exposed
 in this session; software checks use the supplied local workspace. Phase B/C must
 record the responsive visual audit and any unavailable sandbox validation explicitly.
+
+## ChatGPT audit follow-up
+
+The post-Codex audit found a time-of-check/time-of-use identity gap in B1: direct
+relay mutation and orphan script deletion trusted the physical identity checked
+earlier in a multi-RPC operation. The service now re-verifies Shelly device id,
+model and generation immediately before the destructive relay/script mutation.
+Regression tests cover endpoint reassignment between inventory and mutation.
+
+A separate rule-lifecycle concern remains intentionally tracked for the product
+cutover: generic registry writes must not let desired rule config drift away from
+an attached deployment. This must be solved together with the runtime update
+transaction API rather than by a persistence-only restriction that would block
+legitimate verified updates. Rule creation also must use the live ownership resolver
+before persistence so two rules cannot claim the same relay through normal product
+flows.
 
 ## Remaining work and exact next step
 

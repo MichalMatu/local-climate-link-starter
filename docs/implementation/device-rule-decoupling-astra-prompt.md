@@ -1,7 +1,7 @@
 # Astra implementation handoff
 
-Repository: `MichalMatu/local-climate-link-starter`  
-Required branch: `work/device-rule-decoupling-20260913`  
+Repository: `MichalMatu/local-climate-link-starter`
+Required branch: `work/device-rule-decoupling-20260913`
 Plan of record: `docs/implementation/device-rule-decoupling-plan.md`
 
 ## Prompt
