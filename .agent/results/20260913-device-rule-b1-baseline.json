@@ -1,0 +1,61 @@
+{
+  "id": "20260913-device-rule-b1-baseline",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "started_at": "2026-09-13T08:13:05.437712+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-device-rule-b1-baseline.sh > /tmp/lcl-device-rule-b1-baseline.sh && bash /tmp/lcl-device-rule-b1-baseline.sh",
+      "exit_code": 2,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   dcd68f61..941a527d  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/device-rule-decoupling-20260913 -> FETCH_HEAD\n * branch              main       -> FETCH_HEAD\n * branch              agent-control -> FETCH_HEAD\n   47116b57..56a90240  main       -> origin/main\nSwitched to a new branch 'work/device-rule-decoupling-20260913'\nbranch 'work/device-rule-decoupling-20260913' set up to track 'origin/work/device-rule-decoupling-20260913'.\nBASELINE_HEAD=0a1452c2a082deda381333645b34818210bad144\nMAIN_HEAD=56a90240029ce19690e96ad02057cc4150ba537f\nMERGE_BASE=563f29a4cbadd39fee7c5f941afe9ac076d36eff\ndocs/implementation/device-rule-decoupling-astra-prompt.md:3: trailing whitespace.\n+Repository: `MichalMatu/local-climate-link-starter`  \ndocs/implementation/device-rule-decoupling-astra-prompt.md:4: trailing whitespace.\n+Required branch: `work/device-rule-decoupling-20260913`  \n",
+      "elapsed_seconds": 3.646,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 20.45,
+      "output_policy": "stream",
+      "captured_output_chars": 1069,
+      "output_truncated": false,
+      "current_rss_mb": 20.45,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 3.646
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.108
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.077
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-13T08:13:11.396845+00:00",
+  "task_digest": "4543db740aed5a8b75b17b32dc23b00ec8271da85f587896ad1e9f343356d155",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "attempt_id": "0857e01c6547730c13f8feb5",
+  "daemon_version": "4.18.20"
+}
