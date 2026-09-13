@@ -16,7 +16,7 @@ import {
   type InstalledAutomation
 } from '../installations/model.js';
 import { useInstalledAutomationStore } from '../installations/store.js';
-import { findScheduleRelayConflict } from '../time-automation/runtime.js';
+import { findScheduleRelayConflict } from '../time-automation/scheduleOwnership.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import {
   cleanupStaleShellyBleDiscoveryScripts,

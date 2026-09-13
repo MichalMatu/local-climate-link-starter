@@ -3,15 +3,26 @@ import { z } from 'zod';
 const DAILY_TIMESPEC_DAYS = 'SUN,MON,TUE,WED,THU,FRI,SAT';
 const clockTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-export const dailyTimeAutomationConfigSchema = z
+export const dailyTimeSettingsSchema = z
   .object({
-    relayId: z.number().int().nonnegative().default(0),
     onTime: z.string().regex(clockTimePattern),
     offTime: z.string().regex(clockTimePattern)
   })
+  .strict()
   .refine((value) => value.onTime !== value.offTime, {
     message: 'ON and OFF times must be different.',
     path: ['offTime']
+  });
+
+export const dailyTimeAutomationConfigSchema = dailyTimeSettingsSchema
+  .innerType()
+  .extend({ relayId: z.number().int().nonnegative().default(0) })
+  .superRefine((value, context) => {
+    const result = dailyTimeSettingsSchema.safeParse({
+      onTime: value.onTime,
+      offTime: value.offTime
+    });
+    if (!result.success) for (const issue of result.error.issues) context.addIssue(issue);
   });
 
 export type DailyTimeAutomationConfig = z.infer<typeof dailyTimeAutomationConfigSchema>;

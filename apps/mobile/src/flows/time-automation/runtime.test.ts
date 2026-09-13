@@ -1,3 +1,4 @@
+import { createDailyScheduleJob } from './scheduleJobs.js';
 import type {
   Result,
   ShellyScheduleCreateResult,
@@ -10,7 +11,6 @@ import { describe, expect, it } from 'vitest';
 import { createTimeInstalledAutomation } from '../installations/model.js';
 import type { TimeAutomationClients } from './runtime.js';
 import {
-  createDailyScheduleJob,
   deleteTimeAutomation,
   installDailyTimeAutomation,
   pauseTimeAutomation,
