@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-rule-lifecycle-v2",
+  "task_digest": "861c9c9e82f71cdb9408040cb113d9ba192efb9f1bc101a2c7a6becb849b1e2a",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T21:41:56.595987+00:00",
+  "attempt_id": "97b90fb0eae54ac9d481ded2",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 52461,
+  "updated_at": "2026-09-13T21:41:56.596061+00:00",
+  "pid": 52461
+}
