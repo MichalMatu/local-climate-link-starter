@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260914-rule-editor-cutover-v4-diagnose",
   "task_digest": "95d1b03154c029eb8a18d043b938004542f2f3d9f0ea5f79182b36a2f9e78cbc",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-13T23:24:28.843202+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-13T23:24:31.954416+00:00",
   "attempt_id": "b6b03fb83c285788362da357",
   "daemon_version": "4.18.20",
   "daemon_pid": 28199,
-  "updated_at": "2026-09-13T23:24:28.843352+00:00",
+  "updated_at": "2026-09-13T23:24:32.228484+00:00",
   "pid": 28199
 }
