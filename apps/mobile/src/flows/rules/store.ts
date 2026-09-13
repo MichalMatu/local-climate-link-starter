@@ -11,17 +11,38 @@ export const createRuleStore = (
   createRegistryStore({
     repository,
     schema: automationRuleSchema,
-    beforeUpsert: (rule, existing) => {
-      if (
-        existing?.deployment &&
-        (existing.kind !== rule.kind ||
+    beforeUpsert: (rule, existing, rules) => {
+      const competingRuleIds = rules
+        .filter(
+          (candidate) =>
+            candidate.id !== rule.id &&
+            candidate.plugId === rule.plugId &&
+            candidate.relayId === rule.relayId
+        )
+        .map((candidate) => candidate.id);
+      if (competingRuleIds.length > 0) {
+        return {
+          ok: false,
+          error: { kind: 'rule-relay-conflict', ruleIds: competingRuleIds }
+        };
+      }
+      if (existing?.deployment) {
+        const bindingChanged =
+          existing.kind !== rule.kind ||
           existing.plugId !== rule.plugId ||
           existing.relayId !== rule.relayId ||
           (existing.kind === 'climate' &&
             rule.kind === 'climate' &&
-            existing.sensorId !== rule.sensorId))
-      ) {
-        return { ok: false, error: { kind: 'deployment-attached', ruleId: rule.id } };
+            existing.sensorId !== rule.sensorId);
+        const desiredConfigChanged =
+          existing.kind === rule.kind &&
+          JSON.stringify(existing.config) !== JSON.stringify(rule.config);
+        if (bindingChanged || desiredConfigChanged) {
+          return {
+            ok: false,
+            error: { kind: 'deployment-attached', ruleId: rule.id }
+          };
+        }
       }
       const devices = readDevices();
       if (!devices.ok) return devices;

@@ -97,6 +97,14 @@ legitimate verified updates. Rule creation also must use the live ownership reso
 before persistence so two rules cannot claim the same relay through normal product
 flows.
 
+### Registry audit hardening
+
+The rule registry now rejects a second saved rule for the same `(plugId, relayId)`
+and rejects desired configuration/binding changes while deployment metadata is
+attached. Deployment-state-only updates remain allowed so safety verification can
+advance. A later runtime transaction API must explicitly detach/commit deployment
+when editing an already deployed rule.
+
 ## Remaining work and exact next step
 
 1. Finish B1 checks and commit this coherent service slice; record its SHA here.

@@ -20,7 +20,11 @@ export const createRegistryStore = <T extends RegistryItem>({
 }: {
   repository: RegistryRepository<T>;
   schema: z.ZodType<T, z.ZodTypeDef, unknown>;
-  beforeUpsert(item: T, existing: T | undefined): RegistryResult<null>;
+  beforeUpsert(
+    item: T,
+    existing: T | undefined,
+    items: readonly T[]
+  ): RegistryResult<null>;
   beforeRemove(id: string, items: readonly T[]): RegistryResult<null>;
 }) =>
   create<RegistryState<T>>((set, get) => {
@@ -39,7 +43,7 @@ export const createRegistryStore = <T extends RegistryItem>({
         const parsed = schema.safeParse(input);
         if (!parsed.success) return { ok: false, error: { kind: 'validation-failed' } };
         const existing = items.find((item) => item.id === parsed.data.id);
-        const checked = beforeUpsert(parsed.data, existing);
+        const checked = beforeUpsert(parsed.data, existing, items);
         if (!checked.ok) return checked;
         const item = {
           ...parsed.data,

@@ -201,6 +201,57 @@ describe('independent device and rule registries', () => {
     }
   );
 
+  it('rejects two saved rules claiming the same plug relay', () => {
+    const { rules } = seeded();
+    expect(rules.getState().upsert(climate).ok).toBe(true);
+    expect(rules.getState().upsert(time)).toEqual({
+      ok: false,
+      error: { kind: 'rule-relay-conflict', ruleIds: [climate.id] }
+    });
+    expect(rules.getState().items).toEqual([climate]);
+  });
+
+  it('does not let desired config drift away from an attached deployment', () => {
+    const { rules } = seeded();
+    const deployedClimate = {
+      ...climate,
+      deployment: {
+        scriptId: 7,
+        scriptHash: 'hash',
+        safetyTest: { status: 'pending' as const }
+      }
+    };
+    expect(rules.getState().upsert(deployedClimate).ok).toBe(true);
+    expect(
+      rules.getState().upsert({
+        ...deployedClimate,
+        config: {
+          ...deployedClimate.config,
+          rule: {
+            ...deployedClimate.config.rule,
+            control: {
+              ...deployedClimate.config.rule.control,
+              onThreshold: 18
+            }
+          }
+        }
+      })
+    ).toEqual({
+      ok: false,
+      error: { kind: 'deployment-attached', ruleId: climate.id }
+    });
+    expect(
+      rules.getState().upsert({
+        ...deployedClimate,
+        deployment: {
+          ...deployedClimate.deployment,
+          safetyTest: { status: 'verified' as const, verifiedAtMs: 10 }
+        },
+        updatedAtMs: 10
+      }).ok
+    ).toBe(true);
+  });
+
   it('validates settings without accepting copied device snapshots or duplicate schedule ids', () => {
     expect(automationRuleSchema.safeParse({ ...climate, shelly: plug }).success).toBe(
       false

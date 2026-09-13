@@ -4,6 +4,7 @@ export type RegistryError =
   | { kind: 'storage-invalid' }
   | { kind: 'device-referenced'; ruleIds: string[] }
   | { kind: 'device-missing'; deviceKind: 'plug' | 'sensor'; deviceId: string }
+  | { kind: 'rule-relay-conflict'; ruleIds: string[] }
   | { kind: 'deployment-attached'; ruleId: string };
 
 export type RegistryResult<T> =
