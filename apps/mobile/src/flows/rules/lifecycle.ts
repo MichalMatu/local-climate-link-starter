@@ -14,6 +14,7 @@ import {
   readClimateRuleRuntime,
   resumeClimateRule,
   runClimateRuleSafetyTest,
+  setClimateRuleRelay,
   type ClimateRuleRuntimeSnapshot
 } from './climateRuntime.js';
 import { ruleLifecycleError } from './lifecycleError.js';
@@ -43,6 +44,7 @@ type LifecycleRuntime = {
   verifyClimate: typeof runClimateRuleSafetyTest;
   pauseClimate: typeof pauseClimateRule;
   resumeClimate: typeof resumeClimateRule;
+  setClimateRelay: typeof setClimateRuleRelay;
   readClimate: typeof readClimateRuleRuntime;
   deleteClimate: typeof deleteClimateRuleDeployment;
   deployTime: typeof deployTimeRule;
@@ -73,6 +75,7 @@ const defaultDependencies: RuleLifecycleDependencies = {
     verifyClimate: runClimateRuleSafetyTest,
     pauseClimate: pauseClimateRule,
     resumeClimate: resumeClimateRule,
+    setClimateRelay: setClimateRuleRelay,
     readClimate: readClimateRuleRuntime,
     deleteClimate: deleteClimateRuleDeployment,
     deployTime: deployTimeRule,
@@ -307,6 +310,28 @@ export const resumeRule = async (
       return deps.runtime.resumeClimate(rule, plug);
     }
     return deps.runtime.resumeTime(rule, plug);
+  });
+};
+
+export const setRuleRelay = async (
+  ruleId: string,
+  on: boolean,
+  deps: RuleLifecycleDependencies = defaultDependencies
+): Promise<ClimateRuleRuntimeSnapshot> => {
+  const snapshot = requireRule(ruleId, deps);
+  return deps.runPlugOperation(snapshot.plugId, async () => {
+    const rule = requireRule(ruleId, deps);
+    if (rule.kind !== 'climate') {
+      throw ruleLifecycleError(
+        'runtime-attention',
+        'Manual relay control is only available for climate rules.'
+      );
+    }
+    if (!rule.deployment) {
+      throw ruleLifecycleError('rule-not-deployed', 'Rule is not deployed.');
+    }
+    const { plug } = requireDevices(rule, deps);
+    return deps.runtime.setClimateRelay(rule, plug, on);
   });
 };
 

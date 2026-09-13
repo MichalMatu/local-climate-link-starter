@@ -9,6 +9,7 @@ import {
   redeployRule,
   resumeRule,
   saveRuleDraft,
+  setRuleRelay,
   verifyRule,
   type RuleLifecycleDependencies
 } from './lifecycle.js';
@@ -48,6 +49,9 @@ const createHarness = (initial: AutomationRule[] = []) => {
     ),
     pauseClimate: vi.fn(async () => ({ mode: 'manual' }) as never),
     resumeClimate: vi.fn(async () => ({ mode: 'auto' }) as never),
+    setClimateRelay: vi.fn(
+      async (_rule, _plug, on: boolean) => ({ relayOn: on, mode: 'manual' }) as never
+    ),
     readClimate: vi.fn(async () => ({ scriptMatch: 'matched' }) as never),
     deleteClimate: vi.fn(async () => {
       events.push('remote:delete-climate');
@@ -118,6 +122,21 @@ describe('rule lifecycle', () => {
     expect(verified.kind === 'climate' && verified.deployment?.safetyTest.status).toBe(
       'verified'
     );
+  });
+
+  it('serializes manual climate relay control through the plug queue', async () => {
+    const deployed = {
+      ...climate,
+      deployment: {
+        ...pendingClimate,
+        safetyTest: { status: 'verified' as const, verifiedAtMs: 99 }
+      }
+    };
+    const harness = createHarness([deployed]);
+    const runtime = await setRuleRelay(climate.id, true, harness.deps);
+    expect(harness.events[0]).toBe('queue');
+    expect(harness.runtime.setClimateRelay).toHaveBeenCalledWith(deployed, plug, true);
+    expect(runtime).toMatchObject({ relayOn: true, mode: 'manual' });
   });
 
   it('deletes the exact remote deployment before detaching and removing the rule', async () => {
