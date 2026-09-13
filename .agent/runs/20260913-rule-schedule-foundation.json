@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-rule-schedule-foundation",
+  "task_digest": "31aec159038268d6cbd214ba87845c802fd720a1570d093b518e2ab14f9e0622",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T19:50:39.775121+00:00",
+  "attempt_id": "c76f1567adb96b4f3939cc65",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 6687,
+  "updated_at": "2026-09-13T19:50:39.775211+00:00",
+  "pid": 6687
+}
