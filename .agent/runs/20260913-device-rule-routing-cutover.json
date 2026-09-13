@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-device-rule-routing-cutover",
+  "task_digest": "08224b24a75268c5604f9bc0da164ee8665c8decbc5b30c4954402b8a6faecbb",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T17:43:16.439420+00:00",
+  "attempt_id": "5afcbdf7e48672dec2564252",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 73051,
+  "updated_at": "2026-09-13T17:43:16.439576+00:00",
+  "pid": 73051
+}
