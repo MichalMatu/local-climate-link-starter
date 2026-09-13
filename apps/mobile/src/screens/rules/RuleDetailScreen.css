@@ -1,0 +1,67 @@
+.rule-detail-shell {
+  align-content: start;
+  gap: var(--lcl-spacing-md);
+}
+
+.rule-detail-header p {
+  color: var(--lcl-color-text-muted);
+  margin: var(--lcl-spacing-xs) 0 0;
+}
+
+.rule-detail-grid {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+}
+
+.rule-detail-card {
+  box-shadow: none;
+  display: grid;
+  gap: var(--lcl-spacing-md);
+}
+
+.rule-detail-card h2 {
+  margin: 0;
+}
+
+.rule-detail-summary,
+.rule-card__summary {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  margin: 0;
+}
+
+.rule-detail-summary > div,
+.rule-card__summary > div {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+}
+
+.rule-detail-summary dt,
+.rule-card__summary dt {
+  color: var(--lcl-color-text-muted);
+}
+
+.rule-detail-summary dd,
+.rule-card__summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.rule-detail-controls .automation-control-group,
+.rule-detail-controls .automation-relay-actions {
+  display: flex;
+  gap: var(--lcl-spacing-sm);
+  width: 100%;
+}
+
+.rule-detail-controls .automation-control-group > *,
+.rule-detail-controls .automation-relay-actions > * {
+  flex: 1 1 0;
+}
+
+.rule-detail-error {
+  color: var(--lcl-color-status-danger-text);
+  margin: 0;
+}

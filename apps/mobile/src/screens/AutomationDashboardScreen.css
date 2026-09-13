@@ -271,3 +271,17 @@
     grid-template-columns: minmax(0, 1fr) auto var(--lcl-size-action-min-width);
   }
 }
+
+.rule-card__summary {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding-top: var(--lcl-spacing-sm);
+}
+
+.rule-card .automation-card__status--ok {
+  color: var(--lcl-color-accent);
+}
+
+.rule-card .automation-card__status--paused,
+.rule-card .automation-card__status--loading {
+  color: var(--lcl-color-text-muted);
+}

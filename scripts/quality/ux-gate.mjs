@@ -7,6 +7,7 @@ const cssPaths = [
   'apps/mobile/src/theme/runtimeStatus.css',
   'apps/mobile/src/app/appShell.css',
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
+  'apps/mobile/src/screens/rules/RuleDetailScreen.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'packages/ui/src/styles.css'
 ];

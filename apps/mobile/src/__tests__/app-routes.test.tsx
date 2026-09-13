@@ -1,13 +1,13 @@
-import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
-import { createInstalledAutomation } from '../flows/installations/model.js';
+import { climate, plug, sensor } from '../flows/registry/fixtures.test-support.js';
 import {
-  resetInstalledAutomationStore,
-  useInstalledAutomationStore
-} from '../flows/installations/store.js';
+  usePlugStore,
+  useRuleStore,
+  useSensorStore
+} from '../flows/registry/devicesAndRules.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
 const nativeAppMocks = vi.hoisted(() => {
@@ -41,16 +41,10 @@ vi.mock(import('@capacitor/core'), async (importOriginal) => {
   };
 });
 
-vi.mock('../screens/InstallationDetailScreen.js', () => ({
-  InstallationDetailScreen: ({
-    installationId,
-    onBack
-  }: {
-    installationId: string;
-    onBack: () => void;
-  }) => (
+vi.mock('../screens/rules/RuleDetailScreen.js', () => ({
+  RuleDetailScreen: ({ ruleId, onBack }: { ruleId: string; onBack: () => void }) => (
     <section>
-      <p>{`mock-installation-${installationId}`}</p>
+      <p>{`mock-rule-${ruleId}`}</p>
       <button type="button" onClick={onBack}>
         mock-dashboard-back
       </button>
@@ -101,28 +95,26 @@ const renderRoutes = () => {
   );
 };
 
-const addClimateInstallation = (suffix = 'route') => {
-  const config = createDefaultShellyThermostatConfig(
-    'xiaomi_lywsd03mmc_bthome_v2',
-    'heating'
-  );
-  const installation = createInstalledAutomation({
-    shelly: { id: `shellyplugsg3-${suffix}`, model: 'S3PL-00112EU', gen: 3 },
-    shellyName: 'Salon',
-    baseUrl: 'http://192.168.0.20/',
-    scriptId: 1,
-    scriptHash: `lcl-${suffix}`,
-    config,
-    nowMs: 1000
+const addClimateRule = () => {
+  usePlugStore.setState({ items: [plug], loadError: null });
+  useSensorStore.setState({ items: [sensor], loadError: null });
+  useRuleStore.setState({
+    items: [{ ...climate, name: 'Salon climate' }],
+    loadError: null
   });
-  useInstalledAutomationStore.getState().upsertInstallation(installation);
-  return installation;
+  return { ...climate, name: 'Salon climate' };
+};
+
+const resetRegistries = () => {
+  usePlugStore.setState({ items: [], loadError: null });
+  useSensorStore.setState({ items: [], loadError: null });
+  useRuleStore.setState({ items: [], loadError: null });
 };
 
 describe('AppRoutes navigation shell', () => {
   beforeEach(() => {
     setLocalePreference('pl');
-    resetInstalledAutomationStore();
+    resetRegistries();
     nativeAppMocks.resetListener();
     nativeAppMocks.getPlatform.mockReturnValue('web');
     nativeAppMocks.addListener.mockClear();
@@ -232,11 +224,11 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
   });
 
-  it('opens an installed system by stable id and returns to its dashboard', () => {
-    const installation = addClimateInstallation('detail');
+  it('opens a saved rule by stable id and returns to its dashboard', () => {
+    const rule = addClimateRule();
     renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon climate' }));
+    expect(screen.getByText(`mock-rule-${rule.id}`)).toBeVisible();
     expect(screen.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
       'aria-current',
       'page'

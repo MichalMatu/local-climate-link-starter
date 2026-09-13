@@ -9,10 +9,10 @@ import {
 } from '../components/AppBottomNavigation.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
-import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 import { PlugManagementScreen } from '../screens/devices/PlugManagementScreen.js';
 import { SensorManagementScreen } from '../screens/devices/SensorManagementScreen.js';
+import { RuleDetailScreen } from '../screens/rules/RuleDetailScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
   const module = await import('../screens/hardware-setup/HardwareSetupScreen.js');
@@ -25,7 +25,7 @@ type PrimaryAppRoute =
   | { type: 'sensors' }
   | { type: 'intent' }
   | { type: 'setup'; intent: SetupIntent }
-  | { type: 'installation'; installationId: string };
+  | { type: 'rule'; ruleId: string };
 type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
@@ -34,7 +34,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
       return route.returnTo;
     case 'setup':
       return { type: 'intent' };
-    case 'installation':
+    case 'rule':
     case 'intent':
     case 'plugs':
     case 'sensors':
@@ -56,9 +56,8 @@ export const AppRoutes = () => {
     (kind: AppNavigationKind) => {
       if (kind === 'settings') {
         const current = routeRef.current;
-        if (current.type !== 'settings') {
+        if (current.type !== 'settings')
           navigate({ type: 'settings', returnTo: current });
-        }
       } else {
         navigate({ type: kind === 'rules' ? 'dashboard' : kind });
       }
@@ -72,17 +71,11 @@ export const AppRoutes = () => {
     let removeListener: (() => Promise<void>) | undefined;
     void App.addListener('backButton', () => {
       const nextRoute = resolveAndroidBackRoute(routeRef.current);
-      if (nextRoute === null) {
-        void App.exitApp();
-      } else {
-        navigate(nextRoute);
-      }
+      if (nextRoute === null) void App.exitApp();
+      else navigate(nextRoute);
     }).then((handle) => {
-      if (!active) {
-        void handle.remove();
-      } else {
-        removeListener = () => handle.remove();
-      }
+      if (!active) void handle.remove();
+      else removeListener = () => handle.remove();
     });
     return () => {
       active = false;
@@ -96,7 +89,9 @@ export const AppRoutes = () => {
         return <AppSettingsScreen />;
       case 'plugs':
         return (
-          <PlugManagementScreen onOpenRule={() => navigate({ type: 'dashboard' })} />
+          <PlugManagementScreen
+            onOpenRule={(ruleId) => navigate({ type: 'rule', ruleId })}
+          />
         );
       case 'sensors':
         return <SensorManagementScreen />;
@@ -111,15 +106,13 @@ export const AppRoutes = () => {
         return (
           <AutomationDashboardScreen
             onAddAutomation={() => navigate({ type: 'intent' })}
-            onOpenInstallation={(installationId) =>
-              navigate({ type: 'installation', installationId })
-            }
+            onOpenRule={(ruleId) => navigate({ type: 'rule', ruleId })}
           />
         );
-      case 'installation':
+      case 'rule':
         return (
-          <InstallationDetailScreen
-            installationId={route.installationId}
+          <RuleDetailScreen
+            ruleId={route.ruleId}
             onBack={() => navigate({ type: 'dashboard' })}
           />
         );
@@ -143,7 +136,7 @@ export const AppRoutes = () => {
       <Suspense
         fallback={
           <main className="demo-shell hardware-shell app-bottom-nav-shell">
-            <p role="status">{t('app.loadingConfigurator')}</p>
+            <p>{t('app.loadingConfigurator')}</p>
           </main>
         }
       >
