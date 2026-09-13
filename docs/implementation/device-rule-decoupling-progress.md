@@ -105,6 +105,15 @@ attached. Deployment-state-only updates remain allowed so safety verification ca
 advance. A later runtime transaction API must explicitly detach/commit deployment
 when editing an already deployed rule.
 
+### Phase B2 sensor-management foundation
+
+Phone BLE/GATT orchestration no longer owns hardware-draft persistence: the caller
+injects the device write boundary. A dedicated `useSensorManagementFlow` now binds
+that orchestration to the independent sensor registry while keeping live readings
+separate. `SensorSetupPage` reads samples by runtime address rather than durable
+registry id, which avoids a subtle break when the new profile-qualified sensor ids
+replace the old MAC-as-id draft shape. Product routing is not switched yet.
+
 ## Remaining work and exact next step
 
 1. Finish B1 checks and commit this coherent service slice; record its SHA here.

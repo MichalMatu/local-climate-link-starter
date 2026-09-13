@@ -202,7 +202,7 @@ export const useHardwareSetupFlow = () => {
     stopSavedSensorLiveScan,
     addDiscoveredSensor,
     setPvvxTimeMutation
-  } = usePhoneSensorFlow(sensorDevices);
+  } = usePhoneSensorFlow(sensorDevices, upsertSensorDevice);
   const {
     shellyScanStartInput,
     setShellyScanStartInput,

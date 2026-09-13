@@ -6,6 +6,7 @@ import {
   setPvvxDeviceTime,
   type BleScanner
 } from '@lcl/ble-core';
+import type { SensorProfileId } from '@lcl/device-profiles';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
@@ -18,7 +19,6 @@ import {
   sensorReadingFromCandidate,
   useHardwareSetupReadingsStore
 } from './sensorReadingsStore.js';
-import { useHardwareSetupDraftStore, type SensorDraftDevice } from './setupDraftStore.js';
 import { normalizeRuntimeAddress } from './validation.js';
 
 type SavedSensorLiveScanState = {
@@ -29,8 +29,15 @@ type SavedSensorLiveScanState = {
 
 type SensorRuntimeSource = 'phone-scan' | 'shelly-scan';
 
+export type SensorRuntimeDevice = {
+  id: string;
+  name: string;
+  runtimeAddress: string;
+  profileId: SensorProfileId;
+};
+
 type PvvxTimeMutationResult = {
-  device: SensorDraftDevice;
+  device: SensorRuntimeDevice;
   acknowledged: boolean;
 };
 
@@ -51,12 +58,12 @@ const savedSensorLiveScanError = (error: unknown): string =>
       ? error.message
       : t('hardware.sensor.phoneBleGenericFailed');
 
-export const usePhoneSensorFlow = (sensorDevices: readonly SensorDraftDevice[]) => {
+export const usePhoneSensorFlow = (
+  sensorDevices: readonly SensorRuntimeDevice[],
+  upsertSensorDevice: (device: SensorRuntimeDevice) => void
+) => {
   const appendSensorReading = useHardwareSetupReadingsStore(
     (state) => state.appendSensorReading
-  );
-  const upsertSensorDevice = useHardwareSetupDraftStore(
-    (state) => state.upsertSensorDevice
   );
   const [phoneBleScanCandidates, setPhoneBleScanCandidates] = useState<
     BleDiscoveryCandidate[]
@@ -230,7 +237,7 @@ export const usePhoneSensorFlow = (sensorDevices: readonly SensorDraftDevice[]) 
   };
 
   const setPvvxTimeMutation = useMutation({
-    mutationFn: async (device: SensorDraftDevice): Promise<PvvxTimeMutationResult> => {
+    mutationFn: async (device: SensorRuntimeDevice): Promise<PvvxTimeMutationResult> => {
       if (device.profileId !== 'xiaomi_lywsd03mmc_bthome_v2') {
         throw new Error(t('hardware.sensor.pvvxOnlyXiaomi'));
       }

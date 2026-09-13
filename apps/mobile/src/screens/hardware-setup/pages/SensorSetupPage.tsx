@@ -259,7 +259,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
   };
 
   const readingsForSensor = (device: SensorDraftDevice): SensorReadingSample[] =>
-    flow.sensorSamplesById[device.id.toUpperCase()] ?? [];
+    flow.sensorSamplesById[device.runtimeAddress.toUpperCase()] ?? [];
 
   return (
     <section
