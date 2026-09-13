@@ -32,7 +32,7 @@ const installation = createInstalledAutomation({
 });
 
 const baseStatus = (
-  automationMode: 'auto' | 'manual' | 'stopped' | 'missing',
+  automationMode: 'auto' | 'manual' | 'unknown' | 'stopped' | 'missing',
   scriptId: number | null
 ) => ({
   relayOn: false,
@@ -56,13 +56,13 @@ describe('installed automation runtime status', () => {
     expect(status.runtimeModeSupported).toBe(true);
   });
 
-  it('recognises an old running runtime as AUTO but upgradeable', async () => {
+  it('keeps an unsupported running runtime explicitly unknown and upgradeable', async () => {
     mocks.readControlStatus.mockResolvedValue(baseStatus('auto', 7));
-    mocks.readRuntimeMode.mockResolvedValue({ mode: 'auto', supported: false });
+    mocks.readRuntimeMode.mockResolvedValue({ mode: null, supported: false });
 
     const status = await readInstalledAutomationControlStatus(installation);
 
-    expect(status.automationMode).toBe('auto');
+    expect(status.automationMode).toBe('unknown');
     expect(status.runtimeModeSupported).toBe(false);
   });
 

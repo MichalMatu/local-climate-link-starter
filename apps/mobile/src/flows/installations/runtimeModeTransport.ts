@@ -8,7 +8,7 @@ import type { ClimateInstalledAutomation } from './model.js';
 
 export type InstalledAutomationRuntimeMode = ClimateRuntimeMode;
 export type InstalledAutomationRuntimeModeState = {
-  mode: ClimateRuntimeMode;
+  mode: ClimateRuntimeMode | null;
   supported: boolean;
 };
 export const readInstalledAutomationRuntimeMode = async (
@@ -18,7 +18,7 @@ export const readInstalledAutomationRuntimeMode = async (
     createShellyTransport(installation.shelly.baseUrl),
     installation.script.id
   );
-  return { mode: mode ?? 'auto', supported: mode !== null };
+  return { mode, supported: mode !== null };
 };
 export const setInstalledAutomationRuntimeMode = (
   installation: ClimateInstalledAutomation,

@@ -3,7 +3,8 @@ import { readShellyControlStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { readInstalledAutomationRuntimeMode } from './runtimeModeTransport.js';
 
-export type InstalledAutomationControlMode = 'auto' | 'manual' | 'stopped' | 'missing';
+export type InstalledAutomationControlMode =
+  'auto' | 'manual' | 'unknown' | 'stopped' | 'missing';
 
 export type InstalledAutomationControlStatus = Omit<
   ShellyControlStatus,
@@ -32,7 +33,7 @@ export const readInstalledAutomationControlStatus = async (
   const runtime = await readInstalledAutomationRuntimeMode(installation);
   return {
     ...status,
-    automationMode: runtime.mode,
+    automationMode: runtime.mode ?? 'unknown',
     runtimeModeSupported: runtime.supported
   };
 };

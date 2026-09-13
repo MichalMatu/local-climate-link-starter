@@ -281,6 +281,7 @@ export const SavedShellyDeviceCard = ({
   const pendingAction = controlState?.pendingAction ?? null;
   const isControlBusy = pendingAction !== null;
   const automationMode = controlStatus?.automationMode ?? null;
+  const runtimeModeVerified = automationMode === 'auto' || automationMode === 'manual';
   const manualControl = automationMode === 'manual';
   const telemetry = controlStatus?.telemetry;
   const clock = controlStatus?.clock;
@@ -370,7 +371,7 @@ export const SavedShellyDeviceCard = ({
               className="automation-control-button"
               type="button"
               aria-pressed={automationMode === 'auto'}
-              disabled={isControlBusy}
+              disabled={isControlBusy || !runtimeModeVerified}
               onClick={() => {
                 if (automationMode !== 'auto') onAutomationAuto(device);
               }}
@@ -381,7 +382,7 @@ export const SavedShellyDeviceCard = ({
               className="automation-control-button"
               type="button"
               aria-pressed={manualControl}
-              disabled={isControlBusy}
+              disabled={isControlBusy || !runtimeModeVerified}
               onClick={() => {
                 if (!manualControl) onAutomationManual(device);
               }}

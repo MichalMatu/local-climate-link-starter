@@ -188,6 +188,12 @@ export const useShellyControlFlow = () => {
     ): Promise<ShellyControlMutationResult> => {
       const currentStatus = await readShellyControlStatus(device.baseUrl);
       const scriptId = requireAutomationScript(currentStatus);
+      if (
+        currentStatus.automationMode !== 'auto' &&
+        currentStatus.automationMode !== 'manual'
+      ) {
+        throw new Error('MANUAL requires a verified live AUTO/MANUAL runtime.');
+      }
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
       const transport = createShellyTransport(device.baseUrl);
       await writeClimateMode(transport, scriptId, 'manual');

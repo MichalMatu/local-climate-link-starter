@@ -63,7 +63,7 @@ describe('runtime mode Script.Eval transport', () => {
     mocks.call.mockResolvedValue({ ok: true, value: { result: '-1' } });
 
     await expect(readInstalledAutomationRuntimeMode(installation)).resolves.toEqual({
-      mode: 'auto',
+      mode: null,
       supported: false
     });
   });

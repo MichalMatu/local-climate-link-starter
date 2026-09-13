@@ -176,11 +176,17 @@ describe('BLE discovery preserves in-process climate mode', () => {
     ).toBe(false);
   });
 
-  it('reads MANUAL from a running process and distinguishes a stopped process', async () => {
-    const f = fixture(1);
-    f.setScripts([climate]);
+  it('reads verified modes and keeps an unsupported running process explicitly unknown', async () => {
+    const manualFixture = fixture(1);
+    manualFixture.setScripts([climate]);
     expect((await readShellyControlStatus(endpoint)).automationMode).toBe('manual');
-    f.setScripts([{ ...climate, running: false }]);
+
+    vi.unstubAllGlobals();
+    const unknownFixture = fixture(-1);
+    unknownFixture.setScripts([climate]);
+    expect((await readShellyControlStatus(endpoint)).automationMode).toBe('unknown');
+
+    unknownFixture.setScripts([{ ...climate, running: false }]);
     expect((await readShellyControlStatus(endpoint)).automationMode).toBe('stopped');
   });
 });

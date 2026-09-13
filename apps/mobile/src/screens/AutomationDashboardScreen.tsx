@@ -64,10 +64,12 @@ const ClimateAutomationCard = ({
   const controlsVerified = controlMatch === 'matched';
   const runtimeControllable =
     controlsVerified &&
-    (controlStatus?.automationMode === 'auto' ||
-      controlStatus?.automationMode === 'manual');
-  const automationRunning = controlsVerified && controlStatus?.automationMode === 'auto';
-  const manualControl = controlsVerified && controlStatus?.automationMode === 'manual';
+    controlStatus?.runtimeModeSupported === true &&
+    (controlStatus.automationMode === 'auto' ||
+      controlStatus.automationMode === 'manual');
+  const automationRunning =
+    runtimeControllable && controlStatus.automationMode === 'auto';
+  const manualControl = runtimeControllable && controlStatus.automationMode === 'manual';
   const relayState =
     controlStatus?.relayOn ??
     snapshot?.plug?.relayState ??

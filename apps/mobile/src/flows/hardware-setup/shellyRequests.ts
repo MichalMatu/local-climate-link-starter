@@ -209,7 +209,7 @@ export type ShellyBleDiscoveryPreparation = {
   automationMode: ClimateRuntimeMode | null;
 };
 
-export type ShellyAutomationMode = 'auto' | 'manual' | 'stopped' | 'missing';
+export type ShellyAutomationMode = 'auto' | 'manual' | 'unknown' | 'stopped' | 'missing';
 
 export type ShellyControlStatus = {
   relayOn: boolean;
@@ -366,7 +366,7 @@ const toControlStatus = async (
     relayOn: status.relayOn,
     automationMode: automationScript
       ? automationScript.running
-        ? ((await readClimateMode(transport, automationScript.id)) ?? 'auto')
+        ? ((await readClimateMode(transport, automationScript.id)) ?? 'unknown')
         : 'stopped'
       : 'missing',
     automationScriptId: automationScript?.id ?? null,

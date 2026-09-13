@@ -151,10 +151,15 @@ const InstalledAutomationDetail = ({
   const scriptMatch = control
     ? installedAutomationScriptMatch(installation, control)
     : null;
-  const isPaused = scriptMatch === 'matched' && control?.automationMode === 'manual';
+  const runtimeModeVerified = control?.runtimeModeSupported === true;
+  const isPaused =
+    scriptMatch === 'matched' &&
+    runtimeModeVerified &&
+    control.automationMode === 'manual';
   const canToggleAutomation =
     scriptMatch === 'matched' &&
-    (control?.automationMode === 'auto' || control?.automationMode === 'manual');
+    runtimeModeVerified &&
+    (control.automationMode === 'auto' || control.automationMode === 'manual');
   const runtimeHealth = snapshot ? installedAutomationHealth(snapshot) : null;
   const recovery = installationRecoveryState({
     diagnosticsError: diagnosticsQuery.isError,
