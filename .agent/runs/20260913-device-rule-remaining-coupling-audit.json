@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-device-rule-remaining-coupling-audit",
+  "task_digest": "c4e61bafb38643f99841485f9f3859ae0cba4cf461f8ac7cc465ef48058bfcd7",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-13T17:45:27.151087+00:00",
+  "attempt_id": "d17c955b326d5778de12de74",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 77295,
+  "updated_at": "2026-09-13T17:45:27.151268+00:00",
+  "pid": 77295
+}
