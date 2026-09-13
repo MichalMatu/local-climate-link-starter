@@ -1,0 +1,9 @@
+{
+  "id": "20260913-device-rule-finish-codex-help",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-13T17:39:28.713099+00:00",
+  "daemon_version": "4.18.20",
+  "error": "ValueError: commands may not invoke local Codex; ChatGPT is the planner and Local Agent executes deterministic commands only"
+}
