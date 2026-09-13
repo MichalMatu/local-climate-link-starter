@@ -1,0 +1,14 @@
+{
+  "id": "20260914-sensor-legacy-audit-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "git fetch origin work/device-rule-decoupling-20260913 && git checkout work/device-rule-decoupling-20260913 && git reset --hard origin/work/device-rule-decoupling-20260913 && test \"$(git rev-parse HEAD)\" = \"2edb38a0af814af09ebf001ddf57cac7d0622f25\" && echo '=== SENSOR MANAGEMENT ===' && sed -n '1,220p' apps/mobile/src/flows/devices/sensors/useSensorManagementFlow.ts && echo '=== SENSOR SCREEN ===' && sed -n '1,220p' apps/mobile/src/screens/devices/SensorManagementScreen.tsx && echo '=== SENSOR PAGE CONTRACT ===' && grep -RInE 'SensorSetupFlow|removeSensorDevice|sensorDevices' apps/mobile/src/screens/hardware-setup/pageContracts.ts apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/__tests__ apps/mobile/src/flows --exclude-dir=node_modules | head -n 240 && echo '=== LEGACY PRODUCT REFERENCES ===' && grep -RInE 'InstalledAutomation|installationId|flows/installations|useHardwareSetupFlow|InstallationDetailScreen|InstallationRuntimeControls|TimeInstallationDetail|TimeAutomationCard|HardwareSetupScreen' apps/mobile/src apps/mobile/e2e --exclude-dir=node_modules | head -n 500"
+  ]
+}
