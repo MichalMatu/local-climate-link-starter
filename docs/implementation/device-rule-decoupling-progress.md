@@ -4,15 +4,17 @@ Branch: `work/device-rule-decoupling-20260913`. Do not merge to `main`.
 
 ## Current checkpoint
 
-HEAD entering this checkpoint: `a3da0a14` (Phase A). Phase B1 adds the independently
-reviewable plug runtime services and hardware smoke; standalone UI and product
-cutover remain outstanding. This document is updated in the B1 implementation
-commit; its SHA is recorded by the next checkpoint.
+HEAD entering this checkpoint: `65b0f6f2` (sensor-management foundation).
+Phase B now has standalone plug management transactions and query orchestration.
+Standalone UI and the coordinated rule/product cutover remain outstanding.
 
 Completed implementation commits:
 
 - `a3da0a14` — Phase A: independent device/rule models, persistence and ownership.
 - `0a1452c2` — Phase B1: standalone plug runtime services and hardware smoke.
+- `5b073ae7` — Recheck physical identity immediately before plug mutations.
+- `9bdddf8c` — Enforce saved-rule ownership and deployment write invariants.
+- `65b0f6f2` — Sensor management foundation independent of the hardware draft.
 
 ## Completed work
 
@@ -116,7 +118,7 @@ replace the old MAC-as-id draft shape. Product routing is not switched yet.
 
 ## Remaining work and exact next step
 
-1. Finish B1 checks and commit this coherent service slice; record its SHA here.
+1. Finish management checkpoint verification and record the commit SHA at the next checkpoint.
 2. Phase B: inspect full Shelly/Sensor pages and adjacent tests, extract dedicated
    management flows, replace device ownership in the hardware draft with new
    registries (no fallback readers), add standalone routes and lifecycle wrappers.
@@ -133,6 +135,50 @@ replace the old MAC-as-id draft shape. Product routing is not switched yet.
    product and repository docs/gates. Run `pnpm check:full` on the final candidate.
 
 The existing product paths still use their current installation/draft models at
-this Phase A checkpoint. New registries have no legacy imports/readers/dual writes;
+this Phase B service checkpoint. New registries have no legacy imports/readers/dual writes;
 production cutover is outstanding, not claimed complete. Do not add adapters from
 new registries back into persisted `InstalledAutomation` snapshots.
+
+### Phase B management transaction checkpoint (2026-09-13)
+
+HEAD entering this checkpoint: `65b0f6f2` (sensor-management foundation).
+
+- Added `operations.ts`: shared physical-plug operation queue, normalized identity,
+  rejection recovery and independent execution for different plugs.
+- Added injectable `management.ts`: registry-aware registration, live inventory,
+  direct relay control, exact orphan deletion, rename and guarded local removal.
+  Current endpoints and rules are resolved after entering the queue. Registration
+  rechecks identity after waiting and preserves the original creation timestamp.
+- Added `usePlugManagementFlow`: TanStack Query integration, endpoint/rule-sensitive
+  cache keys, mutation invalidation and fail-closed raw-control availability.
+- Fixed sensor discovery persistence-result propagation; exposed registry load
+  failures and resolved rename/remove inputs from the latest sensor registry.
+- Updated hardware smoke to exercise the new management boundary, with injected
+  RPC clients and isolated persistence.
+- Focused checks: 35 tests passed across plug service/management/hook and sensor
+  hook tests. Mobile typecheck passed before the final sensor additions; full
+  candidate validation is recorded below when complete.
+
+This checkpoint does not switch product routes or remove the old installation
+model. The new management hooks are not yet reachable from app navigation.
+No UI layout changed, so this checkpoint has no new visual audit.
+
+Exact next step: compose standalone device pages from the management hooks, then
+perform the coordinated route/rule persistence cutover described in phases B–E.
+Use `runPlugOperation` for rule mutations as well as plug actions; do not call it
+recursively from an operation already holding the same plug queue. Keep typed
+`ok: false` results visible to UI instead of treating mutation `isSuccess` alone
+as proof that persistence or hardware verification succeeded.
+
+Checkpoint verification completed:
+
+- `pnpm check:full` passed: formatting, workspace lint, UX/repository gates,
+  all workspace typechecks/tests, core coverage, workspace builds and all 25
+  responsive E2E tests. Mobile: 236 tests passed; generator: 94 passed.
+- First full run found one unused import after sharing the runtime test fixture;
+  removed it and reran the complete command successfully.
+- No real hardware test in this checkpoint: the current local Shelly endpoint was
+  not supplied. The updated smoke is ready but has not been run on hardware;
+  this checkpoint made no relay changes and makes no claim about its current state.
+- Existing responsive E2E verifies regression behavior only; it does not constitute
+  acceptance of the outstanding standalone screens or rule cutover.

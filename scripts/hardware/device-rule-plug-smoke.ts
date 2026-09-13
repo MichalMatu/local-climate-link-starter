@@ -12,10 +12,7 @@ import {
 } from '@lcl/shelly-client';
 import { checkPlugRegistration } from '../../apps/mobile/src/flows/devices/plugs/registration.js';
 import { readPlugRuntime } from '../../apps/mobile/src/flows/devices/plugs/inventory.js';
-import {
-  deleteOrphanClimateScript,
-  setUnownedPlugRelay
-} from '../../apps/mobile/src/flows/devices/plugs/runtime.js';
+import { createPlugManagement } from '../../apps/mobile/src/flows/devices/plugs/management.js';
 import { createDeviceRuleRegistries } from '../../apps/mobile/src/flows/registry/devicesAndRules.js';
 
 // Service-level smoke for the authorized development plug. No existing scripts
@@ -67,21 +64,27 @@ const registries = createDeviceRuleRegistries({
     storage.delete(key);
   }
 });
-assert(registries.plugs.getState().upsert(plug).ok);
+const management = createPlugManagement({
+  readPlugs: registries.plugs.getState,
+  readRules: registries.rules.getState,
+  clients: () => clients
+});
+const registered = await management.register(baseUrl, plug.name);
+assert(registered.ok, JSON.stringify(registered));
 assert.equal(registries.rules.getState().items.length, 0);
 let testScriptId: number | null = null;
 try {
-  const on = await setUnownedPlugRelay({ plug, rules: [], on: true, clients });
+  const on = await management.setRelay(plug.id, true);
   assert(on.ok && on.value.relayOn, JSON.stringify(on));
   process.stdout.write('PASS saved plug, zero rules: relay ON verified\n');
-  const off = await setUnownedPlugRelay({ plug, rules: [], on: false, clients });
+  const off = await management.setRelay(plug.id, false);
   assert(off.ok && !off.value.relayOn, JSON.stringify(off));
   process.stdout.write('PASS saved plug, zero rules: relay OFF verified\n');
   const code = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
   const installed = await clients.device.installScript(createInstallPlan(code));
   assert(installed.ok, JSON.stringify(installed));
   testScriptId = installed.value.scriptId;
-  const orphan = await readPlugRuntime(plug, [], clients);
+  const orphan = await management.refresh(plug.id);
   assert(orphan.ok, JSON.stringify(orphan));
   assert.deepEqual(
     orphan.value.managedScripts.map((script) => ({
@@ -90,14 +93,9 @@ try {
     })),
     [{ id: testScriptId, ruleIds: [] }]
   );
-  const blocked = await setUnownedPlugRelay({ plug, rules: [], on: true, clients });
+  const blocked = await management.setRelay(plug.id, true);
   assert(!blocked.ok && blocked.error.kind === 'relay-owned');
-  const deleted = await deleteOrphanClimateScript({
-    plug,
-    rules: [],
-    scriptId: testScriptId,
-    clients
-  });
+  const deleted = await management.deleteOrphan(plug.id, testScriptId);
   assert(deleted.ok, JSON.stringify(deleted));
   assert.equal(deleted.value.relayOn, false);
   assert.equal(deleted.value.managedScripts.length, 0);
@@ -108,12 +106,7 @@ try {
   );
 } finally {
   if (testScriptId !== null) {
-    const cleanup = await deleteOrphanClimateScript({
-      plug,
-      rules: [],
-      scriptId: testScriptId,
-      clients
-    });
+    const cleanup = await management.deleteOrphan(plug.id, testScriptId);
     if (!cleanup.ok)
       process.stderr.write(
         `Cleanup requires attention: ${JSON.stringify(cleanup.error)}\n`

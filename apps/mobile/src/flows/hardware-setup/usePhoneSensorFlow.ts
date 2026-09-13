@@ -58,9 +58,9 @@ const savedSensorLiveScanError = (error: unknown): string =>
       ? error.message
       : t('hardware.sensor.phoneBleGenericFailed');
 
-export const usePhoneSensorFlow = (
+export const usePhoneSensorFlow = <TPersistResult>(
   sensorDevices: readonly SensorRuntimeDevice[],
-  upsertSensorDevice: (device: SensorRuntimeDevice) => void
+  upsertSensorDevice: (device: SensorRuntimeDevice) => TPersistResult
 ) => {
   const appendSensorReading = useHardwareSetupReadingsStore(
     (state) => state.appendSensorReading
@@ -228,7 +228,7 @@ export const usePhoneSensorFlow = (
     appendSensorReading(
       sensorReadingFromCandidate({ ...candidate, runtimeAddress }, source)
     );
-    upsertSensorDevice({
+    return upsertSensorDevice({
       id: runtimeAddress,
       name,
       runtimeAddress,

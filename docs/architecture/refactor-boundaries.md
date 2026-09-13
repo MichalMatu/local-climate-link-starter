@@ -92,3 +92,24 @@ AUTO/MANUAL is an in-process runtime state. Keep transport, status interpretatio
 relay safety, upgrade/recovery and React synchronization in the dedicated modules
 documented in `runtime-control.md`; do not fold them into
 `useHardwareSetupFlow`, Dashboard or Installation Detail.
+
+## Independent device management transactions
+
+The device/rule cutover introduces `flows/devices/plugs/management.ts` as the
+registry-aware boundary for standalone plug operations. It accepts physical ids,
+resolves current devices and rules after entering a shared per-plug queue, and
+calls the validated inventory/relay/orphan services. Endpoint updates, renames,
+local removals and future rule deployment transactions must use the same queue.
+The queue releases on both success and failure and does not block other plugs.
+Direct registry writes remain a persistence primitive, not a product mutation API.
+
+`usePlugManagementFlow` owns TanStack Query state. Runtime cache identity includes
+physical id, endpoint and current rules; relay commands and orphan removal
+invalidate runtime observations even on failure. Storage errors and failed or
+pending observations prevent raw control. The hook is ready for standalone screen
+composition; the existing product routes have not switched to it yet.
+
+`useSensorManagementFlow` returns the sensor repository's typed result for both
+manual entry and BLE discovery. Device persistence failures must not produce a
+saved-device success toast. Live readings remain keyed by runtime address and are
+cleared only after successful local deletion.

@@ -14,6 +14,7 @@ const DEFAULT_SENSOR_PROFILE: SensorProfileId = 'xiaomi_lywsd03mmc_bthome_v2';
 
 export const useSensorManagementFlow = () => {
   const sensorDevices = useSensorStore((state) => state.items);
+  const loadError = useSensorStore((state) => state.loadError);
   const upsertSavedSensor = useSensorStore((state) => state.upsert);
   const removeSavedSensor = useSensorStore((state) => state.remove);
   const clearSensorReadings = useHardwareSetupReadingsStore(
@@ -49,9 +50,7 @@ export const useSensorManagementFlow = () => {
     return created.ok ? upsertSavedSensor(created.value) : created;
   };
 
-  const phoneSensorFlow = usePhoneSensorFlow(sensorDevices, (device) => {
-    persistRuntimeDevice(device);
-  });
+  const phoneSensorFlow = usePhoneSensorFlow(sensorDevices, persistRuntimeDevice);
 
   const addSensorDraft = (): RegistryResult<SavedSensor> => {
     if (!sensorInputState.ok) {
@@ -61,7 +60,9 @@ export const useSensorManagementFlow = () => {
   };
 
   const setSensorDeviceName = (id: string, name: string): RegistryResult<SavedSensor> => {
-    const device = sensorDevices.find((candidate) => candidate.id === id);
+    const device = useSensorStore
+      .getState()
+      .items.find((candidate) => candidate.id === id);
     if (!device) {
       return {
         ok: false,
@@ -72,7 +73,9 @@ export const useSensorManagementFlow = () => {
   };
 
   const removeSensorDevice = (id: string): RegistryResult<null> => {
-    const device = sensorDevices.find((candidate) => candidate.id === id);
+    const device = useSensorStore
+      .getState()
+      .items.find((candidate) => candidate.id === id);
     const removed = removeSavedSensor(id);
     if (removed.ok && device) {
       clearSensorReadings(device.runtimeAddress);
@@ -82,6 +85,7 @@ export const useSensorManagementFlow = () => {
 
   return {
     sensorDevices,
+    loadError,
     sensorSamplesById,
     sensorProfileInput,
     setSensorProfileInput,
