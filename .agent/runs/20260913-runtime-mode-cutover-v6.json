@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-runtime-mode-cutover-v6",
+  "task_digest": "294923701e1d828804c588ddc7e51f1fe4334ea83a8b7403d1ad1e0252137432",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T18:00:16.440777+00:00",
+  "attempt_id": "8a391dea9ef6344e4efe8ceb",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 90470,
+  "updated_at": "2026-09-13T18:00:16.440884+00:00",
+  "pid": 90470
+}
