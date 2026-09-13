@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260913-runtime-mode-test-audit",
   "task_digest": "6d7f72e6d34d2d18b9dc5971ac42a9dcc324225bbb06e98f2f4e7e253d02abc0",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 2048,
-  "started_at": "2026-09-13T17:46:37.151260+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-13T17:46:40.623815+00:00",
   "attempt_id": "c8c941701bb463e51300fa21",
   "daemon_version": "4.18.20",
   "daemon_pid": 78374,
-  "updated_at": "2026-09-13T17:46:37.151414+00:00",
+  "updated_at": "2026-09-13T17:46:40.871467+00:00",
   "pid": 78374
 }
