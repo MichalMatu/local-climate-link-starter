@@ -1,0 +1,15 @@
+{
+  "id": "20260913-device-rule-b1-baseline",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-device-rule-b1-baseline.sh > /tmp/lcl-device-rule-b1-baseline.sh && bash /tmp/lcl-device-rule-b1-baseline.sh"
+  ],
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096
+}
