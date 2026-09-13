@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core';
 import { DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { AppBottomNavigation } from '../components/AppBottomNavigation.js';
 import {
   getLocalePreference,
   localePreferenceChangeEvent,
@@ -33,11 +32,6 @@ export type SupportDiagnosticRow = {
   tone?: DiagnosticRowProps['tone'];
 };
 
-type AppSettingsScreenProps = {
-  onOpenClimate(): void;
-  onOpenTime(): void;
-};
-
 const localeLabelKeys: Record<Locale, TranslationKey> = {
   pl: 'settings.language.pl',
   en: 'settings.language.en',
@@ -64,10 +58,7 @@ const copyToClipboard = async (value: string): Promise<void> => {
   await navigator.clipboard.writeText(value);
 };
 
-export const AppSettingsScreen = ({
-  onOpenClimate,
-  onOpenTime
-}: AppSettingsScreenProps) => {
+export const AppSettingsScreen = () => {
   const { locale, t } = useTranslation();
   const platform = Capacitor.getPlatform();
   const [localePreference, setLocalePreferenceState] = useState<LocalePreference>(() =>
@@ -248,12 +239,6 @@ export const AppSettingsScreen = ({
           </div>
         </details>
       </div>
-
-      <AppBottomNavigation
-        activeKind="settings"
-        onOpenClimate={onOpenClimate}
-        onOpenTime={onOpenTime}
-      />
     </main>
   );
 };

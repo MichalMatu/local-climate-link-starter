@@ -1,4 +1,5 @@
 export const pl = {
+  navigation: { rules: 'Reguły', plugs: 'Gniazdka', sensors: 'Termometry' },
   app: {
     name: 'Local Climate Link',
     promise: 'Termostat bez huba.',

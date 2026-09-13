@@ -8,10 +8,6 @@ import {
 } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
@@ -44,15 +40,11 @@ const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'lo
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
   onBack(): void;
-  onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
 };
 
 export const TimeInstallationDetail = ({
   installation,
-  onBack,
-  onNavigateDashboard,
-  onOpenSettings
+  onBack
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -303,15 +295,6 @@ export const TimeInstallationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
-
-      <AppBottomNavigation
-        activeKind="time"
-        onOpenClimate={() =>
-          onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
-        }
-        onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
 
       <Modal
         actions={

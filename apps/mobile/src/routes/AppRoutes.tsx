@@ -7,6 +7,7 @@ import {
   AppBottomNavigation,
   type AppNavigationKind
 } from '../components/AppBottomNavigation.js';
+import type { AutomationCategory } from '../flows/rules/navigation.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
@@ -20,25 +21,18 @@ const HardwareSetupScreen = lazy(async () => {
 
 type SetupRouteIntent = SetupIntent;
 type PrimaryAppRoute =
-  | { type: 'dashboard'; kind?: AppNavigationKind }
-  | { type: 'intent'; sourceKind: AppNavigationKind }
-  | { type: 'setup'; intent: SetupRouteIntent; sourceKind: AppNavigationKind }
-  | { type: 'installation'; installationId: string; kind: AppNavigationKind };
+  | { type: 'dashboard'; kind?: AutomationCategory }
+  | { type: 'intent'; sourceKind: AutomationCategory }
+  | { type: 'setup'; intent: SetupRouteIntent; sourceKind: AutomationCategory }
+  | { type: 'installation'; installationId: string; kind: AutomationCategory };
 type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
 type RouteFallbackProps = {
   activeKind: AppNavigationKind;
-  onOpenClimate(): void;
-  onOpenTime(): void;
-  onOpenSettings(): void;
+  onNavigate(kind: AppNavigationKind): void;
 };
 
-const RouteFallback = ({
-  activeKind,
-  onOpenClimate,
-  onOpenTime,
-  onOpenSettings
-}: RouteFallbackProps) => {
+const RouteFallback = ({ activeKind, onNavigate }: RouteFallbackProps) => {
   const { t } = useTranslation();
 
   return (
@@ -46,12 +40,7 @@ const RouteFallback = ({
       <section className="demo-panel">
         <p role="status">{t('app.loadingConfigurator')}</p>
       </section>
-      <AppBottomNavigation
-        activeKind={activeKind}
-        onOpenClimate={onOpenClimate}
-        onOpenTime={onOpenTime}
-        onOpenSettings={onOpenSettings}
-      />
+      <AppBottomNavigation activeKind={activeKind} onNavigate={onNavigate} />
     </main>
   );
 };
@@ -74,7 +63,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   return null;
 };
 
-const setupKindForIntent = (intent: SetupRouteIntent): AppNavigationKind =>
+const setupKindForIntent = (intent: SetupRouteIntent): AutomationCategory =>
   intent === 'time' ? 'time' : 'climate';
 
 export const AppRoutes = () => {
@@ -130,22 +119,13 @@ export const AppRoutes = () => {
   };
 
   if (route.type === 'settings') {
-    return (
-      <AppSettingsScreen
-        onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-        onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-      />
-    );
+    return <AppSettingsScreen />;
   }
 
   if (route.type === 'intent') {
     return (
       <SetupIntentScreen
-        activeKind={route.sourceKind}
         onCancel={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
-        onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-        onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-        onOpenSettings={openSettings}
         onSelect={selectIntent}
       />
     );
@@ -170,7 +150,6 @@ export const AppRoutes = () => {
             kind: installation?.kind === 'time' ? 'time' : 'climate'
           });
         }}
-        onOpenSettings={openSettings}
       />
     );
   }
@@ -180,8 +159,6 @@ export const AppRoutes = () => {
       <InstallationDetailScreen
         installationId={route.installationId}
         onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
-        onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
-        onOpenSettings={openSettings}
       />
     );
   }
@@ -190,15 +167,18 @@ export const AppRoutes = () => {
     <Suspense
       fallback={
         <RouteFallback
-          activeKind={route.sourceKind}
-          onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-          onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-          onOpenSettings={openSettings}
+          activeKind="rules"
+          onNavigate={(kind) => {
+            if (kind === 'rules') {
+              navigate({ type: 'dashboard', kind: 'climate' });
+            } else if (kind === 'settings') {
+              openSettings();
+            }
+          }}
         />
       }
     >
       <HardwareSetupScreen
-        navigationKind={route.sourceKind}
         setupIntent={route.intent}
         onBackToIntent={() =>
           navigate(
@@ -207,8 +187,6 @@ export const AppRoutes = () => {
               : { type: 'intent', sourceKind: route.sourceKind }
           )
         }
-        onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
-        onOpenSettings={openSettings}
         onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
       />
     </Suspense>

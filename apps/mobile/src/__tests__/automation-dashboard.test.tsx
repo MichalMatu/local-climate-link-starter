@@ -171,18 +171,13 @@ const installTimeShellyFetchMock = () => {
   return fetchMock;
 };
 
-const renderDashboard = (
-  onAddAutomation = vi.fn(),
-  onOpenInstallation = vi.fn(),
-  onOpenSettings = vi.fn()
-) => {
+const renderDashboard = (onAddAutomation = vi.fn(), onOpenInstallation = vi.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
   });
   return {
     onAddAutomation,
     onOpenInstallation,
-    onOpenSettings,
     queryClient,
     ...render(
       <I18nProvider>
@@ -190,7 +185,6 @@ const renderDashboard = (
           <AutomationDashboardScreen
             onAddAutomation={onAddAutomation}
             onOpenInstallation={onOpenInstallation}
-            onOpenSettings={onOpenSettings}
           />
         </QueryClientProvider>
       </I18nProvider>
@@ -236,16 +230,6 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    const timeNav = screen.getByRole('button', { name: 'Czas' });
-    expect(timeNav).toBeEnabled();
-    fireEvent.click(timeNav);
-    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Klimat' }));
-    expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
     expect(
       document.querySelector('.automation-card__menu svg.tabler-icon')
@@ -270,16 +254,6 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    const climateNav = screen.getByRole('button', { name: 'Klimat' });
-    expect(climateNav).toBeEnabled();
-    fireEvent.click(climateNav);
-    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
-
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
     expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);
   });

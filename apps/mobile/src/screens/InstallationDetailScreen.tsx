@@ -10,10 +10,6 @@ import { IconCode } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
@@ -50,8 +46,6 @@ import {
 type InstallationDetailScreenProps = {
   installationId: string;
   onBack(): void;
-  onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
 };
 
 const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
@@ -59,9 +53,7 @@ const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
 
 export const InstallationDetailScreen = ({
   installationId,
-  onBack,
-  onNavigateDashboard,
-  onOpenSettings
+  onBack
 }: InstallationDetailScreenProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -96,29 +88,12 @@ export const InstallationDetailScreen = ({
             {t('detail.backToDashboard')}
           </button>
         </header>
-        <AppBottomNavigation
-          activeKind="climate"
-          onOpenClimate={() =>
-            onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
-          }
-          onOpenTime={() =>
-            onNavigateDashboard ? onNavigateDashboard('time') : onBack()
-          }
-          {...(onOpenSettings ? { onOpenSettings } : {})}
-        />
       </main>
     );
   }
 
   if (installation.kind === 'time') {
-    return (
-      <TimeInstallationDetail
-        installation={installation}
-        onBack={onBack}
-        {...(onNavigateDashboard ? { onNavigateDashboard } : {})}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
-    );
+    return <TimeInstallationDetail installation={installation} onBack={onBack} />;
   }
 
   return (
@@ -129,8 +104,6 @@ export const InstallationDetailScreen = ({
       dismissToast={dismissToast}
       toasts={toasts}
       queryClient={queryClient}
-      {...(onNavigateDashboard ? { onNavigateDashboard } : {})}
-      {...(onOpenSettings ? { onOpenSettings } : {})}
     />
   );
 };
@@ -142,8 +115,6 @@ type InstalledAutomationDetailProps = {
   dismissToast(id: string): void;
   toasts: ToastMessage[];
   queryClient: ReturnType<typeof useQueryClient>;
-  onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
 };
 
 const InstalledAutomationDetail = ({
@@ -152,9 +123,7 @@ const InstalledAutomationDetail = ({
   pushToast,
   dismissToast,
   toasts,
-  queryClient,
-  onNavigateDashboard,
-  onOpenSettings
+  queryClient
 }: InstalledAutomationDetailProps) => {
   const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
@@ -424,15 +393,6 @@ const InstalledAutomationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
-
-      <AppBottomNavigation
-        activeKind="climate"
-        onOpenClimate={() =>
-          onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
-        }
-        onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
 
       <InstallationDiagnosticsModal
         installation={installation}

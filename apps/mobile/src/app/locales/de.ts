@@ -1,6 +1,7 @@
 import type { PlMessages } from './pl.js';
 
 export const de = {
+  navigation: { rules: 'Regeln', plugs: 'Steckdosen', sensors: 'Thermometer' },
   app: {
     name: 'Local Climate Link',
     promise: 'Thermostat ohne Hub.',

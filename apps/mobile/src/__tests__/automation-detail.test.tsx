@@ -329,28 +329,16 @@ const installTimeShellyFetchMock = () => {
   };
 };
 
-const renderDetail = (
-  installationId: string,
-  onBack = vi.fn(),
-  onNavigateDashboard = vi.fn(),
-  onOpenSettings = vi.fn()
-) => {
+const renderDetail = (installationId: string, onBack = vi.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
   return {
     onBack,
-    onNavigateDashboard,
-    onOpenSettings,
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <InstallationDetailScreen
-            installationId={installationId}
-            onBack={onBack}
-            onNavigateDashboard={onNavigateDashboard}
-            onOpenSettings={onOpenSettings}
-          />
+          <InstallationDetailScreen installationId={installationId} onBack={onBack} />
         </QueryClientProvider>
       </I18nProvider>
     )
@@ -381,7 +369,7 @@ describe('InstallationDetailScreen', () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
-    const { onBack, onNavigateDashboard, onOpenSettings } = renderDetail(saved.id);
+    const { onBack } = renderDetail(saved.id);
 
     expect(await screen.findByText('21.4°C')).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
@@ -396,7 +384,6 @@ describe('InstallationDetailScreen', () => {
     expect(
       document.querySelector('.installation-detail-header .runtime-refresh-action')
     ).toBeNull();
-    expect(document.querySelector('.app-bottom-nav')).not.toBeNull();
     expect(
       document.querySelectorAll('.installation-detail-shell svg:not(.tabler-icon)')
     ).toHaveLength(0);
@@ -442,11 +429,7 @@ describe('InstallationDetailScreen', () => {
     expect(rpcMethods).not.toContain('Script.Start');
     expect(screen.getByText('21.4°C')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
-    expect(onNavigateDashboard).toHaveBeenCalledWith('time');
     expect(onBack).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
-    expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
   it('opens scoped technical diagnostics without duplicating the installation summary', async () => {

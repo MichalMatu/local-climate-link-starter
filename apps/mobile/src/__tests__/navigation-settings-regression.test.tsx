@@ -46,24 +46,6 @@ describe('navigation and settings regression coverage', () => {
     window.localStorage.clear();
   });
 
-  it('opens language and appearance settings from the normal app shell', () => {
-    render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia aplikacji' }));
-
-    expect(screen.queryByRole('dialog')).toBeNull();
-    expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Język' })).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Wygląd' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    expect(screen.queryByRole('button', { name: 'Przywróć system' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Zamknij' })).toBeNull();
-    expect(document.querySelector('.app-settings__hint')).toBeNull();
-  });
-
   it('returns visibly from Add automation to an existing dashboard', () => {
     const config = createDefaultShellyThermostatConfig(
       'xiaomi_lywsd03mmc_bthome_v2',

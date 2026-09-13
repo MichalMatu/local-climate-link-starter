@@ -10,10 +10,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
+import type { AutomationCategory } from '../flows/rules/navigation.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -261,24 +258,22 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
   );
 
 type AutomationDashboardScreenProps = {
-  initialKind?: AppNavigationKind;
-  onAddAutomation(kind: AppNavigationKind): void;
+  initialKind?: AutomationCategory;
+  onAddAutomation(kind: AutomationCategory): void;
   onOpenInstallation(installationId: string): void;
-  onOpenSettings?: () => void;
 };
 
 export const AutomationDashboardScreen = ({
   initialKind,
   onAddAutomation,
-  onOpenInstallation,
-  onOpenSettings
+  onOpenInstallation
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
   const queryClient = useQueryClient();
   const hasClimate = installations.some((installation) => installation.kind !== 'time');
   const hasTime = installations.some((installation) => installation.kind === 'time');
-  const [activeKind, setActiveKind] = useState<AppNavigationKind>(
+  const [activeKind] = useState<AutomationCategory>(
     () => initialKind ?? (hasTime && !hasClimate ? 'time' : 'climate')
   );
 
@@ -348,13 +343,6 @@ export const AutomationDashboardScreen = ({
       >
         <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
       </button>
-
-      <AppBottomNavigation
-        activeKind={activeKind}
-        onOpenClimate={() => setActiveKind('climate')}
-        onOpenTime={() => setActiveKind('time')}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
     </main>
   );
 };

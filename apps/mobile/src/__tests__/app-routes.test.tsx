@@ -136,10 +136,6 @@ describe('AppRoutes navigation shell', () => {
     renderRoutes();
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
   });
@@ -155,35 +151,6 @@ describe('AppRoutes navigation shell', () => {
       screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     ).toBeNull();
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
-  });
-
-  it('opens time setup directly from the Time plus and returns to Time dashboard', async () => {
-    renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-  });
-
-  it('keeps Settings available through bottom navigation from Add automation', () => {
-    renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
-    expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
   });
 
   it('returns from Android setup through intent and dashboard before exiting', async () => {
@@ -218,22 +185,5 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
     expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-  });
-
-  it('completes direct Time setup back to the Time dashboard', async () => {
-    renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
   });
 });

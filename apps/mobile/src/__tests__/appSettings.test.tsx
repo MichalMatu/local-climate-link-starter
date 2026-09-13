@@ -43,7 +43,7 @@ describe('app settings screen', () => {
 
     render(
       <I18nProvider>
-        <AppSettingsScreen onOpenClimate={vi.fn()} onOpenTime={vi.fn()} />
+        <AppSettingsScreen />
       </I18nProvider>
     );
 

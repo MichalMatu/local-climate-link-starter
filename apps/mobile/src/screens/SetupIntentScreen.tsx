@@ -1,17 +1,9 @@
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
 type SetupIntentScreenProps = {
-  activeKind: AppNavigationKind;
   onSelect(intent: SetupIntent): void;
   onCancel(): void;
-  onOpenClimate(): void;
-  onOpenTime(): void;
-  onOpenSettings?: () => void;
 };
 
 const INTENT_CHOICES = [
@@ -27,14 +19,7 @@ const INTENT_CHOICES = [
   }
 ] as const;
 
-export const SetupIntentScreen = ({
-  activeKind,
-  onSelect,
-  onCancel,
-  onOpenClimate,
-  onOpenTime,
-  onOpenSettings
-}: SetupIntentScreenProps) => {
+export const SetupIntentScreen = ({ onSelect, onCancel }: SetupIntentScreenProps) => {
   const { t } = useTranslation();
 
   return (
@@ -69,13 +54,6 @@ export const SetupIntentScreen = ({
           </button>
         ))}
       </section>
-
-      <AppBottomNavigation
-        activeKind={activeKind}
-        onOpenClimate={onOpenClimate}
-        onOpenTime={onOpenTime}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
     </main>
   );
 };
