@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-local-codex-worktree-audit",
+  "task_digest": "3703a297db6500118c53f332d97298237be99350af469498ff9a632957a29f67",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T18:57:14.145721+00:00",
+  "attempt_id": "53347df9e2f3f2d55827a1de",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 34503,
+  "updated_at": "2026-09-13T18:57:14.145780+00:00",
+  "pid": 34503
+}
