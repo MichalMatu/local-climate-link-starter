@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-runtime-mode-failclosed-audit",
+  "task_digest": "f9f8487a1cfebeef39d2bb267f04ed7d5ea08e04ae102bb909a5a8f8062863a3",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T20:09:10.336642+00:00",
+  "attempt_id": "adb74e82cb8cf79d0507fde1",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 32495,
+  "updated_at": "2026-09-13T20:09:10.336856+00:00",
+  "pid": 32495
+}
