@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-rule-runtime-foundation-v5",
+  "task_digest": "0a01c6485b06245f57dbd6b905715c116f3dc6e64a760f4c32b3c8c0c7bcd66d",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T21:01:01.921890+00:00",
+  "attempt_id": "397c4e003c6692ed8cea3d95",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 2729,
+  "updated_at": "2026-09-13T21:01:01.922021+00:00",
+  "pid": 2729
+}
