@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-runtime-mode-local-head-audit",
+  "task_digest": "408976259fe7c23543f6b52e5942825c67eb1d60c246b61a4e5e4ac7603ddbdf",
+  "idle_timeout": 180,
+  "task_timeout": 1200,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-13T18:04:07.839681+00:00",
+  "attempt_id": "ee726b78fd722c1cba060c06",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 95802,
+  "updated_at": "2026-09-13T18:04:07.839834+00:00",
+  "pid": 95802
+}
