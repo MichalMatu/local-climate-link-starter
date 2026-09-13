@@ -7,12 +7,14 @@ import {
   AppBottomNavigation,
   type AppNavigationKind
 } from '../components/AppBottomNavigation.js';
-import type { AutomationCategory } from '../flows/rules/navigation.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import type { AutomationCategory } from '../flows/rules/navigation.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
+import { PlugManagementScreen } from '../screens/devices/PlugManagementScreen.js';
+import { SensorManagementScreen } from '../screens/devices/SensorManagementScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
   const module = await import('../screens/hardware-setup/HardwareSetupScreen.js');
@@ -22,6 +24,8 @@ const HardwareSetupScreen = lazy(async () => {
 type SetupRouteIntent = SetupIntent;
 type PrimaryAppRoute =
   | { type: 'dashboard'; kind?: AutomationCategory }
+  | { type: 'plugs' }
+  | { type: 'sensors' }
   | { type: 'intent'; sourceKind: AutomationCategory }
   | { type: 'setup'; intent: SetupRouteIntent; sourceKind: AutomationCategory }
   | { type: 'installation'; installationId: string; kind: AutomationCategory };
@@ -81,6 +85,20 @@ export const AppRoutes = () => {
     }
     navigate({ type: 'settings', returnTo: current });
   }, [navigate]);
+  const navigateTopLevel = useCallback(
+    (kind: AppNavigationKind) => {
+      if (kind === 'settings') {
+        openSettings();
+      } else if (kind === 'rules') {
+        navigate({ type: 'dashboard' });
+      } else if (kind === 'plugs') {
+        navigate({ type: 'plugs' });
+      } else {
+        navigate({ type: 'sensors' });
+      }
+    },
+    [navigate, openSettings]
+  );
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'android') {
@@ -119,7 +137,30 @@ export const AppRoutes = () => {
   };
 
   if (route.type === 'settings') {
-    return <AppSettingsScreen />;
+    return (
+      <>
+        <AppSettingsScreen />
+        <AppBottomNavigation activeKind="settings" onNavigate={navigateTopLevel} />
+      </>
+    );
+  }
+
+  if (route.type === 'plugs') {
+    return (
+      <>
+        <PlugManagementScreen onOpenRule={() => navigate({ type: 'dashboard' })} />
+        <AppBottomNavigation activeKind="plugs" onNavigate={navigateTopLevel} />
+      </>
+    );
+  }
+
+  if (route.type === 'sensors') {
+    return (
+      <>
+        <SensorManagementScreen />
+        <AppBottomNavigation activeKind="sensors" onNavigate={navigateTopLevel} />
+      </>
+    );
   }
 
   if (route.type === 'intent') {
@@ -133,24 +174,27 @@ export const AppRoutes = () => {
 
   if (route.type === 'dashboard') {
     return (
-      <AutomationDashboardScreen
-        {...(route.kind ? { initialKind: route.kind } : {})}
-        onAddAutomation={(kind) =>
-          kind === 'time'
-            ? navigate({ type: 'setup', intent: 'time', sourceKind: 'time' })
-            : navigate({ type: 'intent', sourceKind: 'climate' })
-        }
-        onOpenInstallation={(installationId) => {
-          const installation = installations.find(
-            (candidate) => candidate.id === installationId
-          );
-          navigate({
-            type: 'installation',
-            installationId,
-            kind: installation?.kind === 'time' ? 'time' : 'climate'
-          });
-        }}
-      />
+      <>
+        <AutomationDashboardScreen
+          {...(route.kind ? { initialKind: route.kind } : {})}
+          onAddAutomation={(kind) =>
+            kind === 'time'
+              ? navigate({ type: 'setup', intent: 'time', sourceKind: 'time' })
+              : navigate({ type: 'intent', sourceKind: 'climate' })
+          }
+          onOpenInstallation={(installationId) => {
+            const installation = installations.find(
+              (candidate) => candidate.id === installationId
+            );
+            navigate({
+              type: 'installation',
+              installationId,
+              kind: installation?.kind === 'time' ? 'time' : 'climate'
+            });
+          }}
+        />
+        <AppBottomNavigation activeKind="rules" onNavigate={navigateTopLevel} />
+      </>
     );
   }
 
@@ -165,18 +209,7 @@ export const AppRoutes = () => {
 
   return (
     <Suspense
-      fallback={
-        <RouteFallback
-          activeKind="rules"
-          onNavigate={(kind) => {
-            if (kind === 'rules') {
-              navigate({ type: 'dashboard', kind: 'climate' });
-            } else if (kind === 'settings') {
-              openSettings();
-            }
-          }}
-        />
-      }
+      fallback={<RouteFallback activeKind="rules" onNavigate={navigateTopLevel} />}
     >
       <HardwareSetupScreen
         setupIntent={route.intent}

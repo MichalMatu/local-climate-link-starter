@@ -203,3 +203,14 @@ Android phone. Validated Shelly Plug S Gen3, firmware 1.7.5, Matter disabled.
   after its disposable runtime script was removed.
 - No APK update or app-data reset performed. This is hardware service validation
   and native baseline inspection, not acceptance of the unfinished product cutover.
+
+### Routing checkpoint — four top-level sections
+
+- Wired the existing `Rules / Plugs / Thermometers / Settings` bottom navigation into `AppRoutes`.
+- Made standalone Plug and Thermometer management screens reachable from normal product navigation.
+- Settings returns through the same shell; Android back semantics remain fail-simple for top-level routes.
+- Added route coverage for all four active navigation states.
+- Focused route/navigation tests, UX/repository gates and workspace typecheck passed before commit.
+- This checkpoint intentionally does not claim the rule persistence/runtime cutover; `InstalledAutomation` remains until later phases.
+
+Exact next step: convert the Rules product path and rule creation to the dedicated rule/device registries, then remove the remaining `InstalledAutomation` and device-draft coupling in runtime setup.

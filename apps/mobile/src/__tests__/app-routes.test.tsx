@@ -63,6 +63,14 @@ vi.mock('../screens/InstallationDetailScreen.js', () => ({
   )
 }));
 
+vi.mock('../screens/devices/PlugManagementScreen.js', () => ({
+  PlugManagementScreen: () => <section>mock-plugs</section>
+}));
+
+vi.mock('../screens/devices/SensorManagementScreen.js', () => ({
+  SensorManagementScreen: () => <section>mock-sensors</section>
+}));
+
 vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
   HardwareSetupScreen: ({
     setupIntent,
@@ -138,6 +146,43 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
+  });
+
+  it('routes the four-item bottom navigation through top-level sections', () => {
+    renderRoutes();
+
+    expect(screen.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
+    expect(screen.getByText('mock-plugs')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    expect(screen.getByText('mock-sensors')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
+    expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reguły' }));
+    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
   });
 
   it('opens Add automation only from plus and does not expose legacy manage choice', () => {
