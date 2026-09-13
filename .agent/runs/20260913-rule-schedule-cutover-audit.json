@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-rule-schedule-cutover-audit",
+  "task_digest": "d639eaf227b983967669cbf5ec2c6bf6d1e253408a14c939320236b8c26e760a",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T19:46:50.569461+00:00",
+  "attempt_id": "b213740e976927a808b4f5e6",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 3956,
+  "updated_at": "2026-09-13T19:46:50.569610+00:00",
+  "pid": 3956
+}
