@@ -1,0 +1,15 @@
+{
+  "id": "20260913-locate-vscode-checkout-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "commands": [
+    "set -eu; candidates='/Users/michal/local-climate-link-starter /Users/michal/Documents/local-climate-link-starter /Users/michal/Documents/GitHub/local-climate-link-starter /Users/michal/Developer/local-climate-link-starter /Users/michal/Projects/local-climate-link-starter /Users/michal/Desktop/local-climate-link-starter /Users/michal/Downloads/local-climate-link-starter'; { for p in $candidates; do [ -e \"$p\" ] && printf '%s\\n' \"$p\"; done; command -v mdfind >/dev/null 2>&1 && mdfind \"kMDItemFSName == 'local-climate-link-starter'\" 2>/dev/null || true; } | awk '!seen[$0]++' | while IFS= read -r repo; do [ -n \"$repo\" ] || continue; if git -C \"$repo\" rev-parse --is-inside-work-tree >/dev/null 2>&1; then echo \"--- $repo ---\"; printf 'ORIGIN='; git -C \"$repo\" remote get-url origin 2>/dev/null || true; printf 'BRANCH='; git -C \"$repo\" branch --show-current || true; printf 'HEAD='; git -C \"$repo\" rev-parse HEAD || true; echo 'STATUS:'; git -C \"$repo\" status --short --branch || true; echo 'DIFF_STAT:'; git -C \"$repo\" diff --stat || true; echo 'CHANGED_COUNT:'; git -C \"$repo\" status --porcelain=v1 | wc -l | tr -d ' '; fi; done"
+  ],
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096
+}
