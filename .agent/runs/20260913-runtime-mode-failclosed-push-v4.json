@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-runtime-mode-failclosed-push-v4",
+  "task_digest": "e5e4d19a03db05587e5b750b6c7b77a56e3a13066706b72771106bdd489a3fb2",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T20:27:59.301700+00:00",
+  "attempt_id": "3720d2c18994e73e511a1ee0",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 57080,
+  "updated_at": "2026-09-13T20:27:59.303006+00:00",
+  "pid": 57080
+}
