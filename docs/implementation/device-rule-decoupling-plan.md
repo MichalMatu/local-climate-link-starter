@@ -30,8 +30,8 @@ Devices do not require rules to exist.
 For climate rules:
 
 ```text
-saved plug + saved thermometer + climate rule config
-    -> generated Shelly script deployment
+saved plug + saved thermometer + climate rule config + optional time constraint
+    -> one generated Shelly script deployment
 ```
 
 For time rules:
@@ -41,7 +41,22 @@ saved plug + schedule config
     -> native Shelly schedule deployment
 ```
 
+A time constraint on a climate rule is part of that same climate rule and must execute inside its climate script. Never deploy a climate script and a separate native schedule that compete for the same relay. A standalone `TimeRule` remains the correct representation when time is the primary automation and no climate sensor condition is involved.
+
 The phone remains only the configurator/management UI. Runtime automation stays on Shelly.
+
+### Target-form invariants
+
+These are product/domain invariants, not temporary implementation details:
+
+- plugs, thermometers and rules are independent durable entities;
+- thermometers are global devices and never belong to a plug; `SavedSensor` must not contain `plugId`;
+- the durable relationship between a thermometer and a plug exists only through a rule;
+- rule names are independent from device names; renaming a plug or thermometer must not rename a rule, and renaming a rule must not mutate device identity or names;
+- runtime observation provenance such as “last seen via phone” or “last seen via plug X” is transient runtime state, not durable device ownership;
+- exactly one rule may own a `(plugId, relayId)` in the current product model;
+- time is both a standalone rule type and an optional constraint on climate rules;
+- desired rule configuration is independent from deployment state, so a rule may remain configured while its runtime is missing, drifted or awaiting repair.
 
 ## 2. UX constraint: preserve the work already done
 
@@ -223,23 +238,39 @@ type SavedSensor = {
 
 For the current MVP, identity can be derived deterministically from normalized profile + Shelly-side runtime address. Do not use an unstable iOS scan identifier as physical identity.
 
-Keep live readings separate from the durable device model.
+A saved thermometer is global. It must not persist `plugId`, owner plug, discovery plug or any equivalent parent relationship. The same BLE thermometer may be visible to multiple Shellys, and deleting a plug must never cascade-delete thermometers. Rule selectors derive durable usage as `sensor -> rule -> plug`.
+
+Keep live readings and observation provenance separate from the durable device model. If the app can prove a current/recent reading source, runtime state may expose data such as `observer = phone | plugId`, `lastSeenAtMs`, RSSI and latest values. This may power UI such as “last seen via”, but it must not be persisted as sensor ownership and must be omitted when provenance is unknown.
 
 ### 4.3 Automation rule
 
 Replace the persistence meaning of `InstalledAutomation` with a rule entity that references devices.
 
-Suggested shape:
+Suggested target shape:
 
 ```ts
+type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+type RuleTimeWindow = {
+  days: Weekday[];
+  start: string; // local HH:mm
+  end: string; // local HH:mm; may cross midnight
+};
+
+type RuleSchedule = {
+  windows: RuleTimeWindow[];
+};
+
 type ClimateRule = {
   version: 1;
   id: string;
   kind: 'climate';
+  name: string;
   plugId: string;
   relayId: number;
   sensorId: string;
   config: ClimateRuleConfig;
+  schedule: RuleSchedule | null;
   deployment: null | {
     scriptId: number;
     scriptHash: string;
@@ -253,9 +284,12 @@ type TimeRule = {
   version: 1;
   id: string;
   kind: 'time';
+  name: string;
   plugId: string;
   relayId: number;
-  config: DailyTimeAutomationConfig;
+  config: {
+    schedule: RuleSchedule;
+  };
   deployment: null | {
     onJobId: number;
     offJobId: number;
@@ -265,9 +299,17 @@ type TimeRule = {
 };
 ```
 
+The current UI may initially expose only one every-day time window, but persistence and rule semantics must not require a future storage migration merely to add weekday-specific or multiple windows. Normalize/validate windows in one rule-domain helper, including cross-midnight semantics.
+
+For a climate rule, `schedule: null` means climate control is unrestricted by time. When a schedule is present, its windows are OR conditions: the climate algorithm may control the relay only inside an active window. Outside all active windows the required state is OFF. If local time cannot be trusted while a climate time constraint is enabled, fail closed to OFF and surface runtime attention rather than guessing.
+
+For a standalone time rule, the schedule is the primary automation and should continue to compile/deploy to native Shelly schedule resources when supported. Do not create those native schedule jobs for a climate rule's time constraint.
+
 Do not duplicate the full plug snapshot in every rule. Resolve `plugId` through the plug store. Resolve `sensorId` through the sensor store.
 
 A missing referenced device is an integrity error, not a valid steady state.
+
+Rule `name` is user-owned display metadata and is deliberately independent from plug/sensor names. Device renames must not rewrite rule names or force deployment identity changes.
 
 The exact climate config representation may keep using the existing typed script-generator config, but avoid storing duplicated identity fields if they can drift independently from the referenced device. Build the generator input from the current rule + resolved plug/sensor at deployment time.
 
@@ -339,6 +381,8 @@ Semantics:
 - a real saved owner blocks another rule on that relay;
 - an orphan Local Climate Link script blocks deployment but has an explicit remediation path in Plug management;
 - an unmanaged Shelly schedule remains protected and blocks conflicting automation;
+- a climate rule with a time constraint remains one owner and one climate deployment; its time constraint must not create a competing native schedule;
+- a standalone `TimeRule` and a `ClimateRule` therefore cannot coexist on the same `(plugId, relayId)` under the current one-owner model;
 - deployment metadata whose remote resource is verified missing must not permanently reserve the relay; mark the rule as attention/not deployed and allow recovery or deletion;
 - never auto-delete a conflict as a side effect of creating another rule.
 
@@ -477,30 +521,33 @@ The Shelly-side “scan thermometers visible to this plug” convenience may rem
 ### Climate
 
 1. choose rule intent/preset (temperature/humidity modes as current UI supports);
-2. choose a saved plug;
-3. choose a saved thermometer;
-4. configure thresholds/advanced settings using the current Rule UI;
-5. validate pure config;
-6. resolve ownership/live conflicts;
-7. deploy exact climate runtime;
-8. run mandatory safe relay test;
-9. mark deployment safety verified and complete setup.
+2. give the rule its own user-visible name;
+3. choose a saved plug;
+4. choose a saved thermometer;
+5. configure thresholds/advanced settings using the current Rule UI;
+6. optionally configure an active time window/schedule constraint;
+7. validate pure config;
+8. resolve ownership/live conflicts;
+9. deploy one exact climate runtime containing both climate logic and any time constraint;
+10. run mandatory safe relay test;
+11. mark deployment safety verified and complete setup.
 
 If either device list is empty, provide a clear path to the corresponding Plugs/Thermometers section rather than embedding the full add wizard in the rule flow.
 
 ### Time
 
-1. choose a saved plug;
-2. configure native schedule;
-3. validate clock/capabilities/conflicts;
-4. create and verify the two schedule jobs transactionally;
-5. persist deployment metadata.
+1. give the rule its own user-visible name;
+2. choose a saved plug;
+3. configure the rule schedule;
+4. validate clock/capabilities/conflicts;
+5. create and verify the native schedule resources transactionally;
+6. persist deployment metadata.
 
-No thermometer is involved.
+No thermometer is involved. A time rule is still shown in the same Rules section as climate rules; “time” is a rule type, not a separate product area.
 
 ## 12. Deployment state and safe relay test
 
-Desired configuration and runtime deployment are different states.
+Desired configuration and runtime deployment are different states. The supported lifecycle is `create -> deploy -> verify -> edit -> redeploy -> pause/resume -> recover -> delete`; editing desired configuration must not require deleting/recreating the durable rule identity. Redeploy must preserve OFF-first/exact-ownership safety and either verify the new runtime or leave an actionable recoverable state.
 
 At minimum, climate rules need to represent:
 
@@ -665,9 +712,13 @@ Exit criteria: no production path needs the old combined installation model.
 - same Shelly physical device at changed base URL updates one record;
 - case normalization cannot create duplicate plug identity;
 - sensor identity normalization;
+- saved sensor has no plug ownership field and remains after unrelated plug deletion;
+- derived sensor usage resolves through climate rule -> current plug;
+- rule names remain unchanged when referenced plug/sensor names change;
 - plug deletion blocked by referencing rule;
 - sensor deletion blocked by referencing climate rule;
 - climate/time output ownership matrix;
+- schedule normalization including weekday and cross-midnight windows;
 - stale deployment metadata vs verified missing remote resource;
 - no backward-compat fallback readers.
 
@@ -685,6 +736,9 @@ Exit criteria: no production path needs the old combined installation model.
 - BLE discovery from MANUAL restores MANUAL;
 - failed BLE discovery cleanup leaves relay OFF and reports recovery state;
 - climate safe test failure leaves rule recoverable but not healthy/complete;
+- climate time constraint executes inside the climate script and does not create native schedule jobs;
+- climate time constraint outside its active window forces OFF;
+- climate time constraint with unavailable/untrusted local time fails closed OFF;
 - time schedule partial failure still rolls back and forces safe state.
 
 ### UI tests
@@ -698,8 +752,12 @@ Exit criteria: no production path needs the old combined installation model.
 - orphan script is visible/actionable from Plug management with no saved rule;
 - direct ON/OFF visible with no owner;
 - references block physical-device deletion with useful copy;
+- Thermometers UI can show durable “used by” rule/plug relationships derived from rules without persisting plug ownership;
+- any “last seen via” source is shown only from proven runtime provenance and is not fabricated;
 - climate rule device selectors use existing registries;
+- climate rule setup supports an optional time constraint without creating a second rule/owner;
 - time rule selector uses plug registry only;
+- rule names are editable/displayed independently from device names;
 - Android back routes for all new top-level/detail/setup states;
 - all locale keys remain in parity.
 
@@ -713,9 +771,12 @@ On the authorized local development Shelly:
 4. remove time rule; verify jobs removed but plug remains saved;
 5. add thermometer independently; live reading path still works;
 6. create climate rule by selecting saved plug + sensor; verify install + safe relay test + runtime status;
-7. switch climate rule MANUAL, run temporary Shelly BLE discovery, close it, verify mode remains MANUAL and relay OFF;
-8. remove climate rule; verify managed script removed but both plug and thermometer remain saved;
-9. re-add/rescan the same Shelly at another reachable endpoint if practical; verify identity deduplicates by device id.
+7. add a climate active-time constraint; verify no native schedule jobs are created for it, verify outside-window behavior is OFF, and verify rule ownership remains singular;
+8. switch climate rule MANUAL, run temporary Shelly BLE discovery, close it, verify mode remains MANUAL and relay OFF;
+9. rename the plug and thermometer; verify the climate rule keeps its independent name and still resolves current devices correctly;
+10. remove climate rule; verify managed script removed but both plug and thermometer remain saved;
+11. remove an unreferenced plug; verify globally saved thermometers remain intact;
+12. re-add/rescan the same Shelly at another reachable endpoint if practical; verify identity deduplicates by device id.
 
 The local development Shelly relay is authorized for ON/OFF testing. Always leave final relay state explicitly verified OFF after safety-sensitive test sequences.
 
@@ -763,7 +824,10 @@ Before every commit, explicitly check these failure modes:
 - [ ] plug identity is stable device id, not IP/base URL;
 - [ ] endpoint changes propagate to all runtime operations through resolution, not copied stale rule data;
 - [ ] saved devices do not depend on an automation existing;
+- [ ] saved thermometers are global and never persist plug ownership;
+- [ ] observation provenance is runtime state, not durable sensor ownership;
 - [ ] rule records reference device ids and do not duplicate mutable device snapshots;
+- [ ] rule names are independent from device names and survive device renames unchanged;
 - [ ] deleting a local device does not silently orphan a rule;
 - [ ] deleting a runtime resource cannot target an unrelated user script/schedule;
 - [ ] orphan managed scripts have a recovery path without needing a saved rule;
@@ -772,6 +836,8 @@ Before every commit, explicitly check these failure modes:
 - [ ] BLE discovery cannot turn MANUAL back into AUTO;
 - [ ] direct raw relay control is not allowed to race an AUTO climate owner;
 - [ ] safe relay test completion is distinguishable from script upload success;
+- [ ] climate time constraints execute in the owned climate script and never as competing native schedule jobs;
+- [ ] climate schedule constraints fail closed OFF when time is unavailable/untrusted;
 - [ ] time schedule transaction rollback semantics remain intact;
 - [ ] unmanaged native schedules remain protected conflicts;
 - [ ] scans/GATT sessions are stopped on screen/modal/page lifecycle transitions;
@@ -839,9 +905,12 @@ Priorities, in order:
 2. the reported orphan-script/time-rule dead end must have a safe deterministic recovery path;
 3. unowned saved plugs must support direct ON/OFF;
 4. rules must reference saved devices and own only desired config + deployment metadata;
-5. preserve existing polished Plug/Thermometer UX;
-6. preserve or strengthen OFF-first/exact-ownership safety;
-7. fix the MANUAL/AUTO inconsistency and BLE discovery mode restoration;
-8. keep architecture gates and full verification green.
+5. thermometers must remain global devices, with usage derived from rules rather than persisted plug ownership;
+6. rule names must remain independent from device names;
+7. time must work both as a standalone rule and as an optional climate constraint without creating competing relay owners;
+8. preserve existing polished Plug/Thermometer UX;
+9. preserve or strengthen OFF-first/exact-ownership safety;
+10. fix the MANUAL/AUTO inconsistency and BLE discovery mode restoration;
+11. keep architecture gates and full verification green.
 
 When uncertain, prefer explicit fail-closed state with actionable remediation over implicit deletion, fallback identity, or guessing runtime ownership.
