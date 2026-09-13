@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-device-rule-b1-baseline",
+  "task_digest": "4543db740aed5a8b75b17b32dc23b00ec8271da85f587896ad1e9f343356d155",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T08:13:05.437670+00:00",
+  "attempt_id": "0857e01c6547730c13f8feb5",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 33933,
+  "updated_at": "2026-09-13T08:13:05.437754+00:00",
+  "pid": 33933
+}
