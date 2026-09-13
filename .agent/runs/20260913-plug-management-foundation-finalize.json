@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260913-plug-management-foundation-finalize",
   "task_digest": "1f9cc627e50c73635f17cb92f8dd0cfa998b421cb919a40a7872e5f0fcb9d1e7",
-  "idle_timeout": 1200,
-  "task_timeout": 18000,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-13T08:34:20.011406+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-13T08:34:23.131992+00:00",
   "attempt_id": "87ed7998a4045f311dae2f56",
   "daemon_version": "4.18.20",
   "daemon_pid": 74506,
-  "updated_at": "2026-09-13T08:34:20.011465+00:00",
+  "updated_at": "2026-09-13T08:34:23.376581+00:00",
   "pid": 74506
 }
