@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 1,
+  "index": 2,
   "total": 2,
-  "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-rule-runtime-foundation-v3.sh > /tmp/lcl-rule-runtime-foundation-v7-base.sh && (bash /tmp/lcl-rule-runtime-foundation-v7-base.sh || true)",
-  "pid": 23158,
+  "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260913-rule-runtime-foundation-repair-v7.sh > /tmp/lcl-rule-runtime-foundation-repair-v7.sh && bash /tmp/lcl-rule-runtime-foundation-repair-v7.sh",
+  "pid": 23338,
   "timeout": 7200,
   "idle_timeout": 1200,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-13T21:20:59.775162+00:00",
-  "stage_name": "command-1",
-  "stage_index": 1,
+  "started_at": "2026-09-13T21:21:06.813024+00:00",
+  "stage_name": "command-2",
+  "stage_index": 2,
   "stage_total": 2,
   "stage_phase": "commands",
   "task_id": "20260913-rule-runtime-foundation-v7",
@@ -18,5 +18,5 @@
   "task_digest": "9873b2459bed03211512c25816901d43187f8f6bb9e303f86e5c413f99377815",
   "daemon_version": "4.18.20",
   "daemon_pid": 22977,
-  "updated_at": "2026-09-13T21:20:59.775438+00:00"
+  "updated_at": "2026-09-13T21:21:06.885818+00:00"
 }
