@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260913-schedule-coverage-push-v5",
+  "task_digest": "6807f9d82c8f40683508ff4bcd322bcbb013cceb24ed50be1f1394d66b5a4240",
+  "idle_timeout": 1200,
+  "task_timeout": 18000,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-13T20:32:39.278845+00:00",
+  "attempt_id": "92dcc37b7189d07eb1506a20",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 65116,
+  "updated_at": "2026-09-13T20:32:39.279046+00:00",
+  "pid": 65116
+}
