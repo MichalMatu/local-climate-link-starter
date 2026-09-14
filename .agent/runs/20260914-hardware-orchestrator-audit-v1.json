@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260914-hardware-orchestrator-audit-v1",
   "task_digest": "1d4aecef4afa61f7b4cbb639f7c4874b56e21ff9a288cd2b3c8ac0b3872d18eb",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-14T02:29:10.631302+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-14T02:29:14.140287+00:00",
   "attempt_id": "ca3618af5d35971b10844d0e",
   "daemon_version": "4.18.20",
   "daemon_pid": 72692,
-  "updated_at": "2026-09-14T02:29:10.631454+00:00",
+  "updated_at": "2026-09-14T02:29:14.396202+00:00",
   "pid": 72692
 }
