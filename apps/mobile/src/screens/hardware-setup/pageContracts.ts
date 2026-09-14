@@ -1,5 +1,5 @@
 import type { HardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
-import type { RegistryResult } from '../../flows/registry/result.js';
+import type { SensorManagementFlow } from '../../flows/devices/sensors/useSensorManagementFlow.js';
 
 export type ShellySetupFlow = Pick<
   HardwareSetupFlow,
@@ -47,32 +47,7 @@ export type ShellySetupFlow = Pick<
   | 'upsertShellyDevice'
 >;
 
-export type SensorSetupFlow = Pick<
-  HardwareSetupFlow,
-  | 'addDiscoveredSensor'
-  | 'addSensorDraft'
-  | 'phoneBleScanCandidates'
-  | 'phoneBleScanMutation'
-  | 'resetPhoneBleScan'
-  | 'restartSavedSensorLiveScan'
-  | 'sensorDevices'
-  | 'sensorInputState'
-  | 'sensorMacInput'
-  | 'sensorNameInput'
-  | 'sensorProfileInput'
-  | 'sensorSamplesById'
-  | 'setPvvxTimeMutation'
-  | 'setSensorDeviceName'
-  | 'setSensorMacInput'
-  | 'setSensorNameInput'
-  | 'setSensorProfileInput'
-  | 'startPhoneBleScan'
-  | 'startSavedSensorLiveScan'
-  | 'stopPhoneBleScan'
-  | 'stopSavedSensorLiveScan'
-> & {
-  removeSensorDevice(id: string): RegistryResult<null> | void;
-};
+export type SensorSetupFlow = SensorManagementFlow;
 
 export type RuleSetupFlow = Pick<
   HardwareSetupFlow,
