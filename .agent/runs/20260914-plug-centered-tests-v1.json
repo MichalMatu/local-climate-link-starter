@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-plug-centered-tests-v1",
+  "task_digest": "7eebbf7f839e88daab2ac228f33bdcce21a790c3e2cabba94f461e930192acc4",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T12:14:51.228026+00:00",
+  "attempt_id": "7a1f7296b1f3f73ea21df17d",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 90535,
+  "updated_at": "2026-09-14T12:14:51.228084+00:00",
+  "pid": 90535
+}
