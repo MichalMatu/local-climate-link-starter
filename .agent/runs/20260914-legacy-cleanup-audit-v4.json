@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260914-legacy-cleanup-audit-v4",
   "task_digest": "10eb907dbf723e522d8cae8516cee489db31377803e2ccc0b011c90fa2d01487",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-14T01:07:54.215563+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-14T01:07:57.571126+00:00",
   "attempt_id": "b89bda28d3a620e84ea02062",
   "daemon_version": "4.18.20",
   "daemon_pid": 10892,
-  "updated_at": "2026-09-14T01:07:54.215714+00:00",
+  "updated_at": "2026-09-14T01:07:57.806518+00:00",
   "pid": 10892
 }
