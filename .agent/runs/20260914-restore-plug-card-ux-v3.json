@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-restore-plug-card-ux-v3",
+  "task_digest": "994380ce18bba00cc8cfc0d1f3ef1ebe9f6c377634dd1d9507412ac157117ca1",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T05:59:12.996268+00:00",
+  "attempt_id": "a7cc7b7f20f78a7b13a7da0a",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 66441,
+  "updated_at": "2026-09-14T05:59:12.996328+00:00",
+  "pid": 66441
+}
