@@ -17,7 +17,6 @@ import {
   formatPlugPower,
   formatPlugVoltage
 } from './plugPresentation.js';
-import './SavedPlugCard.css';
 
 const formatMetric = (
   value: number | null | undefined,
