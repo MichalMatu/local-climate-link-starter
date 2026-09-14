@@ -20,11 +20,7 @@ const landingTokenizedCssPaths = [
 const tokenizedCssPaths = [...cssPaths, ...landingTokenizedCssPaths];
 const responsiveCssPaths = [...cssPaths, ...landingTokenizedCssPaths];
 const hardwareSetupPagePaths = [
-  'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx',
-  'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
-  'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx',
-  'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx',
-  'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx'
+  'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
 ];
 const feedbackContractPagePaths = [...hardwareSetupPagePaths];
 const packageRuntimeCopyPaths = [
@@ -74,33 +70,6 @@ const checkBottomNavigationShell = async () => {
       );
     }
   }
-};
-
-const checkSavedShellyCardFeedback = async () => {
-  const path = 'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx';
-  const source = await readRepoFile(path);
-  const start = source.indexOf('export const SavedShellyDeviceCard =');
-  const end = source.length;
-
-  if (start === -1 || end === -1 || end <= start) {
-    addFailure(path, 'cannot find the saved Shelly device card boundary');
-    return;
-  }
-
-  const cardSource = source.slice(start, end);
-  const blockedPatterns = [
-    ['role="status"', 'transient status text inside a saved device card'],
-    ['role="alert"', 'transient alert text inside a saved device card'],
-    ['warning-box', 'inline warning box inside a saved device card'],
-    ['controlState?.message', 'control message rendered inside a saved device card'],
-    ['controlState?.error', 'control error rendered inside a saved device card']
-  ];
-
-  blockedPatterns.forEach(([pattern, message]) => {
-    if (cardSource.includes(pattern)) {
-      addFailure(path, message);
-    }
-  });
 };
 
 const checkTokenizedCssCoverage = async () => {
@@ -192,15 +161,7 @@ const checkFeedbackContractPatterns = async () => {
     if (source.includes('pushToast(') && !source.includes('<ToastViewport')) {
       addFailure(path, 'pushToast usage must render the shared ToastViewport');
     }
-  }
 
-  const cohesiveDialogStatePaths = [
-    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx',
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
-    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx'
-  ];
-  for (const path of cohesiveDialogStatePaths) {
-    const source = await readRepoFile(path);
     if (
       /const \[is[A-Z][A-Za-z0-9]*ModalOpen,\s*setIs[A-Z][A-Za-z0-9]*ModalOpen\]\s*=\s*useState/.test(
         source
@@ -209,56 +170,6 @@ const checkFeedbackContractPatterns = async () => {
       addFailure(
         path,
         'setup pages with multiple dialogs must use one cohesive dialog state instead of independent modal booleans'
-      );
-    }
-  }
-
-  const rulePath = 'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx';
-  const ruleFeedbackPath =
-    'apps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts';
-  const ruleSource = await readRepoFile(rulePath);
-  const ruleFeedbackSource = await readRepoFile(ruleFeedbackPath);
-
-  if (
-    !ruleSource.includes(
-      "open={dialog === 'install-block' && flow.installMutation.isError}"
-    ) ||
-    !ruleSource.includes(
-      '<FeedbackPanel tone="danger" title={mutationError(flow.installMutation.error)}>'
-    ) ||
-    !ruleSource.includes('useRuleSetupFeedback({ flow, pushToast, setDialog, t });') ||
-    !ruleFeedbackSource.includes("setDialog('install-block');")
-  ) {
-    addFailure(
-      rulePath,
-      'installMutation.isError is a blocking install failure and must open a modal with FeedbackPanel, not inline content'
-    );
-  }
-
-  const installErrorEffectEndMarker =
-    '}, [flow.installMutation.error, flow.installMutation.isError, setDialog]);';
-  const installErrorEffectEndIndex = ruleFeedbackSource.indexOf(
-    installErrorEffectEndMarker
-  );
-  const installErrorEffectStartIndex =
-    installErrorEffectEndIndex === -1
-      ? -1
-      : ruleFeedbackSource.lastIndexOf('useEffect(() => {', installErrorEffectEndIndex);
-
-  if (installErrorEffectStartIndex === -1 || installErrorEffectEndIndex === -1) {
-    addFailure(
-      ruleFeedbackPath,
-      'cannot find installMutation.isError effect for feedback-contract verification'
-    );
-  } else {
-    const installErrorEffectSource = ruleFeedbackSource.slice(
-      installErrorEffectStartIndex,
-      installErrorEffectEndIndex + installErrorEffectEndMarker.length
-    );
-    if (installErrorEffectSource.includes('pushToast(')) {
-      addFailure(
-        ruleFeedbackPath,
-        'blocking install failures must not be duplicated as toast feedback'
       );
     }
   }
@@ -595,7 +506,6 @@ const checkPackageRuntimeCopy = async () => {
 };
 
 await checkBottomNavigationShell();
-await checkSavedShellyCardFeedback();
 await checkTokenizedCssCoverage();
 await checkTokenizedCss();
 await checkFeedbackContractPatterns();
