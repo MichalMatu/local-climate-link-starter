@@ -1,111 +1,79 @@
-# Local Climate Link — next chat handoff
+# Local Climate Link — UX restoration handoff
 
 Updated: 2026-09-14
 
-This is the canonical continuation handoff for the current device/rule decoupling branch.
+## Start here
 
-## Hard repository binding and execution model
+Work only in `MichalMatu/local-climate-link-starter` with Local Agent binding `e75c77cb-7589-4452-94b2-decc97ff85a1`.
 
-Work only on:
+Active implementation branch: `work/device-rule-decoupling-20260913`.
+The last product/code checkpoint before this documentation-only cleanup is `0fbe83040ae0e41f932bb83a65a8b3438c26ba1b`.
+Do not merge to `main` automatically.
 
-- repository: `MichalMatu/local-climate-link-starter`
-- repository id: `local-climate-link-starter`
-- Local Agent binding: `e75c77cb-7589-4452-94b2-decc97ff85a1`
-- Local Agent control branch: `agent-control`
-- managed clone: `/Users/michal/agent-workspace/repos/local-climate-link-starter/work`
-- active work branch: `work/device-rule-decoupling-20260913`
+## Goal for the next chat
 
-Every Local Agent task must contain exactly:
+Restore the **accepted v2.0.10 visual UX and interaction quality** while keeping the new independent Plug / Thermometer / Rule architecture and all useful new behavior.
 
-```json
-"agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1"
-```
+This is not a rollback of the refactor. Preserve the new registries, rule ownership, lifecycle, deployment safety, LAN scan, device/rule independence, rule usage information, orphan-resource handling and current schedule logic. Reuse the old visual hierarchy, card composition, spacing, typography, menus and progressive disclosure as the reference surface, then fit the new logic into that design.
 
-ChatGPT plans and authors; Local Agent executes deterministic project/tool/device commands. Never launch local Codex or another AI agent from a Local Agent task. Check `.agent/status/daemon.json` before editing the work branch.
+## Canonical old UX reference
 
-Do not merge this work branch to `main` during the acceptance pass.
+Accepted application baseline (do not move):
 
-## Stable rollback baseline
+- tag: `stable-20260912-v2.0.10-ux-polish`
+- application SHA: `8173f0851adc77222fc3e98b02113ff28f7119fd`
+- later `main` application tree before screenshots: `56a90240029ce19690e96ad02057cc4150ba537f` (the intervening commits were documentation / `.gitignore` only)
 
-The previously user-accepted v2.0.10 build remains frozen at annotated tag:
+Fresh physical Samsung SM-S906B reference capture is committed on `main` at `a625d57422d39dbb9acc603c9a8943bf4ef3fec5`:
 
-```text
-stable-20260912-v2.0.10-ux-polish
-8173f0851adc77222fc3e98b02113ff28f7119fd
-```
+`artifacts/ux-reference/main-20260914/`
 
-Do not move or recreate that tag.
+The Android folder contains 19 screenshots plus matching `.txt` DOM/body snapshots. Use these files as the visual source of truth instead of reconstructing the old UX from memory.
 
-## Current decoupling checkpoint
+Key captures:
 
-Checkpoint entering the final documentation/acceptance pass:
+- `01-dashboard-climate.png`
+- `02-climate-detail.png`
+- `03-climate-detail-expanded.png`
+- `04-settings.png` / `05-settings-expanded.png`
+- `06-dashboard-time.png`
+- `07-time-setup-shelly.png` / `08-time-add-plug.png`
+- `09-time-schedule.png` / `10-time-wheel-picker.png`
+- `11-setup-intent.png`
+- `12-climate-setup-shelly.png` / `13-climate-add-plug.png`
+- `14-climate-setup-sensors.png` / `15-add-thermometer.png`
+- `16-climate-setup-rule.png` / `17-climate-rule-expanded.png`
+- `18-rule-advanced-modal.png`
+- `20-developer-diagnostics.png`
 
-```text
-06da99e9dcc72c0e66d12269cd6605b4536e4c7c
-Remove legacy setup draft store
-```
+Old `artifacts/ui-audit/physical-20260910` captures were removed so there is one canonical physical reference set. Play Store assets were intentionally left alone because they are release assets, not audit history.
 
-The coordinated product cutover is complete:
+## Current architecture that must remain
 
-- Plugs, Thermometers and Rules are independent registries.
-- Rules route and mutate by `ruleId`.
-- The dashboard renders Rule registry entries, not installation snapshots.
-- Climate and time runtimes use rule-centric lifecycle services.
-- Legacy `InstalledAutomation`, installation runtime/store/screens, old time-automation product code, hardware setup orchestrator and persisted `lcl.hardwareSetupDraft.v8` store are removed.
-- Responsive E2E now targets the current `Rules / Plugs / Thermometers / Settings` product and passes 7/7.
+- Plug, Sensor and Rule are independent durable entities (`lcl.plugs.v1`, `lcl.sensors.v1`, `lcl.rules.v1`).
+- A sensor is global; durable sensor↔plug association exists only through a climate rule.
+- Exactly one rule may own `(plugId, relayId)`.
+- Rule and device names are independent.
+- Climate AUTO/MANUAL is canonical in-process `R.m`; normal mode changes never stop/start the managed script.
+- Unknown runtime mode fails closed.
+- BLE discovery keeps the climate runtime alive in MANUAL/OFF, cleans up discovery, then restores the exact previous mode; it never guesses AUTO.
+- Time rules own native Shelly schedules. Climate active hours stay in the climate script.
+- Direct relay control is allowed only when ownership is known and unclaimed.
+- Runtime mutation verifies exact physical/rule/script/schedule ownership and uses OFF-first safety.
 
-See `docs/implementation/device-rule-decoupling-progress.md` and `docs/adr/ADR-0006-independent-devices-and-rules.md` for the current model.
+Canonical technical docs: `docs/adr/ADR-0006-independent-devices-and-rules.md`, `docs/architecture/refactor-boundaries.md`, and `docs/architecture/runtime-control.md`.
 
-## Runtime invariants that must not regress
+## Current verification
 
-### Climate AUTO
+At `0fbe83040ae0e41f932bb83a65a8b3438c26ba1b`:
 
-- exact managed climate script remains running,
-- canonical runtime mode is readable and AUTO,
-- BLE runtime and diagnostics remain live,
-- automatic relay decisions are allowed only for the owning rule.
+- focused device UX regression E2E: 3/3 pass,
+- full responsive E2E: 10/10 pass,
+- `pnpm check:full`: pass,
+- Android build/install/cold start on Samsung SM-S906B: pass, no fatal exception.
 
-### Climate MANUAL
+The old `main` build is currently the visual reference; do not infer current implementation quality from it.
 
-- exact managed climate script remains running,
-- runtime/diagnostics remain live,
-- automatic output decisions are blocked in-process,
-- relay is forced/verified OFF before direct manual control is permitted.
+## First next-chat task
 
-### Unknown / stopped / missing
-
-These are failure or maintenance states, not aliases for AUTO or MANUAL. Unknown/unreadable mode fails closed. Normal AUTO/MANUAL switching must not use `Script.Stop`/`Script.Start`.
-
-### Time rules
-
-Native Shelly Schedule jobs are owned by exact ids in rule deployment metadata. Climate active-hours constraints are separate and remain inside the climate script.
-
-## Current architecture boundaries
-
-- `flows/devices/plugs`: plug persistence, registration and guarded standalone runtime operations.
-- `flows/devices/sensors`: sensor persistence and live sensor management.
-- `flows/rules`: rule model/editor/lifecycle/runtime/ownership.
-- `flows/registry/devicesAndRules.ts`: composed independent registries.
-- `flows/runtime/relaySafety.ts`: generic OFF-and-confirm safety primitive.
-- `flows/hardware-setup`: only surviving narrow discovery/diagnostic/validation helpers and transient `draftDevices.ts` contracts; no durable hardware-draft store.
-- Screens orchestrate and present; business transactions remain in flow/service modules.
-
-No compatibility readers, dual writes or adapters should recreate the deleted installation/draft persistence model.
-
-## Current verification state
-
-Before this final acceptance pass:
-
-- `pnpm check` is green on the current implementation candidate.
-- mobile tests at the latest cleanup: 31 files / 156 tests passed.
-- current responsive Playwright: 7/7 passed across phone, tablet and desktop sizes.
-- repository and UX quality gates pass.
-- earlier Shelly Plug S Gen3 firmware 1.7.5 service/runtime hardware smokes exercised real ON/OFF and AUTO/MANUAL discovery restoration and explicitly finished relay OFF.
-
-## Exact remaining work
-
-1. Refresh stale architecture/troubleshooting documentation and run `pnpm check:full`.
-2. Build/sync/install the candidate APK on Samsung SM-S906B (`RFCT70L7E8J`) using the repository Android workflow.
-3. Cold-start and inspect Rules, Plugs, Thermometers, Settings, climate/time editors and rule details on the physical device. Capture screenshots and fix real safe-area, overflow, spacing, touch-target, form/list/detail or navigation problems.
-4. Run final hardware smoke if the Shelly environment is available. Real relay ON/OFF is authorized; the last operation must explicitly verify relay OFF.
-5. Record final SHA and evidence. Do not merge to `main` automatically.
+Compare the current work-branch screens against the physical reference images **screen by screen**, starting with dashboard/device cards and menus. Make small reviewable visual changes, preserving current business logic. After each small UX batch run focused checks; run full `check:full` and Android acceptance only at the end of an iteration.

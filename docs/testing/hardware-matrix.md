@@ -325,31 +325,31 @@ The hardware helper parses compact `/diag` fields from `{ v, z, s, q, y, p, g }`
 
 ## Manual test checklist — Shelly + Xiaomi BTHome
 
-| Test                             | Expected                            | Result | Date | Firmware | Notes |
-| -------------------------------- | ----------------------------------- | ------ | ---- | -------- | ----- |
-| Shelly reachable by manual IP    | RPC responds                        | ☐      |      |          |       |
-| Shelly.GetDeviceInfo model check | Plug S Gen3 or compatible           | ☐      |      |          |       |
-| Matter ON detection              | Install blocked                     | ☐      |      |          |       |
-| Matter OFF + Scripts available   | Install allowed                     | ☐      |      |          |       |
-| Missing Script.List/BLE status   | Install blocked with clear message  | ☐      |      |          |       |
-| Bluetooth enabled                | BLE scan can start                  | ☐      |      |          |       |
-| Xiaomi phone scan                | temp/humidity visible               | ☐      |      |          |       |
-| Xiaomi Shelly-side scan          | Shelly sees sensor                  | ☐      |      |          |       |
-| Shelly-side scan tab switch      | scanner deleted, automation resumes | ☐      |      |          |       |
-| Shelly-side scan app background  | scanner deleted, automation resumes | ☐      |      |          |       |
-| Script upload                    | Script.PutCode succeeds             | ☐      |      |          |       |
-| Script start                     | Script.GetStatus running            | ☐      |      |          |       |
-| Install completion gate          | Gotowe shown only after relay test  | ☐      |      |          |       |
-| Safe relay test                  | ON briefly, final OFF               | ☐      |      |          |       |
-| Delete while relay ON            | OFF confirmed before stop/delete    | ☐      |      |          |       |
-| Delete with Script.Stop failure  | OFF still attempted before delete   | ☐      |      |          |       |
-| Threshold ON                     | relay ON below threshold            | ☐      |      |          |       |
-| Threshold OFF                    | relay OFF after first crossed frame | ☐      |      |          |       |
-| Xiaomi VPD alternating payloads  | temp/humidity compose safely        | ☐      |      |          |       |
-| Stale timeout                    | relay OFF after timeout             | ☐      |      |          |       |
-| Power cycle                      | boots safe OFF and script restarts  | ☐      |      |          |       |
-| Diagnostics VPD/progi            | VPD and effective thresholds real   | ☐      |      |          |       |
-| Diagnostics export               | no secrets/raw payload by default   | ☐      |      |          |       |
+| Test                             | Expected                                              | Result | Date | Firmware | Notes |
+| -------------------------------- | ----------------------------------------------------- | ------ | ---- | -------- | ----- |
+| Shelly reachable by manual IP    | RPC responds                                          | ☐      |      |          |       |
+| Shelly.GetDeviceInfo model check | Plug S Gen3 or compatible                             | ☐      |      |          |       |
+| Matter ON detection              | Install blocked                                       | ☐      |      |          |       |
+| Matter OFF + Scripts available   | Install allowed                                       | ☐      |      |          |       |
+| Missing Script.List/BLE status   | Install blocked with clear message                    | ☐      |      |          |       |
+| Bluetooth enabled                | BLE scan can start                                    | ☐      |      |          |       |
+| Xiaomi phone scan                | temp/humidity visible                                 | ☐      |      |          |       |
+| Xiaomi Shelly-side scan          | Shelly sees sensor                                    | ☐      |      |          |       |
+| Shelly-side scan tab switch      | scanner cleaned up, exact prior runtime mode restored | ☐      |      |          |       |
+| Shelly-side scan app background  | scanner cleaned up, exact prior runtime mode restored | ☐      |      |          |       |
+| Script upload                    | Script.PutCode succeeds                               | ☐      |      |          |       |
+| Script start                     | Script.GetStatus running                              | ☐      |      |          |       |
+| Install completion gate          | Gotowe shown only after relay test                    | ☐      |      |          |       |
+| Safe relay test                  | ON briefly, final OFF                                 | ☐      |      |          |       |
+| Delete while relay ON            | OFF confirmed before stop/delete                      | ☐      |      |          |       |
+| Delete with Script.Stop failure  | OFF still attempted before delete                     | ☐      |      |          |       |
+| Threshold ON                     | relay ON below threshold                              | ☐      |      |          |       |
+| Threshold OFF                    | relay OFF after first crossed frame                   | ☐      |      |          |       |
+| Xiaomi VPD alternating payloads  | temp/humidity compose safely                          | ☐      |      |          |       |
+| Stale timeout                    | relay OFF after timeout                               | ☐      |      |          |       |
+| Power cycle                      | boots safe OFF and script restarts                    | ☐      |      |          |       |
+| Diagnostics VPD/progi            | VPD and effective thresholds real                     | ☐      |      |          |       |
+| Diagnostics export               | no secrets/raw payload by default                     | ☐      |      |          |       |
 
 ## Manual test checklist — TP357
 

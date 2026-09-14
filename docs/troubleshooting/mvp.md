@@ -1,212 +1,50 @@
-# MVP troubleshooting
+# Troubleshooting
 
-## Matter enabled
+This document describes the current independent-device/rule architecture. Historical setup-draft and installed-automation recovery paths are intentionally omitted.
 
-User message:
+## Shelly cannot be registered or reached
 
-```text
-Matter jest włączony. Lokalny termostat wymaga Shelly Scripts. Wyłącz Matter w Shelly, aby kontynuować.
-```
+Check the saved endpoint, local Wi-Fi connectivity, `Shelly.GetDeviceInfo`, model/identity match, firmware, Scripts availability, BLE capability and Matter state. LAN scan results are candidates only after device-info verification; manual address entry remains available.
 
-Action: block install. Do not attempt script upload.
+Never treat a reachable IP as the device identity. Runtime mutations re-verify the physical Shelly identity before writing.
 
-Some Matter firmware reports Matter only in `Shelly.GetDeviceInfo`, not in
-`Shelly.GetStatus`. The app must treat either source as blocking. If a previous
-Local Climate Link script already exists and `Script.GetStatus` reports
-`out_of_memory`, disable Matter, restart Shelly, and upload the rule again.
+## Sensor visible on phone but not from Shelly
 
-In demo mode, enable the Matter ON scenario explicitly. The compatible card and the blocked card must not be shown at the same time.
+Check Shelly Bluetooth, sensor battery/distance, runtime BLE address/profile, RSSI threshold and advertising format. Use Shelly-side BLE discovery from the target plug.
 
-## Scripts or BLE missing in Shelly status
+### Shelly-side BLE discovery safety
 
-User messages:
+For a deployed climate rule, discovery does **not** use normal script stop/start as a mode switch. The app reads the exact current `R.m` mode, puts the running climate runtime into MANUAL, verifies relay OFF, runs the temporary discovery scanner, cleans it up, restarts climate BLE scanning as needed, and restores the exact previous AUTO/MANUAL mode.
 
-```text
-Nie widzę Shelly Scripts w statusie gniazdka. Sprawdź firmware albo wyłącz Matter.
-Nie widzę Bluetooth/BLE w statusie Shelly. Sprawdź, czy gniazdko obsługuje BLE.
-```
+If the previous mode is unknown or restoration cannot be verified, fail closed and keep the relay OFF. Never guess AUTO. A climate script that was genuinely stopped before discovery remains a separate maintenance/recovery state.
 
-Action: block install only when script RPC is unavailable or BLE is missing/disabled.
-Some Shelly firmware does not expose a global `script` component in
-`Shelly.GetStatus`; if `Script.List` works, the app treats Shelly Scripts as
-available. Recheck firmware, Shelly model, Matter state, and Bluetooth settings
-before trying to upload the script.
+## AUTO / MANUAL or manual relay control unavailable
 
-## Invalid threshold
+- AUTO and MANUAL require exact managed-script ownership and readable runtime mode.
+- MANUAL keeps runtime/diagnostics alive and blocks automatic relay decisions.
+- Manual ON/OFF is exposed only for a verified MANUAL climate owner, or as guarded standalone plug control when no rule owns the relay.
+- Unknown mode, conflicting ownership or unreadable inventory fails closed.
 
-User message:
+Normal AUTO/MANUAL changes never call `Script.Stop`/`Script.Start`.
 
-```text
-Próg włączenia musi być niższy niż próg wyłączenia.
-```
+## Climate deployment failed
 
-Action: block script preview and install until `rule.control` thresholds match the
-selected direction.
+Upload alone is not deployment success. Verify the current plug identity, exact script id/hash, MANUAL/OFF safety state and safety test. If persistence/attachment fails after a remote mutation, recovery must leave truthful local deployment state and best-effort clean the new remote artifact.
 
-For heating and humidifying, `onThreshold` must be lower than `offThreshold`.
-For cooling and dehumidifying, `onThreshold` must be higher than `offThreshold`.
+## Time rule failed
 
-## No BLE sensor seen by phone
+Time rules use native Shelly Schedule jobs. Check exact stored job ids and live ownership before edit/pause/resume/delete. Do not create a native time rule that competes with a climate rule for the same relay. Climate active hours are not native schedule ownership.
 
-In the current skeleton, the default flow is demo mode. If no sensor appears in the web preview, first check the app state/test flow rather than hardware.
+## Relay state is uncertain
 
-Check:
+Use OFF-first recovery. Send OFF, reread and verify. If OFF cannot be confirmed, report the uncertainty and do not continue with destructive/redeploy operations as if the relay were safe.
 
-```text
-Bluetooth permission
-phone Bluetooth enabled
-sensor battery
-sensor within 1–2 m
-BTHome v2 enabled for Xiaomi
-TP357 fixture/parser status
-Android permission mode, especially neverForLocation
-```
+## Sensor stale / weak signal
 
-## Phone sees sensor but Shelly does not
+Check battery, distance, runtime address/profile, packet freshness and RSSI. Incomplete BLE frames may update telemetry without refreshing the control measurement. Do not relax stale/RSSI safety thresholds merely to hide a real radio problem.
 
-Check:
+## Matter / Scripts / memory problems
 
-```text
-Shelly Bluetooth enabled
-Shelly BLE scanner can start
-sensor closer to Shelly
-RSSI threshold not too strict
-runtimeAddress matches the address Shelly sees
-Shelly-side discovery path working
-Matter/Scripts availability
-```
+Matter or firmware configuration may block Shelly Scripts. `Script.List` availability is a stronger capability signal than assuming a global script field exists in status. For `out_of_memory` / `out_of_codespace`, inspect exact script status and firmware, remove only owned temporary resources, and keep final relay OFF.
 
-## Shelly-side BLE scan finds no sensor
-
-The `Skanuj BLE` action runs from the selected Shelly, not from the phone. The app
-opens a modal, uploads a temporary `Local Climate Link BLE Discovery` script,
-sets the relay OFF, stops the main automation while scanning, and polls
-`/script/<id>/ble-scan` automatically. Closing the modal stops the scanner and
-restarts automation only if it was running before discovery. Switching away from
-the Shelly tab or backgrounding/closing the app should trigger the same cleanup.
-Both the temporary discovery script and generated runtime script request a
-passive BLE scan close to Shelly's documented script defaults
-(`interval_ms: 241`, `window_ms: 61`). Scan-level RSSI filtering is disabled
-(`rssi_thr: 0`) so packets reach the script first; Local Climate Link applies
-the configured RSSI threshold in JavaScript after receipt. These settings do not
-change radio transmit power because sensor advertisements are received, not
-sent, by the plug.
-
-Generated runtime diagnostics separate radio freshness from control freshness:
-`lastPacketSeenUptimeMs` means Shelly saw any packet from the target runtime
-address, while `lastSeenUptimeMs` means the last full measurement usable by the
-selected rule. Both values are Shelly uptime milliseconds, not Unix timestamps.
-Battery-only or incomplete BTHome frames update telemetry only; they do not
-force OFF, reset ON hit counters, or refresh the stale-sensor timer. Xiaomi
-temperature and humidity may arrive in separate advertisements; when VPD assist
-is enabled, the runtime composes them only if both values are fresh within a
-short window.
-
-If Shelly reports `out_of_memory`, the discovery script could not stay running
-within the plug's available script memory. Close the BLE scan modal, wait a few
-seconds, and try again. If it repeats, restart Shelly and verify that the main
-automation is stopped while the temporary scanner runs.
-
-Upload chunking is not the same as runtime memory. `Script.PutCode` can upload a
-large script in chunks, but Shelly can still fail later with `out_of_memory` or
-`out_of_codespace` when the JavaScript engine starts or serves an endpoint. The
-runtime script should be the minimal generated variant for one sensor profile:
-`xiaomi-bthome-minimal` or `tp357-minimal`. The `Local Climate Link BLE Discovery`
-script is temporary and should be stopped and deleted after the scan.
-
-Useful checks:
-
-```bash
-curl -sS -X POST http://<shelly-ip>/rpc \
-  -H 'Content-Type: application/json' \
-  -d '{"id":1,"method":"Script.GetStatus","params":{"id":1}}'
-```
-
-Read `running`, `mem_used`, `mem_peak`, `mem_free`, and `errors`. A healthy final
-runtime should not keep the discovery script running beside it.
-
-Check:
-
-```text
-Shelly and thermometer are close enough
-Bluetooth is enabled on Shelly
-Scripts are enabled on Shelly
-Matter is not blocking Scripts
-Xiaomi/PVVX advertises unencrypted BTHome v2
-RSSI is not too weak at Shelly location
-the app is pointed at the saved Shelly plug you want to scan from
-```
-
-If the browser shows a 403 or network error during development, verify that Vite
-is running and the Shelly request is going through the dev proxy. The proxy only
-allows private/local targets and the MVP Shelly paths: `/rpc`,
-`/script/<id>/diag`, and `/script/<id>/ble-scan`.
-
-## AUTO / MANUAL controls
-
-`AUTO` and `MANUAL` are the canonical in-process mode of the exact climate rule deployment. The managed Shelly script stays running in both modes; normal mode changes do not use `Script.Stop` or `Script.Start`.
-
-```text
-AUTO: allow the owning climate rule to make automatic relay decisions.
-MANUAL: block automatic output decisions and force/verify relay OFF.
-ON/OFF: manual relay control is available only for a verified MANUAL climate owner.
-```
-
-If runtime mode is unknown or unreadable, the app fails closed instead of assuming AUTO. If a climate rule is not deployed or its safety test is not verified, open that rule and complete deployment/verification before attempting normal runtime control.
-
-## Script upload failed
-
-Climate deployment uses local Shelly RPC against the plug referenced by the saved rule. Upload alone is not success: the lifecycle must retain exact script identity/hash, establish MANUAL/OFF state and complete verification before AUTO can resume.
-
-Check:
-
-```text
-Shelly reachable by RPC
-existing script stopped before PutCode
-existing Local Climate Link script backup attempted
-script size below limits
-chunked PutCode when needed
-Script.GetStatus error code
-Script.GetStatus reports running
-```
-
-## Relay test failed
-
-Action:
-
-```text
-always send final OFF
-if final OFF fails, report that final state could not be confirmed
-show recovery button: Wyłącz relay teraz
-show diagnostics
-stop automation if uncertain
-```
-
-## Sensor stale
-
-User message:
-
-```text
-Nie widzę czujnika od X minut. Dla bezpieczeństwa gniazdko zostało wyłączone.
-```
-
-Possible actions:
-
-```text
-check battery
-move sensor closer
-increase stale timeout only if advertising interval requires it
-lower rssiMin carefully
-```
-
-## TP357 not found
-
-User message:
-
-```text
-Nie widzę jeszcze termometru BLE.
-```
-
-Action: keep the TP357 close to the selected Shelly, wait for a few advertisements, and run the Shelly BLE scan again. The discovery script expects the advertisement to expose a `TP357` local name and manufacturer data.
-
-Generated TP357 runtime scripts use the MatrixHub manufacturer-data parser. If discovery works but runtime diagnostics stay stale, record the raw advertisement and compare it with the MatrixHub payload model.
+For detailed runtime-mode semantics see `docs/architecture/runtime-control.md`. Hardware history and firmware evidence live in `docs/testing/hardware-matrix.md`.

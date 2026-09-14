@@ -1,3 +1,7 @@
+# Historical MVP plan
+
+> Historical design context only. For current work use `docs/HANDOFF_NEXT_CHAT.md` and `docs/architecture/overview.md`.
+
 # Local Climate Link — historical MVP plan
 
 Status: historical MVP `1.0.0` plan retained for design context.
