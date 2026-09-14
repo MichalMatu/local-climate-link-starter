@@ -1,0 +1,14 @@
+{
+  "id": "20260914-legacy-screen-cleanup-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260914-legacy-screen-cleanup-v1.sh > /tmp/lcl-legacy-screen-cleanup-v1.sh && bash /tmp/lcl-legacy-screen-cleanup-v1.sh"
+  ]
+}
