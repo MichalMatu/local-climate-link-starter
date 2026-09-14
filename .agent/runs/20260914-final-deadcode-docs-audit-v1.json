@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-final-deadcode-docs-audit-v1",
+  "task_digest": "13863fbe5dc8069d3d9204f0e98b307751740efc592cda87c3e71d5b3122f16b",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T04:46:28.150214+00:00",
+  "attempt_id": "b7d44900472f5df6c4447adb",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 78439,
+  "updated_at": "2026-09-14T04:46:28.153969+00:00",
+  "pid": 78439
+}
