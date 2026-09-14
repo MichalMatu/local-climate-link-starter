@@ -9,7 +9,7 @@ import {
   parseRuleAdvancedSettings,
   validateRuleAdvancedSettings
 } from './ruleAdvancedSettings.js';
-import type { SensorDraftDevice } from './setupDraftStore.js';
+import type { SensorDraftDevice } from './draftDevices.js';
 import {
   formatSensorId,
   normalizeRuntimeAddress,

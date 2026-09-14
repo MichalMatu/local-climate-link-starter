@@ -12,7 +12,7 @@ import {
   restartShellyBleDiscoveryScan,
   stopShellyBleDiscovery
 } from './shellyRequests.js';
-import type { ShellyDraftDevice } from './setupDraftStore.js';
+import type { ShellyDraftDevice } from './draftDevices.js';
 
 export type BleDiscoverySession = {
   shellyId: string;

@@ -12,7 +12,7 @@ import {
   fetchShellyJson,
   unwrapShellyResult
 } from './shellyRequests.js';
-import type { ShellyDraftDevice } from './setupDraftStore.js';
+import type { ShellyDraftDevice } from './draftDevices.js';
 import { toNumberOrFallback } from './validation.js';
 
 export const resolveScriptDiagnosticStatusMessage = (payload: unknown): string | null => {

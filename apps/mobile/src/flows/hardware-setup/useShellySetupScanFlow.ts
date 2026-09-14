@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { scanShellySetupUrls, type ShellySetupScanOutcome } from './shellyRequests.js';
-import type { ShellyDraftDevice } from './setupDraftStore.js';
+import type { ShellyDraftDevice } from './draftDevices.js';
 import { createIpv4RangeScanUrls, normalizeShellyUrl } from './validation.js';
 
 export const buildUnsavedShellyScanUrls = (
