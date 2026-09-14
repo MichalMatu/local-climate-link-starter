@@ -1,0 +1,15 @@
+{
+  "id": "20260914-plug-centered-format-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = c86c3778d9f5fa518600f0ec4e12bcd5aaa85bdc; test -z \"$(git status --porcelain)\"; pnpm exec prettier --write apps/mobile/src/flows/rules/useClimateRuleDiagnostics.ts apps/mobile/src/screens/devices/SavedPlugCard.tsx; git diff --check; git add apps/mobile/src/flows/rules/useClimateRuleDiagnostics.ts apps/mobile/src/screens/devices/SavedPlugCard.tsx; git -c user.name='Local Agent' -c user.email='local-agent@users.noreply.github.com' commit -m 'Format plug-centered UX changes'; git push origin HEAD:work/device-rule-decoupling-20260913; git status --short"
+  ]
+}
