@@ -9,9 +9,9 @@ import './AppBottomNavigation.css';
 
 export type AppNavigationKind = 'rules' | 'plugs' | 'sensors' | 'settings';
 const entries = [
-  { id: 'rules', icon: IconListDetails, label: 'navigation.rules' },
   { id: 'plugs', icon: IconPlug, label: 'navigation.plugs' },
   { id: 'sensors', icon: IconTemperature, label: 'navigation.sensors' },
+  { id: 'rules', icon: IconListDetails, label: 'navigation.rules' },
   { id: 'settings', icon: IconSettings, label: 'dashboard.settingsTab' }
 ] as const;
 export const AppBottomNavigation = ({
