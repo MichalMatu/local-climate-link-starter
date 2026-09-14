@@ -285,3 +285,133 @@
 .rule-card .automation-card__status--loading {
   color: var(--lcl-color-text-muted);
 }
+
+.plug-operational-card {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+}
+
+.plug-operational-card__identity {
+  min-width: 0;
+}
+
+.plug-operational-card__identity h3 {
+  margin: 0;
+}
+
+.plug-operational-card__identity p {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  margin: var(--lcl-spacing-xs) 0 0;
+}
+
+.plug-operational-card__state {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding-top: var(--lcl-spacing-sm);
+}
+
+.plug-operational-card__climate,
+.plug-operational-card__time-rule {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  padding-top: var(--lcl-spacing-sm);
+}
+
+.plug-operational-card__sensor-heading {
+  align-items: center;
+  display: flex;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+  gap: var(--lcl-spacing-xs);
+}
+
+.plug-operational-card__sensor-heading svg {
+  color: var(--lcl-color-accent);
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
+}
+
+.plug-operational-card__climate-metrics {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.plug-operational-card__climate-metrics > div {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+}
+
+.plug-operational-card__climate-metrics span,
+.plug-operational-card__rule-summary span,
+.plug-operational-card__time-rule span {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-xs);
+}
+
+.plug-operational-card__climate-metrics strong {
+  font-size: var(--lcl-font-size-lg);
+  white-space: nowrap;
+}
+
+.plug-operational-card__rule-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lcl-spacing-sm);
+}
+
+.plug-operational-card__mode-control {
+  background: var(--lcl-color-surface-muted);
+  border-radius: var(--lcl-radius-round);
+  display: flex;
+  overflow: hidden;
+}
+
+.plug-operational-card__mode-control > * {
+  flex: 1 1 0;
+}
+
+.plug-operational-card__mode-control .automation-control-button {
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-round);
+  color: var(--lcl-color-text-muted);
+  min-height: var(--lcl-size-compact-control-min-height);
+}
+
+.plug-operational-card__mode-control .automation-control-button[aria-pressed='true'] {
+  background: var(--lcl-color-accent);
+  color: var(--lcl-color-accent-contrast);
+}
+
+.plug-operational-card__relay-actions {
+  display: flex;
+  gap: var(--lcl-spacing-sm);
+}
+
+.plug-operational-card__relay-actions > * {
+  flex: 1 1 0;
+}
+
+.plug-operational-card__rule-link {
+  background: transparent;
+  border: 0;
+  color: var(--lcl-color-accent);
+  cursor: pointer;
+  font: inherit;
+  justify-self: start;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+@media (max-width: 30rem) {
+  .plug-operational-card__climate-metrics {
+    gap: var(--lcl-spacing-xs);
+  }
+
+  .plug-operational-card__climate-metrics strong {
+    font-size: var(--lcl-font-size-md);
+  }
+}
