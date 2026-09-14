@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-plug-centered-fix-runtime-narrowing-v1",
+  "task_digest": "dcf47d40562b2bc195b43101ca9af5362d4ba798520435bcccc1c357869ffc6a",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T12:11:32.152279+00:00",
+  "attempt_id": "31a802aa9bfc380b7f680044",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 83114,
+  "updated_at": "2026-09-14T12:11:32.153103+00:00",
+  "pid": 83114
+}
