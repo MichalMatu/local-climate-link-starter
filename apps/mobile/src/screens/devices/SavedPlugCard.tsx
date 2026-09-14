@@ -54,22 +54,32 @@ export const SavedPlugCard = ({
   const ruleRuntime = useRuleRuntime(owner?.id ?? '');
   const ruleSnapshot = ruleRuntime.runtime.data;
   const climateRuntime =
-    climateRule && ruleSnapshot && 'mode' in ruleSnapshot ? ruleSnapshot : null;
+    climateRule &&
+    ruleSnapshot &&
+    'mode' in ruleSnapshot &&
+    'scriptMatch' in ruleSnapshot &&
+    'modeSupported' in ruleSnapshot
+      ? ruleSnapshot
+      : null;
   const diagnosticsSnapshot = diagnostics.data;
   const relayOn =
-    ruleSnapshot && 'relayOn' in ruleSnapshot ? ruleSnapshot.relayOn : plugSnapshot?.relayOn;
+    ruleSnapshot && 'relayOn' in ruleSnapshot
+      ? ruleSnapshot.relayOn
+      : plugSnapshot?.relayOn;
   const climateVerified = Boolean(
     climateRule?.deployment &&
-      climateRule.deployment.safetyTest.status === 'verified' &&
-      climateRuntime?.scriptMatch === 'matched' &&
-      climateRuntime.modeSupported
+    climateRule.deployment.safetyTest.status === 'verified' &&
+    climateRuntime?.scriptMatch === 'matched' &&
+    climateRuntime.modeSupported
   );
   const auto = climateVerified && climateRuntime?.mode === 'auto';
   const manual = climateVerified && climateRuntime?.mode === 'manual';
   const actionBusy = relayBusy || ruleRuntime.action.isPending;
   const threshold = owner ? ruleThresholdSummary(owner) : null;
   const schedule = owner
-    ? ruleScheduleSummary(owner.kind === 'climate' ? owner.schedule : owner.config.schedule)
+    ? ruleScheduleSummary(
+        owner.kind === 'climate' ? owner.schedule : owner.config.schedule
+      )
     : null;
 
   return (
@@ -114,7 +124,10 @@ export const SavedPlugCard = ({
       </div>
 
       {climateRule && (
-        <section className="plug-operational-card__climate" aria-label={t('detail.automation')}>
+        <section
+          className="plug-operational-card__climate"
+          aria-label={t('detail.automation')}
+        >
           <div className="plug-operational-card__sensor-heading">
             <IconTemperature aria-hidden="true" />
             <span>{sensor?.name ?? t('common.missing')}</span>

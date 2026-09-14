@@ -13,10 +13,7 @@ export const climateRuleDiagnosticsQueryKey = (
   scriptId: number | null
 ) => ['climate-rule-diagnostics', ruleId, baseUrl, scriptId] as const;
 
-export const useClimateRuleDiagnostics = (
-  rule: ClimateRule | null,
-  plug: SavedPlug
-) =>
+export const useClimateRuleDiagnostics = (rule: ClimateRule | null, plug: SavedPlug) =>
   useQuery<HardwareDiagnosticSnapshot>({
     queryKey: climateRuleDiagnosticsQueryKey(
       rule?.id ?? '',

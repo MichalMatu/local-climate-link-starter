@@ -38,14 +38,15 @@ describe('navigation and settings regression coverage', () => {
     window.localStorage.clear();
   });
 
-  it('returns visibly from Add automation to the dashboard', () => {
+  it('returns visibly from Add automation to the plug root', () => {
     render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Reguły' }));
     expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'add-automation-test' }));
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
-    expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
   });
 });

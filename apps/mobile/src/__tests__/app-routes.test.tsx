@@ -140,10 +140,13 @@ describe('AppRoutes navigation shell', () => {
     expect(nativeAppMocks.addListener).not.toHaveBeenCalled();
   });
 
-  it('uses the empty dashboard as the canonical zero-installation root', () => {
+  it('uses plugs as the canonical zero-installation root', () => {
     renderRoutes();
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    expect(screen.getByText('mock-plugs')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
   });
@@ -151,7 +154,7 @@ describe('AppRoutes navigation shell', () => {
   it('routes the four-item bottom navigation through top-level sections', () => {
     renderRoutes();
 
-    expect(screen.getByRole('button', { name: 'Reguły' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
@@ -185,8 +188,9 @@ describe('AppRoutes navigation shell', () => {
     );
   });
 
-  it('opens Add automation only from plus and does not expose legacy manage choice', () => {
+  it('opens Add automation from the temporary Rules entry and does not expose legacy manage choice', () => {
     renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Reguły' }));
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     expect(screen.getByRole('button', { name: /Sterować temperaturą/ })).toBeVisible();
@@ -208,6 +212,7 @@ describe('AppRoutes navigation shell', () => {
       )
     );
 
+    fireEvent.click(screen.getByRole('button', { name: 'Reguły' }));
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
@@ -215,7 +220,7 @@ describe('AppRoutes navigation shell', () => {
     act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     act(() => nativeAppMocks.fireBack());
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByText('mock-plugs')).toBeVisible();
     act(() => nativeAppMocks.fireBack());
     await waitFor(() => expect(nativeAppMocks.exitApp).toHaveBeenCalledTimes(1));
 
@@ -227,6 +232,7 @@ describe('AppRoutes navigation shell', () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
     renderRoutes();
     await waitFor(() => expect(nativeAppMocks.addListener).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole('button', { name: 'Reguły' }));
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
     fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
@@ -234,12 +240,13 @@ describe('AppRoutes navigation shell', () => {
     act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     act(() => nativeAppMocks.fireBack());
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByText('mock-plugs')).toBeVisible();
   });
 
-  it('opens a saved rule by stable id and returns to its dashboard', () => {
+  it('opens a saved rule by stable id and returns to plugs', () => {
     const rule = addClimateRule();
     renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Reguły' }));
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon climate' }));
     expect(screen.getByText(`mock-rule-${rule.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-edit-rule' }));
@@ -251,6 +258,6 @@ describe('AppRoutes navigation shell', () => {
       'page'
     );
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByText('mock-plugs')).toBeVisible();
   });
 });
