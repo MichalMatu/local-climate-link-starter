@@ -1,0 +1,14 @@
+{
+  "id": "20260914-install-main-reference-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": ["machine"],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260914-install-main-reference-v1.sh > /tmp/lcl-install-main-reference-v1.sh && bash /tmp/lcl-install-main-reference-v1.sh"
+  ]
+}
