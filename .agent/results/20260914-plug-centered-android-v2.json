@@ -1,0 +1,60 @@
+{
+  "id": "20260914-plug-centered-android-v2",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "started_at": "2026-09-14T12:21:15.929473+00:00",
+  "command_timeout": 1800,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260914-plug-centered-android-v2.sh > /tmp/lcl-plug-centered-android-v2.sh && bash /tmp/lcl-plug-centered-android-v2.sh",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   09e4e050..5b059ab1  agent-control -> origin/agent-control\nargs: [-p, link.localclimate.app, -c, android.intent.category.LAUNCHER, 1]\n arg: \"-p\"\n arg: \"link.localclimate.app\"\n arg: \"-c\"\n arg: \"android.intent.category.LAUNCHER\"\n arg: \"1\"\ndata=\"link.localclimate.app\"\ndata=\"android.intent.category.LAUNCHER\"\n--- ROOT UI TEXT ---\n--- APP WARNINGS ---\n--------- beginning of main\nE/ashmem  (26519): Pinning is deprecated since Android Q. Please use trim or other methods.\nW/chromium(26519): [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.\nW/Capacitor(26519): Unable to read file at path public/plugins\nW/libEGL  (26519): Couldn't find an OpenGL ES implementation from \nW/cr_media(26519): BLUETOOTH_CONNECT permission is missing.\nW/cr_media(26519): getBluetoothAdapter() requires BLUETOOTH permission\nW/cr_media(26519): registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission\nW/libEGL  (26519): ANGLE Warn:RendererVk.cpp:5464 (appBasedFeatureOverrides): BLOB CACHE IS DISABLED DUE TO LACK OF MULTIFILE BLOBCACHE SUPPORT\nW/AudioCapabilities(26519): Unsupported mediaType audio/x-ape\nW/AudioCapabilities(26519): Unsupported mediaType audio/x-ima\nW/AudioCapabilities(26519): Unsupported mediaType audio/mpeg-L1\nW/AudioCapabilities(26519): Unsupported mediaType audio/mpeg-L2\nW/VideoCapabilities(26519): Unsupported mime video/wvc1\nW/VideoCapabilities(26519): Unsupported mime video/x-ms-wmv\nW/VideoCapabilities(26519): Unrecognized profile/level 32768/256 for video/mp4v-es\nW/AudioCapabilities(26519): Unsupported mime audio/x-ape\nW/AudioCapabilities(26519): Unsupported mime audio/x-ima\nW/AudioCapabilities(26519): Unsupported mime audio/mpeg-L1\nW/AudioCapabilities(26519): Unsupported mime audio/mpeg-L2\nW/VideoCapabilities(26519): Unsupported mime video/wvc1\nW/VideoCapabilities(26519): Unsupported mime video/wvc1\nW/VideoCapabilities(26519): Unsupported mime video/x-ms-wmv\nW/VideoCapabilities(26519): Unrecognized profile/level 32768/256 for video/mp4v-es\nE/chromium(26519): [ERROR:components/page_load_metrics/browser/page_load_metrics_update_dispatcher.cc:187] Invalid first_paint (unset) for first_contentful_paint 0.395 s\nW/InteractionJankMonitor(26519): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=link.localclimate.app\nE/chromium(26519): [ERROR:components/page_load_metrics/browser/page_load_metrics_update_dispatcher.cc:187] Invalid first_paint (unset) for first_contentful_paint 0.395 s\nPreparing worktree (detached HEAD 55ec920a)\nHEAD is now at 55ec920a Make plugs the primary app entry\n[detached HEAD 674f896e] Capture plug-centered Android UX evidence\n 5 files changed, 31 insertions(+)\n create mode 100644 .agent/artifacts/plug-centered-ux/55ec920a/logcat-warnings.txt\n create mode 100644 .agent/artifacts/plug-centered-ux/55ec920a/root-plugs.png\n create mode 100644 .agent/artifacts/plug-centered-ux/55ec920a/root-plugs.xml\n create mode 100644 .agent/artifacts/plug-centered-ux/55ec920a/wm-density.txt\n create mode 100644 .agent/artifacts/plug-centered-ux/55ec920a/wm-size.txt\nremote: \nremote: Create a pull request for 'agent-artifacts/plug-centered-ux-20260914-55ec920a' on GitHub by visiting:        \nremote:      https://github.com/MichalMatu/local-climate-link-starter/pull/new/agent-artifacts/plug-centered-ux-20260914-55ec920a        \nremote: \nTo https://github.com/MichalMatu/local-climate-link-starter.git\n * [new branch]        HEAD -> agent-artifacts/plug-centered-ux-20260914-55ec920a\nPRODUCT_HEAD=55ec920a2c627e789c40509d1f4739e91acfd265\nARTIFACT_REF=agent-artifacts/plug-centered-ux-20260914-55ec920a\nARTIFACT_HEAD=674f896e030ba6f78240574f854fd81b0c36932b\n",
+      "elapsed_seconds": 11.544,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 22.56,
+      "output_policy": "stream",
+      "captured_output_chars": 3822,
+      "output_truncated": false,
+      "current_rss_mb": 22.56,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 11.544
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.084
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.068
+  },
+  "finished_at": "2026-09-14T12:21:28.930570+00:00",
+  "task_digest": "cf74a13e6a9417e9b5a5c9e4c3a1584dccdfa2f2ada7642ac71d9005fcd0fd65",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 2048,
+  "attempt_id": "e897e0b2f0d552c79fea1aa4",
+  "daemon_version": "4.18.20"
+}
