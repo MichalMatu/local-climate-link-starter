@@ -13,21 +13,23 @@ export const SensorRuleUsageList = ({
 }: SensorRuleUsageListProps) => {
   if (usages.length === 0) return null;
   return (
-    <div className="field-stack">
+    <div className="sensor-rule-usage">
       <strong>{label}</strong>
       {usages.map((usage) =>
         onOpenRule ? (
           <button
             key={usage.ruleId}
-            className="secondary-action"
+            className="sensor-rule-usage__link"
             type="button"
             onClick={() => onOpenRule(usage.ruleId)}
           >
-            {usage.ruleName} → {usage.plugName}
+            <span>{usage.ruleName}</span>
+            <small>{usage.plugName}</small>
           </button>
         ) : (
           <span key={usage.ruleId}>
-            {usage.ruleName} → {usage.plugName}
+            <span>{usage.ruleName}</span>
+            <small>{usage.plugName}</small>
           </span>
         )
       )}

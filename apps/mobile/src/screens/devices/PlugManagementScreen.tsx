@@ -1,5 +1,5 @@
 import { Modal, ToastViewport } from '@lcl/ui';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { usePlugManagementFlow } from '../../flows/devices/plugs/usePlugManagementFlow.js';
@@ -7,6 +7,7 @@ import { useShellySetupScanFlow } from '../../flows/hardware-setup/useShellySetu
 import { normalizeShellyUrl } from '../../flows/hardware-setup/validation.js';
 import { useToastQueue } from '../hardware-setup/useToastQueue.js';
 import type { PlugManagementResult } from '../../flows/devices/plugs/management.js';
+import { PlugDetailContent } from './PlugDetailContent.js';
 import { SavedPlugCard } from './SavedPlugCard.js';
 
 export const PlugManagementScreen = ({
@@ -51,6 +52,7 @@ export const PlugManagementScreen = ({
     flow.registration.isPending ||
     flow.relay.isPending ||
     flow.orphanRemoval.isPending ||
+    flow.rename.isPending ||
     flow.removal.isPending;
   return (
     <main className="demo-shell hardware-shell app-bottom-nav-shell">
@@ -200,85 +202,33 @@ export const PlugManagementScreen = ({
         title={selected?.name ?? ''}
         description={selected?.baseUrl ?? ''}
         onClose={() => setDialog('none')}
-        actions={
-          <>
-            <button
-              className="secondary-action"
-              type="button"
-              onClick={() => {
-                void flow.runtime.refetch();
-              }}
-            >
-              {t('common.refresh')}
-            </button>
-            <button
-              className="secondary-action secondary-action--danger"
-              type="button"
-              aria-label={t('common.delete')}
-              onClick={() => setDialog('remove')}
-            >
-              <IconTrash />
-            </button>
-          </>
-        }
+        actions={null}
       >
-        {flow.runtime.isFetching && (
-          <p role="status">{t('hardware.shelly.localRpcConnecting')}</p>
-        )}
-        {(flow.runtimeError || flow.runtime.isError) && (
-          <p role="alert">{t('hardware.shelly.checkFailedDetail')}</p>
-        )}
         {selected && (
-          <>
-            <div className="automation-relay-actions">
-              {[true, false].map((on) => (
-                <button
-                  key={String(on)}
-                  className="automation-relay-button"
-                  type="button"
-                  aria-pressed={flow.snapshot?.relayOn === on}
-                  disabled={!flow.canControlRelay}
-                  onClick={async () => {
-                    report(await flow.relay.mutateAsync({ id: selected.id, on }));
-                  }}
-                >
-                  {on ? 'ON' : 'OFF'}
-                </button>
-              ))}
-            </div>
-            {flow.rules
-              .filter((rule) => rule.plugId === selected.id)
-              .map((rule) => (
-                <div className="action-row" key={rule.id}>
-                  <button
-                    className="secondary-action"
-                    type="button"
-                    onClick={() => onOpenRule(rule.id)}
-                  >
-                    {rule.name}
-                  </button>
-                </div>
-              ))}
-            {flow.snapshot?.managedScripts.map((script) => (
-              <div className="saved-list__row" key={script.id}>
-                <span>
-                  {script.name} · #{script.id}
-                </span>
-                {!script.ruleIds.length && (
-                  <button
-                    className="secondary-action secondary-action--danger"
-                    type="button"
-                    onClick={() => {
-                      setScriptId(script.id);
-                      setDialog('orphan');
-                    }}
-                  >
-                    {t('common.delete')}
-                  </button>
-                )}
-              </div>
-            ))}
-          </>
+          <PlugDetailContent
+            plug={selected}
+            snapshot={flow.snapshot}
+            rules={flow.rules}
+            canControlRelay={flow.canControlRelay}
+            busy={busy}
+            runtimeLoading={flow.runtime.isFetching}
+            runtimeFailed={Boolean(flow.runtimeError || flow.runtime.isError)}
+            onRefresh={() => {
+              void flow.runtime.refetch();
+            }}
+            onRename={async (nextName) =>
+              report(await flow.rename.mutateAsync({ id: selected.id, name: nextName }))
+            }
+            onSetRelay={async (on) => {
+              report(await flow.relay.mutateAsync({ id: selected.id, on }));
+            }}
+            onOpenRule={onOpenRule}
+            onDeleteOrphan={(nextScriptId) => {
+              setScriptId(nextScriptId);
+              setDialog('orphan');
+            }}
+            onRequestDelete={() => setDialog('remove')}
+          />
         )}
       </Modal>
       <Modal

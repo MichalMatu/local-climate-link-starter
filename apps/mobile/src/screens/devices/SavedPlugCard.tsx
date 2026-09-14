@@ -23,6 +23,7 @@ export const SavedPlugCard = ({
   const runtime = usePlugRuntimeQuery(plug, rules);
   const snapshot = runtime.data?.ok ? runtime.data.value : null;
   const telemetry = snapshot?.telemetry;
+  const owner = rules.find((rule) => rule.plugId === plug.id && rule.relayId === 0);
 
   return (
     <article
@@ -40,6 +41,18 @@ export const SavedPlugCard = ({
         >
           <IconDotsVertical className="automation-card__menu-icon" aria-hidden="true" />
         </button>
+      </div>
+
+      <div className="shelly-state-strip">
+        <span>
+          {t('hardware.metrics.relay')}{' '}
+          <strong>
+            {snapshot ? (snapshot.relayOn ? 'ON' : 'OFF') : t('common.missing')}
+          </strong>
+        </span>
+        <span>
+          {t('time.owner')} <strong>{owner?.name ?? t('common.missing')}</strong>
+        </span>
       </div>
 
       <div
