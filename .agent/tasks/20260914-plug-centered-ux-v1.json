@@ -1,0 +1,15 @@
+{
+  "id": "20260914-plug-centered-ux-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; EXPECTED=c86c3778d9f5fa518600f0ec4e12bcd5aaa85bdc; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"; pnpm check:full; ADB=/opt/homebrew/bin/adb; SERIAL=RFCT70L7E8J; test -x \"$ADB\"; test \"$(\"$ADB\" -s \"$SERIAL\" get-state)\" = device; test \"$(\"$ADB\" -s \"$SERIAL\" shell getprop ro.product.model | tr -d '\\r')\" = SM-S906B; bash scripts/android/phone-alpha-install.sh; sleep 3; echo '--- UI DUMP ---'; \"$ADB\" -s \"$SERIAL\" shell uiautomator dump /sdcard/lcl-plug-centered.xml >/dev/null; \"$ADB\" -s \"$SERIAL\" exec-out cat /sdcard/lcl-plug-centered.xml; echo '--- APP WARNINGS ---'; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief '*:W' | tail -n 120 || true; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\""
+  ]
+}
