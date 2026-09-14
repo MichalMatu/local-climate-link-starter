@@ -1,5 +1,5 @@
 import { readClimateMode, writeClimateMode } from '../runtime/modeProtocol.js';
-import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
+import { forceRelayOffAndConfirm } from '../runtime/relaySafety.js';
 import { useMutation } from '@tanstack/react-query';
 import { RpcShellyClient } from '@lcl/shelly-client';
 import { useCallback, useState } from 'react';

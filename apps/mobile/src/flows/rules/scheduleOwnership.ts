@@ -13,12 +13,3 @@ export const scheduleJobControlsRelay = (
     }
     return call.params.id === relayId;
   });
-
-export const findScheduleRelayConflict = (
-  jobs: readonly ShellyScheduleJob[],
-  relayId: number,
-  ignoredJobIds: readonly number[] = []
-): ShellyScheduleJob | null =>
-  jobs.find(
-    (job) => !ignoredJobIds.includes(job.id) && scheduleJobControlsRelay(job, relayId)
-  ) ?? null;

@@ -3,7 +3,7 @@ import {
   type ShellyScheduleJob
 } from '@lcl/shelly-client';
 import { normalizePlugId, type SavedPlug } from '../devices/plugs/model.js';
-import { scheduleJobControlsRelay } from '../time-automation/scheduleOwnership.js';
+import { scheduleJobControlsRelay } from './scheduleOwnership.js';
 import type { AutomationRule } from './model.js';
 import { expectedTimeRulePair, ruleScheduleJobMatches } from './timeSchedule.js';
 
