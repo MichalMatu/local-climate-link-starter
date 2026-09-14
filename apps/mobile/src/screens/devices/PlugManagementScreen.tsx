@@ -79,9 +79,21 @@ export const PlugManagementScreen = ({
               key={plug.id}
               plug={plug}
               rules={flow.rules}
+              relayBusy={flow.relay.isPending}
               onOpen={() => {
                 flow.selectPlug(plug.id);
                 setDialog('detail');
+              }}
+              onOpenRule={onOpenRule}
+              onSetRelay={(on) => {
+                flow.relay.mutate(
+                  { id: plug.id, on },
+                  {
+                    onSuccess: (result) => {
+                      report(result);
+                    }
+                  }
+                );
               }}
             />
           ))}
