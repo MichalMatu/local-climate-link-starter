@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-modern-responsive-e2e-v1",
+  "task_digest": "b49d49e210ad7254a64ef81547b51567b235febb131de6e220d5fc9046c8ae77",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T04:03:02.145580+00:00",
+  "attempt_id": "afcd18973bc73a02ec877285",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 40422,
+  "updated_at": "2026-09-14T04:03:02.145705+00:00",
+  "pid": 40422
+}
