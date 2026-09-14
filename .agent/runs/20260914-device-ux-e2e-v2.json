@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-device-ux-e2e-v2",
+  "task_digest": "060573fbce9d99c6647aeabb95274d0f25be2a8e8797ea55329d895ef7734188",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T06:12:17.009971+00:00",
+  "attempt_id": "975b61646fa4c3ce44488d6f",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 83238,
+  "updated_at": "2026-09-14T06:12:17.010128+00:00",
+  "pid": 83238
+}
