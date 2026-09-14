@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.18.20",
-  "state": "idle",
-  "pid": 99655,
-  "updated_at": "2026-09-14T07:43:07.664743+00:00",
+  "state": "waiting_resource",
+  "pid": 1648,
+  "updated_at": "2026-09-14T07:44:01.631443+00:00",
   "self_revision": "4255bd0ba13b7f14dec67f0bfe8d1def78f8a3c9",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,13 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 99655,
+  "worker_pid": 1648,
   "supervisor_pid": 49829,
-  "last_task_id": "20260914-main-canonical-ux-capture-v3",
+  "pending_task_id": "20260914-main-ux-reference-v4",
+  "blocked_resources": [
+    "machine"
+  ],
+  "waiting_since": "2026-09-14T07:44:01.630977+00:00",
+  "retrying": true,
   "execution_variant": "parallel"
 }
