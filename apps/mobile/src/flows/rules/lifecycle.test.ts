@@ -173,10 +173,76 @@ describe('rule lifecycle', () => {
       'remote:delete-climate',
       'remote:deploy-climate'
     ]);
-    expect(harness.events.slice(3)).toEqual([
-      'store:upsert:climate-1:draft',
-      'store:upsert:climate-1:deployed'
+    expect(harness.events.slice(3)).toEqual(['store:upsert:climate-1:deployed']);
+  });
+
+  it('cleans a new remote deployment and leaves desired config undeployed when redeploy persistence fails', async () => {
+    const previous = { ...climate, deployment: pendingClimate };
+    const desired = {
+      ...climate,
+      name: 'Desired after failed attach',
+      updatedAtMs: 50
+    };
+    const harness = createHarness([previous]);
+    const originalUpsert = harness.deps.stores.upsertRule;
+    let rejectedDeploymentAttach = false;
+    harness.deps.stores.upsertRule = (input: unknown) => {
+      const rule = input as AutomationRule;
+      if (!rejectedDeploymentAttach && rule.deployment) {
+        rejectedDeploymentAttach = true;
+        harness.events.push('store:reject:deployed');
+        return { ok: false, error: { kind: 'storage-unavailable' } };
+      }
+      return originalUpsert(input);
+    };
+
+    await expect(redeployRule(desired, harness.deps)).rejects.toMatchObject({
+      code: 'registry-rejected'
+    });
+
+    expect(harness.runtime.deleteClimate).toHaveBeenCalledTimes(2);
+    expect(harness.events).toEqual([
+      'queue',
+      'remote:delete-climate',
+      'remote:deploy-climate',
+      'store:reject:deployed',
+      'remote:delete-climate',
+      'store:upsert:climate-1:draft'
     ]);
+    expect(harness.getRules()[0]).toMatchObject({
+      id: climate.id,
+      name: 'Desired after failed attach',
+      deployment: null
+    });
+  });
+
+  it('cleans a recovered remote deployment when persistence fails', async () => {
+    const deployed = {
+      ...time,
+      deployment: { pairs: [{ windowIndex: 0, onJobId: 10, offJobId: 11 }] }
+    };
+    const harness = createHarness([deployed]);
+    harness.runtime.readTime.mockResolvedValueOnce({
+      scheduleState: 'attention'
+    } as never);
+    const originalUpsert = harness.deps.stores.upsertRule;
+    let rejectedDeploymentAttach = false;
+    harness.deps.stores.upsertRule = (input: unknown) => {
+      const rule = input as AutomationRule;
+      if (!rejectedDeploymentAttach && rule.deployment) {
+        rejectedDeploymentAttach = true;
+        harness.events.push('store:reject:deployed');
+        return { ok: false, error: { kind: 'storage-unavailable' } };
+      }
+      return originalUpsert(input);
+    };
+
+    await expect(recoverRule(time.id, harness.deps)).rejects.toMatchObject({
+      code: 'registry-rejected'
+    });
+
+    expect(harness.runtime.deleteTime).toHaveBeenCalledOnce();
+    expect(harness.getRules()[0]?.deployment).toBeNull();
   });
 
   it('recovers an undeployed rule without re-entering the plug queue', async () => {

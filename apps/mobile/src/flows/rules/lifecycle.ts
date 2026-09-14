@@ -180,15 +180,31 @@ const deleteRemote = async (
   else await deps.runtime.deleteTime(rule, plug);
 };
 
-const persistDetachedThenAttached = (
-  previous: AutomationRule,
-  next: AutomationRule,
+const persistDesiredUndeployed = (
+  desired: AutomationRule,
   deps: RuleLifecycleDependencies
-): AutomationRule => {
+): AutomationRule =>
   unwrapRegistry(
-    deps.stores.upsertRule({ ...previous, deployment: null, updatedAtMs: deps.now() })
+    deps.stores.upsertRule({ ...desired, deployment: null, updatedAtMs: deps.now() })
   );
-  return unwrapRegistry(deps.stores.upsertRule(next));
+
+const persistRemoteDeployment = async (
+  desired: AutomationRule,
+  deployed: AutomationRule,
+  deps: RuleLifecycleDependencies
+): Promise<AutomationRule> => {
+  const attached = { ...deployed, updatedAtMs: deps.now() } as AutomationRule;
+  try {
+    return unwrapRegistry(deps.stores.upsertRule(attached));
+  } catch (error) {
+    await deleteRemote(attached, deps).catch(() => undefined);
+    deps.stores.upsertRule({
+      ...desired,
+      deployment: null,
+      updatedAtMs: deps.now()
+    });
+    throw error;
+  }
 };
 
 export const saveRuleDraft = (
@@ -370,7 +386,7 @@ export const redeployRule = async (
     try {
       return await deployRemote(desired, deps);
     } catch (error) {
-      persistDetachedThenAttached(current, desired, deps);
+      persistDesiredUndeployed(desired, deps);
       throw error;
     }
   };
@@ -387,15 +403,11 @@ export const redeployRule = async (
         deployRemote(desired, deps)
       );
     } catch (error) {
-      persistDetachedThenAttached(previous, desired, deps);
+      persistDesiredUndeployed(desired, deps);
       throw error;
     }
   }
-  return persistDetachedThenAttached(
-    previous,
-    { ...deployed, updatedAtMs: deps.now() },
-    deps
-  );
+  return persistRemoteDeployment(desired, deployed, deps);
 };
 
 export const recoverRule = async (
@@ -444,10 +456,6 @@ export const recoverRule = async (
     });
     const desired = { ...rule, deployment: null } as AutomationRule;
     const deployed = await deployRemote(desired, deps);
-    return persistDetachedThenAttached(
-      rule,
-      { ...deployed, updatedAtMs: deps.now() },
-      deps
-    );
+    return persistRemoteDeployment(desired, deployed, deps);
   });
 };
