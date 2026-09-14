@@ -3,6 +3,7 @@ import { IconPlus, IconSettings, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { usePlugManagementFlow } from '../../flows/devices/plugs/usePlugManagementFlow.js';
+import { useShellySetupScanFlow } from '../../flows/hardware-setup/useShellySetupScanFlow.js';
 import { normalizeShellyUrl } from '../../flows/hardware-setup/validation.js';
 import { useToastQueue } from '../hardware-setup/useToastQueue.js';
 import type { PlugManagementResult } from '../../flows/devices/plugs/management.js';
@@ -14,6 +15,14 @@ export const PlugManagementScreen = ({
 }) => {
   const { t } = useTranslation();
   const flow = usePlugManagementFlow();
+  const scan = useShellySetupScanFlow(
+    flow.plugs.map((plug) => ({
+      id: plug.id,
+      name: plug.name,
+      baseUrl: plug.baseUrl,
+      scriptIdInput: ''
+    }))
+  );
   const [dialog, setDialog] = useState<'none' | 'add' | 'detail' | 'remove' | 'orphan'>(
     'none'
   );
@@ -52,7 +61,10 @@ export const PlugManagementScreen = ({
           className="primary-action setup-add-fab"
           type="button"
           aria-label={t('hardware.shelly.add')}
-          onClick={() => setDialog('add')}
+          onClick={() => {
+            scan.resetShellyScan();
+            setDialog('add');
+          }}
         >
           <IconPlus className="setup-add-fab__icon" />
         </button>
@@ -87,7 +99,10 @@ export const PlugManagementScreen = ({
         busy={busy}
         closeLabel={t('common.cancel')}
         title={t('hardware.shelly.add')}
-        onClose={() => setDialog('none')}
+        onClose={() => {
+          scan.resetShellyScan();
+          setDialog('none');
+        }}
         actions={
           <button
             className="primary-action"
@@ -118,9 +133,66 @@ export const PlugManagementScreen = ({
         }
       >
         <label className="field">
-          {t('hardware.sensor.nameLabel')}
+          {t('hardware.shelly.deviceNameLabel')}
           <input value={name} onChange={(event) => setName(event.currentTarget.value)} />
         </label>
+        <section className="saved-list" aria-label={t('hardware.shelly.foundListLabel')}>
+          <h3>{t('hardware.shelly.networkScanTitle')}</h3>
+          <div className="action-row">
+            <label className="field">
+              {t('hardware.shelly.scanRangeStart')}
+              <input
+                value={scan.shellyScanStartInput}
+                onChange={(event) =>
+                  scan.setShellyScanStartInput(event.currentTarget.value)
+                }
+              />
+            </label>
+            <label className="field">
+              {t('hardware.shelly.scanRangeEnd')}
+              <input
+                value={scan.shellyScanEndInput}
+                onChange={(event) =>
+                  scan.setShellyScanEndInput(event.currentTarget.value)
+                }
+              />
+            </label>
+          </div>
+          <button
+            className="secondary-action"
+            type="button"
+            onClick={() => {
+              if (scan.shellyScanMutation.isPending) scan.stopShellyScan();
+              else scan.startShellyScan();
+            }}
+          >
+            {scan.shellyScanMutation.isPending
+              ? t('hardware.shelly.scanStop')
+              : t('hardware.shelly.scanNetwork')}
+          </button>
+          {scan.shellyScanMutation.isPending && (
+            <p role="status">{t('hardware.shelly.scanningIpRange')}</p>
+          )}
+          {scan.shellyScanStopped && <p>{t('hardware.shelly.scanStopped')}</p>}
+          {scan.shellyScanMutation.isError && (
+            <p role="alert">{t('hardware.shelly.scanNetworkFailedTitle')}</p>
+          )}
+          {scan.shellyScanMutation.isSuccess &&
+            !scan.shellyScanMutation.data.stopped &&
+            scan.shellyScanMutation.data.results.length === 0 && (
+              <p>{t('hardware.shelly.scanResultEmpty')}</p>
+            )}
+          {scan.shellyScanMutation.data?.results.map((result) => (
+            <button
+              key={result.baseUrl}
+              className="secondary-action"
+              type="button"
+              onClick={() => setAddress(result.baseUrl)}
+            >
+              {result.baseUrl}
+            </button>
+          ))}
+        </section>
         <label className="field">
           {t('common.address')}
           <input
