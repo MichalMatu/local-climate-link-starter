@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260914-e2e-setupdraft-audit-v1",
   "task_digest": "a76d4b4d5c22761ad30c96a17f6ad61fd32aedbd9a3a13e8a78bfdfef370c08f",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-14T03:40:30.354582+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-14T03:40:33.592431+00:00",
   "attempt_id": "440e23828dff7047dcb56dda",
   "daemon_version": "4.18.20",
   "daemon_pid": 25048,
-  "updated_at": "2026-09-14T03:40:30.354726+00:00",
+  "updated_at": "2026-09-14T03:40:33.839773+00:00",
   "pid": 25048
 }
