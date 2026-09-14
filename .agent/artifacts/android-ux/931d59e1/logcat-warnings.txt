@@ -1,0 +1,25 @@
+--------- beginning of main
+E/ashmem  (26845): Pinning is deprecated since Android Q. Please use trim or other methods.
+W/chromium(26845): [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+W/Capacitor(26845): Unable to read file at path public/plugins
+W/libEGL  (26845): Couldn't find an OpenGL ES implementation from 
+W/cr_media(26845): BLUETOOTH_CONNECT permission is missing.
+W/cr_media(26845): getBluetoothAdapter() requires BLUETOOTH permission
+W/cr_media(26845): registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+W/libEGL  (26845): ANGLE Warn:RendererVk.cpp:5464 (appBasedFeatureOverrides): BLOB CACHE IS DISABLED DUE TO LACK OF MULTIFILE BLOBCACHE SUPPORT
+W/AudioCapabilities(26845): Unsupported mediaType audio/x-ape
+W/AudioCapabilities(26845): Unsupported mediaType audio/x-ima
+W/AudioCapabilities(26845): Unsupported mediaType audio/mpeg-L1
+W/AudioCapabilities(26845): Unsupported mediaType audio/mpeg-L2
+W/VideoCapabilities(26845): Unsupported mime video/wvc1
+W/VideoCapabilities(26845): Unsupported mime video/x-ms-wmv
+W/VideoCapabilities(26845): Unrecognized profile/level 32768/256 for video/mp4v-es
+W/AudioCapabilities(26845): Unsupported mime audio/x-ape
+W/AudioCapabilities(26845): Unsupported mime audio/x-ima
+W/AudioCapabilities(26845): Unsupported mime audio/mpeg-L1
+W/AudioCapabilities(26845): Unsupported mime audio/mpeg-L2
+W/VideoCapabilities(26845): Unsupported mime video/wvc1
+W/VideoCapabilities(26845): Unsupported mime video/wvc1
+W/VideoCapabilities(26845): Unsupported mime video/x-ms-wmv
+W/VideoCapabilities(26845): Unrecognized profile/level 32768/256 for video/mp4v-es
+W/InteractionJankMonitor(26845): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=link.localclimate.app

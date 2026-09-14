@@ -1,0 +1,487 @@
+WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)
+  Display: mDisplayId=0 (organized)
+    init=1080x2340 450dpi mMinSizeOfResizeableTaskDp=220 mMinSizeOfDesktopTaskDp=304 base=1080x2340 420dpi cur=1080x2340 app=1080x2340 rng=1080x1080-2340x2340
+    deferred=false mLayoutNeeded=false
+    initCutout=DisplayCutout{insets=Rect(0, 74 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(514, 0 - 566, 74), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=1080 displayHeight=2340 physicalDisplayWidth=1080 physicalDisplayHeight=2340 density={2.8125} cutoutSpec={M 0,0 H -9.244444444444444 V 26.31111111111111 H 9.244444444444444 V 0 H 0 Z @dp} rotation={0} scale={1.0} physicalPixelDisplaySizeRatio={1.0}}} sideOverrides={}}
+    baseCutout=DisplayCutout{insets=Rect(0, 74 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(514, 0 - 566, 74), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=1080 displayHeight=2340 physicalDisplayWidth=1080 physicalDisplayHeight=2340 density={2.8125} cutoutSpec={M 0,0 H -9.244444444444444 V 26.31111111111111 H 9.244444444444444 V 0 H 0 Z @dp} rotation={0} scale={1.0} physicalPixelDisplaySizeRatio={1.0}}} sideOverrides={}}
+
+    initRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=101, center=Point(101, 101)}, RoundedCorner{position=TopRight, radius=101, center=Point(979, 101)}, RoundedCorner{position=BottomRight, radius=101, center=Point(979, 2239)}, RoundedCorner{position=BottomLeft, radius=101, center=Point(101, 2239)}]}
+    baseRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=95, center=Point(95, 95)}, RoundedCorner{position=TopRight, radius=95, center=Point(985, 95)}, RoundedCorner{position=BottomRight, radius=95, center=Point(985, 2245)}, RoundedCorner{position=BottomLeft, radius=95, center=Point(95, 2245)}]}
+
+  mLastOrientationSource=WindowedMagnification:0:31@239241347
+  deepestLastOrientationSource=ActivityRecord{257262984 u0 link.localclimate.app/.MainActivity t987}
+  overrideConfig={1.0 260mcc3mnc [en_GB,pl_PL] ldltr sw411dp w411dp h891dp 420dpi nrml long port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 0 - 1080, 2340) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0 mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=undefined mOverlappingWithCutout=false} s.8356 fontWeightAdjustment=0 ff=0 bf=-1 bts=0 cst=1.0 nightDim=0 themeSeq=0}
+  ignoreOrientationRequest=false
+  mLayoutSeq=33001
+  mCurrentFocus=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+  mFocusedApp=ActivityRecord{257262984 u0 link.localclimate.app/.MainActivity t987}
+
+  mHoldScreenWindow=null
+  mObscuringWindow=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+  mLastWakeLockHoldingWindow=null
+  mLastWakeLockObscuringWindow=Window{8055139 u0 com.android.systemui.wallpapers.ImageWallpaper}
+
+  displayId=0
+  mWallpaperTarget=null
+  mLastWallpaperZoomOut=0.0
+  mFindResults
+    mTopHideWhenLockedWallpaper=Window{8055139 u0 com.android.systemui.wallpapers.ImageWallpaper}
+      mTopHideWhenLockedWallpaper.Token=WallpaperWindowToken{bc755b5 showWhenLocked=false}_<system>
+    mTopShowWhenLockedWallpaper=Window{77265da u0 com.android.systemui.wallpapers.ImageWallpaper}
+      mTopShowWhenLockedWallpaper.Token=WallpaperWindowToken{4e60ff4 showWhenLocked=true}_<lock>
+  token WallpaperWindowToken{bc755b5 showWhenLocked=false}_<system>:
+    mWallpaperX=0.5
+    mWallpaperY=0.5
+    mWallpaperXStep=NA
+    mWallpaperYStep=NA
+    mWallpaperDisplayOffsetX=NA
+    mWallpaperDisplayOffsetY=NA
+  token WallpaperWindowToken{4e60ff4 showWhenLocked=true}_<lock>:
+    mWallpaperX=0.5
+    mWallpaperY=0.5
+    mWallpaperXStep=NA
+    mWallpaperYStep=NA
+    mWallpaperDisplayOffsetX=NA
+    mWallpaperDisplayOffsetY=NA
+
+  mSystemGestureExclusion=SkRegion()
+
+  Display areas in top down Z order:
+    * Leaf:36:36
+    * HideDisplayCutout:32:35
+      * OneHanded:34:35
+        * AppZoomOut:34:35
+          * Leaf:34:35
+      * AppZoomOut:33:33
+        * Leaf:33:33
+      * OneHanded:32:32
+        * AppZoomOut:32:32
+          * Leaf:32:32
+    * WindowedMagnification:0:31
+      * HideDisplayCutout:26:31
+        * OneHanded:26:31
+          * AppZoomOut:26:31
+            * Leaf:26:31
+      * Leaf:24:25
+      * HideDisplayCutout:18:23
+        * OneHanded:18:23
+          * AppZoomOut:23:23
+            * Leaf:23:23
+          * Leaf:22:22
+          * AppZoomOut:20:21
+            * Leaf:20:21
+          * Leaf:19:19
+          * AppZoomOut:18:18
+            * Leaf:18:18
+      * OneHanded:17:17
+        * Leaf:17:17
+      * HideDisplayCutout:16:16
+        * OneHanded:16:16
+          * AppZoomOut:16:16
+            * Leaf:16:16
+      * OneHanded:15:15
+        * Leaf:15:15
+      * HideDisplayCutout:0:14
+        * OneHanded:0:14
+          * AppZoomOut:2:14
+            * ImePlaceholder:13:14
+              * ImeContainer
+            * Leaf:3:12
+            * DefaultTaskDisplayArea_d0 (organized)
+          * RemoteWallpaperAnim:1:1
+            * Leaf:1:1
+          * AppZoomOut:0:0
+            * Leaf:0:0
+
+  Task display areas in top down Z order:
+    TaskDisplayArea DefaultTaskDisplayArea_d0
+      overrideConfig={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=undefined mOverlappingWithCutout=false} ?fontWeightAdjustment ff=0 bf=-1 bts=-1 cst=0.0 nightDim=-1 themeSeq=0}
+      mPreferredTopFocusableRootTask=Task{ff37107 #987 type=standard A=10650:link.localclimate.app}
+      mLastFocusedRootTask=Task{ff37107 #987 type=standard A=10650:link.localclimate.app}
+      Application tokens in top down Z order:
+      * Task{ff37107 #987 type=standard A=10650:link.localclimate.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=1}
+        bounds=[0,0][1080,2340]
+        * ActivityRecord{257262984 u0 link.localclimate.app/.MainActivity t987}
+      * Task{93b6b6c #986 type=standard A=10639:io.blueeye U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
+        bounds=[0,0][1080,2340]
+        * ActivityRecord{258961392 u0 io.blueeye/.MainActivity t986}
+        * ActivityRecord{67242617 u0 io.blueeye/.MainActivity t986}
+      * Task{bf5aff7 #1 type=home U=0 visible=false visibleRequested=false mode=fullscreen translucent=false sz=1}
+        bounds=[0,0][1080,2340]
+        * Task{f63ff4b #628 type=home I=com.sec.android.app.launcher/.activities.LauncherActivity U=0 rootTaskId=1 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+          bounds=[0,0][1080,2340]
+          * ActivityRecord{207875662 u0 com.sec.android.app.launcher/.activities.LauncherActivity t628}
+      * Task{4f9ded0 #704 type=recents I=com.sec.android.app.launcher/com.android.quickstep.RecentsActivity U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+        bounds=[0,0][1080,2340]
+        * ActivityRecord{115703443 u0 com.sec.android.app.launcher/com.android.quickstep.RecentsActivity t704}
+      * Task{30b1d19 #883 type=standard A=10437:com.lidl.eci.lidlplus U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
+        bounds=[0,0][1080,2340]
+        * ActivityRecord{117278496 u0 com.lidl.eci.lidlplus/eu.scrm.lidlplus.payments.presentation.digitalcard.DigitalCardActivity t883}
+        * ActivityRecord{144774240 u0 com.lidl.eci.lidlplus/es.lidlplus.features.main.MainActivity t883}
+      * Task{64afb84 #698 type=undefined U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
+        bounds=[0,0][1080,2340]
+        * Task{7530d97 #700 type=undefined U=0 rootTaskId=698 visible=false visibleRequested=false mode=multi-window stage=side/bottom translucent=true sz=0}
+          bounds=[0,1198][1080,2340]
+        * Task{2a77f6d #699 type=undefined U=0 rootTaskId=698 visible=false visibleRequested=false mode=multi-window stage=main/top translucent=true sz=0}
+          bounds=[0,0][1080,1177]
+      * Task{9acae42 #701 type=undefined dw=activatable U=0 visible=false visibleRequested=false mode=freeform translucent=true sz=0}
+        bounds=[0,0][1080,2340]
+      * Task{6f5c046 #702 type=undefined dw=minimized U=0 visible=false visibleRequested=false mode=freeform translucent=true sz=0}
+        bounds=[0,0][1080,2340]
+
+  rootHomeTask=Task=1
+  rootRecentsTask=Task=704
+
+  PinnedTaskController
+    mIsImeShowing=false
+    mImeHeight=0
+    mMinAspectRatio=0.41841003
+    mMaxAspectRatio=2.39
+  rootMainStageTask=Task=699
+  rootSideStageTask=Task=700
+
+  DisplayFrames w=1080 h=2340 r=0
+
+  DisplayPolicy
+    mCarDockEnablesAccelerometer=true mDeskDockEnablesAccelerometer=true
+    mDockMode=EXTRA_DOCK_STATE_UNDOCKED mLidState=LID_ABSENT
+    mAwake=true mScreenOnEarly=true mScreenOnFully=true
+    mKeyguardDrawComplete=true mWindowManagerDrawComplete=true
+    mHdmiPlugged=false
+    mLastBehavior=SHOW_TRANSIENT_BARS_BY_SWIPE
+    mShowingDream=false mDreamingLockscreen=false
+    mStatusBar=Window{b02aaab u0 StatusBar}
+    mExpandedPanel=Window{a5e93a2 u0 NotificationShade}
+    isKeyguardShowing=false
+    mNavigationBar=Window{9db9a92 u0 NavigationBar0}
+    mNavBarOpacityMode=2
+    mNavigationBarCanMove=false
+    mHasBottomNavigationBar=true
+    mLeftGestureHost=Window{9db9a92 u0 NavigationBar0}
+    mTopGestureHost=Window{b02aaab u0 StatusBar}
+    mRightGestureHost=Window{9db9a92 u0 NavigationBar0}
+    mBottomGestureHost=Window{9db9a92 u0 NavigationBar0}
+    mFocusedWindow=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+    mTopFullscreenOpaqueWindowState=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+    mSystemBarColorApps={ActivityRecord{257262984 u0 link.localclimate.app/.MainActivity t987}}
+    mNavBarColorWindowCandidate=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+    mNavBarBackgroundWindowCandidate=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+    mLastStatusBarAppearanceRegions=
+      AppearanceRegion{ bounds=[0,0][1080,2340]}
+    mLastLetterboxDetails=
+    mStatusBarBackgroundWindows=
+      Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+    mTopIsFullscreen=true
+    mImeInsetsConsumed=false
+    mForceShowNavigationBarEnabled=false mAllowLockscreenWhenOn=false
+    mRemoteInsetsControllerControlsSystemBars=false
+    mDecorInsetsInfo:
+      ROTATION_0={nonDecorInsets=[0,0][0,0], overrideNonDecorInsets=[0,74][0,39], configInsets=[0,0][0,0], overrideConfigInsets=[0,74][0,39], nonDecorFrame=[0,0][1080,2340], overrideNonDecorFrame=[0,74][1080,2301], configFrame=[0,0][1080,2340], overrideConfigFrame=[0,74][1080,2301]}
+      ROTATION_90={nonDecorInsets=[0,0][0,0], overrideNonDecorInsets=[74,0][0,39], configInsets=[0,0][0,0], overrideConfigInsets=[74,79][0,39], nonDecorFrame=[0,0][2340,1080], overrideNonDecorFrame=[74,0][2340,1041], configFrame=[0,0][2340,1080], overrideConfigFrame=[74,79][2340,1041]}
+      ROTATION_180={nonDecorInsets=[0,0][0,0], overrideNonDecorInsets=[0,0][0,113], configInsets=[0,0][0,0], overrideConfigInsets=[0,74][0,113], nonDecorFrame=[0,0][1080,2340], overrideNonDecorFrame=[0,0][1080,2227], configFrame=[0,0][1080,2340], overrideConfigFrame=[0,74][1080,2227]}
+      ROTATION_270={nonDecorInsets=[0,0][0,0], overrideNonDecorInsets=[0,0][74,39], configInsets=[0,0][0,0], overrideConfigInsets=[0,79][74,39], nonDecorFrame=[0,0][2340,1080], overrideNonDecorFrame=[0,0][2266,1041], configFrame=[0,0][2340,1080], overrideConfigFrame=[0,79][2266,1041]}
+    SystemGestures:
+      mDisplayCutoutTouchableRegionSize=32
+      mSwipeStartThreshold=Rect(63, 106 - 63, 63)
+      mSwipeDistanceThreshold=63
+    UiContextResourcesConfig=
+    {1.0 260mcc3mnc [en_GB,pl_PL] ldltr sw411dp w411dp h891dp 420dpi nrml long port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 0 - 1080, 2340) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0 mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=undefined mOverlappingWithCutout=false} as.1 s.6530 fontWeightAdjustment=0 ff=0 bf=-1 bts=0 cst=1.0 nightDim=0 themeSeq=0}
+    UiContextResourcesMetrics=
+    DisplayMetrics{density=2.625, width=1080, height=2340, scaledDensity=2.625, xdpi=391.885, ydpi=393.615}
+
+    DisplayPolicyExt
+      mIsOneHandOpEnabled=false
+      mHasOneHandOpSpec=false
+      mReasonToStart=SYSTEM_BOOTED
+      mOneHandOpController=null
+      mOneHandOpHandler=null
+      CoverPolicy
+        mLastCoverAppCovered=false
+
+    RefreshRatePolicy
+      mLowRefreshRateMode={id=3, width=1080, height=2340, fps=60.0, vsync=60.0, synthetic=false, alternativeRefreshRates=[10.0, 24.0, 30.0, 48.0, 96.0, 120.00001], supportedHdrTypes=[2, 3, 4]}
+      mNonHighRefreshRatePackages:
+      RefreshRatePolicy History
+<< PreferredModeHistory_ModeId >>
+#12 << 09-13 19:45:58.545 >>
+ [ModeId] Requested ( modeId=3 w=Window{1fbdb9 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#11 << 09-13 18:07:04.268 >>
+ [ModeId] Requested ( modeId=3 w=Window{dec1bec u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#10 << 09-13 17:37:57.685 >>
+ [ModeId] Requested ( modeId=3 w=Window{a3d28a3 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#9 << 09-13 15:38:31.577 >>
+ [ModeId] Requested ( modeId=3 w=Window{e1ecc94 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#8 << 09-12 18:52:56.716 >>
+ [ModeId] Requested ( modeId=3 w=Window{dad600e u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#7 << 09-11 15:31:23.766 >>
+ [ModeId] Requested ( modeId=3 w=Window{e8c0adc u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#6 << 09-11 11:00:10.879 >>
+ [ModeId] Requested ( modeId=3 w=Window{c82409 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#5 << 09-10 18:11:08.582 >>
+ [ModeId] Requested ( modeId=3 w=Window{2136324 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#4 << 09-10 08:30:09.945 >>
+ [ModeId] Requested ( modeId=3 w=Window{9ad400 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#3 << 09-10 08:07:20.214 >>
+ [ModeId] Requested ( modeId=3 w=Window{6ec533c u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#2 << 09-10 07:55:23.109 >>
+ [ModeId] Requested ( modeId=3 w=Window{8e1bd8d u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#1 << 09-10 07:54:38.215 >>
+ [ModeId] Requested ( modeId=3 w=Window{5c4f7b3 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+<< PreferredModeHistory_Min >>
+#15 << 09-13 19:45:58.720 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{1fbdb9 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#14 << 09-13 18:32:41.992 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{cb677ff u0 InputMethod})
+
+#13 << 09-13 18:27:54.831 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{f7d63b1 u0 com.whatsapp/com.whatsapp.calling.ui.VoipActivityV2})
+
+#12 << 09-13 18:09:52.779 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{cb677ff u0 InputMethod})
+
+#11 << 09-13 18:07:04.611 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{dec1bec u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#10 << 09-13 17:43:13.463 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{cb677ff u0 InputMethod})
+
+#9 << 09-13 17:43:11.162 >>
+ [Min] Requested ( refreshRate=30.001415 w=Window{5e78b7 u0 Popup Menu})
+
+#8 << 09-13 17:43:07.263 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{cb677ff u0 InputMethod})
+
+#7 << 09-13 17:37:58.042 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{a3d28a3 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#6 << 09-13 15:38:31.743 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{e1ecc94 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#5 << 09-12 19:21:20.774 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{cb677ff u0 InputMethod})
+
+#4 << 09-12 19:21:16.159 >>
+ [Min] Requested ( refreshRate=30.001415 w=Window{b737189 u0 Popup Menu})
+
+#3 << 09-12 19:13:36.234 >>
+ [Min] Requested ( refreshRate=60.0 w=Window{cb677ff u0 InputMethod})
+
+#2 << 09-12 19:13:36.181 >>
+ [Min] Requested ( refreshRate=30.001415 w=Window{3ef755d u0 com.openai.chatgpt/com.openai.chatgpt.MainActivity})
+
+#1 << 09-12 19:13:32.936 >>
+ [Min] Requested ( refreshRate=30.001415 w=Window{55e5d23 u0 Popup Menu})
+
+<< PreferredModeHistory_Max >>
+#15 << 09-13 19:45:58.720 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{1fbdb9 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#14 << 09-13 18:27:54.832 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{f7d63b1 u0 com.whatsapp/com.whatsapp.calling.ui.VoipActivityV2})
+
+#13 << 09-13 18:07:04.611 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{dec1bec u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#12 << 09-13 17:43:13.463 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{df27706 u0 com.openai.chatgpt/com.openai.chatgpt.MainActivity})
+
+#11 << 09-13 17:43:11.162 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{5e78b7 u0 Popup Menu})
+
+#10 << 09-13 17:37:58.042 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{a3d28a3 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#9 << 09-13 15:38:31.743 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{e1ecc94 u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#8 << 09-12 19:21:20.774 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{d816cc3 u0 com.openai.chatgpt/com.openai.chatgpt.MainActivity})
+
+#7 << 09-12 19:21:16.159 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{b737189 u0 Popup Menu})
+
+#6 << 09-12 19:13:36.181 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{3ef755d u0 com.openai.chatgpt/com.openai.chatgpt.MainActivity})
+
+#5 << 09-12 19:13:32.936 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{55e5d23 u0 Popup Menu})
+
+#4 << 09-12 19:04:42.958 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{3ef755d u0 com.openai.chatgpt/com.openai.chatgpt.MainActivity})
+
+#3 << 09-12 19:04:39.766 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{c75fad5 u0 Popup Menu})
+
+#2 << 09-12 18:52:57.282 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{dad600e u0 com.sec.android.app.camera/com.sec.android.app.camera.Camera})
+
+#1 << 09-12 18:38:16.680 >>
+ [Max] Requested ( refreshRate=60.0 w=Window{5884842 u0 com.samsung.android.ruler/com.samsung.android.ruler.main.rulerPreviewActivity})
+
+
+  DisplayRotation
+    mCurrentAppOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+    mLastOrientation=-1
+    mRotation=0 mDeferredRotationPauseCount=0
+    mLandscapeRotation=ROTATION_90 mSeascapeRotation=ROTATION_270
+    mPortraitRotation=ROTATION_0 mUpsideDownRotation=ROTATION_180
+    mSupportAutoRotation=true
+    WindowOrientationListener
+      mEnabled=true
+      mCurrentRotation=ROTATION_0
+      mSensorType=null
+      mSensor={Sensor name="AutoRotation Sensor", vendor="Samsung Electronics", version=16, type=27, maxRange=255.0, resolution=1.0, power=0.001, minDelay=0}
+      mRate=1
+      OrientationSensorJudge
+        mDesiredRotation=-1
+        mProposedRotation=-1
+        mTouching=false
+        mTouchEndedTimestampNanos=380948693191136
+        mLastRotationResolution=-1
+
+    mCarDockRotation=-1 mDeskDockRotation=-1
+    mUserRotationMode=USER_ROTATION_FREE mUserRotation=ROTATION_0 mCameraRotationMode=0 mAllowAllRotations=false
+    mDemoHdmiRotation=ROTATION_90 mDemoHdmiRotationLock=false mUndockedHdmiRotation=-1
+    mLidOpenRotation=-1
+    mFixedToUserRotation=false
+
+    RotationHistory
+      09-13 15:39:55.673 ROTATION_0 to ROTATION_270
+        source=ActivityRecord{22341517 u0 com.sec.android.app.camera/.Camera t933} SCREEN_ORIENTATION_SENSOR
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_270
+      09-13 15:39:57.511 ROTATION_270 to ROTATION_0
+        source=ActivityRecord{22341517 u0 com.sec.android.app.camera/.Camera t933} SCREEN_ORIENTATION_SENSOR
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_0
+      09-13 15:39:58.828 ROTATION_0 to ROTATION_270
+        source=ActivityRecord{22341517 u0 com.sec.android.app.camera/.Camera t933} SCREEN_ORIENTATION_SENSOR
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_270
+      09-13 15:40:04.971 ROTATION_270 to ROTATION_0
+        source=ActivityRecord{22341517 u0 com.sec.android.app.camera/.Camera t933} SCREEN_ORIENTATION_SENSOR
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_0
+      09-13 19:51:07.483 ROTATION_0 to ROTATION_270
+        source=ActivityRecord{179477179 u0 com.openai.chatgpt/.MainActivity t974} SCREEN_ORIENTATION_UNSPECIFIED
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_270
+      09-13 19:51:07.991 ROTATION_270 to ROTATION_0
+        source=Window{a5e93a2 u0 NotificationShade} SCREEN_ORIENTATION_NOSENSOR
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=-2
+      09-14 06:52:25.485 ROTATION_0 to ROTATION_90
+        source=ActivityRecord{258961392 u0 io.blueeye/.MainActivity t986} SCREEN_ORIENTATION_UNSPECIFIED
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_90
+      09-14 06:52:54.035 ROTATION_90 to ROTATION_0
+        source=ActivityRecord{258961392 u0 io.blueeye/.MainActivity t986} SCREEN_ORIENTATION_UNSPECIFIED
+        mode=USER_ROTATION_FREE user=ROTATION_0 sensor=ROTATION_0
+
+        RotationLockHistory
+          09-14 07:11:13.844: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:16.134: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:19.663: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:23.332: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:25.635: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:29.229: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:32.707: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+          09-14 07:11:36.461: mode=USER_ROTATION_FREE, rotation=ROTATION_0, caller=UiAutomationConnection#restoreRotationStateLocked
+
+  InputConsumers:
+    name=recents_animation_input_consumer pid=12419 user=UserHandle{0}
+
+  WindowInsetsStateController
+    InsetsState
+      mDisplayFrame=Rect(0, 0 - 1080, 2340)
+      mDisplayCutout=DisplayCutout{insets=Rect(0, 74 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(514, 0 - 566, 74), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=1080 displayHeight=2340 physicalDisplayWidth=1080 physicalDisplayHeight=2340 density={2.8125} cutoutSpec={M 0,0 H -9.244444444444444 V 26.31111111111111 H 9.244444444444444 V 0 H 0 Z @dp} rotation={0} scale={1.0} physicalPixelDisplaySizeRatio={1.0}}} sideOverrides={}}
+      mRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=95, center=Point(95, 95)}, RoundedCorner{position=TopRight, radius=95, center=Point(985, 95)}, RoundedCorner{position=BottomRight, radius=95, center=Point(985, 2245)}, RoundedCorner{position=BottomLeft, radius=95, center=Point(95, 2245)}]}
+      mRoundedCornerFrame=Rect(0, 0 - 0, 0)
+      mPrivacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=Rect(964, 0 - 1080, 74) rotation=0}
+      mDisplayShape=DisplayShape{ spec=-311912193 displayWidth=1080 displayHeight=2340 physicalPixelDisplaySizeRatio=1.0 rotation=0 offsetX=0 offsetY=0 scale=1.0}
+        InsetsSource id=3 type=ime frame=[0,0][0,0] visible=false flags= sideHint=NONE boundingRects=null
+        InsetsSource id=27 type=displayCutout frame=[0,0][1080,74] visible=true flags= sideHint=TOP boundingRects=null
+        InsetsSource id=11130000 type=statusBars frame=[0,0][1080,74] visible=false flags= sideHint=TOP boundingRects=null
+        InsetsSource id=11130005 type=mandatorySystemGestures frame=[0,0][1080,106] visible=true flags= sideHint=TOP boundingRects=null
+        InsetsSource id=11130006 type=tappableElement frame=[0,0][1080,74] visible=true flags= sideHint=TOP boundingRects=null
+        InsetsSource id=12560001 type=navigationBars frame=[0,2301][1080,2340] visible=true flags=SUPPRESS_SCRIM sideHint=BOTTOM boundingRects=null
+        InsetsSource id=12560004 type=systemGestures frame=[0,0][78,2340] visible=true flags= sideHint=LEFT boundingRects=null
+        InsetsSource id=12560005 type=mandatorySystemGestures frame=[0,2256][1080,2340] visible=true flags= sideHint=BOTTOM boundingRects=null
+        InsetsSource id=12560006 type=tappableElement frame=[0,0][0,0] visible=true flags= sideHint=NONE boundingRects=null
+        InsetsSource id=12560024 type=systemGestures frame=[1002,0][1080,2340] visible=true flags= sideHint=RIGHT boundingRects=null
+    Control map:
+      Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}:
+        InsetsSourceControl: {3 mType=ime mSurfacePosition=Point(0, 74) mInsetsHint=Insets{left=0, top=0, right=0, bottom=991}}
+        InsetsSourceControl: {11130000 mType=statusBars initiallyVisible mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=74, right=0, bottom=0}}
+        InsetsSourceControl: {12560001 mType=navigationBars initiallyVisible mSurfacePosition=Point(0, 2214) mInsetsHint=Insets{left=0, top=0, right=0, bottom=39}}
+    InsetsSourceProviders:
+      InsetsSourceProvider
+        mSource=InsetsSource id=12560024 type=systemGestures frame=[1002,0][1080,2340] visible=true flags= sideHint=RIGHT boundingRects=null
+        mSourceFrame=Rect(1002, 0 - 1080, 2340)
+        mIsLeashInitialized=false mHasPendingPosition=false
+        mWindowContainer=Window{9db9a92 u0 NavigationBar0}
+      InsetsSourceProvider
+        mSource=InsetsSource id=12560006 type=tappableElement frame=[0,0][0,0] visible=true flags= sideHint=NONE boundingRects=null
+        mSourceFrame=Rect(0, 0 - 0, 0)
+        mIsLeashInitialized=false mHasPendingPosition=false
+        mWindowContainer=Window{9db9a92 u0 NavigationBar0}
+      InsetsSourceProvider
+        mSource=InsetsSource id=12560005 type=mandatorySystemGestures frame=[0,2256][1080,2340] visible=true flags= sideHint=BOTTOM boundingRects=null
+        mSourceFrame=Rect(0, 2256 - 1080, 2340)
+        mIsLeashInitialized=false mHasPendingPosition=false
+        mWindowContainer=Window{9db9a92 u0 NavigationBar0}
+      InsetsSourceProvider
+        mSource=InsetsSource id=12560004 type=systemGestures frame=[0,0][78,2340] visible=true flags= sideHint=LEFT boundingRects=null
+        mSourceFrame=Rect(0, 0 - 78, 2340)
+        mIsLeashInitialized=false mHasPendingPosition=false
+        mWindowContainer=Window{9db9a92 u0 NavigationBar0}
+      InsetsSourceProvider
+        mSource=InsetsSource id=12560001 type=navigationBars frame=[0,2301][1080,2340] visible=true flags=SUPPRESS_SCRIM sideHint=BOTTOM boundingRects=null
+        mSourceFrame=Rect(0, 2301 - 1080, 2340)
+        mOverrideFrames={2011=Rect(0, 2214 - 1080, 2340)}
+        mControl=InsetsSourceControl mId=12560001 mType=navigationBars mLeash=Surface(name=Surface(name=9db9a92 NavigationBar0)/@0x64038de - animation-leash of insets_animation)/@0xdb3fe90 mInitiallyVisible=true mSurfacePosition=Point(0, 2214) mInsetsHint=Insets{left=0, top=0, right=0, bottom=39} mSkipAnimationOnce=false mImeStatsToken=null mControlledByPolicy=false
+        mInsetsHint=Insets{left=0, top=0, right=0, bottom=39}
+        mIsLeashInitialized=true mHasPendingPosition=false
+        mWindowContainer=Window{9db9a92 u0 NavigationBar0}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=9db9a92 NavigationBar0)/@0x64038de - animation-leash of insets_animation)/@0xdb3fe90
+        mControlTarget=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+      InsetsSourceProvider
+        mSource=InsetsSource id=11130006 type=tappableElement frame=[0,0][1080,74] visible=true flags= sideHint=TOP boundingRects=null
+        mSourceFrame=Rect(0, 0 - 1080, 74)
+        mIsLeashInitialized=false mHasPendingPosition=false
+        mWindowContainer=Window{b02aaab u0 StatusBar}
+      InsetsSourceProvider
+        mSource=InsetsSource id=11130005 type=mandatorySystemGestures frame=[0,0][1080,106] visible=true flags= sideHint=TOP boundingRects=null
+        mSourceFrame=Rect(0, 0 - 1080, 106)
+        mIsLeashInitialized=false mHasPendingPosition=false
+        mWindowContainer=Window{b02aaab u0 StatusBar}
+      InsetsSourceProvider
+        mSource=InsetsSource id=11130000 type=statusBars frame=[0,0][1080,74] visible=false flags= sideHint=TOP boundingRects=null
+        mSourceFrame=Rect(0, 0 - 1080, 74)
+        mControl=InsetsSourceControl mId=11130000 mType=statusBars mLeash=Surface(name=Surface(name=b02aaab StatusBar)/@0x9564d5 - animation-leash of insets_animation)/@0xf21f8e mInitiallyVisible=true mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=74, right=0, bottom=0} mSkipAnimationOnce=false mImeStatsToken=null mControlledByPolicy=false
+        mInsetsHint=Insets{left=0, top=74, right=0, bottom=0}
+        mIsLeashInitialized=true mHasPendingPosition=false
+        mWindowContainer=Window{b02aaab u0 StatusBar}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=b02aaab StatusBar)/@0x9564d5 - animation-leash of insets_animation)/@0xf21f8e
+        mControlTarget=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+      ImeInsetsSourceProvider
+        mSource=InsetsSource id=3 type=ime frame=[0,0][0,0] visible=false flags= sideHint=NONE boundingRects=null
+        mSourceFrame=Rect(0, 2340 - 1080, 2340)
+        mControl=InsetsSourceControl mId=3 mType=ime mLeash=Surface(name=Surface(name=cb677ff InputMethod)/@0x343e6b8 - animation-leash of insets_animation)/@0xa788a20 mInitiallyVisible=false mSurfacePosition=Point(0, 74) mInsetsHint=Insets{left=0, top=0, right=0, bottom=991} mSkipAnimationOnce=false mImeStatsToken=null mControlledByPolicy=false
+        mInsetsHint=Insets{left=0, top=0, right=0, bottom=991} stale
+        mIsLeashInitialized=true mHasPendingPosition=false
+        mWindowContainer=Window{cb677ff u0 InputMethod}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=cb677ff InputMethod)/@0x343e6b8 - animation-leash of insets_animation)/@0xa788a20
+        mControlTarget=Window{4160f8c u0 link.localclimate.app/link.localclimate.app.MainActivity}
+        mImeShowing=false mLastDrawn=false        showImePostLayout not scheduled, mImeRequester=null
+
+  InsetsPolicy
+    status: WINDOW_STATE_HIDDEN
+    nav: WINDOW_STATE_SHOWING
+
