@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-plug-centered-ux-v1",
+  "task_digest": "d7a74b31b017455bbb707e72178484055966e8a9cbdbe112d15c5122944d082b",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T12:05:50.763313+00:00",
+  "attempt_id": "5e6033f8a18ee48c9fbde1f3",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 72691,
+  "updated_at": "2026-09-14T12:05:50.763445+00:00",
+  "pid": 72691
+}
