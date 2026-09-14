@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-sensor-page-contract-decouple-v1",
+  "task_digest": "7510b652555e7000bf113807c7a6fd61bd7548433df77351706a694d739f900b",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T01:49:33.050686+00:00",
+  "attempt_id": "c5019ec52981f57169bcdfb3",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 43754,
+  "updated_at": "2026-09-14T01:49:33.050777+00:00",
+  "pid": 43754
+}
