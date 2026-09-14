@@ -144,23 +144,19 @@ allows private/local targets and the MVP Shelly paths: `/rpc`,
 
 ## AUTO / MANUAL controls
 
-`AUTO` and `MANUAL` control the main Shelly automation script named
-`Local Climate Link Thermostat`.
+`AUTO` and `MANUAL` are the canonical in-process mode of the exact climate rule deployment. The managed Shelly script stays running in both modes; normal mode changes do not use `Script.Stop` or `Script.Start`.
 
 ```text
-AUTO: start the thermostat script. Do not force relay ON.
-MANUAL: stop the thermostat script and set relay OFF.
-ON/OFF: manually control only the relay.
+AUTO: allow the owning climate rule to make automatic relay decisions.
+MANUAL: block automatic output decisions and force/verify relay OFF.
+ON/OFF: manual relay control is available only for a verified MANUAL climate owner.
 ```
 
-If the app shows `Najpierw zapisz regułę dla tego gniazdka.`, the saved Shelly
-does not have the main thermostat script yet. Go to `Reguła`, choose the Shelly
-and thermometer, then use `Zapisz i wyślij`.
+If runtime mode is unknown or unreadable, the app fails closed instead of assuming AUTO. If a climate rule is not deployed or its safety test is not verified, open that rule and complete deployment/verification before attempting normal runtime control.
 
 ## Script upload failed
 
-In demo mode, upload uses `FakeShellyClient` and does not contact a real Shelly.
-In hardware setup, upload uses local Shelly RPC against the selected saved plug.
+Climate deployment uses local Shelly RPC against the plug referenced by the saved rule. Upload alone is not success: the lifecycle must retain exact script identity/hash, establish MANUAL/OFF state and complete verification before AUTO can resume.
 
 Check:
 

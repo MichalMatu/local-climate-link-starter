@@ -1,115 +1,79 @@
 # Refactor boundaries
 
-This document records the responsibility boundaries established during the v2.0.10
-architecture and code-cleanliness audit. File size is a warning signal, not a
-refactor goal by itself. A file should be split only when it owns more than one
-cohesive responsibility or when its public surface is becoming difficult to reason
-about and test.
+This document records the current product boundaries after the device/rule decoupling work. File size is a warning signal, not a refactor goal by itself. Split code at a real responsibility boundary and keep screens focused on orchestration and presentation.
 
-## Hardware setup outcome
+## Product model boundary
 
-The hardware setup façade remains `flows/hardware-setup/useHardwareSetupFlow.ts`,
-but it is now a composer rather than the implementation home for every hardware
-operation. It is roughly 575 lines, down from more than 1000 lines at the start of
-this cleanup and from about 1660 lines in the earlier audit history.
+Plugs, thermometers and rules are independent durable entities.
 
-Cohesive capabilities now own their implementation details:
+- Plug persistence and mutations live under `flows/devices/plugs`.
+- Sensor persistence and live-management orchestration live under `flows/devices/sensors`.
+- Desired rule configuration, deployment metadata, lifecycle transactions and runtime ownership live under `flows/rules`.
+- `flows/registry/devicesAndRules.ts` composes the independent registries and supplies cross-registry read boundaries.
 
-- `ruleConfigDerivation.ts` derives validated Shelly, sensor and climate-rule state.
-- `useShellySetupScanFlow.ts` owns LAN scan state, cancellation and scan execution.
-- `useHardwareDiagnosticsFlow.ts` owns script diagnostics and resource snapshots.
-- `useClimateAutomationInstallFlow.ts` owns install/conflict handling and the safe
-  relay test.
-- `useShellyControlFlow.ts`, `useShellyBleDiscoveryFlow.ts` and
-  `usePhoneSensorFlow.ts` remain the transport/device lifecycle boundaries.
+A sensor is never plug-owned. Durable plug/sensor association exists only through a climate rule. Rule/device names are independent and mutable without changing the other entity's identity.
 
-The façade may coordinate these capabilities and expose the compatibility surface
-needed by narrow page contracts, but low-level transport, scan, diagnostic,
-installation or BLE implementation must not migrate back into it.
+## Screen and flow boundary
 
-## Setup page composition
+Screens own route-level composition, dialogs and user interaction. They do not own RPC protocols, persistence transactions or rule deployment algorithms.
 
-The largest setup pages were reduced without changing their page contracts:
+- `AutomationDashboardScreen` renders current rules from the Rule registry.
+- `RuleDetailScreen` presents runtime state and dispatches lifecycle actions by `ruleId`.
+- `RuleEditorScreen` composes the pure rule editor state with `useRuleEditorFlow`.
+- `PlugManagementScreen` and `SensorManagementScreen` expose independent device management.
+- `AppRoutes` owns the four top-level product sections: Rules, Plugs, Thermometers and Settings.
 
-- `ShellySetupPage.tsx` is about 658 lines; presentation lives in
-  `ShellySetupPresentation.tsx` and lifecycle/feedback orchestration in
-  `useShellySetupFeedback.ts`.
-- `SensorSetupPage.tsx` is about 604 lines; BLE/live-reading lifecycle and transient
-  feedback live in `useSensorSetupFeedback.ts`.
-- `RuleSetupPage.tsx` is about 638 lines; mutation feedback lives in
-  `useRuleSetupFeedback.ts` and advanced settings rendering lives in
-  `RuleAdvancedSettingsModal.tsx`.
+Flow hooks may orchestrate queries/mutations and narrow UI state, but business transactions remain in focused service/lifecycle modules. Avoid god hooks and large compatibility façades.
 
-These parent pages still own page-level composition, local dialog intent and user
-interaction wiring. Extracted helpers/hooks own one named responsibility and must
-not become generic dumping grounds.
+## Plug-operation boundary
 
-## Regression budgets
+`flows/devices/plugs/operations.ts` provides the shared per-physical-plug queue. Plug management and rule lifecycle mutations resolve the latest registry state after entering that queue so endpoint changes or ownership changes cannot be bypassed by stale inputs.
 
-`pnpm quality:repo` enforces headroom above the current sizes for the hardware
-setup façade, the three largest setup pages and their extracted responsibility
-modules. These limits are regression alarms, not targets to optimize toward. If a
-limit is approached, first inspect responsibility growth; do not mechanically
-shuffle lines into arbitrary files just to satisfy the gate.
+Direct relay control is fail closed: inventory must be readable, physical identity must match, and no rule may own the relay. Failed command verification forces OFF and rereads the output.
 
-The same gate keeps screen/client boundaries, domain-package boundaries, narrow
-page contracts and existing subsystem budgets intact. `pnpm quality:ux` continues
-to enforce the feedback/modal and design-system contracts.
+## Rule lifecycle boundary
+
+`flows/rules/lifecycle.ts` is the product transaction boundary for create/deploy/verify/edit/redeploy/pause/resume/recover/delete and climate manual relay control.
+
+Desired configuration and deployment state remain distinct. A successful remote mutation is not enough when the local deployment attachment fails; recovery must leave a truthful undeployed local state and best-effort remove the new remote artifact.
+
+Exactly one rule may own a `(plugId, relayId)` pair. Product flows must use the live ownership resolver instead of relying on persistence alone.
+
+## Climate runtime boundary
+
+Climate AUTO/MANUAL is an in-process runtime state stored in `R.m`. Normal mode switching keeps the exact managed script running.
+
+- AUTO permits automatic relay decisions.
+- MANUAL keeps runtime/diagnostics alive, blocks automatic output and requires OFF before manual control is exposed.
+- Unknown/unreadable mode fails closed and is never coerced to AUTO.
+- BLE discovery preserves and restores the exact prior mode after cleanup.
+- Climate deployment is incomplete until exact script identity/hash and safety state are verified.
+
+Transport/status parsing, runtime ownership and lifecycle transactions stay in their dedicated modules; do not fold them into screen components.
+
+## Time runtime boundary
+
+Time rules own native Shelly Schedule jobs through exact job ids recorded in deployment metadata. Creation, pause/resume, edit/redeploy and deletion are transactional and verify exact schedule ownership.
+
+Climate active-hours constraints are not native time-rule ownership; they remain inside the generated climate runtime.
+
+## Hardware helper boundary
+
+The old persisted hardware-setup draft and setup façade are gone. Surviving `flows/hardware-setup` modules are narrow helpers for discovery, diagnostics, validation and transient device contracts. `draftDevices.ts` contains transient contracts only and must not become a durable store.
+
+No compatibility reader, dual write or adapter may recreate the removed installation/draft persistence path.
 
 ## Safety-sensitive boundaries
 
-Cleanup ordering and exact ownership are architectural behavior, not formatting:
+Structural cleanup must preserve behavior:
 
-- relay control must retain OFF-first safety semantics,
-- climate/time ownership conflicts must be checked before installation,
-- temporary Shelly BLE discovery must be cleaned up before managed automation is
-  resumed or installed,
-- blocking install failures remain modal feedback rather than transient toasts,
-- invalid LAN scan input must be validated when starting a scan, not allowed to
-  throw during React render.
+- OFF-first relay safety and verified final OFF after destructive/hardware tests,
+- exact physical identity before plug mutations,
+- exact rule/script/schedule ownership before runtime mutation,
+- fail-closed behavior for incomplete or unreadable inventory/mode state,
+- cleanup of temporary BLE discovery before restoring climate mode,
+- typed persistence/hardware failures visible to the UI rather than inferred from mutation completion.
 
-Structural refactors must preserve these rules and the existing hardware regression
-tests.
+## Regression gates
 
-## What not to split by size alone
-
-Locale dictionaries, focused hardware scripts and large regression/E2E test files
-can legitimately be large data- or scenario-oriented files. They are not God
-objects merely because their line count is high. Split them only when a concrete
-maintenance or responsibility boundary justifies it.
-
-## Audit hygiene
-
-Production code must remain free of accidental `TODO/FIXME/HACK`, `@ts-ignore`,
-broad `eslint-disable`, debug `console.log/debug` and unnecessary `as any` escape
-hatches. Architecture cleanup is accepted only when formatting, lint, repository
-and UX quality gates, typecheck, tests, coverage, build and responsive E2E remain
-green.
-
-## Climate runtime control boundary
-
-AUTO/MANUAL is an in-process runtime state. Keep transport, status interpretation,
-relay safety, upgrade/recovery and React synchronization in the dedicated modules
-documented in `runtime-control.md`; do not fold them into
-`useHardwareSetupFlow`, Dashboard or Installation Detail.
-
-## Independent device management transactions
-
-The device/rule cutover introduces `flows/devices/plugs/management.ts` as the
-registry-aware boundary for standalone plug operations. It accepts physical ids,
-resolves current devices and rules after entering a shared per-plug queue, and
-calls the validated inventory/relay/orphan services. Endpoint updates, renames,
-local removals and future rule deployment transactions must use the same queue.
-The queue releases on both success and failure and does not block other plugs.
-Direct registry writes remain a persistence primitive, not a product mutation API.
-
-`usePlugManagementFlow` owns TanStack Query state. Runtime cache identity includes
-physical id, endpoint and current rules; relay commands and orphan removal
-invalidate runtime observations even on failure. Storage errors and failed or
-pending observations prevent raw control. The hook is ready for standalone screen
-composition; the existing product routes have not switched to it yet.
-
-`useSensorManagementFlow` returns the sensor repository's typed result for both
-manual entry and BLE discovery. Device persistence failures must not produce a
-saved-device success toast. Live readings remain keyed by runtime address and are
-cleared only after successful local deletion.
+`pnpm quality:repo` protects architecture and repository budgets; `pnpm quality:ux` protects feedback/modal/design-system contracts. Final acceptance requires formatting, lint, both quality gates, typecheck, tests, core coverage, build and responsive E2E via `pnpm check:full`.

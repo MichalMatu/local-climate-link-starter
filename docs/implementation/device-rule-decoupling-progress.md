@@ -1,240 +1,53 @@
 # Device/rule decoupling progress
 
-Branch: `work/device-rule-decoupling-20260913`. Do not merge to `main`.
+Branch: `work/device-rule-decoupling-20260913`. Do not merge to `main` before final device acceptance.
 
 ## Current checkpoint
 
-HEAD entering this checkpoint: `65b0f6f2` (sensor-management foundation).
-Phase B now has standalone plug management transactions and query orchestration.
-Standalone UI and the coordinated rule/product cutover remain outstanding.
+The product cutover is complete. Plugs, thermometers and rules are independent durable entities and the active product/runtime path no longer depends on `InstalledAutomation`, installation snapshots or the legacy hardware-setup draft store.
 
-Completed implementation commits:
+Checkpoint entering this documentation refresh: `06da99e9dcc72c0e66d12269cd6605b4536e4c7c`.
 
-- `a3da0a14` — Phase A: independent device/rule models, persistence and ownership.
-- `0a1452c2` — Phase B1: standalone plug runtime services and hardware smoke.
-- `5b073ae7` — Recheck physical identity immediately before plug mutations.
-- `9bdddf8c` — Enforce saved-rule ownership and deployment write invariants.
-- `65b0f6f2` — Sensor management foundation independent of the hardware draft.
+## Current architecture
 
-## Completed work
+- `flows/devices/plugs` owns saved plugs, registration, standalone runtime inspection and guarded direct relay operations.
+- `flows/devices/sensors` owns saved thermometers and live sensor-management orchestration. A saved sensor is global and is never owned by a plug.
+- `flows/rules` owns desired climate/time rules, deployment state, lifecycle transactions, runtime ownership and presentation-independent editor state.
+- `flows/registry/devicesAndRules.ts` exposes the independent Plug, Sensor and Rule registries.
+- Durable sensor-to-plug association exists only through a climate rule.
+- Exactly one rule may own a `(plugId, relayId)` pair.
+- The product navigation is `Rules / Plugs / Thermometers / Settings`; rule screens route by `ruleId`.
+- Rule names and device names are independent. Renaming either side does not mutate the other identity.
 
-- Dedicated plug, sensor and rule schemas, repositories and injectable Zustand
-  stores under `flows/devices`, `flows/rules`, `flows/registry`.
-- Canonical Shelly device id, mutable endpoint, profile/runtime-address sensor id,
-  independent storage keys, explicit persistence failures and duplicate rejection.
-- Rule references, device deletion guards, deployed-rule deletion/rebinding guards,
-  current-device resolution and generator input construction.
-- Explicit pending/failed/verified climate safety-test metadata retaining exact
-  script id/hash. Rules do not embed mutable device snapshots.
-- Pure ownership resolver: unknown inventory fails closed; duplicate orphan scripts
-  remain individually visible; missing deployments release the relay only after
-  complete verified inventory; partial/mismatched deployments remain blocked.
-- Shared climate settings validation in script-generator, shared desired daily
-  time settings and pure schedule ownership/job helpers. Current callers migrated
-  for extracted helpers without compatibility re-exports.
-- ADR-0006 records the approved architecture.
+## Runtime and safety invariants
 
-## Phase B1 services
+- Plug mutations and rule lifecycle work are serialized per physical plug.
+- Raw relay control is available only when ownership is known and unclaimed.
+- Climate AUTO/MANUAL is the canonical in-process `R.m` state; normal mode changes do not use `Script.Stop`/`Script.Start`.
+- Unknown or unreadable climate mode fails closed.
+- Climate deployment is not considered safe after upload alone: exact script identity/hash, MANUAL/OFF state and the safety test must be verified before AUTO can resume.
+- BLE discovery preserves the exact prior AUTO/MANUAL state and restores it only after scanner cleanup; unknown prior mode rejects instead of guessing.
+- Time rules use native Shelly schedules; climate active hours stay inside the climate runtime and do not create native schedule ownership.
+- Delete/redeploy/recovery operations verify exact ownership and use OFF-first cleanup semantics.
 
-- `shelly-client/inventory.ts`: validated method inventory, all exact script ids and
-  Switch.GetStatus (no default OFF for missing data).
-- Plug registration checks device identity/profile and relay status without calling
-  Scripts/BLE/schedules. Runtime inventory distinguishes absent APIs from failed RPCs.
-- Direct unowned ON/OFF verifies physical identity, ownership and actual output.
-  Failed command verification forces and rereads OFF.
-- Orphan cleanup protects owned and unrelated scripts, checks exact name/id again
-  after stopping, deletes only that id, then verifies absence and OFF.
-- `scripts/hardware/device-rule-plug-smoke.ts` exercises these services against the
-  explicitly selected development device. Requires SHELLY_URL + SHELLY_DEVICE_ID;
-  refuses to remove pre-existing scripts or schedules.
+## Legacy removal completed
 
-## Verification
+The coordinated cleanup removed the old installation product/runtime path, legacy installation detail screens, the hardware setup orchestrator, the old time-automation module, obsolete LED/install E2E, and the persisted hardware setup draft store. Only narrow transient device contracts needed by surviving discovery/diagnostic flows remain in `flows/hardware-setup/draftDevices.ts`.
 
-- Installed locked dependencies with `pnpm install --frozen-lockfile`; no dependency
-  or lockfile changes.
-- New registry/model/reference tests: 19 passed.
-- New ownership tests: 11 passed.
-- Existing time config/runtime tests: 12 passed.
-- Script generator: 94 passed, including snapshots and runtime matrix.
-- B1 plug service tests: 15 passed. Shelly client: 49 passed (3 new inventory tests).
-- Mobile typecheck, workspace lint, `pnpm quality:repo` and `pnpm quality:ux` passed after final fixes.
-- `pnpm build` passed for all workspaces. `pnpm format:check` passed after formatting
-  the supplied plan (format-only baseline issue) and a new test file.
-- Initial tests exposed missing discriminator fields in test fixtures; fixed.
-- Typecheck caught optional `enable` in schedule test fixtures; helper return type
-  now describes its always-present `enable` field; recheck passed.
+The registry persistence test intentionally seeds old storage keys and proves that current registries do not read them. This is a negative isolation test, not a compatibility reader.
 
-## Hardware and visual state
+## Verification completed so far
 
-2026-09-13 Phase B1 service smoke passed on local Shelly Plug S Gen3, firmware 1.7.5:
+- Rule/device registry, ownership, lifecycle and fail-closed runtime tests pass.
+- Mobile test suite at the setup-draft removal checkpoint: 31 files / 156 tests passed.
+- Responsive E2E was rewritten for the current product and passes 7/7 across 360x800, 390x844, 412x915, 768x1024 and 1440x900 coverage.
+- Workspace lint, repository/UX quality gates, typecheck, tests, coverage and builds pass through `pnpm check` on the current candidate.
+- Earlier real-device service/runtime smokes on Shelly Plug S Gen3 firmware 1.7.5 exercised relay ON/OFF and AUTO/MANUAL discovery restoration and finished with the relay explicitly OFF.
 
-- stored a plug in an isolated registry with zero rules;
-- actual ON verified, actual OFF verified;
-- installed a disposable generated LCL climate script, listed its exact orphan id;
-- raw ON was blocked while the orphan was present;
-- deleted exact orphan, verified absence, registry still contained the plug;
-- final `Switch.GetStatus` explicitly verified **OFF**, no test scripts left.
+## Remaining acceptance work
 
-Command: `SHELLY_URL=<local endpoint> SHELLY_DEVICE_ID=<verified physical id> pnpm exec tsx scripts/hardware/device-rule-plug-smoke.ts`.
-This is service-level hardware validation, **not** an app UI/route acceptance test.
-Plan scenarios 3–9 and complete app-based scenarios 1–2 remain outstanding.
-
-No UI changes or visual audit yet. No callable ChatGPT execution sandbox is exposed
-in this session; software checks use the supplied local workspace. Phase B/C must
-record the responsive visual audit and any unavailable sandbox validation explicitly.
-
-## ChatGPT audit follow-up
-
-The post-Codex audit found a time-of-check/time-of-use identity gap in B1: direct
-relay mutation and orphan script deletion trusted the physical identity checked
-earlier in a multi-RPC operation. The service now re-verifies Shelly device id,
-model and generation immediately before the destructive relay/script mutation.
-Regression tests cover endpoint reassignment between inventory and mutation.
-
-A separate rule-lifecycle concern remains intentionally tracked for the product
-cutover: generic registry writes must not let desired rule config drift away from
-an attached deployment. This must be solved together with the runtime update
-transaction API rather than by a persistence-only restriction that would block
-legitimate verified updates. Rule creation also must use the live ownership resolver
-before persistence so two rules cannot claim the same relay through normal product
-flows.
-
-### Registry audit hardening
-
-The rule registry now rejects a second saved rule for the same `(plugId, relayId)`
-and rejects desired configuration/binding changes while deployment metadata is
-attached. Deployment-state-only updates remain allowed so safety verification can
-advance. A later runtime transaction API must explicitly detach/commit deployment
-when editing an already deployed rule.
-
-### Phase B2 sensor-management foundation
-
-Phone BLE/GATT orchestration no longer owns hardware-draft persistence: the caller
-injects the device write boundary. A dedicated `useSensorManagementFlow` now binds
-that orchestration to the independent sensor registry while keeping live readings
-separate. `SensorSetupPage` reads samples by runtime address rather than durable
-registry id, which avoids a subtle break when the new profile-qualified sensor ids
-replace the old MAC-as-id draft shape. Product routing is not switched yet.
-
-## Remaining work and exact next step
-
-1. Finish management checkpoint verification and record the commit SHA at the next checkpoint.
-2. Phase B: inspect full Shelly/Sensor pages and adjacent tests, extract dedicated
-   management flows, replace device ownership in the hardware draft with new
-   registries (no fallback readers), add standalone routes and lifecycle wrappers.
-3. Wire the tested B1 services to those flows, resolving the latest registry records
-   at each operation; serialize mutations per physical plug (including future rule
-   deployment) and invalidate endpoint-sensitive queries. Keep raw control away
-   from climate AUTO owners.
-4. Phase C: four-item navigation, Rules dashboard and existing-device selectors;
-   migrate Android back behavior and all locales/E2E fixtures.
-5. Phase D: move climate/time runtime callers to resolved rule references, preserve
-   canonical `R.m`, fix BLE discovery mode restoration, safe-test completion, exact
-   ownership and time rollback; hardware scenarios 1–9 from the plan.
-6. Phase E: remove old installation/draft device contracts and update architecture,
-   product and repository docs/gates. Run `pnpm check:full` on the final candidate.
-
-The existing product paths still use their current installation/draft models at
-this Phase B service checkpoint. New registries have no legacy imports/readers/dual writes;
-production cutover is outstanding, not claimed complete. Do not add adapters from
-new registries back into persisted `InstalledAutomation` snapshots.
-
-### Phase B management transaction checkpoint (2026-09-13)
-
-HEAD entering this checkpoint: `65b0f6f2` (sensor-management foundation).
-
-- Added `operations.ts`: shared physical-plug operation queue, normalized identity,
-  rejection recovery and independent execution for different plugs.
-- Added injectable `management.ts`: registry-aware registration, live inventory,
-  direct relay control, exact orphan deletion, rename and guarded local removal.
-  Current endpoints and rules are resolved after entering the queue. Registration
-  rechecks identity after waiting and preserves the original creation timestamp.
-- Added `usePlugManagementFlow`: TanStack Query integration, endpoint/rule-sensitive
-  cache keys, mutation invalidation and fail-closed raw-control availability.
-- Fixed sensor discovery persistence-result propagation; exposed registry load
-  failures and resolved rename/remove inputs from the latest sensor registry.
-- Updated hardware smoke to exercise the new management boundary, with injected
-  RPC clients and isolated persistence.
-- Focused checks: 35 tests passed across plug service/management/hook and sensor
-  hook tests. Mobile typecheck passed before the final sensor additions; full
-  candidate validation is recorded below when complete.
-
-This checkpoint does not switch product routes or remove the old installation
-model. The new management hooks are not yet reachable from app navigation.
-No UI layout changed, so this checkpoint has no new visual audit.
-
-Exact next step: compose standalone device pages from the management hooks, then
-perform the coordinated route/rule persistence cutover described in phases B–E.
-Use `runPlugOperation` for rule mutations as well as plug actions; do not call it
-recursively from an operation already holding the same plug queue. Keep typed
-`ok: false` results visible to UI instead of treating mutation `isSuccess` alone
-as proof that persistence or hardware verification succeeded.
-
-Checkpoint verification completed:
-
-- `pnpm check:full` passed: formatting, workspace lint, UX/repository gates,
-  all workspace typechecks/tests, core coverage, workspace builds and all 25
-  responsive E2E tests. Mobile: 236 tests passed; generator: 94 passed.
-- First full run found one unused import after sharing the runtime test fixture;
-  removed it and reran the complete command successfully.
-- No real hardware test in this checkpoint: the current local Shelly endpoint was
-  not supplied. The updated smoke is ready but has not been run on hardware;
-  this checkpoint made no relay changes and makes no claim about its current state.
-- Existing responsive E2E verifies regression behavior only; it does not constitute
-  acceptance of the outstanding standalone screens or rule cutover.
-
-### Hardware follow-up — management checkpoint `2b0777aa`
-
-2026-09-13, user supplied the current development plug endpoint and connected
-Android phone. Validated Shelly Plug S Gen3, firmware 1.7.5, Matter disabled.
-
-- Initial smoke correctly refused a pre-existing script. Inventory contained only
-  the running `Local Climate Link Thermostat` at exact id 1 and no schedules.
-- Under standing developer-artifact authority, removed that exact LCL script using
-  the validated orphan-removal service; confirmed absence and relay OFF.
-- Reran `device-rule-plug-smoke.ts` through the new management service: registration
-  with zero rules, actual relay ON, actual relay OFF, generated orphan inventory,
-  blocked raw ON while orphan existed, exact orphan removal and preserved plug
-  registry all passed.
-- Final `Switch.GetStatus`: **OFF**. No scripts or schedules remain.
-- ADB connected to Samsung SM-S906B. Installed app version 2.0.10 starts; Bluetooth
-  SCAN and CONNECT permissions are granted. Inspected a native screenshot: existing
-  Climate/Time navigation remains and the old installed entry reports attention
-  after its disposable runtime script was removed.
-- No APK update or app-data reset performed. This is hardware service validation
-  and native baseline inspection, not acceptance of the unfinished product cutover.
-
-### Routing checkpoint — four top-level sections
-
-- Wired the existing `Rules / Plugs / Thermometers / Settings` bottom navigation into `AppRoutes`.
-- Made standalone Plug and Thermometer management screens reachable from normal product navigation.
-- Settings returns through the same shell; Android back semantics remain fail-simple for top-level routes.
-- Added route coverage for all four active navigation states.
-- Focused route/navigation tests, UX/repository gates and workspace typecheck passed before commit.
-- This checkpoint intentionally does not claim the rule persistence/runtime cutover; `InstalledAutomation` remains until later phases.
-
-Exact next step: convert the Rules product path and rule creation to the dedicated rule/device registries, then remove the remaining `InstalledAutomation` and device-draft coupling in runtime setup.
-
-### Runtime mode correction — continuation from `83f889a4`
-
-- Recorded the user's Local Agent-only execution rule in `AGENTS.md`: no Codex CLI
-  and no nested AI agents. Work uses concrete local checkout commands/scripts.
-- Extracted one shared `R.m` protocol. Setup controls now read and write live mode;
-  stopped processes are reported as stopped, not MANUAL. Direct setup relay
-  commands require live MANUAL.
-- BLE discovery keeps the climate process suspended in MANUAL, verifies OFF, then
-  restores the prior mode after exact discovery cleanup and scanner restart.
-  This avoids a MANUAL -> boot AUTO -> MANUAL interval entirely.
-- Added eight regressions for mode preservation, stopped runtime, unknown mode,
-  duplicate scripts, renamed discovery id and failed AUTO restoration. Updated
-  current UI mocks/assertions to the real `Script.Eval` contract.
-- Removed browser-only timer access from the shared network reader so the same
-  implementation can run in the local hardware smoke.
-- Added `scripts/hardware/runtime-mode-smoke.ts` (explicit endpoint/device id).
-  Both MANUAL and AUTO discovery paths passed on the real development plug.
-  Final relay **OFF**, climate/discovery test scripts removed.
-- Localized updated mode/discovery help in all seven supported locales.
-
-The Rules registry/product cutover remains the next major implementation step;
-this runtime correction does not claim removal of `InstalledAutomation` or the
-hardware draft device collections. Full checkpoint checks are recorded below.
+1. Run `pnpm check:full` on the documentation-refreshed final candidate.
+2. Build/sync/install the debug APK on the connected Samsung SM-S906B using the repository Android workflow.
+3. Cold-start and visually inspect Rules, Plugs, Thermometers, Settings, climate/time editors and rule details on the physical phone; capture screenshots and fix any real overflow, safe-area, spacing, touch-target or navigation issues found.
+4. Run the final available Shelly hardware smoke with the configured local environment, if present. Any relay exercise must end with an explicit verified OFF state.
+5. Record the exact final SHA and acceptance evidence. Do not merge to `main` as part of this branch task.
