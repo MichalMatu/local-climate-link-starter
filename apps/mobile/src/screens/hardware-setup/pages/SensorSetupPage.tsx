@@ -569,7 +569,7 @@ export const SensorSetupPage = ({
                       temperatureSample?.temperatureC,
                       '°C',
                       1,
-                      '— °C'
+                      t('common.missingData')
                     )}
                   </strong>
                 </div>
@@ -590,7 +590,12 @@ export const SensorSetupPage = ({
                         : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
                     }
                   >
-                    {formatNullableMetric(humiditySample?.humidityPct, '%', 1, '— %')}
+                    {formatNullableMetric(
+                      humiditySample?.humidityPct,
+                      '%',
+                      1,
+                      t('common.missingData')
+                    )}
                   </strong>
                 </div>
               </div>

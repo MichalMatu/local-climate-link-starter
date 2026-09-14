@@ -1146,6 +1146,7 @@ select {
 .sensor-data-metric-card--empty .sensor-data-metric-card__value,
 .sensor-data-metric-card__value--empty {
   color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-lg);
   opacity: var(--lcl-opacity-muted);
 }
 
