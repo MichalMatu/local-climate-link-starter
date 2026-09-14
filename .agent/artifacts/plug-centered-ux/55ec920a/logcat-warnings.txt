@@ -1,0 +1,27 @@
+--------- beginning of main
+E/ashmem  (26519): Pinning is deprecated since Android Q. Please use trim or other methods.
+W/chromium(26519): [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+W/Capacitor(26519): Unable to read file at path public/plugins
+W/libEGL  (26519): Couldn't find an OpenGL ES implementation from 
+W/cr_media(26519): BLUETOOTH_CONNECT permission is missing.
+W/cr_media(26519): getBluetoothAdapter() requires BLUETOOTH permission
+W/cr_media(26519): registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+W/libEGL  (26519): ANGLE Warn:RendererVk.cpp:5464 (appBasedFeatureOverrides): BLOB CACHE IS DISABLED DUE TO LACK OF MULTIFILE BLOBCACHE SUPPORT
+W/AudioCapabilities(26519): Unsupported mediaType audio/x-ape
+W/AudioCapabilities(26519): Unsupported mediaType audio/x-ima
+W/AudioCapabilities(26519): Unsupported mediaType audio/mpeg-L1
+W/AudioCapabilities(26519): Unsupported mediaType audio/mpeg-L2
+W/VideoCapabilities(26519): Unsupported mime video/wvc1
+W/VideoCapabilities(26519): Unsupported mime video/x-ms-wmv
+W/VideoCapabilities(26519): Unrecognized profile/level 32768/256 for video/mp4v-es
+W/AudioCapabilities(26519): Unsupported mime audio/x-ape
+W/AudioCapabilities(26519): Unsupported mime audio/x-ima
+W/AudioCapabilities(26519): Unsupported mime audio/mpeg-L1
+W/AudioCapabilities(26519): Unsupported mime audio/mpeg-L2
+W/VideoCapabilities(26519): Unsupported mime video/wvc1
+W/VideoCapabilities(26519): Unsupported mime video/wvc1
+W/VideoCapabilities(26519): Unsupported mime video/x-ms-wmv
+W/VideoCapabilities(26519): Unrecognized profile/level 32768/256 for video/mp4v-es
+E/chromium(26519): [ERROR:components/page_load_metrics/browser/page_load_metrics_update_dispatcher.cc:187] Invalid first_paint (unset) for first_contentful_paint 0.395 s
+W/InteractionJankMonitor(26519): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=link.localclimate.app
+E/chromium(26519): [ERROR:components/page_load_metrics/browser/page_load_metrics_update_dispatcher.cc:187] Invalid first_paint (unset) for first_contentful_paint 0.395 s
