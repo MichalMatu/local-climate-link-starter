@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260914-quickfix-plug-add-scan-v1",
+  "task_digest": "13126495fbdba054c0967ecbd8f147ef5b65d4c194735a49915b850d8debde7a",
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-14T05:31:40.528861+00:00",
+  "attempt_id": "cdfa952fc79b0c86c3111dd7",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 33107,
+  "updated_at": "2026-09-14T05:31:40.529077+00:00",
+  "pid": 33107
+}
