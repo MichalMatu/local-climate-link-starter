@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { usePlugStore, useRuleStore } from '../../registry/devicesAndRules.js';
+import type { AutomationRule } from '../../rules/model.js';
+import type { SavedPlug } from './model.js';
 import { createPlugManagement } from './management.js';
 
 const management = createPlugManagement({
@@ -10,6 +12,18 @@ const management = createPlugManagement({
 
 export const plugRuntimeQueryKey = (id: string, baseUrl: string) =>
   ['plug-runtime', id, baseUrl] as const;
+
+export const usePlugRuntimeQuery = (
+  plug: SavedPlug | null,
+  rules: readonly AutomationRule[],
+  enabled = true
+) =>
+  useQuery({
+    queryKey: [...plugRuntimeQueryKey(plug?.id ?? '', plug?.baseUrl ?? ''), rules],
+    enabled: enabled && plug !== null,
+    retry: false,
+    queryFn: () => management.refresh(plug!.id)
+  });
 
 export const usePlugManagementFlow = () => {
   const queryClient = useQueryClient();
@@ -31,14 +45,7 @@ export const usePlugManagementFlow = () => {
       await invalidate();
     }
   });
-  const runtime = useQuery({
-    queryKey: [
-      ...plugRuntimeQueryKey(selectedPlug?.id ?? '', selectedPlug?.baseUrl ?? ''),
-      rules
-    ],
-    enabled: selectedPlug !== null && !loadError && !rulesLoadError,
-    queryFn: () => management.refresh(selectedPlug!.id)
-  });
+  const runtime = usePlugRuntimeQuery(selectedPlug, rules, !loadError && !rulesLoadError);
   const relay = useMutation({
     mutationFn: ({ id, on }: { id: string; on: boolean }) => management.setRelay(id, on),
     onSettled: invalidate

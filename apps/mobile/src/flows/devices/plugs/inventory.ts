@@ -1,7 +1,9 @@
 import {
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RPC_METHODS,
-  type ShellyInventoryScript
+  type ShellyClockStatus,
+  type ShellyInventoryScript,
+  type ShellyPlugTelemetry
 } from '@lcl/shelly-client';
 import type { AutomationRule } from '../../rules/model.js';
 import {
@@ -19,6 +21,8 @@ export type PlugRuntimeSnapshot = {
   inventory: Extract<RelayInventory, { status: 'verified' }>;
   ownership: RelayOwnership;
   managedScripts: ManagedPlugScript[];
+  telemetry: ShellyPlugTelemetry;
+  clock: ShellyClockStatus;
 };
 
 export const verifyPlugIdentity = async (
@@ -42,6 +46,8 @@ export const readPlugRuntime = async (
 ): Promise<PlugRuntimeResult<PlugRuntimeSnapshot>> => {
   const identity = await verifyPlugIdentity(plug, clients);
   if (!identity.ok) return identity;
+  const status = fromShellyResult(await clients.device.getStatus());
+  if (!status.ok) return status;
   const methods = fromShellyResult(await clients.inventory.listMethods());
   if (!methods.ok) return methods;
   const scripts = methods.value.methods.includes(RPC_METHODS.ScriptList)
@@ -67,6 +73,8 @@ export const readPlugRuntime = async (
       relayOn: relay.value.output,
       inventory,
       ownership: resolveRelayOwnership({ plug, relayId: 0, rules, inventory }),
+      telemetry: status.value.telemetry,
+      clock: status.value.clock,
       managedScripts: scripts.value.scripts
         .filter((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME)
         .map((script) => ({

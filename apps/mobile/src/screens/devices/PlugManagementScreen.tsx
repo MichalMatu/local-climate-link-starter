@@ -1,5 +1,5 @@
 import { Modal, ToastViewport } from '@lcl/ui';
-import { IconPlus, IconSettings, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { usePlugManagementFlow } from '../../flows/devices/plugs/usePlugManagementFlow.js';
@@ -7,6 +7,7 @@ import { useShellySetupScanFlow } from '../../flows/hardware-setup/useShellySetu
 import { normalizeShellyUrl } from '../../flows/hardware-setup/validation.js';
 import { useToastQueue } from '../hardware-setup/useToastQueue.js';
 import type { PlugManagementResult } from '../../flows/devices/plugs/management.js';
+import { SavedPlugCard } from './SavedPlugCard.js';
 
 export const PlugManagementScreen = ({
   onOpenRule
@@ -72,25 +73,15 @@ export const PlugManagementScreen = ({
         <div className="saved-list">
           {!flow.plugs.length && <p>{t('hardware.shelly.empty')}</p>}
           {flow.plugs.map((plug) => (
-            <article className="saved-list__item" key={plug.id}>
-              <div className="saved-list__row">
-                <div className="saved-list__field">
-                  <h2>{plug.name}</h2>
-                  <span>{plug.baseUrl}</span>
-                </div>
-                <button
-                  className="secondary-action"
-                  type="button"
-                  aria-label={`${t('hardware.shelly.settings')}: ${plug.name}`}
-                  onClick={() => {
-                    flow.selectPlug(plug.id);
-                    setDialog('detail');
-                  }}
-                >
-                  <IconSettings />
-                </button>
-              </div>
-            </article>
+            <SavedPlugCard
+              key={plug.id}
+              plug={plug}
+              rules={flow.rules}
+              onOpen={() => {
+                flow.selectPlug(plug.id);
+                setDialog('detail');
+              }}
+            />
           ))}
         </div>
       </section>

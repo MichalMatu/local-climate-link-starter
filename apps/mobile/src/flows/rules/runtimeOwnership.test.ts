@@ -12,7 +12,9 @@ const verified = {
     schedules: []
   },
   ownership: { status: 'blocked' as const, conflicts: [], attention: [] },
-  managedScripts: []
+  managedScripts: [],
+  telemetry: {},
+  clock: { timeSynced: false }
 };
 
 describe('rule runtime ownership guard', () => {
