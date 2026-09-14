@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260914-final-hardware-smoke-v1",
   "task_digest": "87043b42d9a0a2ab5115b81711d0fe0c93394ea74ce4a2735da22dd70d0e19b6",
-  "idle_timeout": 900,
-  "task_timeout": 10800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-14T05:19:04.085869+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-14T05:19:07.304273+00:00",
   "attempt_id": "9618fd0e758c163a60a991d8",
   "daemon_version": "4.18.20",
   "daemon_pid": 20090,
-  "updated_at": "2026-09-14T05:19:04.085932+00:00",
+  "updated_at": "2026-09-14T05:19:07.533386+00:00",
   "pid": 20090
 }
