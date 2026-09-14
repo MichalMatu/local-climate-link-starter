@@ -2658,3 +2658,87 @@ select {
   outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
   outline-offset: calc(-1 * var(--lcl-border-width-md));
 }
+
+/* Compact rule schedule editor */
+.rule-schedule-fields {
+  gap: var(--lcl-spacing-md);
+}
+
+.rule-weekdays {
+  display: flex;
+  gap: var(--lcl-spacing-xs);
+  width: 100%;
+}
+
+.rule-weekday {
+  appearance: none;
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text-muted);
+  cursor: pointer;
+  flex: 1 1 0;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  min-height: var(--lcl-size-compact-control-min-height);
+  min-width: 0;
+  padding: 0;
+}
+
+.rule-weekday[aria-pressed='true'] {
+  background: var(--lcl-color-accent);
+  border-color: var(--lcl-color-accent);
+  color: var(--lcl-color-accent-contrast);
+}
+
+.rule-weekday:focus-visible,
+.rule-time-button:focus-visible {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: var(--lcl-border-width-sm);
+}
+
+.rule-time-row {
+  display: flex;
+  gap: var(--lcl-spacing-md);
+  width: 100%;
+}
+
+.rule-time-row > .field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.rule-time-button {
+  appearance: none;
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  font-size: var(--lcl-font-size-xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--lcl-font-weight-bold);
+  min-height: var(--lcl-size-control-min-height);
+  padding: 0 var(--lcl-spacing-md);
+  text-align: center;
+  width: 100%;
+}
+
+.rule-time-button[aria-expanded='true'] {
+  border-color: var(--lcl-color-accent);
+}
+
+.rule-inline-time-picker {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-lg);
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  padding: var(--lcl-spacing-md);
+}
+
+.rule-inline-time-picker__actions {
+  display: flex;
+  gap: var(--lcl-spacing-sm);
+  justify-content: flex-end;
+}
