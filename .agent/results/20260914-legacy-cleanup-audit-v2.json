@@ -1,0 +1,60 @@
+{
+  "id": "20260914-legacy-cleanup-audit-v2",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "started_at": "2026-09-14T00:47:33.841798+00:00",
+  "command_timeout": 900,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260914-legacy-cleanup-audit-v2.sh > /tmp/lcl-legacy-cleanup-audit-v2.sh && bash /tmp/lcl-legacy-cleanup-audit-v2.sh",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n * branch              agent-control -> FETCH_HEAD\n   e4a1543c..0d5bfed1  agent-control -> origin/agent-control\nFrom https://github.com/MichalMatu/local-climate-link-starter\n * branch              work/device-rule-decoupling-20260913 -> FETCH_HEAD\nSwitched to branch 'work/device-rule-decoupling-20260913'\nYour branch is up to date with 'origin/work/device-rule-decoupling-20260913'.\nHEAD is now at 1cd94a6b Show rule usage for thermometers\n=== LEGACY FILES ===\napps/mobile/src/flows/installations/deviceLed.ts\napps/mobile/src/flows/installations/healthRecovery.test.ts\napps/mobile/src/flows/installations/healthRecovery.ts\napps/mobile/src/flows/installations/model.test.ts\napps/mobile/src/flows/installations/model.ts\napps/mobile/src/flows/installations/presentation.ts\napps/mobile/src/flows/installations/relaySafety.ts\napps/mobile/src/flows/installations/repository.test.ts\napps/mobile/src/flows/installations/repository.ts\napps/mobile/src/flows/installations/runtimeControl.test.ts\napps/mobile/src/flows/installations/runtimeControl.ts\napps/mobile/src/flows/installations/runtimeDiagnostics.test.ts\napps/mobile/src/flows/installations/runtimeDiagnostics.ts\napps/mobile/src/flows/installations/runtimeModeTransport.test.ts\napps/mobile/src/flows/installations/runtimeModeTransport.ts\napps/mobile/src/flows/installations/runtimeStatus.test.ts\napps/mobile/src/flows/installations/runtimeStatus.ts\napps/mobile/src/flows/installations/runtimeUpgrade.ts\napps/mobile/src/flows/installations/scriptPreview.ts\napps/mobile/src/flows/installations/store.test.ts\napps/mobile/src/flows/installations/store.ts\napps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts\napps/mobile/src/flows/time-automation/config.test.ts\napps/mobile/src/flows/time-automation/config.ts\napps/mobile/src/flows/time-automation/runtime.test.ts\napps/mobile/src/flows/time-automation/runtime.ts\napps/mobile/src/flows/time-automation/scheduleJobs.ts\napps/mobile/src/flows/time-automation/scheduleOwnership.ts\napps/mobile/src/flows/time-automation/useTimeAutomationRuntime.ts\napps/mobile/src/flows/time-automation/useTimeAutomationSetupFlow.ts\napps/mobile/src/screens/InstallationDetailScreen.tsx\napps/mobile/src/screens/InstallationDiagnosticsModal.tsx\napps/mobile/src/screens/InstallationRuntimeControls.tsx\napps/mobile/src/screens/ShellyLedSettingsCard.tsx\napps/mobile/src/screens/TimeAutomationCard.tsx\napps/mobile/src/screens/TimeInstallationDetail.tsx\napps/mobile/src/flows/hardware-setup/bleDiscoveryMode.test.ts\napps/mobile/src/flows/hardware-setup/phoneBleScan.ts\napps/mobile/src/flows/hardware-setup/resourceDiagnostics.test.ts\napps/mobile/src/flows/hardware-setup/resourceDiagnostics.ts\napps/mobile/src/flows/hardware-setup/ruleAdvancedSettings.ts\napps/mobile/src/flows/hardware-setup/ruleConfigDerivation.test.ts\napps/mobile/src/flows/hardware-setup/ruleConfigDerivation.ts\napps/mobile/src/flows/hardware-setup/schemas.ts\napps/mobile/src/flows/hardware-setup/sensorReadingsStore.test.ts\napps/mobile/src/flows/hardware-setup/sensorReadingsStore.ts\napps/mobile/src/flows/hardware-setup/setupDraftStore.ts\napps/mobile/src/flows/hardware-setup/shellyRequests.ts\napps/mobile/src/flows/hardware-setup/useClimateAutomationInstallFlow.test.ts\napps/mobile/src/flows/hardware-setup/useClimateAutomationInstallFlow.ts\napps/mobile/src/flows/hardware-setup/useHardwareDiagnosticsFlow.test.ts\napps/mobile/src/flows/hardware-setup/useHardwareDiagnosticsFlow.ts\napps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts\napps/mobile/src/flows/hardware-setup/usePhoneSensorFlow.ts\napps/mobile/src/flows/hardware-setup/useShellyBleDiscoveryFlow.ts\napps/mobile/src/flows/hardware-setup/useShellyControlFlow.ts\napps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.test.ts\napps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.ts\napps/mobile/src/flows/hardware-setup/validation.ts\napps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx\napps/mobile/src/screens/hardware-setup/helpers.ts\napps/mobile/src/screens/hardware-setup/pageContracts.ts\napps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/RuleAdvancedSettingsModal.tsx\napps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx\napps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx\napps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts\napps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts\napps/mobile/src/screens/hardware-setup/pages/useShellySetupFeedback.ts\napps/mobile/src/screens/hardware-setup/useToastQueue.ts\n=== PRODUCT SOURCE REFERENCES ===\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 24: rg: command not found\n=== ALL REFERENCES ===\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 29: rg: command not found\n=== IMPORTERS OF LEGACY SCREEN/HOOK FILES ===\n--- InstallationDetailScreen\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- InstallationRuntimeControls\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- TimeInstallationDetail\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- TimeAutomationCard\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- ShellyLedSettingsCard\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- HardwareSetupScreen\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- useHardwareSetupFlow\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- useClimateAutomationInstallFlow\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n--- useTimeAutomationSetupFlow\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 45: rg: command not found\n=== INSTALLATIONS MODULE IMPORTERS ===\n--- deviceLed\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- healthRecovery.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- healthRecovery\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- model.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- model\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- presentation\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- relaySafety\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- repository.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- repository\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeControl.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeControl\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeDiagnostics.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeDiagnostics\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeModeTransport.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeModeTransport\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeStatus.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeStatus\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- runtimeUpgrade\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- scriptPreview\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- store.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- store\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n--- useInstalledAutomationRuntime\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 53: rg: command not found\n=== TIME AUTOMATION MODULE IMPORTERS ===\n--- config.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- config\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- runtime.test\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- runtime\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- scheduleJobs\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- scheduleOwnership\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- useTimeAutomationRuntime\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n--- useTimeAutomationSetupFlow\n/tmp/lcl-legacy-cleanup-audit-v2.sh: line 61: rg: command not found\n=== PACKAGE GATES / TEST NAMES ===\napps/mobile/src/__tests__/app-routes.test.tsx\napps/mobile/src/__tests__/appSettings.test.tsx\napps/mobile/src/__tests__/automation-dashboard.test.tsx\napps/mobile/src/__tests__/automation-detail.test.tsx\napps/mobile/src/__tests__/climate-delete.test.tsx\napps/mobile/src/__tests__/devConsole.test.tsx\napps/mobile/src/__tests__/hardware-setup.test.tsx\napps/mobile/src/__tests__/i18n.test.ts\napps/mobile/src/__tests__/modal.test.tsx\napps/mobile/src/__tests__/navigation-settings-regression.test.tsx\napps/mobile/src/__tests__/rule-detail.test.tsx\napps/mobile/src/__tests__/rule-editor.test.tsx\napps/mobile/src/__tests__/script-preview.test.ts\napps/mobile/src/__tests__/shelly-led-settings.test.tsx\napps/mobile/src/__tests__/shelly-script-code.test.ts\n",
+      "elapsed_seconds": 2.103,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 8.11,
+      "output_policy": "stream",
+      "captured_output_chars": 9437,
+      "output_truncated": false,
+      "current_rss_mb": 8.11,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 2.103
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.122
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.078
+  },
+  "finished_at": "2026-09-14T00:47:37.927148+00:00",
+  "task_digest": "156104743089941c7bf986ff1779df45f3e4ebe258cb6e5a229335a1be6028a5",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "63afe0f92bfe6d051dd9016a",
+  "daemon_version": "4.18.20"
+}
