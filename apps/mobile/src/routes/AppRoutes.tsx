@@ -35,17 +35,18 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
       return { type: 'rule', ruleId: route.ruleId };
     case 'rule':
     case 'intent':
-    case 'plugs':
     case 'sensors':
-      return { type: 'dashboard' };
+      return { type: 'plugs' };
     case 'dashboard':
+      return { type: 'plugs' };
+    case 'plugs':
       return null;
   }
 };
 
 export const AppRoutes = () => {
   const { t } = useTranslation();
-  const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
+  const [route, setRoute] = useState<AppRoute>({ type: 'plugs' });
   const routeRef = useRef(route);
   const navigate = useCallback((nextRoute: AppRoute) => {
     routeRef.current = nextRoute;
@@ -101,7 +102,7 @@ export const AppRoutes = () => {
       case 'intent':
         return (
           <SetupIntentScreen
-            onCancel={() => navigate({ type: 'dashboard' })}
+            onCancel={() => navigate({ type: 'plugs' })}
             onSelect={(intent) => navigate({ type: 'setup', intent })}
           />
         );
@@ -116,7 +117,7 @@ export const AppRoutes = () => {
         return (
           <RuleDetailScreen
             ruleId={route.ruleId}
-            onBack={() => navigate({ type: 'dashboard' })}
+            onBack={() => navigate({ type: 'plugs' })}
             onEdit={() => navigate({ type: 'rule-edit', ruleId: route.ruleId })}
           />
         );
