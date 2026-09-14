@@ -462,7 +462,11 @@ export const de = {
       settingsAria: 'Thermometereinstellungen für {name}',
       settingsTitle: 'Thermometereinstellungen',
       noBleFound: 'Keine BLE-Thermometer gefunden.',
-      typeLabel: 'Typ'
+      typeLabel: 'Typ',
+      usedBy: 'Verwendet von',
+      deleteBlockedByRule:
+        'Dieses Thermometer wird von einer Regel verwendet. Öffne oder lösche die Regel, bevor du das Thermometer entfernst.',
+      deleteFailedTitle: 'Thermometer konnte nicht entfernt werden.'
     },
     rule: {
       advanced: 'Erweitert',

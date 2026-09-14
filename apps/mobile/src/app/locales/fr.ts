@@ -466,7 +466,11 @@ export const fr = {
       settingsAria: 'Réglages du thermomètre {name}',
       settingsTitle: 'Réglages du thermomètre',
       noBleFound: 'Aucun thermomètre BLE trouvé.',
-      typeLabel: 'Type'
+      typeLabel: 'Type',
+      usedBy: 'Utilisé par',
+      deleteBlockedByRule:
+        'Ce thermomètre est utilisé par une règle. Ouvrez ou supprimez la règle avant de retirer le thermomètre.',
+      deleteFailedTitle: 'Impossible de supprimer le thermomètre.'
     },
     rule: {
       advanced: 'Avancé',

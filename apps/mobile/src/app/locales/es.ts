@@ -459,7 +459,11 @@ export const es = {
       settingsAria: 'Ajustes del termómetro {name}',
       settingsTitle: 'Ajustes del termómetro',
       noBleFound: 'No se encontraron termómetros BLE.',
-      typeLabel: 'Tipo'
+      typeLabel: 'Tipo',
+      usedBy: 'Usado por',
+      deleteBlockedByRule:
+        'Este termómetro está siendo usado por una regla. Abre o elimina la regla antes de quitar el termómetro.',
+      deleteFailedTitle: 'No se pudo eliminar el termómetro.'
     },
     rule: {
       advanced: 'Avanzado',

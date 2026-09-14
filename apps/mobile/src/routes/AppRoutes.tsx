@@ -93,7 +93,11 @@ export const AppRoutes = () => {
           />
         );
       case 'sensors':
-        return <SensorManagementScreen />;
+        return (
+          <SensorManagementScreen
+            onOpenRule={(ruleId) => navigate({ type: 'rule', ruleId })}
+          />
+        );
       case 'intent':
         return (
           <SetupIntentScreen

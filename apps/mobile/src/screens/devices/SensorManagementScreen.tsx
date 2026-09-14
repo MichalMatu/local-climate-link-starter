@@ -1,10 +1,22 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { useSensorManagementFlow } from '../../flows/devices/sensors/useSensorManagementFlow.js';
+import { buildSensorRuleUsageById } from '../../flows/devices/sensors/usage.js';
+import { usePlugStore, useRuleStore } from '../../flows/registry/devicesAndRules.js';
 import { SensorSetupPage } from '../hardware-setup/pages/SensorSetupPage.js';
-export const SensorManagementScreen = () => {
+export const SensorManagementScreen = ({
+  onOpenRule
+}: {
+  onOpenRule(id: string): void;
+}) => {
   const { t } = useTranslation();
   const flow = useSensorManagementFlow();
+  const plugs = usePlugStore((state) => state.items);
+  const rules = useRuleStore((state) => state.items);
+  const usageBySensorId = useMemo(
+    () => buildSensorRuleUsageById(flow.sensorDevices, rules, plugs),
+    [flow.sensorDevices, plugs, rules]
+  );
   const cleanup = useRef(() => {});
   cleanup.current = () => {
     flow.stopPhoneBleScan();
@@ -23,7 +35,11 @@ export const SensorManagementScreen = () => {
       <header className="demo-header app-page-header">
         <h1>{t('navigation.sensors')}</h1>
       </header>
-      <SensorSetupPage flow={flow} />
+      <SensorSetupPage
+        flow={flow}
+        usageBySensorId={usageBySensorId}
+        onOpenRule={onOpenRule}
+      />
     </main>
   );
 };

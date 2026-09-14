@@ -457,7 +457,11 @@ export const ptBr = {
       settingsAria: 'Configurações do termômetro {name}',
       settingsTitle: 'Configurações do termômetro',
       noBleFound: 'Nenhum termômetro BLE encontrado.',
-      typeLabel: 'Tipo'
+      typeLabel: 'Tipo',
+      usedBy: 'Usado por',
+      deleteBlockedByRule:
+        'Este termômetro é usado por uma regra. Abra ou exclua a regra antes de remover o termômetro.',
+      deleteFailedTitle: 'Não foi possível remover o termômetro.'
     },
     rule: {
       advanced: 'Avançado',

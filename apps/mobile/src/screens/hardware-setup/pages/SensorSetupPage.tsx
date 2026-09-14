@@ -5,6 +5,8 @@ import { IconClock, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
+import type { SensorRuleUsageById } from '../../../flows/devices/sensors/usage.js';
+import { SensorRuleUsageList } from '../../devices/SensorRuleUsageList.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { HardwarePageProps } from '../helpers.js';
 import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';
@@ -177,7 +179,16 @@ type SensorDialogState =
   | { kind: 'ble' }
   | { kind: 'remove'; device: SensorDraftDevice };
 
-export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) => {
+type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
+  usageBySensorId?: SensorRuleUsageById;
+  onOpenRule?(ruleId: string): void;
+};
+
+export const SensorSetupPage = ({
+  flow,
+  usageBySensorId = {},
+  onOpenRule
+}: SensorSetupPageProps) => {
   const { locale, t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
   const [editingSensorId, setEditingSensorId] = useState<string | null>(null);
@@ -186,6 +197,9 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
   const isAddSensorModalOpen = dialog.kind === 'add';
   const isPhoneBleScanModalOpen = dialog.kind === 'ble';
   const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
+  const pendingRemovalUsages = sensorPendingRemoval
+    ? (usageBySensorId[sensorPendingRemoval.id] ?? [])
+    : [];
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
   const isSensorGattPending = flow.setPvvxTimeMutation.isPending;
   const shouldShowPhoneBleEmpty =
@@ -253,7 +267,15 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
       return;
     }
 
-    flow.removeSensorDevice(sensorPendingRemoval.id);
+    const removed = flow.removeSensorDevice(sensorPendingRemoval.id);
+    if (removed && !removed.ok) {
+      const detail =
+        removed.error.kind === 'device-referenced'
+          ? t('hardware.sensor.deleteBlockedByRule')
+          : t('common.operationFailed');
+      pushToast('warning', t('hardware.sensor.deleteFailedTitle'), detail);
+      return;
+    }
     setDialog({ kind: 'none' });
     pushToast('ok', t('hardware.sensor.removed'));
   };
@@ -427,6 +449,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
             className="secondary-action secondary-action--danger"
             type="button"
             title={t('hardware.sensor.deleteTitle')}
+            disabled={pendingRemovalUsages.length > 0}
             onClick={confirmRemoveSensor}
           >
             {t('common.delete')}
@@ -434,7 +457,11 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
         }
         onClose={() => setDialog({ kind: 'none' })}
       >
-        <p>{t('hardware.sensor.deleteDescription')}</p>
+        <p>
+          {pendingRemovalUsages.length > 0
+            ? t('hardware.sensor.deleteBlockedByRule')
+            : t('hardware.sensor.deleteDescription')}
+        </p>
       </Modal>
       <ToastViewport
         dismissLabel={t('toast.dismiss')}
@@ -460,6 +487,7 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
           const batterySample = latestBatterySample(samples);
           const rssiSample = latestNumericSample(samples, 'rssi');
           const isEditing = editingSensorId === device.id;
+          const usages = usageBySensorId[device.id] ?? [];
 
           return (
             <article key={device.id} className="saved-list__item sensor-saved-card">
@@ -595,6 +623,11 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
                   <dd>{device.runtimeAddress}</dd>
                 </div>
               </dl>
+              <SensorRuleUsageList
+                label={t('hardware.sensor.usedBy')}
+                usages={usages}
+                {...(onOpenRule ? { onOpenRule } : {})}
+              />
             </article>
           );
         })}

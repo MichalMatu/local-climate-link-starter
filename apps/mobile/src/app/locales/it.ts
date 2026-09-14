@@ -462,7 +462,11 @@ export const it = {
       settingsAria: 'Impostazioni termometro {name}',
       settingsTitle: 'Impostazioni termometro',
       noBleFound: 'Nessun termometro BLE trovato.',
-      typeLabel: 'Tipo'
+      typeLabel: 'Tipo',
+      usedBy: 'Usato da',
+      deleteBlockedByRule:
+        'Questo termometro è usato da una regola. Apri o elimina la regola prima di rimuovere il termometro.',
+      deleteFailedTitle: 'Impossibile rimuovere il termometro.'
     },
     rule: {
       advanced: 'Avanzate',
