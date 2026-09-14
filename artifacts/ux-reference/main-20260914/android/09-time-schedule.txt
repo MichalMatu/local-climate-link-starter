@@ -1,0 +1,24 @@
+Cancel
+Time control
+Shelly
+Schedule
+
+Time automation
+
+Set ON and OFF times
+
+Shelly runs the schedule locally without the phone or cloud.
+
+Device
+Shelly Plug S Gen3
+Turn ON at08:00
+Turn OFF at20:00
+
+Times use the Shelly local clock. Installation requires the device clock to be synchronized.
+
+This schedule becomes the only owner of the relay. It cannot be combined with climate automation on the same output.
+
+Save schedule to Shelly
+Climate
+Time
+Settings

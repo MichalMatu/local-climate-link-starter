@@ -1,0 +1,85 @@
+{
+  "sourceBranch": "main",
+  "sourceSha": "56a90240029ce19690e96ad02057cc4150ba537f",
+  "device": "Samsung SM-S906B",
+  "serial": "RFCT70L7E8J",
+  "captureDate": "2026-09-14",
+  "screenshots": [
+    {
+      "name": "01-dashboard-climate",
+      "description": "Climate dashboard with saved automation."
+    },
+    {
+      "name": "02-climate-detail",
+      "description": "Saved climate automation detail."
+    },
+    {
+      "name": "03-climate-detail-expanded",
+      "description": "Climate detail with progressive sections expanded."
+    },
+    {
+      "name": "04-settings",
+      "description": "App settings default state."
+    },
+    {
+      "name": "05-settings-expanded",
+      "description": "App settings with progressive diagnostics expanded."
+    },
+    {
+      "name": "06-dashboard-time",
+      "description": "Time dashboard / empty time category."
+    },
+    {
+      "name": "07-time-setup-shelly",
+      "description": "Time automation Shelly selection step."
+    },
+    {
+      "name": "08-time-add-plug",
+      "description": "Add Shelly modal in time setup."
+    },
+    {
+      "name": "09-time-schedule",
+      "description": "Time schedule editor."
+    },
+    {
+      "name": "10-time-wheel-picker",
+      "description": "Custom HH/MM wheel picker with fade and centered selection."
+    },
+    {
+      "name": "11-setup-intent",
+      "description": "Climate automation goal chooser."
+    },
+    {
+      "name": "12-climate-setup-shelly",
+      "description": "Climate setup Shelly step."
+    },
+    {
+      "name": "13-climate-add-plug",
+      "description": "Add Shelly modal with LAN scan disclosure."
+    },
+    {
+      "name": "14-climate-setup-sensors",
+      "description": "Climate setup saved thermometers."
+    },
+    {
+      "name": "15-add-thermometer",
+      "description": "Add BLE thermometer modal."
+    },
+    {
+      "name": "16-climate-setup-rule",
+      "description": "Climate rule editor default state."
+    },
+    {
+      "name": "17-climate-rule-expanded",
+      "description": "Rule editor with Advanced and Developer tools disclosed."
+    },
+    {
+      "name": "18-rule-advanced-modal",
+      "description": "Advanced safety/runtime rule settings modal."
+    },
+    {
+      "name": "20-developer-diagnostics",
+      "description": "Developer diagnostics screen reached from Rule."
+    }
+  ]
+}

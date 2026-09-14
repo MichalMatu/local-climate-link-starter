@@ -1,0 +1,25 @@
+Change goal
+Humidity control
+Shelly
+Sensors
+Rule
+Shelly plug
+Select Shelly plug.
+Shelly Plug S Gen3
+Thermometer
+Add and select a thermometer.
+Thermometer 76:20
+Thermometer 24:CD
+Rule mode
+Humidifying
+Dehumidifying
+Turn on below %
+Turn off above %
+VPD assist
+disabled
+Send
+Advanced
+Developer tools
+Climate
+Time
+Settings

@@ -1,0 +1,22 @@
+Cancel
+Time control
+Shelly
+Schedule
+Add plug
+Plug name
+Shelly IP address
+Scan network
+Add
+Close
+Shelly Plug S Gen3
+0.0 W
+243 V
+25.16 kWh
+09:48
+AUTO
+MANUAL
+ON
+OFF
+Climate
+Time
+Settings

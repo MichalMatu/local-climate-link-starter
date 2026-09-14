@@ -1,0 +1,35 @@
+Shelly Plug S Gen3
+
+Humidity control
+
+Climate now
+Temperature
+24.3°C
+Humidity
+74.0%
+VPD
+—
+Output
+OFF
+Active ON / OFF thresholds
+45% / 55%
+Automation
+Mode
+Humidifying
+ON / OFF thresholds
+45% / 55%
+Sensor
+Thermometer 76:20
+AUTO
+MANUAL
+ON
+OFF
+Diagnostics
+Delete automation
+Plug LED
+
+Reading LED settings…
+
+Climate
+Time
+Settings

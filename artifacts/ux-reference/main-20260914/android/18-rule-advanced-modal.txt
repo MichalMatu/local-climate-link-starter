@@ -1,0 +1,46 @@
+Change goal
+Humidity control
+Shelly
+Sensors
+Rule
+Shelly plug
+Select Shelly plug.
+Shelly Plug S Gen3
+Thermometer
+Add and select a thermometer.
+Thermometer 76:20
+Thermometer 24:CD
+Rule mode
+Humidifying
+Dehumidifying
+Turn on below %
+Turn off above %
+VPD assist
+disabled
+Send
+Advanced
+
+Safety limits and resilience to weak or missing sensor data. Defaults are suitable for most installations.
+
+Open advanced options
+Developer tools
+
+Script inspection, script operations and full Shelly diagnostics. Not required for normal setup.
+
+Shelly Script preview
+Load from Shelly
+Remove from Shelly
+Open technical diagnostics
+Advanced options
+Next ON after min
+Maximum run time h
+After Shelly restart
+OFF, then AUTO after first reading
+No reading for min
+Minimum RSSI dBm
+Defaults
+Apply
+Close
+Climate
+Time
+Settings

@@ -1,0 +1,20 @@
+Change goal
+Humidity control
+Shelly
+Sensors
+Rule
+Back to rule
+Developer diagnostics
+
+Raw script, BLE and Shelly state. Use only for diagnostics and service.
+
+Shelly plug
+Select Shelly plug.
+Shelly Plug S Gen3
+Refresh diagnostics
+
+Refresh requires the Local Climate Link script installed and running in AUTO.
+
+Climate
+Time
+Settings

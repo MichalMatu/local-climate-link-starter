@@ -1,0 +1,19 @@
+Your automations
+Shelly Plug S Gen3
+
+Humidity control
+
+Humidity
+74.0%
+45% / 55%
+Temperature
+24.3°C
+VPD
+—
+AUTO
+MANUAL
+ON
+OFF
+Climate
+Time
+Settings

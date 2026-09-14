@@ -1,0 +1,19 @@
+Settings
+Language
+System
+Polski
+English
+Deutsch
+Español
+Français
+Italiano
+Português
+Appearance
+System
+Light
+Dark
+Diagnostics
+0 captured
+Climate
+Time
+Settings

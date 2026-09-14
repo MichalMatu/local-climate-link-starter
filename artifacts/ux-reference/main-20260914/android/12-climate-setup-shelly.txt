@@ -1,0 +1,18 @@
+Change goal
+Humidity control
+Shelly
+Sensors
+Rule
+Shelly Plug S Gen3
+0.0 W
+243 V
+25.16 kWh
+09:48
+Scan BLE thermometers through this plug
+AUTO
+MANUAL
+ON
+OFF
+Climate
+Time
+Settings

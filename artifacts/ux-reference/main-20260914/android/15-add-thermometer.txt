@@ -1,0 +1,47 @@
+Change goal
+Humidity control
+Shelly
+Sensors
+Rule
+Add thermometer
+Scan BLE
+Thermometer type
+Xiaomi/PVVX BTHome v2
+TP357
+Thermometer name
+Thermometer MAC
+Add
+Close
+Thermometer 76:20
+Temperature
+24.2°C
+Humidity
+74.0%
+Type
+TP357
+Battery
+34%
+RSSI
+-72 dBm
+Last reading
+09:48 AM
+MAC
+F7:5F:8D:0F:76:20
+Thermometer 24:CD
+Temperature
+— °C
+Humidity
+— %
+Type
+BTHome v2
+Battery
+4.02 V
+RSSI
+-57 dBm
+Last reading
+09:48 AM
+MAC
+A4:C1:38:4F:24:CD
+Climate
+Time
+Settings

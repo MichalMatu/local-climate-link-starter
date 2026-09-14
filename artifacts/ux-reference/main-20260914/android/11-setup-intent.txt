@@ -1,0 +1,11 @@
+Cancel
+What do you want to do?
+Control temperature
+Heating or cooling based on a BLE thermometer.
+›
+Control humidity
+Humidifying or dehumidifying based on a BLE sensor.
+›
+Climate
+Time
+Settings
