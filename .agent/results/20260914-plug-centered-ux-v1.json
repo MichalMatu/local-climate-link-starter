@@ -1,0 +1,61 @@
+{
+  "id": "20260914-plug-centered-ux-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "started_at": "2026-09-14T12:05:50.763384+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; EXPECTED=c86c3778d9f5fa518600f0ec4e12bcd5aaa85bdc; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"; pnpm check:full; ADB=/opt/homebrew/bin/adb; SERIAL=RFCT70L7E8J; test -x \"$ADB\"; test \"$(\"$ADB\" -s \"$SERIAL\" get-state)\" = device; test \"$(\"$ADB\" -s \"$SERIAL\" shell getprop ro.product.model | tr -d '\\r')\" = SM-S906B; bash scripts/android/phone-alpha-install.sh; sleep 3; echo '--- UI DUMP ---'; \"$ADB\" -s \"$SERIAL\" shell uiautomator dump /sdcard/lcl-plug-centered.xml >/dev/null; \"$ADB\" -s \"$SERIAL\" exec-out cat /sdcard/lcl-plug-centered.xml; echo '--- APP WARNINGS ---'; PID=$(\"$ADB\" -s \"$SERIAL\" shell pidof link.localclimate.app | tr -d '\\r'); test -n \"$PID\"; \"$ADB\" -s \"$SERIAL\" logcat -d --pid=\"$PID\" -v brief '*:W' | tail -n 120 || true; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"",
+      "exit_code": 1,
+      "output": "\n> local-climate-link-starter@2.0.10 check:full /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> pnpm check && pnpm e2e:responsive\n\n\n> local-climate-link-starter@2.0.10 check /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build\n\n\n> local-climate-link-starter@2.0.10 format:check /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> prettier --check .\n\nChecking formatting...\n[warn] apps/mobile/src/flows/rules/useClimateRuleDiagnostics.ts\n[warn] apps/mobile/src/screens/devices/SavedPlugCard.tsx\n[warn] Code style issues found in 2 files. Run Prettier with --write to fix.\n ELIFECYCLE  Command failed with exit code 1.\n ELIFECYCLE  Command failed with exit code 1.\n ELIFECYCLE  Command failed with exit code 1.\n",
+      "elapsed_seconds": 4.314,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 639.91,
+      "output_policy": "stream",
+      "captured_output_chars": 909,
+      "output_truncated": false,
+      "current_rss_mb": 639.91,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 4.314
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.081
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.071
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-14T12:05:57.107846+00:00",
+  "task_digest": "d7a74b31b017455bbb707e72178484055966e8a9cbdbe112d15c5122944d082b",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "5e6033f8a18ee48c9fbde1f3",
+  "daemon_version": "4.18.20"
+}
