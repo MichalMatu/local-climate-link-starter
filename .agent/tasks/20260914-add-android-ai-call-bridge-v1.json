@@ -1,0 +1,17 @@
+{
+  "id": "20260914-add-android-ai-call-bridge-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": ["machine"],
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 900,
+  "memory_limit_mb": 1024,
+  "commands": [
+    "set -euo pipefail; cd \"$HOME/local-agent\"; test \"$(git rev-parse HEAD)\" = \"d2c23951456d1e1528e3c52e47bdd104294cf170\"; .venv/bin/python - <<'PY'\nimport json\nfrom pathlib import Path\nfrom local_agent.foundation.process import atomic_write_text\nfrom local_agent.repository.context import repository_from_dict, validate_repository_set\n\nhome = Path.home().resolve()\nregistry = home / 'Library' / 'Application Support' / 'local-agent' / 'repositories.json'\npayload = json.loads(registry.read_text(encoding='utf-8'))\nif payload.get('version') != 1 or not isinstance(payload.get('repositories'), list):\n    raise SystemExit('invalid repository registry')\n\ntarget = {\n    'id': 'android-ai-call-bridge',\n    'repository': 'MichalMatu/android-ai-call-bridge',\n    'agent_binding': 'c25f88c0-4682-414c-8062-c47fa4034cb0',\n}\nrepos = payload['repositories']\nfound = None\nfor item in repos:\n    same_id = str(item.get('id', '')).casefold() == target['id'].casefold()\n    same_repo = str(item.get('repository', '')).casefold() == target['repository'].casefold()\n    same_binding = item.get('agent_binding') == target['agent_binding']\n    if same_id or same_repo or same_binding:\n        if not (same_id and same_repo):\n            raise SystemExit(f'conflicting registry entry: {item!r}')\n        found = item\n        break\n\nif found is None:\n    repos.append(dict(target))\n    changed = True\nelse:\n    previous = found.get('agent_binding')\n    if previous not in (None, target['agent_binding']):\n        raise SystemExit(f'conflicting agent_binding: {previous!r}')\n    found['agent_binding'] = target['agent_binding']\n    changed = previous != target['agent_binding']\n\nenabled = []\nfor item in repos:\n    if item.get('enabled', True):\n        enabled.append(repository_from_dict(item, home=home))\nvalidate_repository_set(enabled)\nif changed:\n    atomic_write_text(registry, json.dumps(payload, indent=2, ensure_ascii=False) + '\\n')\nprint(json.dumps({'registry': str(registry), 'changed': changed, 'repository_count': len(enabled), 'target': target}, indent=2))\nPY",
+    "set -euo pipefail; cd \"$HOME/local-agent\"; .venv/bin/python -m local_agent.repository.admin provision --repository-id android-ai-call-bridge",
+    "set -euo pipefail; cd \"$HOME/local-agent\"; .venv/bin/python -m local_agent.repository.admin validate --repository-id android-ai-call-bridge; .venv/bin/python -m local_agent.repository.admin list --repository-id android-ai-call-bridge"
+  ]
+}
