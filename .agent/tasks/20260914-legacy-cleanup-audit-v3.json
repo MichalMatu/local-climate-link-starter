@@ -1,0 +1,14 @@
+{
+  "id": "20260914-legacy-cleanup-audit-v3",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "commands": [
+    "git fetch origin agent-control && git show origin/agent-control:.agent/scripts/20260914-legacy-cleanup-audit-v3.sh > /tmp/lcl-legacy-cleanup-audit-v3.sh && bash /tmp/lcl-legacy-cleanup-audit-v3.sh"
+  ]
+}
