@@ -1,0 +1,15 @@
+{
+  "id": "20260915-verify-phone-main-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": ["adb-phone-rfct70l7e8j"],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; ADB=/opt/homebrew/bin/adb; echo CURRENT_HEAD=$(git rev-parse HEAD); echo ORIGIN_MAIN=$(git rev-parse origin/main); MDNS=\"$(\"$ADB\" mdns services)\"; ENDPOINT=\"$(printf '%s\\n' \"$MDNS\" | awk '/adb-RFCT70L7E8J/ && /_adb-tls-connect\\._tcp/ {print $3; exit}')\"; test -n \"$ENDPOINT\"; \"$ADB\" connect \"$ENDPOINT\" >/dev/null; test \"$(\"$ADB\" -s \"$ENDPOINT\" get-state)\" = device; echo WIFI_ENDPOINT=$ENDPOINT; echo '--- PACKAGE ---'; \"$ADB\" -s \"$ENDPOINT\" shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=|lastUpdateTime=' | head -10 | tr -d '\\r'; APK_PATH=\"$(\"$ADB\" -s \"$ENDPOINT\" shell pm path link.localclimate.app | sed -n 's/^package://p' | head -1 | tr -d '\\r')\"; test -n \"$APK_PATH\"; TMP=\"$(mktemp -d)\"; trap 'rm -rf \"$TMP\"' EXIT; \"$ADB\" -s \"$ENDPOINT\" pull \"$APK_PATH\" \"$TMP/installed.apk\" >/dev/null; mkdir -p \"$TMP/installed\"; unzip -qq \"$TMP/installed.apk\" 'assets/public/*' -d \"$TMP/installed\"; INST_SIG=\"$(cd \"$TMP/installed/assets/public\" && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')\"; echo INSTALLED_WEB_ASSETS_SHA256=$INST_SIG; git fetch origin main >/dev/null; git worktree add --detach \"$TMP/main-src\" origin/main >/dev/null; cd \"$TMP/main-src\"; corepack pnpm install --frozen-lockfile >/dev/null; corepack pnpm --filter @lcl/mobile build >/dev/null; MAIN_SIG=\"$(cd apps/mobile/dist && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')\"; echo MAIN_WEB_ASSETS_SHA256=$MAIN_SIG; if [ \"$INST_SIG\" = \"$MAIN_SIG\" ]; then echo PHONE_MATCHES_MAIN_WEB_ASSETS=YES; else echo PHONE_MATCHES_MAIN_WEB_ASSETS=NO; fi"
+  ]
+}
