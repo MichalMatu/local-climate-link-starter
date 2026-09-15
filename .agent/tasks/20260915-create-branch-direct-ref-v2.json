@@ -1,0 +1,13 @@
+{
+  "id": "20260915-create-branch-direct-ref-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 256,
+  "commands": ["set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"0ad9595b6d1b9a1db69b5a616a5f17932c424ee7\"; git push --no-verify origin HEAD:refs/heads/work/plug-centered-main-20260915; git ls-remote --heads origin refs/heads/work/plug-centered-main-20260915"]
+}
