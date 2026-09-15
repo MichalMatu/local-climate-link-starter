@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260915-identify-installed-branch-v1",
+  "task_digest": "93f4fe62b59f062ae64644063647af1df3749e676eae2c2145727d1c37bf324d",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-15T20:46:43.911190+00:00",
+  "attempt_id": "92b54fb1e8b018cd6a5513d0",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 8462,
+  "updated_at": "2026-09-15T20:46:43.911236+00:00",
+  "pid": 8462
+}
