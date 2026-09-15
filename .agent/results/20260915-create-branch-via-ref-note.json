@@ -1,0 +1,59 @@
+{
+  "id": "20260915-create-branch-via-ref-note",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "started_at": "2026-09-15T20:51:39.033576+00:00",
+  "command_timeout": 300,
+  "edits": {},
+  "commands": [
+    {
+      "command": "echo DIRECT_GITHUB_BRANCH_CREATION_REQUIRED",
+      "exit_code": 0,
+      "output": "DIRECT_GITHUB_BRANCH_CREATION_REQUIRED\n",
+      "elapsed_seconds": 0.113,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 256,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 39,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.113
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.101
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "finished_at": "2026-09-15T20:51:40.913492+00:00",
+  "task_digest": "da697957974076d2d97d20855cb8e1b83ce1a6841b6a561c0c91b2e4a8cd32b8",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 256,
+  "attempt_id": "5c8af4d3cead032ccbc97e6e",
+  "daemon_version": "4.18.20"
+}
