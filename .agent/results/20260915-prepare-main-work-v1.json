@@ -1,0 +1,60 @@
+{
+  "id": "20260915-prepare-main-work-v1",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "started_at": "2026-09-15T20:48:21.869900+00:00",
+  "command_timeout": 120,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; echo MAIN_HEAD=$(git rev-parse HEAD); git status --short",
+      "exit_code": 0,
+      "output": "MAIN_HEAD=0ad9595b6d1b9a1db69b5a616a5f17932c424ee7\n",
+      "elapsed_seconds": 0.427,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 512,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.25,
+      "output_policy": "stream",
+      "captured_output_chars": 51,
+      "output_truncated": false,
+      "current_rss_mb": 3.25,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.427
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.084
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.066
+  },
+  "finished_at": "2026-09-15T20:48:23.964272+00:00",
+  "task_digest": "c40d098cb3cf1b70ce615ae310bebf17b89c08e2670b9354a8a3b10facbea713",
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "memory_limit_mb": 512,
+  "attempt_id": "fc08d0129a8f33919c1deaa7",
+  "daemon_version": "4.18.20"
+}
