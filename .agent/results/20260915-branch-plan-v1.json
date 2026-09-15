@@ -1,0 +1,58 @@
+{
+  "id": "20260915-branch-plan-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "started_at": "2026-09-15T20:48:55.805837+00:00",
+  "command_timeout": 60,
+  "edits": {},
+  "commands": [
+    {
+      "command": "git rev-parse HEAD",
+      "exit_code": 125,
+      "output": "",
+      "elapsed_seconds": 0.0,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limited": false,
+      "not_started": true,
+      "budget_exhausted": true,
+      "budget_remaining_seconds": 118.458,
+      "required_budget_seconds": 120.0,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "not_started",
+      "elapsed_seconds": 0.0
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.092
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.069
+  },
+  "failure_reason": "task_budget_exhausted",
+  "finished_at": "2026-09-15T20:48:57.508683+00:00",
+  "task_digest": "a34685d2c59e681044451fb0af7d1dd56ea390d822479d8d422c2b206c599c00",
+  "idle_timeout": 60,
+  "task_timeout": 120,
+  "memory_limit_mb": 256,
+  "attempt_id": "43d2fc398ca64abe02a87139",
+  "daemon_version": "4.18.20"
+}
