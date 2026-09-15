@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260915-create-branch-direct-ref-v2",
+  "task_digest": "f5a020c88c7f39e600e01e9115265b4d924dba29ac5f0aa3b84ecf78428b323b",
+  "idle_timeout": 120,
+  "task_timeout": 600,
+  "memory_limit_mb": 256,
+  "started_at": "2026-09-15T20:52:07.007092+00:00",
+  "attempt_id": "d92cac694e210dd1a1856045",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 15760,
+  "updated_at": "2026-09-15T20:52:07.007195+00:00",
+  "pid": 15760
+}
