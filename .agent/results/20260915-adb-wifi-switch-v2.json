@@ -1,0 +1,60 @@
+{
+  "id": "20260915-adb-wifi-switch-v2",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "started_at": "2026-09-15T20:39:15.870801+00:00",
+  "command_timeout": 120,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; ADB=/opt/homebrew/bin/adb; echo '--- BEFORE ---'; \"$ADB\" devices -l; echo '--- MDNS ---'; MDNS=\"$(\"$ADB\" mdns services)\"; printf '%s\\n' \"$MDNS\"; ENDPOINT=\"$(printf '%s\\n' \"$MDNS\" | awk '/adb-RFCT70L7E8J/ && /_adb-tls-connect\\._tcp/ {print $3; exit}')\"; test -n \"$ENDPOINT\"; echo WIFI_ENDPOINT=$ENDPOINT; echo '--- CONNECT ---'; \"$ADB\" connect \"$ENDPOINT\"; test \"$(\"$ADB\" -s \"$ENDPOINT\" get-state)\" = device; printf 'MODEL='; \"$ADB\" -s \"$ENDPOINT\" shell getprop ro.product.model | tr -d '\\r'; printf 'SERIALNO='; \"$ADB\" -s \"$ENDPOINT\" shell getprop ro.serialno | tr -d '\\r'; printf 'ANDROID_VERSION='; \"$ADB\" -s \"$ENDPOINT\" shell getprop ro.build.version.release | tr -d '\\r'; printf 'WLAN_IP='; \"$ADB\" -s \"$ENDPOINT\" shell ip -4 addr show wlan0 | awk '/inet / {print $2; exit}' | tr -d '\\r'; echo '--- AFTER ---'; \"$ADB\" devices -l",
+      "exit_code": 0,
+      "output": "--- BEFORE ---\nList of devices attached\n192.168.0.100:34771    device product:g0sxeea model:SM_S906B device:g0s transport_id:1\n\n--- MDNS ---\nList of discovered mdns services\nadb-RFCT70L7E8J-HNMIWH\t_adb-tls-connect._tcp\t192.168.0.100:34771\nWIFI_ENDPOINT=192.168.0.100:34771\n--- CONNECT ---\nalready connected to 192.168.0.100:34771\nMODEL=SM-S906B\nSERIALNO=RFCT70L7E8J\nANDROID_VERSION=16\nWLAN_IP=192.168.0.100/24\n--- AFTER ---\nList of devices attached\n192.168.0.100:34771    device product:g0sxeea model:SM_S906B device:g0s transport_id:1\n\n",
+      "elapsed_seconds": 2.369,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 512,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 9.95,
+      "output_policy": "stream",
+      "captured_output_chars": 537,
+      "output_truncated": false,
+      "current_rss_mb": 9.95,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 2.369
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.151
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.074
+  },
+  "finished_at": "2026-09-15T20:39:20.164337+00:00",
+  "task_digest": "e11eaa95ba0129264334778a5608774f6cb60860497284744ea111778c24562c",
+  "idle_timeout": 60,
+  "task_timeout": 300,
+  "memory_limit_mb": 512,
+  "attempt_id": "ac82875ebe7779f76a75269d",
+  "daemon_version": "4.18.20"
+}
