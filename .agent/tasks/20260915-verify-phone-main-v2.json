@@ -1,0 +1,15 @@
+{
+  "id": "20260915-verify-phone-main-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": ["adb-phone-rfct70l7e8j"],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"0ad9595b6d1b9a1db69b5a616a5f17932c424ee7\"; pnpm --filter @lcl/mobile build >/dev/null; MAIN_SIG=\"$(cd apps/mobile/dist && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')\"; echo MAIN_WEB_ASSETS_SHA256=$MAIN_SIG; echo INSTALLED_WEB_ASSETS_SHA256=d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a; if [ \"$MAIN_SIG\" = \"d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a\" ]; then echo PHONE_MATCHES_MAIN_WEB_ASSETS=YES; else echo PHONE_MATCHES_MAIN_WEB_ASSETS=NO; fi; git status --short"
+  ]
+}
