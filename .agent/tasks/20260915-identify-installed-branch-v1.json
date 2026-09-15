@@ -1,0 +1,15 @@
+{
+  "id": "20260915-identify-installed-branch-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/device-rule-decoupling-20260913",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; echo BRANCH_HEAD=$(git rev-parse HEAD); pnpm --filter @lcl/mobile build >/dev/null; SIG=\"$(cd apps/mobile/dist && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')\"; echo BRANCH_WEB_ASSETS_SHA256=$SIG; echo INSTALLED_WEB_ASSETS_SHA256=d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a; if [ \"$SIG\" = \"d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a\" ]; then echo PHONE_MATCHES_OLD_BRANCH=YES; else echo PHONE_MATCHES_OLD_BRANCH=NO; fi; git status --short"
+  ]
+}
