@@ -1,0 +1,15 @@
+{
+  "id": "20260915-main-work-note-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 60,
+  "idle_timeout": 60,
+  "task_timeout": 120,
+  "memory_limit_mb": 256,
+  "commands": [
+    "printf 'NEXT_BASE=%s\\n' \"$(git rev-parse HEAD)\""
+  ]
+}
