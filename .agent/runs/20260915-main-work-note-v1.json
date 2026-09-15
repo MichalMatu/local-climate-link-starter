@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260915-main-work-note-v1",
   "task_digest": "cb31f56afae1b826a9bfaa5b88fe0937d38ade8ce2e755ca631e8f255a86660f",
-  "idle_timeout": 60,
-  "task_timeout": 120,
-  "memory_limit_mb": 256,
-  "started_at": "2026-09-15T20:50:34.208831+00:00",
+  "status": "failed",
+  "failure_reason": "task_budget_exhausted",
+  "finished_at": "2026-09-15T20:50:35.894122+00:00",
   "attempt_id": "2504350c4362a799fcaee2ca",
   "daemon_version": "4.18.20",
   "daemon_pid": 13614,
-  "updated_at": "2026-09-15T20:50:34.208936+00:00",
+  "updated_at": "2026-09-15T20:50:36.144663+00:00",
   "pid": 13614
 }
