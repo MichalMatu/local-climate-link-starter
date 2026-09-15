@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260915-install-main-phone-v1",
+  "task_digest": "0406212b57457d9e2aba669073866e8f85a7b471ddeb4ba9a14103248a9a8716",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-15T20:49:34.231352+00:00",
+  "attempt_id": "eff092de37ae9882a4d40a8b",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 12147,
+  "updated_at": "2026-09-15T20:49:34.231438+00:00",
+  "pid": 12147
+}
