@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260915-verify-phone-main-v1",
+  "task_digest": "50cf9e09f38352aeb790c8cb84f1c3a2b53a79ac9673fd4ed37840c760e62d56",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-15T20:44:53.190441+00:00",
+  "attempt_id": "ffe081796e1c336028dc743e",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 5962,
+  "updated_at": "2026-09-15T20:44:53.190506+00:00",
+  "pid": 5962
+}
