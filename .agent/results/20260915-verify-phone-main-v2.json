@@ -1,0 +1,60 @@
+{
+  "id": "20260915-verify-phone-main-v2",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "main",
+  "allow_write": false,
+  "started_at": "2026-09-15T20:45:42.062523+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"0ad9595b6d1b9a1db69b5a616a5f17932c424ee7\"; pnpm --filter @lcl/mobile build >/dev/null; MAIN_SIG=\"$(cd apps/mobile/dist && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')\"; echo MAIN_WEB_ASSETS_SHA256=$MAIN_SIG; echo INSTALLED_WEB_ASSETS_SHA256=d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a; if [ \"$MAIN_SIG\" = \"d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a\" ]; then echo PHONE_MATCHES_MAIN_WEB_ASSETS=YES; else echo PHONE_MATCHES_MAIN_WEB_ASSETS=NO; fi; git status --short",
+      "exit_code": 0,
+      "output": "MAIN_WEB_ASSETS_SHA256=b417baad7c43a16ea07dbc3ff167166f7d236a92a346ab82552c364647a52ceb\nINSTALLED_WEB_ASSETS_SHA256=d7168249ab01e1bf1c6fb16c45a22781bfe77a24f27cd0062509d2fbe758106a\nPHONE_MATCHES_MAIN_WEB_ASSETS=NO\n",
+      "elapsed_seconds": 8.499,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 473.81,
+      "output_policy": "stream",
+      "captured_output_chars": 214,
+      "output_truncated": false,
+      "current_rss_mb": 462.59,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 8.499
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.101
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.07
+  },
+  "finished_at": "2026-09-15T20:45:52.191678+00:00",
+  "task_digest": "d08ae3918946bd6f1d6375bc7bbb8f014b46c5ec083df4840a838a28eb4c5398",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "b2da348a27e4992d2a57c551",
+  "daemon_version": "4.18.20"
+}
