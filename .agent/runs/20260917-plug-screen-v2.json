@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260917-plug-screen-v2",
   "task_digest": "4e89b2a3d119485f4fc48e3069018b4f8a1f517e5b024875e594a8a11030eddc",
-  "idle_timeout": 900,
-  "task_timeout": 14400,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T08:56:49.011358+00:00",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-17T08:56:51.389543+00:00",
   "attempt_id": "62a08342c3d516c8a7b85d7d",
   "daemon_version": "4.18.20",
   "daemon_pid": 29875,
-  "updated_at": "2026-09-17T08:56:49.011479+00:00",
+  "updated_at": "2026-09-17T08:56:51.675267+00:00",
   "pid": 29875
 }
