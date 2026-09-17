@@ -1,0 +1,15 @@
+{
+  "id": "20260917-plug-screen-phone-dom-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": ["adb-phone-rfct70l7e8j"],
+  "command_timeout": 1800,
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -euo pipefail; EXPECTED=5d3977850e10ee9399a1c0aacdbcbac4c1a30139; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; ADB=/opt/homebrew/bin/adb; TARGET=RFCT70L7E8J; test \"$(\"$ADB\" -s \"$TARGET\" get-state)\" = device; PID=\"$(\"$ADB\" -s \"$TARGET\" shell pidof link.localclimate.app | tr -d '\\r')\"; test -n \"$PID\"; echo PID=$PID; echo '--- ACTIVITY ---'; \"$ADB\" -s \"$TARGET\" shell dumpsys activity activities | grep -m1 'mResumedActivity' || true; echo '--- WEBVIEW SOCKETS ---'; \"$ADB\" -s \"$TARGET\" shell cat /proc/net/unix | grep webview_devtools_remote || true; \"$ADB\" -s \"$TARGET\" forward --remove tcp:9222 >/dev/null 2>&1 || true; \"$ADB\" -s \"$TARGET\" forward tcp:9222 localabstract:webview_devtools_remote_${PID}; sleep 1; echo '--- DEVTOOLS TARGETS ---'; JSON=\"$(curl -fsS http://127.0.0.1:9222/json || true)\"; printf '%s\\n' \"$JSON\"; if [ -n \"$JSON\" ]; then python3 - <<'PY'\nimport json, os, subprocess, sys, urllib.request\nraw = subprocess.check_output(['curl','-fsS','http://127.0.0.1:9222/json'], text=True)\ntargets=json.loads(raw)\nprint('TARGET_COUNT='+str(len(targets)))\nfor i,t in enumerate(targets):\n    print(f'TARGET_{i}_URL={t.get(\"url\",\"\")}')\n    print(f'TARGET_{i}_TITLE={t.get(\"title\",\"\")}')\nPY\nfi; echo '--- UI DUMP ---'; \"$ADB\" -s \"$TARGET\" shell uiautomator dump /sdcard/lcl-ui.xml >/dev/null 2>&1 || true; \"$ADB\" -s \"$TARGET\" shell cat /sdcard/lcl-ui.xml | head -c 20000 || true; echo; echo '--- APP ERRORS ---'; \"$ADB\" -s \"$TARGET\" logcat -d --pid=\"$PID\" -v brief '*:E' | tail -80 || true"
+  ]
+}
