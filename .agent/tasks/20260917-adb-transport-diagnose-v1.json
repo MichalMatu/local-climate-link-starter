@@ -1,0 +1,15 @@
+{
+  "id": "20260917-adb-transport-diagnose-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": ["adb-phone-rfct70l7e8j"],
+  "command_timeout": 300,
+  "idle_timeout": 120,
+  "task_timeout": 900,
+  "memory_limit_mb": 1024,
+  "commands": [
+    "set +e; ADB=/opt/homebrew/bin/adb; echo '--- ADB VERSION ---'; \"$ADB\" version; echo '--- DEVICES BEFORE ---'; \"$ADB\" devices -l; echo '--- MDNS ---'; \"$ADB\" mdns services; echo '--- TRY LAST KNOWN WIFI ENDPOINT ---'; \"$ADB\" connect 192.168.0.100:46727; sleep 2; echo '--- DEVICES AFTER ---'; \"$ADB\" devices -l; echo '--- USB SERIAL CHECK ---'; \"$ADB\" -s RFCT70L7E8J get-state 2>&1; echo '--- WIFI SERIAL CHECK ---'; \"$ADB\" -s 192.168.0.100:46727 get-state 2>&1"
+  ]
+}
