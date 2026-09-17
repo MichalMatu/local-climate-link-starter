@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
-  "pid": 4421,
+  "command": "pnpm android:phone-alpha",
+  "pid": 4473,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T23:54:29.548187+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-17T23:54:31.454908+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-thermometer-live-pulse-rule-flow-phone-v48",
@@ -18,5 +18,5 @@
   "task_digest": "088646cb3351836f4fff8084826746bf46997156ba600f5ef0c908873a85be49",
   "daemon_version": "4.18.22",
   "daemon_pid": 98008,
-  "updated_at": "2026-09-17T23:54:29.577923+00:00"
+  "updated_at": "2026-09-17T23:54:31.532671+00:00"
 }
