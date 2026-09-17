@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-refactor-log-audit-v1",
+  "task_digest": "5a1e4d9a7ce7ca588dd57c1dafcd2f4d6139ee75f211a1c9180293fa1ed53ff3",
+  "idle_timeout": 300,
+  "task_timeout": 600,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-17T16:21:33.661543+00:00",
+  "attempt_id": "5e78501db5819961ef35bc10",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 91969,
+  "updated_at": "2026-09-17T16:21:33.661677+00:00",
+  "pid": 91969
+}
