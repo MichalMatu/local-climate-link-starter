@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-thermometers-nav-time-intent-v3",
+  "task_digest": "4750e4e549009d474ee6e8df4ea97f50a63e0a607f7e1bf32b77a9c616c9be2f",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T12:46:36.842590+00:00",
+  "attempt_id": "26144fe0596064bf47b7c21f",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 55297,
+  "updated_at": "2026-09-17T12:46:36.842657+00:00",
+  "pid": 55297
+}
