@@ -389,38 +389,6 @@ export const ShellySetupPage = ({
           </summary>
           <div className="shelly-network-scan__body">
             <div className="shelly-network-scan__toolbar">
-              <div
-                className="shelly-network-scan__presets"
-                role="group"
-                aria-label={t('hardware.shelly.networkScanTitle')}
-              >
-                <button
-                  className="shelly-network-scan__preset"
-                  type="button"
-                  disabled={isShellyScanActive}
-                  onClick={() =>
-                    applyShellyScanPreset(SHELLY_AP_SCAN_ADDRESS, SHELLY_AP_SCAN_ADDRESS)
-                  }
-                >
-                  AP mode
-                </button>
-                <span
-                  className="shelly-network-scan__preset-separator"
-                  aria-hidden="true"
-                >
-                  ·
-                </span>
-                <button
-                  className="shelly-network-scan__preset"
-                  type="button"
-                  disabled={isShellyScanActive}
-                  onClick={() =>
-                    applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
-                  }
-                >
-                  STA mode
-                </button>
-              </div>
               <span className="shelly-network-scan__info">
                 <InfoTooltip
                   label={t('hardware.shelly.infoScanLabel')}
@@ -475,6 +443,35 @@ export const ShellySetupPage = ({
                   </span>
                 )}
               </label>
+            </div>
+            <div
+              className="shelly-network-scan__presets"
+              role="group"
+              aria-label={t('hardware.shelly.networkScanTitle')}
+            >
+              <button
+                className="shelly-network-scan__preset"
+                type="button"
+                disabled={isShellyScanActive}
+                onClick={() =>
+                  applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
+                }
+              >
+                STA
+              </button>
+              <span className="shelly-network-scan__preset-separator" aria-hidden="true">
+                ·
+              </span>
+              <button
+                className="shelly-network-scan__preset"
+                type="button"
+                disabled={isShellyScanActive}
+                onClick={() =>
+                  applyShellyScanPreset(SHELLY_AP_SCAN_ADDRESS, SHELLY_AP_SCAN_ADDRESS)
+                }
+              >
+                AP
+              </button>
             </div>
             <div className="action-row shelly-network-scan__actions">
               <button

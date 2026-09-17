@@ -1399,11 +1399,11 @@ describe('HardwareSetupScreen', () => {
 
     expect(within(dialog).getByText(/Zakres: 32 adresy.*12 s/)).toBeInTheDocument();
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'AP mode' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'AP' }));
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.33.1');
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.33.1');
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'STA mode' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'STA' }));
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
   });

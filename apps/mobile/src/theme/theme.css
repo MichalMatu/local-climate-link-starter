@@ -1521,13 +1521,14 @@ select {
   align-items: center;
   display: flex;
   gap: var(--lcl-spacing-sm);
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .shelly-network-scan__presets {
   align-items: center;
   display: inline-flex;
   gap: var(--lcl-spacing-sm);
+  justify-self: center;
   min-width: 0;
 }
 
