@@ -10,6 +10,7 @@ type ShellySetupFeedbackOptions = {
   flow: ShellySetupFlow;
   isBleScanModalOpen: boolean;
   pushToast: PushToast;
+  suppressControlFeedbackDeviceId?: string | null;
   t: Translate;
 };
 
@@ -17,6 +18,7 @@ export const useShellySetupFeedback = ({
   flow,
   isBleScanModalOpen,
   pushToast,
+  suppressControlFeedbackDeviceId = null,
   t
 }: ShellySetupFeedbackOptions) => {
   const shownBleStopErrorRef = useRef<string | null>(null);
@@ -60,10 +62,17 @@ export const useShellySetupFeedback = ({
       }
 
       shownControlFeedbackRef.current[deviceId] = feedbackKey;
-      pushToast(controlState.error ? 'warning' : 'ok', message);
+      if (deviceId !== suppressControlFeedbackDeviceId) {
+        pushToast(controlState.error ? 'warning' : 'ok', message);
+      }
       flow.acknowledgeShellyControlFeedback(deviceId, controlState.updatedAtMs, message);
     });
-  }, [flow.acknowledgeShellyControlFeedback, flow.shellyControlStates, pushToast]);
+  }, [
+    flow.acknowledgeShellyControlFeedback,
+    flow.shellyControlStates,
+    pushToast,
+    suppressControlFeedbackDeviceId
+  ]);
 
   useEffect(() => {
     if (!flow.stopBleDiscoveryMutation.isError) {

@@ -141,6 +141,7 @@ export const ShellySetupPage = ({
     flow,
     isBleScanModalOpen,
     pushToast,
+    suppressControlFeedbackDeviceId: settingsOnlyDeviceId ?? null,
     t
   });
 

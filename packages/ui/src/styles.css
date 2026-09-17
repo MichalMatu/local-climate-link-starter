@@ -218,11 +218,13 @@
   font-size: var(--lcl-font-size-sm);
   gap: var(--lcl-spacing-xs);
   line-height: var(--lcl-line-height-normal);
+  box-sizing: border-box;
   max-width: min(
     var(--lcl-size-tooltip-max-width),
-    calc(100vw - (var(--lcl-spacing-xl) * 2))
+    calc(100vw - (var(--lcl-spacing-lg) * 2))
   );
   opacity: 0;
+  overflow-wrap: anywhere;
   padding: var(--lcl-spacing-md);
   pointer-events: none;
   position: absolute;
@@ -234,7 +236,10 @@
     transform var(--lcl-motion-fast),
     visibility var(--lcl-motion-fast);
   visibility: hidden;
-  width: max-content;
+  width: min(
+    var(--lcl-size-tooltip-max-width),
+    calc(100vw - (var(--lcl-spacing-lg) * 2))
+  );
   z-index: var(--lcl-z-index-toast);
 }
 

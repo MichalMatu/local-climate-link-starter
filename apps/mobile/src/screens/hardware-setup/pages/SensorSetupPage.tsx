@@ -281,7 +281,11 @@ export const SensorSetupPage = ({
       aria-label={t('hardware.nav.sensorTitle')}
     >
       <button
-        className="primary-action setup-add-fab"
+        className={
+          primaryAddAction === 'phone-scan'
+            ? 'primary-action dashboard-fab'
+            : 'primary-action setup-add-fab'
+        }
         type="button"
         aria-label={
           primaryAddAction === 'phone-scan'
@@ -297,7 +301,14 @@ export const SensorSetupPage = ({
           primaryAddAction === 'phone-scan' ? openPhoneBleScanModal : openAddSensorModal
         }
       >
-        <IconPlus className="setup-add-fab__icon" aria-hidden="true" />
+        <IconPlus
+          className={
+            primaryAddAction === 'phone-scan'
+              ? 'dashboard-fab__icon'
+              : 'setup-add-fab__icon'
+          }
+          aria-hidden="true"
+        />
       </button>
 
       <Modal
