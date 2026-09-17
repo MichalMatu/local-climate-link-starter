@@ -1,0 +1,21 @@
+{
+  "id": "20260917-shelly-scan-range-row-phone-v40",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 2400,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; test -z \"$(git status --porcelain)\"; git reset --hard origin/work/plug-screen-automation-entry-20260917; test \"$(git rev-parse HEAD)\" = \"6b6ccfb5cadf60fc4291f9bcfdbe91ec098d66d0\"",
+    "git show origin/agent-control:.agent/scripts/20260917-shelly-scan-range-row-v40.py | python3",
+    "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/theme/theme.css; git diff --check",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --passWithNoTests",
+    "git add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/theme/theme.css && git commit -m 'Keep Shelly scan range on one row' && git push origin HEAD:work/plug-screen-automation-entry-20260917 && test -z \"$(git status --porcelain)\" && git rev-parse HEAD",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; APK_PATH=$(adb shell pm path link.localclimate.app | head -n 1 | sed 's/^package://'); rm -f /tmp/lcl-v40.apk /tmp/lcl-v40-hardware.js /tmp/lcl-v40-css.txt; adb pull \"$APK_PATH\" /tmp/lcl-v40.apk >/dev/null; BUNDLE=$(unzip -Z1 /tmp/lcl-v40.apk | grep -E 'assets/public/assets/HardwareSetupScreen-.*\\.js$' | head -n 1); test -n \"$BUNDLE\"; unzip -p /tmp/lcl-v40.apk \"$BUNDLE\" > /tmp/lcl-v40-hardware.js; unzip -p /tmp/lcl-v40.apk 'assets/public/assets/*.css' > /tmp/lcl-v40-css.txt; grep -q 'shelly-network-scan__range' /tmp/lcl-v40-css.txt; ! grep -q 'STA mode' /tmp/lcl-v40-hardware.js; grep -q 'STA' /tmp/lcl-v40-hardware.js; grep -q 'AP' /tmp/lcl-v40-hardware.js; shasum -a 256 /tmp/lcl-v40.apk; echo \"installed_bundle=$BUNDLE\"",
+    "set -euo pipefail; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; git rev-parse HEAD; test -z \"$(git status --porcelain)\""
+  ]
+}
