@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-plug-details-stable-metadata-rename-v1",
+  "task_digest": "586f49148d74db97052a710b90940ec2bb61b155c8cab131743a0a77b610e6a0",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T13:50:36.433287+00:00",
+  "attempt_id": "41bb83c0627ad73046a4fbe4",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 19322,
+  "updated_at": "2026-09-17T13:50:36.433527+00:00",
+  "pid": 19322
+}
