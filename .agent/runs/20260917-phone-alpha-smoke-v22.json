@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-phone-alpha-smoke-v22",
+  "task_digest": "3cef138ff784f551c318369bc567e5bf801a4197fcdd2c046b11ff2f8cc7ab39",
+  "idle_timeout": 300,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T19:27:10.903645+00:00",
+  "attempt_id": "c1a5c0b839ae4d6639cca3a2",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 68068,
+  "updated_at": "2026-09-17T19:27:10.903705+00:00",
+  "pid": 68068
+}
