@@ -1,0 +1,16 @@
+{
+  "id": "20260917-empty-states-phone-v28",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": ["android-device"],
+  "command_timeout": 2400,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; test -z \"$(git status --porcelain)\"; git reset --hard origin/work/plug-screen-automation-entry-20260917; test \"$(git rev-parse HEAD)\" = \"b3048a681909da6f0336183e1aa01af581f169c0\"",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$(command -v adb || true)\"; if [ -z \"$ADB\" ] && [ -x \"$SDK/platform-tools/adb\" ]; then ADB=\"$SDK/platform-tools/adb\"; fi; test -n \"$ADB\"; test \"$($ADB devices | awk 'NR>1 && $2==\"device\"{n++} END{print n+0}')\" -eq 1; $ADB shell monkey -p link.localclimate.app -c android.intent.category.LAUNCHER 1 >/dev/null; sleep 2; $ADB shell uiautomator dump /sdcard/lcl-empty-plugs.xml >/dev/null; $ADB pull /sdcard/lcl-empty-plugs.xml /tmp/lcl-empty-plugs.xml >/dev/null; python3 - <<'PY'\nimport re, xml.etree.ElementTree as ET\nroot=ET.parse('/tmp/lcl-empty-plugs.xml').getroot()\ntexts=[n.attrib.get('text','') for n in root.iter()]\njoined='\\n'.join(t for t in texts if t)\nprint('=== PLUGS UI ===')\nprint(joined)\nassert ('No plugs added.' in texts) or ('Brak dodanych gniazdek.' in texts), texts\nassert 'No automations' not in texts and 'Brak automatyzacji' not in texts, texts\nthermo=None\nfor n in root.iter():\n    if n.attrib.get('text') in {'Thermometers','Termometry'}:\n        thermo=n; break\nassert thermo is not None, texts\nm=re.match(r'\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]', thermo.attrib['bounds'])\nassert m\nx1,y1,x2,y2=map(int,m.groups())\nprint(f'THERMO_TAP={(x1+x2)//2},{(y1+y2)//2}')\nopen('/tmp/lcl-thermo-tap.txt','w').write(f'{(x1+x2)//2} {(y1+y2)//2}')\nPY\nread X Y < /tmp/lcl-thermo-tap.txt; $ADB shell input tap \"$X\" \"$Y\"; sleep 1; $ADB shell uiautomator dump /sdcard/lcl-empty-thermometers.xml >/dev/null; $ADB pull /sdcard/lcl-empty-thermometers.xml /tmp/lcl-empty-thermometers.xml >/dev/null; python3 - <<'PY'\nimport xml.etree.ElementTree as ET\nroot=ET.parse('/tmp/lcl-empty-thermometers.xml').getroot()\ntexts=[n.attrib.get('text','') for n in root.iter()]\nprint('=== THERMOMETERS UI ===')\nprint('\\n'.join(t for t in texts if t))\nassert ('No thermometers added.' in texts) or ('Brak dodanych termometrów.' in texts), texts\nPY\necho '=== FOCUS ==='; $ADB shell dumpsys window | grep -m2 -E 'mCurrentFocus|mFocusedApp' || true; echo '=== ERROR CHECK ==='; if $ADB logcat -d -v brief | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; then exit 31; else echo NO_FATAL_OR_ANR; fi; test -z \"$(git status --porcelain --untracked-files=no)\"; git rev-parse HEAD"
+  ]
+}
