@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 96909,
+  "command": "set -euo pipefail; apk_path=$(adb shell pm path link.localclimate.app | head -n 1 | tr -d '\\r' | sed 's/^package://'); test -n \"$apk_path\"; adb pull \"$apk_path\" /tmp/lcl-v43-installed.apk >/dev/null; unzip -p /tmp/lcl-v43-installed.apk 'assets/public/assets/*.js' | grep -q 'shelly-network-scan__info'; ! unzip -p /tmp/lcl-v43-installed.apk 'assets/public/assets/*.js' | grep -q 'shelly-network-scan__toolbar'; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; git rev-parse HEAD; test -z \"$(git status --porcelain)\"",
+  "pid": 98045,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T22:36:49.070635+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-17T22:37:17.902217+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-shelly-info-header-phone-v43",
@@ -18,5 +18,5 @@
   "task_digest": "426d53c978ef0f32b0949801acfcac7765fb6e861355ea839ea32bfa627eeaff",
   "daemon_version": "4.18.22",
   "daemon_pid": 91344,
-  "updated_at": "2026-09-17T22:36:49.149339+00:00"
+  "updated_at": "2026-09-17T22:37:17.975444+00:00"
 }
