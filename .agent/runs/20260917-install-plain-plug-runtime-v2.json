@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-plain-plug-runtime-v2",
+  "task_digest": "5a53521b59d9588304e3f28fd45dae46da2ec4bc0cb8ddc7facbda2703f6ed7c",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T12:18:28.593598+00:00",
+  "attempt_id": "3a32fe9c4ac314b5dddae871",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 33967,
+  "updated_at": "2026-09-17T12:18:28.593757+00:00",
+  "pid": 33967
+}
