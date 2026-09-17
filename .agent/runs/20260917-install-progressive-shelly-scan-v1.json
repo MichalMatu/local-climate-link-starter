@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 5,
   "total": 9,
-  "command": "pnpm --filter @lcl/mobile exec cap sync android",
-  "pid": 40736,
+  "command": "/opt/homebrew/bin/adb devices -l",
+  "pid": 40862,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T14:09:47.082210+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-17T14:09:50.580282+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260917-install-progressive-shelly-scan-v1",
@@ -18,5 +18,5 @@
   "task_digest": "2e97feab67960e7eeb1dfe1157af4967b13c70224cd5e4a3ec798e5eddf62632",
   "daemon_version": "4.18.22",
   "daemon_pid": 40373,
-  "updated_at": "2026-09-17T14:09:47.174049+00:00"
+  "updated_at": "2026-09-17T14:09:50.675267+00:00"
 }
