@@ -1,0 +1,13 @@
+{
+  "id": "20260917-inspect-compact-plug-details-v1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 300,
+  "task_timeout": 600,
+  "commands": [
+    "set -euo pipefail; echo HEAD=$(git rev-parse HEAD); echo '--- git status ---'; git status --short; echo '--- info modal source ---'; sed -n '500,700p' apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx; echo '--- relevant tests ---'; sed -n '830,880p' apps/mobile/src/__tests__/hardware-setup.test.tsx; sed -n '1010,1040p' apps/mobile/src/__tests__/hardware-setup.test.tsx; sed -n '1848,1868p' apps/mobile/src/__tests__/hardware-setup.test.tsx"
+  ]
+}
