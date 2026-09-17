@@ -1,0 +1,60 @@
+{
+  "id": "20260917-plug-screen-v2",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "started_at": "2026-09-17T08:56:49.011419+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; grep -q \"climateTab: 'Gniazdka'\" apps/mobile/src/app/locales/pl.ts; grep -q \"PlainPlugCard\" apps/mobile/src/screens/AutomationDashboardScreen.tsx; git status --short; python3 - <<'PY'\nfrom pathlib import Path\n\ndef rep(path, old, new, count=None):\n    p=Path(path); text=p.read_text();\n    if old not in text: raise SystemExit(f'missing {old!r} in {path}')\n    p.write_text(text.replace(old,new) if count is None else text.replace(old,new,count))\n\n# Dashboard tests: rename only the Plug-tab expectations and cover an unconfigured saved plug.\np='apps/mobile/src/__tests__/automation-dashboard.test.tsx'\ntext=Path(p).read_text()\ntext=text.replace(\"import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';\", \"import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';\")\ntext=text.replace(\"import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';\", \"import {\\n  resetHardwareSetupDraftStore,\\n  useHardwareSetupDraftStore\\n} from '../flows/hardware-setup/setupDraftStore.js';\\nimport { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';\")\ntext=text.replace(\"    resetInstalledAutomationStore();\\n    vi.restoreAllMocks();\", \"    resetInstalledAutomationStore();\\n    resetHardwareSetupDraftStore();\\n    vi.restoreAllMocks();\")\ntext=text.replace(\"    resetInstalledAutomationStore();\\n    vi.unstubAllGlobals();\", \"    resetInstalledAutomationStore();\\n    resetHardwareSetupDraftStore();\\n    vi.unstubAllGlobals();\")\ntext=text.replace(\"expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\", \"expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\", 1)\ntext=text.replace(\"name: 'Klimat'\", \"name: 'Gniazdka'\")\nneedle=\"  it('shows live runtime values from Shelly for a saved installation', async () => {\"\nnew_test=\"  it('shows a saved plug without automation and starts setup with that plug context', () => {\\n    const onAddAutomation = vi.fn();\\n    useHardwareSetupDraftStore.getState().upsertShellyDevice({\\n      id: 'http://192.168.0.30/',\\n      name: 'Nawilżacz',\\n      baseUrl: 'http://192.168.0.30/',\\n      scriptIdInput: '1'\\n    });\\n\\n    renderDashboard(onAddAutomation);\\n\\n    const card = screen.getByText('Nawilżacz').closest('article');\\n    expect(card).not.toBeNull();\\n    expect(within(card as HTMLElement).getByText('Brak automatyzacji')).toBeVisible();\\n    fireEvent.click(\\n      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })\\n    );\\n    expect(onAddAutomation).toHaveBeenCalledWith('climate', 'http://192.168.0.30/');\\n  });\\n\\n\"+needle\nif needle not in text: raise SystemExit('dashboard insertion point missing')\ntext=text.replace(needle,new_test,1)\nPath(p).write_text(text)\n\n# AppRoutes tests: climate surface is now Plugs; add context propagation assertion.\np='apps/mobile/src/__tests__/app-routes.test.tsx'\ntext=Path(p).read_text()\ntext=text.replace(\"import type { SetupIntent } from '../flows/setup-intent.js';\", \"import type { SetupIntent } from '../flows/setup-intent.js';\\nimport {\\n  resetHardwareSetupDraftStore,\\n  useHardwareSetupDraftStore\\n} from '../flows/hardware-setup/setupDraftStore.js';\")\ntext=text.replace(\"    setupIntent,\\n    onBackToIntent,\\n    onSetupComplete\\n  }: {\\n    setupIntent?: SetupIntent;\\n    onBackToIntent?: () => void;\\n    onSetupComplete?: () => void;\\n  }) => (\", \"    setupIntent,\\n    fixedShellyId,\\n    onBackToIntent,\\n    onSetupComplete\\n  }: {\\n    setupIntent?: SetupIntent;\\n    fixedShellyId?: string;\\n    onBackToIntent?: () => void;\\n    onSetupComplete?: () => void;\\n  }) => (\")\ntext=text.replace(\"      <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>\", \"      <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>\\n      <p>{`mock-fixed-shelly-${fixedShellyId ?? 'none'}`}</p>\")\ntext=text.replace(\"    resetInstalledAutomationStore();\\n    nativeAppMocks.resetListener();\", \"    resetInstalledAutomationStore();\\n    resetHardwareSetupDraftStore();\\n    nativeAppMocks.resetListener();\")\n# Zero/root climate headings and nav become Gniazdka; leave Time headings untouched.\ntext=text.replace(\"expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();\\n    expect(screen.getByRole('button', { name: 'Klimat' }))\", \"expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();\\n    expect(screen.getByRole('button', { name: 'Gniazdka' }))\", 1)\ntext=text.replace(\"expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    act(() => nativeAppMocks.fireBack());\", \"expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    act(() => nativeAppMocks.fireBack());\", 1)\ntext=text.replace(\"expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    expect(screen.getByRole('button', { name: 'Klimat' }))\", \"expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    expect(screen.getByRole('button', { name: 'Gniazdka' }))\", 1)\nneedle=\"  it('opens time setup directly from the Time plus and returns to Time dashboard', async () => {\"\nnew_test=\"  it('starts climate setup from a saved plug without asking for the plug again', async () => {\\n    useHardwareSetupDraftStore.getState().upsertShellyDevice({\\n      id: 'http://192.168.0.30/',\\n      name: 'Nawilżacz',\\n      baseUrl: 'http://192.168.0.30/',\\n      scriptIdInput: '1'\\n    });\\n    renderRoutes();\\n\\n    const card = screen.getByText('Nawilżacz').closest('article');\\n    expect(card).not.toBeNull();\\n    fireEvent.click(\\n      (card as HTMLElement).querySelector('button') as HTMLButtonElement\\n    );\\n    fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));\\n\\n    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();\\n    expect(screen.getByText('mock-fixed-shelly-http://192.168.0.30/')).toBeVisible();\\n  });\\n\\n\"+needle\nif needle not in text: raise SystemExit('routes insertion point missing')\ntext=text.replace(needle,new_test,1)\nPath(p).write_text(text)\n\n# Responsive E2E contract follows the renamed navigation item.\np='apps/mobile/e2e/responsive.spec.ts'\ntext=Path(p).read_text().replace(\"name: 'Klimat'\", \"name: 'Gniazdka'\")\nPath(p).write_text(text)\nPY\npnpm prettier --write apps/mobile/src/__tests__/automation-dashboard.test.tsx apps/mobile/src/__tests__/app-routes.test.tsx apps/mobile/e2e/responsive.spec.ts; git diff --check; pnpm quality:ux; pnpm typecheck; pnpm test; pnpm build; git diff --check; git status --short; git diff --stat",
+      "exit_code": 1,
+      "output": "",
+      "elapsed_seconds": 0.373,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.373
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.101
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.077
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-17T08:56:51.389543+00:00",
+  "task_digest": "4e89b2a3d119485f4fc48e3069018b4f8a1f517e5b024875e594a8a11030eddc",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "62a08342c3d516c8a7b85d7d",
+  "daemon_version": "4.18.20"
+}
