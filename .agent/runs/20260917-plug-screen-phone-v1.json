@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-plug-screen-phone-v1",
+  "task_digest": "ec2eeb2a77bb89fae4362a39a51f90bf21d98359e6ddb1db4a96d14ab376bbe5",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T09:08:04.533677+00:00",
+  "attempt_id": "59ad39850be25162f6bea371",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 46482,
+  "updated_at": "2026-09-17T09:08:04.533803+00:00",
+  "pid": 46482
+}
