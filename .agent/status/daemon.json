@@ -2,9 +2,9 @@
   "version": 1,
   "daemon_version": "4.18.20",
   "state": "idle",
-  "pid": 46482,
-  "updated_at": "2026-09-17T09:09:17.108135+00:00",
-  "self_revision": "586897b4022bc5603ee221fbeda2ee03810c6f60",
+  "pid": 55038,
+  "updated_at": "2026-09-17T09:13:11.996478+00:00",
+  "self_revision": "3a4f00c101abfed206fb263c5a4bf8ffe331b066",
   "poll_seconds": 15,
   "self_update_seconds": 60,
   "command_timeout_default": 900,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 46482,
-  "supervisor_pid": 43861,
-  "last_task_id": "20260917-plug-screen-phone-v1",
+  "worker_pid": 55038,
+  "supervisor_pid": 54788,
   "execution_variant": "parallel"
 }
