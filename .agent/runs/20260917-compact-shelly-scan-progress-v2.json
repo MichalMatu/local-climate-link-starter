@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-compact-shelly-scan-progress-v2",
+  "task_digest": "6cd726a8364584c3bfd635b889737984eba59a04a8e23b43300846b349ca9a03",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T14:22:07.216485+00:00",
+  "attempt_id": "22af0ab3f209f8def647bd5d",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 50897,
+  "updated_at": "2026-09-17T14:22:07.216642+00:00",
+  "pid": 50897
+}
