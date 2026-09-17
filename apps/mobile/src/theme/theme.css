@@ -2601,27 +2601,22 @@ select {
   width: var(--lcl-size-control-icon-size);
 }
 
-.sensor-card-leading-icon--fresh {
+.sensor-card-leading-icon--fresh .sensor-card-leading-icon__icon {
   animation: sensor-card-reading-pulse 650ms ease-out;
 }
 
 @keyframes sensor-card-reading-pulse {
   0%,
   100% {
-    background: var(--lcl-color-surface-muted);
     color: var(--lcl-color-text-muted);
-    transform: scale(1);
   }
-
-  40% {
-    background: var(--lcl-color-accent);
-    color: var(--lcl-color-accent-contrast);
-    transform: scale(1.06);
+  45% {
+    color: var(--lcl-color-accent);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sensor-card-leading-icon--fresh {
+  .sensor-card-leading-icon--fresh .sensor-card-leading-icon__icon {
     animation: none;
     color: var(--lcl-color-accent);
   }

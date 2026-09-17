@@ -52,6 +52,7 @@ export type SensorSetupFlow = Pick<
   | 'removeSensorDevice'
   | 'resetPhoneBleScan'
   | 'restartSavedSensorLiveScan'
+  | 'savedSensorLiveScanState'
   | 'sensorDevices'
   | 'sensorInputState'
   | 'sensorMacInput'

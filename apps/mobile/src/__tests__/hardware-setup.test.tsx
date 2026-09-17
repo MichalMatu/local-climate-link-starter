@@ -19,7 +19,8 @@ import {
 const phoneBleScannerMock = vi.hoisted(() => ({
   failureMessage: null as string | null,
   startCount: 0,
-  stopCount: 0
+  stopCount: 0,
+  endContinuousScanCount: 0
 }));
 
 const pvvxGattMock = vi.hoisted(() => ({
@@ -119,6 +120,11 @@ vi.mock('@lcl/ble-core', async () => {
         yield advertisement;
       }
 
+      if (options?.timeoutMs === 0 && phoneBleScannerMock.endContinuousScanCount > 0) {
+        phoneBleScannerMock.endContinuousScanCount -= 1;
+        return;
+      }
+
       while (options?.timeoutMs === 0 && !this.stopped) {
         await new Promise((resolve) => setTimeout(resolve, 10));
       }
@@ -163,7 +169,7 @@ import {
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
 
-const renderHardwareSetup = () => {
+const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -174,7 +180,7 @@ const renderHardwareSetup = () => {
   return render(
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <HardwareSetupScreen />
+        <HardwareSetupScreen {...props} />
       </I18nProvider>
     </QueryClientProvider>
   );
@@ -377,6 +383,7 @@ describe('HardwareSetupScreen', () => {
     phoneBleScannerMock.failureMessage = null;
     phoneBleScannerMock.startCount = 0;
     phoneBleScannerMock.stopCount = 0;
+    phoneBleScannerMock.endContinuousScanCount = 0;
     pvvxGattMock.timeCalls = 0;
     pvvxGattMock.stopCountAtTimeStart = 0;
     setLocalePreference('system');
@@ -712,6 +719,23 @@ describe('HardwareSetupScreen', () => {
     );
     expect(getRuleSummary()).not.toHaveTextContent('gniazdko przejdzie w OFF');
     expect(getRuleSummary()).not.toHaveTextContent('Termometr:');
+  });
+
+  it('opens fixed climate setup directly on the rule editor', () => {
+    const shellyId = 'http://192.168.0.30/';
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: shellyId,
+      name: 'Grzejnik',
+      baseUrl: shellyId,
+      scriptIdInput: '1'
+    });
+
+    renderHardwareSetup({ setupIntent: 'temperature', fixedShellyId: shellyId });
+
+    expect(screen.queryByRole('button', { name: 'Termometry' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reguła' })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Termometr' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Tryb reguły' })).toBeInTheDocument();
   });
 
   it('does not duplicate app settings inside developer diagnostics', () => {
@@ -2310,6 +2334,30 @@ describe('HardwareSetupScreen', () => {
     await waitFor(
       () => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(2),
       { timeout: 1000 }
+    );
+  });
+
+  it('restarts saved thermometer live scan after an unexpected scanner end', async () => {
+    vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      sensorDevices: [
+        {
+          id: 'A4:C1:38:4F:24:CD',
+          name: 'Xiaomi salon',
+          runtimeAddress: 'A4:C1:38:4F:24:CD',
+          profileId: 'xiaomi_lywsd03mmc_bthome_v2'
+        }
+      ]
+    });
+    phoneBleScannerMock.endContinuousScanCount = 1;
+    renderHardwareSetup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    expect(await screen.findByText('21.3°C')).toBeInTheDocument();
+    await waitFor(
+      () => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(2),
+      { timeout: 2500 }
     );
   });
 

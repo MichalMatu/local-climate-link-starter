@@ -64,7 +64,7 @@ const availableTabsForIntent = (
       : TIME_HARDWARE_TABS;
   }
   return fixedShellyId
-    ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id !== 'shelly')
+    ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id === 'rule')
     : CLIMATE_HARDWARE_TABS;
 };
 
@@ -209,7 +209,7 @@ export const HardwareSetupScreen = ({
         </div>
       )}
 
-      {!plugAddOnly && (
+      {!plugAddOnly && availableTabs.length > 1 && (
         <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
           {availableTabs.map((tab) => (
             <button

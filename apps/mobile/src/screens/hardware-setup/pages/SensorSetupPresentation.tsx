@@ -211,6 +211,7 @@ export const SavedSensorCard = ({
   const previousSeenAtMsRef = useRef<number | null>(latestSeenAtMs);
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSamplePulseActive, setIsSamplePulseActive] = useState(false);
+  const [samplePulseSequence, setSamplePulseSequence] = useState(0);
   const batterySample = latestBatterySample(samples);
   const rssiSample = latestNumericSample(samples, 'rssi');
 
@@ -221,6 +222,7 @@ export const SavedSensorCard = ({
     if (previousSeenAtMs !== null && latestSeenAtMs <= previousSeenAtMs) return;
 
     previousSeenAtMsRef.current = latestSeenAtMs;
+    setSamplePulseSequence((current) => current + 1);
     setIsSamplePulseActive(true);
     if (pulseTimeoutRef.current !== null) clearTimeout(pulseTimeoutRef.current);
     pulseTimeoutRef.current = setTimeout(() => {
@@ -245,7 +247,10 @@ export const SavedSensorCard = ({
           }`}
           aria-hidden="true"
         >
-          <IconTemperature className="sensor-card-leading-icon__icon" />
+          <IconTemperature
+            key={samplePulseSequence}
+            className="sensor-card-leading-icon__icon"
+          />
         </span>
         {isEditing ? (
           <input

@@ -6,6 +6,8 @@ import type { SensorSetupFlow } from '../pageContracts.js';
 
 type PushToast = (tone: ToastTone, title: string, detail?: string) => void;
 
+const SAVED_SENSOR_LIVE_SCAN_RETRY_MS = 1000;
+
 type SensorSetupFeedbackOptions = {
   flow: SensorSetupFlow;
   shouldRunSavedSensorLiveScan: boolean;
@@ -47,6 +49,22 @@ export const useSensorSetupFeedback = ({
   }, [
     flow.startSavedSensorLiveScan,
     flow.stopSavedSensorLiveScan,
+    shouldRunSavedSensorLiveScan
+  ]);
+
+  useEffect(() => {
+    if (shouldRunSavedSensorLiveScan && !flow.savedSensorLiveScanState.running) {
+      const retryTimer = setTimeout(() => {
+        flow.startSavedSensorLiveScan();
+      }, SAVED_SENSOR_LIVE_SCAN_RETRY_MS);
+
+      return () => clearTimeout(retryTimer);
+    }
+
+    return undefined;
+  }, [
+    flow.savedSensorLiveScanState.running,
+    flow.startSavedSensorLiveScan,
     shouldRunSavedSensorLiveScan
   ]);
 
