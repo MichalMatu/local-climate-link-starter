@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-clean-add-plug-scan-ux-v1",
+  "task_digest": "b700486c365e3c144e617eea2eb7587ccb9fbeeed76b46dd186023aadc28fb78",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T11:33:21.413881+00:00",
+  "attempt_id": "eff6fd6b3ad78cd5f7179c9f",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 90413,
+  "updated_at": "2026-09-17T11:33:21.413933+00:00",
+  "pid": 90413
+}
