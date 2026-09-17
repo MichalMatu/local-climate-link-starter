@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 5,
-  "command": "pnpm exec prettier --write apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/theme/theme.css; git diff --check",
-  "pid": 88426,
+  "command": "pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --passWithNoTests",
+  "pid": 88544,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T21:10:39.361450+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-17T21:10:44.175688+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 5,
   "stage_phase": "commands",
   "task_id": "20260917-shelly-scan-direct-add-v34",
@@ -18,5 +18,5 @@
   "task_digest": "c9ce1b767586ab8048f6534ccc781ebef96e03036ad4380ac18d77bb674a87a2",
   "daemon_version": "4.18.22",
   "daemon_pid": 88149,
-  "updated_at": "2026-09-17T21:10:39.401559+00:00"
+  "updated_at": "2026-09-17T21:10:44.230291+00:00"
 }
