@@ -298,6 +298,22 @@ describe('AutomationDashboardScreen', () => {
     expect(within(plugCard).getByText('25.16 kWh')).toBeVisible();
     expect(within(plugCard).getByText('09:48')).toBeVisible();
 
+    fireEvent.click(
+      within(plugCard).getByRole('button', { name: 'Ustawienia gniazdka: Nawilżacz' })
+    );
+    const settingsDialog = await screen.findByRole('dialog', { name: 'Nawilżacz' });
+    expect(
+      within(settingsDialog).getByRole('button', {
+        name: 'Skanuj termometry BLE przez to gniazdko'
+      })
+    ).toBeVisible();
+    expect(
+      within(settingsDialog).getByRole('button', {
+        name: 'Usuń gniazdko tylko z aplikacji'
+      })
+    ).toBeVisible();
+    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Zamknij' }));
+
     const onButton = within(plugCard).getByRole('button', { name: 'ON' });
     const offButton = within(plugCard).getByRole('button', { name: 'OFF' });
     expect(offButton).toHaveAttribute('aria-pressed', 'true');

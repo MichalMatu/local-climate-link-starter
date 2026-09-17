@@ -39,6 +39,7 @@ import { useShellyControlFlow } from '../flows/hardware-setup/useShellyControlFl
 import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
+import { ShellySetupPage } from './hardware-setup/pages/ShellySetupPage.js';
 import './AutomationDashboardScreen.css';
 
 const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
@@ -287,12 +288,31 @@ const ThermometerDashboardSection = () => {
   return <SensorSetupPage flow={flow} primaryAddAction="phone-scan" />;
 };
 
+const PlugSettingsOverlay = ({
+  deviceId,
+  onClose
+}: {
+  deviceId: string;
+  onClose(): void;
+}) => {
+  const flow = useHardwareSetupFlow();
+  return (
+    <ShellySetupPage
+      flow={flow}
+      settingsOnlyDeviceId={deviceId}
+      onSettingsClose={onClose}
+    />
+  );
+};
+
 const PlainPlugCard = ({
   device,
-  onAddAutomation
+  onAddAutomation,
+  onOpenSettings
 }: {
   device: ShellyDraftDevice;
   onAddAutomation(): void;
+  onOpenSettings(): void;
 }) => {
   const { t } = useTranslation();
   const { shellyControlStates, refreshShellyControl, turnRelayOn, turnRelayOff } =
@@ -321,6 +341,15 @@ const PlainPlugCard = ({
           <h2>{device.name}</h2>
           <p>{t('dashboard.emptyCategory')}</p>
         </div>
+        <button
+          className="automation-card__menu"
+          type="button"
+          aria-label={`${t('hardware.shelly.settings')}: ${device.name}`}
+          title={t('hardware.shelly.settings')}
+          onClick={onOpenSettings}
+        >
+          <IconDotsVertical aria-hidden="true" />
+        </button>
       </header>
 
       <div
@@ -395,6 +424,7 @@ export const AutomationDashboardScreen = ({
   const [activeKind, setActiveKind] = useState<AppNavigationKind>(
     () => initialKind ?? 'climate'
   );
+  const [settingsDeviceId, setSettingsDeviceId] = useState<string | null>(null);
 
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
@@ -463,6 +493,7 @@ export const AutomationDashboardScreen = ({
                   key={`plug:${device.id}`}
                   device={device}
                   onAddAutomation={() => onAddAutomation('climate', device.id)}
+                  onOpenSettings={() => setSettingsDeviceId(device.id)}
                 />
               )
             )}
@@ -481,6 +512,14 @@ export const AutomationDashboardScreen = ({
           </div>
         )}
       </section>
+
+      {settingsDeviceId && (
+        <PlugSettingsOverlay
+          key={settingsDeviceId}
+          deviceId={settingsDeviceId}
+          onClose={() => setSettingsDeviceId(null)}
+        />
+      )}
 
       {activeKind === 'climate' && (
         <button
