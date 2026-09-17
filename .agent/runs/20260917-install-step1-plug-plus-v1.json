@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-step1-plug-plus-v1",
+  "task_digest": "1349c63cd9b624886c8016ebc2ee5e3091a024abc91c32fe411e650d9eeb6b07",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T11:14:41.571631+00:00",
+  "attempt_id": "cf266b5e818010b51bc44d76",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 70609,
+  "updated_at": "2026-09-17T11:14:41.571683+00:00",
+  "pid": 70609
+}
