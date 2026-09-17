@@ -186,6 +186,32 @@
   color: var(--lcl-color-accent-contrast);
 }
 
+.automation-card__plug-runtime {
+  align-items: center;
+  color: var(--lcl-color-text-muted);
+  display: flex;
+  font-size: var(--lcl-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--lcl-font-weight-semibold);
+  gap: var(--lcl-spacing-xs);
+  justify-content: center;
+  line-height: var(--lcl-line-height-compact);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.automation-card__plug-runtime > span {
+  align-items: center;
+  display: inline-flex;
+}
+
+.automation-card__plug-runtime > span:not(:last-child)::after {
+  color: var(--lcl-color-text-muted);
+  content: '·';
+  margin-left: var(--lcl-spacing-xs);
+  opacity: 0.45;
+}
+
 .automation-card__relay-actions {
   display: flex;
   gap: var(--lcl-spacing-sm);

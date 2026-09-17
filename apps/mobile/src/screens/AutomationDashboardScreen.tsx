@@ -53,6 +53,11 @@ type AutomationCardProps = {
   onOpen(installationId: string): void;
 };
 
+const formatPlugEnergy = (value: number | null | undefined): string => {
+  if (value == null || !Number.isFinite(value)) return '—';
+  return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
+};
+
 const ClimateAutomationCard = ({
   installation,
   onOpen
@@ -205,6 +210,16 @@ const ClimateAutomationCard = ({
             MANUAL
           </button>
         </div>
+      </div>
+
+      <div
+        className="automation-card__plug-runtime"
+        aria-label={t('hardware.shelly.statusMetricsLabel')}
+      >
+        <span>{formatInstallationMetric(snapshot?.plug?.powerW, ' W', 1)}</span>
+        <span>{formatInstallationMetric(snapshot?.plug?.voltageV, ' V', 0)}</span>
+        <span>{formatPlugEnergy(snapshot?.plug?.energyWh)}</span>
+        <span>{snapshot?.time.localTime ?? '—'}</span>
       </div>
 
       <div

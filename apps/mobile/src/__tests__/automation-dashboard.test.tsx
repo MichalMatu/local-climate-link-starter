@@ -263,6 +263,10 @@ describe('AutomationDashboardScreen', () => {
     expect(await screen.findByText('21.4°C')).toBeVisible();
     expect(screen.getByText('55.2%')).toBeVisible();
     expect(screen.getByText('1.31 kPa')).toBeVisible();
+    expect(screen.getByText('42.3 W')).toBeVisible();
+    expect(screen.getByText('230 V')).toBeVisible();
+    expect(screen.getByText('1.23 kWh')).toBeVisible();
+    expect(screen.getByText('09:31')).toBeVisible();
     expect(screen.getByText('Salon')).toBeVisible();
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
