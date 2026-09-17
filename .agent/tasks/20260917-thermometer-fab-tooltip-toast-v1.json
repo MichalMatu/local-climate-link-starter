@@ -1,0 +1,13 @@
+{
+  "id": "20260917-thermometer-fab-tooltip-toast-v1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": true,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 1800,
+  "task_timeout": 4800,
+  "commands": [
+    "set -euo pipefail; EXPECTED=f0aeb866a3e9f301d5a2008fdfa186f96c249a67; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"; git fetch -q origin agent-control; git show origin/agent-control:.agent/patches/20260917-thermometer-fab-tooltip-toast-v1.py > /tmp/thermometer-polish.py; python3 /tmp/thermometer-polish.py; FILES='apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/useShellySetupFeedback.ts apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx packages/ui/src/styles.css'; pnpm exec prettier --write $FILES; pnpm --filter @lcl/mobile test; pnpm --filter @lcl/mobile build; pnpm quality:ux; git diff --check; git add $FILES; git commit --no-verify -m 'Polish thermometer add and plug feedback UX'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; echo NEW_HEAD=$(git rev-parse HEAD)"
+  ]
+}
