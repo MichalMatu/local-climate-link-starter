@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-shelly-scan-direct-add-phone-v36",
+  "task_digest": "618f00cf211cc3c0474a0bbbb6c30340f873b353b1eb41bafb4d5b9fc3d4e0c2",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T21:21:19.250642+00:00",
+  "attempt_id": "c1ea0381feb6388423db856a",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 3978,
+  "updated_at": "2026-09-17T21:21:19.250693+00:00",
+  "pid": 3978
+}
