@@ -1044,6 +1044,23 @@ select {
   min-width: var(--lcl-size-action-min-width);
 }
 
+.shelly-network-scan__progress {
+  align-items: center;
+  color: var(--lcl-color-text-muted);
+  display: flex;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+  gap: var(--lcl-spacing-sm);
+  justify-content: center;
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding-block: var(--lcl-spacing-sm);
+}
+
+.shelly-network-scan__progress .scan-loading-state__spinner {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
 .saved-list__field {
   display: grid;
   font-size: var(--lcl-font-size-md);

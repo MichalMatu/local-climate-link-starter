@@ -468,12 +468,6 @@ export const ShellySetupPage = ({
                 </button>
               )}
             </div>
-            {isShellyScanActive && (
-              <div className="scan-loading-state scan-loading-state--compact">
-                <span className="scan-loading-state__spinner" aria-hidden="true" />
-                <strong>{t('hardware.shelly.scanningIpRange')}</strong>
-              </div>
-            )}
             {shouldShowEmptyScanResult && <p>{t('hardware.shelly.scanResultEmpty')}</p>}
             {scanResults.length > 0 && (
               <div
@@ -511,6 +505,12 @@ export const ShellySetupPage = ({
                     </div>
                   </article>
                 ))}
+              </div>
+            )}
+            {isShellyScanActive && (
+              <div className="shelly-network-scan__progress">
+                <span className="scan-loading-state__spinner" aria-hidden="true" />
+                <span>{t('hardware.shelly.scanningIpRange')}</span>
               </div>
             )}
           </div>
