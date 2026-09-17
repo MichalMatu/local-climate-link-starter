@@ -4,10 +4,11 @@ import {
   IconDeviceMobile,
   IconPencil,
   IconPlug,
+  IconTemperature,
   IconTrash,
   IconWifi
 } from '@tabler/icons-react';
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
 import type { SensorSetupFlow } from '../pageContracts.js';
@@ -60,6 +61,8 @@ const formatSeenAt = (
 const latestSample = (
   samples: readonly SensorReadingSample[]
 ): SensorReadingSample | null => samples.at(-1) ?? null;
+
+const SENSOR_SAMPLE_PULSE_MS = 650;
 
 type NumericSampleMetric = 'temperatureC' | 'humidityPct' | 'rssi';
 
@@ -204,12 +207,46 @@ export const SavedSensorCard = ({
     typeof humiditySample?.humidityPct === 'number' &&
     Number.isFinite(humiditySample.humidityPct);
   const latest = latestSample(samples);
+  const latestSeenAtMs = latest?.seenAtMs ?? null;
+  const previousSeenAtMsRef = useRef<number | null>(latestSeenAtMs);
+  const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isSamplePulseActive, setIsSamplePulseActive] = useState(false);
   const batterySample = latestBatterySample(samples);
   const rssiSample = latestNumericSample(samples, 'rssi');
+
+  useEffect(() => {
+    if (latestSeenAtMs === null) return;
+
+    const previousSeenAtMs = previousSeenAtMsRef.current;
+    if (previousSeenAtMs !== null && latestSeenAtMs <= previousSeenAtMs) return;
+
+    previousSeenAtMsRef.current = latestSeenAtMs;
+    setIsSamplePulseActive(true);
+    if (pulseTimeoutRef.current !== null) clearTimeout(pulseTimeoutRef.current);
+    pulseTimeoutRef.current = setTimeout(() => {
+      setIsSamplePulseActive(false);
+      pulseTimeoutRef.current = null;
+    }, SENSOR_SAMPLE_PULSE_MS);
+  }, [latestSeenAtMs]);
+
+  useEffect(
+    () => () => {
+      if (pulseTimeoutRef.current !== null) clearTimeout(pulseTimeoutRef.current);
+    },
+    []
+  );
 
   return (
     <article className="saved-list__item sensor-saved-card">
       <div className="sensor-card-header">
+        <span
+          className={`sensor-card-leading-icon${
+            isSamplePulseActive ? ' sensor-card-leading-icon--fresh' : ''
+          }`}
+          aria-hidden="true"
+        >
+          <IconTemperature className="sensor-card-leading-icon__icon" />
+        </span>
         {isEditing ? (
           <input
             autoFocus

@@ -2549,7 +2549,49 @@ select {
   align-items: center;
   display: grid;
   gap: var(--lcl-spacing-sm);
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: var(--lcl-size-control-min-height) minmax(0, 1fr) auto;
+}
+
+.sensor-card-leading-icon {
+  align-items: center;
+  background: var(--lcl-color-surface-muted);
+  border-radius: var(--lcl-radius-round);
+  color: var(--lcl-color-text-muted);
+  display: inline-flex;
+  height: var(--lcl-size-control-min-height);
+  justify-content: center;
+  width: var(--lcl-size-control-min-height);
+}
+
+.sensor-card-leading-icon__icon {
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
+}
+
+.sensor-card-leading-icon--fresh {
+  animation: sensor-card-reading-pulse 650ms ease-out;
+}
+
+@keyframes sensor-card-reading-pulse {
+  0%,
+  100% {
+    background: var(--lcl-color-surface-muted);
+    color: var(--lcl-color-text-muted);
+    transform: scale(1);
+  }
+
+  40% {
+    background: var(--lcl-color-accent);
+    color: var(--lcl-color-accent-contrast);
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sensor-card-leading-icon--fresh {
+    animation: none;
+    color: var(--lcl-color-accent);
+  }
 }
 
 .sensor-card-title-row,
