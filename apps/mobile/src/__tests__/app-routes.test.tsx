@@ -1,6 +1,6 @@
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
 import { createInstalledAutomation } from '../flows/installations/model.js';
@@ -185,7 +185,9 @@ describe('AppRoutes navigation shell', () => {
     renderRoutes();
     const card = screen.getByText('Nawilżacz').closest('article');
     expect(card).not.toBeNull();
-    fireEvent.click((card as HTMLElement).querySelector('button') as HTMLButtonElement);
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
+    );
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
     expect(screen.getByText('mock-fixed-shelly-http://192.168.0.30/')).toBeVisible();
@@ -218,7 +220,9 @@ describe('AppRoutes navigation shell', () => {
     });
     renderRoutes();
     const card = screen.getByText('Wentylator').closest('article');
-    fireEvent.click((card as HTMLElement).querySelector('button') as HTMLButtonElement);
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
     expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
@@ -244,7 +248,9 @@ describe('AppRoutes navigation shell', () => {
     );
 
     const card = screen.getByText('Grzejnik').closest('article');
-    fireEvent.click((card as HTMLElement).querySelector('button') as HTMLButtonElement);
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
+    );
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
 

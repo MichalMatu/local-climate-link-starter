@@ -238,8 +238,49 @@ describe('AutomationDashboardScreen', () => {
     expect(onAddAutomation).not.toHaveBeenCalled();
   });
 
-  it('shows a saved plug without automation and starts setup with that plug context', () => {
+  it('keeps a saved plug fully controllable after automation is removed', async () => {
     const onAddAutomation = vi.fn();
+    let relayOn = false;
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        id?: number | string;
+        method?: string;
+        params?: { on?: boolean };
+      };
+      let result: unknown = {};
+      switch (body.method) {
+        case 'Shelly.GetDeviceInfo':
+          result = { id: 'shellyplugsg3-plain', model: 'S3PL-00112EU', gen: 3 };
+          break;
+        case 'Shelly.GetStatus':
+          result = {
+            matter: { enabled: false },
+            script: { enable: true },
+            ble: { enable: true },
+            'switch:0': {
+              id: 0,
+              output: relayOn,
+              apower: relayOn ? 28.4 : 0,
+              voltage: 243.2,
+              current: relayOn ? 0.12 : 0,
+              aenergy: { total: 25160 }
+            },
+            wifi: { rssi: -55 },
+            sys: { time: '09:48', unixtime: 1_782_667_904, uptime: 12_345 }
+          };
+          break;
+        case 'Script.List':
+          result = { scripts: [] };
+          break;
+        case 'Switch.Set':
+          relayOn = body.params?.on === true;
+          result = {};
+          break;
+      }
+      return jsonResponse({ id: body.id ?? 1, result });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
     useHardwareSetupDraftStore.getState().upsertShellyDevice({
       id: 'http://192.168.0.30/',
       name: 'Nawilżacz',
@@ -247,12 +288,32 @@ describe('AutomationDashboardScreen', () => {
       scriptIdInput: '1'
     });
     renderDashboard(onAddAutomation);
+
     const card = screen.getByText('Nawilżacz').closest('article');
     expect(card).not.toBeNull();
-    expect(within(card as HTMLElement).getByText('Brak automatyzacji')).toBeVisible();
-    fireEvent.click(
-      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
-    );
+    const plugCard = card as HTMLElement;
+    expect(within(plugCard).getByText('Brak automatyzacji')).toBeVisible();
+    expect(await within(plugCard).findByText('0.0 W')).toBeVisible();
+    expect(within(plugCard).getByText('243 V')).toBeVisible();
+    expect(within(plugCard).getByText('25.16 kWh')).toBeVisible();
+    expect(within(plugCard).getByText('09:48')).toBeVisible();
+
+    const onButton = within(plugCard).getByRole('button', { name: 'ON' });
+    const offButton = within(plugCard).getByRole('button', { name: 'OFF' });
+    expect(offButton).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(onButton);
+    await waitFor(() => expect(onButton).toHaveAttribute('aria-pressed', 'true'));
+    expect(
+      fetchMock.mock.calls.some(([, init]) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          method?: string;
+          params?: { on?: boolean };
+        };
+        return body.method === 'Switch.Set' && body.params?.on === true;
+      })
+    ).toBe(true);
+
+    fireEvent.click(within(plugCard).getByRole('button', { name: 'Dodaj automatykę' }));
     expect(onAddAutomation).toHaveBeenCalledWith('climate', 'http://192.168.0.30/');
   });
 
