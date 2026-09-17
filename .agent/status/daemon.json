@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.18.20",
-  "state": "running",
+  "state": "idle",
   "pid": 68950,
-  "updated_at": "2026-09-17T09:31:07.476659+00:00",
+  "updated_at": "2026-09-17T09:31:28.139314+00:00",
   "self_revision": "d2c23951456d1e1528e3c52e47bdd104294cf170",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -14,7 +14,7 @@
   "task_timeout_default": 1800,
   "task_timeout_max": 21600,
   "memory_limit_mb_default": 4096,
-  "current_task_id": "20260917-audit-plug-plus-runtime-v2",
+  "current_task_id": null,
   "current_attempt_id": null,
   "current_task_digest": null,
   "repository_id": "local-climate-link-starter",
@@ -25,8 +25,6 @@
   "execution_model": "multi_repository_worker",
   "worker_pid": 68950,
   "supervisor_pid": 64224,
-  "active_resources": [
-    "repo-local-climate-link-starter"
-  ],
+  "last_task_id": "20260917-audit-plug-plus-runtime-v2",
   "execution_variant": "parallel"
 }
