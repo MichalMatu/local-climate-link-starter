@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 9,
-  "command": "pnpm --filter @lcl/mobile build",
-  "pid": 83785,
+  "command": "pnpm --filter @lcl/mobile exec cap sync android",
+  "pid": 83917,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T13:15:05.915249+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-17T13:15:12.347395+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260917-install-plain-plug-settings-v1",
@@ -18,5 +18,5 @@
   "task_digest": "b73d4dbed04d9204c270ad5c3c20b9e9e26ceaf4a9e93bcb4b77eb42b512fce8",
   "daemon_version": "4.18.22",
   "daemon_pid": 83638,
-  "updated_at": "2026-09-17T13:15:05.986251+00:00"
+  "updated_at": "2026-09-17T13:15:12.418930+00:00"
 }
