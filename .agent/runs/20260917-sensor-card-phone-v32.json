@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 3,
-  "command": "pnpm android:phone-alpha",
-  "pid": 60042,
+  "command": "set -euo pipefail; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$(command -v adb || true)\"; if [ -z \"$ADB\" ] && [ -x \"$SDK/platform-tools/adb\" ]; then ADB=\"$SDK/platform-tools/adb\"; fi; test -n \"$ADB\"; test \"$($ADB devices | awk 'NR>1 && $2==\"device\"{n++} END{print n+0}')\" -eq 1; $ADB shell monkey -p link.localclimate.app -c android.intent.category.LAUNCHER 1 >/dev/null; sleep 2; echo '=== PACKAGE ==='; $ADB shell dumpsys package link.localclimate.app | grep -m2 -E 'versionName=|versionCode='; echo '=== FOCUS ==='; $ADB shell dumpsys window | grep -m2 -E 'mCurrentFocus|mFocusedApp' | grep 'link.localclimate.app'; echo '=== ERROR CHECK ==='; if $ADB logcat -d -v brief | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; then exit 31; else echo NO_FATAL_OR_ANR; fi; test -z \"$(git status --porcelain --untracked-files=no)\"; git rev-parse HEAD",
+  "pid": 60749,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T20:51:34.664744+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-17T20:52:00.696262+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 3,
   "stage_phase": "commands",
   "task_id": "20260917-sensor-card-phone-v32",
@@ -18,5 +18,5 @@
   "task_digest": "5f3b1f8e2a725e904d24a7f8a3f357c21b71fb887bbafb5f2e506075d408d82c",
   "daemon_version": "4.18.22",
   "daemon_pid": 59767,
-  "updated_at": "2026-09-17T20:51:34.694811+00:00"
+  "updated_at": "2026-09-17T20:52:00.770538+00:00"
 }
