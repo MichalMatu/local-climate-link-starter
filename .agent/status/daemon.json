@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.22",
   "state": "idle",
-  "pid": 83091,
-  "updated_at": "2026-09-17T16:11:04.387166+00:00",
+  "pid": 87921,
+  "updated_at": "2026-09-17T16:16:10.190207+00:00",
   "self_revision": "224046066b0df92544337db0ee623e372629e726",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 83091,
+  "worker_pid": 87921,
   "supervisor_pid": 61783,
-  "last_task_id": "re-audit-boundaries-20260917-1812",
   "execution_variant": "parallel"
 }
