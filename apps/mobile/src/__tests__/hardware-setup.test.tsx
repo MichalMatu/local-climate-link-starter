@@ -1414,6 +1414,8 @@ describe('HardwareSetupScreen', () => {
     const tooltipButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu Shelly'
     });
+    expect(tooltipButton.closest('.lcl-modal__header-actions')).not.toBeNull();
+    expect(tooltipButton.closest('.shelly-network-scan__body')).toBeNull();
     expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
 
     fireEvent.click(tooltipButton);

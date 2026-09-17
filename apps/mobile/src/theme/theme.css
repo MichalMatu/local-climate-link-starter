@@ -1535,13 +1535,6 @@ select {
   justify-content: flex-end;
 }
 
-.shelly-network-scan__toolbar {
-  align-items: center;
-  display: flex;
-  gap: var(--lcl-spacing-sm);
-  justify-content: flex-end;
-}
-
 .shelly-network-scan__range {
   display: flex;
   gap: var(--lcl-spacing-md);

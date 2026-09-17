@@ -346,6 +346,19 @@ export const ShellySetupPage = ({
       <Modal
         busy={flow.checkShellyMutation.isPending}
         closeLabel={t('common.close')}
+        headerActions={
+          <span className="shelly-network-scan__info">
+            <InfoTooltip
+              label={t('hardware.shelly.infoScanLabel')}
+              title={t('hardware.shelly.infoScanTitle')}
+            >
+              {shellyScanEstimate}
+              <br />
+              <br />
+              {t('hardware.shelly.scannerBehavior')}
+            </InfoTooltip>
+          </span>
+        }
         open={isAddShellyModalOpen}
         size="task"
         title={t('hardware.shelly.add')}
@@ -407,19 +420,6 @@ export const ShellySetupPage = ({
             aria-label={t('hardware.shelly.scanNetwork')}
           >
             <div className="shelly-network-scan__body">
-              <div className="shelly-network-scan__toolbar">
-                <span className="shelly-network-scan__info">
-                  <InfoTooltip
-                    label={t('hardware.shelly.infoScanLabel')}
-                    title={t('hardware.shelly.infoScanTitle')}
-                  >
-                    {shellyScanEstimate}
-                    <br />
-                    <br />
-                    {t('hardware.shelly.scannerBehavior')}
-                  </InfoTooltip>
-                </span>
-              </div>
               <div className="shelly-network-scan__range">
                 <label
                   className={showShellyScanRangeError ? 'field field--invalid' : 'field'}
