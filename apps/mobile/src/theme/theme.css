@@ -1171,6 +1171,76 @@ select {
   opacity: var(--lcl-opacity-muted);
 }
 
+.sensor-status-strip {
+  align-items: center;
+  color: var(--lcl-color-text-muted);
+  display: flex;
+  gap: var(--lcl-spacing-md);
+  justify-content: space-between;
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding-inline: var(--lcl-spacing-xs);
+}
+
+.sensor-status-strip__item {
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--lcl-font-size-sm);
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sensor-status-strip__item svg {
+  flex: 0 0 auto;
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
+}
+
+.sensor-status-strip__item strong {
+  color: var(--lcl-color-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--lcl-font-weight-semibold);
+}
+
+.sensor-card-details-disclosure {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding-top: var(--lcl-spacing-xs);
+}
+
+.sensor-card-details-disclosure > summary {
+  color: var(--lcl-color-text-muted);
+  cursor: pointer;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+  list-style: none;
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-xl) var(--lcl-spacing-sm) 0;
+  position: relative;
+}
+
+.sensor-card-details-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sensor-card-details-disclosure > summary::after {
+  border-bottom: var(--lcl-border-width-md) solid var(--lcl-color-text-muted);
+  border-right: var(--lcl-border-width-md) solid var(--lcl-color-text-muted);
+  content: '';
+  height: var(--lcl-size-select-indicator-size);
+  position: absolute;
+  right: var(--lcl-spacing-xs);
+  top: 50%;
+  transform: translateY(-65%) rotate(45deg);
+  width: var(--lcl-size-select-indicator-size);
+}
+
+.sensor-card-details-disclosure[open] > summary::after {
+  transform: translateY(-35%) rotate(225deg);
+}
+
+.sensor-card-details-disclosure .sensor-card-details {
+  margin-top: var(--lcl-spacing-xs);
+}
+
 .icon-action-row {
   align-items: center;
   display: inline-flex;

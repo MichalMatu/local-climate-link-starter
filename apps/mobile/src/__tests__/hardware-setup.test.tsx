@@ -1604,11 +1604,23 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.getByText('Xiaomi salon')).toBeInTheDocument();
     const sensorCard = getSavedSensorCard('Xiaomi salon');
-    expect(within(sensorCard).getByText('MAC')).toBeInTheDocument();
-    expect(within(sensorCard).getByText('A4:C1:38:4F:24:CD')).toBeInTheDocument();
-    expect(within(sensorCard).getByText('BTHome v2')).toBeInTheDocument();
-    expect(within(sensorCard).getByText('Bateria')).toBeInTheDocument();
-    expect(within(sensorCard).getByText('RSSI')).toBeInTheDocument();
+    const details = within(sensorCard).getByText('Szczegóły', { selector: 'summary' });
+    expect(details.closest('details')).not.toHaveAttribute('open');
+    expect(within(sensorCard).queryByText('MAC')).not.toBeVisible();
+    expect(within(sensorCard).queryByText('BTHome v2')).not.toBeVisible();
+    expect(within(sensorCard).getByLabelText(/^Bateria:/)).toBeVisible();
+    expect(within(sensorCard).getByLabelText(/^RSSI:/)).toBeVisible();
+    expect(within(sensorCard).getByLabelText(/^Ostatni pomiar:/)).toBeVisible();
+    expect(
+      sensorCard.querySelectorAll('.sensor-status-strip svg.tabler-icon')
+    ).toHaveLength(3);
+    expect(
+      sensorCard.querySelectorAll('.sensor-status-strip svg:not(.tabler-icon)')
+    ).toHaveLength(0);
+    fireEvent.click(details);
+    expect(within(sensorCard).getByText('MAC')).toBeVisible();
+    expect(within(sensorCard).getByText('A4:C1:38:4F:24:CD')).toBeVisible();
+    expect(within(sensorCard).getByText('BTHome v2')).toBeVisible();
     expect(
       within(sensorCard).getByRole('button', {
         name: 'Ustaw czas Xiaomi/PVVX zgodnie z telefonem'

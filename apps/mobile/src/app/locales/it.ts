@@ -460,6 +460,7 @@ export const it = {
       settingsAria: 'Impostazioni termometro {name}',
       settingsTitle: 'Impostazioni termometro',
       noBleFound: 'Nessun termometro BLE trovato.',
+      details: 'Dettagli',
       typeLabel: 'Tipo'
     },
     rule: {

@@ -455,6 +455,7 @@ export const ptBr = {
       settingsAria: 'Configurações do termômetro {name}',
       settingsTitle: 'Configurações do termômetro',
       noBleFound: 'Nenhum termômetro BLE encontrado.',
+      details: 'Detalhes',
       typeLabel: 'Tipo'
     },
     rule: {

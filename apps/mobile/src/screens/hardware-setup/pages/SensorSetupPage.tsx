@@ -2,12 +2,14 @@ import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { Modal, ToastViewport } from '@lcl/ui';
 import {
+  IconBattery,
   IconClock,
   IconDeviceMobile,
   IconPencil,
   IconPlug,
   IconPlus,
-  IconTrash
+  IconTrash,
+  IconWifi
 } from '@tabler/icons-react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -626,35 +628,59 @@ export const SensorSetupPage = ({
                   </strong>
                 </div>
               </div>
-              <dl className="sensor-card-details">
-                <div>
-                  <dt>{t('hardware.sensor.typeLabel')}</dt>
-                  <dd>{sensorProfileDisplayLabels[device.profileId]}</dd>
-                </div>
-                <div>
-                  <dt>{t('hardware.metrics.battery')}</dt>
-                  <dd>{formatBattery(batterySample, t('common.missingData'))}</dd>
-                </div>
-                <div>
-                  <dt>{t('common.rssi')}</dt>
-                  <dd>
-                    {formatNullableMetric(
-                      rssiSample?.rssi,
-                      ' dBm',
-                      0,
-                      t('common.missingData')
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t('hardware.metrics.lastMeasurement')}</dt>
-                  <dd>{formatSeenAt(latest, locale, t('common.missingData'))}</dd>
-                </div>
-                <div className="sensor-card-details__wide">
-                  <dt>MAC</dt>
-                  <dd>{device.runtimeAddress}</dd>
-                </div>
-              </dl>
+              <div className="sensor-status-strip">
+                <span
+                  className="sensor-status-strip__item"
+                  aria-label={`${t('hardware.metrics.battery')}: ${formatBattery(
+                    batterySample,
+                    '—'
+                  )}`}
+                  title={t('hardware.metrics.battery')}
+                >
+                  <IconBattery aria-hidden="true" />
+                  <strong>{formatBattery(batterySample, '—')}</strong>
+                </span>
+                <span
+                  className="sensor-status-strip__item"
+                  aria-label={`${t('common.rssi')}: ${formatNullableMetric(
+                    rssiSample?.rssi,
+                    ' dBm',
+                    0,
+                    '—'
+                  )}`}
+                  title={t('common.rssi')}
+                >
+                  <IconWifi aria-hidden="true" />
+                  <strong>
+                    {formatNullableMetric(rssiSample?.rssi, ' dBm', 0, '—')}
+                  </strong>
+                </span>
+                <span
+                  className="sensor-status-strip__item"
+                  aria-label={`${t('hardware.metrics.lastMeasurement')}: ${formatSeenAt(
+                    latest,
+                    locale,
+                    '—'
+                  )}`}
+                  title={t('hardware.metrics.lastMeasurement')}
+                >
+                  <IconClock aria-hidden="true" />
+                  <strong>{formatSeenAt(latest, locale, '—')}</strong>
+                </span>
+              </div>
+              <details className="sensor-card-details-disclosure">
+                <summary>{t('hardware.sensor.details')}</summary>
+                <dl className="sensor-card-details">
+                  <div>
+                    <dt>{t('hardware.sensor.typeLabel')}</dt>
+                    <dd>{sensorProfileDisplayLabels[device.profileId]}</dd>
+                  </div>
+                  <div className="sensor-card-details__wide">
+                    <dt>MAC</dt>
+                    <dd>{device.runtimeAddress}</dd>
+                  </div>
+                </dl>
+              </details>
             </article>
           );
         })}

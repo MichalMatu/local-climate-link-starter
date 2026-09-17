@@ -465,6 +465,7 @@ export const fr = {
       settingsAria: 'Réglages du thermomètre {name}',
       settingsTitle: 'Réglages du thermomètre',
       noBleFound: 'Aucun thermomètre BLE trouvé.',
+      details: 'Détails',
       typeLabel: 'Type'
     },
     rule: {

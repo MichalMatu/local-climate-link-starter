@@ -458,6 +458,7 @@ export const es = {
       settingsAria: 'Ajustes del termómetro {name}',
       settingsTitle: 'Ajustes del termómetro',
       noBleFound: 'No se encontraron termómetros BLE.',
+      details: 'Detalles',
       typeLabel: 'Tipo'
     },
     rule: {
