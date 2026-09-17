@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-single-scan-toggle-button-v2",
+  "task_digest": "a9b206faa99978062db9f2ea692ea9014174357877d19219adaea2e7f690c4c0",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T14:29:55.285486+00:00",
+  "attempt_id": "0f85b59a7b0d10cf043295ee",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 58002,
+  "updated_at": "2026-09-17T14:29:55.285541+00:00",
+  "pid": 58002
+}
