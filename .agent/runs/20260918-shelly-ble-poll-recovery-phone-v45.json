@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 8,
-  "command": "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/useShellySetupFeedback.ts apps/mobile/src/__tests__/hardware-setup.test.tsx; git diff --check",
-  "pid": 40925,
+  "command": "pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --passWithNoTests",
+  "pid": 40959,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T23:12:52.249975+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-17T23:12:53.755161+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260918-shelly-ble-poll-recovery-phone-v45",
@@ -18,5 +18,5 @@
   "task_digest": "7fd73cfbdd65ccd003dfac588036541d15f9e58b0ed01bf2b2460eb76083903f",
   "daemon_version": "4.18.22",
   "daemon_pid": 40718,
-  "updated_at": "2026-09-17T23:12:52.266713+00:00"
+  "updated_at": "2026-09-17T23:12:53.827799+00:00"
 }
