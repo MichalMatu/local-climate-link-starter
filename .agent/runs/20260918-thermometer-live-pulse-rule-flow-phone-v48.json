@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 4473,
+  "command": "set -euo pipefail; apk_path=$(adb shell pm path link.localclimate.app | head -n 1 | tr -d '\\r' | sed 's/^package://'); test -n \"$apk_path\"; adb pull \"$apk_path\" /tmp/lcl-v48-installed.apk >/dev/null; unzip -p /tmp/lcl-v48-installed.apk 'assets/public/assets/*.css' | grep -Fq 'sensor-card-leading-icon--fresh .sensor-card-leading-icon__icon'; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; git rev-parse HEAD; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+  "pid": 5412,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T23:54:31.454908+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-17T23:55:10.558856+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-thermometer-live-pulse-rule-flow-phone-v48",
@@ -18,5 +18,5 @@
   "task_digest": "088646cb3351836f4fff8084826746bf46997156ba600f5ef0c908873a85be49",
   "daemon_version": "4.18.22",
   "daemon_pid": 98008,
-  "updated_at": "2026-09-17T23:54:31.532671+00:00"
+  "updated_at": "2026-09-17T23:55:10.683471+00:00"
 }
