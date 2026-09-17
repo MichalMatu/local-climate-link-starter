@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-scanner-saved-accordion-v1",
+  "task_digest": "9626486adb230118389b7bc56ad2066e55c7804195328bb32012c76b42d069b2",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T12:00:49.994736+00:00",
+  "attempt_id": "56ff9d5c88e8db2cd75125bb",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 14813,
+  "updated_at": "2026-09-17T12:00:49.994887+00:00",
+  "pid": 14813
+}
