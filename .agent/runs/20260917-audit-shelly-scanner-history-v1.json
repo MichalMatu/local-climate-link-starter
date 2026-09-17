@@ -1,0 +1,9 @@
+{
+  "event": "invalid_task_rejected",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "updated_at": "2026-09-17T11:26:07.013713+00:00",
+  "task_id": "20260917-audit-shelly-scanner-history-v1",
+  "daemon_version": "4.18.22",
+  "pid": 82723
+}
