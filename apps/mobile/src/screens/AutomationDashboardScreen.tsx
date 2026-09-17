@@ -2,7 +2,6 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
-  IconClock,
   IconDotsVertical,
   IconPlug,
   IconPlus,
@@ -37,7 +36,9 @@ import {
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useShellyControlFlow } from '../flows/hardware-setup/useShellyControlFlow.js';
+import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
+import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
 import './AutomationDashboardScreen.css';
 
 const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
@@ -281,6 +282,11 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
     <ClimateAutomationCard installation={installation} onOpen={onOpen} />
   );
 
+const ThermometerDashboardSection = () => {
+  const flow = useHardwareSetupFlow();
+  return <SensorSetupPage flow={flow} primaryAddAction="phone-scan" />;
+};
+
 const PlainPlugCard = ({
   device,
   onAddAutomation
@@ -386,14 +392,8 @@ export const AutomationDashboardScreen = ({
   const installations = useInstalledAutomationStore((state) => state.installations);
   const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
   const queryClient = useQueryClient();
-  const climateInstallations = installations.filter(
-    (installation): installation is ClimateInstalledAutomation =>
-      installation.kind !== 'time'
-  );
-  const hasClimate = shellyDevices.length > 0 || climateInstallations.length > 0;
-  const hasTime = installations.some((installation) => installation.kind === 'time');
   const [activeKind, setActiveKind] = useState<AppNavigationKind>(
-    () => initialKind ?? (hasTime && !hasClimate ? 'time' : 'climate')
+    () => initialKind ?? 'climate'
   );
 
   useEffect(() => {
@@ -419,59 +419,41 @@ export const AutomationDashboardScreen = ({
     };
   }, [queryClient]);
 
-  const visibleInstallations = installations.filter((installation) =>
-    activeKind === 'time' ? installation.kind === 'time' : installation.kind !== 'time'
-  );
   const normalizedBaseUrl = (value: string) =>
     value.trim().replace(/\/+$/, '').toLowerCase();
-  const matchedClimateInstallationIds = new Set<string>();
+  const matchedInstallationIds = new Set<string>();
   const plugEntries = shellyDevices.map((device) => {
     const installation =
-      climateInstallations.find(
+      installations.find(
         (candidate) =>
           normalizedBaseUrl(candidate.shelly.baseUrl) ===
           normalizedBaseUrl(device.baseUrl)
       ) ?? null;
-    if (installation) matchedClimateInstallationIds.add(installation.id);
+    if (installation) matchedInstallationIds.add(installation.id);
     return { device, installation };
   });
-  const unmatchedClimateInstallations = climateInstallations.filter(
-    (installation) => !matchedClimateInstallationIds.has(installation.id)
+  const unmatchedInstallations = installations.filter(
+    (installation) => !matchedInstallationIds.has(installation.id)
   );
-  const hasPlugEntries =
-    plugEntries.length > 0 || unmatchedClimateInstallations.length > 0;
-  const fabLabel =
-    activeKind === 'climate' ? t('hardware.shelly.add') : t('dashboard.addAutomation');
+  const hasPlugEntries = plugEntries.length > 0 || unmatchedInstallations.length > 0;
+  const fabLabel = t('hardware.shelly.add');
 
   return (
     <main className="demo-shell dashboard-shell app-bottom-nav-shell">
       <header className="demo-header dashboard-header app-page-header">
         <h1>
-          {activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.title')}
+          {activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.timeTab')}
         </h1>
       </header>
 
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
         {activeKind === 'time' ? (
-          visibleInstallations.length > 0 ? (
-            visibleInstallations.map((installation) => (
-              <AutomationCard
-                key={installation.id}
-                installation={installation}
-                onOpen={onOpenInstallation}
-              />
-            ))
-          ) : (
-            <div className="dashboard-kind-empty" role="status">
-              <IconClock className="dashboard-kind-empty__icon" aria-hidden="true" />
-              <strong>{t('dashboard.emptyCategory')}</strong>
-            </div>
-          )
+          <ThermometerDashboardSection />
         ) : hasPlugEntries ? (
           <>
             {plugEntries.map(({ device, installation }) =>
               installation ? (
-                <ClimateAutomationCard
+                <AutomationCard
                   key={installation.id}
                   installation={installation}
                   onOpen={onOpenInstallation}
@@ -484,8 +466,8 @@ export const AutomationDashboardScreen = ({
                 />
               )
             )}
-            {unmatchedClimateInstallations.map((installation) => (
-              <ClimateAutomationCard
+            {unmatchedInstallations.map((installation) => (
+              <AutomationCard
                 key={installation.id}
                 installation={installation}
                 onOpen={onOpenInstallation}
@@ -500,21 +482,17 @@ export const AutomationDashboardScreen = ({
         )}
       </section>
 
-      <button
-        className="dashboard-fab"
-        type="button"
-        aria-label={fabLabel}
-        title={fabLabel}
-        onClick={() => {
-          if (activeKind === 'climate') {
-            onAddPlug();
-            return;
-          }
-          onAddAutomation(activeKind);
-        }}
-      >
-        <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
-      </button>
+      {activeKind === 'climate' && (
+        <button
+          className="dashboard-fab"
+          type="button"
+          aria-label={fabLabel}
+          title={fabLabel}
+          onClick={onAddPlug}
+        >
+          <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
+        </button>
+      )}
 
       <AppBottomNavigation
         activeKind={activeKind}

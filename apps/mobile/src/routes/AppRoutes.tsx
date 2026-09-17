@@ -74,22 +74,17 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     return { type: 'dashboard', kind: 'climate' };
   }
   if (route.type === 'setup') {
-    return route.intent === 'time'
-      ? { type: 'dashboard', kind: 'time' }
-      : {
-          type: 'intent',
-          sourceKind: route.sourceKind,
-          ...(route.shellyId ? { shellyId: route.shellyId } : {})
-        };
+    return {
+      type: 'intent',
+      sourceKind: route.sourceKind,
+      ...(route.shellyId ? { shellyId: route.shellyId } : {})
+    };
   }
   if (route.type === 'intent') {
     return { type: 'dashboard', kind: route.sourceKind };
   }
   return null;
 };
-
-const setupKindForIntent = (intent: SetupRouteIntent): AppNavigationKind =>
-  intent === 'time' ? 'time' : 'climate';
 
 export const AppRoutes = () => {
   const installations = useInstalledAutomationStore((state) => state.installations);
@@ -141,13 +136,16 @@ export const AppRoutes = () => {
     };
   }, [navigate]);
 
-  const selectIntent = (intent: SetupIntent, shellyId?: string) => {
-    const nextKind = setupKindForIntent(intent);
+  const selectIntent = (
+    intent: SetupIntent,
+    sourceKind: AppNavigationKind,
+    shellyId?: string
+  ) => {
     if (shellyId) selectShellyDevice(shellyId);
     navigate({
       type: 'setup',
       intent,
-      sourceKind: nextKind,
+      sourceKind,
       ...(shellyId ? { shellyId } : {})
     });
   };
@@ -169,7 +167,7 @@ export const AppRoutes = () => {
         onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
         onOpenSettings={openSettings}
-        onSelect={(intent) => selectIntent(intent, route.shellyId)}
+        onSelect={(intent) => selectIntent(intent, route.sourceKind, route.shellyId)}
       />
     );
   }
@@ -198,7 +196,7 @@ export const AppRoutes = () => {
           navigate({
             type: 'installation',
             installationId,
-            kind: installation?.kind === 'time' ? 'time' : 'climate'
+            kind: 'climate'
           });
         }}
         onOpenSettings={openSettings}
@@ -256,15 +254,11 @@ export const AppRoutes = () => {
         setupIntent={route.intent}
         {...(route.shellyId ? { fixedShellyId: route.shellyId } : {})}
         onBackToIntent={() =>
-          navigate(
-            route.intent === 'time'
-              ? { type: 'dashboard', kind: 'time' }
-              : {
-                  type: 'intent',
-                  sourceKind: route.sourceKind,
-                  ...(route.shellyId ? { shellyId: route.shellyId } : {})
-                }
-          )
+          navigate({
+            type: 'intent',
+            sourceKind: route.sourceKind,
+            ...(route.shellyId ? { shellyId: route.shellyId } : {})
+          })
         }
         onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
         onOpenSettings={openSettings}

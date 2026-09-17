@@ -58,7 +58,11 @@ const availableTabsForIntent = (
   plugAddOnly = false
 ) => {
   if (plugAddOnly) return PLUG_ADD_HARDWARE_TABS;
-  if (setupIntent === 'time') return TIME_HARDWARE_TABS;
+  if (setupIntent === 'time') {
+    return fixedShellyId
+      ? TIME_HARDWARE_TABS.filter((tab) => tab.id === 'schedule')
+      : TIME_HARDWARE_TABS;
+  }
   return fixedShellyId
     ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id !== 'shelly')
     : CLIMATE_HARDWARE_TABS;
@@ -199,7 +203,7 @@ export const HardwareSetupScreen = ({
       {setupIntent && onBackToIntent && (
         <div className="setup-context">
           <button className="setup-context__back" type="button" onClick={onBackToIntent}>
-            {setupIntent === 'time' ? t('common.cancel') : t('intent.back')}
+            {t('intent.back')}
           </button>
           <strong>{t(`intent.${setupIntent}.context`)}</strong>
         </div>

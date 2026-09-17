@@ -341,10 +341,13 @@ describe('AutomationDashboardScreen', () => {
       'aria-current',
       'page'
     );
-    const timeNav = screen.getByRole('button', { name: 'Czas' });
-    expect(timeNav).toBeEnabled();
-    fireEvent.click(timeNav);
-    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
+    const thermometerNav = screen.getByRole('button', { name: 'Termometry' });
+    expect(thermometerNav).toBeEnabled();
+    fireEvent.click(thermometerNav);
+    expect(screen.getByRole('heading', { name: 'Termometry' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
+    ).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
@@ -371,15 +374,16 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
-    const climateNav = screen.getByRole('button', { name: 'Gniazdka' });
-    expect(climateNav).toBeEnabled();
-    fireEvent.click(climateNav);
-    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
+    const thermometerNav = screen.getByRole('button', { name: 'Termometry' });
+    expect(thermometerNav).toBeEnabled();
+    fireEvent.click(thermometerNav);
+    expect(screen.getByRole('heading', { name: 'Termometry' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
+    expect(screen.getByText('Harmonogram dzienny')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
     expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);

@@ -95,7 +95,7 @@ export const fr = {
   dashboard: {
     title: 'Vos automatisations',
     climateTab: 'Prises',
-    timeTab: 'Temps',
+    timeTab: 'Thermomètres',
     settingsTab: 'Réglages',
     description: 'Voyez ce que chaque Shelly mesure et fait actuellement.',
     addAutomation: 'Ajouter une automatisation',

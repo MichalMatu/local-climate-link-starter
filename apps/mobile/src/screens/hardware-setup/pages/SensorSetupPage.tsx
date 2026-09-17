@@ -1,7 +1,14 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { Modal, ToastViewport } from '@lcl/ui';
-import { IconClock, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import {
+  IconClock,
+  IconDeviceMobile,
+  IconPencil,
+  IconPlug,
+  IconPlus,
+  IconTrash
+} from '@tabler/icons-react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
@@ -177,7 +184,14 @@ type SensorDialogState =
   | { kind: 'ble' }
   | { kind: 'remove'; device: SensorDraftDevice };
 
-export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) => {
+type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
+  primaryAddAction?: 'manual' | 'phone-scan';
+};
+
+export const SensorSetupPage = ({
+  flow,
+  primaryAddAction = 'manual'
+}: SensorSetupPageProps) => {
   const { locale, t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
   const [editingSensorId, setEditingSensorId] = useState<string | null>(null);
@@ -269,9 +283,19 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
       <button
         className="primary-action setup-add-fab"
         type="button"
-        aria-label={t('hardware.sensor.add')}
-        title={t('hardware.sensor.addTitle')}
-        onClick={openAddSensorModal}
+        aria-label={
+          primaryAddAction === 'phone-scan'
+            ? t('hardware.sensor.scanPhoneTitle')
+            : t('hardware.sensor.add')
+        }
+        title={
+          primaryAddAction === 'phone-scan'
+            ? t('hardware.sensor.scanPhoneTitle')
+            : t('hardware.sensor.addTitle')
+        }
+        onClick={
+          primaryAddAction === 'phone-scan' ? openPhoneBleScanModal : openAddSensorModal
+        }
       >
         <IconPlus className="setup-add-fab__icon" aria-hidden="true" />
       </button>
@@ -484,6 +508,25 @@ export const SensorSetupPage = ({ flow }: HardwarePageProps<SensorSetupFlow>) =>
                 ) : (
                   <div className="sensor-card-title-row">
                     <h3 className="sensor-card-title">{device.name}</h3>
+                    {latest?.source === 'phone-scan' && (
+                      <span
+                        className="sensor-card-source"
+                        title={t('hardware.sensor.scanPhoneTitle')}
+                      >
+                        <IconDeviceMobile
+                          className="icon-action__svg"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    )}
+                    {latest?.source === 'shelly-scan' && (
+                      <span
+                        className="sensor-card-source"
+                        title={t('hardware.nav.shellyTitle')}
+                      >
+                        <IconPlug className="icon-action__svg" aria-hidden="true" />
+                      </span>
+                    )}
                     <button
                       className="icon-action rule-summary-icon-action"
                       type="button"

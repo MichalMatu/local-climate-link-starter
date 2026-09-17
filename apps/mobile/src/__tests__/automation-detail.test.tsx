@@ -442,7 +442,7 @@ describe('InstallationDetailScreen', () => {
     expect(rpcMethods).not.toContain('Script.Start');
     expect(screen.getByText('21.4°C')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     expect(onNavigateDashboard).toHaveBeenCalledWith('time');
     expect(onBack).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));

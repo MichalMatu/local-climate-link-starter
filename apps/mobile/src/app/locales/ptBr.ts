@@ -92,7 +92,7 @@ export const ptBr = {
   dashboard: {
     title: 'Suas automações',
     climateTab: 'Tomadas',
-    timeTab: 'Tempo',
+    timeTab: 'Termômetros',
     settingsTab: 'Configurações',
     description: 'Veja o que cada Shelly está lendo e fazendo agora.',
     addAutomation: 'Adicionar automação',

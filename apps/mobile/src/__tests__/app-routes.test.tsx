@@ -193,22 +193,25 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByText('mock-fixed-shelly-http://192.168.0.30/')).toBeVisible();
   });
 
-  it('opens time setup directly from the Time plus and returns to Time dashboard', async () => {
+  it('starts time setup from a saved plug and keeps that Shelly context', async () => {
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.33/',
+      name: 'Lampa',
+      baseUrl: 'http://192.168.0.33/',
+      scriptIdInput: '1'
+    });
     renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
+    const card = screen.getByText('Lampa').closest('article');
+    expect(card).not.toBeNull();
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
+    expect(screen.getByText('mock-fixed-shelly-http://192.168.0.33/')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
+    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
   });
 
   it('keeps Settings available from per-plug Add automation intent', () => {
@@ -278,14 +281,23 @@ describe('AppRoutes navigation shell', () => {
     );
   });
 
-  it('completes direct Time setup back to the Time dashboard', async () => {
+  it('completes per-plug Time setup back to the Plugs dashboard', async () => {
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.34/',
+      name: 'Pompa',
+      baseUrl: 'http://192.168.0.34/',
+      scriptIdInput: '1'
+    });
     renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Czas' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    const card = screen.getByText('Pompa').closest('article');
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Czas' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
