@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-shelly-scan-range-row-phone-v40",
+  "task_digest": "903013d0cc0e5cedd7fc2ea998a3b4c3bf3bb6a2202b1c5d41e8cdccff7aa28a",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T22:08:13.679234+00:00",
+  "attempt_id": "75f96f6496953f682443e2bc",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 60711,
+  "updated_at": "2026-09-17T22:08:13.679313+00:00",
+  "pid": 60711
+}
