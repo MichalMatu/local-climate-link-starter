@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-plug-screen-v1",
+  "task_digest": "6656199791a0e38b5c6f387d976bbe6008e2de95f1279e6dfe1fa0f0ae4faab5",
+  "idle_timeout": 900,
+  "task_timeout": 14400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T08:54:22.543738+00:00",
+  "attempt_id": "0362ae1b5c2590d013824b87",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 27032,
+  "updated_at": "2026-09-17T08:54:22.543854+00:00",
+  "pid": 27032
+}
