@@ -448,25 +448,17 @@ export const ShellySetupPage = ({
               <button
                 className="secondary-action"
                 type="button"
-                aria-busy={isShellyScanActive || undefined}
-                disabled={isShellyScanActive}
-                title={t('hardware.shelly.scanStartTitle')}
-                onClick={startShellyScan}
+                title={
+                  isShellyScanActive
+                    ? t('hardware.shelly.scanStopTitle')
+                    : t('hardware.shelly.scanStartTitle')
+                }
+                onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
               >
                 {isShellyScanActive
-                  ? t('hardware.shelly.scanning')
+                  ? t('hardware.shelly.scanStop')
                   : t('hardware.shelly.scanStart')}
               </button>
-              {isShellyScanActive && (
-                <button
-                  className="secondary-action"
-                  type="button"
-                  title={t('hardware.shelly.scanStopTitle')}
-                  onClick={stopShellyScan}
-                >
-                  {t('hardware.shelly.scanStop')}
-                </button>
-              )}
             </div>
             {shouldShowEmptyScanResult && <p>{t('hardware.shelly.scanResultEmpty')}</p>}
             {scanResults.length > 0 && (
