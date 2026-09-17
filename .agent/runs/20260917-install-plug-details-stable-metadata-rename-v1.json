@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 9,
-  "command": "pnpm --filter @lcl/mobile build",
-  "pid": 19563,
+  "command": "pnpm --filter @lcl/mobile exec cap sync android",
+  "pid": 19707,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T13:50:38.418610+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-17T13:50:46.470039+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260917-install-plug-details-stable-metadata-rename-v1",
@@ -18,5 +18,5 @@
   "task_digest": "586f49148d74db97052a710b90940ec2bb61b155c8cab131743a0a77b610e6a0",
   "daemon_version": "4.18.22",
   "daemon_pid": 19322,
-  "updated_at": "2026-09-17T13:50:38.501713+00:00"
+  "updated_at": "2026-09-17T13:50:46.543605+00:00"
 }
