@@ -1,380 +1,164 @@
-# Local Climate Link — post-v2.0.10 product roadmap
+# Local Climate Link — next functional steps
 
-Status: active product roadmap after the completed v2.0.10 runtime/detail/diagnostics and UX/architecture cleanup tranches.
+Updated: 2026-09-17
 
-Frozen user-accepted application baseline:
+This is the current product roadmap after the Plug/Thermometer navigation and management pass on `work/plug-screen-automation-entry-20260917`.
 
-```text
-8173f0851adc77222fc3e98b02113ff28f7119fd
-Use contextual setup back label
-stable-20260912-v2.0.10-ux-polish
-```
-
-This document is the canonical roadmap for the next product phase. `docs/plan.md`
-remains historical MVP/design context; `docs/HANDOFF_NEXT_CHAT.md` carries the
-short current continuation state.
-
-## Closure checkpoint — 2026-09-12 / v2.0.10 UX + architecture
-
-The 2026-09-12 cleanup is completed baseline, not future work. It added contextual Climate/Time setup entry, the custom HH/MM schedule picker, compact device setup surfaces, render-safe LAN scan validation, cohesive feedback/lifecycle hooks, focused install/diagnostic/scan flows, architecture regression budgets, and current architecture documentation. The exact frozen application SHA passed `pnpm check:full` and was manually verified by the user on Samsung SM-S906B.
-
-`main` contains this completed baseline. The stable tag above preserves the exact user-accepted application tree independently of later documentation-only commits on `main`.
-
-## Implementation checkpoint — 2026-09-11 / v2.0.10
-
-The following slices are implemented baseline, not future work:
-
-- persistent per-installation identity/configuration,
-- dashboard-first entry; Add automation opens only from the dashboard `+` action,
-- stable per-installation detail management,
-- shared `Klimat / Czas / Ustawienia` bottom navigation and full-page Settings,
-- explicit AUTO/MANUAL plus MANUAL-only relay ON/OFF with exact-script safety checks,
-- native Shelly schedule ownership for pure time automation,
-- progressive disclosure for installation-scoped developer diagnostics,
-- script/device resource diagnostics and 3-second modal-only auto-refresh,
-- current-value-only climate UI; chart/history persistence was intentionally removed,
-- completed physical-button validation preserving native momentary behavior.
-
-The next agreed product slice is **expanded Shelly LED configuration**. Keep it
-app-side through `PLUGS_UI`; do not re-open the stable climate runtime or add LED
-logic to the generated thermostat script.
-
-## Product direction
-
-Local Climate Link is no longer best described as only a thermostat. The stable
-core already supports four climate-control modes:
-
-- heating,
-- cooling,
-- humidifying,
-- dehumidifying,
-
-plus VPD-assisted threshold adjustment and safety guards such as stale-sensor
-OFF, boot OFF, minimum-change protection, maximum ON time, RSSI filtering, and
-consecutive-hit confirmation.
-
-The next product direction is therefore:
-
-> a simple local climate automation configurator that uses Shelly as the runtime
-> controller and the phone as setup, status, and diagnostics UI.
-
-The architectural promise does not change: once configured, automation must keep
-working without the phone, cloud, Home Assistant, MQTT broker, or server.
-
-## Non-negotiable rules for this roadmap
-
-- `v2.0.9` is the rollback/reference point. Do not rewrite Stable Core v1 just to
-  support the new UI.
-- Keep the generated climate script small and safety-focused.
-- Generated JavaScript is never the source of truth; typed configuration is.
-- Keep phone BLE as setup/diagnostic input, not the runtime controller.
-- Prefer native Shelly capabilities over adding unrelated logic to the climate
-  script.
-- Add one vertical slice at a time and keep the existing hardware matrix as the
-  regression gate for runtime changes.
-- No licensing, payments, Play Store work, phone-to-Shelly BLE RPC, new device
-  families, or cloud features in this roadmap.
-
-## Phase 0 — installation model before UX work
-
-This is the main architectural issue found in the re-audit.
-
-Today the app can remember multiple Shelly devices and sensors, but the active
-rule fields are one global setup draft and some installation state is only held
-in the current React flow. That is sufficient for the current configurator but
-not for a dashboard or a reliable per-Shelly detail screen.
-
-Before changing navigation, introduce one small persistent domain model for an
-installed automation. It should bind at least:
+The last product-code SHA built and installed on the physical Samsung S22+ is:
 
 ```text
-app installation id
-Shelly identity + current connection address
-Shelly script id/hash
-sensor identity + runtime BLE address/profile
-climate rule config
-installation state/version
+19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac
+Compact thermometer card details
 ```
 
-Use this model as the app-side source of truth for installed systems. Do not use
-IP address, generated script text, current tab state, or the last setup draft as
-installation identity.
+The later `8b5044cb7d653f38681c8c12315ff9ad593ba256` commit is documentation-only handoff state.
 
-Development data may be reset instead of adding migration complexity, consistent
-with `AGENTS.md`.
+## Current product model
 
-### Gate
-
-Do not build the new dashboard or per-Shelly screen until two independently
-configured Shelly entries can retain different sensor/rule configurations in
-app storage.
-
-## 1. Better UX — completed
-
-The app now uses a dashboard-first information architecture. Existing and new
-users land on the normal automation dashboard; the task-oriented setup picker is
-opened only from the dashboard `+` action and offers temperature, humidity, and
-time automation. Existing automations are managed from their dashboard/detail
-surfaces rather than through a duplicate `manage existing automation` setup path.
-
-Heating/cooling and humidifying/dehumidifying remain presets inside the relevant
-flow rather than primary navigation concepts. Global `Klimat / Czas / Ustawienia`
-navigation remains visible through setup while local setup tabs stay second-level.
-
-The implementation reuses the existing BLE, Shelly RPC and script-generation
-adapters. The production-readiness hardening subsequently narrowed setup-page
-contracts and extracted cohesive flow subsystems instead of introducing a new
-wizard god-component.
-
-## 2. Simple dashboard after configuration
-
-The dashboard should answer only the questions a normal user has after setup:
+The primary mental model is:
 
 ```text
-What is the climate now?
-Is the automation working?
-Is the output ON or OFF?
-What is the configured target/range?
-Is the sensor fresh and reachable?
+physical Plug -> control method / installed automation
 ```
 
-Primary values:
+Keep these accepted decisions:
 
-- temperature,
-- humidity,
-- VPD when both measurements are available,
-- relay state,
-- automation mode,
-- target/range,
-- simple health/freshness state.
+- bottom navigation is **Plugs | Thermometers | Settings**,
+- `+` on Plugs adds a physical Plug,
+- automation setup starts from a concrete Plug and keeps that Plug context,
+- Time is a Plug automation type, not a global dashboard section,
+- `InstalledAutomation` remains the durable automation entity,
+- an unconfigured saved Plug remains useful for live telemetry, direct relay control and later automation assignment,
+- both phone BLE and Shelly-side BLE discovery save thermometers into the same sensor store,
+- user display name is separate from hardware identity (`model` + `gen`),
+- no independent global Rules/ownership surface is planned without a concrete requirement.
 
-For an installed system, prefer the Shelly runtime diagnostic snapshot as the
-live source for temperature/humidity/VPD/relay decision. Do not silently mix a
-phone BLE reading with a Shelly runtime reading and present them as one state.
-Phone BLE remains useful during setup and sensor-specific history work, but the
-runtime dashboard should describe what the controller itself currently sees.
+Future Plug-family support should build on stored hardware identity rather than hard-coded `Plug S Gen3` labels or user names.
 
-Show offline/stale states explicitly instead of displaying old values as if they
-were live.
+## Current dashboard state
 
-## 3. Hide advanced options without hiding safety
+### Plugs
 
-Use progressive disclosure with three levels:
+A physical Plug is the main dashboard entity.
 
-```text
-Normal
-Advanced
-Developer diagnostics
-```
+A plain Plug card currently provides:
 
-Normal should contain the mode, target/range, current status, and the controls a
-normal user changes.
+- editable user name,
+- live power/voltage/energy/time,
+- direct ON/OFF,
+- physical-device settings,
+- `Dodaj automatykę`.
 
-Advanced can contain safety tuning such as RSSI threshold, stale timeout,
-minimum change interval, maximum ON time, and VPD target. Keep safe defaults and
-plain-language descriptions; these settings must remain accessible because they
-change runtime behavior.
+A Plug with an installed climate/time automation renders the corresponding installed-automation card and uses the `InstalledAutomation` runtime/status path.
 
-Developer diagnostics can contain script ID/hash, raw decision reason, firmware,
-runtime memory, RPC details, and low-level diagnostic fields.
+Concrete Plug settings currently show model/gen + compatibility, address, firmware, Wi-Fi RSSI, uptime, NTP sync/timestamp, Scripts, Bluetooth and Matter. They also expose Shelly-side BLE thermometer discovery and app-only Plug removal.
 
-Do not equate "hide" with "delete". The goal is a calm default UI while keeping
-support/recovery information available.
+### Thermometers
 
-## 4. Expand from climate preset to local automation configurator
+Thermometers are a first-class bottom-navigation surface. Saved cards show:
 
-Keep the existing four climate modes and VPD support as the first automation
-family. Do not generalize Stable Core v1 into a large generic rule engine before
-there is a concrete use case.
+- editable user name,
+- latest temperature and humidity,
+- battery/voltage, RSSI and last reading time,
+- latest reading source icon,
+- Details disclosure with type and MAC.
 
-The next automation family may be simple time control, for example a lamp that
-is ON from 08:00 to 20:00. Prefer native Shelly schedules for pure time-based
-ON/OFF automation so the climate script does not grow.
+Phone BLE and Shelly-side discovery converge on the same saved sensor/readings model.
 
-### Relay ownership rule
+## Immediate architecture hygiene before more feature work
 
-A single relay must have one clear owner. Do not create a climate script and an
-independent schedule that both call `Switch.Set` on the same relay without an
-explicit combined-control design.
+The 2026-09-17 read-only re-audit found two concrete composition regressions and one older duplicate control path.
 
-Therefore distinguish:
+### 1. Restore repository architecture gate
 
-```text
-climate automation -> generated local climate script
-pure time automation -> native Shelly Schedule
-combined time + climate -> separate future design/gate
-```
+`pnpm quality:repo` currently fails because:
 
-This avoids nondeterministic fights between two controllers and protects the
-Stable Core v1 safety model.
+- `ShellySetupPage.tsx` is 811 lines against a 700-line budget,
+- `SensorSetupPage.tsx` is 691 lines against a 650-line budget.
 
-VPD must also remain described accurately: current VPD assist adjusts the active
-control thresholds using temperature/humidity; it is not a separate multi-output
-VPD controller.
+Do not raise the budgets. Use the real presentation seams already present:
 
-## 5. Shelly LED and physical button
+- extract cohesive Shelly Add/LAN-scan, concrete settings and/or BLE-discovery presentation units while keeping the existing `ShellySetupFlow`,
+- extract the saved thermometer card presentation from `SensorSetupPage` while keeping phone BLE/lifecycle in the existing flows/hooks.
 
-Treat LED and button work as two separate capabilities.
+These are behavior-preserving cleanup tasks, not a redesign.
 
-### LED — next vertical slice
+### 2. Retire the legacy generic Shelly AUTO/MANUAL path
 
-Shelly Plug S Gen3 exposes `PLUGS_UI` device configuration. The repository already
-has a working typed client and a basic installation-detail card, so this is now an
-incremental UX/capability expansion rather than a new subsystem.
+The installed climate runtime correctly changes AUTO/MANUAL inside the running managed script with exact installation checks. Generic hardware setup still exposes an older `useShellyControlFlow` AUTO/MANUAL path that uses `Script.Start` / `Script.Stop` through `SavedShellyDeviceCard`.
 
-Current code state:
+Do not build new management features on that path. Narrow generic Shelly control to physical status/direct relay control and keep installed automation control in `flows/installations/*`. Preserve temporary stop/restart behavior that is specifically part of Shelly BLE-discovery cleanup.
 
-- `RpcShellyPlugsUiClient` reads/writes `PLUGS_UI`,
-- typed validation already covers modes `power`, `switch`, and `off`,
-- typed patches already support arbitrary relay ON/OFF RGB + brightness and
-  power-mode brightness,
-- `ShellyLedSettingsCard` displays the confirmed current mode/configuration,
-- `deviceLed.ts` currently narrows writes to two presets: `relay-state` and `off`.
+This cleanup should be handled deliberately because it changes which legacy setup controls remain visible; do not mix it into a visual-only thermometer change.
 
-Next implementation:
+## Next small UX slice
 
-1. keep the existing client and query path; do not create a second LED backend,
-2. expand the installation-level wrapper from preset-only writes to a typed editable
-   configuration,
-3. expose mode selection (`switch`, `power`, `off`),
-4. in switch mode expose relay ON color + brightness and relay OFF color + brightness,
-5. in power mode expose brightness only,
-6. re-read `PLUGS_UI.GetConfig` after every write and render the confirmed device state,
-7. retain a compact relay-state preset only if it remains a useful shortcut rather than
-   becoming a parallel state model,
-8. keep unsupported firmware graceful and do not invent fallback values,
-9. add focused client/flow/UI tests, responsive E2E coverage, then a real Plug S Gen3
-   smoke test.
+After the architecture audit/cleanup boundary is accepted, the next already-agreed UX item is the thermometer card header.
 
-Keep LED configuration separate from automation health. Do not infer script health from
-LED color and do not add dynamic RSSI/battery/error flashing in this slice. Night-mode
-configuration is also a separate follow-up unless a dedicated capability/schema audit
-explicitly brings it into scope.
+Implement only this small slice:
 
-### Button — hardware validation complete
+- add a Tabler thermometer/temperature icon at the upper-left,
+- align icon/name/actions with the spatial rhythm of Plug cards,
+- when a genuinely newer BLE sample arrives, allow the icon to turn blue briefly and then return to normal,
+- define “new” as the sensor's existing latest sample `seenAtMs` strictly advancing,
+- do not trigger from mount, rerender, tab switch or global scan lifecycle,
+- do not create another sensor store or second freshness domain state.
 
-Real-hardware validation was completed on 2026-09-09 with Shelly Plug S Gen3
-model `S3PL-00112EU`, firmware `1.7.5` (test device `192.168.0.16`), and
-`PLUGS_UI.controls["switch:0"].in_mode = "momentary"`.
+The existing readings store is the semantic source of truth. Any transient pulse mechanism is presentation-only.
 
-Hardware/RPC proof:
+## Automation ownership rules
 
-- `Button.GetConfig id=0` and `Button.GetStatus id=0` both returned
-  `Argument 'id', value 0 not found`, so there is no physical `button:0`
-  component on this device; the generic `Button.*` RPC namespace must not be
-  treated as proof of one,
-- a passive V2 websocket listener on `ws://192.168.0.16/rpc` opened correctly
-  with `write=False` and made no configuration changes,
-- a real physical press produced `NotifyStatus` updates with
-  `switch:0.output=true, source:"button"` and later
-  `switch:0.output=false, source:"button"`,
-- no separate button `NotifyEvent` was observed in that run,
-- the listener exited cleanly; its Local Agent claim was released and the agent
-  returned to IDLE.
+### Climate
 
-The physical-button experiment is therefore DONE. Preserve native `momentary`
-behavior: do not set detached mode, do not implement long-press pause/stop, do
-not take ownership of the physical button, and do not change
-`PLUGS_UI.controls["switch:0"].in_mode`. `source:"button"` may be used for
-diagnostics. No further user button test is required without a new justified
-hardware gate.
+Climate automation remains the generated local climate runtime with the accepted safety model.
 
-This keeps manual relay control predictable, avoids spending script/UI budget on
-an event path the tested device does not expose separately, and leaves Stable
-Core v1 unchanged.
+AUTO/MANUAL invariants:
 
-## 6. Dedicated screen for every Shelly / installed system
+- the exact managed script remains running in AUTO and MANUAL,
+- MANUAL blocks automatic output decisions inside the runtime,
+- relay is forced/verified OFF during mode transition as already implemented,
+- direct ON/OFF requires verified MANUAL ownership/capability.
 
-After Phase 0, add a stable detail route for each installed system rather than
-making the old setup tabs the permanent management UI.
+### Time
 
-The detail screen should contain:
+Pure time automation belongs to a concrete Plug and uses native Shelly Schedule. It is not a global Time surface.
 
-```text
-current climate + VPD
-relay/output state
-assigned sensor
-active automation and target/range
-automation pause/resume or edit entry point
-simple health state
-advanced settings
-diagnostics
-later: supported schedules
-```
+Keep one relay owner. Do not let a climate script and independent native schedule both drive the same relay without a separately designed combined-control model.
 
-Use an app-side stable installation/device ID for routing. IP address is a
-connection property and may change.
+### Durable entity
 
-The dashboard should be a summary/list; this detail screen is where device-level
-management belongs.
+`InstalledAutomation` remains the authoritative installed automation record. Do not infer ownership from setup draft selection, IP address, generated script text or a new global registry.
 
-## Implementation order
+## Sensor rules
 
-Completed baseline:
+- phone BLE is setup/live-reading input, not the autonomous runtime controller,
+- Shelly-side BLE discovery uses the existing temporary discovery flow and saves into the same sensor store,
+- sample source may differ, but there is one per-sensor readings store,
+- MAC remains available under Details because it is useful for identification/debugging and future assignment,
+- do not add a second “freshness” model for UI animation.
 
-1. persistent per-installation model,
-2. intent-first UX shell and navigation,
-3. dashboard backed by installed-system/runtime state,
-4. per-installation detail screen,
-5. progressive disclosure and scoped developer diagnostics,
-6. first automation expansion using native Shelly schedules,
-7. physical-button hardware validation with native momentary behavior preserved.
+## Deferred product work
 
-Next:
+These remain valid later candidates, not the immediate next slice:
 
-8. expanded Shelly LED configuration through `PLUGS_UI`, using the existing client and
-   installation detail without changing the climate runtime.
+- expanded Shelly `PLUGS_UI` LED configuration,
+- additional Plug hardware families after capability/hardware-identity audit,
+- richer thermometer management only when a concrete workflow requires it,
+- combined time + climate control only after an explicit relay-ownership design,
+- VPD algorithm changes only in a dedicated runtime/algorithm audit.
 
-After LED configuration is stable, re-audit the remaining product roadmap from actual
-user/hardware evidence instead of carrying old speculative TODOs forward.
+Do not reopen stable climate runtime code for unrelated device/UI work.
 
-## Main risks caught before implementation
+## Development order
 
-### 1. Global setup draft is not a multi-installation model
+Current order is:
 
-Fix this first or settings from one Shelly can become the apparent settings of
-another device in the new UI.
+1. keep this architecture/product documentation current,
+2. restore `quality:repo` headroom through the two justified presentation extractions,
+3. resolve/narrow the legacy duplicate generic Shelly AUTO/MANUAL path separately,
+4. implement the small thermometer leading-icon/new-sample pulse slice,
+5. run focused mobile tests, build, `pnpm quality:ux`, `pnpm quality:repo`, `git diff --check` and broader checks appropriate to the touched scope,
+6. install on the physical S22+ and visually verify when the UX slice is ready,
+7. only then choose the next product feature from current evidence.
 
-### 2. Multiple relay controllers can conflict
-
-A native schedule and climate script must not independently own the same relay.
-Define ownership before adding schedules.
-
-### 3. Dashboard can accidentally have two truths
-
-Phone BLE and Shelly runtime may see different packet ages/RSSI/readings. Use the
-Shelly runtime as the primary installed-system status source.
-
-### 4. LED capability should stay device-native
-
-The client already supports static `PLUGS_UI` mode/color/brightness configuration; the
-current app wrapper is simply narrower than that capability. Expand the UI/wrapper,
-not the thermostat runtime. Dynamic error flashes and night-mode behavior remain
-separate experiments until explicitly audited and tested on hardware.
-
-### 5. Physical button is intentionally native-only on Plug S Gen3
-
-The firmware `1.7.5` hardware test did not expose a separate `button:0` component
-or a separate button `NotifyEvent`; websocket relay updates carried
-`source:"button"`. Preserve native `momentary` behavior instead of adding
-detached-mode or long-press automation semantics.
-
-### 6. UI refactor can become a big-bang rewrite
-
-The current setup pages already contain substantial behavior. Preserve tested
-flows and move one vertical slice at a time.
-
-### 7. Script budget remains a hard boundary
-
-UI, schedules, LED configuration, and management features should live outside
-the generated climate script unless runtime-local climate logic truly requires
-otherwise.
-
-## Definition of success for this roadmap
-
-At the end of this phase, a user should be able to open Local Climate Link and
-understand the system without knowing what a Shelly Script, RSSI threshold, or
-script ID is; configure or inspect more than one independent Shelly system
-without settings leaking between them; see the state that the Shelly controller
-itself is using; and still retain the offline, local, fail-safe behavior frozen
-in `v2.0.9`.
+Do not claim a new release baseline until the full required gate and physical QA are actually rerun.
