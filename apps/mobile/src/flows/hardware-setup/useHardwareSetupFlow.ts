@@ -213,7 +213,7 @@ export const useHardwareSetupFlow = () => {
     startShellyScan,
     stopShellyScan,
     resetShellyScan
-  } = useShellySetupScanFlow(shellyDevices);
+  } = useShellySetupScanFlow();
 
   const updateShellyUrlInput = (value: string) => {
     setShellyUrlInputDraft(value);

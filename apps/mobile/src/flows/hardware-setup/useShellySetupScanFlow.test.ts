@@ -2,37 +2,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 import { createElement, type PropsWithChildren } from 'react';
 import { describe, expect, it } from 'vitest';
-import {
-  buildUnsavedShellyScanUrls,
-  useShellySetupScanFlow
-} from './useShellySetupScanFlow.js';
-
-const device = (id: string, baseUrl: string) => ({
-  id,
-  name: id,
-  baseUrl,
-  scriptIdInput: '1'
-});
+import { buildShellyScanUrls, useShellySetupScanFlow } from './useShellySetupScanFlow.js';
 
 describe('Shelly setup scan derivation', () => {
-  it('excludes already saved devices from the requested IPv4 range', () => {
-    expect(
-      buildUnsavedShellyScanUrls(
-        [device('saved', '192.168.0.2')],
-        '192.168.0.1',
-        '192.168.0.3'
-      )
-    ).toEqual(['http://192.168.0.1/', 'http://192.168.0.3/']);
-  });
-
-  it('preserves the full range when saved entries are outside it', () => {
-    expect(
-      buildUnsavedShellyScanUrls(
-        [device('other', 'http://192.168.1.2/')],
-        '192.168.0.1',
-        '192.168.0.2'
-      )
-    ).toEqual(['http://192.168.0.1/', 'http://192.168.0.2/']);
+  it('preserves every address in the requested IPv4 range', () => {
+    expect(buildShellyScanUrls('192.168.0.1', '192.168.0.3')).toEqual([
+      'http://192.168.0.1/',
+      'http://192.168.0.2/',
+      'http://192.168.0.3/'
+    ]);
   });
 
   it('defaults STA discovery to the full common 192.168.0.x host range', () => {
@@ -41,7 +19,7 @@ describe('Shelly setup scan derivation', () => {
     });
     const wrapper = ({ children }: PropsWithChildren) =>
       createElement(QueryClientProvider, { client: queryClient }, children);
-    const { result } = renderHook(() => useShellySetupScanFlow([]), { wrapper });
+    const { result } = renderHook(() => useShellySetupScanFlow(), { wrapper });
 
     expect(result.current.shellyScanStartInput).toBe('192.168.0.1');
     expect(result.current.shellyScanEndInput).toBe('192.168.0.254');
@@ -54,7 +32,7 @@ describe('Shelly setup scan derivation', () => {
     });
     const wrapper = ({ children }: PropsWithChildren) =>
       createElement(QueryClientProvider, { client: queryClient }, children);
-    const { result } = renderHook(() => useShellySetupScanFlow([]), { wrapper });
+    const { result } = renderHook(() => useShellySetupScanFlow(), { wrapper });
 
     act(() => {
       result.current.setShellyScanStartInput('192.168.0.');

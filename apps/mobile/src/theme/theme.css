@@ -1396,6 +1396,7 @@ select {
   margin-top: var(--lcl-spacing-sm);
 }
 
+.shelly-manual-add > summary,
 .shelly-network-scan > summary {
   color: var(--lcl-color-text);
   cursor: pointer;
@@ -1406,6 +1407,12 @@ select {
 }
 
 .shelly-network-scan__body {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  padding-bottom: var(--lcl-spacing-sm);
+}
+
+.shelly-manual-add__body {
   display: grid;
   gap: var(--lcl-spacing-md);
   padding-bottom: var(--lcl-spacing-sm);

@@ -1,29 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { scanShellySetupUrls, type ShellySetupScanOutcome } from './shellyRequests.js';
-import type { ShellyDraftDevice } from './setupDraftStore.js';
-import { createIpv4RangeScanUrls, normalizeShellyUrl } from './validation.js';
+import { createIpv4RangeScanUrls } from './validation.js';
 
-export const buildUnsavedShellyScanUrls = (
-  devices: ShellyDraftDevice[],
-  startInput: string,
-  endInput: string
-): string[] => {
-  const savedBaseUrls = new Set<string>();
-  for (const device of devices) {
-    try {
-      savedBaseUrls.add(normalizeShellyUrl(device.baseUrl));
-    } catch {
-      savedBaseUrls.add(device.baseUrl);
-    }
-  }
+export const buildShellyScanUrls = (startInput: string, endInput: string): string[] =>
+  createIpv4RangeScanUrls(startInput, endInput);
 
-  return createIpv4RangeScanUrls(startInput, endInput).filter(
-    (baseUrl) => !savedBaseUrls.has(baseUrl)
-  );
-};
-
-export const useShellySetupScanFlow = (shellyDevices: ShellyDraftDevice[]) => {
+export const useShellySetupScanFlow = () => {
   const [shellyScanStartInput, setShellyScanStartInput] = useState('192.168.0.1');
   const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.254');
   const [shellyScanStopped, setShellyScanStopped] = useState(false);
@@ -35,14 +18,11 @@ export const useShellySetupScanFlow = (shellyDevices: ShellyDraftDevice[]) => {
       const controller = new AbortController();
       shellyScanAbortControllerRef.current = controller;
       try {
-        const scanBaseUrls = buildUnsavedShellyScanUrls(
-          shellyDevices,
-          shellyScanStartInput,
-          shellyScanEndInput
-        );
+        const baseUrls = buildShellyScanUrls(shellyScanStartInput, shellyScanEndInput);
         return await scanShellySetupUrls({
-          baseUrls: scanBaseUrls,
-          signal: controller.signal
+          baseUrls,
+          signal: controller.signal,
+          stopAfterFirst: false
         });
       } finally {
         if (shellyScanAbortControllerRef.current === controller) {

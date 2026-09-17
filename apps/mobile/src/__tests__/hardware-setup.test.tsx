@@ -1354,7 +1354,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).getByText('Salon')).toBeInTheDocument();
   });
 
-  it('continues Shelly network scan past already saved plugs', async () => {
+  it('shows already saved Shelly devices and continues scanning the full range', async () => {
     vi.mocked(fetch).mockImplementation(
       async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
@@ -1410,7 +1410,14 @@ describe('HardwareSetupScreen', () => {
     });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
 
-    expect(await within(dialog).findByText('http://192.168.0.21/')).toBeInTheDocument();
+    expect(await within(dialog).findByText('http://192.168.0.20/')).toBeInTheDocument();
+    expect(within(dialog).getByText('http://192.168.0.21/')).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
+    ).toBeDisabled();
+    expect(
+      within(dialog).getByRole('button', { name: 'Wybierz: http://192.168.0.21/' })
+    ).toBeEnabled();
     const scannedHosts = vi
       .mocked(fetch)
       .mock.calls.map((call) => ({
@@ -1421,8 +1428,8 @@ describe('HardwareSetupScreen', () => {
         ({ method, url }) => method === 'Shelly.GetDeviceInfo' && url.pathname === '/rpc'
       )
       .map(({ url }) => url.hostname);
+    expect(scannedHosts).toContain('192.168.0.20');
     expect(scannedHosts).toContain('192.168.0.21');
-    expect(scannedHosts).not.toContain('192.168.0.20');
   });
 
   it('shows Shelly scan help as a compact tooltip', async () => {
@@ -1430,6 +1437,13 @@ describe('HardwareSetupScreen', () => {
 
     const addDialog = await openShellyAddDialog();
     const dialog = addDialog;
+    const manualSummary = within(dialog).getByText('Dodaj ręcznie');
+    const scanSummary = within(dialog).getByText('Skanuj sieć');
+    expect(manualSummary.closest('details')).toHaveAttribute('open');
+    expect(scanSummary.closest('details')).not.toHaveAttribute('open');
+    fireEvent.click(scanSummary);
+    expect(manualSummary.closest('details')).not.toHaveAttribute('open');
+    expect(scanSummary.closest('details')).toHaveAttribute('open');
 
     const tooltipButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu Shelly'
@@ -1443,9 +1457,7 @@ describe('HardwareSetupScreen', () => {
 
     expect(within(dialog).getByText('Skanowanie Shelly')).toBeInTheDocument();
     expect(within(dialog).getByText(/192\.168\.33\.1/)).toBeInTheDocument();
-    expect(
-      within(dialog).getByText(/Już dodane gniazdka są pomijane/i)
-    ).toBeInTheDocument();
+    expect(within(dialog).getByText(/oznacza je jako Dodane/i)).toBeInTheDocument();
     expect(
       within(dialog).getByText(/Zakres: 254 adresy.*1 min 36 s/)
     ).toBeInTheDocument();

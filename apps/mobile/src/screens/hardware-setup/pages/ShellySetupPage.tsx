@@ -26,7 +26,10 @@ import {
   ShellyAddForm,
   shellyCompatibilityBadge
 } from './ShellySetupPresentation.js';
-import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
+import {
+  countIpv4RangeScanAddresses,
+  normalizeShellyUrl
+} from '../../../flows/hardware-setup/validation.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { useShellySetupFeedback } from './useShellySetupFeedback.js';
@@ -40,6 +43,14 @@ type ShellyDialogState =
 const SHELLY_AP_SCAN_ADDRESS = '192.168.33.1';
 const SHELLY_STA_SCAN_START = '192.168.0.1';
 const SHELLY_STA_SCAN_END = '192.168.0.254';
+
+const normalizeScanBaseUrl = (value: string): string => {
+  try {
+    return normalizeShellyUrl(value);
+  } catch {
+    return value.trim().replace(/\/+$/, '').toLowerCase();
+  }
+};
 
 type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {
   enableBleDiscovery?: boolean;
@@ -66,6 +77,9 @@ export const ShellySetupPage = ({
   );
   const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
   const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
+  const [activeAddSection, setActiveAddSection] = useState<'manual' | 'scan' | null>(
+    'manual'
+  );
   const { dismissToast, pushToast, toasts } = useToastQueue('shelly-toast');
   const isAddShellyModalOpen = dialog.kind === 'add';
   const isBleScanModalOpen = dialog.kind === 'ble';
@@ -149,6 +163,7 @@ export const ShellySetupPage = ({
   const openAddShellyModal = () => {
     flow.checkShellyMutation.reset();
     setDidSubmitShellyAdd(false);
+    setActiveAddSection('manual');
     setDialog({ kind: 'add' });
   };
 
@@ -157,6 +172,7 @@ export const ShellySetupPage = ({
     flow.resetShellyScan();
     setDidSubmitShellyAdd(false);
     setDidSubmitShellyScan(false);
+    setActiveAddSection('manual');
     setDialog({ kind: 'none' });
     if (addOnly) onAddCancel?.();
   };
@@ -180,6 +196,14 @@ export const ShellySetupPage = ({
     flow.stopShellyScan();
   };
 
+  const toggleAddSection = (section: 'manual' | 'scan') => {
+    const nextSection = activeAddSection === section ? null : section;
+    if (activeAddSection === 'scan' && nextSection !== 'scan' && isShellyScanActive) {
+      flow.stopShellyScan();
+    }
+    setActiveAddSection(nextSection);
+  };
+
   const selectScannedShellyDevice = (result: ShellySetupScanResult) => {
     if (!flow.shellyNameInput.trim()) {
       flow.setShellyNameInput(result.deviceInfo.model);
@@ -188,6 +212,12 @@ export const ShellySetupPage = ({
     flow.resetShellyScan();
     setDidSubmitShellyScan(false);
   };
+
+  const isSavedShellyScanResult = (result: ShellySetupScanResult) =>
+    shellyDevices.some(
+      (device) =>
+        normalizeScanBaseUrl(device.baseUrl) === normalizeScanBaseUrl(result.baseUrl)
+    );
 
   const openBleScanModal = (device: ShellyDraftDevice) => {
     flow.resetBleDiscovery();
@@ -261,23 +291,42 @@ export const ShellySetupPage = ({
         title={t('hardware.shelly.add')}
         onClose={closeAddShellyModal}
       >
-        <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
-        <div className="shelly-manual-add__actions">
-          <button
-            className="primary-action"
-            type="button"
-            aria-busy={flow.checkShellyMutation.isPending || undefined}
-            disabled={isAnyShellyCheckPending}
-            title={t('hardware.shelly.addCheckedTitle')}
-            onClick={checkShelly}
+        <details className="shelly-manual-add" open={activeAddSection === 'manual'}>
+          <summary
+            onClick={(event) => {
+              event.preventDefault();
+              toggleAddSection('manual');
+            }}
           >
-            {flow.checkShellyMutation.isPending
-              ? t('hardware.shelly.checking')
-              : t('common.add')}
-          </button>
-        </div>
-        <details className="shelly-network-scan">
-          <summary>{t('hardware.shelly.scanNetwork')}</summary>
+            {t('hardware.shelly.addManual')}
+          </summary>
+          <div className="shelly-manual-add__body">
+            <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
+            <div className="shelly-manual-add__actions">
+              <button
+                className="primary-action"
+                type="button"
+                aria-busy={flow.checkShellyMutation.isPending || undefined}
+                disabled={isAnyShellyCheckPending}
+                title={t('hardware.shelly.addCheckedTitle')}
+                onClick={checkShelly}
+              >
+                {flow.checkShellyMutation.isPending
+                  ? t('hardware.shelly.checking')
+                  : t('common.add')}
+              </button>
+            </div>
+          </div>
+        </details>
+        <details className="shelly-network-scan" open={activeAddSection === 'scan'}>
+          <summary
+            onClick={(event) => {
+              event.preventDefault();
+              toggleAddSection('scan');
+            }}
+          >
+            {t('hardware.shelly.scanNetwork')}
+          </summary>
           <div className="shelly-network-scan__body">
             <div className="shelly-network-scan__toolbar">
               <div
@@ -417,12 +466,19 @@ export const ShellySetupPage = ({
                         </strong>
                       </div>
                       <button
-                        aria-label={`${t('common.select')}: ${result.baseUrl}`}
+                        aria-label={
+                          isSavedShellyScanResult(result)
+                            ? `${t('hardware.shelly.alreadyAdded')}: ${result.baseUrl}`
+                            : `${t('common.select')}: ${result.baseUrl}`
+                        }
                         className="secondary-action shelly-scan-result__add"
                         type="button"
+                        disabled={isSavedShellyScanResult(result)}
                         onClick={() => selectScannedShellyDevice(result)}
                       >
-                        {t('common.select')}
+                        {isSavedShellyScanResult(result)
+                          ? t('hardware.shelly.alreadyAdded')
+                          : t('common.select')}
                       </button>
                     </div>
                   </article>
