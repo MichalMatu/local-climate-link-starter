@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-inspect-compact-plug-details-v1",
+  "task_digest": "ee46bdfe2af416d06e475d7915cae25b58e057dddb5dfdd699a698087bee186f",
+  "idle_timeout": 300,
+  "task_timeout": 600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T14:51:35.793908+00:00",
+  "attempt_id": "4d439cf23480bb25469657a4",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 88704,
+  "updated_at": "2026-09-17T14:51:35.793963+00:00",
+  "pid": 88704
+}
