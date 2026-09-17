@@ -1,0 +1,14 @@
+{
+  "id": "20260917-boundary-cleanup-code-v13",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 1800,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"c6354e254cb291a4866e3fb4c44dc5bfb263c442\"; git show origin/agent-control:.agent/scripts/20260917-boundary-cleanup-v2.py | python3; git show origin/agent-control:.agent/scripts/20260917-boundary-cleanup-v4-polish.py | python3; git show origin/agent-control:.agent/scripts/20260917-hardware-setup-tests-v1.py | python3; git show origin/agent-control:.agent/scripts/20260917-lint-cleanup-v1.py | python3; git show origin/agent-control:.agent/scripts/20260917-lint-cleanup-v2.py | python3; pnpm exec prettier --write apps/mobile/src docs/implementation/device-rule-decoupling-plan.md; git diff --check; pnpm format:check; pnpm lint; pnpm quality:ux; pnpm quality:repo; pnpm typecheck; pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx src/__tests__/automation-dashboard.test.tsx src/__tests__/automation-dashboard-controls.test.tsx src/__tests__/app-routes.test.tsx src/flows/hardware-setup/useShellySetupScanFlow.test.ts --passWithNoTests; pnpm test:coverage:core; pnpm build; if git grep -n -E 'setAutomationAuto|setAutomationManual' -- 'apps/mobile/src/**' ':!apps/mobile/src/__tests__/**'; then exit 1; fi; git add apps/mobile/src docs/implementation/device-rule-decoupling-plan.md; git commit -m 'Tighten hardware setup boundaries'; git push origin HEAD:work/plug-screen-automation-entry-20260917; git status --short; git rev-parse HEAD"
+  ]
+}
