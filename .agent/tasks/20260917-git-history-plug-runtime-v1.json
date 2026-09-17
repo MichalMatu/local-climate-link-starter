@@ -1,0 +1,15 @@
+{
+  "id": "20260917-git-history-plug-runtime-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-centered-main-20260915",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 1024,
+  "commands": [
+    "set -euo pipefail; echo '=== COMMITS TOUCHING PLUG TELEMETRY PRESENTATION ==='; git log --all --date=short --pretty=format:'%h %ad %d %s' -S'formatPlugPower' -- apps/mobile/src | head -80; echo; echo '=== COMMITS TOUCHING powerW IN SCREENS ==='; git log --all --date=short --pretty=format:'%h %ad %d %s' -S'powerW' -- apps/mobile/src/screens | head -120; echo; echo '=== COMMITS FOR SHELLY PRESENTATION FILE ==='; git log --all --follow --date=short --pretty=format:'%h %ad %d %s' -- apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx | head -100; echo; echo '=== COMMITS FOR DASHBOARD ==='; git log --all --follow --date=short --pretty=format:'%h %ad %d %s' -- apps/mobile/src/screens/AutomationDashboardScreen.tsx | head -100; echo; echo '=== SEARCH HISTORICAL FILE NAMES / PLUG CARD ==='; git log --all --name-only --pretty=format: | grep -E 'SavedPlugCard|Plug.*Card|Shelly.*Card|AutomationDashboardScreen|ShellySetupPresentation' | sort -u | head -120; echo; echo '=== REFACTOR BRANCH PLUG CARD IF PRESENT ==='; git show 55ec920a2c627e789c40509d1f4739e91acfd265:apps/mobile/src/screens/devices/SavedPlugCard.tsx 2>/dev/null | sed -n '1,320p' || true; echo; echo '=== MAIN SHELLY CARD CURRENT/ANCESTOR ==='; git show a625d57422d39dbb9acc603c9a8943bf4ef3fec5:apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 2>/dev/null | sed -n '240,390p' || true; echo; echo '=== OLD DASHBOARD A625 ==='; git show a625d57422d39dbb9acc603c9a8943bf4ef3fec5:apps/mobile/src/screens/AutomationDashboardScreen.tsx 2>/dev/null | sed -n '1,380p' || true"
+  ]
+}
