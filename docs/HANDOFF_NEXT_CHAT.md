@@ -1,4 +1,4 @@
-# Next chat handoff — Plug/Thermometer architecture re-audit
+# Next chat handoff — Plug/Thermometer cleanup complete
 
 Updated: 2026-09-17
 
@@ -18,62 +18,35 @@ Local Agent Chat Bridge binding:
 e75c77cb-7589-4452-94b2-decc97ff85a1
 ```
 
-Control branch:
+Control branch: `agent-control`.
 
-```text
-agent-control
-```
-
-Daemon verified during the audit:
-
-```text
-daemon_version 4.18.22
-repository MichalMatu/local-climate-link-starter
-binding e75c77cb-7589-4452-94b2-decc97ff85a1
-```
-
-Managed workspace verified read-only:
+Managed workspace:
 
 ```text
 /Users/michal/agent-workspace/repos/local-climate-link-starter/work
-remote https://github.com/MichalMatu/local-climate-link-starter.git
 ```
 
-The Local Agent uses its managed local branch `agent-work` tracking the requested remote work branch. At the start of the re-audit the workspace was clean and both local HEAD and `origin/work/plug-screen-automation-entry-20260917` were exactly:
+## Current code checkpoint
+
+Current product-code HEAD after architecture cleanup:
 
 ```text
-8b5044cb7d653f38681c8c12315ff9ad593ba256
-Refresh next chat handoff
+c67ac66c10e076e4b5d798e11bf117eefca49ea3
+Tighten hardware setup boundaries
 ```
 
-`origin/main` / merge-base was:
+This commit was pushed to `work/plug-screen-automation-entry-20260917`.
 
-```text
-0ad9595b6d1b9a1db69b5a616a5f17932c424ee7
-Document preferred Wi-Fi ADB workflow
-```
-
-The full audited range was 20 commits / 34 changed files ahead of `main`, not merely the last commit.
-
-## Product-code checkpoint
-
-The last product-code SHA built and installed on the physical Samsung S22+ remains:
+The last build physically installed on the Samsung S22+ is still the older checkpoint:
 
 ```text
 19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac
 Compact thermometer card details
 ```
 
-Its direct child `8b5044cb...` was documentation-only. The re-audit then updated architecture/product/UX documentation in:
+The phone was unavailable after the cleanup, so `c67ac66c...` has **not yet** been installed or physically smoke-tested on the S22+. Do not claim physical QA until that is done.
 
-```text
-6f31eb8009c4dfc5f27f122150169d90401f9581
-Refresh architecture and product audit docs
-```
-
-The commit containing this handoff is also documentation-only. No application behavior was changed by the re-audit.
-
-## Product model — keep frozen unless explicitly re-decided
+## Product model — keep stable
 
 Bottom navigation:
 
@@ -81,161 +54,114 @@ Bottom navigation:
 Plugs | Thermometers | Settings
 ```
 
-Accepted ownership model:
+Ownership model:
 
 ```text
 physical Plug -> zero or one installed automation for that relay
 ```
 
-Keep all of these decisions:
+Keep these decisions:
 
-- `+` on Plugs adds a physical Plug,
-- automation entry belongs to a concrete Plug,
+- automation entry starts from a concrete Plug,
 - Time is a Plug automation type, not a global Time section,
-- `InstalledAutomation` remains the durable automation entity/source of installed automation truth,
-- a plain saved Plug remains useful after automation removal,
-- both phone BLE and Shelly-side BLE discovery save into the same sensor draft/readings model,
-- user Plug name is separate from hardware identity (`model` + `gen`),
-- do not introduce a global Rules/automation ownership store without a concrete requirement.
+- `InstalledAutomation` remains the durable installed-automation entity,
+- `setupDraftStore.ts` remains setup/device metadata, not a second automation registry,
+- a plain saved Plug remains useful for telemetry, direct relay control on the dashboard and later automation assignment,
+- phone BLE and Shelly-side BLE discovery feed the same saved-sensor/readings model,
+- user names are separate from hardware identity (`model` + `gen`).
 
-## Read-only architecture re-audit — completed
+## Architecture cleanup completed
 
-The requested preimplementation audit is complete. It compared the whole branch to `main`, inspected current responsibility boundaries and ran read-only Local Agent checks.
+Commit `c67ac66c...` resolves the concrete debt found by the 2026-09-17 re-audit without introducing new stores or transport layers.
 
-### What remains well separated
+### Presentation boundaries
 
-- `useShellySetupScanFlow.ts` cleanly owns LAN scan state, progressive results and cancellation.
-- `useShellyBleDiscoveryFlow.ts` cleanly owns temporary Shelly BLE-discovery lifecycle/cleanup.
-- `usePhoneSensorFlow.ts` cleanly owns phone BLE scan/live scan/GATT coordination and feeds the shared sensor readings/store path.
-- `sensorReadingsStore.ts` remains the one per-sensor reading source for both discovery paths.
-- `setupDraftStore.ts` still owns setup inputs + saved Plug/Sensor metadata and has not become an automation ownership registry.
-- the installed automation path in `flows/installations/*` retains the accepted exact-script and runtime AUTO/MANUAL safety semantics.
-- setup pages continue to depend on narrow page contracts rather than importing low-level Shelly/BLE transports.
+- `SensorSetupPage.tsx` no longer owns the full saved-thermometer card presentation; that responsibility is moved to `SensorSetupPresentation.tsx`.
+- Shelly setup modal/presentation responsibilities are split across the existing presentation layer, including focused `ShellySettingsModal.tsx` and `ShellyBleDiscoveryModal.tsx` boundaries.
+- the empty `.sensor-setup-panel {}` selector was removed.
+- repository architecture budgets were restored instead of raised.
 
-### Concrete architectural debt/regression
+### Generic Shelly runtime ownership
 
-#### 1. `ShellySetupPage.tsx`
+The legacy generic hardware-setup AUTO/MANUAL path was removed.
 
-The page is not a transport god object, but it now composes four distinct UI tasks:
+Generic Shelly setup no longer exposes `AUTO`, `MANUAL`, `ON`, `OFF` runtime automation controls and no longer owns the old `Script.Start` / `Script.Stop` mode switching path. Installed automation control remains under `flows/installations/*`, where the managed runtime stays authoritative.
 
-- Add Plug/manual entry,
-- LAN scan/results,
-- concrete Plug settings,
-- Shelly BLE discovery.
+Temporary script stop/restart that belongs specifically to Shelly BLE-discovery cleanup is unchanged and must not be confused with normal AUTO/MANUAL runtime control.
 
-Read-only line count: about 810 lines. `pnpm quality:repo` reports 811 against the 700-line responsibility budget.
+### Dashboard refresh regression caught during verification
 
-Recommended cleanup: behavior-preserving extraction of cohesive modal/presentation units only. Keep one discriminated dialog state and the existing flow/hook ownership.
+An intermediate lint cleanup made `PlainPlugCard` refresh depend on an unstable mutation callback and caused `automation-dashboard.test.tsx` to grow until JS heap OOM. That change was rejected before commit.
 
-#### 2. `SensorSetupPage.tsx`
+The final implementation keeps refresh tied to physical target identity (`device.id` / `baseUrl`) while a ref provides the latest refresh function. The dashboard test then returned to normal execution.
 
-Phone BLE/live lifecycle is correctly outside the page, but the saved thermometer card is now a distinct presentation unit with name/source/actions, metrics, status strip and Details.
+## Verification completed on final code
 
-Read-only line count: about 690 lines. `pnpm quality:repo` reports 691 against the 650-line responsibility budget.
+Local Agent task `20260917-boundary-cleanup-code-v19` completed successfully on the exact final diff.
 
-Recommended cleanup: extract a focused saved-sensor card component. This is also the clean boundary for the next thermometer leading-icon/sample-pulse UX.
-
-#### 3. legacy duplicate AUTO/MANUAL RPC path
-
-This is the most important semantic debt found.
-
-The accepted `InstalledAutomation` runtime path changes AUTO/MANUAL inside the running managed script and verifies exact ownership. Generic hardware setup still exposes older `setAutomationAuto` / `setAutomationManual` actions from `useShellyControlFlow`, wired by `SavedShellyDeviceCard`, and those call `Script.Start` / `Script.Stop`.
-
-Do not extend this legacy path. Generic Shelly control should eventually be narrowed to physical status/direct relay control; installed automation control belongs in `flows/installations/*`.
-
-Do not confuse this with temporary BLE-discovery cleanup, where stop/restart is intentional lifecycle behavior.
-
-#### 4. `AutomationDashboardScreen.tsx`
-
-Current size is about 579 lines. Do not split it for line count alone.
-
-Two real seams exist if/when the screen is next changed:
-
-- saved Plug -> `InstalledAutomation` reconciliation currently lives inline and can become a small pure selector/helper,
-- `PlainPlugCard` can be extracted if doing so removes duplicated physical-control state or makes a concrete change safer.
-
-Do not create a second ownership store to solve this.
-
-#### 5. test coupling
-
-Most tests remain user-behavior oriented, but some assertions depend on implementation classes such as `.status-stack`, `.sensor-setup-panel--embedded`, `.demo-panel` and exact DOM/icon class structure. Replace these opportunistically with accessible/user-visible contracts when those tests are touched; do not rewrite large test files solely for line count.
-
-### `useHardwareSetupFlow.ts`
-
-Current read-only line count: about 586; budget is 650.
-
-It remains a composing facade, but docs must describe it accurately: it still contains a small residual setup/script orchestration cluster (`check/recheck`, `setupStatus`, load/delete setup script). Those responsibilities predate this branch and did not regrow during the Plug/Thermometer pass. Do not extract them during unrelated UX work.
-
-## Quality-gate result from the audit
-
-Read-only Local Agent execution of:
-
-```bash
-pnpm quality:repo
-```
-
-currently fails exactly the two composition budgets relevant to this pass:
+`pnpm check` passed before commit and again in the pre-push hook. In both complete runs the mobile suite reported:
 
 ```text
-ShellySetupPage.tsx 811 > 700
-SensorSetupPage.tsx 691 > 650
+Test Files  31 passed (31)
+Tests       171 passed (171)
 ```
 
-Do **not** raise the budgets. The audit found real extraction boundaries for both files.
+The final verification also passed:
 
-Other inspected flow sizes remain below their architecture budgets:
+- formatting,
+- lint,
+- `quality:ux`,
+- `quality:repo`,
+- typecheck,
+- workspace tests,
+- core coverage gate,
+- production build,
+- `git diff --check`.
 
-```text
-useHardwareSetupFlow.ts       586
-useShellySetupScanFlow.ts      84
-useShellyControlFlow.ts       290
-useShellyBleDiscoveryFlow.ts  177
-usePhoneSensorFlow.ts         264
-setupDraftStore.ts            341
-```
+Earlier runner failures (`ERR_IPC_CHANNEL_CLOSED`, worker OOM, idle timeout) were investigated rather than accepted as product failures. The final `pnpm check` completed normally after fixing the real dashboard refresh loop.
 
-No full `pnpm check:full` or new physical QA was claimed during this docs/read-only audit.
+## Diagnostics/logging decision
 
-## Documentation updated by this audit
+Do not create another logging module.
 
-Read before continuing:
+The repository already has:
 
-- `docs/architecture/refactor-boundaries.md`
-- `docs/product/next-functional-steps.md`
-- `docs/ux-polish-backlog.md`
+- `packages/diagnostics` for bounded structured diagnostics/redaction/support export,
+- `apps/mobile/src/app/runtimeDiagnostics.ts` for browser/WebView runtime errors and unhandled rejections.
 
-They now reflect the Plug-centric product model and the audit findings above. Old roadmap wording that treated `Klimat / Czas / Ustawienia` or expanded LED settings as the immediate next task is no longer current.
+If physical `adb logcat` later shows missing evidence, add only small structured events through these existing boundaries. Do not add noisy `console.log` instrumentation or log raw secrets, MACs/IPs unnecessarily.
 
-## Recommended next decision
+## Nearest next UX slice
 
-Before adding more UX, decide whether to first execute the two small behavior-preserving presentation extractions that restore `pnpm quality:repo` headroom. They are justified by real responsibility boundaries, not file size alone.
+The next agreed small UX task remains the thermometer card header:
 
-Keep the legacy generic Shelly AUTO/MANUAL cleanup as a separate semantic slice; do not hide it inside a visual refactor.
+- Tabler thermometer/temperature icon in the upper-left,
+- align with Plug-card header rhythm,
+- briefly pulse blue only when the existing per-sensor sample `seenAtMs` strictly advances,
+- no pulse on mount/rerender/tab switch,
+- no second freshness store.
 
-## Nearest already-agreed UX slice
+The new saved-sensor presentation boundary created by `c67ac66c...` is the correct place for this behavior.
 
-After the audit/cleanup boundary is accepted, the next small UX task remains:
+## Physical S22+ QA still pending
 
-> Add a Tabler thermometer/temperature icon to the upper-left of each saved thermometer card, aligned analogously to the Plug icon. When a genuinely newer BLE sample arrives, the icon may briefly turn blue and then return to normal.
+When the phone is available again:
 
-Fresh-sample semantics are already determined:
+1. verify the exact target with ADB,
+2. build/install the current branch checkpoint,
+3. launch and smoke-test Plugs, Thermometers, Settings, Plug settings and BLE-related entry points,
+4. clear/capture `adb logcat` around launch and navigation,
+5. inspect AndroidRuntime/Capacitor/WebView/JS errors and ANRs,
+6. record the installed SHA and result in docs.
 
-- use the existing sensor sample's `seenAtMs`,
-- a new event means `seenAtMs` strictly advances for that sensor,
-- do not pulse on mount, rerender or tab switch,
-- do not use global saved-scan `updatedAtMs` as per-sensor freshness,
-- do not add a new store or second domain freshness state.
-
-The preferred implementation boundary is the focused saved-sensor card component described by the audit.
+Prefer the existing repo Android/ADB scripts and `docs/development/android-device-adb.md`; do not invent a parallel install workflow.
 
 ## Process guardrails
 
 - continue on `work/plug-screen-automation-entry-20260917`,
-- use the Local Agent Chat Bridge with the exact binding above,
-- before any new Local Agent task read `.agent/status/daemon.json`,
-- do not edit the same work branch while a Local Agent task is active,
-- work in small slices,
-- do not refactor working architecture speculatively,
+- use the exact Local Agent binding above,
+- check `.agent/status/daemon.json` before a new Local Agent task,
+- never edit the same branch while a Local Agent task is active,
+- keep changes small and behavior-oriented,
 - preserve `InstalledAutomation` ownership and runtime safety,
-- after real code changes run focused tests/checks appropriate to scope and restore `pnpm quality:repo`,
-- when a UX slice is complete, build/install on the S22+ and visually verify before calling it accepted.
+- do not raise architecture budgets to hide responsibility growth.
