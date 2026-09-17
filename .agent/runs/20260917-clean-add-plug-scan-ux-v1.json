@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-clean-add-plug-scan-ux-v1",
+  "task_digest": "251e2d777c196f10a6a5681ed207181098b6ade14ff4cc465f5ddcb811eba9cb",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T11:30:02.928221+00:00",
+  "attempt_id": "ec377ed7e1d2ebdd8c291e4f",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 86074,
+  "updated_at": "2026-09-17T11:30:02.928324+00:00",
+  "pid": 86074
+}
