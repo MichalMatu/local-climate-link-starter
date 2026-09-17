@@ -4,7 +4,7 @@ import {
   FeedbackPanel,
   InfoTooltip,
   Modal,
-  ShellyCard,
+  StatusBadge,
   ToastViewport
 } from '@lcl/ui';
 import { IconBluetooth, IconPlus, IconTrash } from '@tabler/icons-react';
@@ -19,7 +19,6 @@ import {
   formatClockTimestamp,
   formatClockUptime,
   formatComponentState,
-  formatAutomationMode,
   formatNullableMetric,
   formatShellyScanEstimate,
   SavedShellyDeviceCard,
@@ -536,7 +535,6 @@ export const ShellySetupPage = ({
       <Modal
         busy={flow.recheckShellyMutation.isPending}
         closeLabel={t('common.close')}
-        description={infoShelly?.baseUrl ?? ''}
         open={infoShelly !== null}
         size="diagnostic"
         title={infoShelly?.name ?? t('hardware.shelly.settings')}
@@ -553,6 +551,19 @@ export const ShellySetupPage = ({
               </FeedbackPanel>
             )}
             <div className="status-stack">
+              <div className="lcl-diagnostic-row">
+                <span>{t('common.model')}</span>
+                <div className="lcl-compact-device__meta">
+                  <strong>
+                    {(flow.setupStatus?.deviceInfo.model ?? infoShelly.model)
+                      ? `${flow.setupStatus?.deviceInfo.model ?? infoShelly.model}, gen ${flow.setupStatus?.deviceInfo.gen ?? infoShelly.gen ?? '?'}`
+                      : t('common.missingData')}
+                  </strong>
+                  <StatusBadge tone={compatibilityBadge.tone}>
+                    {compatibilityBadge.label}
+                  </StatusBadge>
+                </div>
+              </div>
               <DiagnosticRow
                 href={infoShelly.baseUrl}
                 label={t('hardware.shelly.addressSettings')}
@@ -564,20 +575,6 @@ export const ShellySetupPage = ({
               <DiagnosticRow
                 label={t('common.firmware')}
                 value={infoStatus?.firmwareId ?? t('common.missingData')}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.relay')}
-                value={
-                  infoStatus
-                    ? infoStatus.relayOn
-                      ? 'ON'
-                      : 'OFF'
-                    : t('common.missingData')
-                }
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.mode')}
-                value={formatAutomationMode(infoStatus?.automationMode, t)}
               />
               <DiagnosticRow
                 label={t('hardware.metrics.wifiRssi')}
@@ -592,51 +589,45 @@ export const ShellySetupPage = ({
                 value={formatClockUptime(infoStatus?.clock.uptimeSec, t)}
               />
               <DiagnosticRow
-                label={t('hardware.shelly.clockSync')}
-                value={formatClockSyncState(infoStatus?.clock, t)}
+                label="NTP"
+                value={
+                  infoStatus
+                    ? `${formatClockSyncState(infoStatus.clock, t)} · ${formatClockTimestamp(
+                        infoStatus.clock.lastSyncUnixTimeSec,
+                        locale,
+                        t
+                      )}`
+                    : t('common.missingData')
+                }
                 tone={infoStatus?.clock.timeSynced ? 'normal' : 'warning'}
               />
               <DiagnosticRow
-                label="NTP"
-                value={formatClockTimestamp(
-                  infoStatus?.clock.lastSyncUnixTimeSec,
-                  locale,
-                  t
-                )}
-              />
-            </div>
-            <ShellyCard
-              name={infoShelly.name}
-              model={
-                (flow.setupStatus?.deviceInfo.model ?? infoShelly.model)
-                  ? `${flow.setupStatus?.deviceInfo.model ?? infoShelly.model}, gen ${flow.setupStatus?.deviceInfo.gen ?? infoShelly.gen ?? '?'}`
-                  : t('common.missingData')
-              }
-              badgeLabel={compatibilityBadge.label}
-              badgeTone={compatibilityBadge.tone}
-              rows={[
-                {
-                  label: 'Scripts',
-                  value: flow.setupStatus
+                label="Scripts"
+                value={
+                  flow.setupStatus
                     ? formatComponentState(flow.setupStatus.status.scripts, t)
                     : t('common.missingData')
-                },
-                {
-                  label: 'Bluetooth',
-                  value: flow.setupStatus
+                }
+              />
+              <DiagnosticRow
+                label="Bluetooth"
+                value={
+                  flow.setupStatus
                     ? formatComponentState(flow.setupStatus.status.bluetooth, t)
                     : t('common.missingData')
-                },
-                {
-                  label: t('hardware.shelly.matter'),
-                  value: flow.setupStatus
+                }
+              />
+              <DiagnosticRow
+                label={t('hardware.shelly.matter')}
+                value={
+                  flow.setupStatus
                     ? flow.setupStatus.status.matterEnabled
                       ? t('common.enabled')
                       : t('common.disabled')
                     : t('common.missingData')
                 }
-              ]}
-            />
+              />
+            </div>
             <div className="action-row">
               {enableBleDiscovery && (
                 <button

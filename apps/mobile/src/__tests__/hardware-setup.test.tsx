@@ -860,8 +860,12 @@ describe('HardwareSetupScreen', () => {
     ).toBeInTheDocument();
     expect(within(infoDialog).getByText('Scripts')).toBeInTheDocument();
     expect(within(infoDialog).getByText('Bluetooth')).toBeInTheDocument();
-    expect(within(infoDialog).getByText('Przekaźnik')).toBeInTheDocument();
-    expect(within(infoDialog).getByText('Tryb')).toBeInTheDocument();
+    const detailRows = infoDialog.querySelector('.status-stack');
+    expect(detailRows).not.toBeNull();
+    expect(
+      within(detailRows as HTMLElement).queryByText('Przekaźnik')
+    ).not.toBeInTheDocument();
+    expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
     fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
     expect(
       screen.queryByRole('dialog', { name: 'Salon testowy' })
@@ -1026,8 +1030,12 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(infoDialog).getByText('20260311-095902/1.7.5-g9979d16')
     ).toBeInTheDocument();
-    expect(within(infoDialog).getByText('Przekaźnik')).toBeInTheDocument();
-    expect(within(infoDialog).getByText('Tryb')).toBeInTheDocument();
+    const detailRows = infoDialog.querySelector('.status-stack');
+    expect(detailRows).not.toBeNull();
+    expect(
+      within(detailRows as HTMLElement).queryByText('Przekaźnik')
+    ).not.toBeInTheDocument();
+    expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
     fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
 
     const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
@@ -1856,7 +1864,11 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('09:31')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
     const infoDialog = await screen.findByRole('dialog', { name: 'Salon' });
-    expect(await within(infoDialog).findByText('zsynchronizowany')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        within(infoDialog).getByText('NTP').closest('.lcl-diagnostic-row')
+      ).toHaveTextContent('zsynchronizowany')
+    );
     expect(within(infoDialog).getByText('3 h 25 min')).toBeInTheDocument();
     expect(within(infoDialog).getByText('NTP')).toBeInTheDocument();
     expect(
