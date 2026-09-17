@@ -234,9 +234,27 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Gniazdka' })).toBeNull();
     expect(screen.queryByText('Nie masz jeszcze zapisanej automatyki')).toBeNull();
+    const plugEmptyState = screen.getByRole('status');
+    expect(within(plugEmptyState).getByText('Brak dodanych gniazdek.')).toBeVisible();
+    expect(screen.queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
     expect(onAddPlug).toHaveBeenCalledTimes(1);
     expect(onAddAutomation).not.toHaveBeenCalled();
+  });
+
+  it('uses the same centered empty-state treatment for Thermometers', () => {
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+
+    const thermometerEmptyState = screen
+      .getByText('Brak dodanych termometrów.')
+      .closest('.dashboard-kind-empty');
+    expect(thermometerEmptyState).not.toBeNull();
+    expect(thermometerEmptyState).toHaveClass('dashboard-kind-empty');
+    expect(
+      thermometerEmptyState?.querySelector('.dashboard-kind-empty__icon')
+    ).not.toBeNull();
   });
 
   it('keeps a saved plug fully controllable after automation is removed', async () => {

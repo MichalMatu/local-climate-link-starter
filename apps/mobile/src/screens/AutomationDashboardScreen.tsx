@@ -549,7 +549,7 @@ export const AutomationDashboardScreen = ({
         ) : (
           <div className="dashboard-kind-empty" role="status">
             <IconPlug className="dashboard-kind-empty__icon" aria-hidden="true" />
-            <strong>{t('dashboard.emptyCategory')}</strong>
+            <strong>{t('hardware.shelly.empty')}</strong>
           </div>
         )}
       </section>

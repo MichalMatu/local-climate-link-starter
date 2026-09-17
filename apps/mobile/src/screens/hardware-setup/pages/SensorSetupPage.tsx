@@ -1,7 +1,7 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { Modal, ToastViewport } from '@lcl/ui';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconTemperature } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
@@ -323,7 +323,18 @@ export const SensorSetupPage = ({
       />
 
       <div className="saved-list" aria-label={t('hardware.sensor.savedListLabel')}>
-        {flow.sensorDevices.length === 0 && <p>{t('hardware.sensor.empty')}</p>}
+        {flow.sensorDevices.length === 0 &&
+          (embedded ? (
+            <div className="dashboard-kind-empty">
+              <IconTemperature
+                className="dashboard-kind-empty__icon"
+                aria-hidden="true"
+              />
+              <strong>{t('hardware.sensor.empty')}</strong>
+            </div>
+          ) : (
+            <p>{t('hardware.sensor.empty')}</p>
+          ))}
         {flow.sensorDevices.map((device) => (
           <SavedSensorCard
             key={device.id}
