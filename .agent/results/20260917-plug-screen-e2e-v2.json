@@ -1,0 +1,60 @@
+{
+  "id": "20260917-plug-screen-e2e-v2",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "started_at": "2026-09-17T09:07:32.667420+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"17d9244be1bb5d6bede2a8ff8f41c03669d4d5b9\"; test -z \"$(git status --porcelain)\"; python3 - <<'PY'\nfrom pathlib import Path\n\np = Path('apps/mobile/e2e/led-settings.spec.ts')\nt = p.read_text()\nold = \"const openDetail = async (page: Page) => {\\n  await page.goto('/');\\n  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n  await page.getByRole('button', { name: 'Szczegóły' }).click();\\n  await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();\\n};\"\nnew = \"const openDetail = async (page: Page) => {\\n  await page.goto('/');\\n  const details = page.getByRole('button', { name: 'Szczegóły' });\\n  await expect(details).toBeVisible();\\n  await details.click();\\n  await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();\\n};\"\nif old not in t: raise SystemExit('LED helper pattern missing')\np.write_text(t.replace(old, new, 1))\n\np = Path('apps/mobile/e2e/responsive.spec.ts')\nt = p.read_text()\nt = t.replace(\"await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    await expect(page.getByText('Salon')).toBeVisible();\", \"await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    await expect(page.getByText('Salon')).toBeVisible();\", 1)\nt = t.replace(\"await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();\\n    await expectNoHorizontalOverflow(page);\\n    await page.getByRole('button', { name: 'Dodaj automatykę' }).click();\", \"await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    await expect(page.locator('.dashboard-fab')).toBeVisible();\\n    await expectNoHorizontalOverflow(page);\\n    await page.locator('.dashboard-fab').click();\", 1)\nt = t.replace(\"  await page.goto('/admin#rule');\\n  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();\", \"  await page.goto('/admin#rule');\\n  await page.locator('.dashboard-fab').click();\", 1)\np.write_text(t)\nPY\npnpm prettier --write apps/mobile/e2e/led-settings.spec.ts apps/mobile/e2e/responsive.spec.ts; git diff --check; pnpm e2e:responsive",
+      "exit_code": 1,
+      "output": "",
+      "elapsed_seconds": 0.357,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.357
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.104
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.079
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-17T09:07:34.846361+00:00",
+  "task_digest": "641c6f88236e4bf495d956a1584584520b6ba04622bf7feef2b108c288fc04f8",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "00b591ab1da37149ab40430b",
+  "daemon_version": "4.18.20"
+}
