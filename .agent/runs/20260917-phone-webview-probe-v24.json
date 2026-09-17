@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-phone-webview-probe-v24",
+  "task_digest": "51b0810f7cd128d3dfa48b97527c9f9c8954795ba231d4d2bef72d6bbc0fffb5",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-17T19:41:49.413607+00:00",
+  "attempt_id": "9d41fe69b04ddfbae417afc3",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 82446,
+  "updated_at": "2026-09-17T19:41:49.413666+00:00",
+  "pid": 82446
+}
