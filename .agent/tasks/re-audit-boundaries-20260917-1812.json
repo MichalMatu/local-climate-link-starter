@@ -1,0 +1,14 @@
+{
+  "id": "re-audit-boundaries-20260917-1812",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 300,
+  "task_timeout": 600,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "printf '%s\\n' '--- line counts ---'; wc -l apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts apps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.ts apps/mobile/src/flows/hardware-setup/useShellyControlFlow.ts apps/mobile/src/flows/hardware-setup/useShellyBleDiscoveryFlow.ts apps/mobile/src/flows/hardware-setup/usePhoneSensorFlow.ts apps/mobile/src/flows/hardware-setup/setupDraftStore.ts; printf '%s\\n' '--- quality repo ---'; pnpm quality:repo; printf '%s\\n' '--- legacy automation start-stop paths ---'; git grep -n -E 'startScript|stopScript|setAutomationAuto|setAutomationManual' -- apps/mobile/src | head -200; printf '%s\\n' '--- test implementation selectors ---'; git grep -n -E 'querySelector|querySelectorAll|closest\\(|className|toHaveClass|classList' -- apps/mobile/src/__tests__ apps/mobile/e2e | head -250"
+  ]
+}
