@@ -291,8 +291,9 @@ const consoleProblems = (page: Page) => {
 
 const openDetail = async (page: Page) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-  await page.getByRole('button', { name: 'Szczegóły' }).click();
+  const details = page.getByRole('button', { name: 'Szczegóły' });
+  await expect(details).toBeVisible();
+  await details.click();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
 };
 

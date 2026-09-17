@@ -609,7 +609,7 @@ for (const viewport of viewports) {
     await mockShellyRpc(page);
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
     await expect(page.getByText('Salon')).toBeVisible();
     await expect(page.getByText('21.4°C')).toBeVisible();
     await expect(page.getByText('55.2%')).toBeVisible();
@@ -819,10 +819,10 @@ for (const viewport of viewports) {
     await page.goto('/admin#shelly');
 
     await expect(page).toHaveTitle('Local Climate Link');
-    await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    await expect(page.locator('.dashboard-fab')).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    await page.locator('.dashboard-fab').click();
     await page.getByRole('button', { name: /Sterować temperaturą/ }).click();
     await expect(
       page.getByRole('navigation', { name: 'Menu konfiguracji' })
@@ -936,7 +936,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await seedDraft(page);
   await mockShellyRpc(page);
   await page.goto('/admin#rule');
-  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+  await page.locator('.dashboard-fab').click();
   await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
   await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
   await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
