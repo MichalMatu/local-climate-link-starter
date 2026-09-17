@@ -1,0 +1,20 @@
+{
+  "id": "20260918-shelly-info-header-phone-v43",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": ["android-device"],
+  "command_timeout": 2400,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = \"bd441698e278ae1b995587833aa2863cdcfe9768\"; test -z \"$(git status --porcelain)\"",
+    "git show origin/agent-control:.agent/scripts/20260918-shelly-info-header-v43.py | python3",
+    "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/theme/theme.css; git diff --check",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --passWithNoTests",
+    "git add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/theme/theme.css && git commit -m 'Move Shelly scan help to modal header' && git push origin HEAD:work/plug-screen-automation-entry-20260917 && test -z \"$(git status --porcelain)\" && git rev-parse HEAD",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; apk_path=$(adb shell pm path link.localclimate.app | head -n 1 | tr -d '\\r' | sed 's/^package://'); test -n \"$apk_path\"; adb pull \"$apk_path\" /tmp/lcl-v43-installed.apk >/dev/null; unzip -p /tmp/lcl-v43-installed.apk 'assets/public/assets/*.js' | grep -q 'shelly-network-scan__info'; ! unzip -p /tmp/lcl-v43-installed.apk 'assets/public/assets/*.js' | grep -q 'shelly-network-scan__toolbar'; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; git rev-parse HEAD; test -z \"$(git status --porcelain)\""
+  ]
+}
