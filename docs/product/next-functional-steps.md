@@ -2,20 +2,25 @@
 
 Updated: 2026-09-17
 
-This is the current product roadmap after the Plug/Thermometer navigation and management pass on `work/plug-screen-automation-entry-20260917`.
+Current code checkpoint after architecture cleanup:
 
-The last product-code SHA built and installed on the physical Samsung S22+ is:
+```text
+c67ac66c10e076e4b5d798e11bf117eefca49ea3
+Tighten hardware setup boundaries
+```
+
+The last code physically installed on the Samsung S22+ is still:
 
 ```text
 19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac
 Compact thermometer card details
 ```
 
-The later `8b5044cb7d653f38681c8c12315ff9ad593ba256` commit is documentation-only handoff state.
+The phone was unavailable after the cleanup, so physical QA of the current checkpoint is still pending.
 
 ## Current product model
 
-The primary mental model is:
+The primary mental model remains:
 
 ```text
 physical Plug -> control method / installed automation
@@ -25,15 +30,29 @@ Keep these accepted decisions:
 
 - bottom navigation is **Plugs | Thermometers | Settings**,
 - `+` on Plugs adds a physical Plug,
-- automation setup starts from a concrete Plug and keeps that Plug context,
+- automation setup starts from a concrete Plug and keeps that context,
 - Time is a Plug automation type, not a global dashboard section,
-- `InstalledAutomation` remains the durable automation entity,
-- an unconfigured saved Plug remains useful for live telemetry, direct relay control and later automation assignment,
-- both phone BLE and Shelly-side BLE discovery save thermometers into the same sensor store,
+- `InstalledAutomation` remains the durable installed-automation entity,
+- a plain saved Plug remains useful for telemetry, direct relay control and later automation assignment,
+- both phone BLE and Shelly-side BLE discovery use the same sensor/readings model,
 - user display name is separate from hardware identity (`model` + `gen`),
 - no independent global Rules/ownership surface is planned without a concrete requirement.
 
-Future Plug-family support should build on stored hardware identity rather than hard-coded `Plug S Gen3` labels or user names.
+## Architecture cleanup status
+
+The immediate architecture debt identified by the 2026-09-17 re-audit is now resolved.
+
+Completed in `c67ac66c...`:
+
+- Shelly setup presentation was split across focused presentation/modal boundaries instead of raising the repository line budget,
+- saved thermometer card presentation was moved out of `SensorSetupPage.tsx`,
+- generic Shelly setup no longer exposes the legacy AUTO/MANUAL runtime path,
+- `useShellyControlFlow` is narrowed to physical status/direct relay responsibilities,
+- installed automation mode ownership remains in `flows/installations/*`,
+- tests were rewritten to assert that generic setup does not send `Script.Start`, `Script.Stop` or `Switch.Set` runtime mutations,
+- a dashboard refresh-loop regression introduced during lint cleanup was found by testing and fixed before commit.
+
+Final standard verification passed twice through `pnpm check`, including 31/31 mobile test files and 171/171 mobile tests, core coverage gate and production build.
 
 ## Current dashboard state
 
@@ -41,7 +60,7 @@ Future Plug-family support should build on stored hardware identity rather than 
 
 A physical Plug is the main dashboard entity.
 
-A plain Plug card currently provides:
+A plain Plug card provides:
 
 - editable user name,
 - live power/voltage/energy/time,
@@ -51,7 +70,7 @@ A plain Plug card currently provides:
 
 A Plug with an installed climate/time automation renders the corresponding installed-automation card and uses the `InstalledAutomation` runtime/status path.
 
-Concrete Plug settings currently show model/gen + compatibility, address, firmware, Wi-Fi RSSI, uptime, NTP sync/timestamp, Scripts, Bluetooth and Matter. They also expose Shelly-side BLE thermometer discovery and app-only Plug removal.
+Concrete Plug settings show model/gen + compatibility, address, firmware, Wi-Fi RSSI, uptime, NTP sync/timestamp, Scripts, Bluetooth and Matter. They also expose Shelly-side BLE thermometer discovery and app-only Plug removal.
 
 ### Thermometers
 
@@ -60,51 +79,23 @@ Thermometers are a first-class bottom-navigation surface. Saved cards show:
 - editable user name,
 - latest temperature and humidity,
 - battery/voltage, RSSI and last reading time,
-- latest reading source icon,
+- latest reading source,
 - Details disclosure with type and MAC.
 
 Phone BLE and Shelly-side discovery converge on the same saved sensor/readings model.
 
-## Immediate architecture hygiene before more feature work
-
-The 2026-09-17 read-only re-audit found two concrete composition regressions and one older duplicate control path.
-
-### 1. Restore repository architecture gate
-
-`pnpm quality:repo` currently fails because:
-
-- `ShellySetupPage.tsx` is 811 lines against a 700-line budget,
-- `SensorSetupPage.tsx` is 691 lines against a 650-line budget.
-
-Do not raise the budgets. Use the real presentation seams already present:
-
-- extract cohesive Shelly Add/LAN-scan, concrete settings and/or BLE-discovery presentation units while keeping the existing `ShellySetupFlow`,
-- extract the saved thermometer card presentation from `SensorSetupPage` while keeping phone BLE/lifecycle in the existing flows/hooks.
-
-These are behavior-preserving cleanup tasks, not a redesign.
-
-### 2. Retire the legacy generic Shelly AUTO/MANUAL path
-
-The installed climate runtime correctly changes AUTO/MANUAL inside the running managed script with exact installation checks. Generic hardware setup still exposes an older `useShellyControlFlow` AUTO/MANUAL path that uses `Script.Start` / `Script.Stop` through `SavedShellyDeviceCard`.
-
-Do not build new management features on that path. Narrow generic Shelly control to physical status/direct relay control and keep installed automation control in `flows/installations/*`. Preserve temporary stop/restart behavior that is specifically part of Shelly BLE-discovery cleanup.
-
-This cleanup should be handled deliberately because it changes which legacy setup controls remain visible; do not mix it into a visual-only thermometer change.
-
 ## Next small UX slice
 
-After the architecture audit/cleanup boundary is accepted, the next already-agreed UX item is the thermometer card header.
+The next agreed implementation is now safe to start on the new saved-sensor presentation boundary:
 
-Implement only this small slice:
+- add a Tabler thermometer/temperature icon at the upper-left of each saved thermometer card,
+- align icon/name/actions with Plug-card header rhythm,
+- briefly turn the icon blue only when that sensor's existing latest sample `seenAtMs` strictly advances,
+- return to normal after the transient animation,
+- do not trigger on mount, rerender, tab switch or global scan lifecycle,
+- do not create another sensor store or freshness domain state.
 
-- add a Tabler thermometer/temperature icon at the upper-left,
-- align icon/name/actions with the spatial rhythm of Plug cards,
-- when a genuinely newer BLE sample arrives, allow the icon to turn blue briefly and then return to normal,
-- define “new” as the sensor's existing latest sample `seenAtMs` strictly advancing,
-- do not trigger from mount, rerender, tab switch or global scan lifecycle,
-- do not create another sensor store or second freshness domain state.
-
-The existing readings store is the semantic source of truth. Any transient pulse mechanism is presentation-only.
+The existing readings store remains the semantic source of truth. Animation state is presentation-only.
 
 ## Automation ownership rules
 
@@ -116,49 +107,65 @@ AUTO/MANUAL invariants:
 
 - the exact managed script remains running in AUTO and MANUAL,
 - MANUAL blocks automatic output decisions inside the runtime,
-- relay is forced/verified OFF during mode transition as already implemented,
-- direct ON/OFF requires verified MANUAL ownership/capability.
+- relay safety stays under verified runtime ownership,
+- generic hardware setup is not an automation-mode control surface.
 
 ### Time
 
 Pure time automation belongs to a concrete Plug and uses native Shelly Schedule. It is not a global Time surface.
 
-Keep one relay owner. Do not let a climate script and independent native schedule both drive the same relay without a separately designed combined-control model.
+Keep one relay owner. Do not let climate runtime and an unrelated native schedule both drive the same relay without a separately designed combined-control model.
 
 ### Durable entity
 
-`InstalledAutomation` remains the authoritative installed automation record. Do not infer ownership from setup draft selection, IP address, generated script text or a new global registry.
+`InstalledAutomation` remains authoritative. Do not infer ownership from setup selection, IP address, generated script text or a new registry.
 
 ## Sensor rules
 
 - phone BLE is setup/live-reading input, not the autonomous runtime controller,
-- Shelly-side BLE discovery uses the existing temporary discovery flow and saves into the same sensor store,
-- sample source may differ, but there is one per-sensor readings store,
-- MAC remains available under Details because it is useful for identification/debugging and future assignment,
-- do not add a second “freshness” model for UI animation.
+- Shelly-side BLE discovery uses the existing temporary discovery flow and same sensor store,
+- sample source may differ, but there is one per-sensor latest-reading model,
+- MAC remains available under Details for identification/debugging,
+- do not add a second freshness model for UI animation.
+
+## Diagnostics/logging
+
+The repo already has `@lcl/diagnostics` plus `runtimeDiagnostics.ts`.
+
+Do not add another logger module now. After physical S22+ QA, only add missing structured events if `adb logcat` shows a concrete observability gap. Keep logs bounded, redacted and low-noise.
+
+## Physical QA pending
+
+When the S22+ is available again:
+
+1. build/install the exact current branch checkpoint,
+2. smoke-test Plugs, Thermometers, Settings and Plug settings,
+3. capture clean `adb logcat` around launch/navigation,
+4. inspect AndroidRuntime, Capacitor/WebView/JS errors and ANRs,
+5. record the installed SHA and physical result in docs.
+
+Use the existing repo Android/ADB workflow rather than inventing a parallel one.
 
 ## Deferred product work
 
-These remain valid later candidates, not the immediate next slice:
+Later candidates, not the immediate next slice:
 
 - expanded Shelly `PLUGS_UI` LED configuration,
 - additional Plug hardware families after capability/hardware-identity audit,
 - richer thermometer management only when a concrete workflow requires it,
-- combined time + climate control only after an explicit relay-ownership design,
+- combined time + climate control only after explicit relay-ownership design,
 - VPD algorithm changes only in a dedicated runtime/algorithm audit.
 
 Do not reopen stable climate runtime code for unrelated device/UI work.
 
 ## Development order
 
-Current order is:
+Current order:
 
-1. keep this architecture/product documentation current,
-2. restore `quality:repo` headroom through the two justified presentation extractions,
-3. resolve/narrow the legacy duplicate generic Shelly AUTO/MANUAL path separately,
-4. implement the small thermometer leading-icon/new-sample pulse slice,
-5. run focused mobile tests, build, `pnpm quality:ux`, `pnpm quality:repo`, `git diff --check` and broader checks appropriate to the touched scope,
-6. install on the physical S22+ and visually verify when the UX slice is ready,
-7. only then choose the next product feature from current evidence.
+1. keep architecture/product documentation synchronized,
+2. implement the small thermometer leading-icon/new-sample pulse slice,
+3. run focused tests and the normal repository gate/build for the touched scope,
+4. when the phone is available, install and perform physical S22+ smoke/logcat QA,
+5. then choose the next product feature from current evidence.
 
-Do not claim a new release baseline until the full required gate and physical QA are actually rerun.
+Do not claim a new physical release baseline until the S22+ verification is actually complete.
