@@ -1,0 +1,20 @@
+{
+  "id": "20260917-git-history-plug-runtime-v4",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-centered-main-20260915",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 600,
+  "idle_timeout": 240,
+  "task_timeout": 1200,
+  "memory_limit_mb": 1024,
+  "commands": [
+    "git branch -a --contains 17d9244b || true; git tag --contains 17d9244b || true; git show -s --format='%H %P %s %ad' --date=iso 17d9244b",
+    "git diff 17d9244b^ 17d9244b -- apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/components/AppBottomNavigation.tsx apps/mobile/src/routes/AppRoutes.tsx | sed -n '1,700p'",
+    "git show 974a2587:apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx | nl -ba | sed -n '250,410p'",
+    "git show 51ea2c66:apps/mobile/src/screens/devices/SavedPlugCard.tsx | nl -ba | sed -n '1,280p'",
+    "git show 193d2dc1:apps/mobile/src/screens/devices/SavedPlugCard.tsx | nl -ba | sed -n '1,340p'",
+    "git show 6079174d:apps/mobile/src/screens/AutomationDashboardScreen.tsx | nl -ba | sed -n '1,300p'"
+  ]
+}
