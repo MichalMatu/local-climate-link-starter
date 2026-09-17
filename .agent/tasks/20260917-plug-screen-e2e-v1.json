@@ -1,0 +1,15 @@
+{
+  "id": "20260917-plug-screen-e2e-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"17d9244be1bb5d6bede2a8ff8f41c03669d4d5b9\"; test -z \"$(git status --porcelain)\"; pnpm e2e:responsive"
+  ]
+}
