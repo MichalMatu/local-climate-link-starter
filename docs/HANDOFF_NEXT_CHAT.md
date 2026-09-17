@@ -35,7 +35,14 @@ c67ac66c10e076e4b5d798e11bf117eefca49ea3
 Tighten hardware setup boundaries
 ```
 
-This commit was pushed to `work/plug-screen-automation-entry-20260917`.
+Documentation then advanced the work branch to:
+
+```text
+c0fa5496a9ec64aa2b4bfb5634f8d42061096d84
+Refresh UX backlog after cleanup
+```
+
+No product code changed between `c67ac66c...` and `c0fa5496...`.
 
 The last build physically installed on the Samsung S22+ is still the older checkpoint:
 
@@ -44,7 +51,24 @@ The last build physically installed on the Samsung S22+ is still the older check
 Compact thermometer card details
 ```
 
-The phone was unavailable after the cleanup, so `c67ac66c...` has **not yet** been installed or physically smoke-tested on the S22+. Do not claim physical QA until that is done.
+The phone was unavailable after the cleanup, so current code has **not yet** been installed or physically smoke-tested on the S22+. Do not claim physical QA until that is done.
+
+## Prepared Android alpha artifact
+
+Local Agent task `20260917-post-cleanup-android-build-v20` completed successfully without using ADB or requiring the phone.
+
+The artifact was built from exact branch HEAD `c0fa5496...` using the normal mobile build, Capacitor sync and Gradle `assembleDebug` path.
+
+```text
+APK: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+size: 4.4 MB
+APK SHA-256: cbee2239905cd46b3f989ffbcb262f9dfcf8282a32ab64f7884d46950ae935b7
+alpha signer SHA-256: 2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76
+```
+
+The APK signer exactly matched the existing alpha keystore fingerprint. The build left no tracked repository changes. Four updated documentation files also passed Prettier verification before the Android build.
+
+When the phone returns, rebuild/install through the existing `pnpm android:phone-alpha` workflow rather than treating the local APK path as a permanent release artifact; that script intentionally performs the established clean alpha install and cold-start verification.
 
 ## Product model — keep stable
 
@@ -148,7 +172,7 @@ The new saved-sensor presentation boundary created by `c67ac66c...` is the corre
 When the phone is available again:
 
 1. verify the exact target with ADB,
-2. build/install the current branch checkpoint,
+2. run the existing alpha install workflow on the current branch,
 3. launch and smoke-test Plugs, Thermometers, Settings, Plug settings and BLE-related entry points,
 4. clear/capture `adb logcat` around launch and navigation,
 5. inspect AndroidRuntime/Capacitor/WebView/JS errors and ANRs,
@@ -161,7 +185,7 @@ Prefer the existing repo Android/ADB scripts and `docs/development/android-devic
 - continue on `work/plug-screen-automation-entry-20260917`,
 - use the exact Local Agent binding above,
 - check `.agent/status/daemon.json` before a new Local Agent task,
-- never edit the same branch while a Local Agent task is active,
+- never edit the same work branch while a Local Agent task is active,
 - keep changes small and behavior-oriented,
 - preserve `InstalledAutomation` ownership and runtime safety,
 - do not raise architecture budgets to hide responsibility growth.
