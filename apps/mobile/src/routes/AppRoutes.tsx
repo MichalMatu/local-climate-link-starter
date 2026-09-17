@@ -7,7 +7,6 @@ import {
   AppBottomNavigation,
   type AppNavigationKind
 } from '../components/AppBottomNavigation.js';
-import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
@@ -87,7 +86,6 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
 };
 
 export const AppRoutes = () => {
-  const installations = useInstalledAutomationStore((state) => state.installations);
   const selectShellyDevice = useHardwareSetupDraftStore(
     (state) => state.selectShellyDevice
   );
@@ -190,9 +188,6 @@ export const AppRoutes = () => {
           });
         }}
         onOpenInstallation={(installationId) => {
-          const installation = installations.find(
-            (candidate) => candidate.id === installationId
-          );
           navigate({
             type: 'installation',
             installationId,

@@ -27,8 +27,7 @@ export const ShellyBleDiscoveryModal = ({
 }: ShellyBleDiscoveryModalProps) => {
   const { t } = useTranslation();
   const candidates = flow.bleDiscoverySnapshot?.candidates ?? [];
-  const didStartFail =
-    flow.bleDiscoverySnapshot?.lastReason === 'ble-scan-start-failed';
+  const didStartFail = flow.bleDiscoverySnapshot?.lastReason === 'ble-scan-start-failed';
   const busy =
     flow.startBleDiscoveryMutation.isPending ||
     flow.refreshBleDiscoveryMutation.isPending ||

@@ -1,36 +1,24 @@
 import type { ShellySetupFlow } from '../pageContracts.js';
-import {
-  DiagnosticRow,
-  FeedbackPanel,
-  InfoTooltip,
-  Modal,
-  StatusBadge,
-  ToastViewport
-} from '@lcl/ui';
-import { IconBluetooth, IconPlus, IconTrash } from '@tabler/icons-react';
-import { useEffect, useId, useState } from 'react';
+import { InfoTooltip, Modal, ToastViewport } from '@lcl/ui';
+import { IconPlus } from '@tabler/icons-react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { ShellySetupScanResult } from '../../../flows/hardware-setup/shellyRequests.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import {
-  formatBleCandidateProfile,
-  formatClockSyncState,
-  formatClockTimestamp,
-  formatClockUptime,
-  formatComponentState,
-  formatNullableMetric,
   formatShellyScanEstimate,
   SavedShellyDeviceCard,
-  ShellyAddForm,
-  shellyCompatibilityBadge
+  ShellyAddForm
 } from './ShellySetupPresentation.js';
 import {
   countIpv4RangeScanAddresses,
   normalizeShellyUrl
 } from '../../../flows/hardware-setup/validation.js';
-import { mutationError, type HardwarePageProps } from '../helpers.js';
+import type { HardwarePageProps } from '../helpers.js';
 import { useToastQueue } from '../useToastQueue.js';
+import { ShellyBleDiscoveryModal } from './ShellyBleDiscoveryModal.js';
+import { ShellySettingsModal } from './ShellySettingsModal.js';
 import { useShellySetupFeedback } from './useShellySetupFeedback.js';
 
 type ShellyDialogState =
@@ -101,7 +89,6 @@ export const ShellySetupPage = ({
     t
   );
   const scanResults = flow.shellyScanResults;
-  const shellyControlStates = flow.shellyControlStates;
   const shellyDevices = flow.shellyDevices;
   const isScanStopped =
     flow.shellyScanStopped || flow.shellyScanMutation.data?.stopped === true;
@@ -118,10 +105,6 @@ export const ShellySetupPage = ({
     }
   })();
   const showShellyScanRangeError = didSubmitShellyScan && shellyScanRangeError !== null;
-  const bleDiscoveryCandidates = flow.bleDiscoverySnapshot?.candidates ?? [];
-  const didBleDiscoveryStartFail =
-    flow.bleDiscoverySnapshot?.lastReason === 'ble-scan-start-failed';
-  const compatibilityBadge = shellyCompatibilityBadge(flow.setupStatus, t);
   const isBleDiscoveryBusy =
     flow.startBleDiscoveryMutation.isPending ||
     flow.refreshBleDiscoveryMutation.isPending ||
@@ -131,11 +114,14 @@ export const ShellySetupPage = ({
     infoShellyId === null
       ? null
       : (shellyDevices.find((device) => device.id === infoShellyId) ?? null);
-  const infoControlState = infoShelly ? shellyControlStates[infoShelly.id] : undefined;
-  const infoStatus = infoControlState?.status;
-  const shouldShowBleRestart = Boolean(
-    flow.bleDiscoverySession && flow.bleDiscoverySnapshot?.running === false
-  );
+  const settingsOnlyShelly =
+    settingsOnlyDeviceId == null
+      ? null
+      : (shellyDevices.find((device) => device.id === settingsOnlyDeviceId) ?? null);
+  const settingsOnlyShellyRef = useRef(settingsOnlyShelly);
+  const recheckShellyRef = useRef(flow.recheckShellyMutation.mutate);
+  const resetRecheckShellyRef = useRef(flow.recheckShellyMutation.reset);
+  const onSettingsCloseRef = useRef(onSettingsClose);
   const { resetBleStopError } = useShellySetupFeedback({
     flow,
     isBleScanModalOpen,
@@ -145,16 +131,26 @@ export const ShellySetupPage = ({
   });
 
   useEffect(() => {
+    settingsOnlyShellyRef.current = settingsOnlyShelly;
+    recheckShellyRef.current = flow.recheckShellyMutation.mutate;
+    resetRecheckShellyRef.current = flow.recheckShellyMutation.reset;
+    onSettingsCloseRef.current = onSettingsClose;
+  }, [
+    flow.recheckShellyMutation.mutate,
+    flow.recheckShellyMutation.reset,
+    onSettingsClose,
+    settingsOnlyShelly
+  ]);
+
+  useEffect(() => {
     if (!settingsOnlyDeviceId) return;
-    const device = shellyDevices.find(
-      (candidate) => candidate.id === settingsOnlyDeviceId
-    );
+    const device = settingsOnlyShellyRef.current;
     if (!device) {
-      onSettingsClose?.();
+      onSettingsCloseRef.current?.();
       return;
     }
-    flow.recheckShellyMutation.reset();
-    flow.recheckShellyMutation.mutate(device);
+    resetRecheckShellyRef.current();
+    recheckShellyRef.current(device);
   }, [settingsOnlyDeviceId]);
 
   const checkShelly = () => {
@@ -532,250 +528,23 @@ export const ShellySetupPage = ({
         <p>{t('hardware.shelly.deleteDescription')}</p>
       </Modal>
 
-      <Modal
-        busy={flow.recheckShellyMutation.isPending}
-        closeLabel={t('common.close')}
-        open={infoShelly !== null}
-        size="diagnostic"
-        title={infoShelly?.name ?? t('hardware.shelly.settings')}
+      <ShellySettingsModal
+        flow={flow}
+        device={infoShelly}
+        enableBleDiscovery={enableBleDiscovery}
         onClose={closeInfoModal}
-      >
-        {infoShelly && (
-          <div className="settings-modal-layout">
-            {flow.recheckShellyMutation.isError && (
-              <FeedbackPanel
-                tone="warning"
-                title={mutationError(flow.recheckShellyMutation.error)}
-              >
-                {t('hardware.shelly.checkFailedDetail')}
-              </FeedbackPanel>
-            )}
-            <div className="status-stack">
-              <div className="lcl-diagnostic-row">
-                <span>{t('common.model')}</span>
-                <div className="lcl-compact-device__meta">
-                  <strong>
-                    {(flow.setupStatus?.deviceInfo.model ?? infoShelly.model)
-                      ? `${flow.setupStatus?.deviceInfo.model ?? infoShelly.model}, gen ${flow.setupStatus?.deviceInfo.gen ?? infoShelly.gen ?? '?'}`
-                      : t('common.missingData')}
-                  </strong>
-                  <StatusBadge tone={compatibilityBadge.tone}>
-                    {compatibilityBadge.label}
-                  </StatusBadge>
-                </div>
-              </div>
-              <DiagnosticRow
-                href={infoShelly.baseUrl}
-                label={t('hardware.shelly.addressSettings')}
-                linkLabel={t('hardware.shelly.openPanelLabel', {
-                  address: infoShelly.baseUrl
-                })}
-                value={infoShelly.baseUrl}
-              />
-              <DiagnosticRow
-                label={t('common.firmware')}
-                value={infoStatus?.firmwareId ?? t('common.missingData')}
-              />
-              <DiagnosticRow
-                label={t('hardware.metrics.wifiRssi')}
-                value={
-                  infoStatus?.telemetry.wifiRssiDbm === undefined
-                    ? t('common.missing')
-                    : `${infoStatus.telemetry.wifiRssiDbm} dBm`
-                }
-              />
-              <DiagnosticRow
-                label={t('hardware.shelly.uptime')}
-                value={formatClockUptime(infoStatus?.clock.uptimeSec, t)}
-              />
-              <DiagnosticRow
-                label="NTP"
-                value={
-                  infoStatus
-                    ? `${formatClockSyncState(infoStatus.clock, t)} · ${formatClockTimestamp(
-                        infoStatus.clock.lastSyncUnixTimeSec,
-                        locale,
-                        t
-                      )}`
-                    : t('common.missingData')
-                }
-                tone={infoStatus?.clock.timeSynced ? 'normal' : 'warning'}
-              />
-              <DiagnosticRow
-                label="Scripts"
-                value={
-                  flow.setupStatus
-                    ? formatComponentState(flow.setupStatus.status.scripts, t)
-                    : t('common.missingData')
-                }
-              />
-              <DiagnosticRow
-                label="Bluetooth"
-                value={
-                  flow.setupStatus
-                    ? formatComponentState(flow.setupStatus.status.bluetooth, t)
-                    : t('common.missingData')
-                }
-              />
-              <DiagnosticRow
-                label={t('hardware.shelly.matter')}
-                value={
-                  flow.setupStatus
-                    ? flow.setupStatus.status.matterEnabled
-                      ? t('common.enabled')
-                      : t('common.disabled')
-                    : t('common.missingData')
-                }
-              />
-            </div>
-            <div className="action-row">
-              {enableBleDiscovery && (
-                <button
-                  className="secondary-action"
-                  type="button"
-                  title={t('hardware.shelly.scanBleViaShellyTitle')}
-                  onClick={() => openBleScanModal(infoShelly)}
-                >
-                  <IconBluetooth className="icon-action__svg" aria-hidden="true" />
-                  <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-                </button>
-              )}
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                title={t('hardware.shelly.deleteTitle')}
-                onClick={() => removeSavedShelly(infoShelly)}
-              >
-                <IconTrash className="icon-action__svg" aria-hidden="true" />
-                <span>{t('hardware.shelly.deleteTitle')}</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+        onBleScan={openBleScanModal}
+        onRemove={removeSavedShelly}
+      />
 
-      <Modal
-        busy={isBleDiscoveryBusy}
-        closeLabel={t('common.close')}
-        description={bleScanShelly ? bleScanShelly.name : ''}
+      <ShellyBleDiscoveryModal
+        flow={flow}
+        device={bleScanShelly}
         open={isBleScanModalOpen}
-        size="task"
-        title={t('hardware.shelly.scanBleTitle')}
-        headerActions={
-          <InfoTooltip
-            label={t('hardware.shelly.scanBleInfoLabel')}
-            title={t('hardware.shelly.scanBleInfoTitle')}
-          >
-            {t('hardware.shelly.scanBleInfo')}
-          </InfoTooltip>
-        }
-        actions={
-          shouldShowBleRestart ? (
-            <button
-              className="secondary-action"
-              type="button"
-              aria-busy={flow.restartBleDiscoveryMutation.isPending}
-              disabled={isBleDiscoveryBusy}
-              title={t('hardware.shelly.scanBleAgainTitle')}
-              onClick={restartBleDiscovery}
-            >
-              {t('hardware.shelly.scanBleAgain')}
-            </button>
-          ) : null
-        }
         onClose={closeBleScanModal}
-      >
-        {didBleDiscoveryStartFail && (
-          <FeedbackPanel tone="warning" title={t('hardware.shelly.scanBleStartFailed')}>
-            {t('hardware.shelly.scanBleStartFailedDetail')}
-          </FeedbackPanel>
-        )}
-        {!didBleDiscoveryStartFail &&
-          bleDiscoveryCandidates.length === 0 &&
-          !shouldShowBleRestart && (
-            <div className="scan-loading-state">
-              <span className="scan-loading-state__spinner" aria-hidden="true" />
-              <strong>{t('hardware.shelly.scanningBle')}</strong>
-              <p>{t('hardware.shelly.scanningBleSafeOff')}</p>
-            </div>
-          )}
-        {bleDiscoveryCandidates.length > 0 && (
-          <div
-            className="ble-candidate-list"
-            aria-label={t('hardware.sensor.foundBleListLabel')}
-          >
-            {bleDiscoveryCandidates.map((candidate) => {
-              const hasTemperature = typeof candidate.temperatureC === 'number';
-              const hasHumidity = typeof candidate.humidityPct === 'number';
-              const isSavedSensor = flow.sensorDevices.some(
-                (device) =>
-                  device.runtimeAddress.toUpperCase() ===
-                  candidate.runtimeAddress.toUpperCase()
-              );
-              return (
-                <article key={candidate.runtimeAddress} className="ble-candidate-item">
-                  <div className="ble-candidate-main">
-                    <strong>{candidate.runtimeAddress}</strong>
-                    <span>{formatBleCandidateProfile(candidate.profileId)}</span>
-                  </div>
-                  <dl className="ble-candidate-metrics">
-                    <div>
-                      <dt>RSSI</dt>
-                      <dd>
-                        {formatNullableMetric(
-                          candidate.rssi,
-                          t('common.missing'),
-                          ' dBm',
-                          0
-                        )}
-                      </dd>
-                    </div>
-                    {hasTemperature && (
-                      <div>
-                        <dt>Temp.</dt>
-                        <dd>
-                          {formatNullableMetric(
-                            candidate.temperatureC,
-                            t('common.missing'),
-                            '°C'
-                          )}
-                        </dd>
-                      </div>
-                    )}
-                    {hasHumidity && (
-                      <div>
-                        <dt>{t('hardware.metrics.humidity')}</dt>
-                        <dd>
-                          {formatNullableMetric(
-                            candidate.humidityPct,
-                            t('common.missing'),
-                            '%'
-                          )}
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
-                  <button
-                    className="secondary-action ble-candidate-action"
-                    type="button"
-                    disabled={isSavedSensor}
-                    title={
-                      isSavedSensor
-                        ? t('hardware.sensor.saveThermometerSavedTitle')
-                        : t('hardware.sensor.saveThermometerTitle')
-                    }
-                    onClick={() => handleDiscoveredSensor(candidate)}
-                  >
-                    {isSavedSensor
-                      ? t('hardware.sensor.saved')
-                      : t('hardware.sensor.saveThermometer')}
-                  </button>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </Modal>
+        onRestart={restartBleDiscovery}
+        onSaveCandidate={handleDiscoveredSensor}
+      />
 
       {!addOnly && !settingsOnlyDeviceId && (
         <div className="saved-list" aria-label={t('hardware.shelly.savedListLabel')}>
@@ -785,15 +554,11 @@ export const ShellySetupPage = ({
               key={device.id}
               controlState={flow.shellyControlStates[device.id]}
               device={device}
-              onAutomationAuto={flow.setAutomationAuto}
-              onAutomationManual={flow.setAutomationManual}
               {...(enableBleDiscovery ? { onBleScan: openBleScanModal } : {})}
               onInfoOpen={openInfoModal}
               onNameChange={(savedDevice, value) =>
                 flow.setShellyDeviceName(savedDevice.id, value)
               }
-              onRelayOff={flow.turnRelayOff}
-              onRelayOn={flow.turnRelayOn}
               onRemove={removeSavedShelly}
             />
           ))}

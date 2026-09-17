@@ -1114,9 +1114,6 @@ select {
   gap: var(--lcl-spacing-sm);
 }
 
-.sensor-setup-panel {
-}
-
 .sensor-setup-panel--embedded {
   display: grid;
   gap: var(--lcl-spacing-lg);
@@ -2669,63 +2666,6 @@ select {
 .shelly-ble-action:disabled {
   cursor: not-allowed;
   opacity: var(--lcl-opacity-disabled);
-}
-
-.shelly-runtime-controls {
-  display: grid;
-  gap: var(--lcl-spacing-sm);
-  width: 100%;
-}
-
-.shelly-mode-row {
-  align-items: center;
-  display: flex;
-  gap: var(--lcl-spacing-sm);
-  justify-content: space-between;
-}
-
-.shelly-saved-card .shelly-mode-control {
-  background: var(--lcl-color-surface-muted);
-  border: 0;
-  border-radius: var(--lcl-radius-round);
-  display: flex;
-  flex: 0 1 var(--lcl-size-action-min-width);
-  max-width: var(--lcl-size-action-min-width);
-  overflow: hidden;
-  width: 100%;
-}
-
-.shelly-saved-card .shelly-mode-control > * {
-  flex: 1 1 0;
-}
-
-.shelly-saved-card .shelly-mode-control .automation-control-button {
-  background: transparent;
-  border: 0;
-  border-radius: var(--lcl-radius-round);
-  color: var(--lcl-color-text-muted);
-  font-size: var(--lcl-font-size-xs);
-  min-height: var(--lcl-size-compact-control-min-height);
-  padding: 0 var(--lcl-spacing-xs);
-}
-
-.shelly-saved-card .shelly-mode-control .automation-control-button[aria-pressed='true'] {
-  background: var(--lcl-color-accent);
-  color: var(--lcl-color-accent-contrast);
-}
-
-.shelly-relay-actions {
-  display: flex;
-  gap: var(--lcl-spacing-sm);
-  width: 100%;
-}
-
-.shelly-relay-actions > * {
-  flex: 1 1 0;
-}
-
-.shelly-saved-card .shelly-relay-actions .automation-relay-button {
-  min-height: var(--lcl-size-compact-control-min-height);
 }
 
 /* Stage 6D: lightweight in-app wheel picker avoids Android's radial clock dialog. */

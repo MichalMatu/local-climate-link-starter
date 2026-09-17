@@ -251,10 +251,6 @@ export const ShellyAddForm = ({ flow, showValidationErrors }: ShellyAddFormProps
 type SavedShellyDeviceCardProps = {
   device: ShellyDraftDevice;
   controlState: ShellyControlCardState | undefined;
-  onRelayOn: (device: ShellyDraftDevice) => void;
-  onRelayOff: (device: ShellyDraftDevice) => void;
-  onAutomationAuto: (device: ShellyDraftDevice) => void;
-  onAutomationManual: (device: ShellyDraftDevice) => void;
   onNameChange: (device: ShellyDraftDevice, value: string) => void;
   onInfoOpen: (device: ShellyDraftDevice) => void;
   onBleScan?: (device: ShellyDraftDevice) => void;
@@ -264,10 +260,6 @@ type SavedShellyDeviceCardProps = {
 export const SavedShellyDeviceCard = ({
   device,
   controlState,
-  onRelayOn,
-  onRelayOff,
-  onAutomationAuto,
-  onAutomationManual,
   onNameChange,
   onInfoOpen,
   onBleScan,
@@ -276,10 +268,8 @@ export const SavedShellyDeviceCard = ({
   const { t } = useTranslation();
   const [isEditingName, setIsEditingName] = useState(false);
   const controlStatus = controlState?.status ?? null;
-  const pendingAction = controlState?.pendingAction ?? null;
-  const isControlBusy = pendingAction !== null;
-  const automationMode = controlStatus?.automationMode ?? null;
-  const manualControl = automationMode === 'manual';
+  const isControlBusy =
+    controlState?.pendingAction !== null && controlState?.pendingAction !== undefined;
   const telemetry = controlStatus?.telemetry;
   const clock = controlStatus?.clock;
 
@@ -320,6 +310,15 @@ export const SavedShellyDeviceCard = ({
         )}
         <div className="shelly-card-actions">
           <button
+            className="icon-action"
+            type="button"
+            aria-label={t('hardware.shelly.settings')}
+            title={t('hardware.shelly.settings')}
+            onClick={() => onInfoOpen(device)}
+          >
+            <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
+          </button>
+          <button
             className="icon-action icon-action--danger"
             type="button"
             aria-label={t('hardware.shelly.deleteTitle')}
@@ -353,80 +352,6 @@ export const SavedShellyDeviceCard = ({
           <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
         </button>
       )}
-
-      <div
-        className="shelly-runtime-controls"
-        aria-label={t('hardware.shelly.controlLabel', { name: device.name })}
-      >
-        <div className="shelly-mode-row">
-          <div
-            className="automation-control-group shelly-mode-control"
-            role="group"
-            aria-label={t('hardware.metrics.mode')}
-          >
-            <button
-              className="automation-control-button"
-              type="button"
-              aria-pressed={automationMode === 'auto'}
-              disabled={isControlBusy}
-              onClick={() => {
-                if (automationMode !== 'auto') onAutomationAuto(device);
-              }}
-            >
-              AUTO
-            </button>
-            <button
-              className="automation-control-button"
-              type="button"
-              aria-pressed={manualControl}
-              disabled={isControlBusy}
-              onClick={() => {
-                if (!manualControl) onAutomationManual(device);
-              }}
-            >
-              MANUAL
-            </button>
-          </div>
-          <button
-            className="icon-action"
-            type="button"
-            aria-label={t('hardware.shelly.settings')}
-            title={t('hardware.shelly.settings')}
-            onClick={() => onInfoOpen(device)}
-          >
-            <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
-          </button>
-        </div>
-
-        <div
-          className="automation-relay-actions shelly-relay-actions"
-          role="group"
-          aria-label={t('hardware.metrics.relay')}
-        >
-          <button
-            className="automation-relay-button"
-            type="button"
-            aria-pressed={controlStatus?.relayOn === true}
-            disabled={isControlBusy || !manualControl}
-            onClick={() => {
-              if (controlStatus?.relayOn !== true) onRelayOn(device);
-            }}
-          >
-            ON
-          </button>
-          <button
-            className="automation-relay-button"
-            type="button"
-            aria-pressed={controlStatus?.relayOn === false}
-            disabled={isControlBusy || !manualControl}
-            onClick={() => {
-              if (controlStatus?.relayOn === true) onRelayOff(device);
-            }}
-          >
-            OFF
-          </button>
-        </div>
-      </div>
     </article>
   );
 };

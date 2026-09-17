@@ -2,11 +2,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement, type PropsWithChildren } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+import type * as ShellyRequestsModule from './shellyRequests.js';
 
 const scanShellySetupUrlsMock = vi.hoisted(() => vi.fn());
 
 vi.mock('./shellyRequests.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('./shellyRequests.js')>();
+  const actual = await importOriginal<typeof ShellyRequestsModule>();
   return { ...actual, scanShellySetupUrls: scanShellySetupUrlsMock };
 });
 import { buildShellyScanUrls, useShellySetupScanFlow } from './useShellySetupScanFlow.js';

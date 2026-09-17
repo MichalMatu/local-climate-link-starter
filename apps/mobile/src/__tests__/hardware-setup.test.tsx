@@ -994,7 +994,7 @@ describe('HardwareSetupScreen', () => {
     expect(vi.mocked(fetch)).not.toHaveBeenCalled();
   });
 
-  it('shows saved Shelly controls and sends relay ON/OFF commands', async () => {
+  it('renders saved Shelly status and settings without runtime automation controls', async () => {
     renderHardwareSetup();
     await addShellyThroughUi();
 
@@ -1004,6 +1004,16 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     expect(within(savedPlugList).queryByText('Przekaźnik')).not.toBeInTheDocument();
     expect(within(savedPlugList).queryByText('Tryb')).not.toBeInTheDocument();
+    for (const name of ['AUTO', 'MANUAL', 'ON', 'OFF']) {
+      expect(
+        within(savedPlugList).queryByRole('button', { name })
+      ).not.toBeInTheDocument();
+    }
+
+    expect(await within(savedPlugList).findByText('0.0 W')).toBeInTheDocument();
+    expect(within(savedPlugList).getByText('230 V')).toBeInTheDocument();
+    expect(within(savedPlugList).getByText('1.23 kWh')).toBeInTheDocument();
+
     const infoToggle = within(savedPlugList).getByRole('button', {
       name: 'Ustawienia gniazdka'
     });
@@ -1018,6 +1028,7 @@ describe('HardwareSetupScreen', () => {
         name: 'Usuń gniazdko tylko z aplikacji'
       })
     ).toHaveClass('icon-action--danger');
+
     fireEvent.click(infoToggle);
     const infoDialog = await screen.findByRole('dialog', { name: 'Przedpokój' });
     expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
@@ -1038,124 +1049,44 @@ describe('HardwareSetupScreen', () => {
     expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
     fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
 
-    const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-    const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
-    const manualButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
-    expect(autoButton).toHaveAttribute('aria-pressed', 'true');
-    expect(manualButton).toHaveAttribute('aria-pressed', 'false');
-
-    const relayButton = within(actionRow).getByRole('button', { name: 'ON' });
-    expect(relayButton).toBeDisabled();
-    fireEvent.click(manualButton);
-    await screen.findByText('Tryb MANUAL. Przekaźnik OFF.');
-    expect(relayButton).not.toBeDisabled();
-
-    fireEvent.click(relayButton);
-    await screen.findByText('Przekaźnik ON.');
-    expect(within(savedPlugList).queryByText('Przekaźnik ON.')).not.toBeInTheDocument();
-    const offButton = within(actionRow).getByRole('button', { name: 'OFF' });
-    expect(offButton).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(offButton);
-    await screen.findByText('Przekaźnik OFF.');
-    expect(within(savedPlugList).queryByText('Przekaźnik OFF.')).not.toBeInTheDocument();
-    expect(within(actionRow).getByRole('button', { name: 'OFF' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-
-    const switchParams = vi
+    const rpcMethods = vi
       .mocked(fetch)
-      .mock.calls.map((call) => requestBody(call[1]))
-      .filter((body) => body.method === 'Switch.Set')
-      .map((body) => body.params);
-
-    expect(switchParams).toEqual(
-      expect.arrayContaining([
-        { id: 0, on: true },
-        { id: 0, on: false }
-      ])
-    );
+      .mock.calls.map((call) => requestBody(call[1]).method)
+      .filter(Boolean);
+    expect(rpcMethods).not.toContain('Script.Start');
+    expect(rpcMethods).not.toContain('Script.Stop');
+    expect(rpcMethods).not.toContain('Switch.Set');
   });
 
-  it('does not replay Shelly control toasts after returning to the Shelly page', async () => {
+  it('keeps installed-runtime ownership out of generic Shelly setup', async () => {
     renderHardwareSetup();
     await addShellyThroughUi();
 
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
-    const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-
-    const manualRelayButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
-    if (manualRelayButton.getAttribute('aria-pressed') !== 'true') {
-      fireEvent.click(manualRelayButton);
-      await screen.findByText('Tryb MANUAL. Przekaźnik OFF.');
+    for (const name of ['AUTO', 'MANUAL', 'ON', 'OFF']) {
+      expect(
+        within(savedPlugList).queryByRole('button', { name })
+      ).not.toBeInTheDocument();
     }
-    fireEvent.click(within(actionRow).getByRole('button', { name: 'ON' }));
-    expect(await screen.findByText('Przekaźnik ON.')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Zamknij: Przekaźnik ON.' }));
-    await waitFor(() =>
-      expect(screen.queryByText('Przekaźnik ON.')).not.toBeInTheDocument()
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
-
-    expect(screen.getByRole('button', { name: 'Shelly' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    expect(screen.queryByText('Przekaźnik ON.')).not.toBeInTheDocument();
-  });
-
-  it('switches saved Shelly automation between MANUAL and AUTO safely', async () => {
-    renderHardwareSetup();
-    await addShellyThroughUi();
-
-    const savedPlugList = screen.getByLabelText('Dodane gniazdka');
-    const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-    const manualButton = within(actionRow).getByRole('button', { name: 'MANUAL' });
-    expect(manualButton).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(manualButton);
-    await screen.findByText('Tryb MANUAL. Przekaźnik OFF.');
     expect(
-      within(savedPlugList).queryByText('Tryb MANUAL. Przekaźnik OFF.')
-    ).not.toBeInTheDocument();
-    expect(manualButton).toHaveAttribute('aria-pressed', 'true');
-    const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
-    expect(autoButton).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(autoButton);
-    await screen.findByText('Tryb AUTO uruchomiony.');
+      within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
+    ).toBeInTheDocument();
     expect(
-      within(savedPlugList).queryByText('Tryb AUTO uruchomiony.')
-    ).not.toBeInTheDocument();
+      within(savedPlugList).getByRole('button', {
+        name: 'Skanuj termometry BLE przez to gniazdko'
+      })
+    ).toBeInTheDocument();
 
-    const controlCalls = vi
+    const runtimeMutations = vi
       .mocked(fetch)
-      .mock.calls.map((call) => requestBody(call[1]))
-      .filter((body) =>
-        ['Script.Stop', 'Script.Start', 'Switch.Set'].includes(body.method ?? '')
+      .mock.calls.map((call) => requestBody(call[1]).method)
+      .filter((method) =>
+        ['Script.Start', 'Script.Stop', 'Switch.Set'].includes(method ?? '')
       );
-
-    expect(controlCalls).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ method: 'Script.Stop', params: { id: 1 } }),
-        expect.objectContaining({
-          method: 'Switch.Set',
-          params: { id: 0, on: false }
-        }),
-        expect.objectContaining({ method: 'Script.Start', params: { id: 1 } })
-      ])
-    );
+    expect(runtimeMutations).toEqual([]);
   });
 
-  it('renders a saved Shelly plug in final shape and refreshes status after reload', async () => {
+  it('renders a saved Shelly plug in final setup shape and refreshes status', async () => {
     useHardwareSetupDraftStore.setState({
       ...DEFAULT_HARDWARE_SETUP_DRAFT,
       shellyDevices: [
@@ -1179,24 +1110,14 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).queryByText('Moc')).not.toBeInTheDocument();
     expect(within(savedPlugList).queryByText('Napięcie')).not.toBeInTheDocument();
     expect(within(savedPlugList).queryByText('Energia')).not.toBeInTheDocument();
-
-    const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-    expect(within(actionRow).getByRole('button', { name: 'AUTO' })).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
-    expect(within(actionRow).getByRole('button', { name: 'MANUAL' })).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
-    expect(within(actionRow).getByRole('button', { name: 'ON' })).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
-    expect(within(actionRow).getByRole('button', { name: 'OFF' })).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
+    for (const name of ['AUTO', 'MANUAL', 'ON', 'OFF']) {
+      expect(
+        within(savedPlugList).queryByRole('button', { name })
+      ).not.toBeInTheDocument();
+    }
+    expect(
+      within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
+    ).toBeInTheDocument();
 
     expect(await within(savedPlugList).findByText('0.0 W')).toBeInTheDocument();
     expect(within(savedPlugList).getByText('230 V')).toBeInTheDocument();
@@ -1266,7 +1187,7 @@ describe('HardwareSetupScreen', () => {
     expect(confirm).not.toHaveBeenCalled();
   });
 
-  it('explains that rule save is required before AUTO or MANUAL controls', async () => {
+  it('keeps a saved Shelly manageable before any automation exists', async () => {
     vi.mocked(fetch).mockImplementation(
       async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
@@ -1290,10 +1211,6 @@ describe('HardwareSetupScreen', () => {
             });
           case 'Script.List':
             return rpcResult({ scripts: [] });
-          case 'Switch.Set':
-          case 'Script.Start':
-          case 'Script.Stop':
-            return rpcResult({});
           default:
             return rpcResult({});
         }
@@ -1303,27 +1220,28 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
     await addShellyThroughUi();
 
-    expect(screen.queryByText('brak reguły')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Najpierw zapisz regułę dla tego gniazdka.')
-    ).not.toBeInTheDocument();
-
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
-    const actionRow = within(savedPlugList).getByLabelText(/^Sterowanie /);
-    const autoButton = within(actionRow).getByRole('button', { name: 'AUTO' });
-    expect(autoButton).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(autoButton);
-    await screen.findByText('Najpierw zapisz regułę dla tego gniazdka.');
+    for (const name of ['AUTO', 'MANUAL', 'ON', 'OFF']) {
+      expect(
+        within(savedPlugList).queryByRole('button', { name })
+      ).not.toBeInTheDocument();
+    }
     expect(
-      within(savedPlugList).queryByText('Najpierw zapisz regułę dla tego gniazdka.')
-    ).not.toBeInTheDocument();
+      within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
+    ).toBeInTheDocument();
+    expect(
+      within(savedPlugList).getByRole('button', {
+        name: 'Skanuj termometry BLE przez to gniazdko'
+      })
+    ).toBeInTheDocument();
 
     const rpcMethods = vi
       .mocked(fetch)
       .mock.calls.map((call) => requestBody(call[1]).method)
       .filter(Boolean);
     expect(rpcMethods).not.toContain('Script.Start');
+    expect(rpcMethods).not.toContain('Script.Stop');
+    expect(rpcMethods).not.toContain('Switch.Set');
   });
 
   it('scans the local network inside the add task and fills the form before adding', async () => {

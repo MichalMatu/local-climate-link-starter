@@ -9,7 +9,7 @@ import {
   IconTemperature
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import {
   AppBottomNavigation,
@@ -321,13 +321,18 @@ const PlainPlugCard = ({
   const [isEditingName, setIsEditingName] = useState(false);
   const { shellyControlStates, refreshShellyControl, turnRelayOn, turnRelayOff } =
     useShellyControlFlow();
+  const refreshShellyControlRef = useRef(refreshShellyControl);
   const controlState = shellyControlStates[device.id];
   const status = controlState?.status ?? null;
   const relayState = status?.relayOn;
   const isBusy = controlState?.pendingAction != null;
 
   useEffect(() => {
-    refreshShellyControl(device);
+    refreshShellyControlRef.current = refreshShellyControl;
+  }, [refreshShellyControl]);
+
+  useEffect(() => {
+    refreshShellyControlRef.current({ id: device.id, baseUrl: device.baseUrl });
   }, [device.id, device.baseUrl]);
 
   return (
@@ -460,6 +465,7 @@ export const AutomationDashboardScreen = ({
     () => initialKind ?? 'climate'
   );
   const [settingsDeviceId, setSettingsDeviceId] = useState<string | null>(null);
+  const closePlugSettings = useCallback(() => setSettingsDeviceId(null), []);
 
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
@@ -552,7 +558,7 @@ export const AutomationDashboardScreen = ({
         <PlugSettingsOverlay
           key={settingsDeviceId}
           deviceId={settingsDeviceId}
-          onClose={() => setSettingsDeviceId(null)}
+          onClose={closePlugSettings}
         />
       )}
 

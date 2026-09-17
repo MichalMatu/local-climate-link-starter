@@ -11,7 +11,7 @@ import {
 } from './shellyRequests.js';
 import type { ShellyDraftDevice } from './setupDraftStore.js';
 
-export type ShellyControlAction = 'status' | 'on' | 'off' | 'auto' | 'manual';
+export type ShellyControlAction = 'status' | 'on' | 'off';
 
 export type ShellyControlViewState = {
   status: ShellyControlStatus | null;
@@ -21,8 +21,10 @@ export type ShellyControlViewState = {
   updatedAtMs: number | null;
 };
 
+type ShellyControlTarget = Pick<ShellyDraftDevice, 'id' | 'baseUrl'>;
+
 type ShellyControlMutationResult = {
-  device: ShellyDraftDevice;
+  device: ShellyControlTarget;
   status: ShellyControlStatus;
 };
 
@@ -73,7 +75,7 @@ export const useShellyControlFlow = () => {
   };
 
   const applyControlStatus = (
-    device: ShellyDraftDevice,
+    device: ShellyControlTarget,
     status: ShellyControlStatus,
     message: string | null
   ) => {
@@ -87,7 +89,7 @@ export const useShellyControlFlow = () => {
   };
 
   const applyControlError = (
-    device: ShellyDraftDevice,
+    device: ShellyControlTarget,
     error: unknown,
     fallbackMessage = t('common.operationFailed')
   ) => {
@@ -99,16 +101,9 @@ export const useShellyControlFlow = () => {
     });
   };
 
-  const requireAutomationScript = (status: ShellyControlStatus): number => {
-    if (status.automationScriptId === null) {
-      throw new Error(t('hardware.rule.automationScriptMissing'));
-    }
-    return status.automationScriptId;
-  };
-
   const refreshShellyControlMutation = useMutation({
     mutationFn: async (
-      device: ShellyDraftDevice
+      device: ShellyControlTarget
     ): Promise<ShellyControlMutationResult> => ({
       device,
       status: await readShellyControlStatus(device.baseUrl)
@@ -125,7 +120,7 @@ export const useShellyControlFlow = () => {
 
   const turnRelayOnMutation = useMutation({
     mutationFn: async (
-      device: ShellyDraftDevice
+      device: ShellyControlTarget
     ): Promise<ShellyControlMutationResult> => {
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
       unwrapShellyResult(await client.setRelayOn());
@@ -147,7 +142,7 @@ export const useShellyControlFlow = () => {
 
   const turnRelayOffMutation = useMutation({
     mutationFn: async (
-      device: ShellyDraftDevice
+      device: ShellyControlTarget
     ): Promise<ShellyControlMutationResult> => {
       const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
       unwrapShellyResult(await client.setRelayOff());
@@ -167,75 +162,16 @@ export const useShellyControlFlow = () => {
     onError: (error, device) => applyControlError(device, error)
   });
 
-  const setAutomationAutoMutation = useMutation({
-    mutationFn: async (
-      device: ShellyDraftDevice
-    ): Promise<ShellyControlMutationResult> => {
-      const currentStatus = await readShellyControlStatus(device.baseUrl);
-      const scriptId = requireAutomationScript(currentStatus);
-      const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
-      unwrapShellyResult(await client.startScript(scriptId));
-      return {
-        device,
-        status: await readShellyControlStatus(device.baseUrl)
-      };
-    },
-    onMutate: (device) =>
-      setShellyControlState(device.id, {
-        pendingAction: 'auto',
-        error: null,
-        message: null
-      }),
-    onSuccess: ({ device, status }) =>
-      applyControlStatus(device, status, t('hardware.flow.relayAutoStarted')),
-    onError: (error, device) => applyControlError(device, error)
-  });
-
-  const setAutomationManualMutation = useMutation({
-    mutationFn: async (
-      device: ShellyDraftDevice
-    ): Promise<ShellyControlMutationResult> => {
-      const currentStatus = await readShellyControlStatus(device.baseUrl);
-      const scriptId = requireAutomationScript(currentStatus);
-      const client = new RpcShellyClient(createShellyTransport(device.baseUrl));
-      const stopResult = await client.stopScript(scriptId);
-      const offResult = await client.setRelayOff();
-      unwrapShellyResult(offResult);
-      unwrapShellyResult(stopResult);
-      return {
-        device,
-        status: await readShellyControlStatus(device.baseUrl)
-      };
-    },
-    onMutate: (device) =>
-      setShellyControlState(device.id, {
-        pendingAction: 'manual',
-        error: null,
-        message: null
-      }),
-    onSuccess: ({ device, status }) =>
-      applyControlStatus(device, status, t('hardware.flow.relayManualOff')),
-    onError: (error, device) => applyControlError(device, error)
-  });
-
-  const refreshShellyControl = (device: ShellyDraftDevice) => {
+  const refreshShellyControl = (device: ShellyControlTarget) => {
     refreshShellyControlMutation.mutate(device);
   };
 
-  const turnRelayOn = (device: ShellyDraftDevice) => {
+  const turnRelayOn = (device: ShellyControlTarget) => {
     turnRelayOnMutation.mutate(device);
   };
 
-  const turnRelayOff = (device: ShellyDraftDevice) => {
+  const turnRelayOff = (device: ShellyControlTarget) => {
     turnRelayOffMutation.mutate(device);
-  };
-
-  const setAutomationAuto = (device: ShellyDraftDevice) => {
-    setAutomationAutoMutation.mutate(device);
-  };
-
-  const setAutomationManual = (device: ShellyDraftDevice) => {
-    setAutomationManualMutation.mutate(device);
   };
 
   const acknowledgeShellyControlFeedback = useCallback(
@@ -275,13 +211,9 @@ export const useShellyControlFlow = () => {
     refreshShellyControlMutation,
     turnRelayOnMutation,
     turnRelayOffMutation,
-    setAutomationAutoMutation,
-    setAutomationManualMutation,
     refreshShellyControl,
     turnRelayOn,
     turnRelayOff,
-    setAutomationAuto,
-    setAutomationManual,
     acknowledgeShellyControlFeedback,
     applyControlStatus,
     applyControlError,

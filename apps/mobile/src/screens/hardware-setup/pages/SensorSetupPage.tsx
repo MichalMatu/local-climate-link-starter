@@ -1,184 +1,20 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { Modal, ToastViewport } from '@lcl/ui';
-import {
-  IconBattery,
-  IconClock,
-  IconDeviceMobile,
-  IconPencil,
-  IconPlug,
-  IconPlus,
-  IconTrash,
-  IconWifi
-} from '@tabler/icons-react';
-import { useId, useState } from 'react';
+import { IconPlus } from '@tabler/icons-react';
+import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { HardwarePageProps } from '../helpers.js';
 import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';
-
-const sensorProfileLabels = {
-  xiaomi_lywsd03mmc_bthome_v2: 'Xiaomi/PVVX BTHome v2',
-  tp357_custom_v1: 'TP357'
-} as const;
-
-const sensorProfileDisplayLabels = {
-  xiaomi_lywsd03mmc_bthome_v2: 'BTHome v2',
-  tp357_custom_v1: 'TP357'
-} as const;
+import {
+  formatSensorMetric,
+  SavedSensorCard,
+  SensorAddForm,
+  sensorProfileDisplayLabels
+} from './SensorSetupPresentation.js';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
-
-const formatNullableMetric = (
-  value: number | null | undefined,
-  suffix = '',
-  fractionDigits = 1,
-  missingLabel: string
-): string =>
-  typeof value === 'number' && Number.isFinite(value)
-    ? `${value.toFixed(fractionDigits)}${suffix}`
-    : missingLabel;
-
-const formatBattery = (
-  sample: SensorReadingSample | null,
-  missingLabel: string
-): string => {
-  if (typeof sample?.batteryPct === 'number') {
-    return formatNullableMetric(sample.batteryPct, '%', 0, missingLabel);
-  }
-  if (typeof sample?.voltageV === 'number') {
-    return formatNullableMetric(sample.voltageV, ' V', 2, missingLabel);
-  }
-  return missingLabel;
-};
-
-const formatSeenAt = (
-  sample: SensorReadingSample | null,
-  locale: string,
-  missingLabel: string
-): string =>
-  sample
-    ? new Intl.DateTimeFormat(locale, {
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(new Date(sample.seenAtMs))
-    : missingLabel;
-
-const latestSample = (samples: SensorReadingSample[]): SensorReadingSample | null =>
-  samples.at(-1) ?? null;
-
-type NumericSampleMetric = 'temperatureC' | 'humidityPct' | 'rssi';
-
-const latestNumericSample = (
-  samples: SensorReadingSample[],
-  metric: NumericSampleMetric
-): SensorReadingSample | null => {
-  for (let index = samples.length - 1; index >= 0; index -= 1) {
-    const sample = samples[index];
-    if (sample && typeof sample[metric] === 'number') {
-      return sample;
-    }
-  }
-
-  return null;
-};
-
-const latestBatterySample = (
-  samples: SensorReadingSample[]
-): SensorReadingSample | null => {
-  for (let index = samples.length - 1; index >= 0; index -= 1) {
-    const sample = samples[index];
-    if (
-      sample &&
-      (typeof sample.batteryPct === 'number' || typeof sample.voltageV === 'number')
-    ) {
-      return sample;
-    }
-  }
-
-  return null;
-};
-
-type SensorAddFormProps = {
-  flow: SensorSetupFlow;
-  showValidationErrors: boolean;
-};
-
-const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps) => {
-  const { t } = useTranslation();
-  const nameInputId = useId();
-  const nameErrorId = useId();
-  const macInputId = useId();
-  const macErrorId = useId();
-  const nameError =
-    showValidationErrors && !flow.sensorInputState.ok
-      ? flow.sensorInputState.fieldErrors.name
-      : undefined;
-  const macError =
-    showValidationErrors && !flow.sensorInputState.ok
-      ? flow.sensorInputState.fieldErrors.mac
-      : undefined;
-
-  return (
-    <>
-      <label className="field">
-        {t('hardware.sensor.profileLabel')}
-        <span className="select-control">
-          <select
-            value={flow.sensorProfileInput}
-            onChange={(event) =>
-              flow.setSensorProfileInput(
-                event.currentTarget.value as typeof flow.sensorProfileInput
-              )
-            }
-          >
-            <option value="xiaomi_lywsd03mmc_bthome_v2">
-              {sensorProfileLabels.xiaomi_lywsd03mmc_bthome_v2}
-            </option>
-            <option value="tp357_custom_v1">{sensorProfileLabels.tp357_custom_v1}</option>
-          </select>
-        </span>
-      </label>
-
-      <div className={nameError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={nameInputId}>{t('hardware.sensor.nameLabel')}</label>
-        <input
-          id={nameInputId}
-          aria-describedby={nameError ? nameErrorId : undefined}
-          aria-invalid={nameError ? true : undefined}
-          type="text"
-          placeholder={t('hardware.sensor.namePlaceholder')}
-          value={flow.sensorNameInput}
-          onChange={(event) => flow.setSensorNameInput(event.currentTarget.value)}
-        />
-        {nameError && (
-          <span className="field__error" id={nameErrorId}>
-            {nameError}
-          </span>
-        )}
-      </div>
-      <div className={macError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={macInputId}>{t('hardware.sensor.macLabel')}</label>
-        <input
-          id={macInputId}
-          aria-describedby={macError ? macErrorId : undefined}
-          aria-invalid={macError ? true : undefined}
-          type="text"
-          inputMode="text"
-          placeholder="AA:BB:CC:DD:EE:FF"
-          value={flow.sensorMacInput}
-          onChange={(event) => flow.setSensorMacInput(event.currentTarget.value)}
-        />
-        {macError && (
-          <span className="field__error" id={macErrorId}>
-            {macError}
-          </span>
-        )}
-      </div>
-    </>
-  );
-};
 
 type SensorDialogState =
   | { kind: 'none' }
@@ -196,7 +32,7 @@ export const SensorSetupPage = ({
   primaryAddAction = 'manual',
   embedded = false
 }: SensorSetupPageProps) => {
-  const { locale, t } = useTranslation();
+  const { t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
   const [editingSensorId, setEditingSensorId] = useState<string | null>(null);
   const [didSubmitSensorAdd, setDidSubmitSensorAdd] = useState(false);
@@ -276,7 +112,7 @@ export const SensorSetupPage = ({
     pushToast('ok', t('hardware.sensor.removed'));
   };
 
-  const readingsForSensor = (device: SensorDraftDevice): SensorReadingSample[] =>
+  const readingsForSensor = (device: SensorDraftDevice) =>
     flow.sensorSamplesById[device.id.toUpperCase()] ?? [];
 
   return (
@@ -404,7 +240,7 @@ export const SensorSetupPage = ({
                     <div>
                       <dt>RSSI</dt>
                       <dd>
-                        {formatNullableMetric(
+                        {formatSensorMetric(
                           candidate.rssi,
                           ' dBm',
                           0,
@@ -416,7 +252,7 @@ export const SensorSetupPage = ({
                       <div>
                         <dt>{t('hardware.metrics.temperatureShort')}</dt>
                         <dd>
-                          {formatNullableMetric(
+                          {formatSensorMetric(
                             candidate.temperatureC,
                             '°C',
                             1,
@@ -429,7 +265,7 @@ export const SensorSetupPage = ({
                       <div>
                         <dt>{t('hardware.metrics.humidityShort')}</dt>
                         <dd>
-                          {formatNullableMetric(
+                          {formatSensorMetric(
                             candidate.humidityPct,
                             '%',
                             1,
@@ -488,202 +324,20 @@ export const SensorSetupPage = ({
 
       <div className="saved-list" aria-label={t('hardware.sensor.savedListLabel')}>
         {flow.sensorDevices.length === 0 && <p>{t('hardware.sensor.empty')}</p>}
-        {flow.sensorDevices.map((device) => {
-          const samples = readingsForSensor(device);
-          const temperatureSample = latestNumericSample(samples, 'temperatureC');
-          const humiditySample = latestNumericSample(samples, 'humidityPct');
-          const hasTemperatureData =
-            typeof temperatureSample?.temperatureC === 'number' &&
-            Number.isFinite(temperatureSample.temperatureC);
-          const hasHumidityData =
-            typeof humiditySample?.humidityPct === 'number' &&
-            Number.isFinite(humiditySample.humidityPct);
-
-          const latest = latestSample(samples);
-          const batterySample = latestBatterySample(samples);
-          const rssiSample = latestNumericSample(samples, 'rssi');
-          const isEditing = editingSensorId === device.id;
-
-          return (
-            <article key={device.id} className="saved-list__item sensor-saved-card">
-              <div className="sensor-card-header">
-                {isEditing ? (
-                  <input
-                    autoFocus
-                    className="sensor-card-name-input"
-                    aria-label={t('hardware.sensor.nameLabel')}
-                    type="text"
-                    value={device.name}
-                    onBlur={() => setEditingSensorId(null)}
-                    onChange={(event) =>
-                      flow.setSensorDeviceName(device.id, event.currentTarget.value)
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === 'Escape') {
-                        event.currentTarget.blur();
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="sensor-card-title-row">
-                    <h3 className="sensor-card-title">{device.name}</h3>
-                    {latest?.source === 'phone-scan' && (
-                      <span
-                        className="sensor-card-source"
-                        title={t('hardware.sensor.scanPhoneTitle')}
-                      >
-                        <IconDeviceMobile
-                          className="icon-action__svg"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    )}
-                    {latest?.source === 'shelly-scan' && (
-                      <span
-                        className="sensor-card-source"
-                        title={t('hardware.nav.shellyTitle')}
-                      >
-                        <IconPlug className="icon-action__svg" aria-hidden="true" />
-                      </span>
-                    )}
-                    <button
-                      className="icon-action rule-summary-icon-action"
-                      type="button"
-                      aria-label={t('hardware.sensor.nameLabel')}
-                      title={t('hardware.sensor.nameLabel')}
-                      onClick={() => setEditingSensorId(device.id)}
-                    >
-                      <IconPencil className="icon-action__svg" aria-hidden="true" />
-                    </button>
-                  </div>
-                )}
-                <div className="sensor-card-actions">
-                  {device.profileId === 'xiaomi_lywsd03mmc_bthome_v2' && (
-                    <button
-                      className="icon-action"
-                      type="button"
-                      disabled={flow.setPvvxTimeMutation.isPending}
-                      aria-label={t('hardware.sensor.pvvxSetTimeTitle')}
-                      title={t('hardware.sensor.pvvxSetTimeTitle')}
-                      onClick={() => flow.setPvvxTimeMutation.mutate(device)}
-                    >
-                      <IconClock className="icon-action__svg" aria-hidden="true" />
-                    </button>
-                  )}
-                  <button
-                    className="icon-action icon-action--danger"
-                    type="button"
-                    aria-label={t('hardware.sensor.deleteTitle')}
-                    title={t('hardware.sensor.deleteTitle')}
-                    onClick={() => setDialog({ kind: 'remove', device })}
-                  >
-                    <IconTrash className="icon-action__svg" aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-              <div className="sensor-metric-grid">
-                <div
-                  className={
-                    hasTemperatureData
-                      ? 'sensor-data-metric-card'
-                      : 'sensor-data-metric-card sensor-data-metric-card--empty'
-                  }
-                >
-                  <span className="sensor-data-metric-card__label">
-                    {t('hardware.metrics.temperature')}
-                  </span>
-                  <strong
-                    className={
-                      hasTemperatureData
-                        ? 'sensor-data-metric-card__value'
-                        : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
-                    }
-                  >
-                    {formatNullableMetric(
-                      temperatureSample?.temperatureC,
-                      '°C',
-                      1,
-                      '— °C'
-                    )}
-                  </strong>
-                </div>
-                <div
-                  className={
-                    hasHumidityData
-                      ? 'sensor-data-metric-card'
-                      : 'sensor-data-metric-card sensor-data-metric-card--empty'
-                  }
-                >
-                  <span className="sensor-data-metric-card__label">
-                    {t('hardware.metrics.humidity')}
-                  </span>
-                  <strong
-                    className={
-                      hasHumidityData
-                        ? 'sensor-data-metric-card__value'
-                        : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
-                    }
-                  >
-                    {formatNullableMetric(humiditySample?.humidityPct, '%', 1, '— %')}
-                  </strong>
-                </div>
-              </div>
-              <div className="sensor-status-strip">
-                <span
-                  className="sensor-status-strip__item"
-                  aria-label={`${t('hardware.metrics.battery')}: ${formatBattery(
-                    batterySample,
-                    '—'
-                  )}`}
-                  title={t('hardware.metrics.battery')}
-                >
-                  <IconBattery aria-hidden="true" />
-                  <strong>{formatBattery(batterySample, '—')}</strong>
-                </span>
-                <span
-                  className="sensor-status-strip__item"
-                  aria-label={`${t('common.rssi')}: ${formatNullableMetric(
-                    rssiSample?.rssi,
-                    ' dBm',
-                    0,
-                    '—'
-                  )}`}
-                  title={t('common.rssi')}
-                >
-                  <IconWifi aria-hidden="true" />
-                  <strong>
-                    {formatNullableMetric(rssiSample?.rssi, ' dBm', 0, '—')}
-                  </strong>
-                </span>
-                <span
-                  className="sensor-status-strip__item"
-                  aria-label={`${t('hardware.metrics.lastMeasurement')}: ${formatSeenAt(
-                    latest,
-                    locale,
-                    '—'
-                  )}`}
-                  title={t('hardware.metrics.lastMeasurement')}
-                >
-                  <IconClock aria-hidden="true" />
-                  <strong>{formatSeenAt(latest, locale, '—')}</strong>
-                </span>
-              </div>
-              <details className="sensor-card-details-disclosure">
-                <summary>{t('hardware.sensor.details')}</summary>
-                <dl className="sensor-card-details">
-                  <div>
-                    <dt>{t('hardware.sensor.typeLabel')}</dt>
-                    <dd>{sensorProfileDisplayLabels[device.profileId]}</dd>
-                  </div>
-                  <div className="sensor-card-details__wide">
-                    <dt>MAC</dt>
-                    <dd>{device.runtimeAddress}</dd>
-                  </div>
-                </dl>
-              </details>
-            </article>
-          );
-        })}
+        {flow.sensorDevices.map((device) => (
+          <SavedSensorCard
+            key={device.id}
+            device={device}
+            samples={readingsForSensor(device)}
+            isEditing={editingSensorId === device.id}
+            pvvxTimePending={flow.setPvvxTimeMutation.isPending}
+            onEditStart={() => setEditingSensorId(device.id)}
+            onEditEnd={() => setEditingSensorId(null)}
+            onNameChange={(value) => flow.setSensorDeviceName(device.id, value)}
+            onPvvxSetTime={() => flow.setPvvxTimeMutation.mutate(device)}
+            onRemove={() => setDialog({ kind: 'remove', device })}
+          />
+        ))}
       </div>
     </section>
   );

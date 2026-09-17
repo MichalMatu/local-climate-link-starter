@@ -174,10 +174,10 @@ Suggested model (exact naming may be adjusted for repository conventions):
 ```ts
 type SavedPlug = {
   version: 1;
-  id: string;                 // canonical normalized physical Shelly device id
+  id: string; // canonical normalized physical Shelly device id
   profileId: 'shelly_plug_s_gen3';
   name: string;
-  baseUrl: string;            // mutable endpoint, not identity
+  baseUrl: string; // mutable endpoint, not identity
   model: string;
   gen: number;
   createdAtMs: number;

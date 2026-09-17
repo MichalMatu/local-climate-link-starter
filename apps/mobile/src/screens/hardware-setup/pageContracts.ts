@@ -17,8 +17,6 @@ export type ShellySetupFlow = Pick<
   | 'restartBleDiscovery'
   | 'restartBleDiscoveryMutation'
   | 'sensorDevices'
-  | 'setAutomationAuto'
-  | 'setAutomationManual'
   | 'setShellyDeviceName'
   | 'setShellyNameInput'
   | 'setShellyScanEndInput'
@@ -42,8 +40,6 @@ export type ShellySetupFlow = Pick<
   | 'stopBleDiscovery'
   | 'stopBleDiscoveryMutation'
   | 'stopShellyScan'
-  | 'turnRelayOff'
-  | 'turnRelayOn'
   | 'upsertShellyDevice'
 >;
 

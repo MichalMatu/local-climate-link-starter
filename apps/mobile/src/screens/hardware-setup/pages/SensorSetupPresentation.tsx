@@ -57,8 +57,9 @@ const formatSeenAt = (
       }).format(new Date(sample.seenAtMs))
     : missingLabel;
 
-const latestSample = (samples: readonly SensorReadingSample[]): SensorReadingSample | null =>
-  samples.at(-1) ?? null;
+const latestSample = (
+  samples: readonly SensorReadingSample[]
+): SensorReadingSample | null => samples.at(-1) ?? null;
 
 type NumericSampleMetric = 'temperatureC' | 'humidityPct' | 'rssi';
 
