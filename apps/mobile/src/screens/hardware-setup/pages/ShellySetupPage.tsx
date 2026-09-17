@@ -501,17 +501,7 @@ export const ShellySetupPage = ({
                 {scanResults.map((result) => (
                   <article key={result.baseUrl} className="saved-list__item">
                     <div className="saved-list__row shelly-scan-result__row">
-                      <div className="saved-list__field">
-                        <span>{t('common.address')}</span>
-                        <strong>{result.baseUrl}</strong>
-                      </div>
-                      <div className="saved-list__field">
-                        <span>{t('common.model')}</span>
-                        <strong>
-                          {result.deviceInfo.model}, gen {result.deviceInfo.gen}
-                        </strong>
-                      </div>
-                      <label className="saved-list__field shelly-scan-result__name">
+                      <label className="field shelly-scan-result__name">
                         <span>{t('hardware.shelly.deviceNameLabel')}</span>
                         <input
                           className="shelly-scan-result__name-input"
@@ -524,6 +514,16 @@ export const ShellySetupPage = ({
                           }
                         />
                       </label>
+                      <div className="saved-list__field">
+                        <span>{t('common.address')}</span>
+                        <strong>{result.baseUrl}</strong>
+                      </div>
+                      <div className="saved-list__field">
+                        <span>{t('common.model')}</span>
+                        <strong>
+                          {result.deviceInfo.model}, gen {result.deviceInfo.gen}
+                        </strong>
+                      </div>
                       <button
                         aria-label={
                           isSavedShellyScanResult(result)

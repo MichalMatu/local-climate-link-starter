@@ -1259,6 +1259,13 @@ describe('HardwareSetupScreen', () => {
       name: 'Nazwa gniazdka: http://192.168.0.20/'
     });
     expect(scannedName).toHaveValue('S3PL-00112EU');
+    const scannedNameField = scannedName.closest('label');
+    const scannedRow = scannedName.closest('.shelly-scan-result__row');
+    expect(scannedNameField).toHaveClass('field', 'shelly-scan-result__name');
+    expect(scannedRow).not.toBeNull();
+    expect(scannedRow?.children[0]).toBe(scannedNameField);
+    expect(scannedRow?.children[1]).toHaveTextContent('Adres');
+    expect(scannedRow?.children[2]).toHaveTextContent('Model');
     fireEvent.change(scannedName, { target: { value: 'Salon' } });
 
     fireEvent.click(
