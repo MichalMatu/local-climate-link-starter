@@ -1485,19 +1485,37 @@ select {
   width: var(--lcl-size-control-icon-size);
 }
 
-.shelly-network-scan {
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  margin-top: var(--lcl-spacing-sm);
+.shelly-add-tabs {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: flex;
+  gap: var(--lcl-spacing-xs);
+  padding: var(--lcl-spacing-xs);
 }
 
-.shelly-manual-add > summary,
-.shelly-network-scan > summary {
-  color: var(--lcl-color-text);
+.shelly-add-tabs__tab {
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-sm);
+  color: var(--lcl-color-text-muted);
   cursor: pointer;
-  font-weight: var(--lcl-font-weight-bold);
-  list-style-position: inside;
-  min-height: var(--lcl-size-control-min-height);
-  padding: var(--lcl-spacing-md) 0;
+  flex: 1 1 0;
+  font: inherit;
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-semibold);
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding: 0 var(--lcl-spacing-md);
+}
+
+.shelly-add-tabs__tab[aria-selected='true'] {
+  background: var(--lcl-color-accent);
+  color: var(--lcl-color-accent-contrast);
+}
+
+.shelly-add-tabs__tab:focus-visible {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-accent);
+  outline-offset: var(--lcl-border-width-sm);
 }
 
 .shelly-network-scan__body {
@@ -1522,6 +1540,22 @@ select {
   display: flex;
   gap: var(--lcl-spacing-sm);
   justify-content: flex-end;
+}
+
+.shelly-network-scan__range {
+  display: flex;
+  gap: var(--lcl-spacing-md);
+}
+
+.shelly-network-scan__range > .field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.shelly-network-scan__range input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
 }
 
 .shelly-network-scan__presets {

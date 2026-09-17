@@ -73,9 +73,7 @@ export const ShellySetupPage = ({
   const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
   const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
   const [scanResultNames, setScanResultNames] = useState<Record<string, string>>({});
-  const [activeAddSection, setActiveAddSection] = useState<'manual' | 'scan' | null>(
-    'manual'
-  );
+  const [activeAddSection, setActiveAddSection] = useState<'manual' | 'scan'>('scan');
   const { dismissToast, pushToast, toasts } = useToastQueue('shelly-toast');
   const isAddShellyModalOpen = dialog.kind === 'add';
   const isBleScanModalOpen = dialog.kind === 'ble';
@@ -181,7 +179,7 @@ export const ShellySetupPage = ({
   const openAddShellyModal = () => {
     flow.checkShellyMutation.reset();
     setDidSubmitShellyAdd(false);
-    setActiveAddSection('manual');
+    setActiveAddSection('scan');
     setDialog({ kind: 'add' });
   };
 
@@ -191,7 +189,7 @@ export const ShellySetupPage = ({
     setDidSubmitShellyAdd(false);
     setDidSubmitShellyScan(false);
     setScanResultNames({});
-    setActiveAddSection('manual');
+    setActiveAddSection('scan');
     setDialog({ kind: 'none' });
     if (addOnly) onAddCancel?.();
   };
@@ -217,12 +215,14 @@ export const ShellySetupPage = ({
     flow.stopShellyScan();
   };
 
-  const toggleAddSection = (section: 'manual' | 'scan') => {
-    const nextSection = activeAddSection === section ? null : section;
-    if (activeAddSection === 'scan' && nextSection !== 'scan' && isShellyScanActive) {
+  const selectAddSection = (section: 'manual' | 'scan') => {
+    if (section === activeAddSection) {
+      return;
+    }
+    if (activeAddSection === 'scan' && isShellyScanActive) {
       flow.stopShellyScan();
     }
-    setActiveAddSection(nextSection);
+    setActiveAddSection(section);
   };
 
   const scannedShellyName = (result: ShellySetupScanResult) =>
@@ -351,211 +351,234 @@ export const ShellySetupPage = ({
         title={t('hardware.shelly.add')}
         onClose={closeAddShellyModal}
       >
-        <details className="shelly-manual-add" open={activeAddSection === 'manual'}>
-          <summary
-            onClick={(event) => {
-              event.preventDefault();
-              toggleAddSection('manual');
-            }}
-          >
-            {t('hardware.shelly.addManual')}
-          </summary>
-          <div className="shelly-manual-add__body">
-            <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
-            <div className="shelly-manual-add__actions">
-              <button
-                className="primary-action"
-                type="button"
-                aria-busy={flow.checkShellyMutation.isPending || undefined}
-                disabled={isAnyShellyCheckPending}
-                title={t('hardware.shelly.addCheckedTitle')}
-                onClick={checkShelly}
-              >
-                {flow.checkShellyMutation.isPending
-                  ? t('hardware.shelly.checking')
-                  : t('common.add')}
-              </button>
-            </div>
-          </div>
-        </details>
-        <details className="shelly-network-scan" open={activeAddSection === 'scan'}>
-          <summary
-            onClick={(event) => {
-              event.preventDefault();
-              toggleAddSection('scan');
-            }}
+        <div
+          className="shelly-add-tabs"
+          role="tablist"
+          aria-label={t('hardware.shelly.add')}
+        >
+          <button
+            className="shelly-add-tabs__tab"
+            type="button"
+            role="tab"
+            aria-selected={activeAddSection === 'scan'}
+            onClick={() => selectAddSection('scan')}
           >
             {t('hardware.shelly.scanNetwork')}
-          </summary>
-          <div className="shelly-network-scan__body">
-            <div className="shelly-network-scan__toolbar">
-              <span className="shelly-network-scan__info">
-                <InfoTooltip
-                  label={t('hardware.shelly.infoScanLabel')}
-                  title={t('hardware.shelly.infoScanTitle')}
+          </button>
+          <button
+            className="shelly-add-tabs__tab"
+            type="button"
+            role="tab"
+            aria-selected={activeAddSection === 'manual'}
+            onClick={() => selectAddSection('manual')}
+          >
+            {t('hardware.shelly.addManual')}
+          </button>
+        </div>
+        {activeAddSection === 'manual' && (
+          <section
+            className="shelly-manual-add"
+            role="tabpanel"
+            aria-label={t('hardware.shelly.addManual')}
+          >
+            <div className="shelly-manual-add__body">
+              <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
+              <div className="shelly-manual-add__actions">
+                <button
+                  className="primary-action"
+                  type="button"
+                  aria-busy={flow.checkShellyMutation.isPending || undefined}
+                  disabled={isAnyShellyCheckPending}
+                  title={t('hardware.shelly.addCheckedTitle')}
+                  onClick={checkShelly}
                 >
-                  {shellyScanEstimate}
-                  <br />
-                  <br />
-                  {t('hardware.shelly.scannerBehavior')}
-                </InfoTooltip>
-              </span>
+                  {flow.checkShellyMutation.isPending
+                    ? t('hardware.shelly.checking')
+                    : t('common.add')}
+                </button>
+              </div>
             </div>
-            <div className="field-row">
-              <label
-                className={showShellyScanRangeError ? 'field field--invalid' : 'field'}
-              >
-                {t('hardware.shelly.scanRangeStart')}
-                <input
-                  aria-describedby={
-                    showShellyScanRangeError ? scanRangeErrorId : undefined
-                  }
-                  aria-invalid={showShellyScanRangeError}
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="192.168.0.1"
-                  value={flow.shellyScanStartInput}
-                  onChange={(event) =>
-                    flow.setShellyScanStartInput(event.currentTarget.value)
-                  }
-                />
-              </label>
-              <label
-                className={showShellyScanRangeError ? 'field field--invalid' : 'field'}
-              >
-                {t('hardware.shelly.scanRangeEnd')}
-                <input
-                  aria-describedby={
-                    showShellyScanRangeError ? scanRangeErrorId : undefined
-                  }
-                  aria-invalid={showShellyScanRangeError}
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="192.168.0.99"
-                  value={flow.shellyScanEndInput}
-                  onChange={(event) =>
-                    flow.setShellyScanEndInput(event.currentTarget.value)
-                  }
-                />
-                {showShellyScanRangeError && (
-                  <span className="field__error" id={scanRangeErrorId}>
-                    {shellyScanRangeError}
-                  </span>
-                )}
-              </label>
-            </div>
-            <div
-              className="shelly-network-scan__presets"
-              role="group"
-              aria-label={t('hardware.shelly.networkScanTitle')}
-            >
-              <button
-                className="shelly-network-scan__preset"
-                type="button"
-                disabled={isShellyScanActive}
-                onClick={() =>
-                  applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
-                }
-              >
-                STA
-              </button>
-              <span className="shelly-network-scan__preset-separator" aria-hidden="true">
-                ·
-              </span>
-              <button
-                className="shelly-network-scan__preset"
-                type="button"
-                disabled={isShellyScanActive}
-                onClick={() =>
-                  applyShellyScanPreset(SHELLY_AP_SCAN_ADDRESS, SHELLY_AP_SCAN_ADDRESS)
-                }
-              >
-                AP
-              </button>
-            </div>
-            <div className="action-row shelly-network-scan__actions">
-              <button
-                className="secondary-action"
-                type="button"
-                title={
-                  isShellyScanActive
-                    ? t('hardware.shelly.scanStopTitle')
-                    : t('hardware.shelly.scanStartTitle')
-                }
-                onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
-              >
-                {isShellyScanActive
-                  ? t('hardware.shelly.scanStop')
-                  : t('hardware.shelly.scanStart')}
-              </button>
-            </div>
-            {shouldShowEmptyScanResult && <p>{t('hardware.shelly.scanResultEmpty')}</p>}
-            {scanResults.length > 0 && (
+          </section>
+        )}
+        {activeAddSection === 'scan' && (
+          <section
+            className="shelly-network-scan"
+            role="tabpanel"
+            aria-label={t('hardware.shelly.scanNetwork')}
+          >
+            <div className="shelly-network-scan__body">
+              <div className="shelly-network-scan__toolbar">
+                <span className="shelly-network-scan__info">
+                  <InfoTooltip
+                    label={t('hardware.shelly.infoScanLabel')}
+                    title={t('hardware.shelly.infoScanTitle')}
+                  >
+                    {shellyScanEstimate}
+                    <br />
+                    <br />
+                    {t('hardware.shelly.scannerBehavior')}
+                  </InfoTooltip>
+                </span>
+              </div>
+              <div className="shelly-network-scan__range">
+                <label
+                  className={showShellyScanRangeError ? 'field field--invalid' : 'field'}
+                >
+                  {t('hardware.shelly.scanRangeStart')}
+                  <input
+                    aria-describedby={
+                      showShellyScanRangeError ? scanRangeErrorId : undefined
+                    }
+                    aria-invalid={showShellyScanRangeError}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="192.168.0.1"
+                    value={flow.shellyScanStartInput}
+                    onChange={(event) =>
+                      flow.setShellyScanStartInput(event.currentTarget.value)
+                    }
+                  />
+                </label>
+                <label
+                  className={showShellyScanRangeError ? 'field field--invalid' : 'field'}
+                >
+                  {t('hardware.shelly.scanRangeEnd')}
+                  <input
+                    aria-describedby={
+                      showShellyScanRangeError ? scanRangeErrorId : undefined
+                    }
+                    aria-invalid={showShellyScanRangeError}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="192.168.0.99"
+                    value={flow.shellyScanEndInput}
+                    onChange={(event) =>
+                      flow.setShellyScanEndInput(event.currentTarget.value)
+                    }
+                  />
+                  {showShellyScanRangeError && (
+                    <span className="field__error" id={scanRangeErrorId}>
+                      {shellyScanRangeError}
+                    </span>
+                  )}
+                </label>
+              </div>
               <div
-                className="saved-list"
-                aria-label={t('hardware.shelly.foundListLabel')}
+                className="shelly-network-scan__presets"
+                role="group"
+                aria-label={t('hardware.shelly.networkScanTitle')}
               >
-                {scanResults.map((result) => (
-                  <article key={result.baseUrl} className="saved-list__item">
-                    <div className="saved-list__row shelly-scan-result__row">
-                      <label className="field shelly-scan-result__name">
-                        <span>{t('hardware.shelly.deviceNameLabel')}</span>
-                        <input
-                          className="shelly-scan-result__name-input"
-                          aria-label={`${t('hardware.shelly.deviceNameLabel')}: ${result.baseUrl}`}
-                          type="text"
-                          value={scannedShellyName(result)}
-                          disabled={isSavedShellyScanResult(result)}
-                          onChange={(event) =>
-                            setScannedShellyName(result, event.currentTarget.value)
+                <button
+                  className="shelly-network-scan__preset"
+                  type="button"
+                  disabled={isShellyScanActive}
+                  onClick={() =>
+                    applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
+                  }
+                >
+                  STA
+                </button>
+                <span
+                  className="shelly-network-scan__preset-separator"
+                  aria-hidden="true"
+                >
+                  ·
+                </span>
+                <button
+                  className="shelly-network-scan__preset"
+                  type="button"
+                  disabled={isShellyScanActive}
+                  onClick={() =>
+                    applyShellyScanPreset(SHELLY_AP_SCAN_ADDRESS, SHELLY_AP_SCAN_ADDRESS)
+                  }
+                >
+                  AP
+                </button>
+              </div>
+              <div className="action-row shelly-network-scan__actions">
+                <button
+                  className="secondary-action"
+                  type="button"
+                  title={
+                    isShellyScanActive
+                      ? t('hardware.shelly.scanStopTitle')
+                      : t('hardware.shelly.scanStartTitle')
+                  }
+                  onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
+                >
+                  {isShellyScanActive
+                    ? t('hardware.shelly.scanStop')
+                    : t('hardware.shelly.scanStart')}
+                </button>
+              </div>
+              {shouldShowEmptyScanResult && <p>{t('hardware.shelly.scanResultEmpty')}</p>}
+              {scanResults.length > 0 && (
+                <div
+                  className="saved-list"
+                  aria-label={t('hardware.shelly.foundListLabel')}
+                >
+                  {scanResults.map((result) => (
+                    <article key={result.baseUrl} className="saved-list__item">
+                      <div className="saved-list__row shelly-scan-result__row">
+                        <label className="field shelly-scan-result__name">
+                          <span>{t('hardware.shelly.deviceNameLabel')}</span>
+                          <input
+                            className="shelly-scan-result__name-input"
+                            aria-label={`${t('hardware.shelly.deviceNameLabel')}: ${result.baseUrl}`}
+                            type="text"
+                            value={scannedShellyName(result)}
+                            disabled={isSavedShellyScanResult(result)}
+                            onChange={(event) =>
+                              setScannedShellyName(result, event.currentTarget.value)
+                            }
+                          />
+                        </label>
+                        <div className="saved-list__field">
+                          <span>{t('common.address')}</span>
+                          <strong>{result.baseUrl}</strong>
+                        </div>
+                        <div className="saved-list__field">
+                          <span>{t('common.model')}</span>
+                          <strong>
+                            {result.deviceInfo.model}, gen {result.deviceInfo.gen}
+                          </strong>
+                        </div>
+                        <button
+                          aria-label={
+                            isSavedShellyScanResult(result)
+                              ? `${t('hardware.shelly.alreadyAdded')}: ${result.baseUrl}`
+                              : `${t('common.add')}: ${result.baseUrl}`
                           }
-                        />
-                      </label>
-                      <div className="saved-list__field">
-                        <span>{t('common.address')}</span>
-                        <strong>{result.baseUrl}</strong>
+                          aria-busy={isAddingScannedShelly(result) || undefined}
+                          className="primary-action shelly-scan-result__add"
+                          type="button"
+                          disabled={
+                            isSavedShellyScanResult(result) ||
+                            flow.checkShellyMutation.isPending ||
+                            scannedShellyName(result).trim().length === 0
+                          }
+                          onClick={() => addScannedShellyDevice(result)}
+                        >
+                          {isSavedShellyScanResult(result)
+                            ? t('hardware.shelly.alreadyAdded')
+                            : isAddingScannedShelly(result)
+                              ? t('hardware.shelly.checking')
+                              : t('common.add')}
+                        </button>
                       </div>
-                      <div className="saved-list__field">
-                        <span>{t('common.model')}</span>
-                        <strong>
-                          {result.deviceInfo.model}, gen {result.deviceInfo.gen}
-                        </strong>
-                      </div>
-                      <button
-                        aria-label={
-                          isSavedShellyScanResult(result)
-                            ? `${t('hardware.shelly.alreadyAdded')}: ${result.baseUrl}`
-                            : `${t('common.add')}: ${result.baseUrl}`
-                        }
-                        aria-busy={isAddingScannedShelly(result) || undefined}
-                        className="primary-action shelly-scan-result__add"
-                        type="button"
-                        disabled={
-                          isSavedShellyScanResult(result) ||
-                          flow.checkShellyMutation.isPending ||
-                          scannedShellyName(result).trim().length === 0
-                        }
-                        onClick={() => addScannedShellyDevice(result)}
-                      >
-                        {isSavedShellyScanResult(result)
-                          ? t('hardware.shelly.alreadyAdded')
-                          : isAddingScannedShelly(result)
-                            ? t('hardware.shelly.checking')
-                            : t('common.add')}
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-            {isShellyScanActive && (
-              <div className="shelly-network-scan__progress">
-                <span className="scan-loading-state__spinner" aria-hidden="true" />
-                <span>{t('hardware.shelly.scanningIpRange')}</span>
-              </div>
-            )}
-          </div>
-        </details>
+                    </article>
+                  ))}
+                </div>
+              )}
+              {isShellyScanActive && (
+                <div className="shelly-network-scan__progress">
+                  <span className="scan-loading-state__spinner" aria-hidden="true" />
+                  <span>{t('hardware.shelly.scanningIpRange')}</span>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
       </Modal>
 
       <Modal

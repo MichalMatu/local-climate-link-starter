@@ -247,9 +247,13 @@ const createAbortableFetchMock = () => {
   };
 };
 
-const openShellyAddDialog = async () => {
+const openShellyAddDialog = async (section: 'manual' | 'scan' = 'manual') => {
   fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
-  return screen.findByRole('dialog', { name: 'Dodaj gniazdko' });
+  const dialog = await screen.findByRole('dialog', { name: 'Dodaj gniazdko' });
+  if (section === 'manual') {
+    fireEvent.click(within(dialog).getByRole('tab', { name: 'Dodaj ręcznie' }));
+  }
+  return dialog;
 };
 
 const openSensorAddDialog = async () => {
@@ -592,11 +596,21 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(shellyAddDialog).getByPlaceholderText('http://192.168.x.x')
     ).toBeInTheDocument();
-    const shellyScanSummary = within(shellyAddDialog).getByText('Skanuj sieć', {
-      selector: 'summary'
+    const shellyScanTab = within(shellyAddDialog).getByRole('tab', {
+      name: 'Skanuj sieć'
     });
-    expect(shellyScanSummary).toBeVisible();
-    expect(shellyScanSummary.closest('details')).not.toHaveAttribute('open');
+    const shellyManualTab = within(shellyAddDialog).getByRole('tab', {
+      name: 'Dodaj ręcznie'
+    });
+    expect(shellyScanTab).toBeVisible();
+    expect(shellyScanTab).toHaveAttribute('aria-selected', 'false');
+    expect(shellyManualTab).toHaveAttribute('aria-selected', 'true');
+    expect(
+      within(shellyAddDialog).getByRole('tabpanel', { name: 'Dodaj ręcznie' })
+    ).toBeInTheDocument();
+    expect(
+      within(shellyAddDialog).queryByRole('tabpanel', { name: 'Skanuj sieć' })
+    ).not.toBeInTheDocument();
     expect(
       within(shellyAddDialog).getByRole('button', { name: 'Dodaj' })
     ).toHaveAttribute('title', 'Dodaj to sprawdzone gniazdko do aplikacji');
@@ -1247,7 +1261,7 @@ describe('HardwareSetupScreen', () => {
   it('adds a scanned Shelly directly with an editable per-result name', async () => {
     renderHardwareSetup();
 
-    const dialog = await openShellyAddDialog();
+    const dialog = await openShellyAddDialog('scan');
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
 
@@ -1278,6 +1292,7 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(dialog).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
     ).toBeDisabled();
+    fireEvent.click(within(dialog).getByRole('tab', { name: 'Dodaj ręcznie' }));
     expect(within(dialog).getByLabelText('Adres IP Shelly')).not.toHaveValue(
       'http://192.168.0.20/'
     );
@@ -1331,7 +1346,7 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi('Salon');
     vi.mocked(fetch).mockClear();
 
-    const addDialog = await openShellyAddDialog();
+    const addDialog = await openShellyAddDialog('scan');
     const dialog = addDialog;
     fireEvent.change(within(dialog).getByLabelText('Od'), {
       target: { value: '192.168.0.19' }
@@ -1366,15 +1381,35 @@ describe('HardwareSetupScreen', () => {
   it('shows Shelly scan help as a compact tooltip', async () => {
     renderHardwareSetup();
 
-    const addDialog = await openShellyAddDialog();
+    const addDialog = await openShellyAddDialog('scan');
     const dialog = addDialog;
-    const manualSummary = within(dialog).getByText('Dodaj ręcznie');
-    const scanSummary = within(dialog).getByText('Skanuj sieć');
-    expect(manualSummary.closest('details')).toHaveAttribute('open');
-    expect(scanSummary.closest('details')).not.toHaveAttribute('open');
-    fireEvent.click(scanSummary);
-    expect(manualSummary.closest('details')).not.toHaveAttribute('open');
-    expect(scanSummary.closest('details')).toHaveAttribute('open');
+    const scanTab = within(dialog).getByRole('tab', { name: 'Skanuj sieć' });
+    const manualTab = within(dialog).getByRole('tab', { name: 'Dodaj ręcznie' });
+    expect(scanTab).toHaveAttribute('aria-selected', 'true');
+    expect(manualTab).toHaveAttribute('aria-selected', 'false');
+    expect(
+      within(dialog).getByRole('tabpanel', { name: 'Skanuj sieć' })
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole('tabpanel', { name: 'Dodaj ręcznie' })
+    ).not.toBeInTheDocument();
+
+    const rangeStart = within(dialog).getByLabelText('Od');
+    const rangeEnd = within(dialog).getByLabelText('Do');
+    const rangeRow = rangeStart.closest('.shelly-network-scan__range');
+    expect(rangeRow).not.toBeNull();
+    expect(rangeRow).toContainElement(rangeEnd);
+
+    fireEvent.click(manualTab);
+    expect(manualTab).toHaveAttribute('aria-selected', 'true');
+    expect(
+      within(dialog).getByRole('tabpanel', { name: 'Dodaj ręcznie' })
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole('tabpanel', { name: 'Skanuj sieć' })
+    ).not.toBeInTheDocument();
+    fireEvent.click(scanTab);
+    expect(scanTab).toHaveAttribute('aria-selected', 'true');
 
     const tooltipButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu Shelly'
@@ -1411,11 +1446,15 @@ describe('HardwareSetupScreen', () => {
   it('uses the discovered model as the default scanner name without populating the manual form', async () => {
     renderHardwareSetup();
 
-    const dialog = await openShellyAddDialog();
+    const dialog = await openShellyAddDialog('scan');
+    const manualTab = within(dialog).getByRole('tab', { name: 'Dodaj ręcznie' });
+    const scanTab = within(dialog).getByRole('tab', { name: 'Skanuj sieć' });
+    fireEvent.click(manualTab);
     const manualName = within(dialog).getByRole('textbox', { name: /^Nazwa gniazdka$/ });
     const manualAddress = within(dialog).getByLabelText('Adres IP Shelly');
     const initialManualName = (manualName as HTMLInputElement).value;
     const initialManualAddress = (manualAddress as HTMLInputElement).value;
+    fireEvent.click(scanTab);
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
     await within(dialog).findByText('http://192.168.0.20/');
@@ -1430,6 +1469,7 @@ describe('HardwareSetupScreen', () => {
     );
 
     expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('tab', { name: 'Dodaj ręcznie' }));
     expect(within(dialog).getByRole('textbox', { name: /^Nazwa gniazdka$/ })).toHaveValue(
       initialManualName
     );
@@ -1445,7 +1485,7 @@ describe('HardwareSetupScreen', () => {
     vi.stubGlobal('fetch', abortableFetch.fetchImpl);
     renderHardwareSetup();
 
-    const dialog = await openShellyAddDialog();
+    const dialog = await openShellyAddDialog('scan');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
 
     const stopButton = await within(dialog).findByRole('button', { name: 'Stop skanu' });
@@ -1467,7 +1507,7 @@ describe('HardwareSetupScreen', () => {
     vi.stubGlobal('fetch', abortableFetch.fetchImpl);
     renderHardwareSetup();
 
-    const dialog = await openShellyAddDialog();
+    const dialog = await openShellyAddDialog('scan');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
     await within(dialog).findByRole('button', { name: 'Stop skanu' });
 
