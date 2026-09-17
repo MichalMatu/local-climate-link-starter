@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260917-plug-runtime-row-audit-v1",
   "task_digest": "e376e626dd2deaeff7cf738cdc292f125ef339a47ded23670ac3fa02f1ed4cc2",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T09:57:58.812526+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-17T09:58:01.579727+00:00",
   "attempt_id": "270d210540b8f418b6488af6",
   "daemon_version": "4.18.20",
   "daemon_pid": 87745,
-  "updated_at": "2026-09-17T09:57:58.812658+00:00",
+  "updated_at": "2026-09-17T09:58:01.867648+00:00",
   "pid": 87745
 }
