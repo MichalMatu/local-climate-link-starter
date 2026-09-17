@@ -312,7 +312,7 @@ describe('AutomationDashboardScreen', () => {
       })
     );
     const settingsDialog = screen.getByRole('dialog', { name: 'Nawilżacz salon' });
-    expect(settingsDialog.querySelector('.lcl-compact-device')).not.toBeNull();
+    expect(settingsDialog.querySelector('.status-stack')).not.toBeNull();
     expect(await within(settingsDialog).findByText('S3PL-00112EU, gen 3')).toBeVisible();
     expect(within(settingsDialog).getByText('zgodne')).toBeVisible();
     await waitFor(() =>
