@@ -1244,13 +1244,10 @@ describe('HardwareSetupScreen', () => {
     expect(rpcMethods).not.toContain('Switch.Set');
   });
 
-  it('scans the local network inside the add task and fills the form before adding', async () => {
+  it('adds a scanned Shelly directly with an editable per-result name', async () => {
     renderHardwareSetup();
 
     const dialog = await openShellyAddDialog();
-    fireEvent.change(within(dialog).getByLabelText('Nazwa gniazdka'), {
-      target: { value: 'Salon' }
-    });
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
 
@@ -1258,24 +1255,25 @@ describe('HardwareSetupScreen', () => {
 
     expect(await within(dialog).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(dialog).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
+    const scannedName = within(dialog).getByRole('textbox', {
+      name: 'Nazwa gniazdka: http://192.168.0.20/'
+    });
+    expect(scannedName).toHaveValue('S3PL-00112EU');
+    fireEvent.change(scannedName, { target: { value: 'Salon' } });
+
     fireEvent.click(
-      within(dialog).getByRole('button', {
-        name: 'Wybierz: http://192.168.0.20/'
-      })
+      within(dialog).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
     );
-
-    expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
-    expect(within(dialog).getByLabelText('Nazwa gniazdka')).toHaveValue('Salon');
-    expect(within(dialog).getByLabelText('Adres IP Shelly')).toHaveValue(
-      'http://192.168.0.20/'
-    );
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Dodaj' }));
 
     expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
+    expect(within(dialog).getByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(
-      screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })
-    ).not.toBeInTheDocument();
+      within(dialog).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
+    ).toBeDisabled();
+    expect(within(dialog).getByLabelText('Adres IP Shelly')).not.toHaveValue(
+      'http://192.168.0.20/'
+    );
     const savedPlugList = screen.getByLabelText('Dodane gniazdka');
     expect(within(savedPlugList).getByText('Salon')).toBeInTheDocument();
   });
@@ -1342,7 +1340,7 @@ describe('HardwareSetupScreen', () => {
       within(dialog).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
     ).toBeDisabled();
     expect(
-      within(dialog).getByRole('button', { name: 'Wybierz: http://192.168.0.21/' })
+      within(dialog).getByRole('button', { name: 'Dodaj: http://192.168.0.21/' })
     ).toBeEnabled();
     const scannedHosts = vi
       .mocked(fetch)
@@ -1403,32 +1401,36 @@ describe('HardwareSetupScreen', () => {
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
   });
 
-  it('uses the scan result action to populate the add form before final add', async () => {
+  it('uses the discovered model as the default scanner name without populating the manual form', async () => {
     renderHardwareSetup();
 
     const dialog = await openShellyAddDialog();
-    fireEvent.change(within(dialog).getByLabelText('Nazwa gniazdka'), {
-      target: { value: '' }
-    });
+    const manualName = within(dialog).getByRole('textbox', { name: /^Nazwa gniazdka$/ });
+    const manualAddress = within(dialog).getByLabelText('Adres IP Shelly');
+    const initialManualName = (manualName as HTMLInputElement).value;
+    const initialManualAddress = (manualAddress as HTMLInputElement).value;
+
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
     await within(dialog).findByText('http://192.168.0.20/');
 
-    fireEvent.click(
-      within(dialog).getByRole('button', {
-        name: 'Wybierz: http://192.168.0.20/'
-      })
-    );
-
-    expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
-    expect(within(dialog).getByLabelText('Nazwa gniazdka')).toHaveValue('S3PL-00112EU');
-    expect(within(dialog).getByLabelText('Adres IP Shelly')).toHaveValue(
-      'http://192.168.0.20/'
-    );
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Dodaj' }));
     expect(
-      await screen.findByRole('button', { name: 'Ustawienia gniazdka' })
-    ).toBeInTheDocument();
+      within(dialog).getByRole('textbox', {
+        name: 'Nazwa gniazdka: http://192.168.0.20/'
+      })
+    ).toHaveValue('S3PL-00112EU');
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
+    );
+
+    expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+    expect(within(dialog).getByRole('textbox', { name: /^Nazwa gniazdka$/ })).toHaveValue(
+      initialManualName
+    );
+    expect(within(dialog).getByLabelText('Adres IP Shelly')).toHaveValue(
+      initialManualAddress
+    );
+    const savedPlugList = screen.getByLabelText('Dodane gniazdka');
+    expect(within(savedPlugList).getByText('S3PL-00112EU')).toBeInTheDocument();
   });
 
   it('stops an active Shelly scan from the inline task control', async () => {

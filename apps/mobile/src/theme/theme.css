@@ -1036,7 +1036,12 @@ select {
 }
 
 .shelly-scan-result__row {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(8rem, 1fr) auto;
+}
+
+.shelly-scan-result__name-input {
+  min-width: 0;
+  width: 100%;
 }
 
 .shelly-scan-result__add {

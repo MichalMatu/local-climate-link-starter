@@ -33,6 +33,11 @@ import {
   useShellyControlFlow
 } from './useShellyControlFlow.js';
 
+type ShellyCheckMutationInput = {
+  baseUrl: string;
+  name: string;
+};
+
 type ShellyCheckMutationResult = HardwareSetupStatus & {
   checkedDevice: ShellyDraftDevice;
 };
@@ -309,15 +314,23 @@ export const useHardwareSetupFlow = () => {
   });
 
   const checkShellyMutation = useMutation({
-    mutationFn: async (): Promise<ShellyCheckMutationResult> => {
-      if (!shellyInputState.ok) {
+    mutationFn: async (
+      input?: ShellyCheckMutationInput
+    ): Promise<ShellyCheckMutationResult> => {
+      const inputState = input
+        ? deriveShellyInputState({
+            shellyNameInput: input.name,
+            shellyUrlInput: input.baseUrl
+          })
+        : shellyInputState;
+      if (!inputState.ok) {
         throw new Error(
-          shellyInputState.fieldErrors.url ??
-            shellyInputState.fieldErrors.name ??
+          inputState.fieldErrors.url ??
+            inputState.fieldErrors.name ??
             t('hardware.flow.fixShellyData')
         );
       }
-      const { baseUrl, name } = shellyInputState;
+      const { baseUrl, name } = inputState;
       const status = await readShellySetupStatus(baseUrl);
       const existingScript = status.scripts.find(
         (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
