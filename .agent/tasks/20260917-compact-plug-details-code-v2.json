@@ -1,0 +1,13 @@
+{
+  "id": "20260917-compact-plug-details-code-v2",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": true,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 1800,
+  "task_timeout": 3600,
+  "commands": [
+    "set -euo pipefail; EXPECTED=9813752ac92a6dcdb2b7dc7ebff26c19618937c8; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; git fetch -q origin agent-control; git show origin/agent-control:.agent/patches/20260917-compact-plug-details-tests-v2.py > /tmp/compact-plug-details-tests.py; python3 /tmp/compact-plug-details-tests.py; FILES='apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/__tests__/hardware-setup.test.tsx'; pnpm exec prettier --write $FILES; pnpm --filter @lcl/mobile test; pnpm --filter @lcl/mobile build; pnpm quality:ux; git diff --check; git add $FILES; git commit --no-verify -m 'Simplify plug settings details'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; echo NEW_HEAD=$(git rev-parse HEAD)"
+  ]
+}
