@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-add-plug-runtime-row-v1",
+  "task_digest": "8093c61bf343064f27ee8f894f4399b5e0a3dca4350ab631a831d20c2198f7dd",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T09:59:18.192177+00:00",
+  "attempt_id": "11ac54dd3c2a080963510e12",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 88936,
+  "updated_at": "2026-09-17T09:59:18.192306+00:00",
+  "pid": 88936
+}
