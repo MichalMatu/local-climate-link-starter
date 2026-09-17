@@ -2,88 +2,117 @@
 
 Updated: 2026-09-17
 
-This backlog reflects the current **Plugs | Thermometers | Settings** product model. Completed work is recorded as baseline; only real follow-ups remain here.
+This backlog reflects the current **Plugs | Thermometers | Settings** product model after architecture cleanup commit:
 
-## Completed current baseline
+```text
+c67ac66c10e076e4b5d798e11bf117eefca49ea3
+Tighten hardware setup boundaries
+```
 
-The active Plug/Thermometer pass already includes:
+## Completed baseline
+
+The current branch includes:
 
 - Plug-centric dashboard and automation entry,
-- Time moved under a concrete Plug instead of a global dashboard section,
+- Time attached to a concrete Plug rather than a global dashboard section,
 - physical Plug cards with editable names, live telemetry, direct ON/OFF, settings and `Dodaj automatykę`,
-- compact concrete Plug settings with duplicated rows removed,
-- LAN scan full-range/progressive-result behavior with one Start/Stop button,
+- compact concrete Plug settings,
+- LAN scan with full-range/progressive-result behavior,
 - Shelly-side BLE thermometer discovery using the existing discovery flow/store,
-- **Thermometers** bottom-navigation surface using the existing sensor setup flow in embedded mode,
-- flat thermometer list without the extra outer panel card,
-- compact thermometer cards with large temperature/humidity, Tabler battery/RSSI/clock strip and closed Details disclosure,
-- viewport-safe InfoTooltip bubbles,
-- duplicate Plug-settings control-error toast suppression limited to that concrete context.
+- **Thermometers** bottom-navigation surface,
+- compact saved thermometer cards with large temperature/humidity and battery/RSSI/last-seen details,
+- viewport-safe tooltips,
+- saved-sensor presentation extracted from `SensorSetupPage.tsx`,
+- Shelly settings/BLE presentation split into focused modal boundaries,
+- generic hardware-setup AUTO/MANUAL runtime controls removed.
 
-The exact product code physically installed on the Samsung S22+ is `19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac`.
+Repository architecture budgets are back within gate. Final `pnpm check` passed, including 31/31 mobile test files and 171/171 tests.
+
+The current branch code has not yet been installed on the physical Samsung S22+ because the phone became unavailable. The last physically installed product code remains `19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac`.
 
 ## Immediate UX follow-up
 
 ### Thermometer leading icon and fresh-sample pulse
 
-The next small visual slice is intentionally narrow:
+This is now the next narrow implementation slice:
 
 - add a Tabler thermometer/temperature icon in the upper-left of each saved thermometer card,
 - align icon/name/actions with the established Plug-card header rhythm,
-- optionally turn the icon blue briefly only when the existing per-sensor latest sample timestamp becomes strictly newer,
+- briefly turn the icon blue only when the existing per-sensor latest sample `seenAtMs` becomes strictly newer,
 - return to normal after the transient animation,
 - do not pulse on mount, rerender, reopening the tab or merely because a BLE scan is running,
-- do not create another store or another domain-level freshness state.
+- do not create another store or domain-level freshness state.
 
-Prefer a focused saved-sensor card component so the pulse semantics stay with card presentation rather than increasing `SensorSetupPage` lifecycle responsibilities.
+The new `SensorSetupPresentation.tsx` boundary is the correct place for the presentation behavior. Keep radio lifecycle in `usePhoneSensorFlow` and sample semantics in `sensorReadingsStore.ts`.
 
 Use Tabler icons only; do not introduce emoji or custom SVG icons.
 
-## Architecture cleanup that should precede/contain further polish
+## Architecture status
 
-The read-only re-audit found two real composition seams:
+The earlier UX blocker is resolved:
 
-- `ShellySetupPage.tsx` now combines Add Plug, LAN scan, concrete Plug settings and Shelly BLE presentation and exceeds its repository budget,
-- `SensorSetupPage.tsx` now combines setup/scan composition with an increasingly substantial saved thermometer card and exceeds its repository budget.
+- `ShellySetupPage.tsx` no longer needs to absorb every settings/BLE presentation concern,
+- `SensorSetupPage.tsx` no longer owns the full saved thermometer card,
+- repository line budgets were restored rather than increased,
+- the old generic Shelly AUTO/MANUAL control path is gone from setup.
 
-Use behavior-preserving component extraction at these seams. Do not create new stores/hooks merely to move lines.
+Do not add new stores/hooks merely to move presentation code around.
 
-The legacy generic Shelly AUTO/MANUAL control path is a separate semantic cleanup; do not hide it inside a visual refactor.
+## Refresh behavior guardrail
+
+A verification run caught an intermediate dashboard refresh loop caused by depending on an unstable mutation callback. The final implementation avoids that by tying refresh to physical Plug identity/address and using a ref for the latest refresh function.
+
+For future card effects, keep event semantics explicit and avoid putting unstable mutation objects/functions directly into effects that perform network refreshes.
 
 ## Test polish
 
-New tests are mostly behavior-oriented, but some assertions intentionally or accidentally depend on implementation classes such as `.status-stack`, `.sensor-setup-panel--embedded`, `.demo-panel` and exact icon DOM classes.
+When tests are touched:
 
-When those tests are touched:
+- prefer roles, accessible names, visible state and RPC effects,
+- retain class/DOM assertions only where layout itself is the contract,
+- keep explicit icon-system assertions where Tabler consistency is intended,
+- keep responsive overflow checks where geometry is the product behavior.
 
-- prefer roles, names, visible content/state and RPC effects,
-- retain class assertions only when the class/layout itself is the product contract,
-- keep explicit Tabler-only assertions where icon-system consistency is the intended contract,
-- keep responsive overflow checks even though they necessarily inspect DOM geometry/classes.
+Do not rewrite large scenario tests solely to make them shorter.
 
-Do not rewrite the large hardware scenario suite solely to make it shorter.
+## Diagnostics/logging UX
+
+Do not add a separate logging surface/module now.
+
+Existing `@lcl/diagnostics`, runtime issue capture and support-report paths should be reused. After physical S22+ QA, add only concrete missing events proven useful by `adb logcat`/support evidence. Keep logs bounded and redacted.
+
+## Physical QA pending
+
+Once the phone is back:
+
+- install the exact current branch build,
+- visually smoke Plugs, Thermometers, Settings and Plug settings,
+- inspect clean launch/navigation `adb logcat`,
+- record any real layout/runtime issue before more polish.
+
+Do not call the current branch a physically accepted baseline until that check is complete.
 
 ## Deferred UX follow-ups
 
-- Further Plug settings restructuring requires a concrete management task; do not add another hierarchy just because the page is large.
-- Technical identifiers such as IP and MAC stay in technical/device-detail contexts; normal cards should prefer saved human names.
-- BLE scanning stays in the existing task/modal flow unless it genuinely grows into filtering, multi-select, persistent scan results or richer device details.
-- Expanded Shelly LED controls remain a later product slice, not part of the current thermometer polish.
-- VPD algorithm/default/range changes remain out of scope until a dedicated runtime/algorithm audit.
+- Further Plug settings restructuring requires a concrete management task.
+- Technical identifiers such as IP/MAC stay in technical details; normal cards should prefer saved human names.
+- BLE scanning stays in the existing task/modal flow unless it genuinely grows into a richer workflow.
+- Expanded Shelly LED controls remain later work.
+- VPD algorithm/default/range changes remain out of scope until a dedicated runtime audit.
 
 ## CSS/design guardrails
 
-- Keep using existing spacing/color/radius tokens.
-- Keep Tabler as the icon system.
-- Similar Plug/Thermometer header geometry is desirable, but do not invent a generic component until there is actual reusable semantics.
-- Avoid broad CSS rewrites during small UX slices.
-- Remove dead/empty selectors opportunistically when touching the same stylesheet.
+- keep existing spacing/color/radius tokens,
+- keep Tabler as the icon system,
+- reuse Plug/Thermometer header rhythm without inventing a generic component prematurely,
+- avoid broad CSS rewrites during small UX slices,
+- remove dead selectors opportunistically when touching the same area.
 
 ## General guardrails
 
-- Preserve useful data unless it is genuinely duplicated.
-- Keep transient progress inside the active task surface; use global toasts only where feedback remains relevant after the task closes.
-- Avoid nested modals for one logical task.
-- Preserve automation/runtime safety during visual cleanup.
-- Prefer small isolated changes with focused checks.
-- Treat architecture line budgets as regression alarms, not goals or numbers to raise.
+- preserve useful data unless genuinely duplicated,
+- keep transient progress inside the active task surface,
+- avoid nested modals for one logical task,
+- preserve automation/runtime safety during visual cleanup,
+- prefer small isolated changes with focused checks,
+- treat architecture budgets as regression alarms, not targets to raise.
