@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.18.20",
-  "state": "idle",
-  "pid": 20179,
-  "updated_at": "2026-09-17T08:44:51.631297+00:00",
+  "state": "running",
+  "pid": 21696,
+  "updated_at": "2026-09-17T08:46:40.849900+00:00",
   "self_revision": "c075f1d7d4d703fb6a6c113d68ae919bb587d144",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -14,7 +14,7 @@
   "task_timeout_default": 1800,
   "task_timeout_max": 21600,
   "memory_limit_mb_default": 4096,
-  "current_task_id": null,
+  "current_task_id": "20260917-check-phone-version-usb-v2",
   "current_attempt_id": null,
   "current_task_digest": null,
   "repository_id": "local-climate-link-starter",
@@ -23,7 +23,10 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 20179,
+  "worker_pid": 21696,
   "supervisor_pid": 19938,
+  "active_resources": [
+    "adb-phone-rfct70l7e8j"
+  ],
   "execution_variant": "parallel"
 }
