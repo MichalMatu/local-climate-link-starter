@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-step1-plug-plus-adds-plug-v3",
+  "task_digest": "b27e24be14177ab25e7a302c0acb8e38f1d7f96057d3d699cde774c4b23d5e6d",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T11:12:29.336379+00:00",
+  "attempt_id": "1d5bb8f3550af1f5548e0cf4",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 67444,
+  "updated_at": "2026-09-17T11:12:29.336450+00:00",
+  "pid": 67444
+}
