@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-single-scan-toggle-button-v1",
+  "task_digest": "f13ec6189ca6601940a55c1ed4fb73636b230ac126a440d6bae38ea0bfb81af8",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T14:27:16.013801+00:00",
+  "attempt_id": "23701c034066588447039c96",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 55338,
+  "updated_at": "2026-09-17T14:27:16.013945+00:00",
+  "pid": 55338
+}
