@@ -37,7 +37,9 @@ type ShellyDialogState =
   | { kind: 'ble'; device: ShellyDraftDevice }
   | { kind: 'info'; deviceId: string }
   | { kind: 'remove'; device: ShellyDraftDevice };
-const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';
+const SHELLY_AP_SCAN_ADDRESS = '192.168.33.1';
+const SHELLY_STA_SCAN_START = '192.168.0.1';
+const SHELLY_STA_SCAN_END = '192.168.0.254';
 
 type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {
   enableBleDiscovery?: boolean;
@@ -159,6 +161,13 @@ export const ShellySetupPage = ({
     if (addOnly) onAddCancel?.();
   };
 
+  const applyShellyScanPreset = (start: string, end: string) => {
+    flow.resetShellyScan();
+    setDidSubmitShellyScan(false);
+    flow.setShellyScanStartInput(start);
+    flow.setShellyScanEndInput(end);
+  };
+
   const startShellyScan = () => {
     setDidSubmitShellyScan(true);
     if (shellyScanRangeError) {
@@ -250,7 +259,10 @@ export const ShellySetupPage = ({
         open={isAddShellyModalOpen}
         size="task"
         title={t('hardware.shelly.add')}
-        actions={
+        onClose={closeAddShellyModal}
+      >
+        <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
+        <div className="shelly-manual-add__actions">
           <button
             className="primary-action"
             type="button"
@@ -263,23 +275,54 @@ export const ShellySetupPage = ({
               ? t('hardware.shelly.checking')
               : t('common.add')}
           </button>
-        }
-        onClose={closeAddShellyModal}
-      >
-        <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
+        </div>
         <details className="shelly-network-scan">
           <summary>{t('hardware.shelly.scanNetwork')}</summary>
           <div className="shelly-network-scan__body">
-            <div className="shelly-network-scan__hint">
-              <span>{shellyScanEstimate}</span>
-              <InfoTooltip
-                label={t('hardware.shelly.infoScanLabel')}
-                title={t('hardware.shelly.infoScanTitle')}
+            <div className="shelly-network-scan__toolbar">
+              <div
+                className="shelly-network-scan__presets"
+                role="group"
+                aria-label={t('hardware.shelly.networkScanTitle')}
               >
-                {t('hardware.shelly.apPanelHelp', { url: SHELLY_AP_PANEL_URL })}
-                <br />
-                {t('hardware.shelly.scannerBehavior')}
-              </InfoTooltip>
+                <button
+                  className="shelly-network-scan__preset"
+                  type="button"
+                  disabled={isShellyScanActive}
+                  onClick={() =>
+                    applyShellyScanPreset(SHELLY_AP_SCAN_ADDRESS, SHELLY_AP_SCAN_ADDRESS)
+                  }
+                >
+                  AP mode
+                </button>
+                <span
+                  className="shelly-network-scan__preset-separator"
+                  aria-hidden="true"
+                >
+                  ·
+                </span>
+                <button
+                  className="shelly-network-scan__preset"
+                  type="button"
+                  disabled={isShellyScanActive}
+                  onClick={() =>
+                    applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
+                  }
+                >
+                  STA mode
+                </button>
+              </div>
+              <span className="shelly-network-scan__info">
+                <InfoTooltip
+                  label={t('hardware.shelly.infoScanLabel')}
+                  title={t('hardware.shelly.infoScanTitle')}
+                >
+                  {shellyScanEstimate}
+                  <br />
+                  <br />
+                  {t('hardware.shelly.scannerBehavior')}
+                </InfoTooltip>
+              </span>
             </div>
             <div className="field-row">
               <label

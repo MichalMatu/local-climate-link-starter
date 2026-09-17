@@ -1326,7 +1326,7 @@ describe('HardwareSetupScreen', () => {
       target: { value: 'Salon' }
     });
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
-    expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.99');
+    expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
 
@@ -1442,28 +1442,27 @@ describe('HardwareSetupScreen', () => {
     expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
 
     expect(within(dialog).getByText('Skanowanie Shelly')).toBeInTheDocument();
-    expect(within(dialog).getByText(/http:\/\/192\.168\.33\.1\//)).toBeInTheDocument();
+    expect(within(dialog).getByText(/192\.168\.33\.1/)).toBeInTheDocument();
     expect(
-      within(dialog).getByText(/Skan pomija już dodane gniazdka/i)
+      within(dialog).getByText(/Już dodane gniazdka są pomijane/i)
     ).toBeInTheDocument();
     expect(
-      within(dialog).getByText(
-        /Wybrany zakres obejmuje 99 adresów\. Skan sprawdza do 8 adresów naraz, limit ok\. 39 s\./
-      )
+      within(dialog).getByText(/Zakres: 254 adresy.*1 min 36 s/)
     ).toBeInTheDocument();
 
     fireEvent.change(within(dialog).getByLabelText('Do'), {
       target: { value: '192.168.0.32' }
     });
 
-    expect(
-      within(dialog).getByText(
-        /Wybrany zakres obejmuje 32 adresy\. Skan sprawdza do 8 adresów naraz, limit ok\. 12 s\./
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(dialog).queryByRole('button', { name: 'Wpisz adres AP' })
-    ).not.toBeInTheDocument();
+    expect(within(dialog).getByText(/Zakres: 32 adresy.*12 s/)).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'AP mode' }));
+    expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.33.1');
+    expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.33.1');
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'STA mode' }));
+    expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
+    expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
   });
 
   it('uses the scan result action to populate the add form before final add', async () => {

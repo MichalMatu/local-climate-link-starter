@@ -375,20 +375,20 @@ export const ptBr = {
       scanRangeFailed: 'Verifique o intervalo de scan.',
       scanRangeStart: 'De',
       scanResultEmpty:
-        'Não encontrei tomada Shelly neste intervalo. Verifique o IP no roteador ou no Shelly.',
+        'Nenhuma nova tomada Shelly foi encontrada nessa faixa. Tomadas já adicionadas são ignoradas.',
       scanShellyTitle: 'Escanear rede Shelly',
       scanStart: 'Iniciar scan',
       scanStartTitle: 'Escanear o intervalo de endereços IP selecionado',
       scanStop: 'Parar scan',
       scanStopTitle: 'Parar scan de rede em andamento',
       scannerBehavior:
-        'O scan ignora tomadas já adicionadas e para na primeira nova. Para continuar buscando, ajuste o intervalo manualmente e rode o scan de novo.',
+        'AP: conecte-se diretamente ao Wi‑Fi do Shelly — o endereço geralmente é 192.168.33.1. STA: o Shelly está na sua rede Wi‑Fi — use a faixa dessa rede. Tomadas já adicionadas são ignoradas; a busca para no primeiro dispositivo novo.',
       scanning: 'Escaneando',
       scanningBle: 'Escaneando termômetros BLE',
       scanningBleSafeOff: 'Shelly: OFF durante o scan.',
       scanningIpRange: 'Escaneando intervalo IP.',
       scanEstimate:
-        'O intervalo selecionado cobre {count}. O scan verifica até {concurrency} endereços por vez, limite de cerca de {duration}.',
+        'Faixa: {count}. Até {concurrency} endereços em paralelo; máximo de aprox. {duration}.',
       scanEstimateUnavailable: 'O tempo do scan aparece após um intervalo válido.',
       scanStopped: 'Scan parado.',
       scripts: 'Scripts',

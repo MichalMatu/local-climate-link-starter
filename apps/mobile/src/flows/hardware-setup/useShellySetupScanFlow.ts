@@ -25,7 +25,7 @@ export const buildUnsavedShellyScanUrls = (
 
 export const useShellySetupScanFlow = (shellyDevices: ShellyDraftDevice[]) => {
   const [shellyScanStartInput, setShellyScanStartInput] = useState('192.168.0.1');
-  const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.99');
+  const [shellyScanEndInput, setShellyScanEndInput] = useState('192.168.0.254');
   const [shellyScanStopped, setShellyScanStopped] = useState(false);
   const shellyScanAbortControllerRef = useRef<AbortController | null>(null);
 

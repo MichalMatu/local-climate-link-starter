@@ -384,20 +384,20 @@ export const fr = {
       scanRangeFailed: 'Vérifie la plage de scan.',
       scanRangeStart: 'De',
       scanResultEmpty:
-        'Je n’ai trouvé aucune prise Shelly dans cette plage. Vérifie l’IP dans le routeur ou dans Shelly.',
+        'Aucune nouvelle prise Shelly trouvée dans cette plage. Les prises déjà ajoutées sont ignorées.',
       scanShellyTitle: 'Scanner le réseau Shelly',
       scanStart: 'Démarrer le scan',
       scanStartTitle: 'Scanner la plage d’adresses IP sélectionnée',
       scanStop: 'Arrêter le scan',
       scanStopTitle: 'Arrêter le scan réseau en cours',
       scannerBehavior:
-        'Le scan ignore les prises déjà ajoutées et s’arrête après la première nouvelle. Pour continuer, ajuste la plage manuellement et relance le scan.',
+        'AP : connectez-vous directement au Wi‑Fi Shelly — l’adresse est généralement 192.168.33.1. STA : Shelly est sur votre Wi‑Fi — utilisez la plage de ce réseau. Les prises déjà ajoutées sont ignorées ; le scan s’arrête au premier nouvel appareil.',
       scanning: 'Scan en cours',
       scanningBle: 'Scan des thermomètres BLE',
       scanningBleSafeOff: 'Shelly : OFF pendant le scan.',
       scanningIpRange: 'Scan de la plage IP.',
       scanEstimate:
-        'La plage sélectionnée couvre {count}. Le scan vérifie jusqu’à {concurrency} adresses à la fois, limite env. {duration}.',
+        'Plage : {count}. Jusqu’à {concurrency} adresses en parallèle ; maximum env. {duration}.',
       scanEstimateUnavailable: 'Le temps de scan apparaîtra après une plage valide.',
       scanStopped: 'Scan arrêté.',
       scripts: 'Scripts',

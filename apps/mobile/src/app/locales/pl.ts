@@ -378,20 +378,20 @@ export const pl = {
       scanRangeFailed: 'Sprawdź zakres skanu.',
       scanRangeStart: 'Od',
       scanResultEmpty:
-        'Nie znalazłem gniazdka Shelly w tym zakresie. Sprawdź IP w routerze albo w ustawieniach Shelly.',
+        'Nie znalazłem nowego gniazdka Shelly w tym zakresie. Już dodane gniazdka są pomijane.',
       scanShellyTitle: 'Skanuj sieć Shelly',
       scanStart: 'Rozpocznij skan',
       scanStartTitle: 'Skanuj wybrany zakres adresów IP',
       scanStop: 'Stop skanu',
       scanStopTitle: 'Zatrzymaj trwający skan sieci',
       scannerBehavior:
-        'Skan pomija już dodane gniazdka i zatrzymuje się po pierwszym nowym. Jeśli chcesz szukać dalej, popraw zakres ręcznie i uruchom skan ponownie.',
+        'AP: połącz się bezpośrednio z Wi‑Fi Shelly — adres to zwykle 192.168.33.1. STA: Shelly jest w Twojej sieci Wi‑Fi — użyj zakresu tej sieci. Już dodane gniazdka są pomijane; skan zatrzymuje się po pierwszym nowym.',
       scanning: 'Skanuję',
       scanningBle: 'Skanuję termometry BLE',
       scanningBleSafeOff: 'Shelly: OFF na czas skanu.',
       scanningIpRange: 'Skanuję zakres IP.',
       scanEstimate:
-        'Wybrany zakres obejmuje {count}. Skan sprawdza do {concurrency} adresów naraz, limit ok. {duration}.',
+        'Zakres: {count}. Do {concurrency} adresów równolegle; maks. ok. {duration}.',
       scanEstimateUnavailable: 'Czas skanu pokażę po poprawnym zakresie.',
       scanStopped: 'Skan zatrzymany.',
       scripts: 'Scripts',

@@ -380,20 +380,20 @@ export const de = {
       scanRangeFailed: 'Scanbereich prüfen.',
       scanRangeStart: 'Von',
       scanResultEmpty:
-        'In diesem Bereich wurde keine Shelly-Steckdose gefunden. Prüfe die IP im Router oder in Shelly.',
+        'Keine neue Shelly-Steckdose in diesem Bereich gefunden. Bereits hinzugefügte Steckdosen werden übersprungen.',
       scanShellyTitle: 'Shelly-Netzwerk scannen',
       scanStart: 'Scan starten',
       scanStartTitle: 'Ausgewählten IP-Adressbereich scannen',
       scanStop: 'Scan stoppen',
       scanStopTitle: 'Laufenden Netzwerkscan stoppen',
       scannerBehavior:
-        'Der Scan überspringt bereits hinzugefügte Steckdosen und stoppt nach der ersten neuen. Um weiterzusuchen, den Bereich manuell anpassen und erneut scannen.',
+        'AP: Direkt mit dem Shelly-WLAN verbinden — die Adresse ist normalerweise 192.168.33.1. STA: Shelly ist in deinem WLAN — verwende den Bereich dieses Netzwerks. Bereits hinzugefügte Steckdosen werden übersprungen; der Scan stoppt beim ersten neuen Gerät.',
       scanning: 'Scanne',
       scanningBle: 'Scanne BLE-Thermometer',
       scanningBleSafeOff: 'Shelly: OFF während des Scans.',
       scanningIpRange: 'Scanne IP-Bereich.',
       scanEstimate:
-        'Der ausgewählte Bereich umfasst {count}. Der Scan prüft bis zu {concurrency} Adressen gleichzeitig, Limit ca. {duration}.',
+        'Bereich: {count}. Bis zu {concurrency} Adressen parallel; maximal ca. {duration}.',
       scanEstimateUnavailable: 'Die Scanzeit erscheint nach einem gültigen Bereich.',
       scanStopped: 'Scan gestoppt.',
       scripts: 'Scripts',

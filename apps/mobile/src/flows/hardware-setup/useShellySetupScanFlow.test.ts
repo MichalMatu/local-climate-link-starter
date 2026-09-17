@@ -35,6 +35,19 @@ describe('Shelly setup scan derivation', () => {
     ).toEqual(['http://192.168.0.1/', 'http://192.168.0.2/']);
   });
 
+  it('defaults STA discovery to the full common 192.168.0.x host range', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
+    });
+    const wrapper = ({ children }: PropsWithChildren) =>
+      createElement(QueryClientProvider, { client: queryClient }, children);
+    const { result } = renderHook(() => useShellySetupScanFlow([]), { wrapper });
+
+    expect(result.current.shellyScanStartInput).toBe('192.168.0.1');
+    expect(result.current.shellyScanEndInput).toBe('192.168.0.254');
+    queryClient.clear();
+  });
+
   it('allows an incomplete scan address while the user is editing without crashing render', () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } }

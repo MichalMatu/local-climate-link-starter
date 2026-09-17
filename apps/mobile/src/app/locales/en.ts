@@ -374,20 +374,20 @@ export const en = {
       scanRangeFailed: 'Check scan range.',
       scanRangeStart: 'From',
       scanResultEmpty:
-        'I did not find a Shelly plug in this range. Check the IP in your router or Shelly settings.',
+        'No new Shelly plug was found in this range. Already added plugs are skipped.',
       scanShellyTitle: 'Scan Shelly network',
       scanStart: 'Start scan',
       scanStartTitle: 'Scan selected IP address range',
       scanStop: 'Stop scan',
       scanStopTitle: 'Stop running network scan',
       scannerBehavior:
-        'The scan skips plugs already added and stops after the first new one. To keep searching, adjust the range manually and run the scan again.',
+        "AP: connect directly to Shelly Wi‑Fi — the address is usually 192.168.33.1. STA: Shelly is on your Wi‑Fi — use that network's range. Already added plugs are skipped; scanning stops after the first new one.",
       scanning: 'Scanning',
       scanningBle: 'Scanning BLE thermometers',
       scanningBleSafeOff: 'Shelly: OFF during scan.',
       scanningIpRange: 'Scanning IP range.',
       scanEstimate:
-        'Selected range covers {count}. The scan checks up to {concurrency} addresses at once, limit about {duration}.',
+        'Range: {count}. Up to {concurrency} addresses in parallel; max. about {duration}.',
       scanEstimateUnavailable: 'Scan time will appear after a valid range.',
       scanStopped: 'Scan stopped.',
       scripts: 'Scripts',

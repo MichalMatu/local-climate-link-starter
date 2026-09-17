@@ -1411,13 +1411,63 @@ select {
   padding-bottom: var(--lcl-spacing-sm);
 }
 
-.shelly-network-scan__hint {
-  align-items: center;
-  color: var(--lcl-color-text-muted);
+.shelly-manual-add__actions {
   display: flex;
-  font-size: var(--lcl-font-size-sm);
+  justify-content: flex-end;
+}
+
+.shelly-network-scan__toolbar {
+  align-items: center;
+  display: flex;
   gap: var(--lcl-spacing-sm);
   justify-content: space-between;
+}
+
+.shelly-network-scan__presets {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+}
+
+.shelly-network-scan__preset {
+  background: transparent;
+  border: 0;
+  color: var(--lcl-color-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+  padding: var(--lcl-spacing-xs) 0;
+}
+
+.shelly-network-scan__preset:hover,
+.shelly-network-scan__preset:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.shelly-network-scan__preset:disabled {
+  color: var(--lcl-color-text-muted);
+  cursor: default;
+  text-decoration: none;
+}
+
+.shelly-network-scan__preset-separator {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+}
+
+.shelly-network-scan__info {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.shelly-network-scan__info .lcl-info-tooltip__bubble {
+  box-sizing: border-box;
+  max-width: min(18rem, calc(100vw - (var(--lcl-spacing-lg) * 2)));
+  overflow-wrap: anywhere;
+  width: min(18rem, calc(100vw - (var(--lcl-spacing-lg) * 2)));
 }
 
 .shelly-network-scan__actions {

@@ -378,20 +378,20 @@ export const it = {
       scanRangeFailed: 'Controlla intervallo scansione.',
       scanRangeStart: 'Da',
       scanResultEmpty:
-        'Non ho trovato prese Shelly in questo intervallo. Controlla l’IP nel router o in Shelly.',
+        'Nessuna nuova presa Shelly trovata in questo intervallo. Le prese già aggiunte vengono ignorate.',
       scanShellyTitle: 'Scansiona rete Shelly',
       scanStart: 'Avvia scansione',
       scanStartTitle: 'Scansiona l’intervallo IP selezionato',
       scanStop: 'Ferma scansione',
       scanStopTitle: 'Ferma la scansione rete in corso',
       scannerBehavior:
-        'La scansione salta le prese già aggiunte e si ferma alla prima nuova. Per continuare, modifica l’intervallo manualmente e scansiona di nuovo.',
+        'AP: connettiti direttamente al Wi‑Fi Shelly — l’indirizzo è di solito 192.168.33.1. STA: Shelly è nella tua rete Wi‑Fi — usa l’intervallo di quella rete. Le prese già aggiunte vengono ignorate; la scansione si ferma al primo nuovo dispositivo.',
       scanning: 'Scansione',
       scanningBle: 'Scansione termometri BLE',
       scanningBleSafeOff: 'Shelly: OFF durante scansione.',
       scanningIpRange: 'Scansione intervallo IP.',
       scanEstimate:
-        'L’intervallo selezionato copre {count}. La scansione controlla fino a {concurrency} indirizzi alla volta, limite circa {duration}.',
+        'Intervallo: {count}. Fino a {concurrency} indirizzi in parallelo; massimo circa {duration}.',
       scanEstimateUnavailable:
         'Il tempo di scansione apparirà dopo un intervallo valido.',
       scanStopped: 'Scansione fermata.',

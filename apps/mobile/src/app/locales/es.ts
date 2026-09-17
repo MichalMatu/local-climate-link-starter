@@ -377,20 +377,20 @@ export const es = {
       scanRangeFailed: 'Comprueba el rango de escaneo.',
       scanRangeStart: 'Desde',
       scanResultEmpty:
-        'No encontré ningún enchufe Shelly en este rango. Comprueba la IP en el router o en Shelly.',
+        'No se encontró un enchufe Shelly nuevo en este rango. Los enchufes ya añadidos se omiten.',
       scanShellyTitle: 'Escanear red Shelly',
       scanStart: 'Iniciar escaneo',
       scanStartTitle: 'Escanear el rango de direcciones IP seleccionado',
       scanStop: 'Detener escaneo',
       scanStopTitle: 'Detener el escaneo de red en curso',
       scannerBehavior:
-        'El escaneo omite enchufes ya añadidos y se detiene tras el primer nuevo. Para seguir buscando, ajusta el rango manualmente y vuelve a escanear.',
+        'AP: conéctate directamente al Wi‑Fi de Shelly — la dirección suele ser 192.168.33.1. STA: Shelly está en tu Wi‑Fi — usa el rango de esa red. Los enchufes ya añadidos se omiten; el escaneo se detiene al encontrar el primero nuevo.',
       scanning: 'Escaneando',
       scanningBle: 'Escaneando termómetros BLE',
       scanningBleSafeOff: 'Shelly: OFF durante el escaneo.',
       scanningIpRange: 'Escaneando rango IP.',
       scanEstimate:
-        'El rango seleccionado cubre {count}. El escaneo comprueba hasta {concurrency} direcciones a la vez, límite aprox. {duration}.',
+        'Rango: {count}. Hasta {concurrency} direcciones en paralelo; máximo aprox. {duration}.',
       scanEstimateUnavailable: 'El tiempo de escaneo aparecerá tras un rango válido.',
       scanStopped: 'Escaneo detenido.',
       scripts: 'Scripts',
