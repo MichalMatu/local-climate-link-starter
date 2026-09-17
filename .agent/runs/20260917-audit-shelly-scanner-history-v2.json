@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-audit-shelly-scanner-history-v2",
+  "task_digest": "d26bcfe1553ddf6e309635987f6cf0479117827624ff9a949033da72d6906cd4",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T11:26:37.983366+00:00",
+  "attempt_id": "584b5ae3ab3229cc445449ac",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 83169,
+  "updated_at": "2026-09-17T11:26:37.983501+00:00",
+  "pid": 83169
+}
