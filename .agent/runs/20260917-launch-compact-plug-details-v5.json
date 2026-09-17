@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-launch-compact-plug-details-v5",
+  "task_digest": "c538ead8e9bb66282b2a232faf4a27262df909aaa8c09fd4255e095260195dfa",
+  "idle_timeout": 300,
+  "task_timeout": 600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T15:03:30.040611+00:00",
+  "attempt_id": "155768598a61f3341a3fde66",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 6319,
+  "updated_at": "2026-09-17T15:03:30.040744+00:00",
+  "pid": 6319
+}
