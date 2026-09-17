@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-compact-thermometer-card-v2",
+  "task_digest": "43bd8e77c587a08848a4a96aa8b2a4b7837284169b0cb8ab05f4a89806b7c78b",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T15:20:49.175499+00:00",
+  "attempt_id": "f8a114cf3f41e51b881a760f",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 20754,
+  "updated_at": "2026-09-17T15:20:49.175563+00:00",
+  "pid": 20754
+}
