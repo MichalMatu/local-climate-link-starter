@@ -1,0 +1,13 @@
+{
+  "id": "20260917-audit-shelly-scanner-history-v1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 900,
+  "task_timeout": 1800,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"5182086ed38f628bc7f7b7bba9687aaa761aeaf9\"; echo '=== shellyRequests history ==='; git log --all --follow --oneline -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts | head -40; echo '=== scanner function introduction/changes ==='; git log --all -S'scanShellySetupUrls' --oneline -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts; echo '=== scan timeout changes ==='; git log --all -S'SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS' --oneline -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts; echo '=== stopAfterFirst changes ==='; git log --all -S'stopAfterFirst' --oneline -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts; echo '=== current scan constants/function ==='; grep -n -A120 -B20 'SHELLY_SETUP_SCAN_CONCURRENCY\|scanShellySetupUrls' apps/mobile/src/flows/hardware-setup/shellyRequests.ts | head -220; echo '=== commits touching scan words ==='; for sha in $(git log --all --format='%H' -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts | head -30); do msg=$(git log -1 --format='%s' $sha); if git show --format= --unified=2 $sha -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts | grep -qiE 'scanShelly|SCAN_RPC_TIMEOUT|stopAfterFirst|concurrency|GetDeviceInfo'; then echo --- $sha $msg; git show --format= --unified=3 $sha -- apps/mobile/src/flows/hardware-setup/shellyRequests.ts | grep -E -C4 'scanShelly|SCAN_RPC_TIMEOUT|stopAfterFirst|concurrency|GetDeviceInfo' | head -120; fi; done"
+  ]
+}
