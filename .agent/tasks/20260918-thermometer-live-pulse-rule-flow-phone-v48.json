@@ -1,0 +1,20 @@
+{
+  "id": "20260918-thermometer-live-pulse-rule-flow-phone-v48",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": ["android-device"],
+  "command_timeout": 2400,
+  "task_timeout": 4200,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; test \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\" = \"a89b1daaab72a4749ef08210c40d4c01528ee1c9\"; test -z \"$(git status --porcelain)\"; if git cat-file -e e9b0a25abe840ae7100fdb64031c64b0f0f41fc0^{commit} 2>/dev/null; then git reset --hard e9b0a25abe840ae7100fdb64031c64b0f0f41fc0; git merge-base --is-ancestor a89b1daaab72a4749ef08210c40d4c01528ee1c9 HEAD; else git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; git show origin/agent-control:.agent/scripts/20260918-thermometer-live-pulse-rule-flow-v46.py | python3; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx; git diff --check; git add apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx; git commit -m 'Stabilize thermometer live UI and simplify climate setup'; fi; git rev-parse HEAD; test -z \"$(git status --porcelain)\"",
+    "set -euo pipefail; if ! grep -Fq \"'savedSensorLiveScanState'\" apps/mobile/src/screens/hardware-setup/pageContracts.ts; then git show origin/agent-control:.agent/scripts/20260918-thermometer-live-pulse-rule-flow-v47.py | python3; fi; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pageContracts.ts; git diff --check",
+    "pnpm check",
+    "set -euo pipefail; git add apps/mobile/src/screens/hardware-setup/pageContracts.ts; git commit --amend --no-edit; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
+    "set -euo pipefail; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; apk_path=$(adb shell pm path link.localclimate.app | head -n 1 | tr -d '\\r' | sed 's/^package://'); test -n \"$apk_path\"; adb pull \"$apk_path\" /tmp/lcl-v48-installed.apk >/dev/null; unzip -p /tmp/lcl-v48-installed.apk 'assets/public/assets/*.css' | grep -Fq 'sensor-card-leading-icon--fresh .sensor-card-leading-icon__icon'; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; git rev-parse HEAD; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\""
+  ]
+}
