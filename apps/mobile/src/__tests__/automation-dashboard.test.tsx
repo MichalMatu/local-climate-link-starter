@@ -231,7 +231,8 @@ describe('AutomationDashboardScreen', () => {
     const onAddPlug = vi.fn();
     const { onAddAutomation } = renderDashboard(vi.fn(), vi.fn(), vi.fn(), onAddPlug);
 
-    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Gniazdka' })).toBeNull();
     expect(screen.queryByText('Nie masz jeszcze zapisanej automatyki')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
     expect(onAddPlug).toHaveBeenCalledTimes(1);
@@ -379,7 +380,10 @@ describe('AutomationDashboardScreen', () => {
     const thermometerNav = screen.getByRole('button', { name: 'Termometry' });
     expect(thermometerNav).toBeEnabled();
     fireEvent.click(thermometerNav);
-    expect(screen.getByRole('heading', { name: 'Termometry' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Termometry' })).toBeNull();
+    expect(document.querySelector('.sensor-setup-panel--embedded')).not.toBeNull();
+    expect(document.querySelector('.sensor-setup-panel--embedded.demo-panel')).toBeNull();
     expect(
       screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
     ).toBeVisible();
@@ -416,7 +420,7 @@ describe('AutomationDashboardScreen', () => {
     const thermometerNav = screen.getByRole('button', { name: 'Termometry' });
     expect(thermometerNav).toBeEnabled();
     fireEvent.click(thermometerNav);
-    expect(screen.getByRole('heading', { name: 'Termometry' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByText('Harmonogram dzienny')).toBeVisible();
 

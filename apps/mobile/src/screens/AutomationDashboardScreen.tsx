@@ -286,7 +286,7 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
 
 const ThermometerDashboardSection = () => {
   const flow = useHardwareSetupFlow();
-  return <SensorSetupPage flow={flow} primaryAddAction="phone-scan" />;
+  return <SensorSetupPage flow={flow} primaryAddAction="phone-scan" embedded />;
 };
 
 const PlugSettingsOverlay = ({
@@ -504,13 +504,12 @@ export const AutomationDashboardScreen = ({
   const fabLabel = t('hardware.shelly.add');
 
   return (
-    <main className="demo-shell dashboard-shell app-bottom-nav-shell">
-      <header className="demo-header dashboard-header app-page-header">
-        <h1>
-          {activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.timeTab')}
-        </h1>
-      </header>
-
+    <main
+      className="demo-shell dashboard-shell app-bottom-nav-shell"
+      aria-label={
+        activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.timeTab')
+      }
+    >
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
         {activeKind === 'time' ? (
           <ThermometerDashboardSection />

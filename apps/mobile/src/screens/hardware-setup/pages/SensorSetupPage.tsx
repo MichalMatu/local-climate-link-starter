@@ -186,11 +186,13 @@ type SensorDialogState =
 
 type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
   primaryAddAction?: 'manual' | 'phone-scan';
+  embedded?: boolean;
 };
 
 export const SensorSetupPage = ({
   flow,
-  primaryAddAction = 'manual'
+  primaryAddAction = 'manual',
+  embedded = false
 }: SensorSetupPageProps) => {
   const { locale, t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
@@ -277,7 +279,11 @@ export const SensorSetupPage = ({
 
   return (
     <section
-      className="demo-panel sensor-setup-panel"
+      className={
+        embedded
+          ? 'sensor-setup-panel sensor-setup-panel--embedded'
+          : 'demo-panel sensor-setup-panel'
+      }
       aria-label={t('hardware.nav.sensorTitle')}
     >
       <button

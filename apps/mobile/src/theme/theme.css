@@ -1117,6 +1117,11 @@ select {
 .sensor-setup-panel {
 }
 
+.sensor-setup-panel--embedded {
+  display: grid;
+  gap: var(--lcl-spacing-lg);
+}
+
 .sensor-card-header {
   align-items: center;
   display: grid;

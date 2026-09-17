@@ -155,7 +155,7 @@ describe('AppRoutes navigation shell', () => {
 
   it('uses the empty dashboard as the canonical zero-installation root', () => {
     renderRoutes();
-    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Dodaj gniazdko' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
@@ -172,7 +172,7 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByText('mock-plug-add-yes')).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'mock-plug-add-cancel' }));
-    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
   });
 
   it('starts climate setup from a saved plug with fixed Shelly context', async () => {
@@ -260,7 +260,7 @@ describe('AppRoutes navigation shell', () => {
     act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     act(() => nativeAppMocks.fireBack());
-    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     act(() => nativeAppMocks.fireBack());
     await waitFor(() => expect(nativeAppMocks.exitApp).toHaveBeenCalledTimes(1));
 
@@ -274,7 +274,7 @@ describe('AppRoutes navigation shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
-    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
@@ -296,7 +296,7 @@ describe('AppRoutes navigation shell', () => {
     fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
-    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
