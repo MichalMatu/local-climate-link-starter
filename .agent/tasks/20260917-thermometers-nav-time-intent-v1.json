@@ -1,0 +1,13 @@
+{
+  "id": "20260917-thermometers-nav-time-intent-v1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": true,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 1800,
+  "task_timeout": 4800,
+  "commands": [
+    "set -euo pipefail; EXPECTED=5279ede71b3d9e88eca5c58e2c55245f36123a5e; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"; git fetch -q origin agent-control; git show origin/agent-control:.agent/patches/20260917-thermometers-nav-time-intent-v1.py > /tmp/thermometers-nav.py; python3 /tmp/thermometers-nav.py; FILES='apps/mobile/src/components/AppBottomNavigation.tsx apps/mobile/src/screens/SetupIntentScreen.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/routes/AppRoutes.tsx apps/mobile/src/app/locales/pl.ts apps/mobile/src/app/locales/en.ts apps/mobile/src/app/locales/de.ts apps/mobile/src/app/locales/es.ts apps/mobile/src/app/locales/fr.ts apps/mobile/src/app/locales/it.ts apps/mobile/src/app/locales/ptBr.ts'; pnpm exec prettier --write $FILES; pnpm --filter @lcl/mobile test; pnpm --filter @lcl/mobile build; git diff --check; git add $FILES; git commit -m 'Move time automation under plugs and add thermometers tab'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; echo NEW_HEAD=$(git rev-parse HEAD)"
+  ]
+}
