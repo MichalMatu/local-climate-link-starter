@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-plug-screen-e2e-fix-v1",
+  "task_digest": "e0f00b2e460f79e900ab21352190fd518494f0efa3e7d6acc4e7b7d7b90fa8be",
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T09:06:31.144341+00:00",
+  "attempt_id": "4ac96947c3a968c606f8117d",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 44102,
+  "updated_at": "2026-09-17T09:06:31.144404+00:00",
+  "pid": 44102
+}
