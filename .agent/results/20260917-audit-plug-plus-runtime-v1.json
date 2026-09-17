@@ -1,9 +1,0 @@
-{
-  "id": "20260917-audit-plug-plus-runtime-v1",
-  "status": "failed",
-  "failure_reason": "invalid_task_file",
-  "started_at": null,
-  "finished_at": "2026-09-17T09:30:44.815605+00:00",
-  "daemon_version": "4.18.20",
-  "error": "ValueError: resources must be declared explicitly"
-}
