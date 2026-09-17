@@ -34,6 +34,8 @@ const CLIMATE_HARDWARE_TABS = [
   }
 ] as const;
 
+const PLUG_ADD_HARDWARE_TABS = [CLIMATE_HARDWARE_TABS[0]] as const;
+
 const TIME_HARDWARE_TABS = [
   {
     id: 'shelly',
@@ -50,7 +52,12 @@ const TIME_HARDWARE_TABS = [
 type PrimaryHardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
 type HardwareTabId = PrimaryHardwareTabId | 'diagnostics';
 
-const availableTabsForIntent = (setupIntent?: SetupIntent, fixedShellyId?: string) => {
+const availableTabsForIntent = (
+  setupIntent?: SetupIntent,
+  fixedShellyId?: string,
+  plugAddOnly = false
+) => {
+  if (plugAddOnly) return PLUG_ADD_HARDWARE_TABS;
   if (setupIntent === 'time') return TIME_HARDWARE_TABS;
   return fixedShellyId
     ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id !== 'shelly')
@@ -89,6 +96,9 @@ type HardwareSetupScreenProps = {
   onOpenSettings?: () => void;
   onSetupComplete?: () => void;
   fixedShellyId?: string;
+  plugAddOnly?: boolean;
+  onPlugAddComplete?: () => void;
+  onPlugAddCancel?: () => void;
 };
 
 export const HardwareSetupScreen = ({
@@ -98,14 +108,17 @@ export const HardwareSetupScreen = ({
   onNavigateDashboard,
   onOpenSettings,
   onSetupComplete,
-  fixedShellyId
+  fixedShellyId,
+  plugAddOnly = false,
+  onPlugAddComplete,
+  onPlugAddCancel
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
-    () => availableTabsForIntent(setupIntent, fixedShellyId),
-    [fixedShellyId, setupIntent]
+    () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly),
+    [fixedShellyId, plugAddOnly, setupIntent]
   );
   const activeNavigationKind =
     navigationKind ?? (setupIntent === 'time' ? 'time' : 'climate');
@@ -192,27 +205,35 @@ export const HardwareSetupScreen = ({
         </div>
       )}
 
-      <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
-        {availableTabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={
-              activeTab === tab.id
-                ? 'setup-top-nav__item setup-top-nav__item--active'
-                : 'setup-top-nav__item'
-            }
-            type="button"
-            aria-current={activeTab === tab.id ? 'page' : undefined}
-            title={t(tab.titleKey)}
-            onClick={() => selectTab(tab.id)}
-          >
-            {t(tab.labelKey)}
-          </button>
-        ))}
-      </nav>
+      {!plugAddOnly && (
+        <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
+          {availableTabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={
+                activeTab === tab.id
+                  ? 'setup-top-nav__item setup-top-nav__item--active'
+                  : 'setup-top-nav__item'
+              }
+              type="button"
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              title={t(tab.titleKey)}
+              onClick={() => selectTab(tab.id)}
+            >
+              {t(tab.labelKey)}
+            </button>
+          ))}
+        </nav>
+      )}
 
       {activeTab === 'shelly' && (
-        <ShellySetupPage flow={flow} enableBleDiscovery={setupIntent !== 'time'} />
+        <ShellySetupPage
+          flow={flow}
+          enableBleDiscovery={setupIntent !== 'time'}
+          addOnly={plugAddOnly}
+          {...(onPlugAddComplete ? { onAddComplete: onPlugAddComplete } : {})}
+          {...(onPlugAddCancel ? { onAddCancel: onPlugAddCancel } : {})}
+        />
       )}
       {setupIntent !== 'time' && activeTab === 'sensor' && (
         <SensorSetupPage flow={flow} />
@@ -250,7 +271,7 @@ export const HardwareSetupScreen = ({
         </>
       )}
 
-      {onNavigateDashboard && (
+      {onNavigateDashboard && !plugAddOnly && (
         <AppBottomNavigation
           activeKind={activeNavigationKind}
           onOpenClimate={() => onNavigateDashboard('climate')}

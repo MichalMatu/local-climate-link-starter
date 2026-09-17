@@ -41,11 +41,17 @@ const SHELLY_AP_PANEL_URL = 'http://192.168.33.1/';
 
 type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {
   enableBleDiscovery?: boolean;
+  addOnly?: boolean;
+  onAddComplete?: () => void;
+  onAddCancel?: () => void;
 };
 
 export const ShellySetupPage = ({
   flow,
-  enableBleDiscovery = true
+  enableBleDiscovery = true,
+  addOnly = false,
+  onAddComplete,
+  onAddCancel
 }: ShellySetupPageProps) => {
   const { locale, t } = useTranslation();
   const isShellyScanActive = flow.shellyScanMutation.isPending && !flow.shellyScanStopped;
@@ -53,7 +59,9 @@ export const ShellySetupPage = ({
     flow.checkShellyMutation.isPending ||
     flow.recheckShellyMutation.isPending ||
     isShellyScanActive;
-  const [dialog, setDialog] = useState<ShellyDialogState>({ kind: 'none' });
+  const [dialog, setDialog] = useState<ShellyDialogState>(() =>
+    addOnly ? { kind: 'add' } : { kind: 'none' }
+  );
   const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
   const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
   const { dismissToast, pushToast, toasts } = useToastQueue('shelly-toast');
@@ -124,6 +132,7 @@ export const ShellySetupPage = ({
         setDidSubmitShellyAdd(false);
         setDialog({ kind: 'none' });
         pushToast('ok', t('hardware.shelly.added'));
+        onAddComplete?.();
       },
       onError: () => {
         pushToast(
@@ -147,6 +156,7 @@ export const ShellySetupPage = ({
     setDidSubmitShellyAdd(false);
     setDidSubmitShellyScan(false);
     setDialog({ kind: 'none' });
+    if (addOnly) onAddCancel?.();
   };
 
   const startShellyScan = () => {
@@ -222,15 +232,17 @@ export const ShellySetupPage = ({
 
   return (
     <section className="demo-panel" aria-label={t('hardware.shelly.regionLabel')}>
-      <button
-        className="primary-action setup-add-fab"
-        type="button"
-        aria-label={t('hardware.shelly.add')}
-        title={t('hardware.shelly.addTitle')}
-        onClick={openAddShellyModal}
-      >
-        <IconPlus className="setup-add-fab__icon" aria-hidden="true" />
-      </button>
+      {!addOnly && (
+        <button
+          className="primary-action setup-add-fab"
+          type="button"
+          aria-label={t('hardware.shelly.add')}
+          title={t('hardware.shelly.addTitle')}
+          onClick={openAddShellyModal}
+        >
+          <IconPlus className="setup-add-fab__icon" aria-hidden="true" />
+        </button>
+      )}
 
       <Modal
         busy={flow.checkShellyMutation.isPending}
@@ -627,26 +639,28 @@ export const ShellySetupPage = ({
         )}
       </Modal>
 
-      <div className="saved-list" aria-label={t('hardware.shelly.savedListLabel')}>
-        {flow.shellyDevices.length === 0 && <p>{t('hardware.shelly.empty')}</p>}
-        {flow.shellyDevices.map((device) => (
-          <SavedShellyDeviceCard
-            key={device.id}
-            controlState={flow.shellyControlStates[device.id]}
-            device={device}
-            onAutomationAuto={flow.setAutomationAuto}
-            onAutomationManual={flow.setAutomationManual}
-            {...(enableBleDiscovery ? { onBleScan: openBleScanModal } : {})}
-            onInfoOpen={openInfoModal}
-            onNameChange={(savedDevice, value) =>
-              flow.setShellyDeviceName(savedDevice.id, value)
-            }
-            onRelayOff={flow.turnRelayOff}
-            onRelayOn={flow.turnRelayOn}
-            onRemove={removeSavedShelly}
-          />
-        ))}
-      </div>
+      {!addOnly && (
+        <div className="saved-list" aria-label={t('hardware.shelly.savedListLabel')}>
+          {flow.shellyDevices.length === 0 && <p>{t('hardware.shelly.empty')}</p>}
+          {flow.shellyDevices.map((device) => (
+            <SavedShellyDeviceCard
+              key={device.id}
+              controlState={flow.shellyControlStates[device.id]}
+              device={device}
+              onAutomationAuto={flow.setAutomationAuto}
+              onAutomationManual={flow.setAutomationManual}
+              {...(enableBleDiscovery ? { onBleScan: openBleScanModal } : {})}
+              onInfoOpen={openInfoModal}
+              onNameChange={(savedDevice, value) =>
+                flow.setShellyDeviceName(savedDevice.id, value)
+              }
+              onRelayOff={flow.turnRelayOff}
+              onRelayOn={flow.turnRelayOn}
+              onRemove={removeSavedShelly}
+            />
+          ))}
+        </div>
+      )}
       <ToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}

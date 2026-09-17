@@ -22,6 +22,7 @@ const HardwareSetupScreen = lazy(async () => {
 type SetupRouteIntent = SetupIntent;
 type PrimaryAppRoute =
   | { type: 'dashboard'; kind?: AppNavigationKind }
+  | { type: 'plug-add' }
   | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
   | {
       type: 'setup';
@@ -68,6 +69,9 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   }
   if (route.type === 'installation') {
     return { type: 'dashboard', kind: route.kind };
+  }
+  if (route.type === 'plug-add') {
+    return { type: 'dashboard', kind: 'climate' };
   }
   if (route.type === 'setup') {
     return route.intent === 'time'
@@ -174,6 +178,7 @@ export const AppRoutes = () => {
     return (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
+        onAddPlug={() => navigate({ type: 'plug-add' })}
         onAddAutomation={(kind, shellyId) => {
           if (shellyId) selectShellyDevice(shellyId);
           if (kind === 'time') {
@@ -198,6 +203,29 @@ export const AppRoutes = () => {
         }}
         onOpenSettings={openSettings}
       />
+    );
+  }
+
+  if (route.type === 'plug-add') {
+    const backToPlugs = () => navigate({ type: 'dashboard', kind: 'climate' });
+    return (
+      <Suspense
+        fallback={
+          <RouteFallback
+            activeKind="climate"
+            onOpenClimate={backToPlugs}
+            onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
+            onOpenSettings={openSettings}
+          />
+        }
+      >
+        <HardwareSetupScreen
+          plugAddOnly
+          navigationKind="climate"
+          onPlugAddComplete={backToPlugs}
+          onPlugAddCancel={backToPlugs}
+        />
+      </Suspense>
     );
   }
 

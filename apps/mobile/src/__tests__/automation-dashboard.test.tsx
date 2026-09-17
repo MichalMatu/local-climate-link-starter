@@ -185,7 +185,8 @@ const installTimeShellyFetchMock = () => {
 const renderDashboard = (
   onAddAutomation = vi.fn(),
   onOpenInstallation = vi.fn(),
-  onOpenSettings = vi.fn()
+  onOpenSettings = vi.fn(),
+  onAddPlug = vi.fn()
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
@@ -194,11 +195,13 @@ const renderDashboard = (
     onAddAutomation,
     onOpenInstallation,
     onOpenSettings,
+    onAddPlug,
     queryClient,
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AutomationDashboardScreen
+            onAddPlug={onAddPlug}
             onAddAutomation={onAddAutomation}
             onOpenInstallation={onOpenInstallation}
             onOpenSettings={onOpenSettings}
@@ -224,13 +227,15 @@ describe('AutomationDashboardScreen', () => {
     vi.unstubAllGlobals();
   });
 
-  it('does not duplicate the canonical zero-installation state', () => {
-    const { onAddAutomation } = renderDashboard();
+  it('uses the Plugs FAB only for adding a physical plug', () => {
+    const onAddPlug = vi.fn();
+    const { onAddAutomation } = renderDashboard(vi.fn(), vi.fn(), vi.fn(), onAddPlug);
 
     expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.queryByText('Nie masz jeszcze zapisanej automatyki')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(onAddAutomation).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
+    expect(onAddPlug).toHaveBeenCalledTimes(1);
+    expect(onAddAutomation).not.toHaveBeenCalled();
   });
 
   it('shows a saved plug without automation and starts setup with that plug context', () => {

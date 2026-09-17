@@ -72,21 +72,34 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     setupIntent,
     fixedShellyId,
     onBackToIntent,
-    onSetupComplete
+    onSetupComplete,
+    plugAddOnly,
+    onPlugAddComplete,
+    onPlugAddCancel
   }: {
     setupIntent?: SetupIntent;
     fixedShellyId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
+    plugAddOnly?: boolean;
+    onPlugAddComplete?: () => void;
+    onPlugAddCancel?: () => void;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
       <p>{`mock-fixed-shelly-${fixedShellyId ?? 'none'}`}</p>
+      <p>{`mock-plug-add-${plugAddOnly ? 'yes' : 'no'}`}</p>
       <button type="button" onClick={onBackToIntent}>
         mock-back
       </button>
       <button type="button" onClick={onSetupComplete}>
         mock-complete
+      </button>
+      <button type="button" onClick={onPlugAddComplete}>
+        mock-plug-add-complete
+      </button>
+      <button type="button" onClick={onPlugAddCancel}>
+        mock-plug-add-cancel
       </button>
     </section>
   )
@@ -143,7 +156,7 @@ describe('AppRoutes navigation shell', () => {
   it('uses the empty dashboard as the canonical zero-installation root', () => {
     renderRoutes();
     expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Dodaj gniazdko' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
@@ -152,17 +165,14 @@ describe('AppRoutes navigation shell', () => {
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
   });
 
-  it('opens Add automation only from plus and does not expose legacy manage choice', () => {
+  it('opens the dedicated Add Plug flow from the Plugs plus', async () => {
     renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
-    expect(screen.getByRole('button', { name: /Sterować temperaturą/ })).toBeVisible();
-    expect(screen.getByRole('button', { name: /Sterować wilgotnością/ })).toBeVisible();
-    expect(screen.queryByRole('button', { name: /Sterować według czasu/ })).toBeNull();
-    expect(
-      screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
-    ).toBeNull();
-    expect(document.querySelector('.app-settings-trigger')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
+    expect(await screen.findByText('mock-setup-none')).toBeVisible();
+    expect(screen.getByText('mock-plug-add-yes')).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-plug-add-cancel' }));
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
   });
 
   it('starts climate setup from a saved plug with fixed Shelly context', async () => {
@@ -199,9 +209,16 @@ describe('AppRoutes navigation shell', () => {
     );
   });
 
-  it('keeps Settings available through bottom navigation from Add automation', () => {
+  it('keeps Settings available from per-plug Add automation intent', () => {
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.31/',
+      name: 'Wentylator',
+      baseUrl: 'http://192.168.0.31/',
+      scriptIdInput: '1'
+    });
     renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    const card = screen.getByText('Wentylator').closest('article');
+    fireEvent.click((card as HTMLElement).querySelector('button') as HTMLButtonElement);
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
     expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
@@ -212,6 +229,12 @@ describe('AppRoutes navigation shell', () => {
 
   it('returns from Android setup through intent and dashboard before exiting', async () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.32/',
+      name: 'Grzejnik',
+      baseUrl: 'http://192.168.0.32/',
+      scriptIdInput: '1'
+    });
     const view = renderRoutes();
     await waitFor(() =>
       expect(nativeAppMocks.addListener).toHaveBeenCalledWith(
@@ -220,7 +243,8 @@ describe('AppRoutes navigation shell', () => {
       )
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    const card = screen.getByText('Grzejnik').closest('article');
+    fireEvent.click((card as HTMLElement).querySelector('button') as HTMLButtonElement);
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
 

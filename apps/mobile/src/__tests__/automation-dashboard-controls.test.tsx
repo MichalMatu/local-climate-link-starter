@@ -78,6 +78,7 @@ describe('AutomationDashboardScreen controls', () => {
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AutomationDashboardScreen
+            onAddPlug={vi.fn()}
             onAddAutomation={vi.fn()}
             onOpenInstallation={vi.fn()}
           />

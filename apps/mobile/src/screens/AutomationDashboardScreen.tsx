@@ -312,6 +312,7 @@ const PlainPlugCard = ({
 
 type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
+  onAddPlug(): void;
   onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
   onOpenSettings?: () => void;
@@ -319,6 +320,7 @@ type AutomationDashboardScreenProps = {
 
 export const AutomationDashboardScreen = ({
   initialKind,
+  onAddPlug,
   onAddAutomation,
   onOpenInstallation,
   onOpenSettings
@@ -381,6 +383,8 @@ export const AutomationDashboardScreen = ({
   );
   const hasPlugEntries =
     plugEntries.length > 0 || unmatchedClimateInstallations.length > 0;
+  const fabLabel =
+    activeKind === 'climate' ? t('hardware.shelly.add') : t('dashboard.addAutomation');
 
   return (
     <main className="demo-shell dashboard-shell app-bottom-nav-shell">
@@ -442,9 +446,15 @@ export const AutomationDashboardScreen = ({
       <button
         className="dashboard-fab"
         type="button"
-        aria-label={t('dashboard.addAutomation')}
-        title={t('dashboard.addAutomation')}
-        onClick={() => onAddAutomation(activeKind)}
+        aria-label={fabLabel}
+        title={fabLabel}
+        onClick={() => {
+          if (activeKind === 'climate') {
+            onAddPlug();
+            return;
+          }
+          onAddAutomation(activeKind);
+        }}
       >
         <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
       </button>
