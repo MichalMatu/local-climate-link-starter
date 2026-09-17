@@ -196,6 +196,7 @@ export type ScanShellySetupUrlsOptions = {
   concurrency?: number;
   signal?: AbortSignal;
   stopAfterFirst?: boolean;
+  onResult?: (result: ShellySetupScanResult) => void;
 };
 
 export type ShellyBleDiscoveryPreparation = {
@@ -448,7 +449,8 @@ export const scanShellySetupUrls = async ({
   baseUrls,
   concurrency = SHELLY_SETUP_SCAN_CONCURRENCY,
   signal,
-  stopAfterFirst = true
+  stopAfterFirst = true,
+  onResult
 }: ScanShellySetupUrlsOptions): Promise<ShellySetupScanOutcome> => {
   const workerCount = Math.min(Math.max(1, Math.trunc(concurrency)), baseUrls.length);
   const foundController = new AbortController();
@@ -472,10 +474,9 @@ export const scanShellySetupUrls = async ({
       }
 
       try {
-        found.push({
-          index,
-          result: await readShellySetupScanResult(baseUrl, requestSignal)
-        });
+        const result = await readShellySetupScanResult(baseUrl, requestSignal);
+        found.push({ index, result });
+        onResult?.(result);
         if (stopAfterFirst) {
           foundController.abort();
           break;

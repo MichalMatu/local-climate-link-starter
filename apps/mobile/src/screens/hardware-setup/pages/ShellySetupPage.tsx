@@ -101,7 +101,7 @@ export const ShellySetupPage = ({
     locale,
     t
   );
-  const scanResults = flow.shellyScanMutation.data?.results ?? [];
+  const scanResults = flow.shellyScanResults;
   const shellyControlStates = flow.shellyControlStates;
   const shellyDevices = flow.shellyDevices;
   const isScanStopped =

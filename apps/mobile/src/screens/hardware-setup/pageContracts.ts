@@ -32,6 +32,7 @@ export type ShellySetupFlow = Pick<
   | 'shellyNameInput'
   | 'shellyScanEndInput'
   | 'shellyScanMutation'
+  | 'shellyScanResults'
   | 'shellyScanStartInput'
   | 'shellyScanStopped'
   | 'shellyUrlInput'
