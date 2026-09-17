@@ -4,6 +4,7 @@ import {
   IconAlertTriangle,
   IconClock,
   IconDotsVertical,
+  IconPlug,
   IconPlus,
   IconTemperature
 } from '@tabler/icons-react';
@@ -26,6 +27,10 @@ import {
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import {
+  useHardwareSetupDraftStore,
+  type ShellyDraftDevice
+} from '../flows/hardware-setup/setupDraftStore.js';
 import {
   useInstalledAutomationActions,
   useInstalledAutomationControl,
@@ -260,9 +265,39 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
     <ClimateAutomationCard installation={installation} onOpen={onOpen} />
   );
 
+const PlainPlugCard = ({
+  device,
+  onAddAutomation
+}: {
+  device: ShellyDraftDevice;
+  onAddAutomation(): void;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <article className="automation-card plug-card plug-card--unconfigured">
+      <header className="automation-card__header">
+        <span className="automation-card__leading-icon" aria-hidden="true">
+          <IconPlug className="automation-card__icon" />
+        </span>
+        <div className="automation-card__identity">
+          <h2>{device.name}</h2>
+          <p>{t('dashboard.emptyCategory')}</p>
+        </div>
+      </header>
+      <button
+        className="primary-action plug-card__automation-action"
+        type="button"
+        onClick={onAddAutomation}
+      >
+        {t('dashboard.addAutomation')}
+      </button>
+    </article>
+  );
+};
+
 type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
-  onAddAutomation(kind: AppNavigationKind): void;
+  onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
   onOpenSettings?: () => void;
 };
@@ -275,8 +310,13 @@ export const AutomationDashboardScreen = ({
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
+  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
   const queryClient = useQueryClient();
-  const hasClimate = installations.some((installation) => installation.kind !== 'time');
+  const climateInstallations = installations.filter(
+    (installation): installation is ClimateInstalledAutomation =>
+      installation.kind !== 'time'
+  );
+  const hasClimate = shellyDevices.length > 0 || climateInstallations.length > 0;
   const hasTime = installations.some((installation) => installation.kind === 'time');
   const [activeKind, setActiveKind] = useState<AppNavigationKind>(
     () => initialKind ?? (hasTime && !hasClimate ? 'time' : 'climate')
@@ -308,32 +348,77 @@ export const AutomationDashboardScreen = ({
   const visibleInstallations = installations.filter((installation) =>
     activeKind === 'time' ? installation.kind === 'time' : installation.kind !== 'time'
   );
+  const normalizedBaseUrl = (value: string) =>
+    value.trim().replace(/\/+$/, '').toLowerCase();
+  const matchedClimateInstallationIds = new Set<string>();
+  const plugEntries = shellyDevices.map((device) => {
+    const installation =
+      climateInstallations.find(
+        (candidate) =>
+          normalizedBaseUrl(candidate.shelly.baseUrl) ===
+          normalizedBaseUrl(device.baseUrl)
+      ) ?? null;
+    if (installation) matchedClimateInstallationIds.add(installation.id);
+    return { device, installation };
+  });
+  const unmatchedClimateInstallations = climateInstallations.filter(
+    (installation) => !matchedClimateInstallationIds.has(installation.id)
+  );
+  const hasPlugEntries =
+    plugEntries.length > 0 || unmatchedClimateInstallations.length > 0;
 
   return (
     <main className="demo-shell dashboard-shell app-bottom-nav-shell">
       <header className="demo-header dashboard-header app-page-header">
-        <h1>{t('dashboard.title')}</h1>
+        <h1>
+          {activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.title')}
+        </h1>
       </header>
 
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
-        {visibleInstallations.length > 0 ? (
-          visibleInstallations.map((installation) => (
-            <AutomationCard
-              key={installation.id}
-              installation={installation}
-              onOpen={onOpenInstallation}
-            />
-          ))
+        {activeKind === 'time' ? (
+          visibleInstallations.length > 0 ? (
+            visibleInstallations.map((installation) => (
+              <AutomationCard
+                key={installation.id}
+                installation={installation}
+                onOpen={onOpenInstallation}
+              />
+            ))
+          ) : (
+            <div className="dashboard-kind-empty" role="status">
+              <IconClock className="dashboard-kind-empty__icon" aria-hidden="true" />
+              <strong>{t('dashboard.emptyCategory')}</strong>
+            </div>
+          )
+        ) : hasPlugEntries ? (
+          <>
+            {plugEntries.map(({ device, installation }) =>
+              installation ? (
+                <ClimateAutomationCard
+                  key={installation.id}
+                  installation={installation}
+                  onOpen={onOpenInstallation}
+                />
+              ) : (
+                <PlainPlugCard
+                  key={`plug:${device.id}`}
+                  device={device}
+                  onAddAutomation={() => onAddAutomation('climate', device.id)}
+                />
+              )
+            )}
+            {unmatchedClimateInstallations.map((installation) => (
+              <ClimateAutomationCard
+                key={installation.id}
+                installation={installation}
+                onOpen={onOpenInstallation}
+              />
+            ))}
+          </>
         ) : (
           <div className="dashboard-kind-empty" role="status">
-            {activeKind === 'time' ? (
-              <IconClock className="dashboard-kind-empty__icon" aria-hidden="true" />
-            ) : (
-              <IconTemperature
-                className="dashboard-kind-empty__icon"
-                aria-hidden="true"
-              />
-            )}
+            <IconPlug className="dashboard-kind-empty__icon" aria-hidden="true" />
             <strong>{t('dashboard.emptyCategory')}</strong>
           </div>
         )}

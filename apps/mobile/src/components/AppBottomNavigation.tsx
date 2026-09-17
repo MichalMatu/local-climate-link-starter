@@ -1,4 +1,4 @@
-import { IconClock, IconSettings, IconTemperature } from '@tabler/icons-react';
+import { IconClock, IconPlug, IconSettings } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
 import './AppBottomNavigation.css';
 
@@ -31,7 +31,7 @@ export const AppBottomNavigation = ({
         aria-current={activeKind === 'climate' ? 'page' : undefined}
         onClick={onOpenClimate}
       >
-        <IconTemperature
+        <IconPlug
           className="dashboard-nav__icon app-bottom-nav__icon"
           aria-hidden="true"
         />

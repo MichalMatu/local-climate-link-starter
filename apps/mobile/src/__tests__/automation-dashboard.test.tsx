@@ -1,5 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
@@ -12,6 +19,10 @@ import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
+import {
+  resetHardwareSetupDraftStore,
+  useHardwareSetupDraftStore
+} from '../flows/hardware-setup/setupDraftStore.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 
 const jsonResponse = (payload: unknown) =>
@@ -202,22 +213,42 @@ describe('AutomationDashboardScreen', () => {
   beforeEach(() => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
     vi.restoreAllMocks();
   });
 
   afterEach(() => {
     cleanup();
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
     vi.unstubAllGlobals();
   });
 
   it('does not duplicate the canonical zero-installation state', () => {
     const { onAddAutomation } = renderDashboard();
 
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.queryByText('Nie masz jeszcze zapisanej automatyki')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
     expect(onAddAutomation).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a saved plug without automation and starts setup with that plug context', () => {
+    const onAddAutomation = vi.fn();
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.30/',
+      name: 'Nawilżacz',
+      baseUrl: 'http://192.168.0.30/',
+      scriptIdInput: '1'
+    });
+    renderDashboard(onAddAutomation);
+    const card = screen.getByText('Nawilżacz').closest('article');
+    expect(card).not.toBeNull();
+    expect(within(card as HTMLElement).getByText('Brak automatyzacji')).toBeVisible();
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
+    );
+    expect(onAddAutomation).toHaveBeenCalledWith('climate', 'http://192.168.0.30/');
   });
 
   it('shows live runtime values from Shelly for a saved installation', async () => {
@@ -236,7 +267,7 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
@@ -244,7 +275,7 @@ describe('AutomationDashboardScreen', () => {
     expect(timeNav).toBeEnabled();
     fireEvent.click(timeNav);
     expect(screen.getByText('Brak automatyzacji')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Klimat' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
     expect(
@@ -274,7 +305,7 @@ describe('AutomationDashboardScreen', () => {
       'aria-current',
       'page'
     );
-    const climateNav = screen.getByRole('button', { name: 'Klimat' });
+    const climateNav = screen.getByRole('button', { name: 'Gniazdka' });
     expect(climateNav).toBeEnabled();
     fireEvent.click(climateNav);
     expect(screen.getByText('Brak automatyzacji')).toBeVisible();

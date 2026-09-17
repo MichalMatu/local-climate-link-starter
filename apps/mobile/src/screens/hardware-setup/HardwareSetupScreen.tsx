@@ -50,8 +50,12 @@ const TIME_HARDWARE_TABS = [
 type PrimaryHardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
 type HardwareTabId = PrimaryHardwareTabId | 'diagnostics';
 
-const availableTabsForIntent = (setupIntent?: SetupIntent) =>
-  setupIntent === 'time' ? TIME_HARDWARE_TABS : CLIMATE_HARDWARE_TABS;
+const availableTabsForIntent = (setupIntent?: SetupIntent, fixedShellyId?: string) => {
+  if (setupIntent === 'time') return TIME_HARDWARE_TABS;
+  return fixedShellyId
+    ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id !== 'shelly')
+    : CLIMATE_HARDWARE_TABS;
+};
 
 const currentTabFromHash = (availableTabs: readonly { id: string }[]): HardwareTabId => {
   if (typeof window === 'undefined') {
@@ -64,7 +68,7 @@ const currentTabFromHash = (availableTabs: readonly { id: string }[]): HardwareT
   }
   return availableTabs.some((tab) => tab.id === hashValue)
     ? (hashValue as PrimaryHardwareTabId)
-    : 'shelly';
+    : ((availableTabs[0]?.id as PrimaryHardwareTabId | undefined) ?? 'shelly');
 };
 
 const setHashTab = (tabId: HardwareTabId) => {
@@ -84,6 +88,7 @@ type HardwareSetupScreenProps = {
   onNavigateDashboard?: (kind: AppNavigationKind) => void;
   onOpenSettings?: () => void;
   onSetupComplete?: () => void;
+  fixedShellyId?: string;
 };
 
 export const HardwareSetupScreen = ({
@@ -92,12 +97,16 @@ export const HardwareSetupScreen = ({
   onBackToIntent,
   onNavigateDashboard,
   onOpenSettings,
-  onSetupComplete
+  onSetupComplete,
+  fixedShellyId
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
-  const { rulePreset, setRulePreset } = flow;
-  const availableTabs = useMemo(() => availableTabsForIntent(setupIntent), [setupIntent]);
+  const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
+  const availableTabs = useMemo(
+    () => availableTabsForIntent(setupIntent, fixedShellyId),
+    [fixedShellyId, setupIntent]
+  );
   const activeNavigationKind =
     navigationKind ?? (setupIntent === 'time' ? 'time' : 'climate');
   const [activeTab, setActiveTab] = useState<HardwareTabId>(() =>
@@ -111,6 +120,11 @@ export const HardwareSetupScreen = ({
   const stopSavedSensorLiveScanRef = useRef<() => void>(() => undefined);
   cleanupBleDiscoveryRef.current = flow.cleanupBleDiscovery;
   stopSavedSensorLiveScanRef.current = flow.stopSavedSensorLiveScan;
+
+  useEffect(() => {
+    if (!fixedShellyId || selectedShellyId === fixedShellyId) return;
+    selectShellyDevice(fixedShellyId);
+  }, [fixedShellyId, selectShellyDevice, selectedShellyId]);
 
   useEffect(() => {
     if (!setupIntent) {
@@ -137,7 +151,7 @@ export const HardwareSetupScreen = ({
       return;
     }
     if (!availableTabs.some((tab) => tab.id === activeTab)) {
-      selectTab('shelly');
+      selectTab((availableTabs[0]?.id as PrimaryHardwareTabId | undefined) ?? 'shelly');
     }
   }, [activeTab, availableTabs, setupIntent]);
 
@@ -207,6 +221,7 @@ export const HardwareSetupScreen = ({
         <RuleSetupPage
           flow={flow}
           selectablePresets={selectableRulePresets}
+          showShellySelector={!fixedShellyId}
           onOpenDiagnostics={() => selectTab('diagnostics')}
         />
       )}

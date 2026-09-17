@@ -434,7 +434,7 @@ const expectClimateDetailHierarchy = async (page: Page) => {
     page.locator('.installation-detail-header .runtime-refresh-action')
   ).toHaveCount(0);
   await expect(page.locator('.app-bottom-nav')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
     'aria-current',
     'page'
   );

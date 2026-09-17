@@ -92,7 +92,7 @@ export const it = {
   },
   dashboard: {
     title: 'Le tue automazioni',
-    climateTab: 'Clima',
+    climateTab: 'Prese',
     timeTab: 'Tempo',
     settingsTab: 'Impostazioni',
     description: 'Guarda cosa vede e fa attualmente ogni Shelly.',

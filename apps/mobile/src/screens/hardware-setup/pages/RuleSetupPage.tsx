@@ -155,12 +155,14 @@ const formatRuleSummary = ({
 
 type RuleSetupPageProps = HardwarePageProps<RuleSetupFlow> & {
   selectablePresets?: readonly RulePresetId[];
+  showShellySelector?: boolean;
   onOpenDiagnostics?: () => void;
 };
 
 export const RuleSetupPage = ({
   flow,
   selectablePresets = ALL_RULE_PRESETS,
+  showShellySelector = true,
   onOpenDiagnostics
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
@@ -284,24 +286,26 @@ export const RuleSetupPage = ({
 
   return (
     <section className="demo-panel" aria-label={t('hardware.nav.ruleTitle')}>
-      <label className="field">
-        {t('hardware.rule.selectedShelly')}
-        <span className="select-control">
-          <select
-            value={flow.selectedShellyId ?? ''}
-            onChange={(event) => flow.selectShellyDevice(event.currentTarget.value)}
-          >
-            <option value="" disabled>
-              {t('hardware.rule.noShellySelected')}
-            </option>
-            {flow.shellyDevices.map((device) => (
-              <option key={device.id} value={device.id}>
-                {device.name}
+      {showShellySelector && (
+        <label className="field">
+          {t('hardware.rule.selectedShelly')}
+          <span className="select-control">
+            <select
+              value={flow.selectedShellyId ?? ''}
+              onChange={(event) => flow.selectShellyDevice(event.currentTarget.value)}
+            >
+              <option value="" disabled>
+                {t('hardware.rule.noShellySelected')}
               </option>
-            ))}
-          </select>
-        </span>
-      </label>
+              {flow.shellyDevices.map((device) => (
+                <option key={device.id} value={device.id}>
+                  {device.name}
+                </option>
+              ))}
+            </select>
+          </span>
+        </label>
+      )}
 
       <label className="field">
         {t('hardware.rule.selectedSensor')}

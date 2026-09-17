@@ -9,6 +9,10 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
+import {
+  resetHardwareSetupDraftStore,
+  useHardwareSetupDraftStore
+} from '../flows/hardware-setup/setupDraftStore.js';
 
 const nativeAppMocks = vi.hoisted(() => {
   let backListener: (() => void) | undefined;
@@ -66,15 +70,18 @@ vi.mock('../screens/InstallationDetailScreen.js', () => ({
 vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
   HardwareSetupScreen: ({
     setupIntent,
+    fixedShellyId,
     onBackToIntent,
     onSetupComplete
   }: {
     setupIntent?: SetupIntent;
+    fixedShellyId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
+      <p>{`mock-fixed-shelly-${fixedShellyId ?? 'none'}`}</p>
       <button type="button" onClick={onBackToIntent}>
         mock-back
       </button>
@@ -120,6 +127,7 @@ describe('AppRoutes navigation shell', () => {
   beforeEach(() => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
     nativeAppMocks.resetListener();
     nativeAppMocks.getPlatform.mockReturnValue('web');
     nativeAppMocks.addListener.mockClear();
@@ -134,9 +142,9 @@ describe('AppRoutes navigation shell', () => {
 
   it('uses the empty dashboard as the canonical zero-installation root', () => {
     renderRoutes();
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
@@ -155,6 +163,22 @@ describe('AppRoutes navigation shell', () => {
       screen.queryByRole('button', { name: /Zarządzać istniejącą automatyką/ })
     ).toBeNull();
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
+  });
+
+  it('starts climate setup from a saved plug with fixed Shelly context', async () => {
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.30/',
+      name: 'Nawilżacz',
+      baseUrl: 'http://192.168.0.30/',
+      scriptIdInput: '1'
+    });
+    renderRoutes();
+    const card = screen.getByText('Nawilżacz').closest('article');
+    expect(card).not.toBeNull();
+    fireEvent.click((card as HTMLElement).querySelector('button') as HTMLButtonElement);
+    fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
+    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
+    expect(screen.getByText('mock-fixed-shelly-http://192.168.0.30/')).toBeVisible();
   });
 
   it('opens time setup directly from the Time plus and returns to Time dashboard', async () => {
@@ -203,7 +227,7 @@ describe('AppRoutes navigation shell', () => {
     act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     act(() => nativeAppMocks.fireBack());
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
     act(() => nativeAppMocks.fireBack());
     await waitFor(() => expect(nativeAppMocks.exitApp).toHaveBeenCalledTimes(1));
 
@@ -217,8 +241,8 @@ describe('AppRoutes navigation shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
-    expect(screen.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Klimat' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );

@@ -8,6 +8,7 @@ import {
   type AppNavigationKind
 } from '../components/AppBottomNavigation.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
@@ -21,8 +22,13 @@ const HardwareSetupScreen = lazy(async () => {
 type SetupRouteIntent = SetupIntent;
 type PrimaryAppRoute =
   | { type: 'dashboard'; kind?: AppNavigationKind }
-  | { type: 'intent'; sourceKind: AppNavigationKind }
-  | { type: 'setup'; intent: SetupRouteIntent; sourceKind: AppNavigationKind }
+  | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
+  | {
+      type: 'setup';
+      intent: SetupRouteIntent;
+      sourceKind: AppNavigationKind;
+      shellyId?: string;
+    }
   | { type: 'installation'; installationId: string; kind: AppNavigationKind };
 type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
@@ -66,7 +72,11 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'setup') {
     return route.intent === 'time'
       ? { type: 'dashboard', kind: 'time' }
-      : { type: 'intent', sourceKind: route.sourceKind };
+      : {
+          type: 'intent',
+          sourceKind: route.sourceKind,
+          ...(route.shellyId ? { shellyId: route.shellyId } : {})
+        };
   }
   if (route.type === 'intent') {
     return { type: 'dashboard', kind: route.sourceKind };
@@ -79,6 +89,9 @@ const setupKindForIntent = (intent: SetupRouteIntent): AppNavigationKind =>
 
 export const AppRoutes = () => {
   const installations = useInstalledAutomationStore((state) => state.installations);
+  const selectShellyDevice = useHardwareSetupDraftStore(
+    (state) => state.selectShellyDevice
+  );
   const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
   const routeRef = useRef(route);
   const navigate = useCallback((nextRoute: AppRoute) => {
@@ -124,9 +137,15 @@ export const AppRoutes = () => {
     };
   }, [navigate]);
 
-  const selectIntent = (intent: SetupIntent) => {
+  const selectIntent = (intent: SetupIntent, shellyId?: string) => {
     const nextKind = setupKindForIntent(intent);
-    navigate({ type: 'setup', intent, sourceKind: nextKind });
+    if (shellyId) selectShellyDevice(shellyId);
+    navigate({
+      type: 'setup',
+      intent,
+      sourceKind: nextKind,
+      ...(shellyId ? { shellyId } : {})
+    });
   };
 
   if (route.type === 'settings') {
@@ -146,7 +165,7 @@ export const AppRoutes = () => {
         onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
         onOpenSettings={openSettings}
-        onSelect={selectIntent}
+        onSelect={(intent) => selectIntent(intent, route.shellyId)}
       />
     );
   }
@@ -155,11 +174,18 @@ export const AppRoutes = () => {
     return (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
-        onAddAutomation={(kind) =>
-          kind === 'time'
-            ? navigate({ type: 'setup', intent: 'time', sourceKind: 'time' })
-            : navigate({ type: 'intent', sourceKind: 'climate' })
-        }
+        onAddAutomation={(kind, shellyId) => {
+          if (shellyId) selectShellyDevice(shellyId);
+          if (kind === 'time') {
+            navigate({ type: 'setup', intent: 'time', sourceKind: 'time' });
+            return;
+          }
+          navigate({
+            type: 'intent',
+            sourceKind: 'climate',
+            ...(shellyId ? { shellyId } : {})
+          });
+        }}
         onOpenInstallation={(installationId) => {
           const installation = installations.find(
             (candidate) => candidate.id === installationId
@@ -200,11 +226,16 @@ export const AppRoutes = () => {
       <HardwareSetupScreen
         navigationKind={route.sourceKind}
         setupIntent={route.intent}
+        {...(route.shellyId ? { fixedShellyId: route.shellyId } : {})}
         onBackToIntent={() =>
           navigate(
             route.intent === 'time'
               ? { type: 'dashboard', kind: 'time' }
-              : { type: 'intent', sourceKind: route.sourceKind }
+              : {
+                  type: 'intent',
+                  sourceKind: route.sourceKind,
+                  ...(route.shellyId ? { shellyId: route.shellyId } : {})
+                }
           )
         }
         onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}

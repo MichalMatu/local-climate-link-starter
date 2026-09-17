@@ -90,7 +90,7 @@ export const pl = {
   },
   dashboard: {
     title: 'Twoje automatyki',
-    climateTab: 'Klimat',
+    climateTab: 'Gniazdka',
     timeTab: 'Czas',
     settingsTab: 'Ustawienia',
     description: 'Podgląd tego, co aktualnie widzi i robi każde Shelly.',
