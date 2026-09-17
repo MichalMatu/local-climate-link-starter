@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "re-audit-workspace-state-20260917-1807",
   "task_digest": "9a45e38d1a6de289f906a31f4be08d2fd8cc054771c2939917ef0769d3665c22",
-  "idle_timeout": 300,
-  "task_timeout": 300,
-  "memory_limit_mb": 1024,
-  "started_at": "2026-09-17T16:06:49.867098+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-17T16:06:53.194307+00:00",
   "attempt_id": "bf513c6de01297b85e872292",
   "daemon_version": "4.18.22",
   "daemon_pid": 78281,
-  "updated_at": "2026-09-17T16:06:49.869939+00:00",
+  "updated_at": "2026-09-17T16:06:53.630908+00:00",
   "pid": 78281
 }
