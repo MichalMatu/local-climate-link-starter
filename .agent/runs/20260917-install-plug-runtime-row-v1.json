@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-plug-runtime-row-v1",
+  "task_digest": "32990396edaaff0872bf8256ac6af15d926c489818756d9f68666317545d76c1",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T10:04:49.121203+00:00",
+  "attempt_id": "2cd99fa84e6f3ff16ce83efa",
+  "daemon_version": "4.18.20",
+  "daemon_pid": 95287,
+  "updated_at": "2026-09-17T10:04:49.121356+00:00",
+  "pid": 95287
+}
