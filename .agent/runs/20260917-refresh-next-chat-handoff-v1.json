@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-refresh-next-chat-handoff-v1",
+  "task_digest": "fce59d765394b138a82be90f00b715da83afd126231c028ef3692411936bc563",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T15:54:49.311710+00:00",
+  "attempt_id": "4a11f3de7157b2f78d6bb935",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 62563,
+  "updated_at": "2026-09-17T15:54:49.311774+00:00",
+  "pid": 62563
+}
