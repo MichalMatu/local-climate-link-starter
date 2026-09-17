@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-compact-plug-details-final-v4",
+  "task_digest": "282e44e136345a03ccf3275bea7f32e4fba0df8804a3c41ea57bf48e71485bab",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T14:55:17.180584+00:00",
+  "attempt_id": "252529669de03018261d31a9",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 95594,
+  "updated_at": "2026-09-17T14:55:17.183310+00:00",
+  "pid": 95594
+}
