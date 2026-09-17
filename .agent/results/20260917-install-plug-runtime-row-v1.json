@@ -1,0 +1,61 @@
+{
+  "id": "20260917-install-plug-runtime-row-v1",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "started_at": "2026-09-17T10:04:49.121287+00:00",
+  "command_timeout": 2400,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"2a05bc9bbed67adbb9d48b12c7a070d5cca4e639\"; pnpm --filter @lcl/mobile build >/dev/null; pnpm --filter @lcl/mobile exec cap sync android >/dev/null; (cd apps/mobile/android && ./gradlew assembleDebug >/dev/null); ADB=/opt/homebrew/bin/adb; ENDPOINT=\"$(\"$ADB\" mdns services | awk '/adb-RFCT70L7E8J/ && /_adb-tls-connect\\._tcp/ {print $3; exit}')\"; test -n \"$ENDPOINT\"; \"$ADB\" connect \"$ENDPOINT\" >/dev/null; APK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; test -f \"$APK\"; echo ADB_ENDPOINT=$ENDPOINT; \"$ADB\" -s \"$ENDPOINT\" install -r \"$APK\"; \"$ADB\" -s \"$ENDPOINT\" shell am force-stop link.localclimate.app; \"$ADB\" -s \"$ENDPOINT\" shell am start -n link.localclimate.app/.MainActivity >/dev/null; sleep 2; \"$ADB\" -s \"$ENDPOINT\" shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=|lastUpdateTime=' | head -10 | tr -d '\\r'; echo PID=$(\"$ADB\" -s \"$ENDPOINT\" shell pidof link.localclimate.app | tr -d '\\r'); git status --short",
+      "exit_code": 1,
+      "output": "Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.\n* daemon not running; starting now at tcp:5037\n* daemon started successfully\nADB_ENDPOINT=192.168.0.100:46727\nadb: device '192.168.0.100:46727' not found\n",
+      "elapsed_seconds": 23.652,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 788.69,
+      "output_policy": "stream",
+      "captured_output_chars": 404,
+      "output_truncated": false,
+      "current_rss_mb": 12.23,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 23.652
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.135
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.078
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-17T10:05:14.797213+00:00",
+  "task_digest": "32990396edaaff0872bf8256ac6af15d926c489818756d9f68666317545d76c1",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "2cd99fa84e6f3ff16ce83efa",
+  "daemon_version": "4.18.20"
+}
