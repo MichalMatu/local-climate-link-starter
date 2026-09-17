@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-shelly-ble-poll-recovery-phone-v44",
+  "task_digest": "68ca25cb319d6617570d050dbf600d06092d9472dc5f5fd96425408133e1f355",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T23:09:11.616247+00:00",
+  "attempt_id": "471c90ef3cf71f0fc68181b7",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 35764,
+  "updated_at": "2026-09-17T23:09:11.616312+00:00",
+  "pid": 35764
+}
