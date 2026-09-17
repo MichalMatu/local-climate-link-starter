@@ -35,29 +35,48 @@ c67ac66c10e076e4b5d798e11bf117eefca49ea3
 Tighten hardware setup boundaries
 ```
 
-Documentation then advanced the work branch to:
+Documentation later advanced the work branch to:
 
 ```text
-c0fa5496a9ec64aa2b4bfb5634f8d42061096d84
-Refresh UX backlog after cleanup
+0463af650bd647ebe300b7ec161323fda58e7520
+Record prepared Android alpha build
 ```
 
-No product code changed between `c67ac66c...` and `c0fa5496...`.
+No product code changed after `c67ac66c...` before the physical Android QA. The alpha installed on the phone therefore contains the product code from `c67ac66c...` plus documentation-only commits.
 
-The last build physically installed on the Samsung S22+ is still the older checkpoint:
+## Android alpha build and physical S22+ QA
+
+The current cleanup checkpoint has now been rebuilt, installed and smoke-tested on the reference Samsung phone through the existing repo workflow.
+
+Reference device:
 
 ```text
-19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac
-Compact thermometer card details
+manufacturer: samsung
+model: SM-S906B
+Android: 16
+SDK/API: 36
+package: link.localclimate.app
+versionName: 2.0.10
+versionCode: 20010
 ```
 
-The phone was unavailable after the cleanup, so current code has **not yet** been installed or physically smoke-tested on the S22+. Do not claim physical QA until that is done.
+The clean install/cold-start path used `pnpm android:phone-alpha` on exact branch HEAD `0463af650bd647ebe300b7ec161323fda58e7520`.
 
-## Prepared Android alpha artifact
+Physical QA evidence:
 
-Local Agent task `20260917-post-cleanup-android-build-v20` completed successfully without using ADB or requiring the phone.
+- `20260917-phone-alpha-smoke-v22` rebuilt, signed, clean-installed and cold-started the alpha app;
+- `20260917-phone-focused-smoke-v23` confirmed `link.localclimate.app/.MainActivity` as the focused and top-resumed activity after a clean start;
+- the app WebView was present and focused in the application window;
+- package metadata matched `2.0.10` / `20010`;
+- filtered `adb logcat` showed no app `FATAL EXCEPTION` and no ANR;
+- `20260917-phone-webview-probe-v24` confirmed one live WebView DevTools target with title `Local Climate Link`, URL `https://localhost/` and an available debugger WebSocket;
+- the repo remained clean after each device task and still resolved to exact tested HEAD `0463af650...`.
 
-The artifact was built from exact branch HEAD `c0fa5496...` using the normal mobile build, Capacitor sync and Gradle `assembleDebug` path.
+This is launch/runtime smoke evidence, not a claim that every product screen and BLE workflow was manually exercised end-to-end. Future feature changes should still get focused physical checks for the affected interaction.
+
+### Prepared artifact before phone return
+
+Before the phone was available, `20260917-post-cleanup-android-build-v20` had already produced a valid alpha APK from `c0fa5496...`:
 
 ```text
 APK: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
@@ -66,9 +85,7 @@ APK SHA-256: cbee2239905cd46b3f989ffbcb262f9dfcf8282a32ab64f7884d46950ae935b7
 alpha signer SHA-256: 2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76
 ```
 
-The APK signer exactly matched the existing alpha keystore fingerprint. The build left no tracked repository changes. Four updated documentation files also passed Prettier verification before the Android build.
-
-When the phone returns, rebuild/install through the existing `pnpm android:phone-alpha` workflow rather than treating the local APK path as a permanent release artifact; that script intentionally performs the established clean alpha install and cold-start verification.
+The phone QA later used the normal rebuild/install workflow rather than treating that earlier local artifact as a permanent release binary.
 
 ## Product model — keep stable
 
@@ -153,7 +170,7 @@ The repository already has:
 - `packages/diagnostics` for bounded structured diagnostics/redaction/support export,
 - `apps/mobile/src/app/runtimeDiagnostics.ts` for browser/WebView runtime errors and unhandled rejections.
 
-If physical `adb logcat` later shows missing evidence, add only small structured events through these existing boundaries. Do not add noisy `console.log` instrumentation or log raw secrets, MACs/IPs unnecessarily.
+The physical launch/logcat QA did not reveal a concrete observability gap that justifies another logging layer. If a future device flow lacks evidence, add only small structured events through the existing diagnostics boundaries. Do not add noisy `console.log` instrumentation or log raw secrets, MACs/IPs unnecessarily.
 
 ## Nearest next UX slice
 
@@ -167,19 +184,6 @@ The next agreed small UX task remains the thermometer card header:
 
 The new saved-sensor presentation boundary created by `c67ac66c...` is the correct place for this behavior.
 
-## Physical S22+ QA still pending
-
-When the phone is available again:
-
-1. verify the exact target with ADB,
-2. run the existing alpha install workflow on the current branch,
-3. launch and smoke-test Plugs, Thermometers, Settings, Plug settings and BLE-related entry points,
-4. clear/capture `adb logcat` around launch and navigation,
-5. inspect AndroidRuntime/Capacitor/WebView/JS errors and ANRs,
-6. record the installed SHA and result in docs.
-
-Prefer the existing repo Android/ADB scripts and `docs/development/android-device-adb.md`; do not invent a parallel install workflow.
-
 ## Process guardrails
 
 - continue on `work/plug-screen-automation-entry-20260917`,
@@ -188,4 +192,5 @@ Prefer the existing repo Android/ADB scripts and `docs/development/android-devic
 - never edit the same work branch while a Local Agent task is active,
 - keep changes small and behavior-oriented,
 - preserve `InstalledAutomation` ownership and runtime safety,
-- do not raise architecture budgets to hide responsibility growth.
+- do not raise architecture budgets to hide responsibility growth,
+- use the established Android/ADB workflow in `docs/development/android-device-adb.md` for future physical checks.
