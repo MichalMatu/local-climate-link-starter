@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.22",
   "state": "idle",
-  "pid": 83638,
-  "updated_at": "2026-09-17T13:15:36.127195+00:00",
+  "pid": 85324,
+  "updated_at": "2026-09-17T13:16:50.047630+00:00",
   "self_revision": "224046066b0df92544337db0ee623e372629e726",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 83638,
-  "supervisor_pid": 36461,
-  "last_task_id": "20260917-install-plain-plug-settings-v1",
+  "worker_pid": 85324,
+  "supervisor_pid": 85082,
   "execution_variant": "parallel"
 }
