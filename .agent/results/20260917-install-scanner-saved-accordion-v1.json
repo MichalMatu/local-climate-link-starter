@@ -1,0 +1,60 @@
+{
+  "id": "20260917-install-scanner-saved-accordion-v1",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "started_at": "2026-09-17T12:07:09.106270+00:00",
+  "command_timeout": 2400,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; EXPECTED=88702785572db128364065185ebee691695686ee; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; pnpm --filter @lcl/mobile build >/dev/null; pnpm --filter @lcl/mobile exec cap sync android >/dev/null; (cd apps/mobile/android && ./gradlew assembleDebug >/dev/null); APK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; ADB=/opt/homebrew/bin/adb; \"$ADB\" start-server >/dev/null; SERIAL=''; TRANSPORT=''; for i in 1 2 3 4 5; do ENDPOINT=\"$(\"$ADB\" mdns services 2>/dev/null | awk '/adb-RFCT70L7E8J/ && /_adb-tls-connect\\._tcp/ {print $3; exit}')\"; if [ -n \"$ENDPOINT\" ]; then \"$ADB\" connect \"$ENDPOINT\" >/dev/null 2>&1 || true; sleep 1; if \"$ADB\" devices -l | grep -F \"$ENDPOINT\" | grep -q ' device '; then SERIAL=\"$ENDPOINT\"; TRANSPORT='WIFI'; break; fi; fi; sleep 1; done; if [ -z \"$SERIAL\" ] && [ \"$(\"$ADB\" -s RFCT70L7E8J get-state 2>/dev/null || true)\" = device ]; then SERIAL=RFCT70L7E8J; TRANSPORT='USB'; fi; test -n \"$SERIAL\"; echo ADB_TRANSPORT=$TRANSPORT; echo ADB_SERIAL=$SERIAL; \"$ADB\" -s \"$SERIAL\" install -r \"$APK\"; \"$ADB\" -s \"$SERIAL\" shell am force-stop link.localclimate.app; \"$ADB\" -s \"$SERIAL\" shell am start -n link.localclimate.app/.MainActivity >/dev/null; echo INSTALLED_HEAD=$EXPECTED",
+      "exit_code": 0,
+      "output": "* daemon not running; starting now at tcp:5037\n* daemon started successfully\nADB_TRANSPORT=USB\nADB_SERIAL=RFCT70L7E8J\nPerforming Streamed Install\nSuccess\nINSTALLED_HEAD=88702785572db128364065185ebee691695686ee\n",
+      "elapsed_seconds": 24.026,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 591.08,
+      "output_policy": "stream",
+      "captured_output_chars": 210,
+      "output_truncated": false,
+      "current_rss_mb": 2.75,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 24.026
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.371
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.078
+  },
+  "finished_at": "2026-09-17T12:07:35.088391+00:00",
+  "task_digest": "5788d2945e53b8bb8021c6e481302099ba10bb443f4ec151ea40c5e41df1be6c",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "a297e3fefd23a861c77ccc12",
+  "daemon_version": "4.18.22"
+}
