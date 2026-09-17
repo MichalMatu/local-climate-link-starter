@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.20",
   "state": "idle",
-  "pid": 95287,
-  "updated_at": "2026-09-17T10:05:31.067077+00:00",
+  "pid": 97289,
+  "updated_at": "2026-09-17T10:06:41.082940+00:00",
   "self_revision": "d2c23951456d1e1528e3c52e47bdd104294cf170",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 95287,
-  "supervisor_pid": 64224,
-  "last_task_id": "20260917-install-plug-runtime-row-v1",
+  "worker_pid": 97289,
+  "supervisor_pid": 97046,
   "execution_variant": "parallel"
 }
