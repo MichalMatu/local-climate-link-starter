@@ -75,6 +75,9 @@ export const useHardwareSetupFlow = () => {
   const setShellyDeviceName = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceName
   );
+  const setShellyDeviceMetadata = useHardwareSetupDraftStore(
+    (state) => state.setShellyDeviceMetadata
+  );
   const setShellyScriptIdDraft = useHardwareSetupDraftStore(
     (state) => state.setShellyScriptId
   );
@@ -328,7 +331,9 @@ export const useHardwareSetupFlow = () => {
           id: baseUrl,
           name,
           baseUrl,
-          scriptIdInput: existingScript ? String(existingScript.id) : '1'
+          scriptIdInput: existingScript ? String(existingScript.id) : '1',
+          model: status.deviceInfo.model,
+          gen: status.deviceInfo.gen
         }
       };
     },
@@ -351,6 +356,10 @@ export const useHardwareSetupFlow = () => {
       readShellySetupStatus(device.baseUrl),
     onSuccess: (status, device) => {
       setSetupStatus(status);
+      setShellyDeviceMetadata(device.id, {
+        model: status.deviceInfo.model,
+        gen: status.deviceInfo.gen
+      });
       applyControlStatus(device, shellyControlStatusFromSetupStatus(status), null);
     },
     onError: () => {

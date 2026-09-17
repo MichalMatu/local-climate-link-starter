@@ -21,8 +21,10 @@ export const ShellyCard = ({
   <article className="lcl-compact-device">
     <div className="lcl-compact-device__header">
       <strong>{name}</strong>
-      <span>{model}</span>
-      <StatusBadge tone={badgeTone}>{badgeLabel}</StatusBadge>
+      <div className="lcl-compact-device__meta">
+        <span>{model}</span>
+        <StatusBadge tone={badgeTone}>{badgeLabel}</StatusBadge>
+      </div>
     </div>
     <dl className="lcl-compact-rows">
       {rows.map((row) => (

@@ -22,7 +22,9 @@ const shellyDraftDeviceSchema = z.object({
   id: z.string(),
   name: z.string(),
   baseUrl: z.string(),
-  scriptIdInput: z.string()
+  scriptIdInput: z.string(),
+  model: z.string().optional(),
+  gen: z.number().int().nonnegative().optional()
 });
 
 const sensorDraftDeviceSchema = z.object({
@@ -81,6 +83,7 @@ type HardwareSetupDraftState = HardwareSetupDraft & {
   upsertShellyDevice(device: ShellyDraftDevice): void;
   selectShellyDevice(id: string): void;
   setShellyDeviceName(id: string, name: string): void;
+  setShellyDeviceMetadata(id: string, metadata: { model: string; gen: number }): void;
   setShellyScriptId(id: string, scriptIdInput: string): void;
   removeShellyDevice(id: string): void;
   setDiagnosticShellyId(id: string): void;
@@ -228,6 +231,11 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setShellyDeviceName: (id, name) =>
       set((state) => {
         const shellyDevices = updateListItem(state.shellyDevices, id, { name });
+        return persistPatch(state, { shellyDevices });
+      }),
+    setShellyDeviceMetadata: (id, metadata) =>
+      set((state) => {
+        const shellyDevices = updateListItem(state.shellyDevices, id, metadata);
         return persistPatch(state, { shellyDevices });
       }),
     setShellyScriptId: (id, scriptIdInput) =>

@@ -552,9 +552,6 @@ export const ShellySetupPage = ({
       >
         {infoShelly && (
           <div className="settings-modal-layout">
-            {flow.recheckShellyMutation.isPending && (
-              <p>{t('hardware.shelly.localRpcConnecting')}</p>
-            )}
             {flow.recheckShellyMutation.isError && (
               <FeedbackPanel
                 tone="warning"
@@ -616,32 +613,38 @@ export const ShellySetupPage = ({
                 )}
               />
             </div>
-            {!flow.recheckShellyMutation.isPending &&
-              !flow.recheckShellyMutation.isError &&
-              flow.setupStatus && (
-                <ShellyCard
-                  name={infoShelly.name}
-                  model={`${flow.setupStatus.deviceInfo.model}, gen ${flow.setupStatus.deviceInfo.gen}`}
-                  badgeLabel={compatibilityBadge.label}
-                  badgeTone={compatibilityBadge.tone}
-                  rows={[
-                    {
-                      label: 'Scripts',
-                      value: formatComponentState(flow.setupStatus.status.scripts, t)
-                    },
-                    {
-                      label: 'Bluetooth',
-                      value: formatComponentState(flow.setupStatus.status.bluetooth, t)
-                    },
-                    {
-                      label: t('hardware.shelly.matter'),
-                      value: flow.setupStatus.status.matterEnabled
-                        ? t('common.enabled')
-                        : t('common.disabled')
-                    }
-                  ]}
-                />
-              )}
+            <ShellyCard
+              name={infoShelly.name}
+              model={
+                (flow.setupStatus?.deviceInfo.model ?? infoShelly.model)
+                  ? `${flow.setupStatus?.deviceInfo.model ?? infoShelly.model}, gen ${flow.setupStatus?.deviceInfo.gen ?? infoShelly.gen ?? '?'}`
+                  : t('common.missingData')
+              }
+              badgeLabel={compatibilityBadge.label}
+              badgeTone={compatibilityBadge.tone}
+              rows={[
+                {
+                  label: 'Scripts',
+                  value: flow.setupStatus
+                    ? formatComponentState(flow.setupStatus.status.scripts, t)
+                    : t('common.missingData')
+                },
+                {
+                  label: 'Bluetooth',
+                  value: flow.setupStatus
+                    ? formatComponentState(flow.setupStatus.status.bluetooth, t)
+                    : t('common.missingData')
+                },
+                {
+                  label: t('hardware.shelly.matter'),
+                  value: flow.setupStatus
+                    ? flow.setupStatus.status.matterEnabled
+                      ? t('common.enabled')
+                      : t('common.disabled')
+                    : t('common.missingData')
+                }
+              ]}
+            />
             <div className="action-row">
               {enableBleDiscovery && (
                 <button

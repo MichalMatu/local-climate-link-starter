@@ -293,15 +293,34 @@ describe('AutomationDashboardScreen', () => {
     expect(card).not.toBeNull();
     const plugCard = card as HTMLElement;
     expect(within(plugCard).getByText('Brak automatyzacji')).toBeVisible();
+    fireEvent.click(within(plugCard).getByRole('button', { name: 'Nazwa gniazdka' }));
+    const nameInput = within(plugCard).getByRole('textbox', { name: 'Nazwa gniazdka' });
+    fireEvent.change(nameInput, { target: { value: 'Nawilżacz salon' } });
+    fireEvent.blur(nameInput);
+    expect(within(plugCard).getByText('Nawilżacz salon')).toBeVisible();
+    expect(useHardwareSetupDraftStore.getState().shellyDevices[0]?.name).toBe(
+      'Nawilżacz salon'
+    );
     expect(await within(plugCard).findByText('0.0 W')).toBeVisible();
     expect(within(plugCard).getByText('243 V')).toBeVisible();
     expect(within(plugCard).getByText('25.16 kWh')).toBeVisible();
     expect(within(plugCard).getByText('09:48')).toBeVisible();
 
     fireEvent.click(
-      within(plugCard).getByRole('button', { name: 'Ustawienia gniazdka: Nawilżacz' })
+      within(plugCard).getByRole('button', {
+        name: 'Ustawienia gniazdka: Nawilżacz salon'
+      })
     );
-    const settingsDialog = await screen.findByRole('dialog', { name: 'Nawilżacz' });
+    const settingsDialog = screen.getByRole('dialog', { name: 'Nawilżacz salon' });
+    expect(settingsDialog.querySelector('.lcl-compact-device')).not.toBeNull();
+    expect(await within(settingsDialog).findByText('S3PL-00112EU, gen 3')).toBeVisible();
+    expect(within(settingsDialog).getByText('zgodne')).toBeVisible();
+    await waitFor(() =>
+      expect(useHardwareSetupDraftStore.getState().shellyDevices[0]).toMatchObject({
+        model: 'S3PL-00112EU',
+        gen: 3
+      })
+    );
     expect(
       within(settingsDialog).getByRole('button', {
         name: 'Skanuj termometry BLE przez to gniazdko'

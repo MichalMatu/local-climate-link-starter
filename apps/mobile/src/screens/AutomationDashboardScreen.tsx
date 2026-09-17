@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
   IconDotsVertical,
+  IconPencil,
   IconPlug,
   IconPlus,
   IconTemperature
@@ -308,13 +309,16 @@ const PlugSettingsOverlay = ({
 const PlainPlugCard = ({
   device,
   onAddAutomation,
-  onOpenSettings
+  onOpenSettings,
+  onNameChange
 }: {
   device: ShellyDraftDevice;
   onAddAutomation(): void;
   onOpenSettings(): void;
+  onNameChange(value: string): void;
 }) => {
   const { t } = useTranslation();
+  const [isEditingName, setIsEditingName] = useState(false);
   const { shellyControlStates, refreshShellyControl, turnRelayOn, turnRelayOff } =
     useShellyControlFlow();
   const controlState = shellyControlStates[device.id];
@@ -338,7 +342,35 @@ const PlainPlugCard = ({
           <IconPlug className="automation-card__icon" />
         </span>
         <div className="automation-card__identity">
-          <h2>{device.name}</h2>
+          {isEditingName ? (
+            <input
+              autoFocus
+              className="plug-card__name-input"
+              aria-label={t('hardware.shelly.deviceNameLabel')}
+              type="text"
+              value={device.name}
+              onBlur={() => setIsEditingName(false)}
+              onChange={(event) => onNameChange(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === 'Escape') {
+                  event.currentTarget.blur();
+                }
+              }}
+            />
+          ) : (
+            <div className="plug-card__title-row">
+              <h2>{device.name}</h2>
+              <button
+                className="icon-action rule-summary-icon-action plug-card__rename"
+                type="button"
+                aria-label={t('hardware.shelly.deviceNameLabel')}
+                title={t('hardware.shelly.deviceNameLabel')}
+                onClick={() => setIsEditingName(true)}
+              >
+                <IconPencil className="icon-action__svg" aria-hidden="true" />
+              </button>
+            </div>
+          )}
           <p>{t('dashboard.emptyCategory')}</p>
         </div>
         <button
@@ -420,6 +452,9 @@ export const AutomationDashboardScreen = ({
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
   const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
+  const setShellyDeviceName = useHardwareSetupDraftStore(
+    (state) => state.setShellyDeviceName
+  );
   const queryClient = useQueryClient();
   const [activeKind, setActiveKind] = useState<AppNavigationKind>(
     () => initialKind ?? 'climate'
@@ -494,6 +529,7 @@ export const AutomationDashboardScreen = ({
                   device={device}
                   onAddAutomation={() => onAddAutomation('climate', device.id)}
                   onOpenSettings={() => setSettingsDeviceId(device.id)}
+                  onNameChange={(value) => setShellyDeviceName(device.id, value)}
                 />
               )
             )}

@@ -306,10 +306,8 @@
 }
 
 .lcl-compact-device__header {
-  align-items: center;
   display: grid;
-  gap: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
-  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+  gap: var(--lcl-spacing-xs);
 }
 
 .lcl-compact-device__header strong {
@@ -317,11 +315,23 @@
   line-height: var(--lcl-line-height-compact);
 }
 
-.lcl-compact-device__header span {
+.lcl-compact-device__meta {
+  align-items: center;
+  display: flex;
+  gap: var(--lcl-spacing-sm);
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.lcl-compact-device__meta > span:first-child {
   color: var(--lcl-color-text-muted);
   font-size: var(--lcl-font-size-sm);
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.lcl-compact-device__meta .lcl-status-badge {
+  flex: 0 0 auto;
 }
 
 .lcl-compact-rows {
@@ -648,13 +658,5 @@
 
   .lcl-info-tooltip__bubble {
     max-width: calc(100vw - (var(--lcl-spacing-lg) * 2));
-  }
-
-  .lcl-compact-device__header {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .lcl-compact-device__header span {
-    grid-column: 1 / -1;
   }
 }
