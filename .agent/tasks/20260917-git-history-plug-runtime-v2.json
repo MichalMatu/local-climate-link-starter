@@ -1,0 +1,15 @@
+{
+  "id": "20260917-git-history-plug-runtime-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-centered-main-20260915",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 1024,
+  "commands": [
+    "set -euo pipefail; for C in 6079174d 974a2587 51ea2c66 193d2dc1 17d9244b; do echo; echo \"================ $C ================\"; git show --no-ext-diff --stat --oneline $C; echo '--- FILES ---'; git diff-tree --no-commit-id --name-status -r $C; done; echo; echo '=== 974a SHELLY CARD DIFF ==='; git show --format=fuller --no-ext-diff 974a2587 -- apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx | sed -n '1,520p'; echo; echo '=== 51ea SAVED PLUG CARD DIFF ==='; git show --format=fuller --no-ext-diff 51ea2c66 -- apps/mobile/src/screens/devices/SavedPlugCard.tsx apps/mobile/src/screens/devices/SavedPlugCard.css | sed -n '1,620p'; echo; echo '=== 193d SAVED PLUG INTEGRATION DIFF ==='; git show --format=fuller --no-ext-diff 193d2dc1 -- apps/mobile/src/screens/devices/SavedPlugCard.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx | sed -n '1,700p'; echo; echo '=== 17d CURRENT NEW PLUG ENTRY SURFACE ==='; git show --format=fuller --no-ext-diff 17d9244b -- apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/components/AppBottomNavigation.tsx apps/mobile/src/app/locales | sed -n '1,700p'; echo; echo '=== INITIAL LIVE DASHBOARD 6079 ==='; git show --format=fuller --no-ext-diff 6079174d -- apps/mobile/src/screens/AutomationDashboardScreen.tsx | sed -n '1,650p'"
+  ]
+}
