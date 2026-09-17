@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 5,
   "total": 6,
-  "command": "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.test.tsx apps/mobile/src/theme/theme.css; git diff --check",
-  "pid": 49466,
+  "command": "pnpm check",
+  "pid": 49613,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T20:44:06.658469+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-17T20:44:11.001966+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260917-sensor-card-live-pulse-v31",
@@ -18,5 +18,5 @@
   "task_digest": "3af69f4c995596fd4444a35ac20aa2e55a11580252fd05fdc95f65010464d1f4",
   "daemon_version": "4.18.22",
   "daemon_pid": 49220,
-  "updated_at": "2026-09-17T20:44:06.727376+00:00"
+  "updated_at": "2026-09-17T20:44:11.077357+00:00"
 }
