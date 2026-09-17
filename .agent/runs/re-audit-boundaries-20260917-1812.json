@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "re-audit-boundaries-20260917-1812",
+  "task_digest": "51a71db8233c76a3de27d603a67fcd923e8d12dc106dd96fe66ae9d1f34e996b",
+  "idle_timeout": 300,
+  "task_timeout": 600,
+  "memory_limit_mb": 2048,
+  "started_at": "2026-09-17T16:10:46.339289+00:00",
+  "attempt_id": "78106a5f60dbaf2cb65dde46",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 83091,
+  "updated_at": "2026-09-17T16:10:46.339386+00:00",
+  "pid": 83091
+}
