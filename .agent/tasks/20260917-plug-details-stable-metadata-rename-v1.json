@@ -1,0 +1,13 @@
+{
+  "id": "20260917-plug-details-stable-metadata-rename-v1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": true,
+  "resources": ["repo-local-climate-link-starter"],
+  "command_timeout": 1800,
+  "task_timeout": 4800,
+  "commands": [
+    "set -euo pipefail; EXPECTED=80b5e8777da8709ff9cf7ebf917154da3b06a896; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"; git fetch -q origin agent-control; git show origin/agent-control:.agent/patches/20260917-plug-details-stable-metadata-rename-v1.py > /tmp/plug-details-stable.py; python3 /tmp/plug-details-stable.py; FILES='apps/mobile/src/flows/hardware-setup/setupDraftStore.ts apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts packages/ui/src/primitives/ShellyCard.tsx packages/ui/src/styles.css apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/screens/AutomationDashboardScreen.css apps/mobile/src/__tests__/automation-dashboard.test.tsx'; pnpm exec prettier --write $FILES; pnpm --filter @lcl/mobile test; pnpm --filter @lcl/mobile build; pnpm quality:ux; git diff --check; git add $FILES; git commit --no-verify -m 'Stabilize plug details and persist hardware identity'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; echo NEW_HEAD=$(git rev-parse HEAD)"
+  ]
+}
