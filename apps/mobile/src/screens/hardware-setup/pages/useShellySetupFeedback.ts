@@ -120,8 +120,6 @@ export const useShellySetupFeedback = ({
       flow.startBleDiscoveryMutation.isPending ||
       flow.refreshBleDiscoveryMutation.isPending ||
       flow.restartBleDiscoveryMutation.isPending ||
-      flow.refreshBleDiscoveryMutation.isError ||
-      flow.restartBleDiscoveryMutation.isError ||
       flow.stopBleDiscoveryMutation.isPending
     ) {
       return;
