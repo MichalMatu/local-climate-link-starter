@@ -1,0 +1,13 @@
+{
+  "id": "20260917-install-single-scan-toggle-button-v2",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter", "adb-phone-rfct70l7e8j"],
+  "command_timeout": 2400,
+  "task_timeout": 4800,
+  "commands": [
+    "set -euo pipefail; EXPECTED=9813752ac92a6dcdb2b7dc7ebff26c19618937c8; test \"$(git rev-parse HEAD)\" = \"$EXPECTED\"; test -z \"$(git status --porcelain)\"; pnpm --filter @lcl/mobile build; pnpm --filter @lcl/mobile exec cap sync android; (cd apps/mobile/android && ./gradlew assembleDebug); test -f apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; /opt/homebrew/bin/adb devices -l; /opt/homebrew/bin/adb -s RFCT70L7E8J install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk; /opt/homebrew/bin/adb -s RFCT70L7E8J shell am force-stop link.localclimate.app; /opt/homebrew/bin/adb -s RFCT70L7E8J shell am start -n link.localclimate.app/.MainActivity; echo INSTALLED_HEAD=$EXPECTED"
+  ]
+}
