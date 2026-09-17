@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-boundary-cleanup-code-v5",
+  "task_digest": "a836d88eccd97fa940af979fe1d1bd0a22121f300f5b810e815c4505c852576b",
+  "idle_timeout": 300,
+  "task_timeout": 2400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T16:30:25.159173+00:00",
+  "attempt_id": "842d5458f5e04a7f440a6045",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 340,
+  "updated_at": "2026-09-17T16:30:25.159272+00:00",
+  "pid": 340
+}
