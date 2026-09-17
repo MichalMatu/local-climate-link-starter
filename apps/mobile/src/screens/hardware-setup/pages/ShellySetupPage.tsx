@@ -395,7 +395,6 @@ export const ShellySetupPage = ({
               <div className="scan-loading-state scan-loading-state--compact">
                 <span className="scan-loading-state__spinner" aria-hidden="true" />
                 <strong>{t('hardware.shelly.scanningIpRange')}</strong>
-                <p>{shellyScanEstimate}</p>
               </div>
             )}
             {shouldShowEmptyScanResult && <p>{t('hardware.shelly.scanResultEmpty')}</p>}
