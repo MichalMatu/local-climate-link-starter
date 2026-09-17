@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-plain-plug-runtime-v2-code",
+  "task_digest": "8180d0e373d266a83b46820d88177425b01fa74bcb84fa4dc302a57a4f1d8abd",
+  "idle_timeout": 300,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T12:14:10.284127+00:00",
+  "attempt_id": "898cc7773119313e1fc04f15",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 32055,
+  "updated_at": "2026-09-17T12:14:10.284206+00:00",
+  "pid": 32055
+}
