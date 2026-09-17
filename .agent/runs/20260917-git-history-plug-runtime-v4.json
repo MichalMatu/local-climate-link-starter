@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260917-git-history-plug-runtime-v4",
   "task_digest": "8a8ba9098e23a5ceae12bab1c502e8f6b63495bc527a7f7ede18bfc922871c95",
-  "idle_timeout": 240,
-  "task_timeout": 1200,
-  "memory_limit_mb": 1024,
-  "started_at": "2026-09-17T09:34:54.011048+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-17T09:34:57.029764+00:00",
   "attempt_id": "84825f23f1bbcbc465cd7102",
   "daemon_version": "4.18.20",
   "daemon_pid": 72585,
-  "updated_at": "2026-09-17T09:34:54.011192+00:00",
+  "updated_at": "2026-09-17T09:34:57.275669+00:00",
   "pid": 72585
 }
