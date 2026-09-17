@@ -2,21 +2,14 @@
 
 Updated: 2026-09-17
 
-Current code checkpoint after architecture cleanup:
+Current product-code checkpoint after architecture cleanup:
 
 ```text
 c67ac66c10e076e4b5d798e11bf117eefca49ea3
 Tighten hardware setup boundaries
 ```
 
-The last code physically installed on the Samsung S22+ is still:
-
-```text
-19bbd0ccf87f5490a216ca4ec302acf9c5b5a7ac
-Compact thermometer card details
-```
-
-The phone was unavailable after the cleanup, so physical QA of the current checkpoint is still pending.
+Documentation-only commits later advanced the branch, and the cleanup code has now been rebuilt and physically installed from branch HEAD `0463af650bd647ebe300b7ec161323fda58e7520` on the Samsung S22+.
 
 ## Current product model
 
@@ -40,7 +33,7 @@ Keep these accepted decisions:
 
 ## Architecture cleanup status
 
-The immediate architecture debt identified by the 2026-09-17 re-audit is now resolved.
+The immediate architecture debt identified by the 2026-09-17 re-audit is resolved.
 
 Completed in `c67ac66c...`:
 
@@ -49,10 +42,34 @@ Completed in `c67ac66c...`:
 - generic Shelly setup no longer exposes the legacy AUTO/MANUAL runtime path,
 - `useShellyControlFlow` is narrowed to physical status/direct relay responsibilities,
 - installed automation mode ownership remains in `flows/installations/*`,
-- tests were rewritten to assert that generic setup does not send `Script.Start`, `Script.Stop` or `Switch.Set` runtime mutations,
+- tests assert that generic setup does not send `Script.Start`, `Script.Stop` or `Switch.Set` runtime mutations,
 - a dashboard refresh-loop regression introduced during lint cleanup was found by testing and fixed before commit.
 
 Final standard verification passed twice through `pnpm check`, including 31/31 mobile test files and 171/171 mobile tests, core coverage gate and production build.
+
+## Physical Android QA status
+
+The architecture-cleanup checkpoint is now physically validated at launch/runtime level on the reference phone.
+
+Reference device and installed app:
+
+```text
+Samsung SM-S906B
+Android 16 / API 36
+link.localclimate.app
+versionName 2.0.10
+versionCode 20010
+```
+
+Evidence from Local Agent tasks:
+
+- `20260917-phone-alpha-smoke-v22`: normal `pnpm android:phone-alpha` clean rebuild/install/cold start completed successfully;
+- `20260917-phone-focused-smoke-v23`: `MainActivity` was the focused and top-resumed activity and the WebView was present;
+- `20260917-phone-webview-probe-v24`: one live page target was exposed as `Local Climate Link` at `https://localhost/` with a debugger WebSocket;
+- filtered ADB logs showed no app `FATAL EXCEPTION` and no ANR;
+- repository state remained clean after the device checks.
+
+This closes the previous “physical QA pending” blocker for the cleanup itself. It is intentionally a launch/runtime smoke baseline, not a claim that every screen, BLE discovery path or hardware mutation was manually exercised. Each future feature should still receive focused physical QA for the interaction it changes.
 
 ## Current dashboard state
 
@@ -86,7 +103,7 @@ Phone BLE and Shelly-side discovery converge on the same saved sensor/readings m
 
 ## Next small UX slice
 
-The next agreed implementation is now safe to start on the new saved-sensor presentation boundary:
+The next agreed implementation is safe to start on the new saved-sensor presentation boundary:
 
 - add a Tabler thermometer/temperature icon at the upper-left of each saved thermometer card,
 - align icon/name/actions with Plug-card header rhythm,
@@ -132,19 +149,7 @@ Keep one relay owner. Do not let climate runtime and an unrelated native schedul
 
 The repo already has `@lcl/diagnostics` plus `runtimeDiagnostics.ts`.
 
-Do not add another logger module now. After physical S22+ QA, only add missing structured events if `adb logcat` shows a concrete observability gap. Keep logs bounded, redacted and low-noise.
-
-## Physical QA pending
-
-When the S22+ is available again:
-
-1. build/install the exact current branch checkpoint,
-2. smoke-test Plugs, Thermometers, Settings and Plug settings,
-3. capture clean `adb logcat` around launch/navigation,
-4. inspect AndroidRuntime, Capacitor/WebView/JS errors and ANRs,
-5. record the installed SHA and physical result in docs.
-
-Use the existing repo Android/ADB workflow rather than inventing a parallel one.
+The physical launch/logcat smoke did not show a concrete observability gap that justifies another logger module. Add future diagnostics only through the existing bounded/redacted paths when a real device flow lacks evidence. Avoid noisy console instrumentation and raw secrets/device identifiers unless strictly necessary.
 
 ## Deferred product work
 
@@ -165,7 +170,7 @@ Current order:
 1. keep architecture/product documentation synchronized,
 2. implement the small thermometer leading-icon/new-sample pulse slice,
 3. run focused tests and the normal repository gate/build for the touched scope,
-4. when the phone is available, install and perform physical S22+ smoke/logcat QA,
+4. install that change on the S22+ and run focused device/logcat QA,
 5. then choose the next product feature from current evidence.
 
-Do not claim a new physical release baseline until the S22+ verification is actually complete.
+The architecture-cleanup baseline now has both repository-gate verification and physical Android launch/runtime smoke evidence.
