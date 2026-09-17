@@ -1,0 +1,15 @@
+{
+  "id": "20260917-plug-runtime-row-audit-v1",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": ["repo-local-climate-link-starter"],
+  "commands": [
+    "git rev-parse HEAD",
+    "git status --short",
+    "sed -n '1,430p' apps/mobile/src/screens/AutomationDashboardScreen.tsx",
+    "sed -n '1,360p' apps/mobile/src/screens/AutomationDashboardScreen.css",
+    "sed -n '1,300p' apps/mobile/src/flows/installations/runtimeDiagnostics.ts"
+  ]
+}
