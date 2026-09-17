@@ -1,0 +1,16 @@
+{
+  "id": "20260917-plug-screen-e2e-v2",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"17d9244be1bb5d6bede2a8ff8f41c03669d4d5b9\"; test -z \"$(git status --porcelain)\"; python3 - <<'PY'\nfrom pathlib import Path\n\np = Path('apps/mobile/e2e/led-settings.spec.ts')\nt = p.read_text()\nold = \"const openDetail = async (page: Page) => {\\n  await page.goto('/');\\n  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n  await page.getByRole('button', { name: 'Szczegóły' }).click();\\n  await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();\\n};\"\nnew = \"const openDetail = async (page: Page) => {\\n  await page.goto('/');\\n  const details = page.getByRole('button', { name: 'Szczegóły' });\\n  await expect(details).toBeVisible();\\n  await details.click();\\n  await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();\\n};\"\nif old not in t: raise SystemExit('LED helper pattern missing')\np.write_text(t.replace(old, new, 1))\n\np = Path('apps/mobile/e2e/responsive.spec.ts')\nt = p.read_text()\nt = t.replace(\"await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    await expect(page.getByText('Salon')).toBeVisible();\", \"await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    await expect(page.getByText('Salon')).toBeVisible();\", 1)\nt = t.replace(\"await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();\\n    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();\\n    await expectNoHorizontalOverflow(page);\\n    await page.getByRole('button', { name: 'Dodaj automatykę' }).click();\", \"await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();\\n    await expect(page.locator('.dashboard-fab')).toBeVisible();\\n    await expectNoHorizontalOverflow(page);\\n    await page.locator('.dashboard-fab').click();\", 1)\nt = t.replace(\"  await page.goto('/admin#rule');\\n  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();\", \"  await page.goto('/admin#rule');\\n  await page.locator('.dashboard-fab').click();\", 1)\np.write_text(t)\nPY\npnpm prettier --write apps/mobile/e2e/led-settings.spec.ts apps/mobile/e2e/responsive.spec.ts; git diff --check; pnpm e2e:responsive",
+    "set -euo pipefail; git add apps/mobile/e2e/led-settings.spec.ts apps/mobile/e2e/responsive.spec.ts; git commit -m 'Update plug-screen E2E contracts'; git push --no-verify origin HEAD:refs/heads/work/plug-screen-automation-entry-20260917; git rev-parse HEAD"
+  ]
+}
