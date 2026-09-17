@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260917-install-scanner-saved-accordion-v1",
+  "task_digest": "5788d2945e53b8bb8021c6e481302099ba10bb443f4ec151ea40c5e41df1be6c",
+  "idle_timeout": 300,
+  "task_timeout": 4800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-17T12:07:09.106194+00:00",
+  "attempt_id": "a297e3fefd23a861c77ccc12",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 21137,
+  "updated_at": "2026-09-17T12:07:09.106343+00:00",
+  "pid": 21137
+}
