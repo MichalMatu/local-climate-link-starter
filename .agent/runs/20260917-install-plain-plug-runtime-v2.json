@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 4,
   "total": 9,
-  "command": "pnpm --filter @lcl/mobile build",
-  "pid": 34306,
+  "command": "cd apps/mobile/android && ./gradlew assembleDebug",
+  "pid": 34566,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-17T12:18:30.862279+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-17T12:18:40.089802+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 9,
   "stage_phase": "commands",
   "task_id": "20260917-install-plain-plug-runtime-v2",
@@ -18,5 +18,5 @@
   "task_digest": "5a53521b59d9588304e3f28fd45dae46da2ec4bc0cb8ddc7facbda2703f6ed7c",
   "daemon_version": "4.18.22",
   "daemon_pid": 33967,
-  "updated_at": "2026-09-17T12:18:30.933619+00:00"
+  "updated_at": "2026-09-17T12:18:40.168027+00:00"
 }
