@@ -48,3 +48,16 @@ A running pre-mode runtime has diagnostics but no `md`. On the first control-mod
 ### Resource diagnostics
 
 The phone reads `Script.GetStatus` for the exact managed script id and `Sys.GetStatus` directly over Shelly RPC during the normal diagnostics refresh. Script `running`, `mem_used`, `mem_peak`, `mem_free`, optional CPU, and device `ram_size` / `ram_free` therefore add no code or state to the generated thermostat runtime. `/diag` remains telemetry-only. Resource parsing is best-effort and independent from climate telemetry, so missing firmware-dependent fields or a failed resource RPC do not disable otherwise-valid diagnostics or control.
+
+## Plain Plug live telemetry
+
+A saved Plug without an installed automation has its own lightweight dashboard runtime path. The Plug card must stay live while it is mounted instead of treating the first status read as a permanent snapshot.
+
+- query key root: `plain-shelly-runtime`;
+- active refresh interval: 5 seconds;
+- background polling: disabled;
+- mount, browser focus/reconnect and native app resume trigger a fresh read;
+- each refresh uses only `Shelly.GetStatus` and never the heavier `Shelly.GetDeviceInfo` + `Script.List` control snapshot;
+- relay ON/OFF is optimistic for the relay indicator, invalidates the live query immediately, then performs a second settle read after 1 second so delayed `apower` telemetry is not left at the pre-switch value.
+
+Keep this path separate from installed-automation runtime ownership. A plain Plug card controls only the physical relay and telemetry; it does not infer or mutate climate AUTO/MANUAL state.

@@ -215,6 +215,11 @@ export type ShellyControlStatus = {
   clock: HardwareSetupStatus['status']['clock'];
 };
 
+export type ShellyRuntimeStatus = Pick<
+  ShellyControlStatus,
+  'relayOn' | 'telemetry' | 'clock'
+>;
+
 export type ShellyAutomationScriptState = {
   script: ScriptListEntry | null;
   code: string | null;
@@ -263,6 +268,18 @@ export const createShellyTransport = (baseUrl: string): FetchShellyRpcTransport 
     defaultTimeoutMs: 8000,
     fetchImpl: createShellyFetch(8000)
   });
+
+export const readShellyRuntimeStatus = async (
+  baseUrl: string
+): Promise<ShellyRuntimeStatus> => {
+  const client = new RpcShellyClient(createShellyTransport(baseUrl));
+  const status = unwrapShellyResult(await client.getStatus());
+  return {
+    relayOn: status.relayOn,
+    telemetry: status.telemetry,
+    clock: status.clock
+  };
+};
 
 const createShellyScanTransport = (
   baseUrl: string,

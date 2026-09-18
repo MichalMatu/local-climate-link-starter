@@ -9,7 +9,7 @@ import {
   IconTemperature
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import {
   AppBottomNavigation,
@@ -36,7 +36,7 @@ import {
   useInstalledAutomationControl,
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
-import { useShellyControlFlow } from '../flows/hardware-setup/useShellyControlFlow.js';
+import { usePlainShellyRuntime } from '../flows/hardware-setup/usePlainShellyRuntime.js';
 import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
@@ -48,7 +48,8 @@ const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
   return (
     root === 'installed-automation-diagnostics' ||
     root === 'installed-automation-control' ||
-    root === 'time-automation-runtime'
+    root === 'time-automation-runtime' ||
+    root === 'plain-shelly-runtime'
   );
 };
 
@@ -319,21 +320,10 @@ const PlainPlugCard = ({
 }) => {
   const { t } = useTranslation();
   const [isEditingName, setIsEditingName] = useState(false);
-  const { shellyControlStates, refreshShellyControl, turnRelayOn, turnRelayOff } =
-    useShellyControlFlow();
-  const refreshShellyControlRef = useRef(refreshShellyControl);
-  const controlState = shellyControlStates[device.id];
-  const status = controlState?.status ?? null;
+  const { status, isRelayPending, turnRelayOn, turnRelayOff } =
+    usePlainShellyRuntime(device);
   const relayState = status?.relayOn;
-  const isBusy = controlState?.pendingAction != null;
-
-  useEffect(() => {
-    refreshShellyControlRef.current = refreshShellyControl;
-  }, [refreshShellyControl]);
-
-  useEffect(() => {
-    refreshShellyControlRef.current({ id: device.id, baseUrl: device.baseUrl });
-  }, [device.id, device.baseUrl]);
+  const isBusy = isRelayPending;
 
   return (
     <article className="automation-card plug-card plug-card--unconfigured">
@@ -410,7 +400,7 @@ const PlainPlugCard = ({
           aria-pressed={relayState === true}
           disabled={isBusy}
           onClick={() => {
-            if (relayState !== true) turnRelayOn(device);
+            if (relayState !== true) turnRelayOn();
           }}
         >
           ON
@@ -421,7 +411,7 @@ const PlainPlugCard = ({
           aria-pressed={relayState === false}
           disabled={isBusy}
           onClick={() => {
-            if (relayState !== false) turnRelayOff(device);
+            if (relayState !== false) turnRelayOff();
           }}
         >
           OFF

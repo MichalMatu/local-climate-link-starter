@@ -371,6 +371,71 @@ describe('AutomationDashboardScreen', () => {
     expect(onAddAutomation).toHaveBeenCalledWith('climate', 'http://192.168.0.30/');
   });
 
+  it('refreshes plain plug power after relay telemetry settles without remounting', async () => {
+    let relayOn = false;
+    let statusReads = 0;
+    const rpcMethods: string[] = [];
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        id?: number | string;
+        method?: string;
+        params?: { on?: boolean };
+      };
+      if (body.method) rpcMethods.push(body.method);
+      let result: unknown = {};
+      switch (body.method) {
+        case 'Shelly.GetStatus': {
+          statusReads += 1;
+          const settledPower = relayOn && statusReads >= 3 ? 28.4 : 0;
+          result = {
+            matter: { enabled: false },
+            script: { enable: true },
+            ble: { enable: true },
+            'switch:0': {
+              id: 0,
+              output: relayOn,
+              apower: settledPower,
+              voltage: 243.2,
+              current: settledPower > 0 ? 0.12 : 0,
+              aenergy: { total: 25160 }
+            },
+            wifi: { rssi: -55 },
+            sys: { time: '09:48', unixtime: 1_782_667_904, uptime: 12_345 }
+          };
+          break;
+        }
+        case 'Switch.Set':
+          relayOn = body.params?.on === true;
+          result = {};
+          break;
+      }
+      return jsonResponse({ id: body.id ?? 1, result });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.31/',
+      name: 'Lampa testowa',
+      baseUrl: 'http://192.168.0.31/',
+      scriptIdInput: '1'
+    });
+    renderDashboard();
+
+    const card = screen.getByText('Lampa testowa').closest('article') as HTMLElement;
+    expect(await within(card).findByText('0.0 W')).toBeVisible();
+
+    const onButton = within(card).getByRole('button', { name: 'ON' });
+    fireEvent.click(onButton);
+    await waitFor(() => expect(onButton).toHaveAttribute('aria-pressed', 'true'));
+    expect(within(card).getByText('0.0 W')).toBeVisible();
+
+    expect(await within(card).findByText('28.4 W', {}, { timeout: 2500 })).toBeVisible();
+    expect(statusReads).toBeGreaterThanOrEqual(3);
+    expect(rpcMethods).toContain('Switch.Set');
+    expect(rpcMethods).not.toContain('Shelly.GetDeviceInfo');
+    expect(rpcMethods).not.toContain('Script.List');
+  });
+
   it('shows live runtime values from Shelly for a saved installation', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
     vi.stubGlobal(

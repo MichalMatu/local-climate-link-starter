@@ -1,6 +1,6 @@
 # Next chat handoff — Plug/Thermometer cleanup complete
 
-Updated: 2026-09-17
+Updated: 2026-09-18
 
 This is the canonical continuation state for `MichalMatu/local-climate-link-starter`.
 
@@ -28,21 +28,9 @@ Managed workspace:
 
 ## Current code checkpoint
 
-Current product-code HEAD after architecture cleanup:
+This branch is active development and has advanced beyond the original `c67ac66c...` cleanup checkpoint. Do not use the historical cleanup SHA as the current product HEAD. Always verify the exact continuation point with `git rev-parse HEAD` and the remote work branch before starting a task.
 
-```text
-c67ac66c10e076e4b5d798e11bf117eefca49ea3
-Tighten hardware setup boundaries
-```
-
-Documentation later advanced the work branch to:
-
-```text
-0463af650bd647ebe300b7ec161323fda58e7520
-Record prepared Android alpha build
-```
-
-No product code changed after `c67ac66c...` before the physical Android QA. The alpha installed on the phone therefore contains the product code from `c67ac66c...` plus documentation-only commits.
+The current product model includes the later dashboard/thermometer/Shelly BLE fixes plus live plain-Plug telemetry described below.
 
 ## Android alpha build and physical S22+ QA
 
@@ -160,6 +148,19 @@ The final verification also passed:
 - `git diff --check`.
 
 Earlier runner failures (`ERR_IPC_CHANNEL_CLOSED`, worker OOM, idle timeout) were investigated rather than accepted as product failures. The final `pnpm check` completed normally after fixing the real dashboard refresh loop.
+
+## Plain Plug live runtime
+
+Plain saved Plug cards are live runtime surfaces, not one-shot setup snapshots.
+
+- `usePlainShellyRuntime` owns the dashboard query for a Plug that has no installed automation;
+- the query polls every 5 s only while the card is active and uses only `Shelly.GetStatus`;
+- native app resume is included in the dashboard runtime-query refetch predicate;
+- ON/OFF updates the relay indicator optimistically, refreshes immediately, then performs a 1 s settle read so Shelly `apower` has time to catch up;
+- generic `useShellyControlFlow` remains for setup/status responsibilities and is not used as the high-frequency telemetry loop;
+- installed climate/time automations keep their existing dedicated runtime-query ownership.
+
+Regression coverage must preserve both active polling and the delayed-power case where the first post-`Switch.Set` status still reports `0 W`.
 
 ## Diagnostics/logging decision
 
