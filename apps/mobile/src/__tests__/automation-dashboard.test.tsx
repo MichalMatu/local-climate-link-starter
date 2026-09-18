@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -30,6 +31,8 @@ const jsonResponse = (payload: unknown) =>
     status: 200,
     headers: { 'content-type': 'application/json' }
   });
+
+const CLIMATE_PULSE_TEST_WAIT_MS = 700;
 
 const controlRpcResult = (method: string | undefined): unknown => {
   switch (method) {
@@ -67,12 +70,14 @@ const diagnosticPayload = ({
   uptimeSec = 12_345,
   effectiveOnThreshold = 19,
   effectiveOffThreshold = 20,
+  lastVpd = 1.31,
   dataState = 'ok'
 }: {
   lastSeenUptimeMs?: number;
   uptimeSec?: number;
   effectiveOnThreshold?: number;
   effectiveOffThreshold?: number;
+  lastVpd?: number | null;
   dataState?: string;
 } = {}) => ({
   v: 1,
@@ -94,7 +99,7 @@ const diagnosticPayload = ({
     0,
     0,
     21.4,
-    1.31,
+    lastVpd,
     effectiveOnThreshold,
     effectiveOffThreshold,
     12_320_000,
@@ -102,7 +107,7 @@ const diagnosticPayload = ({
   ]
 });
 
-const installedAutomation = () => {
+const installedAutomation = (vpdAssistEnabled = false) => {
   const base = createDefaultShellyThermostatConfig(
     'xiaomi_lywsd03mmc_bthome_v2',
     'heating'
@@ -115,6 +120,13 @@ const installedAutomation = () => {
     scriptHash: 'lcl-test',
     config: {
       ...base,
+      rule: {
+        ...base.rule,
+        vpdAssist: {
+          ...base.rule.vpdAssist,
+          enabled: vpdAssistEnabled
+        }
+      },
       sensor: {
         ...base.sensor,
         runtimeAddress: 'A4:C1:38:4F:24:CD',
@@ -479,6 +491,65 @@ describe('AutomationDashboardScreen', () => {
     expect(
       document.querySelectorAll('.dashboard-shell svg:not(.tabler-icon)')
     ).toHaveLength(0);
+  });
+
+  it('derives current VPD from runtime temperature and humidity when Shelly omits it', async () => {
+    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse(diagnosticPayload({ lastVpd: null })))
+    );
+
+    renderDashboard();
+
+    expect(await screen.findByText('1.14 kPa')).toBeVisible();
+  });
+
+  it('shows the VPD target inline only while VPD assist is enabled', async () => {
+    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation(true));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse(diagnosticPayload()))
+    );
+
+    renderDashboard();
+
+    expect(await screen.findByText('1.31 → 1.20 kPa')).toBeVisible();
+    expect(screen.queryByText('1.31 kPa')).toBeNull();
+  });
+
+  it('pulses only the climate symbol when a fresh runtime measurement arrives', async () => {
+    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
+    let lastSeenUptimeMs = 12_300_000;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse(diagnosticPayload({ lastSeenUptimeMs })))
+    );
+
+    const { queryClient } = renderDashboard();
+    expect(await screen.findByText('21.4°C')).toBeVisible();
+    const leadingIcon = document.querySelector(
+      '.automation-card--climate .automation-card__leading-icon'
+    );
+    expect(leadingIcon).not.toBeNull();
+    await waitFor(() =>
+      expect(leadingIcon).toHaveClass('automation-card__leading-icon--fresh')
+    );
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, CLIMATE_PULSE_TEST_WAIT_MS));
+    });
+    expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--fresh');
+
+    lastSeenUptimeMs = 12_330_000;
+    await act(async () => {
+      await queryClient.refetchQueries({
+        predicate: (query) => query.queryKey[0] === 'installed-automation-diagnostics'
+      });
+    });
+    await waitFor(() =>
+      expect(leadingIcon).toHaveClass('automation-card__leading-icon--fresh')
+    );
+    expect(leadingIcon?.querySelector('.automation-card__icon')).not.toBeNull();
   });
 
   it('shows a native time schedule and opens it by stable installation id', async () => {

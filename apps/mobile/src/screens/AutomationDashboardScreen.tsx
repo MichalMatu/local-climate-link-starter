@@ -1,4 +1,5 @@
 import { App as CapacitorApp } from '@capacitor/app';
+import { calculateVpdKpa } from '@lcl/automation-core';
 import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
@@ -9,7 +10,7 @@ import {
   IconTemperature
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import {
   AppBottomNavigation,
@@ -21,6 +22,7 @@ import type {
 } from '../flows/installations/model.js';
 import {
   formatInstallationMetric,
+  formatInstallationVpd,
   installationHealthLabel,
   installationThresholdSummary
 } from '../flows/installations/presentation.js';
@@ -63,6 +65,8 @@ const formatPlugEnergy = (value: number | null | undefined): string => {
   return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
+const CLIMATE_READING_PULSE_MS = 650;
+
 const ClimateAutomationCard = ({
   installation,
   onOpen
@@ -76,6 +80,43 @@ const ClimateAutomationCard = ({
   const action = useInstalledAutomationActions(installation);
 
   const snapshot = query.data;
+  const lastSeenUptimeMs = snapshot?.diagnostics.lastSeenUptimeMs ?? null;
+  const previousLastSeenUptimeMsRef = useRef<number | null>(lastSeenUptimeMs);
+  const readingPulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isReadingPulseActive, setIsReadingPulseActive] = useState(false);
+  const [readingPulseSequence, setReadingPulseSequence] = useState(0);
+
+  useEffect(() => {
+    if (lastSeenUptimeMs === null) return;
+
+    const previousLastSeenUptimeMs = previousLastSeenUptimeMsRef.current;
+    if (
+      previousLastSeenUptimeMs !== null &&
+      lastSeenUptimeMs === previousLastSeenUptimeMs
+    ) {
+      return;
+    }
+
+    previousLastSeenUptimeMsRef.current = lastSeenUptimeMs;
+    setReadingPulseSequence((current) => current + 1);
+    setIsReadingPulseActive(true);
+    if (readingPulseTimeoutRef.current !== null) {
+      clearTimeout(readingPulseTimeoutRef.current);
+    }
+    readingPulseTimeoutRef.current = setTimeout(() => {
+      setIsReadingPulseActive(false);
+      readingPulseTimeoutRef.current = null;
+    }, CLIMATE_READING_PULSE_MS);
+  }, [lastSeenUptimeMs]);
+
+  useEffect(
+    () => () => {
+      if (readingPulseTimeoutRef.current !== null) {
+        clearTimeout(readingPulseTimeoutRef.current);
+      }
+    },
+    []
+  );
   const health = snapshot ? installedAutomationHealth(snapshot) : null;
   const controlStatus = control.data;
   const controlMatch = controlStatus
@@ -120,6 +161,15 @@ const ClimateAutomationCard = ({
         label: t('dashboard.humidity'),
         value: formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')
       };
+  const currentVpdKpa =
+    snapshot?.diagnostics.lastVpd ??
+    calculateVpdKpa(
+      snapshot?.diagnostics.lastTemp ?? undefined,
+      snapshot?.diagnostics.lastHumidity ?? undefined
+    );
+  const targetVpdKpa = installation.config.rule.vpdAssist.enabled
+    ? installation.config.rule.vpdAssist.targetKpa
+    : null;
 
   let warningLabel: string | null = null;
   let warningClass = 'attention';
@@ -141,10 +191,10 @@ const ClimateAutomationCard = ({
         <span
           className={`automation-card__leading-icon${
             automationRunning ? ' automation-card__leading-icon--active' : ''
-          }`}
+          }${isReadingPulseActive ? ' automation-card__leading-icon--fresh' : ''}`}
           aria-hidden="true"
         >
-          <IconTemperature className="automation-card__icon" />
+          <IconTemperature key={readingPulseSequence} className="automation-card__icon" />
         </span>
 
         <div className="automation-card__identity">
@@ -181,9 +231,7 @@ const ClimateAutomationCard = ({
           </div>
           <div>
             <span>{t('dashboard.vpd')}</span>
-            <strong>
-              {formatInstallationMetric(snapshot?.diagnostics.lastVpd, ' kPa', 2)}
-            </strong>
+            <strong>{formatInstallationVpd(currentVpdKpa, targetVpdKpa)}</strong>
           </div>
         </div>
 

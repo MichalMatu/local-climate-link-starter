@@ -33,7 +33,7 @@ Important established facts:
   commit b44899ba66b202ca05f48a8856a9871daee97832
 - Latest observed tags are v2.0.9 down through v2.0.0, then v1.0. The expected next patch candidate is 2.0.10 / Android versionCode 20010, but verify all authoritative version fields before writing.
 - Do not use rg unless you first prove it exists; the Local Agent environment reported `rg: command not found`. Use git grep/grep or another available command.
-- VPD ranges/configuration stay unchanged. With VPD assist OFF, runtime intentionally reports lastVpd=null and dashboard shows `—`; that is not a bug.
+- VPD ranges/configuration stay unchanged. Minimal/older runtime may report lastVpd=null with VPD assist OFF; the dashboard derives current VPD from runtime temperature/humidity, while the target is shown only when VPD assist is enabled.
 - Real climate automation currently exists on Shelly http://192.168.0.16/, script id 1, name Local Climate Link Thermostat. Last verified state was running=true, relay OFF, no native schedules.
 - Physical phone-alpha installs MUST use pnpm android:phone-alpha and MUST intentionally uninstall link.localclimate.app first, clearing app data. Do not ask again.
 - The alpha signer expected from the current setup is SHA-256 2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76.

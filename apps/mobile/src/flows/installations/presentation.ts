@@ -31,6 +31,17 @@ export const formatInstallationMetric = (
 ): string =>
   value == null || !Number.isFinite(value) ? '—' : `${value.toFixed(digits)}${unit}`;
 
+export const formatInstallationVpd = (
+  currentVpdKpa: number | null | undefined,
+  targetVpdKpa?: number | null
+): string => {
+  if (currentVpdKpa == null || !Number.isFinite(currentVpdKpa)) return '—';
+  const current = currentVpdKpa.toFixed(2);
+  return targetVpdKpa != null && Number.isFinite(targetVpdKpa)
+    ? `${current} → ${targetVpdKpa.toFixed(2)} kPa`
+    : `${current} kPa`;
+};
+
 export const installationThresholdSummary = (
   installation: ClimateInstalledAutomation,
   effectiveOnThreshold?: number | null,

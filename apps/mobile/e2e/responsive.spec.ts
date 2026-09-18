@@ -572,7 +572,7 @@ const seedInstalledAutomation = async (page: Page) => {
                   onThreshold: 19,
                   offThreshold: 20
                 },
-                vpdAssist: { enabled: false, targetKpa: 1.2 },
+                vpdAssist: { enabled: true, targetKpa: 1.2 },
                 staleTimeoutSec: 120,
                 minChangeMs: 120000,
                 maxOnMs: 14400000,
@@ -609,15 +609,16 @@ for (const viewport of viewports) {
     await mockShellyRpc(page);
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
+    await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Gniazdka' })).toHaveCount(0);
     await expect(page.getByText('Salon')).toBeVisible();
     await expect(page.getByText('21.4°C')).toBeVisible();
     await expect(page.getByText('55.2%')).toBeVisible();
-    await expect(page.getByText('1.31 kPa')).toBeVisible();
+    await expect(page.getByText('1.31 → 1.20 kPa')).toBeVisible();
     await expect(page.getByText('Działa')).toHaveCount(0);
     await expect(page.getByText('19°C / 20°C')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toHaveCount(0);
     await page.getByRole('button', { name: 'Szczegóły: Salon' }).click();
     await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Klimat teraz' })).toBeVisible();

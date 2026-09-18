@@ -46,6 +46,27 @@
   color: var(--lcl-color-accent);
 }
 
+.automation-card__leading-icon--fresh .automation-card__icon {
+  animation: automation-card-reading-pulse 650ms ease-out;
+}
+
+@keyframes automation-card-reading-pulse {
+  0%,
+  100% {
+    color: var(--lcl-color-accent);
+  }
+  45% {
+    color: var(--lcl-color-accent-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .automation-card__leading-icon--fresh .automation-card__icon {
+    animation: none;
+    color: var(--lcl-color-accent);
+  }
+}
+
 .automation-card__icon,
 .automation-card__menu-icon,
 .dashboard-fab__icon {
