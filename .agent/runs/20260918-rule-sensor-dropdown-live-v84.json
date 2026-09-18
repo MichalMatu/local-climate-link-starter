@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 30746,
+  "command": "set -euo pipefail; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+  "pid": 31377,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T21:37:16.239152+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-18T21:37:41.917522+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-rule-sensor-dropdown-live-v84",
@@ -18,5 +18,5 @@
   "task_digest": "7f0a681a81bba1275b3d79c9f691458e83535556fd1c78a5120f0534f0411160",
   "daemon_version": "4.18.22",
   "daemon_pid": 26595,
-  "updated_at": "2026-09-18T21:37:16.315159+00:00"
+  "updated_at": "2026-09-18T21:37:41.986853+00:00"
 }
