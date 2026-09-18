@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-dashboard-vpd-pulse-v94",
+  "task_digest": "4413b5b8feb60d7b9b3ad372e71ea4d0a7164257805208a7723c0c986f094516",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T22:51:01.333139+00:00",
+  "attempt_id": "2e2d56466947a6fa07f0f585",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 93809,
+  "updated_at": "2026-09-18T22:51:01.333221+00:00",
+  "pid": 93809
+}
