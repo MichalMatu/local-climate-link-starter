@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 60550,
+  "command": "adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2 && adb shell pidof link.localclimate.app && adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'",
+  "pid": 61215,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T15:00:05.278193+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-18T15:00:32.035316+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-shared-select-listbox-phone-v63",
@@ -18,5 +18,5 @@
   "task_digest": "0a8d5525920c3bc3e5109e9c9176c9b68f965f74934f65478f9797d5e2b95194",
   "daemon_version": "4.18.22",
   "daemon_pid": 56074,
-  "updated_at": "2026-09-18T15:00:05.349713+00:00"
+  "updated_at": "2026-09-18T15:00:32.105929+00:00"
 }
