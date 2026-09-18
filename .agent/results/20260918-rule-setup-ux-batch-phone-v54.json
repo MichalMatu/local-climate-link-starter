@@ -1,0 +1,60 @@
+{
+  "id": "20260918-rule-setup-ux-batch-phone-v54",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "started_at": "2026-09-18T13:06:55.375096+00:00",
+  "command_timeout": 3000,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"5204c62b142322c71c27bc45db2eefa3586d06aa\"; test -n \"$(git status --porcelain)\"",
+      "exit_code": 1,
+      "output": "",
+      "elapsed_seconds": 0.397,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 7,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 7,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.397
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.083
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.069
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-18T13:06:57.313609+00:00",
+  "task_digest": "d2e3380caeb3447e23825e183c21543f9927a29ca7bfaaa85ce19cf953b105e6",
+  "idle_timeout": 300,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "250fd6e4793fdbace71df492",
+  "daemon_version": "4.18.22"
+}
