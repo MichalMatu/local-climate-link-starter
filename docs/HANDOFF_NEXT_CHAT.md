@@ -1,197 +1,339 @@
-# Next chat handoff — Plug/Thermometer cleanup complete
+# Next chat handoff — Developer tools / diagnostics cleanup
 
 Updated: 2026-09-18
 
 This is the canonical continuation state for `MichalMatu/local-climate-link-starter`.
 
-## Branch and Local Agent
+## Immutable repo / Local Agent binding
 
-Continue only on:
-
-```text
-work/plug-screen-automation-entry-20260917
-```
-
-Local Agent Chat Bridge binding:
+Work only on:
 
 ```text
-e75c77cb-7589-4452-94b2-decc97ff85a1
+repository: MichalMatu/local-climate-link-starter
+runtime catalog repo id: local-climate-link-starter
+work branch: work/plug-screen-automation-entry-20260917
+control branch: agent-control
+Local Agent binding: e75c77cb-7589-4452-94b2-decc97ff85a1
+managed workspace: /Users/michal/agent-workspace/repos/local-climate-link-starter/work
 ```
 
-Control branch: `agent-control`.
+Every Local Agent task JSON created by this chat must contain exactly:
 
-Managed workspace:
+```json
+"agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1"
+```
+
+Do not infer or substitute another repo under this binding.
+
+Before every Local Agent task, read `.agent/status/daemon.json`. Never edit the work branch while a Local Agent task is active.
+
+## Exact continuation point
+
+Last completed PRODUCT commit before this handoff:
 
 ```text
-/Users/michal/agent-workspace/repos/local-climate-link-starter/work
+2f7364544015db1b1be8cc8b43366efca0f09922
+Standardize contextual info placement
 ```
 
-## Current code checkpoint
+The handoff documentation commit is newer than the product commit. Treat `2f736454...` as the last validated product checkpoint and the current branch HEAD as documentation-only until the Developer tools cleanup is implemented and validated.
 
-This branch is active development and has advanced beyond the original `c67ac66c...` cleanup checkpoint. Do not use the historical cleanup SHA as the current product HEAD. Always verify the exact continuation point with `git rev-parse HEAD` and the remote work branch before starting a task.
-
-The current product model includes the later dashboard/thermometer/Shelly BLE fixes plus live plain-Plug telemetry described below.
-
-## Android alpha build and physical S22+ QA
-
-The current cleanup checkpoint has now been rebuilt, installed and smoke-tested on the reference Samsung phone through the existing repo workflow.
-
-Reference device:
+At handoff time the Local Agent daemon is idle. The last task was:
 
 ```text
-manufacturer: samsung
-model: SM-S906B
-Android: 16
-SDK/API: 36
-package: link.localclimate.app
-versionName: 2.0.10
-versionCode: 20010
+20260918-developer-tools-scope-cleanup-phone-v76
+status: failed
 ```
 
-The clean install/cold-start path used `pnpm android:phone-alpha` on exact branch HEAD `0463af650bd647ebe300b7ec161323fda58e7520`.
+No product commit from v74-v76 was pushed. The remote work branch product state therefore remains `2f736454...` plus this handoff documentation commit.
 
-Physical QA evidence:
+Do NOT depend on the failed task's dirty workspace. Reconstruct from the remote branch in one coherent implementation pass.
 
-- `20260917-phone-alpha-smoke-v22` rebuilt, signed, clean-installed and cold-started the alpha app;
-- `20260917-phone-focused-smoke-v23` confirmed `link.localclimate.app/.MainActivity` as the focused and top-resumed activity after a clean start;
-- the app WebView was present and focused in the application window;
-- package metadata matched `2.0.10` / `20010`;
-- filtered `adb logcat` showed no app `FATAL EXCEPTION` and no ANR;
-- `20260917-phone-webview-probe-v24` confirmed one live WebView DevTools target with title `Local Climate Link`, URL `https://localhost/` and an available debugger WebSocket;
-- the repo remained clean after each device task and still resolved to exact tested HEAD `0463af650...`.
+## Current stable product model
 
-This is launch/runtime smoke evidence, not a claim that every product screen and BLE workflow was manually exercised end-to-end. Future feature changes should still get focused physical checks for the affected interaction.
+Keep these decisions unchanged:
 
-### Prepared artifact before phone return
+- bottom navigation: `Plugs | Thermometers | Settings`;
+- automation creation starts from a concrete Plug;
+- Time is a Plug automation type, not a global Time surface;
+- `InstalledAutomation` is the durable installed automation entity;
+- a plain saved Plug remains useful before/after automation assignment;
+- phone BLE and Shelly BLE discovery feed the same saved sensor/readings model;
+- display name is separate from hardware identity (`model` + `gen`);
+- one relay owner: do not let climate automation and another scheduler/owner control the same relay without explicit combined-control design.
 
-Before the phone was available, `20260917-post-cleanup-android-build-v20` had already produced a valid alpha APK from `c0fa5496...`:
+## Recent completed UI work — do not regress
+
+### Shared styled selects
+
+Commit:
 
 ```text
-APK: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
-size: 4.4 MB
-APK SHA-256: cbee2239905cd46b3f989ffbcb262f9dfcf8282a32ab64f7884d46950ae935b7
-alpha signer SHA-256: 2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76
+7a5f6c26f7c229c024cdaddedae3a03a63ca992e
+Replace native selects with shared listbox
 ```
 
-The phone QA later used the normal rebuild/install workflow rather than treating that earlier local artifact as a permanent release binary.
+All current mobile production native selects were migrated to the shared styled `SelectField` / listbox pattern. Android/WebView system select popups must not return.
 
-## Product model — keep stable
+### Shared contextual info popovers
 
-Bottom navigation:
+Commit:
 
 ```text
-Plugs | Thermometers | Settings
+d5037a48a7670838845e01926ec9f5b86303fcc0
+Unify contextual info popovers
 ```
 
-Ownership model:
+Contextual help uses the shared `InfoPopover`. `Escape` closes only the top info layer rather than the underlying modal.
+
+### Contextual info placement / viewport safety
+
+Commit:
 
 ```text
-physical Plug -> zero or one installed automation for that relay
+2f7364544015db1b1be8cc8b43366efca0f09922
+Standardize contextual info placement
 ```
 
-Keep these decisions:
+Canonical UI rule:
 
-- automation entry starts from a concrete Plug,
-- Time is a Plug automation type, not a global Time section,
-- `InstalledAutomation` remains the durable installed-automation entity,
-- `setupDraftStore.ts` remains setup/device metadata, not a second automation registry,
-- a plain saved Plug remains useful for telemetry, direct relay control on the dashboard and later automation assignment,
-- phone BLE and Shelly-side BLE discovery feed the same saved-sensor/readings model,
-- user names are separate from hardware identity (`model` + `gen`).
+- contextual `i` belongs directly beside the label/title it explains;
+- right edge is for actions/state controls such as gear, delete, refresh, checkbox/toggle;
+- shared `InfoLabel` owns field-label + info placement;
+- modal title info is rendered beside the title;
+- `InfoPopover` is clamped to the phone viewport;
+- do not reintroduce ad-hoc `IconInfoCircle` placement.
 
-## Architecture cleanup completed
+The user visually checked this on the phone and said it is sufficiently good.
 
-Commit `c67ac66c...` resolves the concrete debt found by the 2026-09-17 re-audit without introducing new stores or transport layers.
+Verification for `2f736454...`:
 
-### Presentation boundaries
+- focused `hardware-setup.test.tsx`: 61/61 passed;
+- full `pnpm check`: passed;
+- installed on Samsung SM-S906B / Android 16;
+- package `link.localclimate.app`, versionName `2.0.10`, versionCode `20010`;
+- MainActivity top-resumed;
+- device smoke check found no app FATAL/ANR.
 
-- `SensorSetupPage.tsx` no longer owns the full saved-thermometer card presentation; that responsibility is moved to `SensorSetupPresentation.tsx`.
-- Shelly setup modal/presentation responsibilities are split across the existing presentation layer, including focused `ShellySettingsModal.tsx` and `ShellyBleDiscoveryModal.tsx` boundaries.
-- the empty `.sensor-setup-panel {}` selector was removed.
-- repository architecture budgets were restored instead of raised.
+## Active goal: Developer tools / diagnostics cleanup
 
-### Generic Shelly runtime ownership
+The user supplied phone screenshots of:
 
-The legacy generic hardware-setup AUTO/MANUAL path was removed.
+1. the Rule page `Developer tools` section with four large stacked buttons;
+2. `Shelly Script preview` modal;
+3. the old setup-time `Developer diagnostics` screen before a rule exists;
+4. the same old diagnostics screen with script data present;
+5. nested diagnostic cards/groups including Input/Processing/Output, BLE/sensor, Script/clock, Shelly telemetry.
 
-Generic Shelly setup no longer exposes `AUTO`, `MANUAL`, `ON`, `OFF` runtime automation controls and no longer owns the old `Script.Start` / `Script.Stop` mode switching path. Installed automation control remains under `flows/installations/*`, where the managed runtime stays authoritative.
+The user explicitly approved an architecture-first cleanup before deciding final metric placement.
 
-Temporary script stop/restart that belongs specifically to Shelly BLE-discovery cleanup is unchanged and must not be confused with normal AUTO/MANUAL runtime control.
+### Problems confirmed by screenshots and code audit
 
-### Dashboard refresh regression caught during verification
+The current setup Developer tools mixes three ownership domains:
 
-An intermediate lint cleanup made `PlainPlugCard` refresh depend on an unstable mutation callback and caused `automation-dashboard.test.tsx` to grow until JS heap OOM. That change was rejected before commit.
+- setup-time script inspection/recovery;
+- installed automation diagnostics;
+- generic Shelly/device diagnostics.
 
-The final implementation keeps refresh tied to physical target identity (`device.id` / `baseUrl`) while a ref provides the latest refresh function. The dashboard test then returned to normal execution.
+The old `DiagnosticsSetupPage` is a legacy global/setup surface. It has:
 
-## Verification completed on final code
+- a separate Shelly selector;
+- persisted `diagnosticShellyId` state;
+- manual `Refresh diagnostics`;
+- a hidden/pseudo `#diagnostics` setup tab;
+- nested cards inside a surrounding setup card/context;
+- an error state when no LCL automation script exists, because it reads `/script/{id}/diag`.
 
-Local Agent task `20260917-boundary-cleanup-code-v19` completed successfully on the exact final diff.
+This no longer matches the product model where automation entry starts from a concrete Plug.
 
-`pnpm check` passed before commit and again in the pre-push hook. In both complete runs the mobile suite reported:
+There are effectively two diagnostics systems today:
+
+1. legacy setup diagnostics:
+   - `apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx`
+   - `apps/mobile/src/flows/hardware-setup/useHardwareDiagnosticsFlow.ts`
+   - separate `diagnosticShellyId` in `setupDraftStore.ts`;
+2. installed automation diagnostics:
+   - `apps/mobile/src/screens/InstallationDiagnosticsModal.tsx`
+   - `apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts`
+   - directly bound to a concrete `InstalledAutomation`;
+   - already supports automatic polling and focus/reconnect semantics.
+
+The installed-automation model is the canonical direction.
+
+## APPROVED FIRST IMPLEMENTATION BATCH
+
+Do this before redesigning which individual metrics live where.
+
+### 1. Developer tools on Rule setup: only two setup-owned actions
+
+Keep:
+
+- `Shelly Script preview`;
+- `Load from Shelly` (existing rule recovery/import into the form).
+
+Remove from Rule setup Developer tools:
+
+- `Remove from Shelly`;
+- `Open technical diagnostics`.
+
+The current four huge vertically stacked buttons are visually too heavy. Present the two remaining setup actions as a compact pair/group without changing their underlying semantics.
+
+`Load from Shelly` is valid setup functionality: it reads the existing managed script, decodes it, and restores sensor, mode, thresholds, VPD and advanced settings into the draft form.
+
+### 2. Delete automation belongs to InstalledAutomation, not setup Developer tools
+
+Do not keep the setup-time script-delete path just because it already exists.
+
+Installed automation deletion already has the correct safety semantics under `flows/installations/*`: verify managed script identity, reject conflicts, force relay OFF, stop/delete, and verify the result.
+
+Remove setup-owned delete UI/state/mutation where no longer needed.
+
+### 3. Remove legacy setup diagnostics surface
+
+Remove the old setup diagnostics concept rather than restyling it:
+
+- remove `DiagnosticsSetupPage.tsx`;
+- remove setup `DiagnosticsSetupFlow` contract;
+- remove hidden `diagnostics` tab/hash route from `HardwareSetupScreen`;
+- remove `Back to rule` developer diagnostics context;
+- remove persisted `diagnosticShellyId` and setter from `setupDraftStore`;
+- remove legacy setup diagnostic composition from `useHardwareSetupFlow`;
+- remove `useHardwareDiagnosticsFlow.ts` and its focused test if no longer referenced;
+- remove the install-flow dependency on `refreshDiagnostics` after the safe relay test.
+
+Automation diagnostics should not be offered before an installed automation exists.
+
+### 4. Installed automation diagnostics becomes the only automation diagnostics surface
+
+Keep `InstallationDiagnosticsModal` bound to the concrete `ClimateInstalledAutomation`.
+
+It already queries through `useInstalledAutomationDiagnostics` / `useInstalledAutomationResourceDiagnostics` and can self-refresh.
+
+Remove the visible/manual refresh action from the diagnostics UI. Use automatic refresh as the normal pattern.
+
+Current established runtime refresh patterns to respect:
+
+- plain Plug runtime: 5 s while active, no background polling, mount/focus/reconnect refetch;
+- installed automation default runtime: 30 s;
+- open `InstallationDiagnosticsModal`: currently 3 s via `INSTALLATION_DIAGNOSTICS_REFRESH_MS`.
+
+Do not introduce another hand-written polling mechanism if React Query already owns the query lifecycle.
+
+### 5. Technical modal/workspace consistency
+
+`Shelly Script preview` is already reasonably good visually and uses the shared `Modal` + `ScriptPreview` path.
+
+The next implementation should make long technical views follow one shared technical-workspace modal pattern rather than each modal having arbitrary geometry.
+
+Do NOT force short confirmation/delete dialogs to become full-height workspaces. The common pattern is for long technical content, not every modal regardless of purpose.
+
+### 6. Do NOT yet redistribute all metrics
+
+That is the NEXT design phase, after the surface cleanup is stable.
+
+Expected future ownership split, not yet the first batch:
+
+Plug/device settings candidates:
+
+- model/gen;
+- base URL / open Shelly panel;
+- firmware;
+- Wi-Fi RSSI;
+- uptime / NTP / clock;
+- Scripts/Bluetooth/Matter state;
+- power, voltage, current, energy;
+- plug temperature;
+- Shelly RAM/system telemetry.
+
+Installed automation diagnostics candidates:
+
+- automation Input -> Processing -> Output;
+- effective thresholds / control value / reason;
+- rule relay vs Shelly relay;
+- selected sensor and BLE packet state;
+- config hash;
+- managed script running state;
+- script CPU/memory;
+- automation-specific runtime state.
+
+Do not move these yet until the user reviews the cleaned surface.
+
+## Failed Local Agent attempt v76 — exact continuation clue
+
+Task:
 
 ```text
-Test Files  31 passed (31)
-Tests       171 passed (171)
+20260918-developer-tools-scope-cleanup-phone-v76
 ```
 
-The final verification also passed:
+It reconstructed the approved cleanup from the clean remote `2f736454...` and successfully reached mobile typecheck, but failed in `pnpm quality:ux` because the UX gate still contains a hard-coded path to the file that the cleanup deletes:
 
-- formatting,
-- lint,
-- `quality:ux`,
-- `quality:repo`,
-- typecheck,
-- workspace tests,
-- core coverage gate,
-- production build,
-- `git diff --check`.
+```text
+apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx
+```
 
-Earlier runner failures (`ERR_IPC_CHANNEL_CLOSED`, worker OOM, idle timeout) were investigated rather than accepted as product failures. The final `pnpm check` completed normally after fixing the real dashboard refresh loop.
+The exact error was `ENOENT` while `scripts/quality/ux-gate.mjs` tried to open that deleted file.
 
-## Plain Plug live runtime
+Known stale quality-gate references that must be audited when deleting the page:
 
-Plain saved Plug cards are live runtime surfaces, not one-shot setup snapshots.
+- `scripts/quality/ux-gate.mjs` includes `DiagnosticsSetupPage.tsx` in `hardwareSetupPagePaths` / feedback-contract page paths;
+- `scripts/quality/repository-gate.mjs` has a page-to-contract mapping for `DiagnosticsSetupPage.tsx -> DiagnosticsSetupFlow`.
 
-- `usePlainShellyRuntime` owns the dashboard query for a Plug that has no installed automation;
-- the query polls every 5 s only while the card is active and uses only `Shelly.GetStatus`;
-- native app resume is included in the dashboard runtime-query refetch predicate;
-- ON/OFF updates the relay indicator optimistically, refreshes immediately, then performs a 1 s settle read so Shelly `apower` has time to catch up;
-- generic `useShellyControlFlow` remains for setup/status responsibilities and is not used as the high-frequency telemetry loop;
-- installed climate/time automations keep their existing dedicated runtime-query ownership.
+The v76 production code got through `@lcl/mobile typecheck` before the UX-gate failure. The failure does NOT prove the UI/architecture patch itself is invalid; the quality tooling must be migrated with the removed surface.
 
-Regression coverage must preserve both active polling and the delayed-power case where the first post-`Switch.Set` status still reports `0 W`.
+For reference only, the control branch contains the previous deterministic patch script:
 
-## Diagnostics/logging decision
+```text
+.agent/scripts/20260918-developer-tools-scope-cleanup-v74.py
+```
 
-Do not create another logging module.
+It is useful for understanding intended edits, but do not blindly depend on failed local state. Re-audit against current remote branch and make one coherent patch including quality gates and tests.
 
-The repository already has:
+## Required regression coverage for the first batch
 
-- `packages/diagnostics` for bounded structured diagnostics/redaction/support export,
-- `apps/mobile/src/app/runtimeDiagnostics.ts` for browser/WebView runtime errors and unhandled rejections.
+Update tests to lock the architecture, not old copy/layout details.
 
-The physical launch/logcat QA did not reveal a concrete observability gap that justifies another logging layer. If a future device flow lacks evidence, add only small structured events through the existing diagnostics boundaries. Do not add noisy `console.log` instrumentation or log raw secrets, MACs/IPs unnecessarily.
+At minimum protect:
 
-## Nearest next UX slice
+- Rule Developer tools exposes exactly the two approved setup actions;
+- setup no longer exposes `Remove from Shelly` or `Open technical diagnostics`;
+- no setup `#diagnostics` pseudo-route/page remains;
+- no standalone diagnostic Shelly selector/manual setup refresh remains;
+- installed automation diagnostics opens for the concrete installation;
+- open installed diagnostics uses automatic polling;
+- no visible manual refresh action is required for normal diagnostics updates;
+- existing safe automation deletion stays under InstalledAutomation ownership;
+- script preview remains available and functional;
+- `Load from Shelly` recovery remains functional.
 
-The next agreed small UX task remains the thermometer card header:
+Do not revive stale broad responsive E2E as a blocker for this focused batch unless it directly covers this current navigation path. The old responsive spec contains known stale expectations from previous UI generations.
 
-- Tabler thermometer/temperature icon in the upper-left,
-- align with Plug-card header rhythm,
-- briefly pulse blue only when the existing per-sensor sample `seenAtMs` strictly advances,
-- no pulse on mount/rerender/tab switch,
-- no second freshness store.
+## Process guardrails — user explicitly wants the fast flow
 
-The new saved-sensor presentation boundary created by `c67ac66c...` is the correct place for this behavior.
+The user was unhappy with long chains of tiny retry tasks. Use this workflow:
 
-## Process guardrails
+```text
+one coherent implementation pass
+-> focused lint/typecheck/tests
+-> one full pnpm check
+-> commit/push
+-> one Android build/install + focused device smoke
+```
 
-- continue on `work/plug-screen-automation-entry-20260917`,
-- use the exact Local Agent binding above,
-- check `.agent/status/daemon.json` before a new Local Agent task,
-- never edit the same work branch while a Local Agent task is active,
-- keep changes small and behavior-oriented,
-- preserve `InstalledAutomation` ownership and runtime safety,
-- do not raise architecture budgets to hide responsibility growth,
-- use the established Android/ADB workflow in `docs/development/android-device-adb.md` for future physical checks.
+Do not run a full Android rebuild after every micro-fix.
+Do not create a new patcher/task for every one-line correction if it can be fixed coherently before the validation pass.
+Do not add full responsive E2E to a small UX/refactor batch by default.
+
+After a Local Agent task is queued, do a quick health check to confirm it was actually picked up and did not fail immediately. Once confirmed healthy/running, do not poll faster than the Local Agent contract allows; use >=2 minutes for healthy work.
+
+## First actions in the new chat
+
+1. Read `AGENTS.md`.
+2. Read this file in full.
+3. Read `.agent/status/daemon.json` on `agent-control`.
+4. Verify remote work branch / workspace / clean working tree.
+5. Confirm the product baseline is still `2f736454...` beneath this handoff-doc commit.
+6. Re-audit the files touched by the approved first Developer tools cleanup, including both quality gates.
+7. Implement the approved first batch in one coherent pass.
+8. Focused tests -> full `pnpm check` -> commit/push -> one physical S22+ install/smoke.
+9. Stop before redistributing individual diagnostics metrics; present the cleaned surface to the user for the next design decision.
