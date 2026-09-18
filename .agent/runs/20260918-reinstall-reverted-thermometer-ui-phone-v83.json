@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 3,
-  "command": "pnpm android:phone-alpha",
-  "pid": 3417,
+  "command": "set -euo pipefail; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+  "pid": 4069,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T21:20:55.598407+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-18T21:21:21.949796+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 3,
   "stage_phase": "commands",
   "task_id": "20260918-reinstall-reverted-thermometer-ui-phone-v83",
@@ -18,5 +18,5 @@
   "task_digest": "1b699a1f82fea83494c5506b2967e3f7e3f552efaec115261812c565801f2210",
   "daemon_version": "4.18.22",
   "daemon_pid": 3250,
-  "updated_at": "2026-09-18T21:20:55.680838+00:00"
+  "updated_at": "2026-09-18T21:21:22.020899+00:00"
 }
