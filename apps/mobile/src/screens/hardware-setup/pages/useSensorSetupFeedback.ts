@@ -3,10 +3,9 @@ import { useEffect, useRef } from 'react';
 import type { Translate } from '../../../app/i18n.js';
 import { mutationError } from '../helpers.js';
 import type { SensorSetupFlow } from '../pageContracts.js';
+import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 
 type PushToast = (tone: ToastTone, title: string, detail?: string) => void;
-
-const SAVED_SENSOR_LIVE_SCAN_RETRY_MS = 1000;
 
 type SensorSetupFeedbackOptions = {
   flow: SensorSetupFlow;
@@ -38,87 +37,7 @@ export const useSensorSetupFeedback = ({
     flow.phoneBleScanMutation.reset();
   }, [flow.phoneBleScanMutation, pushToast, t]);
 
-  useEffect(() => {
-    if (!shouldRunSavedSensorLiveScan) {
-      flow.stopSavedSensorLiveScan();
-      return;
-    }
-
-    flow.startSavedSensorLiveScan();
-    return () => flow.stopSavedSensorLiveScan();
-  }, [
-    flow.startSavedSensorLiveScan,
-    flow.stopSavedSensorLiveScan,
-    shouldRunSavedSensorLiveScan
-  ]);
-
-  useEffect(() => {
-    if (shouldRunSavedSensorLiveScan && !flow.savedSensorLiveScanState.running) {
-      const retryTimer = setTimeout(() => {
-        flow.startSavedSensorLiveScan();
-      }, SAVED_SENSOR_LIVE_SCAN_RETRY_MS);
-
-      return () => clearTimeout(retryTimer);
-    }
-
-    return undefined;
-  }, [
-    flow.savedSensorLiveScanState.running,
-    flow.startSavedSensorLiveScan,
-    shouldRunSavedSensorLiveScan
-  ]);
-
-  useEffect(() => {
-    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const clearResumeTimer = () => {
-      if (resumeTimer !== null) {
-        clearTimeout(resumeTimer);
-        resumeTimer = null;
-      }
-    };
-
-    const scheduleResume = () => {
-      if (!shouldRunSavedSensorLiveScan) {
-        return;
-      }
-
-      clearResumeTimer();
-      resumeTimer = setTimeout(() => {
-        resumeTimer = null;
-        void flow.restartSavedSensorLiveScan();
-      }, 250);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        clearResumeTimer();
-        flow.stopSavedSensorLiveScan();
-        return;
-      }
-
-      scheduleResume();
-    };
-
-    const handleFocus = () => {
-      if (document.visibilityState !== 'hidden') {
-        scheduleResume();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      clearResumeTimer();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [
-    flow.restartSavedSensorLiveScan,
-    flow.stopSavedSensorLiveScan,
-    shouldRunSavedSensorLiveScan
-  ]);
+  useSavedSensorLiveScanLifecycle({ flow, enabled: shouldRunSavedSensorLiveScan });
 
   useEffect(() => {
     if (!flow.setPvvxTimeMutation.isSuccess) {

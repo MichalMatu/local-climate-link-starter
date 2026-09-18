@@ -5,12 +5,14 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent as ReactKeyboardEvent
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode
 } from 'react';
 
 export type SelectFieldOption<T extends string = string> = {
   value: T;
   label: string;
+  meta?: ReactNode;
   disabled?: boolean;
 };
 
@@ -266,6 +268,10 @@ export const SelectField = <T extends string>({
                 ref={(element) => {
                   optionRefs.current[index] = element;
                 }}
+                aria-describedby={
+                  option.meta ? `${listboxId}-option-${index}-meta` : undefined
+                }
+                aria-label={option.label}
                 aria-selected={selected}
                 className={`lcl-select-field__option ${
                   selected ? 'lcl-select-field__option--selected' : ''
@@ -278,7 +284,17 @@ export const SelectField = <T extends string>({
                 onFocus={() => setActiveIndex(index)}
                 onKeyDown={(event) => handleOptionKeyDown(event, index)}
               >
-                <span>{option.label}</span>
+                <span className="lcl-select-field__option-content">
+                  <span className="lcl-select-field__option-label">{option.label}</span>
+                  {option.meta && (
+                    <span
+                      className="lcl-select-field__option-meta"
+                      id={`${listboxId}-option-${index}-meta`}
+                    >
+                      {option.meta}
+                    </span>
+                  )}
+                </span>
                 <span className="lcl-select-field__check" aria-hidden="true">
                   {selected ? '✓' : ''}
                 </span>

@@ -1,4 +1,5 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
+import { IconDeviceMobile, IconPlug } from '@tabler/icons-react';
 import {
   FeedbackPanel,
   InfoLabel,
@@ -16,6 +17,8 @@ import {
   type TranslationKey
 } from '../../../app/i18n.js';
 import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
+import { useRuleSensorReadings } from '../../../flows/hardware-setup/useRuleSensorReadings.js';
+import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS
@@ -24,6 +27,30 @@ import { useToastQueue } from '../useToastQueue.js';
 import { RuleAdvancedSettingsInline } from './RuleAdvancedSettingsInline.js';
 import { stripTrailingUnit } from './formUnits.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
+
+const formatCompactSensorMetric = (
+  value: number | undefined,
+  unit: string,
+  fractionDigits: number
+): string =>
+  typeof value === 'number' && Number.isFinite(value)
+    ? `${value.toFixed(fractionDigits)}${unit}`
+    : `—${unit}`;
+
+const formatSensorLiveSummary = (
+  reading:
+    | {
+        temperatureC?: number | undefined;
+        humidityPct?: number | undefined;
+        vpdKpa?: number | undefined;
+      }
+    | undefined
+): string =>
+  `${formatCompactSensorMetric(reading?.temperatureC, '°C', 1)} · ${formatCompactSensorMetric(
+    reading?.humidityPct,
+    '%',
+    1
+  )} · ${formatCompactSensorMetric(reading?.vpdKpa, 'kPa', 2)}`;
 
 type RuleControlCopy = {
   labelKey: TranslationKey;
@@ -181,6 +208,15 @@ export const RuleSetupPage = ({
   const maxOnHours = Number(flow.maxOnHoursInput);
   const rssiMinDbm = Number(flow.rssiMinInput);
   const isScriptActionBusy = flow.loadAutomationScriptMutation.isPending;
+  useSavedSensorLiveScanLifecycle({
+    flow,
+    enabled: flow.sensorDevices.length > 0
+  });
+  const sensorLiveReadings = useRuleSensorReadings({
+    sensorDevices: flow.sensorDevices,
+    samplesBySensorId: flow.sensorSamplesById,
+    preferredShellyBaseUrl: flow.selectedShelly?.baseUrl
+  });
   const ruleSummary = formatRuleSummary({
     actionLabel: t(copy.actionLabelKey),
     direction,
@@ -261,10 +297,35 @@ export const RuleSetupPage = ({
           ariaLabel={t('hardware.rule.selectedSensor')}
           value={flow.selectedSensorId ?? ''}
           placeholder={t('hardware.flow.noSelectedSensor')}
-          options={flow.sensorDevices.map((device) => ({
-            value: device.id,
-            label: device.name
-          }))}
+          options={flow.sensorDevices.map((device) => {
+            const reading = sensorLiveReadings[device.runtimeAddress.toUpperCase()];
+            const sourceTitle =
+              reading?.source === 'shelly-runtime'
+                ? `${t('hardware.rule.selectedShelly')}: ${reading.shellyName ?? ''}`
+                : reading?.source === 'phone'
+                  ? t('hardware.sensor.scanPhoneTitle')
+                  : undefined;
+
+            return {
+              value: device.id,
+              label: device.name,
+              meta: (
+                <span
+                  className={`rule-sensor-option-live${
+                    reading?.stale ? ' rule-sensor-option-live--stale' : ''
+                  }`}
+                  title={sourceTitle}
+                >
+                  {reading?.source === 'shelly-runtime' ? (
+                    <IconPlug aria-hidden="true" />
+                  ) : reading?.source === 'phone' ? (
+                    <IconDeviceMobile aria-hidden="true" />
+                  ) : null}
+                  <span>{formatSensorLiveSummary(reading)}</span>
+                </span>
+              )
+            };
+          })}
           onChange={flow.selectSensorDevice}
         />
       </div>

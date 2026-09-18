@@ -2261,6 +2261,34 @@ describe('HardwareSetupScreen', () => {
     expect(within(sensorCard).getByText('-72 dBm')).toBeInTheDocument();
   });
 
+  it('shows compact live values on the right side of the rule thermometer options', async () => {
+    vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      sensorDevices: [
+        {
+          id: 'A4:C1:38:4F:24:CD',
+          name: 'Xiaomi salon',
+          runtimeAddress: 'A4:C1:38:4F:24:CD',
+          profileId: 'xiaomi_lywsd03mmc_bthome_v2'
+        }
+      ],
+      selectedSensorId: 'A4:C1:38:4F:24:CD'
+    });
+    renderHardwareSetup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    await waitFor(() => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Termometr' }));
+
+    const option = await screen.findByRole('option', { name: 'Xiaomi salon' });
+    expect(option).toHaveTextContent('21.3°C · 45.7% · 1.38kPa');
+    expect(option.querySelector('.tabler-icon-device-mobile')).not.toBeNull();
+    const metadata = option.querySelector('.lcl-select-field__option-meta');
+    expect(metadata).not.toBeNull();
+    expect(metadata).toHaveTextContent('21.3°C · 45.7% · 1.38kPa');
+  });
+
   it('restarts saved thermometer live scan after app visibility resumes', async () => {
     vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
     useHardwareSetupDraftStore.setState({

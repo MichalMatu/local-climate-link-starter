@@ -89,9 +89,31 @@
   gap: var(--lcl-spacing-md);
   justify-content: space-between;
   min-height: var(--lcl-size-control-min-height);
-  padding: 0 var(--lcl-spacing-md);
+  padding: var(--lcl-spacing-xs) var(--lcl-spacing-md);
   text-align: left;
   width: 100%;
+}
+
+.lcl-select-field__option-content {
+  align-items: baseline;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.lcl-select-field__option-label {
+  flex: 1 1 8rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lcl-select-field__option-meta {
+  flex: 0 0 auto;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .lcl-select-field__option:hover,

@@ -172,7 +172,7 @@ export const HardwareSetupScreen = ({
     if (activeTab !== 'shelly') {
       cleanupBleDiscoveryRef.current();
     }
-    if (activeTab !== 'sensor') {
+    if (activeTab !== 'sensor' && activeTab !== 'rule') {
       stopSavedSensorLiveScanRef.current();
     }
   }, [activeTab]);
