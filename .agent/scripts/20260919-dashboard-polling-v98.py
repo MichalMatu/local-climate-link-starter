@@ -28,8 +28,11 @@ new = "  lastVpd = 1.31,\n  dataState = 'ok',\n  plugRelayOn = true,\n  ruleRela
 if old not in test:
     raise SystemExit('diagnostic options anchor missing')
 test = test.replace(old, new, 1)
-test = test.replace("  p: [true, 42.3, 230.1, 0.2, 1234, 31.2],", "  p: [plugRelayOn, 42.3, 230.1, 0.2, 1234, 31.2],", 1)
-# Replace only the rule relay field in the diagnostic g array.
+test = test.replace(
+    "  p: [true, 42.3, 230.1, 0.2, 1234, 31.2],",
+    "  p: [plugRelayOn, 42.3, 230.1, 0.2, 1234, 31.2],",
+    1,
+)
 old = "    -51,\n    true,\n    'ok',\n"
 new = "    -51,\n    ruleRelayOn,\n    'ok',\n"
 if old not in test:
@@ -68,5 +71,64 @@ if anchor not in test:
     raise SystemExit('test insertion anchor missing')
 test = test.replace(anchor, insert + anchor, 1)
 
+anchor = "  it('shows a native time schedule and opens it by stable installation id', async () => {\n"
+insert = r'''  it('keeps the fresh-reading pulse working while the automation is in MANUAL mode', async () => {
+    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
+    let lastSeenUptimeMs = 12_300_000;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof URL ? input.toString() : String(input);
+      const target = new URL(url, 'http://localhost').searchParams.get('target');
+      if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
+        return jsonResponse(
+          diagnosticPayload({
+            lastSeenUptimeMs,
+            plugRelayOn: false,
+            ruleRelayOn: false
+          })
+        );
+      }
+
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        id?: number | string;
+        method?: string;
+      };
+      const result =
+        body.method === 'Script.Eval' ? { result: '1' } : controlRpcResult(body.method);
+      return jsonResponse({ id: body.id ?? 1, result });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { queryClient } = renderDashboard();
+    expect(await screen.findByText('21.4°C')).toBeVisible();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'MANUAL' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      )
+    );
+
+    const leadingIcon = document.querySelector(
+      '.automation-card--climate .automation-card__leading-icon'
+    );
+    expect(leadingIcon).not.toBeNull();
+    expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--active');
+    expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--fresh');
+
+    lastSeenUptimeMs = 12_330_000;
+    await act(async () => {
+      await queryClient.refetchQueries({
+        predicate: (query) => query.queryKey[0] === 'installed-automation-diagnostics'
+      });
+    });
+    await waitFor(() =>
+      expect(leadingIcon).toHaveClass('automation-card__leading-icon--fresh')
+    );
+  });
+
+'''
+if anchor not in test:
+    raise SystemExit('manual pulse insertion anchor missing')
+test = test.replace(anchor, insert + anchor, 1)
+
 test_path.write_text(test)
-print('Applied 5s dashboard diagnostics polling and physical relay precedence')
+print('Applied 5s dashboard diagnostics polling, physical relay precedence, and MANUAL pulse coverage')
