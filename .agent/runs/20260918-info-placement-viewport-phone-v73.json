@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "git add -A && git commit -m 'Standardize contextual info placement' && git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917 && test -z \"$(git status --porcelain)\" && git rev-parse HEAD",
-  "pid": 32656,
+  "command": "pnpm android:phone-alpha",
+  "pid": 33057,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T16:09:26.653177+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-18T16:09:31.708883+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-info-placement-viewport-phone-v73",
@@ -18,5 +18,5 @@
   "task_digest": "fbb2b62d7604484c78fd2c048f79394766ce2f7c082f4279b7405b57991c1591",
   "daemon_version": "4.18.22",
   "daemon_pid": 28381,
-  "updated_at": "2026-09-18T16:09:26.666084+00:00"
+  "updated_at": "2026-09-18T16:09:31.776701+00:00"
 }
