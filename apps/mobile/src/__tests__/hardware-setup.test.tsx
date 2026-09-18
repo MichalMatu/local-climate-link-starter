@@ -317,11 +317,12 @@ const confirmRuleScriptDelete = async () => {
 };
 
 const getRuleSummary = () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Podsumowanie reguły' }));
-  const dialog = screen.getByRole('dialog', { name: 'Podsumowanie reguły' });
+  const trigger = screen.getByRole('button', { name: 'Podsumowanie reguły' });
+  fireEvent.click(trigger);
+  const popover = screen.getByRole('tooltip', { name: 'Podsumowanie reguły' });
   const snapshot = document.createElement('article');
-  snapshot.textContent = dialog.textContent;
-  fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
+  snapshot.textContent = popover.textContent;
+  fireEvent.click(trigger);
   return snapshot;
 };
 
@@ -1421,7 +1422,7 @@ describe('HardwareSetupScreen', () => {
     expect(scannedHosts).toContain('192.168.0.21');
   });
 
-  it('shows Shelly scan help as a compact tooltip', async () => {
+  it('shows Shelly scan help in the shared info popover', async () => {
     renderHardwareSetup();
 
     const addDialog = await openShellyAddDialog('scan');
@@ -1463,21 +1464,24 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(tooltipButton);
     expect(tooltipButton).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.click(tooltipButton);
-    expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
-
-    expect(within(dialog).getByText('Skanowanie Shelly')).toBeInTheDocument();
-    expect(within(dialog).getByText(/192\.168\.33\.1/)).toBeInTheDocument();
-    expect(within(dialog).getByText(/oznacza je jako Dodane/i)).toBeInTheDocument();
+    const scanInfoPopover = within(dialog).getByRole('tooltip', {
+      name: 'Skanowanie Shelly'
+    });
+    expect(within(scanInfoPopover).getByText(/192\.168\.33\.1/)).toBeInTheDocument();
     expect(
-      within(dialog).getByText(/Zakres: 254 adresy.*1 min 36 s/)
+      within(scanInfoPopover).getByText(/oznacza je jako Dodane/i)
+    ).toBeInTheDocument();
+    expect(
+      within(scanInfoPopover).getByText(/Zakres: 254 adresy.*1 min 36 s/)
     ).toBeInTheDocument();
 
     fireEvent.change(within(dialog).getByLabelText('Do'), {
       target: { value: '192.168.0.32' }
     });
 
-    expect(within(dialog).getByText(/Zakres: 32 adresy.*12 s/)).toBeInTheDocument();
+    expect(
+      within(scanInfoPopover).getByText(/Zakres: 32 adresy.*12 s/)
+    ).toBeInTheDocument();
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'AP' }));
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.33.1');
@@ -1486,6 +1490,14 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'STA' }));
     expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
     expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(tooltipButton).toHaveAttribute('aria-expanded', 'false'));
+    await waitFor(() =>
+      expect(
+        within(dialog).queryByRole('tooltip', { name: 'Skanowanie Shelly' })
+      ).not.toBeInTheDocument()
+    );
+    expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
   });
 
   it('uses the discovered model as the default scanner name without populating the manual form', async () => {
@@ -2471,7 +2483,23 @@ describe('HardwareSetupScreen', () => {
         .getByText('VPD assist', { selector: 'strong' })
         .closest('section');
       expect(vpdSection).not.toBeNull();
-      expect(within(vpdSection as HTMLElement).getByRole('button')).toBeInTheDocument();
+      const vpdInfoButton = within(vpdSection as HTMLElement).getByRole('button', {
+        name: /Opcjonalnie koryguje punkt pracy/
+      });
+      fireEvent.click(vpdInfoButton);
+      const vpdInfoPopover = within(vpdSection as HTMLElement).getByRole('tooltip', {
+        name: 'VPD assist'
+      });
+      expect(
+        within(vpdInfoPopover).getByText(/Nie zmienia limitów bezpieczeństwa/)
+      ).toBeInTheDocument();
+      expect(
+        within(vpdInfoPopover).getByText(/Nie rozszerza zakresu/)
+      ).toBeInTheDocument();
+      fireEvent.click(vpdInfoButton);
+      expect(
+        within(vpdSection as HTMLElement).queryByRole('tooltip', { name: 'VPD assist' })
+      ).not.toBeInTheDocument();
 
       expect(screen.getByLabelText('Włącz poniżej %')).toHaveValue(45);
       expect(screen.getByLabelText('Wyłącz powyżej %')).toHaveValue(55);
@@ -2636,12 +2664,21 @@ describe('HardwareSetupScreen', () => {
     const dialog = await screen.findByRole('dialog', {
       name: 'Skanuj termometry BLE'
     });
+    const bleInfoButton = within(dialog).getByRole('button', {
+      name: 'Informacja o skanowaniu BLE'
+    });
+    expect(bleInfoButton).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(bleInfoButton);
+    expect(bleInfoButton).toHaveAttribute('aria-expanded', 'true');
     expect(
-      within(dialog).getByRole('button', { name: 'Informacja o skanowaniu BLE' })
-    ).toBeInTheDocument();
-    expect(within(dialog).getByRole('tooltip')).toHaveTextContent(
+      within(dialog).getByRole('tooltip', {
+        name: 'Na czas skanowania zatrzymuję automatyzację'
+      })
+    ).toHaveTextContent(
       'Shelly uruchomi osobny skrypt skanera BLE. Przekaźnik zostanie ustawiony na OFF, a po zakończeniu skanu wznowię automatyzację, jeśli była uruchomiona.'
     );
+    fireEvent.click(bleInfoButton);
+    expect(bleInfoButton).toHaveAttribute('aria-expanded', 'false');
     expect(
       within(dialog).queryByRole('button', { name: 'Rozpocznij skan BLE' })
     ).not.toBeInTheDocument();

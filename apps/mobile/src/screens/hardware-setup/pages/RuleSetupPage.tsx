@@ -1,7 +1,14 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
-import { FeedbackPanel, Modal, ScriptPreview, SelectField, ToastViewport } from '@lcl/ui';
+import {
+  FeedbackPanel,
+  InfoPopover,
+  Modal,
+  ScriptPreview,
+  SelectField,
+  ToastViewport
+} from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
-import { IconInfoCircle, IconTrash } from '@tabler/icons-react';
+import { IconTrash } from '@tabler/icons-react';
 import { useCallback, useId, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
@@ -277,15 +284,12 @@ export const RuleSetupPage = ({
       <div className="field">
         <div className="rule-field-label-row">
           <span>{t('hardware.rule.ruleMode')}</span>
-          <button
-            aria-label={t('hardware.rule.summaryTitle')}
-            className="icon-action rule-summary-icon-action"
-            type="button"
+          <InfoPopover
+            label={t('hardware.rule.summaryTitle')}
             title={t('hardware.rule.summaryTitle')}
-            onClick={() => setDialog('summary')}
           >
-            <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
-          </button>
+            {ruleSummary}
+          </InfoPopover>
         </div>
         <SelectField<RulePresetId>
           ariaLabel={t('hardware.rule.ruleMode')}
@@ -344,15 +348,15 @@ export const RuleSetupPage = ({
         <div className="rule-vpd-assist__header">
           <div className="icon-action-row">
             <strong>{t('hardware.rule.vpdAssistTitle')}</strong>
-            <button
-              aria-label={t('hardware.rule.vpdAssistHint')}
-              className="icon-action rule-summary-icon-action"
-              type="button"
-              title={t('hardware.rule.vpdAssistHint')}
-              onClick={() => setDialog('vpd-info')}
+            <InfoPopover
+              label={t('hardware.rule.vpdAssistHint')}
+              title={t('hardware.rule.vpdAssistTitle')}
             >
-              <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
-            </button>
+              {t('hardware.rule.vpdAssistHint')}
+              <br />
+              <br />
+              {t('hardware.rule.vpdRangeHint')}
+            </InfoPopover>
           </div>
           <label className="toggle-row rule-vpd-assist__toggle">
             <input
@@ -473,25 +477,6 @@ export const RuleSetupPage = ({
         </details>
       </div>
 
-      <Modal
-        closeLabel={t('common.close')}
-        open={dialog === 'summary'}
-        title={t('hardware.rule.summaryTitle')}
-        onClose={() => setDialog('none')}
-      >
-        <p>{ruleSummary}</p>
-      </Modal>
-      <Modal
-        closeLabel={t('common.close')}
-        open={dialog === 'vpd-info'}
-        title={t('hardware.rule.vpdAssistTitle')}
-        onClose={() => setDialog('none')}
-      >
-        <>
-          <p>{t('hardware.rule.vpdAssistHint')}</p>
-          <p>{t('hardware.rule.vpdRangeHint')}</p>
-        </>
-      </Modal>
       <Modal
         closeLabel={t('common.close')}
         open={dialog === 'install-block' && flow.installMutation.isError}

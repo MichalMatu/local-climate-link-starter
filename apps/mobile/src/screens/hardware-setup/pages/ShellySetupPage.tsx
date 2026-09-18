@@ -1,5 +1,5 @@
 import type { ShellySetupFlow } from '../pageContracts.js';
-import { InfoTooltip, Modal, ToastViewport } from '@lcl/ui';
+import { InfoPopover, Modal, ToastViewport } from '@lcl/ui';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -348,7 +348,7 @@ export const ShellySetupPage = ({
         closeLabel={t('common.close')}
         headerActions={
           <span className="shelly-network-scan__info">
-            <InfoTooltip
+            <InfoPopover
               label={t('hardware.shelly.infoScanLabel')}
               title={t('hardware.shelly.infoScanTitle')}
             >
@@ -356,7 +356,7 @@ export const ShellySetupPage = ({
               <br />
               <br />
               {t('hardware.shelly.scannerBehavior')}
-            </InfoTooltip>
+            </InfoPopover>
           </span>
         }
         open={isAddShellyModalOpen}

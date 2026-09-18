@@ -180,12 +180,12 @@
   color: var(--lcl-color-status-danger-text);
 }
 
-.lcl-info-tooltip {
+.lcl-info-popover {
   display: inline-flex;
   position: relative;
 }
 
-.lcl-info-tooltip__trigger {
+.lcl-info-popover__trigger {
   align-items: center;
   background: var(--lcl-color-surface-muted);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
@@ -203,39 +203,31 @@
   width: var(--lcl-size-toast-dismiss-size);
 }
 
-.lcl-info-tooltip__trigger:hover,
-.lcl-info-tooltip__trigger:focus-visible {
+.lcl-info-popover__trigger:hover,
+.lcl-info-popover__trigger:focus-visible {
   border-color: var(--lcl-color-accent);
 }
 
-.lcl-info-tooltip__bubble {
+.lcl-info-popover__bubble {
   background: var(--lcl-color-surface);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-md);
   box-shadow: var(--lcl-shadow-lg);
+  box-sizing: border-box;
   color: var(--lcl-color-text);
   display: grid;
   font-size: var(--lcl-font-size-sm);
   gap: var(--lcl-spacing-xs);
   line-height: var(--lcl-line-height-normal);
-  box-sizing: border-box;
   max-width: min(
     var(--lcl-size-tooltip-max-width),
     calc(100vw - (var(--lcl-spacing-lg) * 2))
   );
-  opacity: 0;
   overflow-wrap: anywhere;
   padding: var(--lcl-spacing-md);
-  pointer-events: none;
   position: absolute;
   right: 0;
   top: calc(100% + var(--lcl-spacing-sm));
-  transform: translateY(calc(var(--lcl-spacing-xs) * -1));
-  transition:
-    opacity var(--lcl-motion-fast),
-    transform var(--lcl-motion-fast),
-    visibility var(--lcl-motion-fast);
-  visibility: hidden;
   width: min(
     var(--lcl-size-tooltip-max-width),
     calc(100vw - (var(--lcl-spacing-lg) * 2))
@@ -243,21 +235,13 @@
   z-index: var(--lcl-z-index-toast);
 }
 
-.lcl-info-tooltip__bubble strong {
+.lcl-info-popover__bubble strong {
   font-size: var(--lcl-font-size-sm);
   line-height: var(--lcl-line-height-compact);
 }
 
-.lcl-info-tooltip__bubble span {
+.lcl-info-popover__content {
   color: var(--lcl-color-text-muted);
-}
-
-.lcl-info-tooltip:not(.lcl-info-tooltip--suppress-hover):hover .lcl-info-tooltip__bubble,
-.lcl-info-tooltip--open .lcl-info-tooltip__bubble,
-.lcl-info-tooltip__trigger:active + .lcl-info-tooltip__bubble {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
 }
 
 .lcl-metrics,

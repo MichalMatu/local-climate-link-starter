@@ -574,6 +574,12 @@ const checkMobileProductionMarkupHygiene = async () => {
         'production mobile layout/style must use tokenized CSS classes, not inline style objects'
       );
     }
+    if (source.includes('IconInfoCircle')) {
+      addFailure(
+        path,
+        'contextual mobile info must use the shared @lcl/ui InfoPopover instead of ad-hoc IconInfoCircle buttons'
+      );
+    }
   }
 };
 

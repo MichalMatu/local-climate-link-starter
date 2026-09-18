@@ -1,10 +1,5 @@
 import type { ShellyClockStatus, ShellyComponentState } from '@lcl/shelly-client';
-import {
-  IconBluetooth,
-  IconInfoCircle,
-  IconPencil,
-  IconTrash
-} from '@tabler/icons-react';
+import { IconBluetooth, IconSettings, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useId, useState } from 'react';
 import {
   useTranslation,
@@ -316,7 +311,7 @@ export const SavedShellyDeviceCard = ({
             title={t('hardware.shelly.settings')}
             onClick={() => onInfoOpen(device)}
           >
-            <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
+            <IconSettings className="icon-action__svg" aria-hidden="true" />
           </button>
           <button
             className="icon-action icon-action--danger"
