@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-rule-setup-final-layout-v87",
+  "task_digest": "0482dabc9d7021c9b29146d178c9619ebdac4667503e56082c3479dd5f1c9e47",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T22:13:28.175523+00:00",
+  "attempt_id": "60b132819512a398773e1b48",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 1326,
+  "updated_at": "2026-09-18T22:13:28.175655+00:00",
+  "pid": 1326
+}
