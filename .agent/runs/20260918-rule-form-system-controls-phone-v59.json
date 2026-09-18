@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "git add apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/RuleAdvancedSettingsInline.tsx apps/mobile/src/theme/theme.css && git commit -m 'Align rule form controls' && git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917 && test -z \"$(git status --porcelain)\" && git rev-parse HEAD",
-  "pid": 90646,
+  "command": "pnpm android:phone-alpha",
+  "pid": 91244,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T14:08:59.143919+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-18T14:09:08.297763+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-rule-form-system-controls-phone-v59",
@@ -18,5 +18,5 @@
   "task_digest": "926191c060fe2950c2d539ce1b8e0a6d6b7b92b7ad2c530b71465a9081568fa7",
   "daemon_version": "4.18.22",
   "daemon_pid": 85000,
-  "updated_at": "2026-09-18T14:08:59.237471+00:00"
+  "updated_at": "2026-09-18T14:09:08.390718+00:00"
 }
