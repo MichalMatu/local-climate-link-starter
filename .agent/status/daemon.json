@@ -2,8 +2,8 @@
   "version": 1,
   "daemon_version": "4.18.22",
   "state": "idle",
-  "pid": 95788,
-  "updated_at": "2026-09-18T12:59:41.089607+00:00",
+  "pid": 4248,
+  "updated_at": "2026-09-18T13:04:50.597269+00:00",
   "self_revision": "224046066b0df92544337db0ee623e372629e726",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -23,8 +23,7 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 95788,
+  "worker_pid": 4248,
   "supervisor_pid": 65293,
-  "last_task_id": "20260918-rule-setup-ux-batch-phone-v53",
   "execution_variant": "parallel"
 }
