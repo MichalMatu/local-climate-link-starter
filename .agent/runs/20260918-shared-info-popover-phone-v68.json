@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-shared-info-popover-phone-v68",
+  "task_digest": "497c62972855eb9d0256ac49e9cd4625406cc2943870fb7261909ef3dd269947",
+  "idle_timeout": 300,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T15:41:26.605233+00:00",
+  "attempt_id": "c385f5f208d105fa78fb694a",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 97199,
+  "updated_at": "2026-09-18T15:41:26.605364+00:00",
+  "pid": 97199
+}
