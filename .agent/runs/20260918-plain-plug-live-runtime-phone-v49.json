@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 29828,
+  "command": "set -euo pipefail; apk_path=$(adb shell pm path link.localclimate.app | head -n 1 | tr -d '\\r' | sed 's/^package://'); test -n \"$apk_path\"; adb pull \"$apk_path\" /tmp/lcl-v49-installed.apk >/dev/null; unzip -p /tmp/lcl-v49-installed.apk 'assets/public/assets/*.js' | grep -Fq 'plain-shelly-runtime'; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; git rev-parse HEAD; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+  "pid": 30799,
   "timeout": 2400,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T00:15:11.585988+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-18T00:15:43.092565+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-plain-plug-live-runtime-phone-v49",
@@ -18,5 +18,5 @@
   "task_digest": "cfe5f4e8dc9417a8809a6d008a80d83e28efc121394946cf67b2fb147c831b78",
   "daemon_version": "4.18.22",
   "daemon_pid": 25961,
-  "updated_at": "2026-09-18T00:15:11.661585+00:00"
+  "updated_at": "2026-09-18T00:15:43.115455+00:00"
 }
