@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-rule-setup-ux-batch-phone-v50",
+  "task_digest": "f1b4515600b82b265e65d8aef0939a52384130fd780e0e89a7e3e03119ff208e",
+  "idle_timeout": 300,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T12:34:38.130066+00:00",
+  "attempt_id": "3fb0bc72e4d4619d051e76cf",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 75428,
+  "updated_at": "2026-09-18T12:34:38.130141+00:00",
+  "pid": 75428
+}
