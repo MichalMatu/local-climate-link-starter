@@ -2818,18 +2818,6 @@ select {
 }
 
 /* Rule setup compact UX batch */
-.rule-field-label-row {
-  align-items: center;
-  display: flex;
-  gap: var(--lcl-spacing-sm);
-  justify-content: space-between;
-}
-
-.rule-field-label-row > label {
-  color: var(--lcl-color-text);
-  font-weight: var(--lcl-font-weight-semibold);
-}
-
 .rule-vpd-assist {
   background: transparent;
   border: 0;

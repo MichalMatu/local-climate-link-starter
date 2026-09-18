@@ -1458,7 +1458,7 @@ describe('HardwareSetupScreen', () => {
     const tooltipButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu Shelly'
     });
-    expect(tooltipButton.closest('.lcl-modal__header-actions')).not.toBeNull();
+    expect(tooltipButton.closest('.lcl-modal__title-row')).not.toBeNull();
     expect(tooltipButton.closest('.shelly-network-scan__body')).toBeNull();
     expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
 
@@ -1498,6 +1498,67 @@ describe('HardwareSetupScreen', () => {
       ).not.toBeInTheDocument()
     );
     expect(screen.getByRole('dialog', { name: 'Dodaj gniazdko' })).toBe(dialog);
+  });
+
+  it('keeps shared info popovers inside a narrow phone viewport', async () => {
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+    const rect = (left: number, top: number, width: number, height: number) =>
+      ({
+        x: left,
+        y: top,
+        left,
+        top,
+        right: left + width,
+        bottom: top + height,
+        width,
+        height,
+        toJSON: () => ({})
+      }) as DOMRect;
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains('lcl-info-popover__trigger')) {
+          return rect(4, 700, 40, 40);
+        }
+        if (this.classList.contains('lcl-info-popover__bubble')) {
+          return rect(0, 0, 352, 180);
+        }
+        return originalGetBoundingClientRect.call(this);
+      });
+
+    try {
+      renderHardwareSetup();
+      const dialog = await openShellyAddDialog('scan');
+      const infoButton = within(dialog).getByRole('button', {
+        name: 'Informacja o skanowaniu Shelly'
+      });
+      fireEvent.click(infoButton);
+      const popover = within(dialog).getByRole('tooltip', { name: 'Skanowanie Shelly' });
+
+      await waitFor(() => {
+        const left = Number.parseFloat(popover.style.left);
+        const top = Number.parseFloat(popover.style.top);
+        expect(left).toBeGreaterThanOrEqual(16);
+        expect(left + 352).toBeLessThanOrEqual(374);
+        expect(top).toBeGreaterThanOrEqual(16);
+        expect(top + 180).toBeLessThanOrEqual(828);
+      });
+    } finally {
+      rectSpy.mockRestore();
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: originalInnerWidth
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: originalInnerHeight
+      });
+    }
   });
 
   it('uses the discovered model as the default scanner name without populating the manual form', async () => {
@@ -2474,8 +2535,12 @@ describe('HardwareSetupScreen', () => {
 
       const ruleModeField = screen.getByLabelText('Tryb reguły').closest('.field');
       expect(ruleModeField).not.toBeNull();
+      const ruleModeInfoLabel = within(ruleModeField as HTMLElement)
+        .getByText('Tryb reguły')
+        .closest('.lcl-info-label');
+      expect(ruleModeInfoLabel).not.toBeNull();
       expect(
-        within(ruleModeField as HTMLElement).getByRole('button', {
+        within(ruleModeInfoLabel as HTMLElement).getByRole('button', {
           name: 'Podsumowanie reguły'
         })
       ).toBeInTheDocument();
@@ -2483,7 +2548,11 @@ describe('HardwareSetupScreen', () => {
         .getByText('VPD assist', { selector: 'strong' })
         .closest('section');
       expect(vpdSection).not.toBeNull();
-      const vpdInfoButton = within(vpdSection as HTMLElement).getByRole('button', {
+      const vpdInfoLabel = screen
+        .getByText('VPD assist', { selector: 'strong' })
+        .closest('.lcl-info-label');
+      expect(vpdInfoLabel).not.toBeNull();
+      const vpdInfoButton = within(vpdInfoLabel as HTMLElement).getByRole('button', {
         name: /Opcjonalnie koryguje punkt pracy/
       });
       fireEvent.click(vpdInfoButton);
@@ -2667,6 +2736,7 @@ describe('HardwareSetupScreen', () => {
     const bleInfoButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu BLE'
     });
+    expect(bleInfoButton.closest('.lcl-modal__title-row')).not.toBeNull();
     expect(bleInfoButton).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(bleInfoButton);
     expect(bleInfoButton).toHaveAttribute('aria-expanded', 'true');

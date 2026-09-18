@@ -1,4 +1,4 @@
-import { FeedbackPanel, InfoPopover, Modal } from '@lcl/ui';
+import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
@@ -45,14 +45,11 @@ export const ShellyBleDiscoveryModal = ({
       open={open}
       size="task"
       title={t('hardware.shelly.scanBleTitle')}
-      headerActions={
-        <InfoPopover
-          label={t('hardware.shelly.scanBleInfoLabel')}
-          title={t('hardware.shelly.scanBleInfoTitle')}
-        >
-          {t('hardware.shelly.scanBleInfo')}
-        </InfoPopover>
-      }
+      titleInfo={{
+        label: t('hardware.shelly.scanBleInfoLabel'),
+        title: t('hardware.shelly.scanBleInfoTitle'),
+        content: t('hardware.shelly.scanBleInfo')
+      }}
       actions={
         shouldShowRestart ? (
           <button

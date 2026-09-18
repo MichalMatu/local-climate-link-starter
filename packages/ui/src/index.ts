@@ -2,6 +2,7 @@ import './styles.css';
 
 export * from './feedback/StatusBadge.js';
 export * from './feedback/InfoPopover.js';
+export * from './feedback/InfoLabel.js';
 export * from './feedback/ToastViewport.js';
 export * from './feedback/FeedbackPanel.js';
 export * from './primitives/SensorCard.js';

@@ -577,7 +577,13 @@ const checkMobileProductionMarkupHygiene = async () => {
     if (source.includes('IconInfoCircle')) {
       addFailure(
         path,
-        'contextual mobile info must use the shared @lcl/ui InfoPopover instead of ad-hoc IconInfoCircle buttons'
+        'contextual mobile info must use shared InfoLabel or Modal.titleInfo instead of ad-hoc IconInfoCircle buttons'
+      );
+    }
+    if (source.includes('<InfoPopover')) {
+      addFailure(
+        path,
+        'mobile product screens must not place InfoPopover directly; use InfoLabel beside labels or Modal.titleInfo beside modal titles'
       );
     }
   }

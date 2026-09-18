@@ -1,7 +1,7 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
 import {
   FeedbackPanel,
-  InfoPopover,
+  InfoLabel,
   Modal,
   ScriptPreview,
   SelectField,
@@ -282,15 +282,13 @@ export const RuleSetupPage = ({
       </div>
 
       <div className="field">
-        <div className="rule-field-label-row">
-          <span>{t('hardware.rule.ruleMode')}</span>
-          <InfoPopover
-            label={t('hardware.rule.summaryTitle')}
-            title={t('hardware.rule.summaryTitle')}
-          >
-            {ruleSummary}
-          </InfoPopover>
-        </div>
+        <InfoLabel
+          label={t('hardware.rule.ruleMode')}
+          infoLabel={t('hardware.rule.summaryTitle')}
+          title={t('hardware.rule.summaryTitle')}
+        >
+          {ruleSummary}
+        </InfoLabel>
         <SelectField<RulePresetId>
           ariaLabel={t('hardware.rule.ruleMode')}
           value={flow.rulePreset}
@@ -346,18 +344,16 @@ export const RuleSetupPage = ({
 
       <section className="rule-vpd-assist">
         <div className="rule-vpd-assist__header">
-          <div className="icon-action-row">
-            <strong>{t('hardware.rule.vpdAssistTitle')}</strong>
-            <InfoPopover
-              label={t('hardware.rule.vpdAssistHint')}
-              title={t('hardware.rule.vpdAssistTitle')}
-            >
-              {t('hardware.rule.vpdAssistHint')}
-              <br />
-              <br />
-              {t('hardware.rule.vpdRangeHint')}
-            </InfoPopover>
-          </div>
+          <InfoLabel
+            label={<strong>{t('hardware.rule.vpdAssistTitle')}</strong>}
+            infoLabel={t('hardware.rule.vpdAssistHint')}
+            title={t('hardware.rule.vpdAssistTitle')}
+          >
+            {t('hardware.rule.vpdAssistHint')}
+            <br />
+            <br />
+            {t('hardware.rule.vpdRangeHint')}
+          </InfoLabel>
           <label className="toggle-row rule-vpd-assist__toggle">
             <input
               aria-label={t('hardware.rule.vpdAssistTitle')}

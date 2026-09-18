@@ -1,6 +1,13 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { InfoPopover } from '../feedback/InfoPopover.js';
 
 type ModalInitialFocus = 'dialog' | 'first-control';
+
+export interface ModalTitleInfo {
+  label: string;
+  title?: string;
+  content: ReactNode;
+}
 
 export interface ModalProps {
   open: boolean;
@@ -12,6 +19,7 @@ export interface ModalProps {
   initialFocus?: ModalInitialFocus;
   size?: 'default' | 'diagnostic' | 'task' | 'workspace';
   children: ReactNode;
+  titleInfo?: ModalTitleInfo;
   headerActions?: ReactNode;
   actions?: ReactNode;
   onClose(): void;
@@ -44,6 +52,7 @@ export const Modal = ({
   initialFocus = 'dialog',
   size = 'default',
   children,
+  titleInfo,
   headerActions,
   actions,
   onClose
@@ -162,8 +171,15 @@ export const Modal = ({
         onClick={(event) => event.stopPropagation()}
       >
         <header className="lcl-modal__header">
-          <div>
-            <h2 id={titleId}>{title}</h2>
+          <div className="lcl-modal__heading">
+            <div className="lcl-modal__title-row">
+              <h2 id={titleId}>{title}</h2>
+              {titleInfo && (
+                <InfoPopover label={titleInfo.label} title={titleInfo.title}>
+                  {titleInfo.content}
+                </InfoPopover>
+              )}
+            </div>
             {description && <p id={descriptionId}>{description}</p>}
           </div>
           {headerActions && (
