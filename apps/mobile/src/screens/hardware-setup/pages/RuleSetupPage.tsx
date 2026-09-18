@@ -42,7 +42,6 @@ const formatSensorLiveSummary = (
     | {
         temperatureC?: number | undefined;
         humidityPct?: number | undefined;
-        vpdKpa?: number | undefined;
       }
     | undefined
 ): string =>
@@ -50,7 +49,7 @@ const formatSensorLiveSummary = (
     reading?.humidityPct,
     '%',
     1
-  )} · ${formatCompactSensorMetric(reading?.vpdKpa, 'kPa', 2)}`;
+  )}`;
 
 type RuleControlCopy = {
   labelKey: TranslationKey;

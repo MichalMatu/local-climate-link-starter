@@ -2282,11 +2282,13 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Termometr' }));
 
     const option = await screen.findByRole('option', { name: 'Xiaomi salon' });
-    expect(option).toHaveTextContent('21.3°C · 45.7% · 1.38kPa');
+    expect(option).toHaveTextContent('21.3°C · 45.7%');
+    expect(option).not.toHaveTextContent('kPa');
     expect(option.querySelector('.tabler-icon-device-mobile')).not.toBeNull();
     const metadata = option.querySelector('.lcl-select-field__option-meta');
     expect(metadata).not.toBeNull();
-    expect(metadata).toHaveTextContent('21.3°C · 45.7% · 1.38kPa');
+    expect(metadata).toHaveTextContent('21.3°C · 45.7%');
+    expect(metadata).not.toHaveTextContent('kPa');
   });
 
   it('restarts saved thermometer live scan after app visibility resumes', async () => {

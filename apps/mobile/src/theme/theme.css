@@ -2982,7 +2982,7 @@ select {
   align-items: center;
   color: var(--lcl-color-text-muted);
   display: inline-flex;
-  font-size: var(--lcl-font-size-sm);
+  font-size: var(--lcl-font-size-xs);
   font-variant-numeric: tabular-nums;
   gap: var(--lcl-spacing-xs);
   line-height: var(--lcl-line-height-tight);
