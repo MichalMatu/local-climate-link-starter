@@ -65,6 +65,7 @@ const formatPlugEnergy = (value: number | null | undefined): string => {
 };
 
 const CLIMATE_READING_PULSE_MS = 650;
+const DASHBOARD_DIAGNOSTICS_REFRESH_MS = 5_000;
 
 const ClimateAutomationCard = ({
   installation,
@@ -74,7 +75,9 @@ const ClimateAutomationCard = ({
   onOpen(installationId: string): void;
 }) => {
   const { t } = useTranslation();
-  const query = useInstalledAutomationDiagnostics(installation);
+  const query = useInstalledAutomationDiagnostics(installation, {
+    refetchInterval: DASHBOARD_DIAGNOSTICS_REFRESH_MS
+  });
   const control = useInstalledAutomationControl(installation);
   const action = useInstalledAutomationActions(installation);
 
@@ -137,8 +140,8 @@ const ClimateAutomationCard = ({
   const automationRunning = controlsVerified && controlStatus?.automationMode === 'auto';
   const manualControl = controlsVerified && controlStatus?.automationMode === 'manual';
   const relayState =
-    controlStatus?.relayOn ??
     snapshot?.plug?.relayState ??
+    controlStatus?.relayOn ??
     snapshot?.diagnostics.relayState;
   const controlsHumidity = installation.config.rule.control.metric === 'humidity';
   const purposeLabel = controlsHumidity

@@ -71,7 +71,9 @@ const diagnosticPayload = ({
   effectiveOnThreshold = 19,
   effectiveOffThreshold = 20,
   lastVpd = 1.31,
-  dataState = 'ok'
+  dataState = 'ok',
+  plugRelayOn = true,
+  ruleRelayOn = true
 }: {
   lastSeenUptimeMs?: number;
   uptimeSec?: number;
@@ -79,20 +81,22 @@ const diagnosticPayload = ({
   effectiveOffThreshold?: number;
   lastVpd?: number | null;
   dataState?: string;
+  plugRelayOn?: boolean;
+  ruleRelayOn?: boolean;
 } = {}) => ({
   v: 1,
   z: 'lcl-test',
   s: ['A4:C1:38:4F:24:CD', 'Xiaomi salon'],
   q: [0, 0, 19, 20, 120, -85],
   y: ['09:31', 1_782_667_904, uptimeSec],
-  p: [true, 42.3, 230.1, 0.2, 1234, 31.2],
+  p: [plugRelayOn, 42.3, 230.1, 0.2, 1234, 31.2],
   g: [
     lastSeenUptimeMs,
     21.4,
     55.2,
     91,
     -51,
-    true,
+    ruleRelayOn,
     'ok',
     12_250_000,
     12_290_000,
@@ -500,6 +504,32 @@ describe('AutomationDashboardScreen', () => {
     ).toHaveLength(0);
   });
 
+  it('prefers the fresh diagnostic plug relay over a stale control poll for the icon', async () => {
+    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof URL ? input.toString() : String(input);
+      const target = new URL(url, 'http://localhost').searchParams.get('target');
+      if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
+        return jsonResponse(diagnosticPayload({ plugRelayOn: true, ruleRelayOn: true }));
+      }
+
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        id?: number | string;
+        method?: string;
+      };
+      return jsonResponse({ id: body.id ?? 1, result: controlRpcResult(body.method) });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderDashboard();
+
+    const card = (await screen.findByText('Salon')).closest('article') as HTMLElement;
+    const leadingIcon = card.querySelector('.automation-card__leading-icon');
+    await waitFor(() =>
+      expect(leadingIcon).toHaveClass('automation-card__leading-icon--active')
+    );
+  });
+
   it('derives current VPD from runtime temperature and humidity when Shelly omits it', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
     vi.stubGlobal(
@@ -557,6 +587,59 @@ describe('AutomationDashboardScreen', () => {
       await new Promise((resolve) => setTimeout(resolve, CLIMATE_PULSE_TEST_WAIT_MS));
     });
     expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--fresh');
+  });
+
+  it('keeps the fresh-reading pulse working while the automation is in MANUAL mode', async () => {
+    useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
+    let lastSeenUptimeMs = 12_300_000;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof URL ? input.toString() : String(input);
+      const target = new URL(url, 'http://localhost').searchParams.get('target');
+      if (url.includes('/script/1/diag') || target?.includes('/script/1/diag')) {
+        return jsonResponse(
+          diagnosticPayload({
+            lastSeenUptimeMs,
+            plugRelayOn: false,
+            ruleRelayOn: false
+          })
+        );
+      }
+
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        id?: number | string;
+        method?: string;
+      };
+      const result =
+        body.method === 'Script.Eval' ? { result: '1' } : controlRpcResult(body.method);
+      return jsonResponse({ id: body.id ?? 1, result });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { queryClient } = renderDashboard();
+    expect(await screen.findByText('21.4°C')).toBeVisible();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'MANUAL' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      )
+    );
+
+    const leadingIcon = document.querySelector(
+      '.automation-card--climate .automation-card__leading-icon'
+    );
+    expect(leadingIcon).not.toBeNull();
+    expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--active');
+    expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--fresh');
+
+    lastSeenUptimeMs = 12_330_000;
+    await act(async () => {
+      await queryClient.refetchQueries({
+        predicate: (query) => query.queryKey[0] === 'installed-automation-diagnostics'
+      });
+    });
+    await waitFor(() =>
+      expect(leadingIcon).toHaveClass('automation-card__leading-icon--fresh')
+    );
   });
 
   it('shows a native time schedule and opens it by stable installation id', async () => {
