@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-info-placement-viewport-phone-v69",
+  "task_digest": "0d3a14c358185d4fb1c6d0eb74d0ff8240b8414143aee9c71064e353df58d173",
+  "idle_timeout": 300,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T16:00:40.191538+00:00",
+  "attempt_id": "2c567bee6501933ed8a356d8",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 20291,
+  "updated_at": "2026-09-18T16:00:40.191639+00:00",
+  "pid": 20291
+}
