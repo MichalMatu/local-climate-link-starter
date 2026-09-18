@@ -1,0 +1,19 @@
+{
+  "id": "20260919-detail-diagnostics-layout-v99",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": ["android-device"],
+  "command_timeout": 3000,
+  "task_timeout": 10800,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = \"49da046054d1a67e3b12cd3a7608a9a91a651a27\"; test -z \"$(git status --porcelain)\"; git status --short --branch",
+    "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-detail-diagnostics-layout-v99.py | python3 -; pnpm exec prettier --write apps/mobile/src/flows/installations/diagnosticPresentation.ts apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/InstallationDiagnosticsModal.tsx apps/mobile/src/__tests__/automation-detail.test.tsx apps/mobile/src/theme/theme.css; git diff --check; git diff --stat",
+    "set -euo pipefail; pnpm --filter @lcl/mobile typecheck; pnpm quality:ux; pnpm quality:repo; pnpm --filter @lcl/mobile exec vitest run src/__tests__/automation-detail.test.tsx --passWithNoTests",
+    "pnpm check",
+    "set -euo pipefail; git diff --check; git add -A; git commit -m 'Refocus climate detail on diagnostics'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\""
+  ]
+}
