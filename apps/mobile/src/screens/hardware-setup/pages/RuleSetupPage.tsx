@@ -8,7 +8,6 @@ import {
   ToastViewport
 } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
-import { IconTrash } from '@tabler/icons-react';
 import { useCallback, useId, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
@@ -153,14 +152,12 @@ const formatRuleSummary = ({
 type RuleSetupPageProps = HardwarePageProps<RuleSetupFlow> & {
   selectablePresets?: readonly RulePresetId[];
   showShellySelector?: boolean;
-  onOpenDiagnostics?: () => void;
 };
 
 export const RuleSetupPage = ({
   flow,
   selectablePresets = ALL_RULE_PRESETS,
-  showShellySelector = true,
-  onOpenDiagnostics
+  showShellySelector = true
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<RuleDialogState>('none');
@@ -183,9 +180,7 @@ export const RuleSetupPage = ({
   const minChangeMin = Number(flow.minChangeMinInput);
   const maxOnHours = Number(flow.maxOnHoursInput);
   const rssiMinDbm = Number(flow.rssiMinInput);
-  const isScriptActionBusy =
-    flow.loadAutomationScriptMutation.isPending ||
-    flow.deleteAutomationScriptMutation.isPending;
+  const isScriptActionBusy = flow.loadAutomationScriptMutation.isPending;
   const ruleSummary = formatRuleSummary({
     actionLabel: t(copy.actionLabelKey),
     direction,
@@ -229,13 +224,6 @@ export const RuleSetupPage = ({
       return;
     }
     flow.loadAutomationScript(flow.selectedShelly);
-  };
-
-  const deleteManagedScript = () => {
-    if (!flow.selectedShelly) {
-      return;
-    }
-    flow.deleteAutomationScript(flow.selectedShelly);
   };
 
   const runSafeRelayTest = () => {
@@ -425,8 +413,7 @@ export const RuleSetupPage = ({
         <details className="rule-progressive-disclosure rule-progressive-disclosure--developer">
           <summary>{t('hardware.rule.developerTools')}</summary>
           <div className="rule-progressive-disclosure__body">
-            <p>{t('hardware.rule.developerToolsHint')}</p>
-            <div className="action-row rule-developer-actions">
+            <div className="action-row rule-developer-actions rule-developer-actions--compact">
               <button
                 className="secondary-action"
                 type="button"
@@ -449,25 +436,6 @@ export const RuleSetupPage = ({
                   ? t('hardware.rule.loadingScriptFromShelly')
                   : t('hardware.rule.loadScriptFromShelly')}
               </button>
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                disabled={!flow.selectedShelly || isScriptActionBusy}
-                title={t('hardware.rule.deleteScriptTitle')}
-                onClick={() => setDialog('delete')}
-              >
-                <IconTrash className="icon-action__svg" aria-hidden="true" />
-                {t('hardware.rule.deleteScriptFromShelly')}
-              </button>
-              {onOpenDiagnostics && (
-                <button
-                  className="secondary-action"
-                  type="button"
-                  onClick={onOpenDiagnostics}
-                >
-                  {t('hardware.rule.openDeveloperDiagnostics')}
-                </button>
-              )}
             </div>
           </div>
         </details>
@@ -531,36 +499,6 @@ export const RuleSetupPage = ({
             onCopy={copyScript}
           />
         )}
-      </Modal>
-      <Modal
-        actions={
-          <button
-            className="secondary-action secondary-action--danger"
-            type="button"
-            disabled={
-              !flow.selectedShelly || flow.deleteAutomationScriptMutation.isPending
-            }
-            title={t('hardware.rule.deleteScriptConfirmTitle')}
-            onClick={deleteManagedScript}
-          >
-            {flow.deleteAutomationScriptMutation.isPending
-              ? t('hardware.rule.deleting')
-              : t('common.confirmDelete')}
-          </button>
-        }
-        busy={flow.deleteAutomationScriptMutation.isPending}
-        closeLabel={t('common.close')}
-        open={dialog === 'delete'}
-        title={t('hardware.rule.deleteScriptConfirmTitle')}
-        onClose={() => {
-          if (!flow.deleteAutomationScriptMutation.isPending) {
-            setDialog('none');
-          }
-        }}
-      >
-        <FeedbackPanel tone="warning" title={t('hardware.rule.deleteScriptTitle')}>
-          {t('hardware.rule.deleteScriptConfirmDetail')}
-        </FeedbackPanel>
       </Modal>
       <ToastViewport
         dismissLabel={t('toast.dismiss')}

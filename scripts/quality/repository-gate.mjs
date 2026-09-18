@@ -275,7 +275,6 @@ const checkHardwareSetupArchitecture = async () => {
     'apps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts': 180,
     'apps/mobile/src/screens/hardware-setup/pages/RuleAdvancedSettingsModal.tsx': 220,
     'apps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.ts': 350,
-    'apps/mobile/src/flows/hardware-setup/useHardwareDiagnosticsFlow.ts': 350,
     'apps/mobile/src/flows/hardware-setup/useClimateAutomationInstallFlow.ts': 350
   };
   for (const [path, maxLines] of Object.entries(compositionBudgets)) {
@@ -295,8 +294,6 @@ const checkHardwareSetupArchitecture = async () => {
       'ShellySetupFlow',
     'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 'SensorSetupFlow',
     'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 'RuleSetupFlow',
-    'apps/mobile/src/screens/hardware-setup/pages/DiagnosticsSetupPage.tsx':
-      'DiagnosticsSetupFlow',
     'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx':
       'TimeScheduleSetupFlow'
   };

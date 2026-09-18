@@ -44,7 +44,6 @@ const hardwareSetupDraftSchema = z.object({
   sensorDevices: z.array(sensorDraftDeviceSchema),
   selectedShellyId: z.string().nullable(),
   selectedSensorId: z.string().nullable(),
-  diagnosticShellyId: z.string().nullable(),
   rulePreset: rulePresetSchema,
   onThresholdInput: z.string(),
   offThresholdInput: z.string(),
@@ -70,7 +69,6 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   sensorDevices: [],
   selectedShellyId: null,
   selectedSensorId: null,
-  diagnosticShellyId: null,
   rulePreset: 'heating',
   onThresholdInput: '19',
   offThresholdInput: '20',
@@ -86,7 +84,6 @@ type HardwareSetupDraftState = HardwareSetupDraft & {
   setShellyDeviceMetadata(id: string, metadata: { model: string; gen: number }): void;
   setShellyScriptId(id: string, scriptIdInput: string): void;
   removeShellyDevice(id: string): void;
-  setDiagnosticShellyId(id: string): void;
   setSensorProfileInput(value: SensorProfileId): void;
   setSensorMacInput(value: string): void;
   setSensorNameInput(value: string): void;
@@ -155,10 +152,6 @@ const createStoredDraft = (
     'selectedSensorId' in patch
       ? (patch.selectedSensorId ?? null)
       : state.selectedSensorId,
-  diagnosticShellyId:
-    'diagnosticShellyId' in patch
-      ? (patch.diagnosticShellyId ?? null)
-      : state.diagnosticShellyId,
   rulePreset: patch.rulePreset ?? state.rulePreset,
   onThresholdInput: patch.onThresholdInput ?? state.onThresholdInput,
   offThresholdInput: patch.offThresholdInput ?? state.offThresholdInput,
@@ -211,8 +204,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
             device,
             ...state.shellyDevices.filter((item) => item.id !== device.id)
           ],
-          selectedShellyId: device.id,
-          diagnosticShellyId: device.id
+          selectedShellyId: device.id
         };
         return persistPatch(state, patch);
       }),
@@ -223,8 +215,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           return state;
         }
         const patch = {
-          selectedShellyId: id,
-          diagnosticShellyId: id
+          selectedShellyId: id
         };
         return persistPatch(state, patch);
       }),
@@ -256,18 +247,12 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           state.selectedShellyId === id
             ? (shellyDevices[0]?.id ?? null)
             : state.selectedShellyId;
-        const nextDiagnosticShellyId =
-          state.diagnosticShellyId === id
-            ? (nextSelectedShellyId ?? shellyDevices[0]?.id ?? null)
-            : state.diagnosticShellyId;
 
         return persistPatch(state, {
           shellyDevices,
-          selectedShellyId: nextSelectedShellyId,
-          diagnosticShellyId: nextDiagnosticShellyId
+          selectedShellyId: nextSelectedShellyId
         });
       }),
-    setDiagnosticShellyId: (diagnosticShellyId) => updateDraft({ diagnosticShellyId }),
     setSensorProfileInput: (sensorProfileInput) => set({ sensorProfileInput }),
     setSensorMacInput: (sensorMacInput) => set({ sensorMacInput }),
     setSensorNameInput: (sensorNameInput) => set({ sensorNameInput }),

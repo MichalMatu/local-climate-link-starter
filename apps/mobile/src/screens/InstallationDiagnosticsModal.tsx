@@ -1,5 +1,4 @@
 import { DiagnosticRow, Modal } from '@lcl/ui';
-import { IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
@@ -97,7 +96,6 @@ export const InstallationDiagnosticsModal = ({
   const plug = snapshot?.plug;
   const resources = resourcesQuery.data;
   const missing = t('common.missing');
-  const isRefreshing = diagnosticsQuery.isFetching || resourcesQuery.isFetching;
 
   const formatUptimeAge = (valueUptimeMs: number | null | undefined): string => {
     if (valueUptimeMs == null) return missing;
@@ -119,29 +117,13 @@ export const InstallationDiagnosticsModal = ({
           duration: formatDuration(nowMs - diagnosticsQuery.dataUpdatedAt)
         });
 
-  const refresh = () => {
-    void Promise.allSettled([diagnosticsQuery.refetch(), resourcesQuery.refetch()]);
-  };
   const resourceScriptRunning = resources?.script?.running ?? script?.running ?? null;
 
   return (
     <Modal
       closeLabel={t('common.close')}
-      headerActions={
-        <button
-          className="icon-action"
-          type="button"
-          aria-busy={isRefreshing || undefined}
-          aria-label={t('common.refresh')}
-          title={t('common.refresh')}
-          disabled={isRefreshing}
-          onClick={refresh}
-        >
-          <IconRefresh className="icon-action__svg" aria-hidden="true" />
-        </button>
-      }
       open={open}
-      size="diagnostic"
+      size="workspace"
       title={`${t('common.diagnostics')} · ${installation.shelly.name}`}
       onClose={onClose}
     >

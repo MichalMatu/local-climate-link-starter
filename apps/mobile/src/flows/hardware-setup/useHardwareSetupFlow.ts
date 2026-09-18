@@ -9,11 +9,9 @@ import { useMemo, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
 import {
-  deleteShellyAutomationScript,
   readShellyAutomationScriptState,
   readShellySetupStatus,
-  type ShellyAutomationScriptState,
-  type ShellyControlStatus
+  type ShellyAutomationScriptState
 } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 import { useHardwareSetupReadingsStore } from './sensorReadingsStore.js';
@@ -24,7 +22,6 @@ import {
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
 import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
-import { useHardwareDiagnosticsFlow } from './useHardwareDiagnosticsFlow.js';
 import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
@@ -54,11 +51,6 @@ type ShellyAutomationScriptLoadMutationResult = {
   device: ShellyDraftDevice;
   state: LoadedShellyAutomationScriptState;
   decoded: DecodedShellyThermostatScript;
-};
-
-type ShellyAutomationDeleteMutationResult = {
-  device: ShellyDraftDevice;
-  status: ShellyControlStatus;
 };
 
 const numberInput = (value: number): string => String(Number(value.toFixed(4)));
@@ -119,12 +111,6 @@ export const useHardwareSetupFlow = () => {
   );
   const upsertSensorDevice = useHardwareSetupDraftStore(
     (state) => state.upsertSensorDevice
-  );
-  const diagnosticShellyId = useHardwareSetupDraftStore(
-    (state) => state.diagnosticShellyId
-  );
-  const setDiagnosticShellyIdDraft = useHardwareSetupDraftStore(
-    (state) => state.setDiagnosticShellyId
   );
   const rulePreset = useHardwareSetupDraftStore((state) => state.rulePreset);
   const setRulePreset = useHardwareSetupDraftStore((state) => state.setRulePreset);
@@ -223,7 +209,6 @@ export const useHardwareSetupFlow = () => {
   const updateShellyUrlInput = (value: string) => {
     setShellyUrlInputDraft(value);
     setSetupStatus(null);
-    clearDiagnosticSnapshot();
   };
 
   const selectedShelly = useMemo(
@@ -234,19 +219,6 @@ export const useHardwareSetupFlow = () => {
     () => sensorDevices.find((device) => device.id === selectedSensorId) ?? null,
     [selectedSensorId, sensorDevices]
   );
-  const diagnosticShelly = useMemo(
-    () => shellyDevices.find((device) => device.id === diagnosticShellyId) ?? null,
-    [diagnosticShellyId, shellyDevices]
-  );
-  const {
-    diagnosticSnapshot,
-    diagnosticResources,
-    diagnosticFetchedAtMs,
-    clearDiagnosticSnapshot,
-    diagnosticMutation,
-    diagnosticResourceMutation,
-    refreshDiagnostics
-  } = useHardwareDiagnosticsFlow(diagnosticShelly);
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
@@ -309,8 +281,7 @@ export const useHardwareSetupFlow = () => {
     selectedShelly,
     configState,
     isThresholdValid,
-    isVpdAssistValid,
-    refreshDiagnostics
+    isVpdAssistValid
   });
 
   const checkShellyMutation = useMutation({
@@ -418,22 +389,7 @@ export const useHardwareSetupFlow = () => {
       setMinChangeMinInput(numberInput(settings.minChangeMs / 60_000));
       setMaxOnHoursInput(numberInput(settings.maxOnMs / 3_600_000));
       resetInstallState();
-      clearDiagnosticSnapshot();
       applyControlStatus(device, state.status, null);
-    },
-    onError: (error, device) => applyControlError(device, error)
-  });
-
-  const deleteAutomationScriptMutation = useMutation({
-    mutationFn: async (
-      device: ShellyDraftDevice
-    ): Promise<ShellyAutomationDeleteMutationResult> => ({
-      device,
-      status: await deleteShellyAutomationScript(device.baseUrl)
-    }),
-    onSuccess: ({ device, status }) => {
-      setShellyScriptIdDraft(device.id, '1');
-      applyControlStatus(device, status, t('hardware.flow.scriptDeleted'));
     },
     onError: (error, device) => applyControlError(device, error)
   });
@@ -442,40 +398,27 @@ export const useHardwareSetupFlow = () => {
     loadAutomationScriptMutation.mutate(device);
   };
 
-  const deleteAutomationScript = (device: ShellyDraftDevice) => {
-    deleteAutomationScriptMutation.mutate(device);
-  };
-
   const selectShellyDevice = (id: string) => {
     selectShellyDeviceDraft(id);
     setSetupStatus(null);
-    clearDiagnosticSnapshot();
     resetInstallState();
   };
 
   const selectSensorDevice = (id: string) => {
     selectSensorDeviceDraft(id);
-    clearDiagnosticSnapshot();
     resetInstallState();
-  };
-
-  const setDiagnosticShellyId = (id: string) => {
-    setDiagnosticShellyIdDraft(id);
-    clearDiagnosticSnapshot();
   };
 
   const removeShellyDevice = (id: string) => {
     removeShellyDeviceDraft(id);
     removeShellyControlState(id);
     setSetupStatus(null);
-    clearDiagnosticSnapshot();
     resetInstallState();
   };
 
   const removeSensorDevice = (id: string) => {
     removeSensorDeviceDraft(id);
     clearSensorReadings(id);
-    clearDiagnosticSnapshot();
     resetInstallState();
   };
 
@@ -507,9 +450,6 @@ export const useHardwareSetupFlow = () => {
     selectSensorDevice,
     setSensorDeviceName,
     removeSensorDevice,
-    diagnosticShellyId,
-    setDiagnosticShellyId,
-    diagnosticShelly,
     rulePreset,
     setRulePreset: (value: RulePresetId) => setRulePreset(value),
     onThresholdInput,
@@ -535,9 +475,6 @@ export const useHardwareSetupFlow = () => {
     isVpdAssistValid,
     canRunSafeRelayTest,
     setupStatus,
-    diagnosticSnapshot,
-    diagnosticResources,
-    diagnosticFetchedAtMs,
     checkShellyMutation,
     recheckShellyMutation,
     shellyScanStartInput,
@@ -552,11 +489,9 @@ export const useHardwareSetupFlow = () => {
     resetShellyScan,
     shellyControlStates,
     loadAutomationScriptMutation,
-    deleteAutomationScriptMutation,
     refreshShellyControl,
     acknowledgeShellyControlFeedback,
     loadAutomationScript,
-    deleteAutomationScript,
     bleDiscoverySession,
     bleDiscoverySnapshot,
     startBleDiscoveryMutation,
@@ -581,10 +516,7 @@ export const useHardwareSetupFlow = () => {
     addDiscoveredSensor,
     setPvvxTimeMutation,
     installMutation,
-    safeRelayTestMutation,
-    diagnosticMutation,
-    diagnosticResourceMutation,
-    refreshDiagnostics
+    safeRelayTestMutation
   };
 };
 

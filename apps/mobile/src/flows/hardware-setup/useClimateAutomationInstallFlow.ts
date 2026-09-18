@@ -57,14 +57,12 @@ export const useClimateAutomationInstallFlow = ({
   selectedShelly,
   configState,
   isThresholdValid,
-  isVpdAssistValid,
-  refreshDiagnostics
+  isVpdAssistValid
 }: {
   selectedShelly: ShellyDraftDevice | null;
   configState: ClimateConfigState;
   isThresholdValid: boolean;
   isVpdAssistValid: boolean;
-  refreshDiagnostics: (scriptId?: number) => void;
 }) => {
   const installedAutomations = useInstalledAutomationStore(
     (state) => state.installations
@@ -189,7 +187,6 @@ export const useClimateAutomationInstallFlow = ({
     },
     onSuccess: ({ install }) => {
       setSafeRelayTestState(install);
-      refreshDiagnostics(install.scriptId);
     }
   });
 

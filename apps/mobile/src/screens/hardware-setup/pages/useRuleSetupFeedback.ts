@@ -4,8 +4,7 @@ import type { Translate } from '../../../app/i18n.js';
 import { mutationError } from '../helpers.js';
 import type { RuleSetupFlow } from '../pageContracts.js';
 
-export type RuleDialogState =
-  'none' | 'script' | 'delete' | 'install-block' | 'relay-test';
+export type RuleDialogState = 'none' | 'script' | 'install-block' | 'relay-test';
 
 type PushToast = (tone: ToastTone, title: string, detail?: string) => void;
 
@@ -22,10 +21,6 @@ export const useRuleSetupFeedback = ({
   setDialog,
   t
 }: RuleSetupFeedbackOptions): void => {
-  useEffect(() => {
-    setDialog((current) => (current === 'delete' ? 'none' : current));
-  }, [flow.selectedShellyId, setDialog]);
-
   useEffect(() => {
     if (!flow.loadAutomationScriptMutation.isError) {
       return;
@@ -45,27 +40,6 @@ export const useRuleSetupFeedback = ({
     pushToast('ok', t('hardware.rule.loadScriptDone'));
     flow.loadAutomationScriptMutation.reset();
   }, [flow.loadAutomationScriptMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.deleteAutomationScriptMutation.isError) {
-      return;
-    }
-    pushToast(
-      'warning',
-      t('hardware.rule.deleteScriptFailedTitle'),
-      mutationError(flow.deleteAutomationScriptMutation.error)
-    );
-    flow.deleteAutomationScriptMutation.reset();
-  }, [flow.deleteAutomationScriptMutation, pushToast, t]);
-
-  useEffect(() => {
-    if (!flow.deleteAutomationScriptMutation.isSuccess) {
-      return;
-    }
-    setDialog('none');
-    pushToast('ok', t('hardware.rule.deleteScriptDone'));
-    flow.deleteAutomationScriptMutation.reset();
-  }, [flow.deleteAutomationScriptMutation, pushToast, setDialog, t]);
 
   useEffect(() => {
     if (!flow.installMutation.isError) {

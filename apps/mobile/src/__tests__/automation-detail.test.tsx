@@ -21,6 +21,7 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
+import { INSTALLATION_DIAGNOSTICS_REFRESH_MS } from '../screens/InstallationDiagnosticsModal.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
   new Response(JSON.stringify(payload), {
@@ -449,7 +450,7 @@ describe('InstallationDetailScreen', () => {
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
-  it('opens scoped technical diagnostics without duplicating the installation summary', async () => {
+  it('opens auto-refreshing scoped technical diagnostics in the shared workspace', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
@@ -457,6 +458,8 @@ describe('InstallationDetailScreen', () => {
     expect(await screen.findByText('21.4°C')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
     const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka · Salon' });
+    expect(dialog).toHaveClass('lcl-modal--workspace');
+    expect(within(dialog).queryByRole('button', { name: 'Odśwież' })).toBeNull();
     expect(await within(dialog).findByText('JS użyte teraz')).toBeVisible();
     expect(within(dialog).getByText('CPU skryptu')).toBeVisible();
     expect(within(dialog).getByText('RAM Shelly wolny')).toBeInTheDocument();
@@ -472,11 +475,12 @@ describe('InstallationDetailScreen', () => {
     await waitFor(() => expect(rpcMethods).toContain('Script.GetStatus'));
     expect(rpcMethods).toContain('Sys.GetStatus');
     const before = rpcMethods.filter((method) => method === 'Script.GetStatus').length;
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Odśwież' }));
-    await waitFor(() =>
-      expect(
-        rpcMethods.filter((method) => method === 'Script.GetStatus').length
-      ).toBeGreaterThan(before)
+    await waitFor(
+      () =>
+        expect(
+          rpcMethods.filter((method) => method === 'Script.GetStatus').length
+        ).toBeGreaterThan(before),
+      { timeout: INSTALLATION_DIAGNOSTICS_REFRESH_MS + 2000 }
     );
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
     expect(screen.queryByRole('dialog', { name: 'Diagnostyka · Salon' })).toBeNull();

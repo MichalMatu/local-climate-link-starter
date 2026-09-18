@@ -296,26 +296,6 @@ const openRuleDisclosure = (label: string): HTMLDetailsElement => {
 
 const openRuleDeveloperTools = () => openRuleDisclosure('Narzędzia deweloperskie');
 
-const openRuleDeleteScriptDialog = async () => {
-  openRuleDeveloperTools();
-  fireEvent.click(screen.getByRole('button', { name: 'Usuń z Shelly' }));
-  return screen.findByRole('dialog', {
-    name: 'Potwierdź usunięcie skryptu z Shelly'
-  });
-};
-
-const openDeveloperDiagnostics = () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
-  openRuleDeveloperTools();
-  fireEvent.click(screen.getByRole('button', { name: 'Otwórz diagnostykę techniczną' }));
-};
-
-const confirmRuleScriptDelete = async () => {
-  const dialog = await openRuleDeleteScriptDialog();
-  fireEvent.click(within(dialog).getByRole('button', { name: 'Potwierdź usuń' }));
-  return dialog;
-};
-
 const getRuleSummary = () => {
   const trigger = screen.getByRole('button', { name: 'Podsumowanie reguły' });
   fireEvent.click(trigger);
@@ -758,19 +738,6 @@ describe('HardwareSetupScreen', () => {
     );
   });
 
-  it('does not duplicate app settings inside developer diagnostics', () => {
-    renderHardwareSetup();
-
-    openDeveloperDiagnostics();
-
-    expect(
-      screen.queryByRole('button', { name: 'Ustawienia aplikacji' })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('dialog', { name: 'Ustawienia aplikacji' })
-    ).not.toBeInTheDocument();
-  });
-
   it('keeps keyboard focus inside setup modals and restores it on close', async () => {
     renderHardwareSetup();
 
@@ -1155,8 +1122,7 @@ describe('HardwareSetupScreen', () => {
           scriptIdInput: '1'
         }
       ],
-      selectedShellyId: 'http://192.168.0.20/',
-      diagnosticShellyId: 'http://192.168.0.20/'
+      selectedShellyId: 'http://192.168.0.20/'
     });
 
     renderHardwareSetup();
@@ -1789,13 +1755,21 @@ describe('HardwareSetupScreen', () => {
       'title',
       'Odczytaj skrypt Local Climate Link z Shelly i wypełnij formularz'
     );
-    expect(screen.getByRole('button', { name: 'Usuń z Shelly' })).toHaveAttribute(
-      'title',
-      'Usuń skrypt Local Climate Link z Shelly'
+    const developerTools = screen
+      .getByText('Narzędzia deweloperskie', { selector: 'summary' })
+      .closest('details');
+    expect(developerTools).not.toBeNull();
+    const developerActions = developerTools!.querySelector('.rule-developer-actions');
+    expect(developerActions).toHaveClass('rule-developer-actions--compact');
+    expect(within(developerActions as HTMLElement).getAllByRole('button')).toHaveLength(
+      2
     );
     expect(
-      screen.getByRole('button', { name: 'Otwórz diagnostykę techniczną' })
-    ).toBeVisible();
+      screen.queryByRole('button', { name: 'Usuń z Shelly' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Otwórz diagnostykę techniczną' })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Skrypt z Shelly' })
     ).not.toBeInTheDocument();
@@ -2053,7 +2027,7 @@ describe('HardwareSetupScreen', () => {
     );
   });
 
-  it('loads a Shelly script into the rule form and deletes it from the main screen', async () => {
+  it('loads a Shelly script into the rule form from the selected plug', async () => {
     renderHardwareSetup();
 
     await addShellyThroughUi('Salon');
@@ -2117,16 +2091,6 @@ describe('HardwareSetupScreen', () => {
       'A4:C1:38:4F:24:CD'
     );
     fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
-
-    const deleteDialog = await confirmRuleScriptDelete();
-
-    expect(await screen.findByText('Usunięto skrypt Shelly.')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(
-        screen.queryByRole('dialog', { name: 'Potwierdź usunięcie skryptu z Shelly' })
-      ).not.toBeInTheDocument();
-    });
-    expect(deleteDialog).not.toBeInTheDocument();
   });
 
   it('does not replay rule success toasts after returning to the rule page', async () => {
@@ -2154,16 +2118,6 @@ describe('HardwareSetupScreen', () => {
       expect(screen.queryByText('Gotowe — działa lokalnie')).not.toBeInTheDocument()
     );
 
-    await confirmRuleScriptDelete();
-
-    expect(await screen.findByText('Usunięto skrypt Shelly.')).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Zamknij: Usunięto skrypt Shelly.' })
-    );
-    await waitFor(() =>
-      expect(screen.queryByText('Usunięto skrypt Shelly.')).not.toBeInTheDocument()
-    );
-
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
       'aria-current',
@@ -2176,105 +2130,6 @@ describe('HardwareSetupScreen', () => {
     expect(
       screen.queryByRole('region', { name: 'Powiadomienia' })
     ).not.toBeInTheDocument();
-  });
-
-  it('sets relay OFF before stopping a script during delete even when Script.Stop fails', async () => {
-    const defaultFetch = vi.mocked(fetch);
-    await defaultFetch(new URL('http://192.168.0.20/rpc'), {
-      method: 'POST',
-      body: JSON.stringify({
-        id: 1,
-        method: 'Switch.Set',
-        params: { id: 0, on: true }
-      })
-    });
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const body = requestBody(init);
-        if (body.method === 'Script.Stop') {
-          const params = body.params as { id?: number } | undefined;
-          if (params?.id === 1) {
-            return jsonResponse({ error: { message: 'stop failed' } });
-          }
-        }
-        return defaultFetch(input, init);
-      })
-    );
-
-    renderHardwareSetup();
-
-    await addShellyThroughUi('Salon');
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
-    await confirmRuleScriptDelete();
-
-    expect(await screen.findByText('Usunięto skrypt Shelly.')).toBeInTheDocument();
-
-    const rpcBodies = vi
-      .mocked(fetch)
-      .mock.calls.map((call) => requestBody(call[1]))
-      .filter((body) => body.method);
-    const deleteIndex = rpcBodies.findIndex(
-      (body) =>
-        body.method === 'Script.Delete' &&
-        (body.params as { id?: number } | undefined)?.id === 1
-    );
-    let stopIndex = -1;
-    for (let index = deleteIndex - 1; index >= 0; index -= 1) {
-      const body = rpcBodies[index];
-      if (
-        body?.method === 'Script.Stop' &&
-        (body.params as { id?: number } | undefined)?.id === 1
-      ) {
-        stopIndex = index;
-        break;
-      }
-    }
-
-    let offIndex = -1;
-    for (let index = stopIndex - 1; index >= 0; index -= 1) {
-      const body = rpcBodies[index];
-      if (
-        body?.method === 'Switch.Set' &&
-        (body.params as { on?: boolean } | undefined)?.on === false
-      ) {
-        offIndex = index;
-        break;
-      }
-    }
-
-    expect(offIndex).toBeGreaterThanOrEqual(0);
-    expect(stopIndex).toBeGreaterThan(offIndex);
-    expect(deleteIndex).toBeGreaterThan(stopIndex);
-  });
-
-  it('reports delete failure separately from confirmed relay OFF safety', async () => {
-    const defaultFetch = vi.mocked(fetch);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const body = requestBody(init);
-        if (body.method === 'Script.Delete') {
-          const params = body.params as { id?: number } | undefined;
-          if (params?.id === 1) {
-            return jsonResponse({ error: { message: 'delete failed' } });
-          }
-        }
-        return defaultFetch(input, init);
-      })
-    );
-
-    renderHardwareSetup();
-
-    await addShellyThroughUi('Salon');
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
-    await confirmRuleScriptDelete();
-
-    expect(await screen.findByText('Nie udało się usunąć skryptu.')).toBeInTheDocument();
-    expect(
-      await screen.findByText(/Przekaźnik OFF potwierdzony, ale nie udało się usunąć/)
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Usunięto skrypt Shelly.')).not.toBeInTheDocument();
   });
 
   it('adds a TP357 thermometer and previews the minimal TP357 Shelly parser', async () => {
@@ -3204,299 +3059,5 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(getSavedSensorCard('Xiaomi salon')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();
-  });
-
-  it('loads generated Shelly script diagnostics and displays humidity readings', async () => {
-    renderHardwareSetup();
-
-    await addShellyThroughUi('Salon');
-    await addSensorThroughUi({ name: 'Xiaomi salon' });
-
-    openDeveloperDiagnostics();
-    expect(screen.getByLabelText('Gniazdko Shelly')).toHaveAttribute(
-      'value',
-      'http://192.168.0.20/'
-    );
-    expect(screen.queryByLabelText('Termometr')).not.toBeInTheDocument();
-    expect(screen.queryByText('Numer skryptu Shelly')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Odśwież diagnostykę' })).toHaveAttribute(
-      'title',
-      'Pobierz aktualny stan skryptu i przekaźnika z Shelly'
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
-
-    await waitFor(() =>
-      expect(screen.getAllByText('31.2°C').length).toBeGreaterThanOrEqual(2)
-    );
-    await waitFor(() => expect(screen.getAllByText('Salon')).toHaveLength(2));
-    expect(screen.getByText('Xiaomi/PVVX BTHome')).toBeInTheDocument();
-    expect(screen.getByText('Input -> Processing -> Output')).toBeInTheDocument();
-    expect(
-      screen.getByText('Pomiar, progi, decyzja i oba stany przekaźnika w jednym miejscu.')
-    ).toBeInTheDocument();
-    const diagnosticGroups = Array.from(
-      document.querySelectorAll<HTMLDetailsElement>('.diagnostic-group')
-    );
-    expect(
-      diagnosticGroups.map((group) => group.querySelector('summary strong')?.textContent)
-    ).toEqual([
-      'Input -> Processing -> Output',
-      'BLE i sensor',
-      'Skrypt i czas',
-      'Telemetria Shelly'
-    ]);
-    expect(diagnosticGroups[0]).toHaveAttribute('open');
-    expect(diagnosticGroups[1]).not.toHaveAttribute('open');
-    expect(diagnosticGroups[2]).not.toHaveAttribute('open');
-    expect(diagnosticGroups[3]).not.toHaveAttribute('open');
-    expect(screen.getByText('Input')).toBeInTheDocument();
-    expect(screen.getByText('Processing')).toBeInTheDocument();
-    expect(screen.getByText('Output')).toBeInTheDocument();
-    expect(
-      screen.getByText('Źródło pomiaru, ostatni pakiet, bateria i RSSI.')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Stan skryptu, hash konfiguracji i zegar Shelly.')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Moc, napięcie, prąd, energia i temperatura gniazdka.')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Skrypt')).toBeInTheDocument();
-    expect(screen.getByText('działa')).toBeInTheDocument();
-    expect(screen.getByText('Hash konfiguracji')).toBeInTheDocument();
-    expect(screen.getByText('lcl-12345678')).toBeInTheDocument();
-    expect(screen.getByText('Wartość reguły')).toBeInTheDocument();
-    expect(screen.getByText('Przekaźnik Shelly')).toBeInTheDocument();
-    expect(screen.getByText('Moc')).toBeInTheDocument();
-    expect(screen.getByText('Napięcie')).toBeInTheDocument();
-    expect(screen.getByText('Prąd')).toBeInTheDocument();
-    expect(screen.getByText('0.00 A')).toBeInTheDocument();
-    expect(screen.getByText('Energia')).toBeInTheDocument();
-    expect(screen.getByText('1.23 kWh')).toBeInTheDocument();
-    expect(screen.getByText('Temp. gniazdka')).toBeInTheDocument();
-    expect(screen.getByText('Czas Shelly')).toBeInTheDocument();
-    expect(screen.getByText('09:31')).toBeInTheDocument();
-    expect(screen.getByText('Zegar')).toBeInTheDocument();
-    expect(screen.getAllByText('OK').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText('44.1%')).toBeInTheDocument();
-    expect(screen.getByText('1.45 kPa')).toBeInTheDocument();
-    expect(screen.getByText('22.2°C')).toBeInTheDocument();
-    expect(screen.getByText('22.6°C')).toBeInTheDocument();
-    expect(screen.getByText('100%')).toBeInTheDocument();
-    expect(screen.getByText('-37 dBm')).toBeInTheDocument();
-    expect(screen.getByText('45 s temu')).toBeInTheDocument();
-    expect(screen.getByText('25 s temu')).toBeInTheDocument();
-    expect(screen.getByText('Wiek snapshotu')).toBeInTheDocument();
-    expect(screen.getByText(/Wiek snapshotu:/)).toBeInTheDocument();
-    expect(screen.getByText('Powyżej progu')).toBeInTheDocument();
-    expect(screen.getByText('Dane BLE')).toBeInTheDocument();
-    expect(screen.getByText('Przekaźnik reguły')).toBeInTheDocument();
-    expect(screen.getAllByText('OFF').length).toBeGreaterThanOrEqual(2);
-    await waitFor(() =>
-      expect(
-        screen.getByText('Stan skryptu RPC').closest('.lcl-diagnostic-row')
-      ).toHaveTextContent('RUNNING')
-    );
-    expect(
-      screen.getByText('JS użyte teraz').closest('.lcl-diagnostic-row')
-    ).toHaveTextContent('12.0 KiB');
-    expect(screen.getByText('JS peak').closest('.lcl-diagnostic-row')).toHaveTextContent(
-      '16.0 KiB'
-    );
-    expect(screen.getByText('JS wolne').closest('.lcl-diagnostic-row')).toHaveTextContent(
-      '24.5 KiB'
-    );
-    expect(
-      screen.getByText('CPU skryptu').closest('.lcl-diagnostic-row')
-    ).toHaveTextContent('0.3%');
-    expect(
-      screen.getByText('RAM Shelly wolny').closest('.lcl-diagnostic-row')
-    ).toHaveTextContent('93.9 KiB');
-    expect(
-      screen.getByText('RAM Shelly razem').closest('.lcl-diagnostic-row')
-    ).toHaveTextContent('253.1 KiB');
-  });
-
-  it('shows a neutral BLE data state when a helper packet follows a valid rule value', async () => {
-    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
-      const url = requestUrl(input);
-      if (url.pathname === '/script/1/diag') {
-        return jsonResponse({
-          v: 1,
-          z: 'lcl-12345678',
-          s: ['A4:C1:38:4F:24:CD', 'Xiaomi/PVVX BTHome'],
-          q: [1, 0, 65, 70, 120, -85],
-          y: ['09:31', 1782667904, 12345],
-          p: [true, 0, 230.1, 0, 1234, 31.2],
-          g: [
-            12300000,
-            23.83,
-            69.56,
-            100,
-            -59,
-            true,
-            'ib',
-            12250000,
-            12310000,
-            0,
-            0,
-            69.56,
-            null,
-            65,
-            70,
-            12320000,
-            'cv'
-          ]
-        });
-      }
-      return rpcResult({});
-    });
-
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      shellyDevices: [
-        {
-          id: 'http://192.168.0.20/',
-          name: 'Salon',
-          baseUrl: 'http://192.168.0.20/',
-          scriptIdInput: '1'
-        }
-      ],
-      selectedShellyId: 'http://192.168.0.20/',
-      diagnosticShellyId: 'http://192.168.0.20/'
-    });
-
-    renderHardwareSetup();
-
-    openDeveloperDiagnostics();
-    fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
-
-    await waitFor(() => expect(screen.getAllByText('69.6%')).toHaveLength(2));
-    expect(screen.getByText('W paśmie histerezy')).toBeInTheDocument();
-
-    const dataBleRow = screen
-      .getByText('Dane BLE')
-      .closest('.lcl-diagnostic-row') as HTMLElement | null;
-    expect(dataBleRow).not.toBeNull();
-    expect(within(dataBleRow!).getByText('-')).toBeInTheDocument();
-    expect(dataBleRow).not.toHaveTextContent('Brak wartości do reguły');
-  });
-
-  it.each([
-    {
-      label: '404',
-      response: () => new Response('missing', { status: 404, statusText: 'Not Found' }),
-      hiddenText: /404|Not Found/
-    },
-    {
-      label: '500',
-      response: () => new Response('broken', { status: 500, statusText: 'Server Error' }),
-      hiddenText: /500|Server Error/
-    },
-    {
-      label: 'malformed JSON',
-      response: () =>
-        new Response('{', {
-          status: 200,
-          headers: { 'content-type': 'application/json' }
-        }),
-      hiddenText: /JSON|Unexpected/
-    },
-    {
-      label: 'schema mismatch',
-      response: () => jsonResponse({ version: 1, diagnostics: { relayState: false } }),
-      hiddenText: /Expected|required|lastSeenUptimeMs|diagnostics/
-    },
-    {
-      label: 'timeout',
-      response: () => Promise.reject(new DOMException('Aborted', 'AbortError')),
-      hiddenText: /Abort|timeout/i
-    }
-  ])(
-    'shows safe diagnostics load errors for $label',
-    async ({ response, hiddenText }) => {
-      vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
-        const url = requestUrl(input);
-        if (url.pathname === '/script/99/diag') {
-          return response();
-        }
-        return rpcResult({});
-      });
-
-      useHardwareSetupDraftStore.setState({
-        ...DEFAULT_HARDWARE_SETUP_DRAFT,
-        shellyDevices: [
-          {
-            id: 'http://192.168.0.20/',
-            name: 'Salon',
-            baseUrl: 'http://192.168.0.20/',
-            scriptIdInput: '99'
-          }
-        ],
-        selectedShellyId: 'http://192.168.0.20/',
-        diagnosticShellyId: 'http://192.168.0.20/'
-      });
-
-      renderHardwareSetup();
-
-      openDeveloperDiagnostics();
-      fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
-
-      const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
-      expect(within(toastRegion).getByRole('status')).toHaveTextContent(
-        'Nie udało się odczytać diagnostyki ze skryptu Shelly.'
-      );
-      expect(within(toastRegion).getByRole('status')).toHaveTextContent(
-        'Sprawdź, czy na wybranym gniazdku jest skrypt Local Climate Link.'
-      );
-      expect(within(toastRegion).getByRole('status')).not.toHaveTextContent(hiddenText);
-      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    }
-  );
-
-  it('shows Shelly script out_of_memory as the diagnostics failure reason', async () => {
-    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL, init) => {
-      const url = requestUrl(input);
-      if (url.pathname === '/script/99/diag') {
-        return new Response('missing', { status: 404, statusText: 'Not Found' });
-      }
-      const body = requestBody(init);
-      if (body.method === 'Script.GetStatus') {
-        return rpcResult({
-          id: 99,
-          running: false,
-          mem_free: 7000,
-          errors: ['out_of_memory']
-        });
-      }
-      return rpcResult({});
-    });
-
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      shellyDevices: [
-        {
-          id: 'http://192.168.0.20/',
-          name: 'Salon',
-          baseUrl: 'http://192.168.0.20/',
-          scriptIdInput: '99'
-        }
-      ],
-      selectedShellyId: 'http://192.168.0.20/',
-      diagnosticShellyId: 'http://192.168.0.20/'
-    });
-
-    renderHardwareSetup();
-
-    openDeveloperDiagnostics();
-    fireEvent.click(screen.getByRole('button', { name: 'Odśwież diagnostykę' }));
-
-    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
-    expect(within(toastRegion).getByRole('status')).toHaveTextContent(
-      'Skrypt Local Climate Link nie działa: Shelly zgłasza out_of_memory.'
-    );
-    expect(within(toastRegion).getByRole('status')).toHaveTextContent(
-      'Wyłącz Matter w Shelly, zrestartuj gniazdko i wyślij regułę ponownie.'
-    );
   });
 });

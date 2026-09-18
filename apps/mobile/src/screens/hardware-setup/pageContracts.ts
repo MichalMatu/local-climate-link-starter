@@ -74,8 +74,6 @@ export type RuleSetupFlow = Pick<
   HardwareSetupFlow,
   | 'canRunSafeRelayTest'
   | 'configState'
-  | 'deleteAutomationScript'
-  | 'deleteAutomationScriptMutation'
   | 'installMutation'
   | 'isAdvancedSettingsValid'
   | 'isThresholdValid'
@@ -110,20 +108,6 @@ export type RuleSetupFlow = Pick<
   | 'staleTimeoutMinInput'
   | 'vpdAssistEnabled'
   | 'vpdTargetInput'
->;
-
-export type DiagnosticsSetupFlow = Pick<
-  HardwareSetupFlow,
-  | 'diagnosticFetchedAtMs'
-  | 'diagnosticMutation'
-  | 'diagnosticResourceMutation'
-  | 'diagnosticResources'
-  | 'diagnosticShelly'
-  | 'diagnosticShellyId'
-  | 'diagnosticSnapshot'
-  | 'refreshDiagnostics'
-  | 'setDiagnosticShellyId'
-  | 'shellyDevices'
 >;
 
 export type TimeScheduleSetupFlow = Pick<HardwareSetupFlow, 'selectedShelly'>;

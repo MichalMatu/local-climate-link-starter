@@ -10,7 +10,6 @@ import {
   rulePresetsForSetupIntent,
   type SetupIntent
 } from '../../flows/setup-intent.js';
-import { DiagnosticsSetupPage } from './pages/DiagnosticsSetupPage.js';
 import { RuleSetupPage } from './pages/RuleSetupPage.js';
 import { SensorSetupPage } from './pages/SensorSetupPage.js';
 import { ShellySetupPage } from './pages/ShellySetupPage.js';
@@ -50,7 +49,7 @@ const TIME_HARDWARE_TABS = [
 ] as const;
 
 type PrimaryHardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
-type HardwareTabId = PrimaryHardwareTabId | 'diagnostics';
+type HardwareTabId = PrimaryHardwareTabId;
 
 const availableTabsForIntent = (
   setupIntent?: SetupIntent,
@@ -74,9 +73,6 @@ const currentTabFromHash = (availableTabs: readonly { id: string }[]): HardwareT
   }
 
   const hashValue = window.location.hash.replace(/^#/, '');
-  if (hashValue === 'diagnostics' && availableTabs === CLIMATE_HARDWARE_TABS) {
-    return 'diagnostics';
-  }
   return availableTabs.some((tab) => tab.id === hashValue)
     ? (hashValue as PrimaryHardwareTabId)
     : ((availableTabs[0]?.id as PrimaryHardwareTabId | undefined) ?? 'shelly');
@@ -161,18 +157,6 @@ export const HardwareSetupScreen = ({
   }, [availableTabs]);
 
   useEffect(() => {
-    if (activeTab === 'diagnostics') {
-      if (setupIntent === 'time') {
-        selectTab('shelly');
-      }
-      return;
-    }
-    if (!availableTabs.some((tab) => tab.id === activeTab)) {
-      selectTab((availableTabs[0]?.id as PrimaryHardwareTabId | undefined) ?? 'shelly');
-    }
-  }, [activeTab, availableTabs, setupIntent]);
-
-  useEffect(() => {
     const cleanup = () => {
       cleanupBleDiscoveryRef.current();
       stopSavedSensorLiveScanRef.current();
@@ -247,7 +231,6 @@ export const HardwareSetupScreen = ({
           flow={flow}
           selectablePresets={selectableRulePresets}
           showShellySelector={!fixedShellyId}
-          onOpenDiagnostics={() => selectTab('diagnostics')}
         />
       )}
       {setupIntent === 'time' && activeTab === 'schedule' && (
@@ -255,24 +238,6 @@ export const HardwareSetupScreen = ({
           flow={flow}
           {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
         />
-      )}
-      {setupIntent !== 'time' && activeTab === 'diagnostics' && (
-        <>
-          <div className="developer-context">
-            <button
-              className="setup-context__back"
-              type="button"
-              onClick={() => selectTab('rule')}
-            >
-              {t('hardware.nav.backToRule')}
-            </button>
-            <div>
-              <strong>{t('hardware.nav.developerDiagnostics')}</strong>
-              <p>{t('hardware.nav.developerDiagnosticsHint')}</p>
-            </div>
-          </div>
-          <DiagnosticsSetupPage flow={flow} />
-        </>
       )}
 
       {onNavigateDashboard && !plugAddOnly && (
