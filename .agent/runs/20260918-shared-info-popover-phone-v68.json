@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "git add -A && git commit -m 'Unify contextual info popovers' && git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917 && test -z \"$(git status --porcelain)\" && git rev-parse HEAD",
-  "pid": 1726,
+  "command": "pnpm android:phone-alpha",
+  "pid": 2204,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T15:43:38.010536+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-18T15:43:44.922629+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-shared-info-popover-phone-v68",
@@ -18,5 +18,5 @@
   "task_digest": "497c62972855eb9d0256ac49e9cd4625406cc2943870fb7261909ef3dd269947",
   "daemon_version": "4.18.22",
   "daemon_pid": 97199,
-  "updated_at": "2026-09-18T15:43:38.042134+00:00"
+  "updated_at": "2026-09-18T15:43:44.998114+00:00"
 }
