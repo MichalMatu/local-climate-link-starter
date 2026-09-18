@@ -294,7 +294,11 @@ const openRuleDisclosure = (label: string): HTMLDetailsElement => {
   return details!;
 };
 
-const openRuleDeveloperTools = () => openRuleDisclosure('Narzędzia deweloperskie');
+const openRuleDeveloperTools = () => {
+  const actions = document.querySelector('.rule-developer-actions--compact');
+  expect(actions).not.toBeNull();
+  expect(actions!.querySelectorAll('button')).toHaveLength(2);
+};
 
 const getRuleSummary = () => {
   const trigger = screen.getByRole('button', { name: 'Podsumowanie reguły' });
@@ -697,14 +701,10 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByLabelText('Gniazdko Shelly')).toBeInTheDocument();
     expect(screen.getByLabelText('Termometr')).toBeInTheDocument();
     expect(screen.getByText('Zaawansowane', { selector: 'summary' })).toBeVisible();
+    openRuleDeveloperTools();
     expect(
-      screen.getByText('Narzędzia deweloperskie', { selector: 'summary' })
-    ).toBeVisible();
-    expect(
-      screen
-        .getByText('Narzędzia deweloperskie', { selector: 'summary' })
-        .closest('details')
-    ).not.toHaveAttribute('open');
+      screen.queryByText('Narzędzia deweloperskie', { selector: 'summary' })
+    ).not.toBeInTheDocument();
     expect(getRuleSummary()).toHaveTextContent(
       'Gdy termometr zniknie na 2 min albo Shelly uruchomi się ponownie'
     );
@@ -1699,9 +1699,10 @@ describe('HardwareSetupScreen', () => {
     );
     expect(screen.getByLabelText('Tryb reguły')).toHaveAttribute('value', 'heating');
     expect(screen.getByText('Zaawansowane', { selector: 'summary' })).toBeVisible();
+    openRuleDeveloperTools();
     expect(
-      screen.getByText('Narzędzia deweloperskie', { selector: 'summary' })
-    ).toBeVisible();
+      screen.queryByText('Narzędzia deweloperskie', { selector: 'summary' })
+    ).not.toBeInTheDocument();
     expect(screen.getByLabelText('VPD assist')).not.toBeChecked();
     fireEvent.click(screen.getByRole('button', { name: 'Tryb reguły' }));
     const ruleModeListbox = screen.getByRole('listbox', { name: 'Tryb reguły' });
@@ -1729,10 +1730,8 @@ describe('HardwareSetupScreen', () => {
     expect(getRuleSummary()).not.toHaveTextContent('Termometr:');
     expect(getRuleSummary()).not.toHaveTextContent('RSSI:');
     expect(
-      screen
-        .getByText('Narzędzia deweloperskie', { selector: 'summary' })
-        .closest('details')
-    ).not.toHaveAttribute('open');
+      screen.queryByText('Narzędzia deweloperskie', { selector: 'summary' })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('dialog', { name: 'Podgląd Shelly Script' })
     ).not.toBeInTheDocument();
@@ -1755,12 +1754,9 @@ describe('HardwareSetupScreen', () => {
       'title',
       'Odczytaj skrypt Local Climate Link z Shelly i wypełnij formularz'
     );
-    const developerTools = screen
-      .getByText('Narzędzia deweloperskie', { selector: 'summary' })
-      .closest('details');
-    expect(developerTools).not.toBeNull();
-    const developerActions = developerTools!.querySelector('.rule-developer-actions');
-    expect(developerActions).toHaveClass('rule-developer-actions--compact');
+    const developerActions = document.querySelector('.rule-developer-actions--compact');
+    expect(developerActions).not.toBeNull();
+    expect(developerActions).toHaveClass('rule-developer-actions');
     expect(within(developerActions as HTMLElement).getAllByRole('button')).toHaveLength(
       2
     );
@@ -2259,6 +2255,30 @@ describe('HardwareSetupScreen', () => {
     const sensorCard = getSavedSensorCard('Xiaomi salon');
     expect(within(sensorCard).getByText('100%')).toBeInTheDocument();
     expect(within(sensorCard).getByText('-72 dBm')).toBeInTheDocument();
+  });
+
+  it('keeps the rule setup compact and ends with the primary send action', () => {
+    renderHardwareSetup();
+    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+
+    const thresholdRow = document.querySelector('.rule-threshold-row');
+    expect(thresholdRow).not.toBeNull();
+    expect(thresholdRow!.querySelectorAll('input[type="number"]')).toHaveLength(2);
+
+    const developerActions = document.querySelector('.rule-developer-actions--compact');
+    expect(developerActions).not.toBeNull();
+    expect(developerActions!.querySelectorAll('button')).toHaveLength(2);
+    expect(
+      screen.queryByText('Narzędzia deweloperskie', { selector: 'summary' })
+    ).not.toBeInTheDocument();
+
+    const advanced = screen.getByText('Zaawansowane', { selector: 'summary' });
+    const send = screen.getByRole('button', { name: 'Wyślij' });
+    const follows = (first: Node, second: Node) =>
+      Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    expect(follows(developerActions!, advanced)).toBe(true);
+    expect(follows(advanced, send)).toBe(true);
   });
 
   it('shows compact live values on the right side of the rule thermometer options', async () => {

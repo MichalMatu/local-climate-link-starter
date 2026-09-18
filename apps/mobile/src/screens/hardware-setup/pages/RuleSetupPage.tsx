@@ -348,7 +348,7 @@ export const RuleSetupPage = ({
         />
       </div>
 
-      <div className="field-row">
+      <div className="field-row rule-threshold-row">
         <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
           <span>{stripTrailingUnit(t(copy.onLabelKey), copy.unit)}</span>
           <span className="field-unit-control">
@@ -447,6 +447,36 @@ export const RuleSetupPage = ({
         )}
       </section>
 
+      <div className="action-row rule-developer-actions rule-developer-actions--compact">
+        <button
+          className="secondary-action"
+          type="button"
+          disabled={!flow.configState.ok}
+          title={t('hardware.rule.scriptPreviewTitle')}
+          onClick={() => setDialog('script')}
+        >
+          <CodeIcon />
+          {t('hardware.rule.scriptPreview')}
+        </button>
+        <button
+          className="secondary-action"
+          type="button"
+          aria-busy={flow.loadAutomationScriptMutation.isPending}
+          disabled={!flow.selectedShelly || isScriptActionBusy}
+          title={t('hardware.rule.loadScriptFromShellyTitle')}
+          onClick={loadScriptFromShelly}
+        >
+          {flow.loadAutomationScriptMutation.isPending
+            ? t('hardware.rule.loadingScriptFromShelly')
+            : t('hardware.rule.loadScriptFromShelly')}
+        </button>
+      </div>
+
+      <details className="rule-progressive-disclosure">
+        <summary>{t('hardware.rule.advanced')}</summary>
+        <RuleAdvancedSettingsInline flow={flow} />
+      </details>
+
       <div className="action-row rule-action-row">
         <button
           className="primary-action"
@@ -462,43 +492,6 @@ export const RuleSetupPage = ({
         >
           {flow.installMutation.isPending ? t('common.sending') : t('common.send')}
         </button>
-      </div>
-
-      <div className="rule-progressive-disclosure-stack">
-        <details className="rule-progressive-disclosure">
-          <summary>{t('hardware.rule.advanced')}</summary>
-          <RuleAdvancedSettingsInline flow={flow} />
-        </details>
-
-        <details className="rule-progressive-disclosure rule-progressive-disclosure--developer">
-          <summary>{t('hardware.rule.developerTools')}</summary>
-          <div className="rule-progressive-disclosure__body">
-            <div className="action-row rule-developer-actions rule-developer-actions--compact">
-              <button
-                className="secondary-action"
-                type="button"
-                disabled={!flow.configState.ok}
-                title={t('hardware.rule.scriptPreviewTitle')}
-                onClick={() => setDialog('script')}
-              >
-                <CodeIcon />
-                {t('hardware.rule.scriptPreview')}
-              </button>
-              <button
-                className="secondary-action"
-                type="button"
-                aria-busy={flow.loadAutomationScriptMutation.isPending}
-                disabled={!flow.selectedShelly || isScriptActionBusy}
-                title={t('hardware.rule.loadScriptFromShellyTitle')}
-                onClick={loadScriptFromShelly}
-              >
-                {flow.loadAutomationScriptMutation.isPending
-                  ? t('hardware.rule.loadingScriptFromShelly')
-                  : t('hardware.rule.loadScriptFromShelly')}
-              </button>
-            </div>
-          </div>
-        </details>
       </div>
 
       <Modal
