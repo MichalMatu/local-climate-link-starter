@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260918-developer-tools-scope-cleanup-phone-v78",
+  "task_digest": "9d11cff360e638d0e999de0714b013ac297f40b57ecc027aca03a199f2879e1c",
+  "idle_timeout": 300,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T17:03:20.937673+00:00",
+  "attempt_id": "768655e23b4131a7ad135c14",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 92422,
+  "updated_at": "2026-09-18T17:03:20.937745+00:00",
+  "pid": 92422
+}
