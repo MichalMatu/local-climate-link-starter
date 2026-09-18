@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 8,
-  "command": "set -euo pipefail; pnpm --filter @lcl/mobile exec playwright test e2e/responsive.spec.ts --grep 'installed automation dashboard'",
-  "pid": 94480,
+  "command": "pnpm check",
+  "pid": 94647,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T22:51:15.240510+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-18T22:51:21.083224+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260918-dashboard-vpd-pulse-v94",
@@ -18,5 +18,5 @@
   "task_digest": "4413b5b8feb60d7b9b3ad372e71ea4d0a7164257805208a7723c0c986f094516",
   "daemon_version": "4.18.22",
   "daemon_pid": 93809,
-  "updated_at": "2026-09-18T22:51:15.310835+00:00"
+  "updated_at": "2026-09-18T22:51:21.153543+00:00"
 }
