@@ -12,10 +12,6 @@ import { SelectField } from '@lcl/ui';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
-import {
-  calculateSensorVpdKpa,
-  type SensorRuntimeReading
-} from '../../../flows/hardware-setup/useSensorRuntimeReadings.js';
 import type { SensorSetupFlow } from '../pageContracts.js';
 
 export const sensorProfileLabels = {
@@ -52,16 +48,16 @@ const formatBattery = (
 };
 
 const formatSeenAt = (
-  seenAtMs: number | null,
+  sample: SensorReadingSample | null,
   locale: string,
   missingLabel: string
 ): string =>
-  seenAtMs === null
-    ? missingLabel
-    : new Intl.DateTimeFormat(locale, {
+  sample
+    ? new Intl.DateTimeFormat(locale, {
         hour: '2-digit',
         minute: '2-digit'
-      }).format(new Date(seenAtMs));
+      }).format(new Date(sample.seenAtMs))
+    : missingLabel;
 
 const latestSample = (
   samples: readonly SensorReadingSample[]
@@ -181,7 +177,6 @@ export const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps
 type SavedSensorCardProps = {
   device: SensorSetupFlow['sensorDevices'][number];
   samples: readonly SensorReadingSample[];
-  runtimeReading: SensorRuntimeReading | null;
   isEditing: boolean;
   pvvxTimePending: boolean;
   onEditStart(): void;
@@ -194,7 +189,6 @@ type SavedSensorCardProps = {
 export const SavedSensorCard = ({
   device,
   samples,
-  runtimeReading,
   isEditing,
   pvvxTimePending,
   onEditStart,
@@ -204,45 +198,30 @@ export const SavedSensorCard = ({
   onRemove
 }: SavedSensorCardProps) => {
   const { locale, t } = useTranslation();
-  const phoneSamples = samples.filter((sample) => sample.source === 'phone-scan');
-  const temperatureSample = latestNumericSample(phoneSamples, 'temperatureC');
-  const humiditySample = latestNumericSample(phoneSamples, 'humidityPct');
-  const latest = latestSample(phoneSamples);
-  const batterySample = latestBatterySample(phoneSamples);
-  const rssiSample = latestNumericSample(phoneSamples, 'rssi');
-  const liveTemperatureC = runtimeReading
-    ? runtimeReading.temperatureC
-    : temperatureSample?.temperatureC;
-  const liveHumidityPct = runtimeReading
-    ? runtimeReading.humidityPct
-    : humiditySample?.humidityPct;
-  const liveVpdKpa = runtimeReading
-    ? runtimeReading.vpdKpa
-    : calculateSensorVpdKpa(liveTemperatureC, liveHumidityPct);
-  const liveBattery = runtimeReading
-    ? formatSensorMetric(runtimeReading.batteryPct, '%', 0, '—')
-    : formatBattery(batterySample, '—');
-  const liveRssi = formatSensorMetric(
-    runtimeReading ? runtimeReading.rssi : rssiSample?.rssi,
-    ' dBm',
-    0,
-    '—'
-  );
-  const liveSeenAtMs = runtimeReading
-    ? runtimeReading.seenAtMs
-    : (latest?.seenAtMs ?? null);
-  const previousSeenAtMsRef = useRef<number | null>(liveSeenAtMs);
+  const temperatureSample = latestNumericSample(samples, 'temperatureC');
+  const humiditySample = latestNumericSample(samples, 'humidityPct');
+  const hasTemperatureData =
+    typeof temperatureSample?.temperatureC === 'number' &&
+    Number.isFinite(temperatureSample.temperatureC);
+  const hasHumidityData =
+    typeof humiditySample?.humidityPct === 'number' &&
+    Number.isFinite(humiditySample.humidityPct);
+  const latest = latestSample(samples);
+  const latestSeenAtMs = latest?.seenAtMs ?? null;
+  const previousSeenAtMsRef = useRef<number | null>(latestSeenAtMs);
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSamplePulseActive, setIsSamplePulseActive] = useState(false);
   const [samplePulseSequence, setSamplePulseSequence] = useState(0);
+  const batterySample = latestBatterySample(samples);
+  const rssiSample = latestNumericSample(samples, 'rssi');
 
   useEffect(() => {
-    if (liveSeenAtMs === null) return;
+    if (latestSeenAtMs === null) return;
 
     const previousSeenAtMs = previousSeenAtMsRef.current;
-    if (previousSeenAtMs !== null && liveSeenAtMs <= previousSeenAtMs) return;
+    if (previousSeenAtMs !== null && latestSeenAtMs <= previousSeenAtMs) return;
 
-    previousSeenAtMsRef.current = liveSeenAtMs;
+    previousSeenAtMsRef.current = latestSeenAtMs;
     setSamplePulseSequence((current) => current + 1);
     setIsSamplePulseActive(true);
     if (pulseTimeoutRef.current !== null) clearTimeout(pulseTimeoutRef.current);
@@ -250,7 +229,7 @@ export const SavedSensorCard = ({
       setIsSamplePulseActive(false);
       pulseTimeoutRef.current = null;
     }, SENSOR_SAMPLE_PULSE_MS);
-  }, [liveSeenAtMs]);
+  }, [latestSeenAtMs]);
 
   useEffect(
     () => () => {
@@ -273,54 +252,37 @@ export const SavedSensorCard = ({
             className="sensor-card-leading-icon__icon"
           />
         </span>
-        <div className="sensor-card-title-row">
-          {isEditing ? (
-            <input
-              autoFocus
-              className="sensor-card-name-input"
-              aria-label={t('hardware.sensor.nameLabel')}
-              type="text"
-              value={device.name}
-              onBlur={onEditEnd}
-              onChange={(event) => onNameChange(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === 'Escape') {
-                  event.currentTarget.blur();
-                }
-              }}
-            />
-          ) : (
+        {isEditing ? (
+          <input
+            autoFocus
+            className="sensor-card-name-input"
+            aria-label={t('hardware.sensor.nameLabel')}
+            type="text"
+            value={device.name}
+            onBlur={onEditEnd}
+            onChange={(event) => onNameChange(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Escape') {
+                event.currentTarget.blur();
+              }
+            }}
+          />
+        ) : (
+          <div className="sensor-card-title-row">
             <h3 className="sensor-card-title">{device.name}</h3>
-          )}
-          <span
-            className={`sensor-card-live-values${
-              runtimeReading?.stale ? ' sensor-card-live-values--stale' : ''
-            }`}
-          >
-            {runtimeReading ? (
-              <span
-                className="sensor-card-source"
-                title={`${t('hardware.rule.selectedShelly')}: ${runtimeReading.shellyName}`}
-              >
-                <IconPlug className="icon-action__svg" aria-hidden="true" />
-              </span>
-            ) : latest ? (
+            {latest?.source === 'phone-scan' && (
               <span
                 className="sensor-card-source"
                 title={t('hardware.sensor.scanPhoneTitle')}
               >
                 <IconDeviceMobile className="icon-action__svg" aria-hidden="true" />
               </span>
-            ) : null}
-            <strong className="sensor-card-live-values__metrics">
-              {formatSensorMetric(liveTemperatureC, ' °C', 1, '— °C')} ·{' '}
-              {formatSensorMetric(liveHumidityPct, ' %', 1, '— %')} ·{' '}
-              {formatSensorMetric(liveVpdKpa, ' kPa', 2, '— kPa')}
-            </strong>
-          </span>
-        </div>
-        <div className="sensor-card-actions">
-          {!isEditing && (
+            )}
+            {latest?.source === 'shelly-scan' && (
+              <span className="sensor-card-source" title={t('hardware.nav.shellyTitle')}>
+                <IconPlug className="icon-action__svg" aria-hidden="true" />
+              </span>
+            )}
             <button
               className="icon-action rule-summary-icon-action"
               type="button"
@@ -330,7 +292,9 @@ export const SavedSensorCard = ({
             >
               <IconPencil className="icon-action__svg" aria-hidden="true" />
             </button>
-          )}
+          </div>
+        )}
+        <div className="sensor-card-actions">
           {device.profileId === 'xiaomi_lywsd03mmc_bthome_v2' && (
             <button
               className="icon-action"
@@ -355,34 +319,85 @@ export const SavedSensorCard = ({
         </div>
       </div>
 
+      <div className="sensor-metric-grid">
+        <div
+          className={
+            hasTemperatureData
+              ? 'sensor-data-metric-card'
+              : 'sensor-data-metric-card sensor-data-metric-card--empty'
+          }
+        >
+          <span className="sensor-data-metric-card__label">
+            {t('hardware.metrics.temperature')}
+          </span>
+          <strong
+            className={
+              hasTemperatureData
+                ? 'sensor-data-metric-card__value'
+                : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
+            }
+          >
+            {formatSensorMetric(temperatureSample?.temperatureC, '°C', 1, '— °C')}
+          </strong>
+        </div>
+        <div
+          className={
+            hasHumidityData
+              ? 'sensor-data-metric-card'
+              : 'sensor-data-metric-card sensor-data-metric-card--empty'
+          }
+        >
+          <span className="sensor-data-metric-card__label">
+            {t('hardware.metrics.humidity')}
+          </span>
+          <strong
+            className={
+              hasHumidityData
+                ? 'sensor-data-metric-card__value'
+                : 'sensor-data-metric-card__value sensor-data-metric-card__value--empty'
+            }
+          >
+            {formatSensorMetric(humiditySample?.humidityPct, '%', 1, '— %')}
+          </strong>
+        </div>
+      </div>
+
       <div className="sensor-status-strip">
         <span
           className="sensor-status-strip__item"
-          aria-label={`${t('hardware.metrics.battery')}: ${liveBattery}`}
+          aria-label={`${t('hardware.metrics.battery')}: ${formatBattery(
+            batterySample,
+            '—'
+          )}`}
           title={t('hardware.metrics.battery')}
         >
           <IconBattery aria-hidden="true" />
-          <strong>{liveBattery}</strong>
+          <strong>{formatBattery(batterySample, '—')}</strong>
         </span>
         <span
           className="sensor-status-strip__item"
-          aria-label={`${t('common.rssi')}: ${liveRssi}`}
+          aria-label={`${t('common.rssi')}: ${formatSensorMetric(
+            rssiSample?.rssi,
+            ' dBm',
+            0,
+            '—'
+          )}`}
           title={t('common.rssi')}
         >
           <IconWifi aria-hidden="true" />
-          <strong>{liveRssi}</strong>
+          <strong>{formatSensorMetric(rssiSample?.rssi, ' dBm', 0, '—')}</strong>
         </span>
         <span
           className="sensor-status-strip__item"
           aria-label={`${t('hardware.metrics.lastMeasurement')}: ${formatSeenAt(
-            liveSeenAtMs,
+            latest,
             locale,
             '—'
           )}`}
           title={t('hardware.metrics.lastMeasurement')}
         >
           <IconClock aria-hidden="true" />
-          <strong>{formatSeenAt(liveSeenAtMs, locale, '—')}</strong>
+          <strong>{formatSeenAt(latest, locale, '—')}</strong>
         </span>
       </div>
 
