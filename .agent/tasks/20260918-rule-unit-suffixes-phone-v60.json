@@ -1,0 +1,20 @@
+{
+  "id": "20260918-rule-unit-suffixes-phone-v60",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": ["android-device"],
+  "command_timeout": 3000,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = \"391e705e9578078b50800b7b9b8a34118b2fbb69\"; test -z \"$(git status --porcelain)\"",
+    "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260918-rule-unit-suffixes-v60b.py | python3; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/formUnits.ts apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/RuleAdvancedSettingsInline.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/app/locales/en.ts apps/mobile/src/app/locales/pl.ts apps/mobile/src/app/locales/de.ts apps/mobile/src/app/locales/es.ts apps/mobile/src/app/locales/fr.ts apps/mobile/src/app/locales/it.ts apps/mobile/src/app/locales/ptBr.ts; pnpm --filter @lcl/mobile exec eslint src/screens/hardware-setup/pages/formUnits.ts src/screens/hardware-setup/pages/RuleSetupPage.tsx src/screens/hardware-setup/pages/RuleAdvancedSettingsInline.tsx src/__tests__/hardware-setup.test.tsx src/app/locales/en.ts src/app/locales/pl.ts src/app/locales/de.ts src/app/locales/es.ts src/app/locales/fr.ts src/app/locales/it.ts src/app/locales/ptBr.ts; git diff --check",
+    "pnpm --filter @lcl/mobile typecheck && pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx -t 'switches between humidity rule modes and copies the generated script' --passWithNoTests",
+    "pnpm check",
+    "git add -A && git commit -m 'Unify rule field unit suffixes' && git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917 && test -z \"$(git status --porcelain)\" && git rev-parse HEAD",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\""
+  ]
+}
