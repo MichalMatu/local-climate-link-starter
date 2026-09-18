@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git add -A; git commit -m 'Keep thermometer fallback phone-only'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
-  "pid": 76320,
+  "command": "pnpm android:phone-alpha",
+  "pid": 76808,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T21:07:20.665996+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-18T21:07:26.773418+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-sensor-live-source-ui-phone-v82",
@@ -18,5 +18,5 @@
   "task_digest": "bb5c8a86df461bb478ff815b4933df5cb7bb96159b5669796966ef93321351e7",
   "daemon_version": "4.18.22",
   "daemon_pid": 72130,
-  "updated_at": "2026-09-18T21:07:20.700231+00:00"
+  "updated_at": "2026-09-18T21:07:26.799153+00:00"
 }
