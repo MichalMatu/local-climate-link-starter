@@ -1,4 +1,4 @@
-import { IconChevronRight } from '@tabler/icons-react';
+import { IconChevronRight, IconPlug } from '@tabler/icons-react';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useTimeAutomationRuntime } from '../flows/time-automation/useTimeAutomationRuntime.js';
 import { useTranslation } from '../app/i18n.js';
@@ -43,6 +43,14 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
   return (
     <article className="automation-card">
       <header className="automation-card__header">
+        <span
+          className={`automation-card__leading-icon${
+            query.data?.relayOn === true ? ' automation-card__leading-icon--active' : ''
+          }`}
+          aria-hidden="true"
+        >
+          <IconPlug className="automation-card__icon" />
+        </span>
         <div className="automation-card__identity">
           <div className="automation-status-row">
             <span className={healthClass(state)}>{stateLabel}</span>

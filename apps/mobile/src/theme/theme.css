@@ -2601,7 +2601,7 @@ select {
 }
 
 .sensor-card-leading-icon--fresh .sensor-card-leading-icon__icon {
-  animation: sensor-card-reading-pulse 650ms ease-out;
+  animation: sensor-card-reading-pulse var(--lcl-motion-reading-pulse) ease-out;
 }
 
 @keyframes sensor-card-reading-pulse {

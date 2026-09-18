@@ -6,8 +6,7 @@ import {
   IconDotsVertical,
   IconPencil,
   IconPlug,
-  IconPlus,
-  IconTemperature
+  IconPlus
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -81,7 +80,14 @@ const ClimateAutomationCard = ({
 
   const snapshot = query.data;
   const lastSeenUptimeMs = snapshot?.diagnostics.lastSeenUptimeMs ?? null;
-  const previousLastSeenUptimeMsRef = useRef<number | null>(lastSeenUptimeMs);
+  const currentUptimeMs =
+    snapshot?.time.uptimeSec != null && Number.isFinite(snapshot.time.uptimeSec)
+      ? snapshot.time.uptimeSec * 1000
+      : null;
+  const previousReadingRef = useRef<{
+    lastSeenUptimeMs: number;
+    currentUptimeMs: number | null;
+  } | null>(null);
   const readingPulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReadingPulseActive, setIsReadingPulseActive] = useState(false);
   const [readingPulseSequence, setReadingPulseSequence] = useState(0);
@@ -89,15 +95,16 @@ const ClimateAutomationCard = ({
   useEffect(() => {
     if (lastSeenUptimeMs === null) return;
 
-    const previousLastSeenUptimeMs = previousLastSeenUptimeMsRef.current;
-    if (
-      previousLastSeenUptimeMs !== null &&
-      lastSeenUptimeMs === previousLastSeenUptimeMs
-    ) {
-      return;
-    }
+    const previousReading = previousReadingRef.current;
+    previousReadingRef.current = { lastSeenUptimeMs, currentUptimeMs };
+    if (previousReading === null) return;
 
-    previousLastSeenUptimeMsRef.current = lastSeenUptimeMs;
+    const runtimeRestarted =
+      previousReading.currentUptimeMs !== null &&
+      currentUptimeMs !== null &&
+      currentUptimeMs < previousReading.currentUptimeMs;
+    if (runtimeRestarted || lastSeenUptimeMs <= previousReading.lastSeenUptimeMs) return;
+
     setReadingPulseSequence((current) => current + 1);
     setIsReadingPulseActive(true);
     if (readingPulseTimeoutRef.current !== null) {
@@ -107,7 +114,7 @@ const ClimateAutomationCard = ({
       setIsReadingPulseActive(false);
       readingPulseTimeoutRef.current = null;
     }, CLIMATE_READING_PULSE_MS);
-  }, [lastSeenUptimeMs]);
+  }, [currentUptimeMs, lastSeenUptimeMs]);
 
   useEffect(
     () => () => {
@@ -190,11 +197,11 @@ const ClimateAutomationCard = ({
       <header className="automation-card__header">
         <span
           className={`automation-card__leading-icon${
-            automationRunning ? ' automation-card__leading-icon--active' : ''
+            relayState === true ? ' automation-card__leading-icon--active' : ''
           }${isReadingPulseActive ? ' automation-card__leading-icon--fresh' : ''}`}
           aria-hidden="true"
         >
-          <IconTemperature key={readingPulseSequence} className="automation-card__icon" />
+          <IconPlug key={readingPulseSequence} className="automation-card__icon" />
         </span>
 
         <div className="automation-card__identity">

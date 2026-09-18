@@ -465,6 +465,13 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('1.23 kWh')).toBeVisible();
     expect(screen.getByText('09:31')).toBeVisible();
     expect(screen.getByText('Salon')).toBeVisible();
+    const climateCard = screen.getByText('Salon').closest('article') as HTMLElement;
+    const climateLeadingIcon = climateCard.querySelector(
+      '.automation-card__leading-icon'
+    );
+    expect(climateLeadingIcon?.querySelector('.tabler-icon-plug')).not.toBeNull();
+    expect(climateLeadingIcon?.querySelector('.tabler-icon-temperature')).toBeNull();
+    expect(climateLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
@@ -518,7 +525,7 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.queryByText('1.31 kPa')).toBeNull();
   });
 
-  it('pulses only the climate symbol when a fresh runtime measurement arrives', async () => {
+  it('pulses only the plug symbol when a fresh climate measurement arrives', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
     let lastSeenUptimeMs = 12_300_000;
     vi.stubGlobal(
@@ -532,12 +539,8 @@ describe('AutomationDashboardScreen', () => {
       '.automation-card--climate .automation-card__leading-icon'
     );
     expect(leadingIcon).not.toBeNull();
-    await waitFor(() =>
-      expect(leadingIcon).toHaveClass('automation-card__leading-icon--fresh')
-    );
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, CLIMATE_PULSE_TEST_WAIT_MS));
-    });
+    expect(leadingIcon?.querySelector('.tabler-icon-plug')).not.toBeNull();
+    expect(leadingIcon?.querySelector('.tabler-icon-temperature')).toBeNull();
     expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--fresh');
 
     lastSeenUptimeMs = 12_330_000;
@@ -550,6 +553,10 @@ describe('AutomationDashboardScreen', () => {
       expect(leadingIcon).toHaveClass('automation-card__leading-icon--fresh')
     );
     expect(leadingIcon?.querySelector('.automation-card__icon')).not.toBeNull();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, CLIMATE_PULSE_TEST_WAIT_MS));
+    });
+    expect(leadingIcon).not.toHaveClass('automation-card__leading-icon--fresh');
   });
 
   it('shows a native time schedule and opens it by stable installation id', async () => {
@@ -567,6 +574,10 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByText('ON')).toBeVisible();
+    const timeCard = screen.getByText('Lampa').closest('article') as HTMLElement;
+    const timeLeadingIcon = timeCard.querySelector('.automation-card__leading-icon');
+    expect(timeLeadingIcon?.querySelector('.tabler-icon-plug')).not.toBeNull();
+    expect(timeLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
