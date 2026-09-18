@@ -99,6 +99,23 @@ describe('SavedSensorCard live sample affordance', () => {
     ).toBeNull();
   });
 
+  it('does not treat a Shelly discovery sample as installed runtime data', () => {
+    const shellyDiscoverySample: SensorReadingSample = {
+      ...sample(1000),
+      source: 'shelly-scan'
+    };
+    const { container } = render(card([shellyDiscoverySample]));
+    const metrics = container.querySelector('.sensor-card-live-values__metrics');
+
+    expect(metrics).toHaveTextContent('— °C · — % · — kPa');
+    expect(
+      container.querySelector('.sensor-card-live-values .tabler-icon-plug')
+    ).toBeNull();
+    expect(
+      container.querySelector('.sensor-card-live-values .tabler-icon-device-mobile')
+    ).toBeNull();
+  });
+
   it('pulses only when seenAtMs strictly advances', () => {
     const { container, rerender } = render(card([sample(1000)]));
     const leadingIcon = () => container.querySelector('.sensor-card-leading-icon');

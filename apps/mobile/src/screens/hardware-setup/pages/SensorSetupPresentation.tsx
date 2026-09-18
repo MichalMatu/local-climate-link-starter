@@ -204,11 +204,12 @@ export const SavedSensorCard = ({
   onRemove
 }: SavedSensorCardProps) => {
   const { locale, t } = useTranslation();
-  const temperatureSample = latestNumericSample(samples, 'temperatureC');
-  const humiditySample = latestNumericSample(samples, 'humidityPct');
-  const latest = latestSample(samples);
-  const batterySample = latestBatterySample(samples);
-  const rssiSample = latestNumericSample(samples, 'rssi');
+  const phoneSamples = samples.filter((sample) => sample.source === 'phone-scan');
+  const temperatureSample = latestNumericSample(phoneSamples, 'temperatureC');
+  const humiditySample = latestNumericSample(phoneSamples, 'humidityPct');
+  const latest = latestSample(phoneSamples);
+  const batterySample = latestBatterySample(phoneSamples);
+  const rssiSample = latestNumericSample(phoneSamples, 'rssi');
   const liveTemperatureC = runtimeReading
     ? runtimeReading.temperatureC
     : temperatureSample?.temperatureC;
@@ -303,16 +304,12 @@ export const SavedSensorCard = ({
               >
                 <IconPlug className="icon-action__svg" aria-hidden="true" />
               </span>
-            ) : latest?.source === 'phone-scan' ? (
+            ) : latest ? (
               <span
                 className="sensor-card-source"
                 title={t('hardware.sensor.scanPhoneTitle')}
               >
                 <IconDeviceMobile className="icon-action__svg" aria-hidden="true" />
-              </span>
-            ) : latest?.source === 'shelly-scan' ? (
-              <span className="sensor-card-source" title={t('hardware.nav.shellyTitle')}>
-                <IconPlug className="icon-action__svg" aria-hidden="true" />
               </span>
             ) : null}
             <strong className="sensor-card-live-values__metrics">

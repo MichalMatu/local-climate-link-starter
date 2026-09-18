@@ -2642,7 +2642,6 @@ describe('HardwareSetupScreen', () => {
     expect(await screen.findByText('Zapisano termometr.')).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(screen.getByText(/^31\.2 °C ·/)).toBeInTheDocument();
     expect(
       within(getSavedSensorCard('Termometr 24:CD')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();
