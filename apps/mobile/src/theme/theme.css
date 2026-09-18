@@ -2977,3 +2977,30 @@ select {
   min-width: 0;
   width: 100%;
 }
+
+.sensor-card-title-row {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.sensor-card-live-values {
+  align-items: center;
+  color: var(--lcl-color-text-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: var(--lcl-spacing-xs);
+  margin-left: auto;
+  min-width: 0;
+}
+
+.sensor-card-live-values__metrics {
+  color: var(--lcl-color-text);
+  font-size: var(--lcl-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lcl-line-height-tight);
+  white-space: nowrap;
+}
+
+.sensor-card-live-values--stale {
+  opacity: var(--lcl-opacity-muted);
+}

@@ -5,6 +5,7 @@ import { IconPlus, IconTemperature } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
+import { useSensorRuntimeReadings } from '../../../flows/hardware-setup/useSensorRuntimeReadings.js';
 import type { HardwarePageProps } from '../helpers.js';
 import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';
 import {
@@ -45,6 +46,7 @@ export const SensorSetupPage = ({
   const shouldShowPhoneBleEmpty =
     flow.phoneBleScanMutation.isSuccess && flow.phoneBleScanCandidates.length === 0;
   const sensorDeviceCount = flow.sensorDevices.length;
+  const sensorRuntimeReadings = useSensorRuntimeReadings(flow.sensorDevices);
   const shouldRunSavedSensorLiveScan =
     sensorDeviceCount > 0 &&
     !isAddSensorModalOpen &&
@@ -340,6 +342,9 @@ export const SensorSetupPage = ({
             key={device.id}
             device={device}
             samples={readingsForSensor(device)}
+            runtimeReading={
+              sensorRuntimeReadings[device.runtimeAddress.toUpperCase()] ?? null
+            }
             isEditing={editingSensorId === device.id}
             pvvxTimePending={flow.setPvvxTimeMutation.isPending}
             onEditStart={() => setEditingSensorId(device.id)}

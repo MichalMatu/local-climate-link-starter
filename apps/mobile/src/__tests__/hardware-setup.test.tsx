@@ -2229,8 +2229,7 @@ describe('HardwareSetupScreen', () => {
       screen.queryByRole('dialog', { name: 'Skanuj BLE telefonem' })
     ).not.toBeInTheDocument();
     expect(screen.getByText('Termometr 24:CD')).toBeInTheDocument();
-    expect(screen.getByText('21.3°C')).toBeInTheDocument();
-    expect(screen.getByText('45.7%')).toBeInTheDocument();
+    expect(screen.getByText(/^21\.3 °C · 45\.7 % · 1\.38 kPa$/)).toBeInTheDocument();
     const sensorCard = getSavedSensorCard('Termometr 24:CD');
     expect(within(sensorCard).getByText('A4:C1:38:4F:24:CD')).toBeInTheDocument();
     expect(within(sensorCard).getByText('100%')).toBeInTheDocument();
@@ -2254,8 +2253,9 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
 
-    expect(await screen.findByText('21.3°C')).toBeInTheDocument();
-    expect(screen.getByText('45.7%')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/^21\.3 °C · 45\.7 % · 1\.38 kPa$/)
+    ).toBeInTheDocument();
     const sensorCard = getSavedSensorCard('Xiaomi salon');
     expect(within(sensorCard).getByText('100%')).toBeInTheDocument();
     expect(within(sensorCard).getByText('-72 dBm')).toBeInTheDocument();
@@ -2278,7 +2278,9 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(await screen.findByText('21.3°C')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/^21\.3 °C · 45\.7 % · 1\.38 kPa$/)
+    ).toBeInTheDocument();
     expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1);
 
     Object.defineProperty(document, 'visibilityState', {
@@ -2321,7 +2323,9 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(await screen.findByText('21.3°C')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/^21\.3 °C · 45\.7 % · 1\.38 kPa$/)
+    ).toBeInTheDocument();
     await waitFor(
       () => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(2),
       { timeout: 2500 }
@@ -2638,7 +2642,7 @@ describe('HardwareSetupScreen', () => {
     expect(await screen.findByText('Zapisano termometr.')).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(screen.getByText('31.2°C')).toBeInTheDocument();
+    expect(screen.getByText(/^31\.2 °C ·/)).toBeInTheDocument();
     expect(
       within(getSavedSensorCard('Termometr 24:CD')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();

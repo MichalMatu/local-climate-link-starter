@@ -2,6 +2,7 @@ import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
+import type { SensorRuntimeReading } from '../../../flows/hardware-setup/useSensorRuntimeReadings.js';
 import { SavedSensorCard } from './SensorSetupPresentation.js';
 
 const device = {
@@ -20,11 +21,15 @@ const sample = (seenAtMs: number): SensorReadingSample => ({
   seenAtMs
 });
 
-const card = (samples: readonly SensorReadingSample[]) => (
+const card = (
+  samples: readonly SensorReadingSample[],
+  runtimeReading: SensorRuntimeReading | null = null
+) => (
   <I18nProvider>
     <SavedSensorCard
       device={device}
       samples={samples}
+      runtimeReading={runtimeReading}
       isEditing={false}
       pvvxTimePending={false}
       onEditStart={vi.fn()}
@@ -53,6 +58,45 @@ describe('SavedSensorCard live sample affordance', () => {
 
     expect(icon).not.toBeNull();
     expect(icon).not.toHaveClass('sensor-card-leading-icon--fresh');
+  });
+
+  it('shows compact phone live values with the phone source icon', () => {
+    const { container } = render(card([sample(1000)]));
+    const metrics = container.querySelector('.sensor-card-live-values__metrics');
+
+    expect(metrics).toHaveTextContent('21.3 °C · 45.7 % · 1.38 kPa');
+    expect(
+      container.querySelector('.sensor-card-live-values .tabler-icon-device-mobile')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('.sensor-card-live-values .tabler-icon-plug')
+    ).toBeNull();
+    expect(container.querySelector('.sensor-metric-grid')).toBeNull();
+  });
+
+  it('prefers installed Shelly runtime values and source over phone samples', () => {
+    const runtimeReading: SensorRuntimeReading = {
+      sensorId: device.runtimeAddress,
+      source: 'shelly-runtime',
+      shellyName: 'Salon',
+      temperatureC: 22.6,
+      humidityPct: 58.4,
+      vpdKpa: 1.12,
+      batteryPct: 87,
+      rssi: -64,
+      seenAtMs: 2000,
+      stale: false
+    };
+    const { container } = render(card([sample(1000)], runtimeReading));
+    const metrics = container.querySelector('.sensor-card-live-values__metrics');
+
+    expect(metrics).toHaveTextContent('22.6 °C · 58.4 % · 1.12 kPa');
+    expect(
+      container.querySelector('.sensor-card-live-values .tabler-icon-plug')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('.sensor-card-live-values .tabler-icon-device-mobile')
+    ).toBeNull();
   });
 
   it('pulses only when seenAtMs strictly advances', () => {
