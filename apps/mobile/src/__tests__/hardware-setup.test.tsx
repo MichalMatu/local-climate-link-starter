@@ -186,6 +186,17 @@ const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = 
   );
 };
 
+const chooseSelectField = (
+  label: string,
+  optionLabel: string,
+  container: HTMLElement = document.body
+) => {
+  const scope = within(container);
+  fireEvent.click(scope.getByRole('button', { name: label }));
+  const listbox = scope.getByRole('listbox', { name: label });
+  fireEvent.click(within(listbox).getByRole('option', { name: optionLabel }));
+};
+
 const rpcResult = (result: unknown) =>
   new Response(JSON.stringify({ id: 1, result }), {
     status: 200,
@@ -348,9 +359,11 @@ const addSensorThroughUi = async ({
 } = {}) => {
   fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
   const addDialog = await openSensorAddDialog();
-  fireEvent.change(within(addDialog).getByLabelText('Typ termometru'), {
-    target: { value: profile }
-  });
+  chooseSelectField(
+    'Typ termometru',
+    profile === 'tp357_custom_v1' ? 'TP357' : 'Xiaomi/PVVX BTHome v2',
+    addDialog
+  );
   fireEvent.change(within(addDialog).getByLabelText('Nazwa termometru'), {
     target: { value: name }
   });
@@ -648,19 +661,25 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByText('Xiaomi/PVVX')).not.toBeInTheDocument();
 
     const sensorAddDialog = await openSensorAddDialog();
-    expect(within(sensorAddDialog).getByLabelText('Typ termometru')).toHaveValue(
+    expect(within(sensorAddDialog).getByLabelText('Typ termometru')).toHaveAttribute(
+      'value',
       'xiaomi_lywsd03mmc_bthome_v2'
     );
+    fireEvent.click(
+      within(sensorAddDialog).getByRole('button', { name: 'Typ termometru' })
+    );
+    const profileListbox = within(sensorAddDialog).getByRole('listbox', {
+      name: 'Typ termometru'
+    });
     expect(
-      within(sensorAddDialog).getByRole('option', {
+      within(profileListbox).getByRole('option', {
         name: 'Xiaomi/PVVX BTHome v2'
       })
     ).toBeInTheDocument();
-    expect(within(sensorAddDialog).getByRole('option', { name: 'TP357' })).toBeEnabled();
-    fireEvent.change(within(sensorAddDialog).getByLabelText('Typ termometru'), {
-      target: { value: 'tp357_custom_v1' }
-    });
-    expect(within(sensorAddDialog).getByLabelText('Typ termometru')).toHaveValue(
+    expect(within(profileListbox).getByRole('option', { name: 'TP357' })).toBeEnabled();
+    fireEvent.click(within(profileListbox).getByRole('option', { name: 'TP357' }));
+    expect(within(sensorAddDialog).getByLabelText('Typ termometru')).toHaveAttribute(
+      'value',
       'tp357_custom_v1'
     );
     expect(screen.queryByText(/wspierane/i)).not.toBeInTheDocument();
@@ -728,8 +747,14 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.queryByRole('button', { name: 'Termometry' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reguła' })).not.toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Termometr' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Tryb reguły' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Termometr' })).toHaveAttribute(
+      'aria-haspopup',
+      'listbox'
+    );
+    expect(screen.getByRole('button', { name: 'Tryb reguły' })).toHaveAttribute(
+      'aria-haspopup',
+      'listbox'
+    );
   });
 
   it('does not duplicate app settings inside developer diagnostics', () => {
@@ -1625,18 +1650,35 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByRole('button', { name: 'Wybierz' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
-    expect(screen.getByLabelText('Gniazdko Shelly')).toHaveValue('http://192.168.0.20/');
-    expect(screen.getByLabelText('Termometr')).toHaveValue('A4:C1:38:4F:24:CD');
-    expect(screen.getByLabelText('Tryb reguły')).toHaveValue('heating');
+    expect(screen.getByLabelText('Gniazdko Shelly')).toHaveAttribute(
+      'value',
+      'http://192.168.0.20/'
+    );
+    expect(screen.getByLabelText('Termometr')).toHaveAttribute(
+      'value',
+      'A4:C1:38:4F:24:CD'
+    );
+    expect(screen.getByLabelText('Tryb reguły')).toHaveAttribute('value', 'heating');
     expect(screen.getByText('Zaawansowane', { selector: 'summary' })).toBeVisible();
     expect(
       screen.getByText('Narzędzia deweloperskie', { selector: 'summary' })
     ).toBeVisible();
     expect(screen.getByLabelText('VPD assist')).not.toBeChecked();
-    expect(screen.getByRole('option', { name: 'Grzanie' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Chłodzenie' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Nawilżanie' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Osuszanie' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Tryb reguły' }));
+    const ruleModeListbox = screen.getByRole('listbox', { name: 'Tryb reguły' });
+    expect(
+      within(ruleModeListbox).getByRole('option', { name: 'Grzanie' })
+    ).toBeInTheDocument();
+    expect(
+      within(ruleModeListbox).getByRole('option', { name: 'Chłodzenie' })
+    ).toBeInTheDocument();
+    expect(
+      within(ruleModeListbox).getByRole('option', { name: 'Nawilżanie' })
+    ).toBeInTheDocument();
+    expect(
+      within(ruleModeListbox).getByRole('option', { name: 'Osuszanie' })
+    ).toBeInTheDocument();
+    fireEvent.click(within(ruleModeListbox).getByRole('option', { name: 'Grzanie' }));
     expect(getRuleSummary()).toHaveTextContent(
       'Gdy termometr Xiaomi salon zniknie na 2 min albo Shelly Salon uruchomi się ponownie'
     );
@@ -1944,10 +1986,8 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi('Salon');
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
 
-    expect(screen.getByLabelText('Termometr')).toHaveValue('');
-    fireEvent.change(screen.getByLabelText('Tryb reguły'), {
-      target: { value: 'cooling' }
-    });
+    expect(screen.getByLabelText('Termometr')).toHaveAttribute('value', '');
+    chooseSelectField('Tryb reguły', 'Chłodzenie');
     fireEvent.change(screen.getByLabelText('Włącz powyżej °C'), {
       target: { value: '24' }
     });
@@ -1975,10 +2015,15 @@ describe('HardwareSetupScreen', () => {
       await screen.findByText('Wczytano ustawienia z Shelly do formularza.')
     ).toBeInTheDocument();
     await waitFor(() =>
-      expect(screen.getByLabelText('Termometr')).toHaveValue('A4:C1:38:4F:24:CD')
+      expect(screen.getByLabelText('Termometr')).toHaveAttribute(
+        'value',
+        'A4:C1:38:4F:24:CD'
+      )
     );
-    expect(screen.getByRole('option', { name: 'Xiaomi salon' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Tryb reguły')).toHaveValue('heating');
+    expect(screen.getByRole('button', { name: 'Termometr' })).toHaveTextContent(
+      'Xiaomi salon'
+    );
+    expect(screen.getByLabelText('Tryb reguły')).toHaveAttribute('value', 'heating');
     expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue(19);
     expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue(20);
 
@@ -2175,7 +2220,10 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
 
-    expect(screen.getByLabelText('Termometr')).toHaveValue('C2:C0:00:30:64:01');
+    expect(screen.getByLabelText('Termometr')).toHaveAttribute(
+      'value',
+      'C2:C0:00:30:64:01'
+    );
     expect(getRuleSummary()).toHaveTextContent(
       'Gdy termometr TP357 salon zniknie na 2 min'
     );
@@ -2410,9 +2458,7 @@ describe('HardwareSetupScreen', () => {
       await addSensorThroughUi({ name: 'Xiaomi salon' });
 
       fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
-      fireEvent.change(screen.getByLabelText('Tryb reguły'), {
-        target: { value: 'humidifying' }
-      });
+      chooseSelectField('Tryb reguły', 'Nawilżanie');
 
       const ruleModeField = screen.getByLabelText('Tryb reguły').closest('.field');
       expect(ruleModeField).not.toBeNull();
@@ -2436,9 +2482,7 @@ describe('HardwareSetupScreen', () => {
       ).toHaveTextContent('"m":1');
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
-      fireEvent.change(screen.getByLabelText('Tryb reguły'), {
-        target: { value: 'dehumidifying' }
-      });
+      chooseSelectField('Tryb reguły', 'Osuszanie');
 
       expect(screen.getByLabelText('Włącz powyżej %')).toHaveValue(65);
       expect(screen.getByLabelText('Wyłącz poniżej %')).toHaveValue(55);
@@ -3062,7 +3106,10 @@ describe('HardwareSetupScreen', () => {
     await addSensorThroughUi({ name: 'Xiaomi salon' });
 
     openDeveloperDiagnostics();
-    expect(screen.getByLabelText('Gniazdko Shelly')).toHaveValue('http://192.168.0.20/');
+    expect(screen.getByLabelText('Gniazdko Shelly')).toHaveAttribute(
+      'value',
+      'http://192.168.0.20/'
+    );
     expect(screen.queryByLabelText('Termometr')).not.toBeInTheDocument();
     expect(screen.queryByText('Numer skryptu Shelly')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Odśwież diagnostykę' })).toHaveAttribute(

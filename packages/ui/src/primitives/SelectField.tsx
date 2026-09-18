@@ -58,7 +58,7 @@ const nextEnabledIndex = <T extends string>(
   return currentIndex;
 };
 
-export const SelectField = <T extends string,>({
+export const SelectField = <T extends string>({
   value,
   options,
   ariaLabel,

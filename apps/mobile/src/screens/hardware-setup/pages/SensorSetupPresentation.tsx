@@ -8,6 +8,7 @@ import {
   IconTrash,
   IconWifi
 } from '@tabler/icons-react';
+import { SelectField } from '@lcl/ui';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
@@ -116,24 +117,23 @@ export const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps
 
   return (
     <>
-      <label className="field">
-        {t('hardware.sensor.profileLabel')}
-        <span className="select-control">
-          <select
-            value={flow.sensorProfileInput}
-            onChange={(event) =>
-              flow.setSensorProfileInput(
-                event.currentTarget.value as typeof flow.sensorProfileInput
-              )
-            }
-          >
-            <option value="xiaomi_lywsd03mmc_bthome_v2">
-              {sensorProfileLabels.xiaomi_lywsd03mmc_bthome_v2}
-            </option>
-            <option value="tp357_custom_v1">{sensorProfileLabels.tp357_custom_v1}</option>
-          </select>
-        </span>
-      </label>
+      <div className="field">
+        <span>{t('hardware.sensor.profileLabel')}</span>
+        <SelectField
+          ariaLabel={t('hardware.sensor.profileLabel')}
+          value={flow.sensorProfileInput}
+          options={[
+            {
+              value: 'xiaomi_lywsd03mmc_bthome_v2',
+              label: sensorProfileLabels.xiaomi_lywsd03mmc_bthome_v2
+            },
+            { value: 'tp357_custom_v1', label: sensorProfileLabels.tp357_custom_v1 }
+          ]}
+          onChange={(value) =>
+            flow.setSensorProfileInput(value as typeof flow.sensorProfileInput)
+          }
+        />
+      </div>
 
       <div className={nameError ? 'field field--invalid' : 'field'}>
         <label htmlFor={nameInputId}>{t('hardware.sensor.nameLabel')}</label>

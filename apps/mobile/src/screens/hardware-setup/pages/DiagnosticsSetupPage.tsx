@@ -1,5 +1,5 @@
 import type { DiagnosticsSetupFlow } from '../pageContracts.js';
-import { DiagnosticRow, ToastViewport } from '@lcl/ui';
+import { DiagnosticRow, SelectField, ToastViewport } from '@lcl/ui';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   useTranslation,
@@ -219,24 +219,19 @@ export const DiagnosticsSetupPage = ({
 
   return (
     <section className="demo-panel" aria-label={t('common.diagnostics')}>
-      <label className="field">
-        {t('hardware.rule.selectedShelly')}
-        <span className="select-control">
-          <select
-            value={flow.diagnosticShellyId ?? ''}
-            onChange={(event) => flow.setDiagnosticShellyId(event.currentTarget.value)}
-          >
-            <option value="" disabled>
-              {t('hardware.rule.noShellySelected')}
-            </option>
-            {flow.shellyDevices.map((device) => (
-              <option key={device.id} value={device.id}>
-                {device.name}
-              </option>
-            ))}
-          </select>
-        </span>
-      </label>
+      <div className="field">
+        <span>{t('hardware.rule.selectedShelly')}</span>
+        <SelectField
+          ariaLabel={t('hardware.rule.selectedShelly')}
+          value={flow.diagnosticShellyId ?? ''}
+          placeholder={t('hardware.rule.noShellySelected')}
+          options={flow.shellyDevices.map((device) => ({
+            value: device.id,
+            label: device.name
+          }))}
+          onChange={flow.setDiagnosticShellyId}
+        />
+      </div>
 
       <div className="action-row">
         <button

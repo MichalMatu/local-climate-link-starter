@@ -1,5 +1,5 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
-import { FeedbackPanel, Modal, ScriptPreview, ToastViewport } from '@lcl/ui';
+import { FeedbackPanel, Modal, ScriptPreview, SelectField, ToastViewport } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
 import { IconInfoCircle, IconTrash } from '@tabler/icons-react';
 import { useCallback, useId, useState } from 'react';
@@ -160,7 +160,6 @@ export const RuleSetupPage = ({
   const { dismissToast, pushToast, toasts } = useToastQueue('rule-toast');
   const thresholdErrorId = useId();
   const vpdErrorId = useId();
-  const ruleModeSelectId = useId();
   const vpdTargetInputId = useId();
   const copy = RULE_PRESET_COPY[flow.rulePreset];
   const currentRule =
@@ -246,48 +245,38 @@ export const RuleSetupPage = ({
   return (
     <section className="demo-panel" aria-label={t('hardware.nav.ruleTitle')}>
       {showShellySelector && (
-        <label className="field">
-          {t('hardware.rule.selectedShelly')}
-          <span className="select-control">
-            <select
-              value={flow.selectedShellyId ?? ''}
-              onChange={(event) => flow.selectShellyDevice(event.currentTarget.value)}
-            >
-              <option value="" disabled>
-                {t('hardware.rule.noShellySelected')}
-              </option>
-              {flow.shellyDevices.map((device) => (
-                <option key={device.id} value={device.id}>
-                  {device.name}
-                </option>
-              ))}
-            </select>
-          </span>
-        </label>
+        <div className="field">
+          <span>{t('hardware.rule.selectedShelly')}</span>
+          <SelectField
+            ariaLabel={t('hardware.rule.selectedShelly')}
+            value={flow.selectedShellyId ?? ''}
+            placeholder={t('hardware.rule.noShellySelected')}
+            options={flow.shellyDevices.map((device) => ({
+              value: device.id,
+              label: device.name
+            }))}
+            onChange={flow.selectShellyDevice}
+          />
+        </div>
       )}
 
-      <label className="field">
-        {t('hardware.rule.selectedSensor')}
-        <span className="select-control">
-          <select
-            value={flow.selectedSensorId ?? ''}
-            onChange={(event) => flow.selectSensorDevice(event.currentTarget.value)}
-          >
-            <option value="" disabled>
-              {t('hardware.flow.noSelectedSensor')}
-            </option>
-            {flow.sensorDevices.map((device) => (
-              <option key={device.id} value={device.id}>
-                {device.name}
-              </option>
-            ))}
-          </select>
-        </span>
-      </label>
+      <div className="field">
+        <span>{t('hardware.rule.selectedSensor')}</span>
+        <SelectField
+          ariaLabel={t('hardware.rule.selectedSensor')}
+          value={flow.selectedSensorId ?? ''}
+          placeholder={t('hardware.flow.noSelectedSensor')}
+          options={flow.sensorDevices.map((device) => ({
+            value: device.id,
+            label: device.name
+          }))}
+          onChange={flow.selectSensorDevice}
+        />
+      </div>
 
       <div className="field">
         <div className="rule-field-label-row">
-          <label htmlFor={ruleModeSelectId}>{t('hardware.rule.ruleMode')}</label>
+          <span>{t('hardware.rule.ruleMode')}</span>
           <button
             aria-label={t('hardware.rule.summaryTitle')}
             className="icon-action rule-summary-icon-action"
@@ -298,21 +287,15 @@ export const RuleSetupPage = ({
             <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
           </button>
         </div>
-        <span className="select-control">
-          <select
-            id={ruleModeSelectId}
-            value={flow.rulePreset}
-            onChange={(event) =>
-              flow.setRulePreset(event.currentTarget.value as RulePresetId)
-            }
-          >
-            {selectablePresets.map((preset) => (
-              <option key={preset} value={preset}>
-                {t(RULE_PRESET_COPY[preset].labelKey)}
-              </option>
-            ))}
-          </select>
-        </span>
+        <SelectField<RulePresetId>
+          ariaLabel={t('hardware.rule.ruleMode')}
+          value={flow.rulePreset}
+          options={selectablePresets.map((preset) => ({
+            value: preset,
+            label: t(RULE_PRESET_COPY[preset].labelKey)
+          }))}
+          onChange={flow.setRulePreset}
+        />
       </div>
 
       <div className="field-row">

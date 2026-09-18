@@ -357,20 +357,21 @@ const checkTransientFeedbackPatterns = async () => {
   }
 };
 
-const checkSelectControlPatterns = async () => {
-  for (const path of hardwareSetupPagePaths) {
-    const source = await readRepoFile(path);
-    const selectMatches = source.matchAll(/<select\b/g);
+const checkNativeSelectPatterns = async () => {
+  const paths = (await listRepoFiles('apps/mobile/src')).filter(
+    (path) =>
+      path.endsWith('.tsx') &&
+      !path.includes('/__tests__/') &&
+      !/\.(?:test|spec)\.tsx$/.test(path)
+  );
 
-    for (const match of selectMatches) {
-      const index = match.index ?? 0;
-      const precedingSource = source.slice(Math.max(0, index - 220), index);
-      if (!precedingSource.includes('select-control')) {
-        addFailure(
-          path,
-          'native select must be wrapped in select-control for tokenized field styling'
-        );
-      }
+  for (const path of paths) {
+    const source = await readRepoFile(path);
+    if (/<select\b/.test(source)) {
+      addFailure(
+        path,
+        'native select is not allowed in mobile product UI; use the shared @lcl/ui SelectField listbox'
+      );
     }
   }
 };
@@ -601,7 +602,7 @@ await checkFeedbackContractPatterns();
 await checkUiPackageFeedbackPatterns();
 await checkFieldValidationPatterns();
 await checkTransientFeedbackPatterns();
-await checkSelectControlPatterns();
+await checkNativeSelectPatterns();
 await checkResponsiveCss();
 await checkModalSizingPatterns();
 await checkThemeTokenPatterns();
