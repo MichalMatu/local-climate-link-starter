@@ -477,6 +477,7 @@ export const en = {
       automationScriptMissing: 'Save the rule for this plug first.',
       bootBehavior: 'After Shelly restart',
       bootBehaviorValue: 'OFF, then AUTO after first reading',
+      bootBehaviorAfterReading: 'after first reading',
       copyGeneratedScriptDone: 'Script copied.',
       copyGeneratedScriptLabel: 'Copy script',
       copyScriptFailedTitle: 'Could not copy script.',

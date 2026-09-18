@@ -483,6 +483,7 @@ export const de = {
       automationScriptMissing: 'Regel zuerst für diese Steckdose speichern.',
       bootBehavior: 'Nach Shelly-Neustart',
       bootBehaviorValue: 'OFF, danach AUTO nach erster Messung',
+      bootBehaviorAfterReading: 'nach dem ersten Messwert',
       copyGeneratedScriptDone: 'Skript kopiert.',
       copyGeneratedScriptLabel: 'Skript kopieren',
       copyScriptFailedTitle: 'Skript konnte nicht kopiert werden.',

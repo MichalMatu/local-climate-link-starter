@@ -480,6 +480,7 @@ export const es = {
       automationScriptMissing: 'Guarda primero la regla para este enchufe.',
       bootBehavior: 'Tras reinicio de Shelly',
       bootBehaviorValue: 'OFF, luego AUTO tras la primera lectura',
+      bootBehaviorAfterReading: 'tras la primera lectura',
       copyGeneratedScriptDone: 'Script copiado.',
       copyGeneratedScriptLabel: 'Copiar script',
       copyScriptFailedTitle: 'No se pudo copiar el script.',

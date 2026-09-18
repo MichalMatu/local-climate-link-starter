@@ -477,6 +477,7 @@ export const ptBr = {
       automationScriptMissing: 'Salve primeiro a regra para esta tomada.',
       bootBehavior: 'Após reiniciar Shelly',
       bootBehaviorValue: 'OFF, depois AUTO após primeira leitura',
+      bootBehaviorAfterReading: 'após a primeira leitura',
       copyGeneratedScriptDone: 'Script copiado.',
       copyGeneratedScriptLabel: 'Copiar script',
       copyScriptFailedTitle: 'Não foi possível copiar o script.',

@@ -481,6 +481,7 @@ export const pl = {
       automationScriptMissing: 'Najpierw zapisz regułę dla tego gniazdka.',
       bootBehavior: 'Po restarcie Shelly',
       bootBehaviorValue: 'OFF, potem AUTO po pierwszym odczycie',
+      bootBehaviorAfterReading: 'po pierwszym odczycie',
       copyGeneratedScriptDone: 'Skopiowano skrypt.',
       copyGeneratedScriptLabel: 'Kopiuj skrypt',
       copyScriptFailedTitle: 'Nie udało się skopiować skryptu.',

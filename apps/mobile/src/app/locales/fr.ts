@@ -487,6 +487,7 @@ export const fr = {
       automationScriptMissing: 'Enregistre d’abord la règle pour cette prise.',
       bootBehavior: 'Après redémarrage Shelly',
       bootBehaviorValue: 'OFF, puis AUTO après la première mesure',
+      bootBehaviorAfterReading: 'après la première mesure',
       copyGeneratedScriptDone: 'Script copié.',
       copyGeneratedScriptLabel: 'Copier le script',
       copyScriptFailedTitle: 'Impossible de copier le script.',

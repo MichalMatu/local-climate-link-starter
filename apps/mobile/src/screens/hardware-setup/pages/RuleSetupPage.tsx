@@ -16,6 +16,7 @@ import {
 } from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { RuleAdvancedSettingsInline } from './RuleAdvancedSettingsInline.js';
+import { stripTrailingUnit } from './formUnits.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 type RuleControlCopy = {
@@ -316,26 +317,38 @@ export const RuleSetupPage = ({
 
       <div className="field-row">
         <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
-          {t(copy.onLabelKey)}
-          <input
-            aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
-            aria-invalid={!flow.isThresholdValid}
-            type="number"
-            step="0.1"
-            value={flow.onThresholdInput}
-            onChange={(event) => flow.setOnThresholdInput(event.currentTarget.value)}
-          />
+          <span>{stripTrailingUnit(t(copy.onLabelKey), copy.unit)}</span>
+          <span className="field-unit-control">
+            <input
+              aria-label={t(copy.onLabelKey)}
+              aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
+              aria-invalid={!flow.isThresholdValid}
+              type="number"
+              step="0.1"
+              value={flow.onThresholdInput}
+              onChange={(event) => flow.setOnThresholdInput(event.currentTarget.value)}
+            />
+            <span className="field-unit-control__unit" aria-hidden="true">
+              {copy.unit}
+            </span>
+          </span>
         </label>
         <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
-          {t(copy.offLabelKey)}
-          <input
-            aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
-            aria-invalid={!flow.isThresholdValid}
-            type="number"
-            step="0.1"
-            value={flow.offThresholdInput}
-            onChange={(event) => flow.setOffThresholdInput(event.currentTarget.value)}
-          />
+          <span>{stripTrailingUnit(t(copy.offLabelKey), copy.unit)}</span>
+          <span className="field-unit-control">
+            <input
+              aria-label={t(copy.offLabelKey)}
+              aria-describedby={flow.isThresholdValid ? undefined : thresholdErrorId}
+              aria-invalid={!flow.isThresholdValid}
+              type="number"
+              step="0.1"
+              value={flow.offThresholdInput}
+              onChange={(event) => flow.setOffThresholdInput(event.currentTarget.value)}
+            />
+            <span className="field-unit-control__unit" aria-hidden="true">
+              {copy.unit}
+            </span>
+          </span>
           {!flow.isThresholdValid && (
             <span className="field__error" id={thresholdErrorId}>
               {t('hardware.rule.thresholdInvalid')}
@@ -377,7 +390,7 @@ export const RuleSetupPage = ({
             <label className="rule-vpd-target-row__label" htmlFor={vpdTargetInputId}>
               {t('hardware.rule.vpdTargetShort')}
             </label>
-            <span className="rule-vpd-target-control">
+            <span className="field-unit-control">
               <input
                 id={vpdTargetInputId}
                 aria-label={t('hardware.rule.vpdTarget')}
@@ -390,7 +403,7 @@ export const RuleSetupPage = ({
                 value={flow.vpdTargetInput}
                 onChange={(event) => flow.setVpdTargetInput(event.currentTarget.value)}
               />
-              <span className="rule-vpd-target-control__unit" aria-hidden="true">
+              <span className="field-unit-control__unit" aria-hidden="true">
                 kPa
               </span>
             </span>

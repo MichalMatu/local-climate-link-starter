@@ -482,6 +482,7 @@ export const it = {
       automationScriptMissing: 'Salva prima la regola per questa presa.',
       bootBehavior: 'Dopo riavvio Shelly',
       bootBehaviorValue: 'OFF, poi AUTO dopo prima lettura',
+      bootBehaviorAfterReading: 'dopo la prima lettura',
       copyGeneratedScriptDone: 'Script copiato.',
       copyGeneratedScriptLabel: 'Copia script',
       copyScriptFailedTitle: 'Impossibile copiare lo script.',

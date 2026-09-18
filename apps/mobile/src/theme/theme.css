@@ -2868,18 +2868,18 @@ select {
   font-weight: var(--lcl-font-weight-semibold);
 }
 
-.rule-vpd-target-control {
+.field-unit-control {
   display: block;
   min-width: 0;
   position: relative;
 }
 
-.rule-vpd-target-control input {
+.field-unit-control input {
   padding-right: calc(var(--lcl-spacing-xl) + var(--lcl-spacing-lg));
   width: 100%;
 }
 
-.rule-vpd-target-control__unit {
+.field-unit-control__unit {
   color: var(--lcl-color-text-muted);
   pointer-events: none;
   position: absolute;
@@ -2934,6 +2934,28 @@ select {
 
 .rule-advanced-inline__readonly {
   margin: 0;
+}
+
+.rule-advanced-inline__boot {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  justify-items: start;
+}
+
+.rule-advanced-inline__boot-flow {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--lcl-spacing-sm);
+}
+
+.rule-advanced-inline__boot-arrow,
+.rule-advanced-inline__boot-note {
+  color: var(--lcl-color-text-muted);
+}
+
+.rule-advanced-inline__boot-note {
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-regular);
 }
 
 .rule-advanced-defaults-link {

@@ -2465,9 +2465,33 @@ describe('HardwareSetupScreen', () => {
       expect(
         within(advancedSection).getByRole('button', { name: 'Domyślne' })
       ).toHaveClass('rule-advanced-defaults-link');
+      expect(within(advancedSection).getByText('OFF')).toBeInTheDocument();
+      expect(within(advancedSection).getByText('→')).toBeInTheDocument();
+      expect(within(advancedSection).getByText('AUTO')).toBeInTheDocument();
       expect(
-        within(advancedSection).getByText('OFF, potem AUTO po pierwszym odczycie')
+        within(advancedSection).getByText('po pierwszym odczycie')
       ).toBeInTheDocument();
+      expect(
+        within(advancedSection).getAllByText('min', {
+          selector: '.field-unit-control__unit'
+        })
+      ).toHaveLength(2);
+      expect(
+        within(advancedSection).getByText('h', { selector: '.field-unit-control__unit' })
+      ).toBeInTheDocument();
+      expect(
+        within(advancedSection).getByText('dBm', {
+          selector: '.field-unit-control__unit'
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(vpdSection as HTMLElement).getByText('kPa', {
+          selector: '.field-unit-control__unit'
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText('%', { selector: '.field-unit-control__unit' })
+      ).toHaveLength(2);
       fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
         target: { value: '-80' }
       });
