@@ -1,0 +1,16 @@
+{
+  "id": "20260918-reinstall-reverted-thermometer-ui-phone-v83",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": ["android-device"],
+  "command_timeout": 3000,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = \"f95d8ccc7f0b61d7a24eef9daf30d35b7e381380\"; test \"$(git rev-parse HEAD^{tree})\" = \"$(git rev-parse e2acd9156224f6dcc11ab0c192d86a437dd5d78e^{tree})\"; test -z \"$(git status --porcelain)\"; git status --short --branch",
+    "pnpm android:phone-alpha",
+    "set -euo pipefail; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\""
+  ]
+}
