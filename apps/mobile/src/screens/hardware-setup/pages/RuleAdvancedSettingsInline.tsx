@@ -29,7 +29,7 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
       <p>{t('hardware.rule.advancedDisclosureHint')}</p>
       <div className="rule-advanced-inline__grid">
         <label
-          className={`rule-advanced-inline__field ${
+          className={`field rule-advanced-inline__field ${
             validation.isMinChangeMinValid ? '' : 'field--invalid'
           }`}
         >
@@ -56,7 +56,7 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
           )}
         </label>
         <label
-          className={`rule-advanced-inline__field ${
+          className={`field rule-advanced-inline__field ${
             validation.isMaxOnHoursValid ? '' : 'field--invalid'
           }`}
         >
@@ -89,7 +89,7 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
       </div>
       <div className="rule-advanced-inline__grid rule-advanced-inline__grid--resilience">
         <label
-          className={`rule-advanced-inline__field ${
+          className={`field rule-advanced-inline__field ${
             validation.isStaleTimeoutValid ? '' : 'field--invalid'
           }`}
         >
@@ -116,7 +116,7 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
           )}
         </label>
         <label
-          className={`rule-advanced-inline__field ${
+          className={`field rule-advanced-inline__field ${
             validation.isRssiMinValid ? '' : 'field--invalid'
           }`}
         >

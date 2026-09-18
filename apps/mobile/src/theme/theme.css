@@ -1796,8 +1796,7 @@ select {
 }
 
 @media (max-width: 30rem) {
-  .developer-context,
-  .rule-vpd-assist__header {
+  .developer-context {
     align-items: stretch;
     display: grid;
   }

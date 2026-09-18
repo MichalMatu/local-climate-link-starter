@@ -372,7 +372,7 @@ export const RuleSetupPage = ({
         </div>
         {flow.vpdAssistEnabled && (
           <div
-            className={`rule-vpd-target-row ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}
+            className={`field rule-vpd-target-row ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}
           >
             <label className="rule-vpd-target-row__label" htmlFor={vpdTargetInputId}>
               {t('hardware.rule.vpdTargetShort')}
