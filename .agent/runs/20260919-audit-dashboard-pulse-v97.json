@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-audit-dashboard-pulse-v97",
+  "task_digest": "78aabec43adb05b1a8925ee6059c3c5c059bdf89aac936180a1155ac3a781e73",
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-18T23:26:55.192150+00:00",
+  "attempt_id": "f62ff80d0f06e77a3d43b295",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 52027,
+  "updated_at": "2026-09-18T23:26:55.192213+00:00",
+  "pid": 52027
+}
