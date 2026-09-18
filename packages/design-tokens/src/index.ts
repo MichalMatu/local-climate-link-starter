@@ -118,7 +118,8 @@ export const tokens = {
   },
   motion: {
     fast: '120ms',
-    normal: '180ms'
+    normal: '180ms',
+    readingPulse: '650ms'
   },
   zIndex: {
     content: '1',

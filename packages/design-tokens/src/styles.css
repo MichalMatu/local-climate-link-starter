@@ -84,6 +84,7 @@
   --lcl-shadow-lg: 0 20px 56px rgba(29, 29, 31, 0.18);
   --lcl-motion-fast: 120ms;
   --lcl-motion-normal: 180ms;
+  --lcl-motion-reading-pulse: 650ms;
   --lcl-z-index-content: 1;
   --lcl-z-index-header: 10;
   --lcl-z-index-modal: 40;
