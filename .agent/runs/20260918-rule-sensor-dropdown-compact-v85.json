@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git add -A; git commit -m 'Compact thermometer picker readings'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
-  "pid": 57429,
+  "command": "pnpm android:phone-alpha",
+  "pid": 57874,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T21:48:36.443137+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-18T21:48:41.151906+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-rule-sensor-dropdown-compact-v85",
@@ -18,5 +18,5 @@
   "task_digest": "9208d4b57b9abd0804b4a458f72f4f3f1b0d3ee10f5fe8117d4926b95046ade8",
   "daemon_version": "4.18.22",
   "daemon_pid": 53604,
-  "updated_at": "2026-09-18T21:48:36.519901+00:00"
+  "updated_at": "2026-09-18T21:48:41.223124+00:00"
 }
