@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 7,
-  "command": "pnpm --filter @lcl/mobile typecheck && pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx -t 'adds Shelly and Xiaomi devices, then enables rule send|switches between humidity rule modes and copies the generated script' --passWithNoTests",
-  "pid": 85412,
+  "command": "pnpm check",
+  "pid": 85715,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T14:06:29.065068+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-09-18T14:06:38.814358+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260918-rule-form-system-controls-phone-v59",
@@ -18,5 +18,5 @@
   "task_digest": "926191c060fe2950c2d539ce1b8e0a6d6b7b92b7ad2c530b71465a9081568fa7",
   "daemon_version": "4.18.22",
   "daemon_pid": 85000,
-  "updated_at": "2026-09-18T14:06:29.143620+00:00"
+  "updated_at": "2026-09-18T14:06:38.890134+00:00"
 }
