@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 8,
-  "command": "pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx -t 'loads a Shelly script into the rule form and deletes it from the main screen|switches between humidity rule modes and copies the generated script' --passWithNoTests",
-  "pid": 96223,
+  "command": "pnpm check && pnpm e2e:responsive",
+  "pid": 96366,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-18T12:58:13.665058+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-18T12:58:17.516454+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 8,
   "stage_phase": "commands",
   "task_id": "20260918-rule-setup-ux-batch-phone-v53",
@@ -18,5 +18,5 @@
   "task_digest": "1ae99290a4c28b2c14d072886744f9601ee012ed8be83a34a0e33f3b880b2997",
   "daemon_version": "4.18.22",
   "daemon_pid": 95788,
-  "updated_at": "2026-09-18T12:58:13.680251+00:00"
+  "updated_at": "2026-09-18T12:58:17.584282+00:00"
 }
