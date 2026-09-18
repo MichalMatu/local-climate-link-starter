@@ -572,6 +572,7 @@ export const de = {
       vpdRangeHint:
         'Nach dem Setzen von kPa wählt VPD den Arbeitspunkt innerhalb der ON/OFF-Schwellen. Der Bereich wird nicht erweitert; bei engem Feuchtebereich kann der Effekt klein sein.',
       vpdTarget: 'Ziel-VPD kPa',
+      vpdTargetShort: 'Ziel-VPD',
       generatedScriptLabel: 'Generiertes Skript'
     },
     flow: {

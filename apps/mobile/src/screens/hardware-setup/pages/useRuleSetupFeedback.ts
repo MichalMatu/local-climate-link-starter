@@ -5,14 +5,7 @@ import { mutationError } from '../helpers.js';
 import type { RuleSetupFlow } from '../pageContracts.js';
 
 export type RuleDialogState =
-  | 'none'
-  | 'summary'
-  | 'vpd-info'
-  | 'script'
-  | 'advanced'
-  | 'delete'
-  | 'install-block'
-  | 'relay-test';
+  'none' | 'summary' | 'vpd-info' | 'script' | 'delete' | 'install-block' | 'relay-test';
 
 type PushToast = (tone: ToastTone, title: string, detail?: string) => void;
 

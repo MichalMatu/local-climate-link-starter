@@ -571,6 +571,7 @@ export const it = {
       vpdRangeHint:
         'Dopo aver impostato kPa, VPD sceglie il punto di lavoro entro le soglie ON/OFF. Non amplia l’intervallo; con un intervallo umidità stretto l’effetto può essere lieve.',
       vpdTarget: 'VPD target kPa',
+      vpdTargetShort: 'VPD target',
       generatedScriptLabel: 'Script generato'
     },
     flow: {

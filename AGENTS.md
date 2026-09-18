@@ -728,6 +728,30 @@ If a command cannot run in the environment, report exactly why and what was alre
 
 ---
 
+## 16A. Fast UX iteration mode
+
+For a sequence of user-approved, low-risk presentation/interaction refinements on the same screen, work in batches instead of treating every micro-change as a release candidate.
+
+During a batch:
+
+- combine several approved visual/UX changes into one coherent patch;
+- run Prettier/ESLint only on changed files, mobile typecheck, and the narrowest focused tests that exercise the changed behavior;
+- do not run the full repository check, Android rebuild, clean uninstall, or device smoke after every icon/spacing/copy adjustment;
+- keep behavior-affecting assertions in focused tests even when the change is primarily visual.
+
+Before presenting the batch for user review:
+
+1. run one full `pnpm check`;
+2. if it passes, commit once and push with `--no-verify` so the identical `prepush` full check is not run a second time;
+3. build/install Android once and run the relevant device smoke once;
+4. report exact focused/full-check/device evidence.
+
+When a deterministic final-gate failure is found, fix it in the same Local Agent task when practical instead of creating a new wait/poll cycle. Retry tasks must be reconstructible from the remote branch plus a deterministic patch; never depend on an unpushed local-only commit.
+
+This fast mode is for iterative UX work. Runtime safety, relay-control semantics, generated Shelly Script behavior, persistence/schema changes, and other safety-critical changes still require the strongest relevant focused tests and hardware validation. Never skip the final full check before declaring a coding batch done.
+
+---
+
 ## 17. Documentation policy
 
 Documentation is part of the implementation.

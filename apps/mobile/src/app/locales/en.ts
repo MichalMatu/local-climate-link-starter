@@ -566,6 +566,7 @@ export const en = {
       vpdRangeHint:
         'After setting kPa, VPD chooses the working point within the ON/OFF thresholds. It does not widen the range; with a narrow humidity range the effect may be subtle.',
       vpdTarget: 'Target VPD kPa',
+      vpdTargetShort: 'Target VPD',
       generatedScriptLabel: 'Generated script'
     },
     flow: {

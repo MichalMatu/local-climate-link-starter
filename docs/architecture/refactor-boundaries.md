@@ -115,6 +115,10 @@ For the future blue icon pulse:
 
 Component-local animation state is acceptable only as transient presentation.
 
+## Rule setup presentation
+
+`RuleSetupPage.tsx` keeps page-level rule composition and dialog intent. Advanced safety/resilience fields render inline through `RuleAdvancedSettingsInline.tsx`; they are draft inputs for the same final rule `Send` action, not a nested modal or separate save flow. VPD remains part of the same rule draft, with its help affordance local to the VPD row and the overall rule-summary help anchored to the Rule mode row.
+
 ## Store boundaries
 
 `setupDraftStore.ts` remains setup/device metadata. Persisted rule fields there are setup inputs, not installed automation ownership.

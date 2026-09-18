@@ -890,11 +890,12 @@ for (const viewport of viewports) {
     await expect(page.getByLabel('VPD assist')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wczytaj z Shelly' })).toBeHidden();
     await page.locator('summary').filter({ hasText: 'Zaawansowane' }).click();
-    await page.getByRole('button', { name: 'Otwórz opcje zaawansowane' }).click();
-    await expect(page.getByRole('dialog', { name: 'Opcje zaawansowane' })).toBeVisible();
+    await expect(page.getByLabel('Ponowne ON po min')).toBeVisible();
+    await expect(page.getByLabel('Maksymalny czas pracy h')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Domyślne' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Opcje zaawansowane' })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
-    await page.getByRole('button', { name: 'Zamknij' }).click();
 
     await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
     await expect(page.getByRole('button', { name: 'Wczytaj z Shelly' })).toBeVisible();
@@ -975,20 +976,14 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await page.getByLabel('VPD assist').check();
   await page.getByLabel('Docelowe VPD kPa').fill('1.25');
   await page.locator('summary').filter({ hasText: 'Zaawansowane' }).click();
-  await page.getByRole('button', { name: 'Otwórz opcje zaawansowane' }).click();
-  const advancedDialog = page.getByRole('dialog', { name: 'Opcje zaawansowane' });
-  await expect(advancedDialog).toBeVisible();
-  await expect(advancedDialog).toBeFocused();
-  await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).not.toBeFocused();
-  await expect(advancedDialog.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
-  await expect(advancedDialog.getByLabel('Brak odczytu przez min')).toHaveValue('2');
-  await expect(advancedDialog.getByLabel('Ponowne ON po min')).toHaveValue('2');
-  await expect(advancedDialog.getByLabel('VPD assist')).toHaveCount(0);
-  await advancedDialog.getByLabel('Minimalny RSSI dBm').fill('-80');
-  await advancedDialog.getByLabel('Brak odczytu przez min').fill('10');
-  await advancedDialog.getByLabel('Ponowne ON po min').fill('3');
-  await advancedDialog.getByLabel('Maksymalny czas pracy h').fill('3');
-  await advancedDialog.getByRole('button', { name: 'Zastosuj' }).click();
+  await expect(page.getByRole('dialog', { name: 'Opcje zaawansowane' })).toHaveCount(0);
+  await expect(page.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
+  await expect(page.getByLabel('Brak odczytu przez min')).toHaveValue('2');
+  await expect(page.getByLabel('Ponowne ON po min')).toHaveValue('2');
+  await page.getByLabel('Minimalny RSSI dBm').fill('-80');
+  await page.getByLabel('Brak odczytu przez min').fill('10');
+  await page.getByLabel('Ponowne ON po min').fill('3');
+  await page.getByLabel('Maksymalny czas pracy h').fill('3');
   await page.getByRole('button', { name: 'Podsumowanie reguły' }).click();
   summaryDialog = page.getByRole('dialog', { name: 'Podsumowanie reguły' });
   await expect(

@@ -12,12 +12,10 @@ import {
 import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
 import {
   DEFAULT_RULE_ADVANCED_SETTINGS,
-  RULE_ADVANCED_LIMITS,
-  type RuleAdvancedSettingsInput,
-  validateRuleAdvancedSettings
+  RULE_ADVANCED_LIMITS
 } from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
 import { useToastQueue } from '../useToastQueue.js';
-import { RuleAdvancedSettingsModal } from './RuleAdvancedSettingsModal.js';
+import { RuleAdvancedSettingsInline } from './RuleAdvancedSettingsInline.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 type RuleControlCopy = {
@@ -77,15 +75,6 @@ const copyToClipboard = async (value: string): Promise<void> => {
   }
   await navigator.clipboard.writeText(value);
 };
-
-const createAdvancedDraft = (flow: RuleSetupFlow): RuleAdvancedSettingsInput => ({
-  vpdAssistEnabled: flow.vpdAssistEnabled,
-  vpdTargetInput: flow.vpdTargetInput,
-  rssiMinInput: flow.rssiMinInput,
-  staleTimeoutMinInput: flow.staleTimeoutMinInput,
-  minChangeMinInput: flow.minChangeMinInput,
-  maxOnHoursInput: flow.maxOnHoursInput
-});
 
 const formatRuleSummary = ({
   actionLabel,
@@ -168,11 +157,10 @@ export const RuleSetupPage = ({
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<RuleDialogState>('none');
   const { dismissToast, pushToast, toasts } = useToastQueue('rule-toast');
-  const [advancedDraft, setAdvancedDraft] = useState<RuleAdvancedSettingsInput>(() =>
-    createAdvancedDraft(flow)
-  );
   const thresholdErrorId = useId();
   const vpdErrorId = useId();
+  const ruleModeSelectId = useId();
+  const vpdTargetInputId = useId();
   const copy = RULE_PRESET_COPY[flow.rulePreset];
   const currentRule =
     flow.configState.ok && flow.configState.config.rule.mode === flow.rulePreset
@@ -184,7 +172,6 @@ export const RuleSetupPage = ({
       ? `${Number(flow.vpdTargetInput).toFixed(2)} kPa`
       : t('hardware.rule.values.checkValue')
     : undefined;
-  const advancedDraftValidation = validateRuleAdvancedSettings(advancedDraft);
   const staleTimeoutMin = Number(flow.staleTimeoutMinInput);
   const minChangeMin = Number(flow.minChangeMinInput);
   const maxOnHours = Number(flow.maxOnHoursInput);
@@ -244,35 +231,6 @@ export const RuleSetupPage = ({
     flow.deleteAutomationScript(flow.selectedShelly);
   };
 
-  const openAdvancedModal = () => {
-    setAdvancedDraft(createAdvancedDraft(flow));
-    setDialog('advanced');
-  };
-
-  const resetAdvancedDraft = () => {
-    setAdvancedDraft({
-      ...DEFAULT_RULE_ADVANCED_SETTINGS,
-      vpdAssistEnabled: flow.vpdAssistEnabled,
-      vpdTargetInput: flow.vpdTargetInput
-    });
-  };
-
-  const updateAdvancedDraft = (patch: Partial<RuleAdvancedSettingsInput>) => {
-    setAdvancedDraft((current) => ({ ...current, ...patch }));
-  };
-
-  const applyAdvancedDraft = () => {
-    if (!advancedDraftValidation.isValid) {
-      return;
-    }
-
-    flow.setRssiMinInput(advancedDraft.rssiMinInput);
-    flow.setStaleTimeoutMinInput(advancedDraft.staleTimeoutMinInput);
-    flow.setMinChangeMinInput(advancedDraft.minChangeMinInput);
-    flow.setMaxOnHoursInput(advancedDraft.maxOnHoursInput);
-    setDialog('none');
-  };
-
   const runSafeRelayTest = () => {
     flow.safeRelayTestMutation.mutate();
   };
@@ -326,10 +284,22 @@ export const RuleSetupPage = ({
         </span>
       </label>
 
-      <label className="field">
-        {t('hardware.rule.ruleMode')}
+      <div className="field">
+        <div className="rule-field-label-row">
+          <label htmlFor={ruleModeSelectId}>{t('hardware.rule.ruleMode')}</label>
+          <button
+            aria-label={t('hardware.rule.summaryTitle')}
+            className="icon-action rule-summary-icon-action"
+            type="button"
+            title={t('hardware.rule.summaryTitle')}
+            onClick={() => setDialog('summary')}
+          >
+            <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
+          </button>
+        </div>
         <span className="select-control">
           <select
+            id={ruleModeSelectId}
             value={flow.rulePreset}
             onChange={(event) =>
               flow.setRulePreset(event.currentTarget.value as RulePresetId)
@@ -342,7 +312,7 @@ export const RuleSetupPage = ({
             ))}
           </select>
         </span>
-      </label>
+      </div>
 
       <div className="field-row">
         <label className={flow.isThresholdValid ? 'field' : 'field field--invalid'}>
@@ -395,43 +365,45 @@ export const RuleSetupPage = ({
               checked={flow.vpdAssistEnabled}
               onChange={(event) => flow.setVpdAssistEnabled(event.currentTarget.checked)}
             />
-            <span>
+            <span className="rule-vpd-assist__toggle-state">
               {flow.vpdAssistEnabled ? t('common.enabled') : t('common.disabled')}
             </span>
           </label>
         </div>
         {flow.vpdAssistEnabled && (
-          <label className={`field ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}>
-            {t('hardware.rule.vpdTarget')}
-            <input
-              aria-describedby={flow.isVpdAssistValid ? undefined : vpdErrorId}
-              aria-invalid={!flow.isVpdAssistValid}
-              max={RULE_ADVANCED_LIMITS.vpdTargetMax}
-              min={RULE_ADVANCED_LIMITS.vpdTargetMin}
-              step="0.05"
-              type="number"
-              value={flow.vpdTargetInput}
-              onChange={(event) => flow.setVpdTargetInput(event.currentTarget.value)}
-            />
+          <div
+            className={`rule-vpd-target-row ${flow.isVpdAssistValid ? '' : 'field--invalid'}`}
+          >
+            <label className="rule-vpd-target-row__label" htmlFor={vpdTargetInputId}>
+              {t('hardware.rule.vpdTargetShort')}
+            </label>
+            <span className="rule-vpd-target-control">
+              <input
+                id={vpdTargetInputId}
+                aria-label={t('hardware.rule.vpdTarget')}
+                aria-describedby={flow.isVpdAssistValid ? undefined : vpdErrorId}
+                aria-invalid={!flow.isVpdAssistValid}
+                max={RULE_ADVANCED_LIMITS.vpdTargetMax}
+                min={RULE_ADVANCED_LIMITS.vpdTargetMin}
+                step="0.05"
+                type="number"
+                value={flow.vpdTargetInput}
+                onChange={(event) => flow.setVpdTargetInput(event.currentTarget.value)}
+              />
+              <span className="rule-vpd-target-control__unit" aria-hidden="true">
+                kPa
+              </span>
+            </span>
             {!flow.isVpdAssistValid && (
-              <span className="field__error" id={vpdErrorId}>
+              <span className="field__error rule-vpd-target-row__error" id={vpdErrorId}>
                 {t('hardware.rule.range.kpa')}
               </span>
             )}
-          </label>
+          </div>
         )}
       </section>
 
       <div className="action-row rule-action-row">
-        <button
-          aria-label={t('hardware.rule.summaryTitle')}
-          className="icon-action rule-summary-icon-action"
-          type="button"
-          title={t('hardware.rule.summaryTitle')}
-          onClick={() => setDialog('summary')}
-        >
-          <IconInfoCircle className="icon-action__svg" aria-hidden="true" />
-        </button>
         <button
           className="primary-action"
           type="button"
@@ -451,17 +423,7 @@ export const RuleSetupPage = ({
       <div className="rule-progressive-disclosure-stack">
         <details className="rule-progressive-disclosure">
           <summary>{t('hardware.rule.advanced')}</summary>
-          <div className="rule-progressive-disclosure__body">
-            <p>{t('hardware.rule.advancedDisclosureHint')}</p>
-            <button
-              className="secondary-action"
-              type="button"
-              title={t('hardware.rule.advancedTitleAttr')}
-              onClick={openAdvancedModal}
-            >
-              {t('hardware.rule.openAdvanced')}
-            </button>
-          </div>
+          <RuleAdvancedSettingsInline flow={flow} />
         </details>
 
         <details className="rule-progressive-disclosure rule-progressive-disclosure--developer">
@@ -623,14 +585,6 @@ export const RuleSetupPage = ({
           {t('hardware.rule.deleteScriptConfirmDetail')}
         </FeedbackPanel>
       </Modal>
-      <RuleAdvancedSettingsModal
-        draft={advancedDraft}
-        open={dialog === 'advanced'}
-        onApply={applyAdvancedDraft}
-        onChange={updateAdvancedDraft}
-        onClose={() => setDialog('none')}
-        onReset={resetAdvancedDraft}
-      />
       <ToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}

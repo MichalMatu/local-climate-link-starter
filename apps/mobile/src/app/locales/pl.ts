@@ -570,6 +570,7 @@ export const pl = {
       vpdRangeHint:
         'Po ustawieniu kPa VPD dobiera punkt pracy w zakresie progów ON/OFF. Nie rozszerza zakresu; przy wąskim zakresie efekt może być mało widoczny.',
       vpdTarget: 'Docelowe VPD kPa',
+      vpdTargetShort: 'Docelowe VPD',
       generatedScriptLabel: 'Wygenerowany skrypt'
     },
     flow: {

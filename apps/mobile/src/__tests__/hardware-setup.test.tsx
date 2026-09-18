@@ -285,12 +285,6 @@ const openRuleDisclosure = (label: string): HTMLDetailsElement => {
 
 const openRuleDeveloperTools = () => openRuleDisclosure('Narzędzia deweloperskie');
 
-const openRuleAdvancedDialog = async () => {
-  openRuleDisclosure('Zaawansowane');
-  fireEvent.click(screen.getByRole('button', { name: 'Otwórz opcje zaawansowane' }));
-  return screen.findByRole('dialog', { name: 'Opcje zaawansowane' });
-};
-
 const openRuleDeleteScriptDialog = async () => {
   openRuleDeveloperTools();
   fireEvent.click(screen.getByRole('button', { name: 'Usuń z Shelly' }));
@@ -1661,10 +1655,16 @@ describe('HardwareSetupScreen', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Podgląd Shelly Script' })
     ).not.toBeInTheDocument();
-    openRuleDisclosure('Zaawansowane');
+    const advancedSection = openRuleDisclosure('Zaawansowane');
     expect(
-      screen.getByRole('button', { name: 'Otwórz opcje zaawansowane' })
-    ).toHaveAttribute('title', 'Zmień VPD, przekaźnik, RSSI i limity bezpieczeństwa');
+      within(advancedSection).getByLabelText('Ponowne ON po min')
+    ).toBeInTheDocument();
+    expect(within(advancedSection).getByRole('button', { name: 'Domyślne' })).toHaveClass(
+      'rule-advanced-defaults-link'
+    );
+    expect(
+      screen.queryByRole('dialog', { name: 'Opcje zaawansowane' })
+    ).not.toBeInTheDocument();
     openRuleDeveloperTools();
     expect(screen.getByRole('button', { name: 'Podgląd Shelly Script' })).toHaveAttribute(
       'title',
@@ -1954,20 +1954,19 @@ describe('HardwareSetupScreen', () => {
     fireEvent.change(screen.getByLabelText(/Wyłącz poniżej °C/), {
       target: { value: '23' }
     });
-    const advancedDialog = await openRuleAdvancedDialog();
-    fireEvent.change(within(advancedDialog).getByLabelText('Minimalny RSSI dBm'), {
+    const advancedSection = openRuleDisclosure('Zaawansowane');
+    fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
       target: { value: '-60' }
     });
-    fireEvent.change(within(advancedDialog).getByLabelText('Brak odczytu przez min'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Brak odczytu przez min'), {
       target: { value: '30' }
     });
-    fireEvent.change(within(advancedDialog).getByLabelText('Ponowne ON po min'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Ponowne ON po min'), {
       target: { value: '10' }
     });
-    fireEvent.change(within(advancedDialog).getByLabelText('Maksymalny czas pracy h'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Maksymalny czas pracy h'), {
       target: { value: '8' }
     });
-    fireEvent.click(within(advancedDialog).getByRole('button', { name: 'Zastosuj' }));
 
     openRuleDeveloperTools();
     fireEvent.click(screen.getByRole('button', { name: 'Wczytaj z Shelly' }));
@@ -1983,21 +1982,13 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue(19);
     expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue(20);
 
-    const loadedAdvancedDialog = await openRuleAdvancedDialog();
-    expect(within(loadedAdvancedDialog).getByLabelText('Minimalny RSSI dBm')).toHaveValue(
-      -85
-    );
-    expect(
-      within(loadedAdvancedDialog).getByLabelText('Brak odczytu przez min')
-    ).toHaveValue(2);
-    expect(within(loadedAdvancedDialog).getByLabelText('Ponowne ON po min')).toHaveValue(
+    expect(within(advancedSection).getByLabelText('Minimalny RSSI dBm')).toHaveValue(-85);
+    expect(within(advancedSection).getByLabelText('Brak odczytu przez min')).toHaveValue(
       2
     );
-    expect(
-      within(loadedAdvancedDialog).getByLabelText('Maksymalny czas pracy h')
-    ).toHaveValue(4);
-    fireEvent.click(
-      within(loadedAdvancedDialog).getByRole('button', { name: 'Zamknij' })
+    expect(within(advancedSection).getByLabelText('Ponowne ON po min')).toHaveValue(2);
+    expect(within(advancedSection).getByLabelText('Maksymalny czas pracy h')).toHaveValue(
+      4
     );
 
     const scriptDialog = await openRuleScriptDialog();
@@ -2423,6 +2414,19 @@ describe('HardwareSetupScreen', () => {
         target: { value: 'humidifying' }
       });
 
+      const ruleModeField = screen.getByLabelText('Tryb reguły').closest('.field');
+      expect(ruleModeField).not.toBeNull();
+      expect(
+        within(ruleModeField as HTMLElement).getByRole('button', {
+          name: 'Podsumowanie reguły'
+        })
+      ).toBeInTheDocument();
+      const vpdSection = screen
+        .getByText('VPD assist', { selector: 'strong' })
+        .closest('section');
+      expect(vpdSection).not.toBeNull();
+      expect(within(vpdSection as HTMLElement).getByRole('button')).toBeInTheDocument();
+
       expect(screen.getByLabelText('Włącz poniżej %')).toHaveValue(45);
       expect(screen.getByLabelText('Wyłącz powyżej %')).toHaveValue(55);
       expect(getRuleSummary()).toHaveTextContent('Nawilżanie włączy się poniżej 45.0%');
@@ -2454,39 +2458,31 @@ describe('HardwareSetupScreen', () => {
         target: { value: '1.25' }
       });
 
-      let advancedDialog = await openRuleAdvancedDialog();
-      await waitFor(() => expect(advancedDialog).toHaveFocus());
+      const advancedSection = openRuleDisclosure('Zaawansowane');
       expect(
-        within(advancedDialog).getByLabelText('Minimalny RSSI dBm')
-      ).not.toHaveFocus();
-      expect(
-        within(advancedDialog).getByRole('button', { name: 'Domyślne' })
-      ).toHaveAttribute('title', 'Przywróć domyślne opcje zaawansowane');
-      expect(
-        within(advancedDialog).getByRole('button', { name: 'Zastosuj' })
-      ).toHaveAttribute('title', 'Zastosuj opcje zaawansowane do tej reguły');
-      expect(within(advancedDialog).queryAllByRole('heading', { level: 3 })).toHaveLength(
-        0
-      );
-      expect(
-        within(advancedDialog).queryByLabelText('VPD assist')
+        screen.queryByRole('dialog', { name: 'Opcje zaawansowane' })
       ).not.toBeInTheDocument();
       expect(
-        within(advancedDialog).getByText('OFF, potem AUTO po pierwszym odczycie')
+        within(advancedSection).getByRole('button', { name: 'Domyślne' })
+      ).toHaveClass('rule-advanced-defaults-link');
+      expect(
+        within(advancedSection).getByText('OFF, potem AUTO po pierwszym odczycie')
       ).toBeInTheDocument();
-      fireEvent.change(within(advancedDialog).getByLabelText('Minimalny RSSI dBm'), {
+      fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
         target: { value: '-80' }
       });
-      fireEvent.change(within(advancedDialog).getByLabelText('Brak odczytu przez min'), {
+      fireEvent.change(within(advancedSection).getByLabelText('Brak odczytu przez min'), {
         target: { value: '10' }
       });
-      fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
         target: { value: '3' }
       });
-      fireEvent.change(within(advancedDialog).getByLabelText('Maksymalny czas pracy h'), {
-        target: { value: '3' }
-      });
-      fireEvent.click(within(advancedDialog).getByRole('button', { name: 'Zastosuj' }));
+      fireEvent.change(
+        within(advancedSection).getByLabelText('Maksymalny czas pracy h'),
+        {
+          target: { value: '3' }
+        }
+      );
       expect(getRuleSummary()).toHaveTextContent(
         'Gdy termometr Xiaomi salon zniknie na 10 min albo Shelly Salon uruchomi się ponownie'
       );
@@ -2528,20 +2524,17 @@ describe('HardwareSetupScreen', () => {
         target: { value: '1.25' }
       });
 
-      advancedDialog = await openRuleAdvancedDialog();
-      fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
         target: { value: '0' }
       });
+      expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(
-        within(advancedDialog).getByRole('button', { name: 'Zastosuj' })
-      ).toBeDisabled();
-      expect(
-        within(advancedDialog).getByText('Zakres: 0.25 do 60 min.')
+        within(advancedSection).getByText('Zakres: 0.25 do 60 min.')
       ).toBeInTheDocument();
-      fireEvent.change(within(advancedDialog).getByLabelText(/Ponowne ON po min/), {
+      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
         target: { value: '3' }
       });
-      fireEvent.click(within(advancedDialog).getByRole('button', { name: 'Zastosuj' }));
+      expect(screen.getByRole('button', { name: 'Wyślij' })).toBeEnabled();
 
       scriptDialog = await openRuleScriptDialog();
       fireEvent.click(
