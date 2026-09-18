@@ -2279,7 +2279,15 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
     await waitFor(() => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1));
-    fireEvent.click(screen.getByRole('button', { name: 'Termometr' }));
+
+    const thermometerSelect = screen.getByRole('button', { name: 'Termometr' });
+    await waitFor(() => expect(thermometerSelect).toHaveTextContent('21.3°C · 45.7%'));
+    expect(thermometerSelect).not.toHaveTextContent('kPa');
+    expect(
+      thermometerSelect.querySelector('.lcl-select-field__trigger-meta')
+    ).not.toBeNull();
+    expect(thermometerSelect.querySelector('.tabler-icon-device-mobile')).not.toBeNull();
+    fireEvent.click(thermometerSelect);
 
     const option = await screen.findByRole('option', { name: 'Xiaomi salon' });
     expect(option).toHaveTextContent('21.3°C · 45.7%');

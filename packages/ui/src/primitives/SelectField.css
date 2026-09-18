@@ -37,10 +37,27 @@
   opacity: var(--lcl-opacity-disabled);
 }
 
+.lcl-select-field__trigger-content {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--lcl-spacing-sm);
+  justify-content: space-between;
+  min-width: 0;
+}
+
 .lcl-select-field__value {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lcl-select-field__trigger-meta {
+  flex: 0 0 auto;
+  margin-left: auto;
+  min-width: 0;
   white-space: nowrap;
 }
 

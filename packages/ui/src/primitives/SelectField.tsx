@@ -239,14 +239,19 @@ export const SelectField = <T extends string>({
         onClick={() => (open ? closeList() : openList())}
         onKeyDown={handleTriggerKeyDown}
       >
-        <span
-          className={
-            selectedOption
-              ? 'lcl-select-field__value'
-              : 'lcl-select-field__value lcl-select-field__value--placeholder'
-          }
-        >
-          {selectedOption?.label ?? placeholder ?? ''}
+        <span className="lcl-select-field__trigger-content">
+          <span
+            className={
+              selectedOption
+                ? 'lcl-select-field__value'
+                : 'lcl-select-field__value lcl-select-field__value--placeholder'
+            }
+          >
+            {selectedOption?.label ?? placeholder ?? ''}
+          </span>
+          {selectedOption?.meta ? (
+            <span className="lcl-select-field__trigger-meta">{selectedOption.meta}</span>
+          ) : null}
         </span>
         <span className="lcl-select-field__chevron" aria-hidden="true">
           ▾
