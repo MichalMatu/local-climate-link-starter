@@ -1,6 +1,6 @@
-# Next chat handoff — post remaining-screen UX consistency audit
+# Next chat handoff — post UI polish and toast-host hardening
 
-Updated: 2026-09-19
+Updated: 2026-09-20
 
 This is the canonical continuation state for `MichalMatu/local-climate-link-starter`.
 
@@ -28,39 +28,116 @@ Every `.agent/tasks/*.json` must contain exactly:
 "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1"
 ```
 
-## Verified product-code checkpoint
+## Current verified app-code checkpoint
 
-Current app-code checkpoint:
-
-```text
-965618b0023946a16acee6dc46a33eea9be7df50
-Stabilize BLE child-page cleanup callback
-```
-
-The remaining-screen UX consistency pass is closed at this checkpoint.
-
-Key commits in the completed pass:
+Latest app-code checkpoint:
 
 ```text
-d8606f8c  Unify missing installation page chrome
-55e80fce  Move Plug settings into page tree
-45919dd2  Move Plug BLE discovery into page tree
-a9efc38b  Unify setup flow back chrome
-2465521e  Move configurator Shelly tools into page tree
-2a164a34  Remove dead advanced settings modal
-965618b0  Stabilize BLE child-page cleanup callback
+8ad5b152bdbf861a8e6620414245dfbcb06c0ead
+Anchor app toasts above bottom navigation
 ```
 
-Final validation on `965618b0` passed:
+Documentation commits follow this app-code checkpoint on the same work branch. Always fetch the fresh branch instead of resetting to the app-code SHA.
 
-- mobile ESLint for the touched page with `--max-warnings=0`;
-- mobile typecheck;
-- UX and repository quality gates;
-- focused Vitest suite: 58/58;
-- one full `pnpm check` with no lint warnings;
-- clean commit and push.
+Recent product/UI commits in this completed slice:
 
-Android alpha build also completed successfully during the preceding `2465521e` validation. Installation/cold-start smoke did not run because ADB reported exactly zero authorized devices. Treat physical Samsung S22+ smoke as **outstanding validation only**, not as a code failure. The app version remains `versionName=2.0.10`, `versionCode=20010` unless a fresh branch check proves otherwise.
+```text
+97bef795  Auto-correct invalid rule threshold gaps
+cd75397e  Polish Plug naming and sensor metadata
+49e641f7  Polish glass surfaces and modal geometry
+8ad5b152  Anchor app toasts above bottom navigation
+```
+
+### Final validation for toast-host hardening
+
+On `8ad5b152`:
+
+- mobile typecheck passed;
+- `quality:ux` passed;
+- `quality:repo` passed;
+- targeted Playwright toast geometry test passed;
+- one full `pnpm check` passed;
+- commit/push passed;
+- screenshot run generated five real viewport captures and re-ran the toast geometry scenario successfully.
+
+Canonical viewport coverage for the toast/nav regression:
+
+```text
+360×800
+390×844
+412×915
+768×1024
+1440×900
+```
+
+The geometry test requires the toast to be mounted in `#app-toast-host`, outside `.app-root-shell__content`, fully inside the viewport and immediately above the persistent bottom navigation.
+
+## Toast regression root cause and permanent contract
+
+The preceding glass polish added `backdrop-filter` to shared page surfaces such as `.demo-panel`. Several screens still mounted the shared `ToastViewport` inside those surfaces. A filtered/transformed ancestor can establish a containing block for fixed descendants, so `position: fixed` toast geometry became relative to different page surfaces instead of the application viewport. That is why toasts appeared in inconsistent vertical positions.
+
+The permanent architecture is now:
+
+```text
+AppShell
+  -> scrollable page content
+  -> app-toast-host
+  -> persistent bottom navigation
+```
+
+Rules:
+
+- `@lcl/ui` still owns the shared visual `ToastViewport` primitive and toast tokens;
+- mobile screens use `AppToastViewport`, which portals into the shell-owned `#app-toast-host`;
+- screen/flow code may own its toast message queue, but not toast viewport geometry;
+- do not add per-screen `bottom` offsets;
+- do not render raw `<ToastViewport>` in `apps/mobile/src/screens/**`;
+- `scripts/quality/ux-gate.mjs` enforces the host/portal contract and blocks raw screen-level toast viewports;
+- `AppBottomNavigation.css` owns the tokenized bottom-nav/safe-area offset.
+
+This contract is documented in `docs/architecture/overview.md`.
+
+## Completed UI polish in the same slice
+
+### Plug naming / detail consistency
+
+- redundant top `‹ Plugs` navigation was removed from the real Plug detail screen because persistent bottom navigation already owns root-tab navigation;
+- Plug display name can be edited from the main Plug card and from Plug detail;
+- configured/installed Plug cards use the same editable-name behavior;
+- naming stays synchronized with the saved physical Plug / installation presentation contract;
+- regression coverage protects these entry points.
+
+### Thermometer card metadata
+
+The old expandable `Details` block was removed when it only hid two metadata values.
+
+Current card contract:
+
+```text
+existing single separator
+model/profile on the left
+MAC / hardware id on the right
+```
+
+No extra separator and no `Type` / `MAC` labels. Metadata typography is intentionally quieter than live measurement data.
+
+### Rule page polish
+
+- invalid paired thresholds auto-repair by one whole unit only when the pair is invalid;
+- valid narrower hysteresis remains untouched;
+- `Shelly Script preview` was shortened to `Shelly Script`;
+- Rule/VPD info-label alignment was normalized;
+- relay-test / shared modals use common content-driven geometry with a shared max height rather than per-modal size variants.
+
+### Glass surfaces
+
+A restrained glass treatment was added to major shared surfaces. Do not solve future glass-related layout issues by adding page-specific positioning exceptions. Keep geometry-critical overlays (toast host, modal layer, persistent nav) outside filtered page surfaces when appropriate.
+
+## Device validation state
+
+A physical Samsung S22+ install/cold-start smoke succeeded for the preceding `49e641f7` polish build (`versionName=2.0.10`, `versionCode=20010`). The user disconnected the phone after the toast-host change and explicitly authorized autonomous emulator/screenshot validation instead.
+
+Physical-device absence is not a blocker for unrelated TypeScript/web/UI work. For native-only behavior, use an Android emulator when available and document whether the check was emulator or physical device.
 
 ## Product model that must remain stable
 
@@ -71,7 +148,7 @@ physical Plug -> optional installed automation
 Accepted invariants:
 
 - bottom navigation is **Plugs | Thermometers | Settings**;
-- `AppShell` owns persistent bottom navigation;
+- `AppShell` owns persistent bottom navigation and the global toast host;
 - page content scrolls independently of that navigation;
 - automation setup starts from a concrete Plug;
 - Time is a Plug automation type, not a global dashboard section;
@@ -106,30 +183,18 @@ Do not reopen these screens without a concrete regression.
 
 ## Closed UX scope: remaining-screen consistency audit
 
-The broad remaining-screen audit is also **closed**. Do not restart it from scratch in the next chat.
+The broad remaining-screen audit is also **closed**. Do not restart it from scratch.
 
-Completed navigation/page-tree work:
-
-- missing Installation detail/diagnostics/script states use shared `AppPageBack` chrome;
-- saved Plug settings are a child page from the Plug dashboard;
-- saved Plug BLE discovery is a deeper child page from Plug settings;
-- configurator saved-Shelly settings are a child page instead of a working modal;
-- configurator Shelly BLE discovery is a deeper child page and preserves BLE cleanup when Back is pressed during scanner startup;
-- setup-flow back chrome uses shared `AppPageBack`;
-- the dead `RuleAdvancedSettingsModal.tsx` was removed; active advanced settings remain inline.
-
-Audit conclusions that should remain stable unless a concrete regression appears:
+Stable conclusions:
 
 - full working tasks belong in the page tree;
-- remaining confirmation/error/picker/preview modals are transient and are acceptable as modals;
-- `TimeInstallationDetail` has intentional status/mode/refresh header content and was not changed merely because it uses older header classes;
-- diagnostics technical fields remain intentional diagnostics, not editable settings;
-- rule script preview is a transient read-only preview/copy surface and remains a modal;
-- `ShellySettingsModal` and `ShellyBleDiscoveryModal` are still referenced fallback components inside `ShellySetupPage`; do not delete them merely because normal dashboard/configurator navigation now routes the working surfaces as pages.
+- confirmation/error/picker/preview modals remain transient and acceptable as modals;
+- `TimeInstallationDetail` has intentional status/mode/refresh header content;
+- diagnostics technical fields remain diagnostics, not editable settings;
+- rule script preview remains a transient read-only preview/copy surface;
+- `ShellySettingsModal` and `ShellyBleDiscoveryModal` remain referenced fallback components and must not be deleted merely because normal routes prefer pages.
 
 ## Navigation / page-tree contract
-
-Use this hierarchy:
 
 ```text
 AppShell
@@ -152,32 +217,37 @@ Healthy boundaries:
 - hardware pages consume narrow `ShellySetupFlow`, `SensorSetupFlow`, `RuleSetupFlow`, and `TimeScheduleSetupFlow` contracts;
 - screens do not own raw `fetch` or Capacitor BLE transport;
 - domain packages remain independent of React/Ionic;
-- repository quality gates enforce these boundaries and line-budget alarms;
-- `RuleAdvancedSettingsInline.tsx` now carries the 220-line responsibility budget formerly attached to the deleted modal.
+- `@lcl/ui` owns reusable presentation primitives; `AppShell` owns app-frame geometry such as persistent nav and the toast host;
+- repository/UX quality gates enforce these boundaries and regression contracts;
+- `RuleAdvancedSettingsInline.tsx` carries the 220-line responsibility budget formerly attached to the deleted modal.
 
 Watchlist, not immediate rewrite targets:
 
-1. `apps/mobile/src/__tests__/hardware-setup.test.tsx` — large scenario file. Split only when materially extending a cohesive feature area. Existing React `act(...)` warnings in the frozen standalone-add regression test are test-harness noise, not a reason to reopen the add screens by themselves.
+1. `apps/mobile/src/__tests__/hardware-setup.test.tsx` — large scenario file. Split only when materially extending a cohesive feature area. Existing React `act(...)` warnings in the frozen standalone-add regression test are test-harness noise.
 2. `apps/mobile/src/theme/theme.css` — large global stylesheet. Remove stale selectors opportunistically only when touching the related surface.
 3. `ShellySetupPage.tsx` and `flows/hardware-setup/shellyRequests.ts` — responsibility-dense. Split only at concrete setup/transport boundaries if they grow.
 4. `useHardwareSetupFlow.ts` — broad facade by design. Keep new transport loops/timers/parsers in focused flows/services.
 
-Do not raise architecture budgets just to make a change pass.
+Do not raise architecture budgets or weaken UX gates merely to make a change pass.
+
+## Repository hygiene after this slice
+
+Temporary screenshot/contact-sheet branches created by Local Agent are validation artifacts only and are not product branches. They may be deleted after evidence has been reviewed/recorded. Do not merge `.agent/screenshots/**` into the work branch.
+
+The work branch itself must remain clean after Local Agent tasks. Generated test outputs, Playwright traces, APKs and screenshots must not be committed to the product branch unless a specific long-lived test fixture is intentionally added.
 
 ## Next work
 
 Do **not** start another broad UX consistency sweep. The next implementation should come from an explicit product requirement or a concrete regression.
 
-Reasonable future product categories remain:
+Reasonable future categories:
 
 - richer Plug management/configuration;
 - additional supported sensor/device profiles;
 - additional Plug-owned automation types;
 - targeted polish on a specific screen when a real usability issue is observed.
 
-Preserve the Plug-owned automation model and single runtime owner.
-
-If the Samsung S22+ becomes visible again, it is useful to complete the outstanding physical install/cold-start smoke for the current checkpoint before a native/device-sensitive change, but do not treat device absence as blocking unrelated web/TypeScript work.
+Preserve the Plug-owned automation model, single runtime owner and shell-owned feedback geometry.
 
 ## Normal workflow for the next implementation slice
 
@@ -188,7 +258,7 @@ fresh branch + daemon
 -> focused typecheck/gates/tests
 -> exactly one final full pnpm check
 -> commit/push
--> physical S22+ smoke when native/device/UI behavior needs it
+-> emulator or physical-device smoke when native/device/UI behavior needs it
 ```
 
 ## Documentation map
@@ -197,7 +267,7 @@ Canonical/current:
 
 - `AGENTS.md` — operating rules and Local Agent contract;
 - `docs/HANDOFF_NEXT_CHAT.md` — continuation state;
-- `docs/architecture/overview.md` — current product/runtime architecture;
+- `docs/architecture/overview.md` — current product/runtime/UI-shell architecture;
 - `docs/architecture/refactor-boundaries.md` — responsibility boundaries and hotspot policy;
 - `docs/product/next-functional-steps.md` — active roadmap.
 
