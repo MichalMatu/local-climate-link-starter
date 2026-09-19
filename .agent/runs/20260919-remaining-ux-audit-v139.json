@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-remaining-ux-audit-v139",
+  "task_digest": "6cf4fddb1e16adaed87b8d3e1f7306db7f067d1cd84a458633ea9c02ff57173f",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T15:48:15.490315+00:00",
+  "attempt_id": "2472118c84956395df2f2328",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 89965,
+  "updated_at": "2026-09-19T15:48:15.490414+00:00",
+  "pid": 89965
+}
