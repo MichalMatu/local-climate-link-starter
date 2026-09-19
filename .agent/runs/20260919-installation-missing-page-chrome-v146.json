@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 7,
-  "command": "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-installation-missing-page-chrome-v143-tests.py | python3 -; git show origin/agent-control:.agent/scripts/20260919-installation-missing-page-chrome-v146-test-fix.py | python3 -; pnpm exec prettier --write apps/mobile/src/__tests__/automation-detail.test.tsx >/dev/null; set +e; output=$(pnpm --filter @lcl/mobile exec vitest run src/__tests__/automation-detail.test.tsx --passWithNoTests 2>&1); status=$?; set -e; printf '%s\\n' \"$output\" | tail -n 80; test $status -ne 0; printf '%s\\n' \"$output\" | grep -q '‹ Gniazdka'; echo RED_CONFIRMED",
-  "pid": 14608,
+  "command": "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-installation-missing-page-chrome-v143-impl.py | python3 -; pnpm exec prettier --write apps/mobile/src/__tests__/automation-detail.test.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx apps/mobile/src/screens/InstallationScriptScreen.tsx >/dev/null; git diff --check; changed=$(git diff --name-only | sort); printf '%s\\n' \"$changed\"; test \"$changed\" = \"$(printf '%s\\n' apps/mobile/src/__tests__/automation-detail.test.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx apps/mobile/src/screens/InstallationScriptScreen.tsx | sort)\"; pnpm --filter @lcl/mobile typecheck; pnpm quality:ux; pnpm quality:repo; pnpm --filter @lcl/mobile exec vitest run src/__tests__/automation-detail.test.tsx src/__tests__/navigation-settings-regression.test.tsx --passWithNoTests",
+  "pid": 14812,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T16:08:50.746028+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-19T16:08:58.862177+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-installation-missing-page-chrome-v146",
@@ -18,5 +18,5 @@
   "task_digest": "6350905e23eaf25f36fc5ef8ba2f620a395c2ffff4605e295c93ae871a636cf9",
   "daemon_version": "4.18.22",
   "daemon_pid": 14350,
-  "updated_at": "2026-09-19T16:08:50.822036+00:00"
+  "updated_at": "2026-09-19T16:08:58.931615+00:00"
 }
