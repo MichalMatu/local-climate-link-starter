@@ -17,6 +17,10 @@ import {
 } from '../flows/installations/model.js';
 import { dailyScheduleTimespec } from '../flows/time-automation/config.js';
 import {
+  resetHardwareSetupDraftStore,
+  useHardwareSetupDraftStore
+} from '../flows/hardware-setup/setupDraftStore.js';
+import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
@@ -372,12 +376,14 @@ describe('InstallationDetailScreen', () => {
   beforeEach(() => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
     vi.restoreAllMocks();
   });
 
   afterEach(() => {
     cleanup();
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
     vi.unstubAllGlobals();
   });
 
@@ -433,6 +439,35 @@ describe('InstallationDetailScreen', () => {
     ).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
     expect(scriptBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps Plug detail free of redundant Plugs back chrome and supports inline rename', async () => {
+    const saved = installation();
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.20/',
+      name: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptIdInput: '1'
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    installShellyFetchMock();
+
+    renderDetail(saved.id);
+
+    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: '‹ Gniazdka' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Nazwa gniazdka' }));
+    const input = screen.getByRole('textbox', { name: 'Nazwa gniazdka' });
+    fireEvent.change(input, { target: { value: 'Nawilżacz growbox' } });
+    fireEvent.blur(input);
+
+    expect(screen.getByRole('heading', { name: 'Nawilżacz growbox' })).toBeVisible();
+    expect(useHardwareSetupDraftStore.getState().shellyDevices[0]?.name).toBe(
+      'Nawilżacz growbox'
+    );
+    expect(useInstalledAutomationStore.getState().installations[0]?.shelly.name).toBe(
+      'Nawilżacz growbox'
+    );
   });
 
   it('shows unique diagnostic detail without duplicating dashboard controls or climate values', async () => {

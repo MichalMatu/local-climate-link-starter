@@ -337,37 +337,6 @@
   }
 }
 
-.plug-card__title-row {
-  align-items: center;
-  display: flex;
-  gap: var(--lcl-spacing-xs);
-  min-width: 0;
-}
-
-.plug-card__title-row h2 {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-.dashboard-shell .plug-card__rename {
-  flex: 0 0 auto;
-  height: var(--lcl-size-compact-control-min-height);
-  width: var(--lcl-size-compact-control-min-height);
-}
-
-.plug-card__name-input {
-  background: var(--lcl-color-surface-muted);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-accent);
-  border-radius: var(--lcl-radius-sm);
-  color: var(--lcl-color-text);
-  font-size: var(--lcl-font-size-2xl);
-  font-weight: var(--lcl-font-weight-bold);
-  line-height: var(--lcl-line-height-tight);
-  min-width: 0;
-  padding: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
-  width: 100%;
-}
-
 .dashboard-shell .plug-card__automation-action {
   width: 100%;
 }

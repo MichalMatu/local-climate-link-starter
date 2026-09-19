@@ -439,6 +439,37 @@ describe('AutomationDashboardScreen', () => {
     expect(rpcMethods).not.toContain('Script.List');
   });
 
+  it('renames a configured Plug inline and keeps draft and installed names synchronized', async () => {
+    const saved = installedAutomation();
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.20/',
+      name: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptIdInput: '1'
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse(diagnosticPayload()))
+    );
+
+    renderDashboard();
+
+    const card = screen.getByText('Salon').closest('article') as HTMLElement;
+    fireEvent.click(within(card).getByRole('button', { name: 'Nazwa gniazdka' }));
+    const input = within(card).getByRole('textbox', { name: 'Nazwa gniazdka' });
+    fireEvent.change(input, { target: { value: 'Nawilżacz growbox' } });
+    fireEvent.blur(input);
+
+    expect(within(card).getByText('Nawilżacz growbox')).toBeVisible();
+    expect(useHardwareSetupDraftStore.getState().shellyDevices[0]?.name).toBe(
+      'Nawilżacz growbox'
+    );
+    expect(useInstalledAutomationStore.getState().installations[0]?.shelly.name).toBe(
+      'Nawilżacz growbox'
+    );
+  });
+
   it('shows live runtime values from Shelly for a saved installation', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
     vi.stubGlobal(

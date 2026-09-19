@@ -11,6 +11,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { AppPageBack } from '../components/AppPageBack.js';
+import { EditablePlugName } from '../components/EditablePlugName.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
@@ -31,6 +32,7 @@ import {
 } from '../flows/installations/runtimeControl.js';
 import { installedAutomationScriptSourceQueryKey } from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
+import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
@@ -139,6 +141,13 @@ const InstalledAutomationDetail = ({
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
+  const renameShellyDevice = useInstalledAutomationStore(
+    (state) => state.renameShellyDevice
+  );
+  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
+  const setShellyDeviceName = useHardwareSetupDraftStore(
+    (state) => state.setShellyDeviceName
+  );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const deleteCopy = installationDeleteCopy[locale];
   const scriptCopy = installationScriptPreviewCopy[locale];
@@ -201,14 +210,30 @@ const InstalledAutomationDetail = ({
     installation.config.rule.control.metric === 'humidity'
       ? t('intent.humidity.context')
       : t('intent.temperature.context');
+  const renamePlug = (value: string) => {
+    renameShellyDevice(installation.shelly.deviceId, value);
+    const normalizedBaseUrl = (url: string) =>
+      url.trim().replace(/\/+$/, '').toLowerCase();
+    const savedDevice = shellyDevices.find(
+      (device) =>
+        normalizedBaseUrl(device.baseUrl) ===
+        normalizedBaseUrl(installation.shelly.baseUrl)
+    );
+    if (savedDevice) {
+      setShellyDeviceName(savedDevice.id, value);
+    }
+  };
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
         <article className="automation-card installation-detail-identity">
           <div className="installation-detail-identity__copy">
-            <h1>{installation.shelly.name}</h1>
+            <EditablePlugName
+              name={installation.shelly.name}
+              variant="detail"
+              onCommit={renamePlug}
+            />
             <p className="installation-detail-purpose">{purposeLabel}</p>
           </div>
         </article>

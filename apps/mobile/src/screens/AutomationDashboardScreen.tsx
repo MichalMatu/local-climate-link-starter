@@ -4,7 +4,6 @@ import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
   IconDotsVertical,
-  IconPencil,
   IconPlug,
   IconPlus
 } from '@tabler/icons-react';
@@ -12,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { EditablePlugName } from '../components/EditablePlugName.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -53,6 +53,7 @@ const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
 type AutomationCardProps = {
   installation: InstalledAutomation;
   onOpen(installationId: string): void;
+  onNameChange(installation: InstalledAutomation, value: string): void;
 };
 
 const formatPlugEnergy = (value: number | null | undefined): string => {
@@ -65,10 +66,12 @@ const DASHBOARD_DIAGNOSTICS_REFRESH_MS = 5_000;
 
 const ClimateAutomationCard = ({
   installation,
-  onOpen
+  onOpen,
+  onNameChange
 }: {
   installation: ClimateInstalledAutomation;
   onOpen(installationId: string): void;
+  onNameChange(value: string): void;
 }) => {
   const { t } = useTranslation();
   const query = useInstalledAutomationDiagnostics(installation, {
@@ -204,7 +207,11 @@ const ClimateAutomationCard = ({
         </span>
 
         <div className="automation-card__identity">
-          <h2>{installation.shelly.name}</h2>
+          <EditablePlugName
+            name={installation.shelly.name}
+            variant="card"
+            onCommit={onNameChange}
+          />
           <p>{purposeLabel}</p>
         </div>
 
@@ -332,11 +339,15 @@ const ClimateAutomationCard = ({
   );
 };
 
-const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
+const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardProps) =>
   installation.kind === 'time' ? (
     <TimeAutomationCard installation={installation} onOpen={onOpen} />
   ) : (
-    <ClimateAutomationCard installation={installation} onOpen={onOpen} />
+    <ClimateAutomationCard
+      installation={installation}
+      onOpen={onOpen}
+      onNameChange={(value) => onNameChange(installation, value)}
+    />
   );
 
 const ThermometerDashboardSection = ({ onAdd }: { onAdd(): void }) => {
@@ -363,7 +374,6 @@ const PlainPlugCard = ({
   onNameChange(value: string): void;
 }) => {
   const { t } = useTranslation();
-  const [isEditingName, setIsEditingName] = useState(false);
   const { status, isRelayPending, turnRelayOn, turnRelayOff } =
     usePlainShellyRuntime(device);
   const relayState = status?.relayOn;
@@ -381,35 +391,7 @@ const PlainPlugCard = ({
           <IconPlug className="automation-card__icon" />
         </span>
         <div className="automation-card__identity">
-          {isEditingName ? (
-            <input
-              autoFocus
-              className="plug-card__name-input"
-              aria-label={t('hardware.shelly.deviceNameLabel')}
-              type="text"
-              value={device.name}
-              onBlur={() => setIsEditingName(false)}
-              onChange={(event) => onNameChange(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === 'Escape') {
-                  event.currentTarget.blur();
-                }
-              }}
-            />
-          ) : (
-            <div className="plug-card__title-row">
-              <h2>{device.name}</h2>
-              <button
-                className="icon-action rule-summary-icon-action plug-card__rename"
-                type="button"
-                aria-label={t('hardware.shelly.deviceNameLabel')}
-                title={t('hardware.shelly.deviceNameLabel')}
-                onClick={() => setIsEditingName(true)}
-              >
-                <IconPencil className="icon-action__svg" aria-hidden="true" />
-              </button>
-            </div>
-          )}
+          <EditablePlugName name={device.name} variant="card" onCommit={onNameChange} />
           <p>{t('dashboard.emptyCategory')}</p>
         </div>
         <button
@@ -492,6 +474,9 @@ export const AutomationDashboardScreen = ({
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
+  const renameShellyDevice = useInstalledAutomationStore(
+    (state) => state.renameShellyDevice
+  );
   const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
   const setShellyDeviceName = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceName
@@ -523,6 +508,17 @@ export const AutomationDashboardScreen = ({
 
   const normalizedBaseUrl = (value: string) =>
     value.trim().replace(/\/+$/, '').toLowerCase();
+  const renameInstalledPlug = (installation: InstalledAutomation, value: string) => {
+    renameShellyDevice(installation.shelly.deviceId, value);
+    const savedDevice = shellyDevices.find(
+      (device) =>
+        normalizedBaseUrl(device.baseUrl) ===
+        normalizedBaseUrl(installation.shelly.baseUrl)
+    );
+    if (savedDevice) {
+      setShellyDeviceName(savedDevice.id, value);
+    }
+  };
   const matchedInstallationIds = new Set<string>();
   const plugEntries = shellyDevices.map((device) => {
     const installation =
@@ -558,6 +554,7 @@ export const AutomationDashboardScreen = ({
                   key={installation.id}
                   installation={installation}
                   onOpen={onOpenInstallation}
+                  onNameChange={renameInstalledPlug}
                 />
               ) : (
                 <PlainPlugCard
@@ -574,6 +571,7 @@ export const AutomationDashboardScreen = ({
                 key={installation.id}
                 installation={installation}
                 onOpen={onOpenInstallation}
+                onNameChange={renameInstalledPlug}
               />
             ))}
           </>

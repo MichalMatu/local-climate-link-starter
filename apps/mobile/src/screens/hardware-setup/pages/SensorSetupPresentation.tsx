@@ -401,19 +401,10 @@ export const SavedSensorCard = ({
         </span>
       </div>
 
-      <details className="sensor-card-details-disclosure">
-        <summary>{t('hardware.sensor.details')}</summary>
-        <dl className="sensor-card-details">
-          <div>
-            <dt>{t('hardware.sensor.typeLabel')}</dt>
-            <dd>{sensorProfileDisplayLabels[device.profileId]}</dd>
-          </div>
-          <div className="sensor-card-details__wide">
-            <dt>MAC</dt>
-            <dd>{device.runtimeAddress}</dd>
-          </div>
-        </dl>
-      </details>
+      <div className="sensor-card-device-meta" aria-label={t('hardware.sensor.details')}>
+        <span>{sensorProfileDisplayLabels[device.profileId]}</span>
+        <span>{device.runtimeAddress}</span>
+      </div>
     </article>
   );
 };

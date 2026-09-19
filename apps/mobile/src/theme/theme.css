@@ -1190,43 +1190,27 @@ select {
   font-weight: var(--lcl-font-weight-semibold);
 }
 
-.sensor-card-details-disclosure {
+.sensor-card-device-meta {
+  align-items: baseline;
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  padding-top: var(--lcl-spacing-xs);
-}
-
-.sensor-card-details-disclosure > summary {
   color: var(--lcl-color-text-muted);
-  cursor: pointer;
-  font-size: var(--lcl-font-size-sm);
+  display: flex;
+  font-size: var(--lcl-font-size-xs);
   font-weight: var(--lcl-font-weight-semibold);
-  list-style: none;
-  padding: var(--lcl-spacing-sm) var(--lcl-spacing-xl) var(--lcl-spacing-sm) 0;
-  position: relative;
+  gap: var(--lcl-spacing-md);
+  justify-content: space-between;
+  min-width: 0;
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-xs) 0;
 }
 
-.sensor-card-details-disclosure > summary::-webkit-details-marker {
-  display: none;
+.sensor-card-device-meta > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.sensor-card-details-disclosure > summary::after {
-  border-bottom: var(--lcl-border-width-md) solid var(--lcl-color-text-muted);
-  border-right: var(--lcl-border-width-md) solid var(--lcl-color-text-muted);
-  content: '';
-  height: var(--lcl-size-select-indicator-size);
-  position: absolute;
-  right: var(--lcl-spacing-xs);
-  top: 50%;
-  transform: translateY(-65%) rotate(45deg);
-  width: var(--lcl-size-select-indicator-size);
-}
-
-.sensor-card-details-disclosure[open] > summary::after {
-  transform: translateY(-35%) rotate(225deg);
-}
-
-.sensor-card-details-disclosure .sensor-card-details {
-  margin-top: var(--lcl-spacing-xs);
+.sensor-card-device-meta > span:last-child {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .icon-action-row {
@@ -2618,37 +2602,45 @@ select {
   width: 100%;
 }
 
-.sensor-card-details {
-  display: grid;
-  gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  margin: 0;
-}
-
-.sensor-card-details > div {
-  align-items: baseline;
+.plug-name-editor {
+  align-items: center;
   display: flex;
   gap: var(--lcl-spacing-xs);
-  justify-content: space-between;
   min-width: 0;
 }
 
-.sensor-card-details dt {
-  color: var(--lcl-color-text-muted);
-  font-size: var(--lcl-font-size-sm);
+.plug-name-editor h1,
+.plug-name-editor h2 {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.sensor-card-details dd {
-  font-size: var(--lcl-font-size-sm);
+.plug-name-editor__action {
+  flex: 0 0 auto;
+}
+
+.plug-name-editor__input {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-accent);
+  border-radius: var(--lcl-radius-sm);
+  color: var(--lcl-color-text);
   font-weight: var(--lcl-font-weight-bold);
-  margin: 0;
+  line-height: var(--lcl-line-height-tight);
+  min-height: var(--lcl-size-compact-control-min-height);
   min-width: 0;
-  overflow-wrap: anywhere;
-  text-align: right;
+  padding: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
+  width: 100%;
 }
 
-.sensor-card-details__wide {
-  grid-column: 1 / -1;
+.plug-name-editor__input--card {
+  font-size: var(--lcl-font-size-2xl);
+}
+
+.plug-name-editor__input--detail {
+  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-xs));
 }
 
 /* Compact saved Shelly cards: UX polish 2026-09-11 */
