@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260919-docs-postcheck-v142",
   "task_digest": "3bbb048c349a904dd0b043115c8ee9647ee4a3c08a8cfbd8e690c52741eadc85",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T15:18:16.518747+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-19T15:18:19.464882+00:00",
   "attempt_id": "e7a29466d58245be084c1b55",
   "daemon_version": "4.18.22",
   "daemon_pid": 41642,
-  "updated_at": "2026-09-19T15:18:16.518909+00:00",
+  "updated_at": "2026-09-19T15:18:19.690552+00:00",
   "pid": 41642
 }
