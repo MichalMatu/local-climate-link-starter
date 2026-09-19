@@ -1,0 +1,105 @@
+{
+  "id": "20260919-final-discovery-polish-v133",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "started_at": "2026-09-19T14:30:33.287195+00:00",
+  "command_timeout": 3000,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = \"47e9776609eef68dd7534c0b3f1e7cfcedca44c0\"; test -z \"$(git status --porcelain)\"; git status --short --branch",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   dd7ba743..6f3229a0  agent-control -> origin/agent-control\nHEAD is now at 47e97766 Unify device discovery cards\n## agent-work...origin/work/plug-screen-automation-entry-20260917\n",
+      "elapsed_seconds": 1.202,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 6.55,
+      "output_policy": "stream",
+      "captured_output_chars": 242,
+      "output_truncated": false,
+      "current_rss_mb": 6.55,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 7,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-final-discovery-polish-v133.py | python3 -; pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx; git diff --check; git status --short",
+      "exit_code": 1,
+      "output": "Expected snippet not found in apps/mobile/src/__tests__/hardware-setup.test.tsx: \"    const scannedRow = scannedName.closest(\\n      '.shelly-scan-result__row'\\n    ) as HTMLElement | null;\\n    expect(sca\"\n",
+      "elapsed_seconds": 0.371,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 12.58,
+      "output_policy": "stream",
+      "captured_output_chars": 207,
+      "output_truncated": false,
+      "current_rss_mb": 12.58,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 7,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 7,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.202
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 7,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.371
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": " M apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n M apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n M apps/mobile/src/theme/theme.css\n",
+    "elapsed_seconds": 0.075
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "diff --git a/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx b/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\nindex 2db45723..4993d444 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n@@ -191,7 +191,9 @@ export const SensorSetupPage = ({\n                   </button>\n                 </div>\n                 <div className=\"device-discovery-card__meta ble-candidate-main\">\n-                  <strong>{candidate.runtimeAddress}</strong>\n+                  <strong className=\"device-discovery-card__identity\">\n+                    {candidate.runtimeAddress}\n+                  </strong>\n                   <span>{sensorProfileDisplayLabels[candidate.profileId]}</span>\n                 </div>\n                 <dl className=\"device-discovery-card__metrics ble-candidate-metrics\">\n@@ -235,8 +237,9 @@ export const SensorSetupPage = ({\n       )}\n       <div className=\"action-row device-add-page__actions device-add-page__scan-control\">\n         <button\n-          className=\"secondary-action\"\n+          className=\"secondary-action device-scan-action\"\n           type=\"button\"\n+          aria-busy={isPhoneBleScanPending || undefined}\n           title={\n             isPhoneBleScanPending\n               ? t('hardware.sensor.scanStopTitle')\n@@ -244,9 +247,14 @@ export const SensorSetupPage = ({\n           }\n           onClick={isPhoneBleScanPending ? flow.stopPhoneBleScan : startPhoneBleScan}\n         >\n-          {isPhoneBleScanPending\n-            ? t('hardware.shelly.scanStop')\n-            : t('hardware.shelly.scanBleAgain')}\n+          {isPhoneBleScanPending && (\n+            <span className=\"device-scan-action__spinner\" aria-hidden=\"true\" />\n+          )}\n+          <span>\n+            {isPhoneBleScanPending\n+              ? t('hardware.shelly.scanStop')\n+              : t('hardware.shelly.scanBleAgain')}\n+          </span>\n         </button>\n       </div>\n     </section>\ndiff --git a/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx b/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\nindex f92db536..c4c64c72 100644\n--- a/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n+++ b/apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n@@ -451,7 +451,9 @@ export const ShellySetupPage = ({\n                             </button>\n                           </div>\n                           <div className=\"device-discovery-card__meta shelly-scan-result__meta\">\n-                            <span>{result.baseUrl}</span>\n+                            <strong className=\"device-discovery-card__identity\">\n+                              {result.baseUrl}\n+                            </strong>\n                             <span>\n                               {result.deviceInfo.model}, gen {result.deviceInfo.gen}\n                             </span>\n@@ -462,8 +464,9 @@ export const ShellySetupPage = ({\n                   )}\n                   <div className=\"action-row shelly-network-scan__actions device-add-page__scan-control\">\n                     <button\n-                      className=\"secondary-action\"\n+                      className=\"secondary-action device-scan-action\"\n                       type=\"button\"\n+                      aria-busy={isShellyScanActive || undefined}\n                       title={\n                         isShellyScanActive\n                           ? t('hardware.shelly.scanStopTitle')\n@@ -471,9 +474,14 @@ export const ShellySetupPage = ({\n                       }\n                       onClick={isShellyScanActive ? stopShellyScan : startShellyScan}\n                     >\n-                      {isShellyScanActive\n-                        ? t('hardware.shelly.scanStop')\n-                        : t('hardware.shelly.scanStart')}\n+                      {isShellyScanActive && (\n+                        <span className=\"device-scan-action__spinner\" aria-hidden=\"true\" />\n+                      )}\n+                      <span>\n+                        {isShellyScanActive\n+                          ? t('hardware.shelly.scanStop')\n+                          : t('hardware.shelly.scanStart')}\n+                      </span>\n                     </button>\n                   </div>\n                 </div>\ndiff --git a/apps/mobile/src/theme/theme.css b/apps/mobile/src/theme/theme.css\nindex d12cd672..4a0a4c91 100644\n--- a/apps/mobile/src/theme/theme.css\n+++ b/apps/mobile/src/theme/theme.css\n@@ -1035,20 +1035,6 @@ select {\n   color: var(--lcl-color-accent);\n }\n \n-.shelly-scan-result__row {\n-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(8rem, 1fr) auto;\n-}\n-\n-.shelly-scan-result__name-input {\n-  min-width: 0;\n-  width: 100%;\n-}\n-\n-.shelly-scan-result__add {\n-  align-self: end;\n-  min-width: var(--lcl-size-action-min-width);\n-}\n-\n .shelly-network-scan__progress {\n   align-items: center;\n   color: var(--lcl-color-text-muted);\n@@ -1776,14 +1762,6 @@ select {\n     width: auto;\n   }\n \n-  .shelly-scan-result__row {\n-    grid-template-columns: minmax(0, 1fr);\n-  }\n-\n-  .shelly-scan-result__add {\n-    width: 100%;\n-  }\n-\n   .advanced-settings__readonly {\n     align-items: flex-start;\n     display: grid;\n@@ -3181,49 +3159,6 @@ select {\n   overflow-wrap: anywhere;\n }\n \n-.shelly-scan-result__add,\n-.ble-candidate-action {\n-  align-self: center;\n-  min-height: var(--lcl-size-compact-control-min-height);\n-  padding-inline: var(--lcl-spacing-md);\n-  width: auto;\n-}\n-\n-.ble-candidate-item {\n-  align-items: center;\n-  grid-template-columns: minmax(0, 1fr) auto;\n-}\n-\n-.ble-candidate-content,\n-.ble-candidate-name {\n-  display: grid;\n-  gap: var(--lcl-spacing-sm);\n-  min-width: 0;\n-}\n-\n-.ble-candidate-name {\n-  gap: var(--lcl-spacing-xs);\n-}\n-\n-.ble-candidate-name input,\n-.shelly-scan-result__name-input {\n-  min-width: 0;\n-  width: 100%;\n-}\n-\n-@media (max-width: 30rem) {\n-  .ble-candidate-item,\n-  .shelly-scan-result__row {\n-    grid-template-columns: minmax(0, 1fr);\n-  }\n-\n-  .ble-candidate-action,\n-  .shelly-scan-result__add {\n-    justify-self: end;\n-    width: auto;\n-  }\n-}\n-\n /* Shared scan-result card contract: editable name + compact action, then metadata. */\n .device-discovery-card {\n   background: var(--lcl-color-surface);\n@@ -3281,6 +3216,7 @@ select {\n .device-discovery-card__action {\n   align-self: end;\n   min-height: var(--lcl-size-compact-control-min-height);\n+  min-width: 0;\n   padding-inline: var(--lcl-spacing-md);\n   width: auto;\n }\n@@ -3296,10 +3232,35 @@ select {\n   overflow-wrap: anywhere;\n }\n \n+.device-discovery-card__identity {\n+  color: var(--lcl-color-text);\n+  font-weight: var(--lcl-font-weight-bold);\n+}\n+\n .device-discovery-card__metrics {\n   margin: 0;\n }\n \n+.device-scan-action {\n+  gap: var(--lcl-spacing-sm);\n+}\n+\n+.device-scan-action__spinner {\n+  animation: lcl-scan-spin 0.85s linear infinite;\n+  border: var(--lcl-border-width-md) solid var(--lcl-color-border);\n+  border-radius: 50%;\n+  border-top-color: var(--lcl-color-accent);\n+  flex: 0 0 auto;\n+  height: 1rem;\n+  width: 1rem;\n+}\n+\n+@media (prefers-reduced-motion: reduce) {\n+  .device-scan-action__spinner {\n+    animation: none;\n+  }\n+}\n+\n .device-discovery-card.ble-candidate-item {\n   grid-template-columns: minmax(0, 1fr);\n }\n@@ -3325,9 +3286,7 @@ select {\n     grid-template-columns: minmax(0, 1fr) auto;\n   }\n \n-  .device-discovery-card__action,\n-  .ble-candidate-action,\n-  .shelly-scan-result__add {\n+  .device-discovery-card__action {\n     justify-self: end;\n     width: auto;\n   }\n",
+    "elapsed_seconds": 0.016
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-19T14:30:36.422446+00:00",
+  "workspace_checkpoint": {
+    "version": 2,
+    "task_id": "20260919-final-discovery-polish-v133",
+    "reason": "task-exit",
+    "created_at": "2026-09-19T14:30:36.782573+00:00",
+    "base_head": "47e9776609eef68dd7534c0b3f1e7cfcedca44c0",
+    "work_branch": "agent-work",
+    "path": "/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260919-final-discovery-polish-v133/1789828236652740000-task-exit",
+    "tracked_patch": "tracked.patch",
+    "untracked_root": "untracked",
+    "untracked_files": [],
+    "tracked_patch_bytes": 7762,
+    "untracked_bytes": 0,
+    "total_bytes": 7762,
+    "status": " M apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx\n M apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx\n M apps/mobile/src/theme/theme.css\n"
+  },
+  "task_digest": "d6cebc68bf491628207c92e9ffbaf65f5f59733ba186f3ef36726f1b395f3e8c",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "ba1898daeb90d1b797e66d55",
+  "daemon_version": "4.18.22"
+}
