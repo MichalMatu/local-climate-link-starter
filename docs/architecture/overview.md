@@ -1,6 +1,6 @@
 # Architecture overview
 
-Updated: 2026-09-19
+Updated: 2026-09-20
 
 ## Product boundary
 
@@ -59,6 +59,31 @@ Examples:
 - Plug -> installation detail -> diagnostics / deployed script.
 
 A modal is appropriate for delete/safety confirmation or another short decision. It is not the default container for a complete working screen.
+
+## Global feedback / toast architecture
+
+`AppShell` also owns the single mobile toast host. Page-level flows may own their local toast queue/message state, but they must render it through `AppToastViewport`, which portals the shared `@lcl/ui` `ToastViewport` into `#app-toast-host`.
+
+The host sits outside the scrollable page-content subtree and outside page cards/glass surfaces:
+
+```text
+AppShell
+  -> scrollable page content
+  -> app-toast-host
+  -> persistent bottom navigation
+```
+
+This is intentional. CSS properties such as `backdrop-filter`, `filter`, `transform` or containment on a page/card can create a containing block for descendants. A raw `position: fixed` toast mounted inside such a surface can therefore become fixed to that surface instead of to the app viewport.
+
+Toast geometry is owned at shell level and keeps the shared viewport immediately above the persistent bottom navigation, including the bottom safe-area inset. Do not add screen-specific toast offsets.
+
+`scripts/quality/ux-gate.mjs` enforces this contract:
+
+- mobile screens must not render raw `<ToastViewport>` directly;
+- `AppShell` must provide the app toast portal target;
+- the bottom-navigation stylesheet must retain the shared toast/nav geometry contract.
+
+Responsive E2E coverage verifies the real toast/nav relationship across the canonical phone, tablet and desktop viewports.
 
 ## Device discovery semantics
 
@@ -142,6 +167,8 @@ Screens compose flows into product UI. They must not call raw `fetch` or import 
 - size alarms for extracted hardware subsystems/pages,
 - narrow page-flow contracts.
 
-These budgets are regression alarms. Do not raise them to accommodate responsibility creep; extract a cohesive subsystem instead.
+`scripts/quality/ux-gate.mjs` additionally protects cross-screen UI contracts such as shell-owned toast hosting and other shared UX primitives.
+
+These budgets and gates are regression alarms. Do not weaken or raise them to accommodate responsibility creep; extract a cohesive subsystem instead.
 
 Current hotspot policy is documented in `docs/architecture/refactor-boundaries.md`.
