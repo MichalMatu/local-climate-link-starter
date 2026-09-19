@@ -1,14 +1,13 @@
 {
-  "event": "task_started",
+  "event": "task_finished",
   "task_id": "20260919-remaining-modal-audit-v149",
   "task_digest": "f1d30c143c45cd78c1da2a66efea2a63d7de8de18429ef9a202d7f2b07e77db2",
-  "idle_timeout": 300,
-  "task_timeout": 1800,
-  "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T16:14:32.803423+00:00",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-19T16:14:35.796862+00:00",
   "attempt_id": "587a2d518f727325c688364f",
   "daemon_version": "4.18.22",
   "daemon_pid": 24067,
-  "updated_at": "2026-09-19T16:14:32.803574+00:00",
+  "updated_at": "2026-09-19T16:14:36.016727+00:00",
   "pid": 24067
 }
