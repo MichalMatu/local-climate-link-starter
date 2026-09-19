@@ -37,6 +37,9 @@ export const SensorSetupPage = ({
   const [editingSensorId, setEditingSensorId] = useState<string | null>(null);
   const [didSubmitSensorAdd, setDidSubmitSensorAdd] = useState(false);
   const [addMode, setAddMode] = useState<SensorAddMode>(primaryAddAction);
+  const [scanCandidateNames, setScanCandidateNames] = useState<Record<string, string>>(
+    {}
+  );
   const autoScanStartedRef = useRef(false);
   const startPhoneBleScanRef = useRef<() => void>(() => undefined);
   const stopPhoneBleScanRef = useRef<() => void>(() => undefined);
@@ -99,8 +102,25 @@ export const SensorSetupPage = ({
     pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 
+  const defaultScannedSensorName = (candidate: BleDiscoveryCandidate) =>
+    t('hardware.flow.sensorDefaultName', {
+      suffix: candidate.runtimeAddress.split(':').slice(-2).join(':')
+    });
+
+  const scannedSensorName = (candidate: BleDiscoveryCandidate) =>
+    scanCandidateNames[candidate.runtimeAddress] ?? defaultScannedSensorName(candidate);
+
+  const setScannedSensorName = (candidate: BleDiscoveryCandidate, value: string) => {
+    setScanCandidateNames((current) => ({
+      ...current,
+      [candidate.runtimeAddress]: value
+    }));
+  };
+
   const saveScannedSensor = (candidate: BleDiscoveryCandidate) => {
-    flow.addDiscoveredSensor(candidate);
+    const name = scannedSensorName(candidate).trim();
+    if (!name) return;
+    flow.addDiscoveredSensor(candidate, 'phone-scan', name);
     pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 
@@ -120,7 +140,101 @@ export const SensorSetupPage = ({
       role="tabpanel"
       aria-label={t('hardware.sensor.scanBle')}
     >
-      <div className="action-row device-add-page__actions">
+      {shouldShowPhoneBleEmpty && <p>{t('hardware.sensor.noBleFound')}</p>}
+      {flow.phoneBleScanCandidates.length > 0 && (
+        <div
+          className="ble-candidate-list"
+          aria-label={t('hardware.sensor.blePhoneFoundLabel')}
+        >
+          {flow.phoneBleScanCandidates.map((candidate) => {
+            const hasTemperature = typeof candidate.temperatureC === 'number';
+            const hasHumidity = typeof candidate.humidityPct === 'number';
+            const savedSensor = flow.sensorDevices.find(
+              (device) =>
+                device.runtimeAddress.toUpperCase() ===
+                candidate.runtimeAddress.toUpperCase()
+            );
+            const isSavedSensor = savedSensor !== undefined;
+            const displayName = savedSensor?.name ?? scannedSensorName(candidate);
+
+            return (
+              <article key={candidate.runtimeAddress} className="ble-candidate-item">
+                <div className="ble-candidate-content">
+                  <label className="ble-candidate-name">
+                    <span>{t('hardware.sensor.nameLabel')}</span>
+                    <input
+                      aria-label={`${t('hardware.sensor.nameLabel')}: ${candidate.runtimeAddress}`}
+                      type="text"
+                      value={displayName}
+                      disabled={isSavedSensor}
+                      onChange={(event) =>
+                        setScannedSensorName(candidate, event.currentTarget.value)
+                      }
+                    />
+                  </label>
+                  <div className="ble-candidate-main">
+                    <strong>{candidate.runtimeAddress}</strong>
+                    <span>{sensorProfileDisplayLabels[candidate.profileId]}</span>
+                  </div>
+                  <dl className="ble-candidate-metrics">
+                    <div>
+                      <dt>RSSI</dt>
+                      <dd>
+                        {formatSensorMetric(
+                          candidate.rssi,
+                          ' dBm',
+                          0,
+                          t('common.missing')
+                        )}
+                      </dd>
+                    </div>
+                    {hasTemperature && (
+                      <div>
+                        <dt>{t('hardware.metrics.temperatureShort')}</dt>
+                        <dd>
+                          {formatSensorMetric(
+                            candidate.temperatureC,
+                            '°C',
+                            1,
+                            t('common.missing')
+                          )}
+                        </dd>
+                      </div>
+                    )}
+                    {hasHumidity && (
+                      <div>
+                        <dt>{t('hardware.metrics.humidityShort')}</dt>
+                        <dd>
+                          {formatSensorMetric(
+                            candidate.humidityPct,
+                            '%',
+                            1,
+                            t('common.missing')
+                          )}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+                <button
+                  className="primary-action ble-candidate-action"
+                  type="button"
+                  disabled={isSavedSensor || displayName.trim().length === 0}
+                  title={
+                    isSavedSensor
+                      ? t('hardware.sensor.saveThermometerSavedTitle')
+                      : t('hardware.sensor.saveThermometerTitle')
+                  }
+                  onClick={() => saveScannedSensor(candidate)}
+                >
+                  {isSavedSensor ? t('hardware.sensor.saved') : t('common.add')}
+                </button>
+              </article>
+            );
+          })}
+        </div>
+      )}
+      <div className="action-row device-add-page__actions device-add-page__scan-control">
         <button
           className="secondary-action"
           type="button"
@@ -136,81 +250,6 @@ export const SensorSetupPage = ({
             : t('hardware.shelly.scanBleAgain')}
         </button>
       </div>
-      {shouldShowPhoneBleEmpty && <p>{t('hardware.sensor.noBleFound')}</p>}
-      {flow.phoneBleScanCandidates.length > 0 && (
-        <div
-          className="ble-candidate-list"
-          aria-label={t('hardware.sensor.blePhoneFoundLabel')}
-        >
-          {flow.phoneBleScanCandidates.map((candidate) => {
-            const hasTemperature = typeof candidate.temperatureC === 'number';
-            const hasHumidity = typeof candidate.humidityPct === 'number';
-            const isSavedSensor = flow.sensorDevices.some(
-              (device) =>
-                device.runtimeAddress.toUpperCase() ===
-                candidate.runtimeAddress.toUpperCase()
-            );
-
-            return (
-              <article key={candidate.runtimeAddress} className="ble-candidate-item">
-                <div className="ble-candidate-main">
-                  <strong>{candidate.runtimeAddress}</strong>
-                  <span>{sensorProfileDisplayLabels[candidate.profileId]}</span>
-                </div>
-                <dl className="ble-candidate-metrics">
-                  <div>
-                    <dt>RSSI</dt>
-                    <dd>
-                      {formatSensorMetric(candidate.rssi, ' dBm', 0, t('common.missing'))}
-                    </dd>
-                  </div>
-                  {hasTemperature && (
-                    <div>
-                      <dt>{t('hardware.metrics.temperatureShort')}</dt>
-                      <dd>
-                        {formatSensorMetric(
-                          candidate.temperatureC,
-                          '°C',
-                          1,
-                          t('common.missing')
-                        )}
-                      </dd>
-                    </div>
-                  )}
-                  {hasHumidity && (
-                    <div>
-                      <dt>{t('hardware.metrics.humidityShort')}</dt>
-                      <dd>
-                        {formatSensorMetric(
-                          candidate.humidityPct,
-                          '%',
-                          1,
-                          t('common.missing')
-                        )}
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-                <button
-                  className="secondary-action ble-candidate-action"
-                  type="button"
-                  disabled={isSavedSensor}
-                  title={
-                    isSavedSensor
-                      ? t('hardware.sensor.saveThermometerSavedTitle')
-                      : t('hardware.sensor.saveThermometerTitle')
-                  }
-                  onClick={() => saveScannedSensor(candidate)}
-                >
-                  {isSavedSensor
-                    ? t('hardware.sensor.saved')
-                    : t('hardware.sensor.saveThermometer')}
-                </button>
-              </article>
-            );
-          })}
-        </div>
-      )}
     </section>
   );
 
@@ -220,9 +259,6 @@ export const SensorSetupPage = ({
         className="device-add-page sensor-add-page"
         aria-label={t('hardware.sensor.add')}
       >
-        <header className="demo-header app-page-header device-add-page__header">
-          <h1>{t('hardware.sensor.add')}</h1>
-        </header>
         <div
           className="shelly-add-tabs"
           role="tablist"

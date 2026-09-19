@@ -86,6 +86,18 @@ const checkDeviceAddPageBoundary = async () => {
   if (!routesSource.includes("type: 'device-add'")) {
     addFailure(routesPath, 'device add flows must be represented in the app page tree');
   }
+  if (sensorSource.includes('device-add-page__header')) {
+    addFailure(
+      sensorPath,
+      'standalone thermometer add page must not duplicate shell navigation/title'
+    );
+  }
+  if (shellySource.includes('device-add-page__header')) {
+    addFailure(
+      shellyPath,
+      'standalone plug add page must not duplicate shell navigation/title'
+    );
+  }
 };
 
 const checkBottomNavigationShell = async () => {

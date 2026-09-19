@@ -318,9 +318,6 @@ export const ShellySetupPage = ({
 
       {addOnly && (
         <>
-          <header className="demo-header app-page-header device-add-page__header">
-            <h1>{t('hardware.shelly.add')}</h1>
-          </header>
           <div className="device-add-page__body">
             <div
               className="shelly-add-tabs"
@@ -378,15 +375,35 @@ export const ShellySetupPage = ({
                 aria-label={t('hardware.shelly.scanNetwork')}
               >
                 <div className="shelly-network-scan__body">
-                  <p className="device-add-page__hint">
-                    <InfoLabel
-                      label={shellyScanEstimate}
-                      infoLabel={t('hardware.shelly.infoScanLabel')}
-                      title={t('hardware.shelly.infoScanTitle')}
+                  <div
+                    className="shelly-network-scan__presets"
+                    role="group"
+                    aria-label={t('hardware.shelly.networkScanTitle')}
+                  >
+                    <button
+                      className="shelly-network-scan__preset"
+                      type="button"
+                      disabled={isShellyScanActive}
+                      onClick={() =>
+                        applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
+                      }
                     >
-                      {t('hardware.shelly.scannerBehavior')}
-                    </InfoLabel>
-                  </p>
+                      STA
+                    </button>
+                    <button
+                      className="shelly-network-scan__preset"
+                      type="button"
+                      disabled={isShellyScanActive}
+                      onClick={() =>
+                        applyShellyScanPreset(
+                          SHELLY_AP_SCAN_ADDRESS,
+                          SHELLY_AP_SCAN_ADDRESS
+                        )
+                      }
+                    >
+                      AP
+                    </button>
+                  </div>
                   <div className="shelly-network-scan__range">
                     <label
                       className={
@@ -434,57 +451,15 @@ export const ShellySetupPage = ({
                       )}
                     </label>
                   </div>
-                  <div
-                    className="shelly-network-scan__presets"
-                    role="group"
-                    aria-label={t('hardware.shelly.networkScanTitle')}
-                  >
-                    <button
-                      className="shelly-network-scan__preset"
-                      type="button"
-                      disabled={isShellyScanActive}
-                      onClick={() =>
-                        applyShellyScanPreset(SHELLY_STA_SCAN_START, SHELLY_STA_SCAN_END)
-                      }
+                  <p className="device-add-page__hint">
+                    <InfoLabel
+                      label={shellyScanEstimate}
+                      infoLabel={t('hardware.shelly.infoScanLabel')}
+                      title={t('hardware.shelly.infoScanTitle')}
                     >
-                      STA
-                    </button>
-                    <span
-                      className="shelly-network-scan__preset-separator"
-                      aria-hidden="true"
-                    >
-                      ·
-                    </span>
-                    <button
-                      className="shelly-network-scan__preset"
-                      type="button"
-                      disabled={isShellyScanActive}
-                      onClick={() =>
-                        applyShellyScanPreset(
-                          SHELLY_AP_SCAN_ADDRESS,
-                          SHELLY_AP_SCAN_ADDRESS
-                        )
-                      }
-                    >
-                      AP
-                    </button>
-                  </div>
-                  <div className="action-row shelly-network-scan__actions">
-                    <button
-                      className="secondary-action"
-                      type="button"
-                      title={
-                        isShellyScanActive
-                          ? t('hardware.shelly.scanStopTitle')
-                          : t('hardware.shelly.scanStartTitle')
-                      }
-                      onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
-                    >
-                      {isShellyScanActive
-                        ? t('hardware.shelly.scanStop')
-                        : t('hardware.shelly.scanStart')}
-                    </button>
-                  </div>
+                      {t('hardware.shelly.scannerBehavior')}
+                    </InfoLabel>
+                  </p>
                   {shouldShowEmptyScanResult && (
                     <p>{t('hardware.shelly.scanResultEmpty')}</p>
                   )}
@@ -494,30 +469,34 @@ export const ShellySetupPage = ({
                       aria-label={t('hardware.shelly.foundListLabel')}
                     >
                       {scanResults.map((result) => (
-                        <article key={result.baseUrl} className="saved-list__item">
-                          <div className="saved-list__row shelly-scan-result__row">
-                            <label className="field shelly-scan-result__name">
-                              <span>{t('hardware.shelly.deviceNameLabel')}</span>
-                              <input
-                                className="shelly-scan-result__name-input"
-                                aria-label={`${t('hardware.shelly.deviceNameLabel')}: ${result.baseUrl}`}
-                                type="text"
-                                value={scannedShellyName(result)}
-                                disabled={isSavedShellyScanResult(result)}
-                                onChange={(event) =>
-                                  setScannedShellyName(result, event.currentTarget.value)
-                                }
-                              />
-                            </label>
-                            <div className="saved-list__field">
-                              <span>{t('common.address')}</span>
-                              <strong>{result.baseUrl}</strong>
-                            </div>
-                            <div className="saved-list__field">
-                              <span>{t('common.model')}</span>
-                              <strong>
-                                {result.deviceInfo.model}, gen {result.deviceInfo.gen}
-                              </strong>
+                        <article
+                          key={result.baseUrl}
+                          className="saved-list__item shelly-scan-result"
+                        >
+                          <div className="shelly-scan-result__row">
+                            <div className="shelly-scan-result__content">
+                              <label className="shelly-scan-result__name">
+                                <span>{t('hardware.shelly.deviceNameLabel')}</span>
+                                <input
+                                  className="shelly-scan-result__name-input"
+                                  aria-label={`${t('hardware.shelly.deviceNameLabel')}: ${result.baseUrl}`}
+                                  type="text"
+                                  value={scannedShellyName(result)}
+                                  disabled={isSavedShellyScanResult(result)}
+                                  onChange={(event) =>
+                                    setScannedShellyName(
+                                      result,
+                                      event.currentTarget.value
+                                    )
+                                  }
+                                />
+                              </label>
+                              <div className="shelly-scan-result__meta">
+                                <span>{result.baseUrl}</span>
+                                <span>
+                                  {result.deviceInfo.model}, gen {result.deviceInfo.gen}
+                                </span>
+                              </div>
                             </div>
                             <button
                               aria-label={
@@ -546,12 +525,22 @@ export const ShellySetupPage = ({
                       ))}
                     </div>
                   )}
-                  {isShellyScanActive && (
-                    <div className="shelly-network-scan__progress">
-                      <span className="scan-loading-state__spinner" aria-hidden="true" />
-                      <span>{t('hardware.shelly.scanningIpRange')}</span>
-                    </div>
-                  )}
+                  <div className="action-row shelly-network-scan__actions device-add-page__scan-control">
+                    <button
+                      className="secondary-action"
+                      type="button"
+                      title={
+                        isShellyScanActive
+                          ? t('hardware.shelly.scanStopTitle')
+                          : t('hardware.shelly.scanStartTitle')
+                      }
+                      onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
+                    >
+                      {isShellyScanActive
+                        ? t('hardware.shelly.scanStop')
+                        : t('hardware.shelly.scanStart')}
+                    </button>
+                  </div>
                 </div>
               </section>
             )}

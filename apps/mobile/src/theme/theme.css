@@ -3123,3 +3123,103 @@ select {
   line-height: var(--lcl-line-height-tight);
   margin: 0;
 }
+
+/* Device add pages are workspace pages, not modal-shaped cards. */
+.device-add-page {
+  gap: var(--lcl-spacing-md);
+}
+
+.device-add-page__scan-control {
+  margin-top: var(--lcl-spacing-xs);
+}
+
+.shelly-network-scan__presets {
+  justify-self: start;
+}
+
+.shelly-network-scan__preset {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding: 0 var(--lcl-spacing-md);
+}
+
+.shelly-scan-result__row {
+  align-items: center;
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.shelly-scan-result__content {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+}
+
+.shelly-scan-result__name {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.shelly-scan-result__name > span,
+.ble-candidate-name > span {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+}
+
+.shelly-scan-result__meta {
+  color: var(--lcl-color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--lcl-font-size-sm);
+  gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
+  overflow-wrap: anywhere;
+}
+
+.shelly-scan-result__add,
+.ble-candidate-action {
+  align-self: center;
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding-inline: var(--lcl-spacing-md);
+  width: auto;
+}
+
+.ble-candidate-item {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.ble-candidate-content,
+.ble-candidate-name {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+}
+
+.ble-candidate-name {
+  gap: var(--lcl-spacing-xs);
+}
+
+.ble-candidate-name input,
+.shelly-scan-result__name-input {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 30rem) {
+  .ble-candidate-item,
+  .shelly-scan-result__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ble-candidate-action,
+  .shelly-scan-result__add {
+    justify-self: end;
+    width: auto;
+  }
+}

@@ -73,17 +73,13 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     fixedShellyId,
     onBackToIntent,
     onSetupComplete,
-    plugAddOnly,
-    onPlugAddComplete,
-    onPlugAddCancel
+    plugAddOnly
   }: {
     setupIntent?: SetupIntent;
     fixedShellyId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
     plugAddOnly?: boolean;
-    onPlugAddComplete?: () => void;
-    onPlugAddCancel?: () => void;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
@@ -94,12 +90,6 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
       </button>
       <button type="button" onClick={onSetupComplete}>
         mock-complete
-      </button>
-      <button type="button" onClick={onPlugAddComplete}>
-        mock-plug-add-complete
-      </button>
-      <button type="button" onClick={onPlugAddCancel}>
-        mock-plug-add-cancel
       </button>
     </section>
   )
@@ -171,7 +161,7 @@ describe('AppRoutes navigation shell', () => {
     expect(await screen.findByText('mock-setup-none')).toBeVisible();
     expect(screen.getByText('mock-plug-add-yes')).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-plug-add-cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
   });
 

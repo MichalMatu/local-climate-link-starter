@@ -101,8 +101,6 @@ type HardwareSetupScreenProps = {
   plugAddOnly?: boolean;
   sensorAddOnly?: boolean;
   sensorAddMode?: SensorAddMode;
-  onPlugAddCancel?: () => void;
-  onSensorAddCancel?: () => void;
 };
 
 export const HardwareSetupScreen = ({
@@ -114,9 +112,7 @@ export const HardwareSetupScreen = ({
   fixedShellyId,
   plugAddOnly = false,
   sensorAddOnly = false,
-  sensorAddMode = 'phone-scan',
-  onPlugAddCancel,
-  onSensorAddCancel
+  sensorAddMode = 'phone-scan'
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
@@ -224,12 +220,6 @@ export const HardwareSetupScreen = ({
 
   return (
     <main className="demo-shell hardware-shell">
-      {plugAddOnly && onPlugAddCancel && (
-        <AppPageBack label={t('dashboard.climateTab')} onBack={onPlugAddCancel} />
-      )}
-      {sensorAddOnly && onSensorAddCancel && (
-        <AppPageBack label={t('dashboard.timeTab')} onBack={onSensorAddCancel} />
-      )}
       {setupIntent && onBackToIntent && !plugAddOnly && !sensorAddOnly && (
         <div className="setup-context">
           <button className="setup-context__back" type="button" onClick={onBackToIntent}>

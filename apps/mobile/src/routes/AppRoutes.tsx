@@ -210,16 +210,12 @@ export const AppRoutes = () => {
       />
     );
   } else if (route.type === 'device-add') {
-    const leaveAddPage = () => navigate(route.returnTo);
     content = (
       <Suspense fallback={<RouteFallback />}>
         <HardwareSetupScreen
           {...(route.device === 'plug'
             ? { plugAddOnly: true }
             : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
-          {...(route.device === 'plug'
-            ? { onPlugAddCancel: leaveAddPage }
-            : { onSensorAddCancel: leaveAddPage })}
         />
       </Suspense>
     );

@@ -212,12 +212,15 @@ export const usePhoneSensorFlow = (sensorDevices: readonly SensorDraftDevice[]) 
 
   const addDiscoveredSensor = (
     candidate: BleDiscoveryCandidate,
-    source: SensorRuntimeSource = 'phone-scan'
+    source: SensorRuntimeSource = 'phone-scan',
+    displayName?: string
   ) => {
     const runtimeAddress = normalizeRuntimeAddress(candidate.runtimeAddress);
-    const name = t('hardware.flow.sensorDefaultName', {
-      suffix: runtimeAddress.split(':').slice(-2).join(':')
-    });
+    const name =
+      displayName?.trim() ||
+      t('hardware.flow.sensorDefaultName', {
+        suffix: runtimeAddress.split(':').slice(-2).join(':')
+      });
     appendSensorReading(
       sensorReadingFromCandidate({ ...candidate, runtimeAddress }, source)
     );
