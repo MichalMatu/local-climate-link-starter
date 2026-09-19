@@ -1,6 +1,6 @@
 # Refactor boundaries
 
-Updated: 2026-09-19
+Updated: 2026-09-20
 
 File size is an alarm, not a refactor goal. Split code only at a real responsibility boundary, to remove duplicate state/transport ownership, or when a quality budget proves that a boundary is regrowing.
 
@@ -55,25 +55,47 @@ Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`
 
 ## Navigation/presentation boundary
 
-`AppShell` owns persistent bottom navigation. Child pages own their working content. A full working task should be a page/subpage; modal scope is limited to transient decisions, confirmations, short previews, pickers or errors.
+`AppShell` owns persistent bottom navigation and application-frame overlay geometry. Child pages own their working content. A full working task should be a page/subpage; modal scope is limited to transient decisions, confirmations, short previews, pickers or errors.
+
+The global mobile toast host is part of that shell boundary:
+
+```text
+AppShell
+  -> scrollable page content
+  -> app-toast-host
+  -> persistent bottom navigation
+```
+
+Screens may own their toast message/queue state, but they render through `AppToastViewport`, which portals the shared `@lcl/ui` `ToastViewport` into `#app-toast-host`. Do not render raw `<ToastViewport>` in `apps/mobile/src/screens/**`, add screen-specific toast `bottom` offsets, or move the host into filtered/transformed page surfaces. `scripts/quality/ux-gate.mjs` protects this contract.
 
 The completed Plug/Thermometer add pages establish the discovery-card presentation contract. Reuse its principles before inventing another one-off layout, but do not prematurely generalize unrelated screens into one component.
 
-Saved Plug settings and BLE discovery now follow the same page-tree rule both from the main dashboard and inside the configurator. Do not regress those working surfaces back into modal-first navigation.
+Saved Plug settings and BLE discovery follow the same page-tree rule both from the main dashboard and inside the configurator. Do not regress those working surfaces back into modal-first navigation.
 
 ## Current architecture checkpoint
 
-At product-code checkpoint `965618b0023946a16acee6dc46a33eea9be7df50`:
+Latest verified app-code checkpoint:
 
-- repository architecture/UX gates pass;
-- full `pnpm check` passes without lint warnings;
-- `HardwareSetupScreen` is a coordinator rather than the previous all-purpose setup screen;
-- `useHardwareSetupFlow` composes dedicated flows and remains protected by a 650-line alarm plus a bounded public surface;
-- Shelly/Sensor/Rule pages have explicit composition budgets;
+```text
+8ad5b152bdbf861a8e6620414245dfbcb06c0ead
+Anchor app toasts above bottom navigation
+```
+
+Documentation commits follow that app-code checkpoint on the active work branch, so always fetch the fresh branch before writing.
+
+At this checkpoint:
+
+- repository architecture and UX gates pass;
+- one full `pnpm check` passes;
+- `HardwareSetupScreen` remains a coordinator rather than an all-purpose setup screen;
+- `useHardwareSetupFlow` composes dedicated flows and remains protected by its size/public-surface alarms;
+- Shelly/Sensor/Rule pages keep explicit composition budgets;
 - phone BLE and Shelly discovery lifecycle ownership remains outside route/shell code;
 - BLE child-page cleanup safely handles Back during scanner startup;
-- `RuleAdvancedSettingsModal.tsx` is deleted as dead code;
-- active advanced settings remain in `RuleAdvancedSettingsInline.tsx`, protected by the same 220-line responsibility budget.
+- `RuleAdvancedSettingsModal.tsx` remains deleted as dead code and active advanced settings remain inline;
+- `AppShell` owns the global toast host while `@lcl/ui` owns the reusable toast primitive;
+- `quality:ux` rejects raw screen-level toast viewports and protects the shell host/nav geometry;
+- responsive toast/nav coverage exercises 360×800, 390×844, 412×915, 768×1024 and 1440×900.
 
 There is no current reason for a broad architecture rewrite or another broad UX consistency sweep before explicit product work.
 
@@ -98,11 +120,13 @@ When a screen is actively refactored:
 - keep design tokens shared;
 - avoid a repository-wide CSS rewrite as an unrelated side quest.
 
+Glass styling is allowed on major surfaces, but geometry-critical overlays must remain outside filtered/transformed page containers unless their positioning contract explicitly accounts for that.
+
 ### `ShellySetupPage.tsx`
 
 The page is bounded to Shelly setup, but it still coordinates saved-device management, add/manual/scan presentation, transient removal confirmation and fallback settings/BLE modal components.
 
-The normal dashboard/configurator working flows now use page callbacks for saved settings and BLE discovery. Keep those page routes primary. If the fallback modal path is later proven unreachable, remove it in a dedicated cleanup with exact reference/tests rather than assuming it is dead.
+The normal dashboard/configurator working flows use page callbacks for saved settings and BLE discovery. Keep those page routes primary. If the fallback modal path is later proven unreachable, remove it in a dedicated cleanup with exact reference/tests rather than assuming it is dead.
 
 If new responsibilities are added, extract by concrete task, not by arbitrary line slices.
 
