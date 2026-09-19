@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git diff --check; git add -A; git commit -m 'Unify device discovery cards'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
-  "pid": 67543,
+  "command": "pnpm android:phone-alpha",
+  "pid": 68026,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T14:12:14.967839+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-19T14:12:20.623659+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-unify-discovery-cards-v132",
@@ -18,5 +18,5 @@
   "task_digest": "0ceadf5a6b25e183ffa1226aae041a4de0dd820b1655c7a6a11b7f81c703448c",
   "daemon_version": "4.18.22",
   "daemon_pid": 63506,
-  "updated_at": "2026-09-19T14:12:15.040677+00:00"
+  "updated_at": "2026-09-19T14:12:20.644389+00:00"
 }
