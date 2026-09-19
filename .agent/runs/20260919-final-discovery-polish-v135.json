@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-final-discovery-polish-v135",
+  "task_digest": "9187b72dfb53c1633b7951bd132931a89b83d183040a145260a97a8185885316",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T14:38:43.031992+00:00",
+  "attempt_id": "3b9192ab47f044a39b99d626",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 92314,
+  "updated_at": "2026-09-19T14:38:43.032213+00:00",
+  "pid": 92314
+}
