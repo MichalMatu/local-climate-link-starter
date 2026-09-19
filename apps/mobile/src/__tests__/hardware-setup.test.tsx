@@ -20,7 +20,8 @@ const phoneBleScannerMock = vi.hoisted(() => ({
   failureMessage: null as string | null,
   startCount: 0,
   stopCount: 0,
-  endContinuousScanCount: 0
+  endContinuousScanCount: 0,
+  advertisementDelayMs: 0
 }));
 
 const pvvxGattMock = vi.hoisted(() => ({
@@ -118,6 +119,11 @@ vi.mock('@lcl/ble-core', async () => {
           return;
         }
         yield advertisement;
+        if (phoneBleScannerMock.advertisementDelayMs > 0) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, phoneBleScannerMock.advertisementDelayMs)
+          );
+        }
       }
 
       if (options?.timeoutMs === 0 && phoneBleScannerMock.endContinuousScanCount > 0) {
@@ -336,11 +342,13 @@ const addShellyThroughUi = async (name = 'Przedpokój') => {
     target: { value: '192.168.0.20' }
   });
   fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
+  expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Dodaj gniazdko' })).toBeVisible();
+  expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
+  closeCurrentAddPage();
   expect(
     await screen.findByRole('button', { name: 'Ustawienia gniazdka' })
   ).toBeInTheDocument();
-  expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
-  expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
 };
 
 const openShellyBleScanFromSettings = async () => {
@@ -372,9 +380,11 @@ const addSensorThroughUi = async ({
     target: { value: mac }
   });
   fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
-  expect(await screen.findByText(name)).toBeInTheDocument();
+  expect(await screen.findByText('Zapisano termometr.')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Dodaj termometr' })).toBeVisible();
   expect(screen.queryByRole('dialog', { name: 'Dodaj termometr' })).toBeNull();
-  expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
+  closeCurrentAddPage();
+  expect(await screen.findByText(name)).toBeInTheDocument();
 };
 
 const getSavedSensorCard = (name: string) => {
@@ -757,12 +767,14 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
     const plugPage = await openShellyAddDialog('scan');
     expect(within(plugPage).getByRole('tab', { name: 'Skanuj sieć' })).toBeVisible();
+    expect(plugPage).not.toHaveClass('automation-card');
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
     closeCurrentAddPage();
 
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     const sensorPage = await openSensorAddDialog();
     expect(within(sensorPage).getByLabelText('MAC termometru')).toBeVisible();
+    expect(sensorPage).not.toHaveClass('automation-card');
     expect(screen.queryByRole('dialog', { name: 'Dodaj termometr' })).toBeNull();
   });
 
@@ -852,10 +864,12 @@ describe('HardwareSetupScreen', () => {
     });
     fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
 
-    expect(await screen.findByText('Salon')).toBeInTheDocument();
+    expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Dodaj gniazdko' })).toBeVisible();
     expect(
       screen.queryByRole('dialog', { name: 'Shelly sprawdzone' })
     ).not.toBeInTheDocument();
+    closeCurrentAddPage();
     expect(screen.queryByText('http://192.168.0.20/')).not.toBeInTheDocument();
     expect(screen.getByText('Salon')).toBeInTheDocument();
     expect(screen.queryByText('Adres')).not.toBeInTheDocument();
@@ -1300,10 +1314,17 @@ describe('HardwareSetupScreen', () => {
       within(page).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
     );
 
+    expect(screen.getByRole('heading', { name: 'Dodaj gniazdko' })).toBeVisible();
+    await waitFor(() =>
+      expect(
+        within(page).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
+      ).toBeDisabled()
+    );
+    expect(within(page).getByText('http://192.168.0.20/')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
+    closeCurrentAddPage();
     const savedPlugList = await screen.findByLabelText('Dodane gniazdka');
     expect(within(savedPlugList).getByText('Salon')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
-    expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
   });
 
   it('shows already saved Shelly devices and continues scanning the full range', async () => {
@@ -1546,6 +1567,12 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(
       within(page).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
     );
+    await waitFor(() =>
+      expect(
+        within(page).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
+      ).toBeDisabled()
+    );
+    closeCurrentAddPage();
 
     const savedPlugList = await screen.findByLabelText('Dodane gniazdka');
     expect(within(savedPlugList).getByText('S3PL-00112EU')).toBeInTheDocument();
@@ -2162,6 +2189,14 @@ describe('HardwareSetupScreen', () => {
     ).not.toHaveTextContent('tp357-parser-placeholder');
   });
 
+  it('keeps the BLE add-page scan alive across candidate rerenders', async () => {
+    phoneBleScannerMock.advertisementDelayMs = 60;
+    renderHardwareSetup({ sensorAddOnly: true, sensorAddMode: 'phone-scan' });
+
+    expect(await screen.findByText('A4:C1:38:4F:24:CD')).toBeInTheDocument();
+    expect(await screen.findByText('F7:5F:8D:0F:76:20')).toBeInTheDocument();
+  });
+
   it('uses the thermometer add child page for phone BLE scan and keeps result order stable', async () => {
     renderHardwareSetup();
 
@@ -2202,7 +2237,12 @@ describe('HardwareSetupScreen', () => {
       within(xiaomiItem!).getByRole('button', { name: 'Zapisz termometr' })
     );
 
-    expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Dodaj termometr' })).toBeVisible();
+    expect(
+      within(xiaomiItem!).getByRole('button', { name: 'Już zapisany' })
+    ).toBeDisabled();
+    expect(await within(page).findByText('F7:5F:8D:0F:76:20')).toBeInTheDocument();
+    closeCurrentAddPage();
     expect(await screen.findByText('Termometr 24:CD')).toBeInTheDocument();
     expect(screen.getByText('21.3°C')).toBeInTheDocument();
     expect(screen.getByText('45.7%')).toBeInTheDocument();
@@ -2231,8 +2271,10 @@ describe('HardwareSetupScreen', () => {
     expect(await screen.findByText('21.3°C')).toBeInTheDocument();
     expect(screen.getByText('45.7%')).toBeInTheDocument();
     const sensorCard = getSavedSensorCard('Xiaomi salon');
-    expect(within(sensorCard).getByText('100%')).toBeInTheDocument();
-    expect(within(sensorCard).getByText('-72 dBm')).toBeInTheDocument();
+    await waitFor(() => expect(within(sensorCard).getByText('100%')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(within(sensorCard).getByText('-72 dBm')).toBeInTheDocument()
+    );
   });
 
   it('keeps the rule setup compact and ends with the primary send action', () => {

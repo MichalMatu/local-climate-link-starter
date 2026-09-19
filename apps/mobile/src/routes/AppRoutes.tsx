@@ -218,14 +218,8 @@ export const AppRoutes = () => {
             ? { plugAddOnly: true }
             : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
           {...(route.device === 'plug'
-            ? {
-                onPlugAddComplete: leaveAddPage,
-                onPlugAddCancel: leaveAddPage
-              }
-            : {
-                onSensorAddComplete: leaveAddPage,
-                onSensorAddCancel: leaveAddPage
-              })}
+            ? { onPlugAddCancel: leaveAddPage }
+            : { onSensorAddCancel: leaveAddPage })}
         />
       </Suspense>
     );

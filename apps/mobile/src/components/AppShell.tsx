@@ -17,7 +17,7 @@ export const AppShell = ({
   onOpenSettings
 }: AppShellProps) => (
   <div className="app-root-shell app-bottom-nav-shell">
-    {children}
+    <div className="app-root-shell__content">{children}</div>
     <AppBottomNavigation
       activeKind={activeKind}
       onOpenClimate={onOpenClimate}

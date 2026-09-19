@@ -101,9 +101,7 @@ type HardwareSetupScreenProps = {
   plugAddOnly?: boolean;
   sensorAddOnly?: boolean;
   sensorAddMode?: SensorAddMode;
-  onPlugAddComplete?: () => void;
   onPlugAddCancel?: () => void;
-  onSensorAddComplete?: () => void;
   onSensorAddCancel?: () => void;
 };
 
@@ -117,9 +115,7 @@ export const HardwareSetupScreen = ({
   plugAddOnly = false,
   sensorAddOnly = false,
   sensorAddMode = 'phone-scan',
-  onPlugAddComplete,
   onPlugAddCancel,
-  onSensorAddComplete,
   onSensorAddCancel
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
@@ -218,15 +214,9 @@ export const HardwareSetupScreen = ({
             flow={flow}
             addOnly
             enableBleDiscovery={setupIntent !== 'time'}
-            onAddComplete={closeLocalAdd}
           />
         ) : (
-          <SensorSetupPage
-            flow={flow}
-            addOnly
-            primaryAddAction={localSensorAddMode}
-            onAddComplete={closeLocalAdd}
-          />
+          <SensorSetupPage flow={flow} addOnly primaryAddAction={localSensorAddMode} />
         )}
       </main>
     );
@@ -276,7 +266,6 @@ export const HardwareSetupScreen = ({
           enableBleDiscovery={setupIntent !== 'time'}
           addOnly={plugAddOnly}
           onAddRequest={openPlugAdd}
-          {...(onPlugAddComplete ? { onAddComplete: onPlugAddComplete } : {})}
         />
       )}
       {setupIntent !== 'time' && activeTab === 'sensor' && (
@@ -285,7 +274,6 @@ export const HardwareSetupScreen = ({
           addOnly={sensorAddOnly}
           onAddRequest={openSensorAdd}
           primaryAddAction={sensorAddOnly ? sensorAddMode : 'manual'}
-          {...(onSensorAddComplete ? { onAddComplete: onSensorAddComplete } : {})}
         />
       )}
       {setupIntent !== 'time' && activeTab === 'rule' && (

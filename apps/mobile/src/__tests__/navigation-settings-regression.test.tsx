@@ -57,6 +57,13 @@ describe('navigation and settings regression coverage', () => {
     expect(screen.queryByRole('button', { name: 'Przywróć system' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Zamknij' })).toBeNull();
     expect(document.querySelector('.app-settings__hint')).toBeNull();
+    const shell = document.querySelector('.app-root-shell');
+    const content = shell?.querySelector(':scope > .app-root-shell__content');
+    const navigation = shell?.querySelector(':scope > .app-bottom-nav');
+    expect(shell).not.toBeNull();
+    expect(content).not.toBeNull();
+    expect(navigation).not.toBeNull();
+    expect(content?.contains(navigation ?? null)).toBe(false);
   });
 
   it('returns visibly from Add automation to an existing dashboard', () => {

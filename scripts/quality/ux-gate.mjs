@@ -77,6 +77,12 @@ const checkDeviceAddPageBoundary = async () => {
   ) {
     addFailure(shellyPath, 'plug add flow must be a child page, not a modal');
   }
+  if (sensorSource.includes('automation-card device-add-page')) {
+    addFailure(sensorPath, 'thermometer add page must not wrap the whole page in a card');
+  }
+  if (shellySource.includes('automation-card device-add-page')) {
+    addFailure(shellyPath, 'plug add page must not wrap the whole page in a card');
+  }
   if (!routesSource.includes("type: 'device-add'")) {
     addFailure(routesPath, 'device add flows must be represented in the app page tree');
   }
@@ -109,6 +115,24 @@ const checkBottomNavigationShell = async () => {
     addFailure(
       shellPath,
       'root AppShell must own the persistent bottom navigation and its spacing'
+    );
+  }
+  if (!shellSource.includes('app-root-shell__content')) {
+    addFailure(
+      shellPath,
+      'root AppShell must isolate scrollable page content from bottom navigation'
+    );
+  }
+  const navCssPath = 'apps/mobile/src/components/AppBottomNavigation.css';
+  const navCss = await readRepoFile(navCssPath);
+  if (
+    !navCss.includes('grid-template-rows: minmax(0, 1fr) auto') ||
+    !navCss.includes('.app-root-shell__content') ||
+    !navCss.includes('overflow-y: auto')
+  ) {
+    addFailure(
+      navCssPath,
+      'bottom navigation must live outside the only scrollable app content row'
     );
   }
 };

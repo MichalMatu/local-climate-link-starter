@@ -1,3 +1,14 @@
+html:root,
+html:root body,
+#root {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .app-shell {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   position: relative;
 }

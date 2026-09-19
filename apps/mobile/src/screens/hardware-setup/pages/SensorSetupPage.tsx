@@ -23,7 +23,6 @@ type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
   embedded?: boolean;
   addOnly?: boolean;
   onAddRequest?: (mode: SensorAddMode) => void;
-  onAddComplete?: () => void;
 };
 
 export const SensorSetupPage = ({
@@ -31,8 +30,7 @@ export const SensorSetupPage = ({
   primaryAddAction = 'manual',
   embedded = false,
   addOnly = false,
-  onAddRequest,
-  onAddComplete
+  onAddRequest
 }: SensorSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
@@ -40,6 +38,8 @@ export const SensorSetupPage = ({
   const [didSubmitSensorAdd, setDidSubmitSensorAdd] = useState(false);
   const [addMode, setAddMode] = useState<SensorAddMode>(primaryAddAction);
   const autoScanStartedRef = useRef(false);
+  const startPhoneBleScanRef = useRef<() => void>(() => undefined);
+  const stopPhoneBleScanRef = useRef<() => void>(() => undefined);
   const { dismissToast, pushToast, toasts } = useToastQueue('sensor-toast');
   const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
@@ -61,19 +61,21 @@ export const SensorSetupPage = ({
     resetPhoneBleError();
     flow.startPhoneBleScan();
   };
+  startPhoneBleScanRef.current = startPhoneBleScan;
+  stopPhoneBleScanRef.current = flow.stopPhoneBleScan;
 
   useEffect(() => {
     if (!addOnly || primaryAddAction !== 'phone-scan' || autoScanStartedRef.current)
       return;
     autoScanStartedRef.current = true;
-    startPhoneBleScan();
+    startPhoneBleScanRef.current();
   }, [addOnly, primaryAddAction]);
 
   useEffect(
     () => () => {
-      if (addOnly) flow.stopPhoneBleScan();
+      if (addOnly) stopPhoneBleScanRef.current();
     },
-    [addOnly, flow.stopPhoneBleScan]
+    [addOnly]
   );
 
   const selectAddMode = (mode: SensorAddMode) => {
@@ -92,13 +94,14 @@ export const SensorSetupPage = ({
     if (!flow.sensorInputState.ok) return;
     flow.addSensorDraft();
     setDidSubmitSensorAdd(false);
-    onAddComplete?.();
+    flow.setSensorNameInput('');
+    flow.setSensorMacInput('');
+    pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 
   const saveScannedSensor = (candidate: BleDiscoveryCandidate) => {
     flow.addDiscoveredSensor(candidate);
-    flow.stopPhoneBleScan();
-    onAddComplete?.();
+    pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 
   const confirmRemoveSensor = () => {
@@ -214,12 +217,12 @@ export const SensorSetupPage = ({
   if (addOnly) {
     return (
       <section
-        className="automation-card device-add-page sensor-add-page"
+        className="device-add-page sensor-add-page"
         aria-label={t('hardware.sensor.add')}
       >
-        <div className="installation-section-heading">
+        <header className="demo-header app-page-header device-add-page__header">
           <h1>{t('hardware.sensor.add')}</h1>
-        </div>
+        </header>
         <div
           className="shelly-add-tabs"
           role="tablist"

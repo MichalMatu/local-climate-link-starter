@@ -200,9 +200,9 @@ export const usePhoneSensorFlow = (sensorDevices: readonly SensorDraftDevice[]) 
     phoneBleScanMutation.mutate();
   };
 
-  const stopPhoneBleScan = () => {
+  const stopPhoneBleScan = useCallback(() => {
     void phoneBleScannerRef.current?.stopScan();
-  };
+  }, []);
 
   const resetPhoneBleScan = () => {
     stopPhoneBleScan();

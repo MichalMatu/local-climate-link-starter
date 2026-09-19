@@ -43,7 +43,6 @@ type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {
   addOnly?: boolean;
   settingsOnlyDeviceId?: string;
   onAddRequest?: () => void;
-  onAddComplete?: () => void;
   onSettingsClose?: () => void;
 };
 
@@ -53,7 +52,6 @@ export const ShellySetupPage = ({
   addOnly = false,
   settingsOnlyDeviceId,
   onAddRequest,
-  onAddComplete,
   onSettingsClose
 }: ShellySetupPageProps) => {
   const { locale, t } = useTranslation();
@@ -160,7 +158,6 @@ export const ShellySetupPage = ({
         setDidSubmitShellyAdd(false);
         setDialog({ kind: 'none' });
         pushToast('ok', t('hardware.shelly.added'));
-        onAddComplete?.();
       },
       onError: () => {
         pushToast(
@@ -228,11 +225,6 @@ export const ShellySetupPage = ({
       {
         onSuccess: () => {
           pushToast('ok', t('hardware.shelly.added'));
-          if (addOnly) {
-            flow.stopShellyScan();
-            setDialog({ kind: 'none' });
-            onAddComplete?.();
-          }
         },
         onError: () => {
           pushToast(
@@ -309,9 +301,7 @@ export const ShellySetupPage = ({
 
   return (
     <section
-      className={
-        addOnly ? 'automation-card device-add-page shelly-add-page' : 'demo-panel'
-      }
+      className={addOnly ? 'device-add-page shelly-add-page' : 'demo-panel'}
       aria-label={addOnly ? t('hardware.shelly.add') : t('hardware.shelly.regionLabel')}
     >
       {!addOnly && !settingsOnlyDeviceId && (
@@ -328,9 +318,9 @@ export const ShellySetupPage = ({
 
       {addOnly && (
         <>
-          <div className="installation-section-heading">
+          <header className="demo-header app-page-header device-add-page__header">
             <h1>{t('hardware.shelly.add')}</h1>
-          </div>
+          </header>
           <div className="device-add-page__body">
             <div
               className="shelly-add-tabs"
