@@ -1316,12 +1316,17 @@ describe('HardwareSetupScreen', () => {
     });
     expect(scannedName).toHaveValue('S3PL-00112EU');
     const scannedRow = scannedName.closest(
-      '.shelly-scan-result__row'
+      '.device-discovery-card'
     ) as HTMLElement | null;
     expect(scannedRow).not.toBeNull();
+    expect(scannedRow).toHaveClass('shelly-scan-result');
+    expect(scannedName).toHaveClass('device-discovery-card__name-input');
     expect(within(scannedRow!).getAllByRole('textbox')).toHaveLength(1);
     expect(within(scannedRow!).getByText('http://192.168.0.20/')).toBeVisible();
     expect(within(scannedRow!).getByText('S3PL-00112EU, gen 3')).toBeVisible();
+    expect(
+      within(scannedRow!).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
+    ).toHaveClass('device-discovery-card__action');
     fireEvent.change(scannedName, { target: { value: 'Salon' } });
 
     fireEvent.click(
@@ -1420,143 +1425,31 @@ describe('HardwareSetupScreen', () => {
     expect(scannedHosts).toContain('192.168.0.21');
   });
 
-  it('shows Shelly scan help in the shared info popover', async () => {
+  it('keeps the Shelly scan page minimal without presets or help chrome', async () => {
     renderHardwareSetup();
 
-    const addDialog = await openShellyAddDialog('scan');
-    const dialog = addDialog;
-    const scanTab = within(dialog).getByRole('tab', { name: 'Skanuj sieć' });
-    const manualTab = within(dialog).getByRole('tab', { name: 'Dodaj ręcznie' });
-    expect(scanTab).toHaveAttribute('aria-selected', 'true');
-    expect(manualTab).toHaveAttribute('aria-selected', 'false');
+    const page = await openShellyAddDialog('scan');
+    expect(within(page).getByLabelText('Od')).toHaveValue('192.168.0.1');
+    expect(within(page).getByLabelText('Do')).toHaveValue('192.168.0.254');
+    expect(within(page).queryByRole('button', { name: 'STA' })).toBeNull();
+    expect(within(page).queryByRole('button', { name: 'AP' })).toBeNull();
     expect(
-      within(dialog).getByRole('tabpanel', { name: 'Skanuj sieć' })
-    ).toBeInTheDocument();
-    expect(
-      within(dialog).queryByRole('tabpanel', { name: 'Dodaj ręcznie' })
-    ).not.toBeInTheDocument();
-
-    const rangeStart = within(dialog).getByLabelText('Od');
-    const rangeEnd = within(dialog).getByLabelText('Do');
-    const rangeRow = rangeStart.closest('.shelly-network-scan__range');
-    expect(rangeRow).not.toBeNull();
-    expect(rangeRow).toContainElement(rangeEnd);
-
-    fireEvent.click(manualTab);
-    expect(manualTab).toHaveAttribute('aria-selected', 'true');
-    expect(
-      within(dialog).getByRole('tabpanel', { name: 'Dodaj ręcznie' })
-    ).toBeInTheDocument();
-    expect(
-      within(dialog).queryByRole('tabpanel', { name: 'Skanuj sieć' })
-    ).not.toBeInTheDocument();
-    fireEvent.click(scanTab);
-    expect(scanTab).toHaveAttribute('aria-selected', 'true');
-
-    const tooltipButton = within(dialog).getByRole('button', {
-      name: 'Informacja o skanowaniu Shelly'
-    });
-    expect(tooltipButton.closest('.device-add-page__hint')).not.toBeNull();
-    expect(tooltipButton.closest('.shelly-network-scan__body')).not.toBeNull();
-    expect(tooltipButton).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(tooltipButton);
-    expect(tooltipButton).toHaveAttribute('aria-expanded', 'true');
-    const scanInfoPopover = within(dialog).getByRole('tooltip', {
-      name: 'Skanowanie Shelly'
-    });
-    expect(within(scanInfoPopover).getByText(/192\.168\.33\.1/)).toBeInTheDocument();
-    expect(
-      within(scanInfoPopover).getByText(/oznacza je jako Dodane/i)
-    ).toBeInTheDocument();
-    expect(
-      within(dialog).getByText(/Zakres: 254 adresy.*1 min 36 s/)
-    ).toBeInTheDocument();
-
-    fireEvent.change(within(dialog).getByLabelText('Do'), {
-      target: { value: '192.168.0.32' }
-    });
-
-    expect(within(dialog).getByText(/Zakres: 32 adresy.*12 s/)).toBeInTheDocument();
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'AP' }));
-    expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.33.1');
-    expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.33.1');
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'STA' }));
-    expect(within(dialog).getByLabelText('Od')).toHaveValue('192.168.0.1');
-    expect(within(dialog).getByLabelText('Do')).toHaveValue('192.168.0.254');
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() => expect(tooltipButton).toHaveAttribute('aria-expanded', 'false'));
-    await waitFor(() =>
-      expect(
-        within(dialog).queryByRole('tooltip', { name: 'Skanowanie Shelly' })
-      ).not.toBeInTheDocument()
+      within(page).queryByRole('button', { name: 'Informacja o skanowaniu Shelly' })
+    ).toBeNull();
+    expect(within(page).queryByText(/Zakres:/)).toBeNull();
+    expect(within(page).getByRole('button', { name: 'Rozpocznij skan' })).toHaveClass(
+      'secondary-action'
     );
-    expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
-    expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
-    expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
-  });
 
-  it('keeps shared info popovers inside a narrow phone viewport', async () => {
-    const originalInnerWidth = window.innerWidth;
-    const originalInnerHeight = window.innerHeight;
-    const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
-    const rect = (left: number, top: number, width: number, height: number) =>
-      ({
-        x: left,
-        y: top,
-        left,
-        top,
-        right: left + width,
-        bottom: top + height,
-        width,
-        height,
-        toJSON: () => ({})
-      }) as DOMRect;
-
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
-    const rectSpy = vi
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(function (this: HTMLElement) {
-        if (this.classList.contains('lcl-info-popover__trigger')) {
-          return rect(4, 700, 40, 40);
-        }
-        if (this.classList.contains('lcl-info-popover__bubble')) {
-          return rect(0, 0, 352, 180);
-        }
-        return originalGetBoundingClientRect.call(this);
-      });
-
-    try {
-      renderHardwareSetup();
-      const dialog = await openShellyAddDialog('scan');
-      const infoButton = within(dialog).getByRole('button', {
-        name: 'Informacja o skanowaniu Shelly'
-      });
-      fireEvent.click(infoButton);
-      const popover = within(dialog).getByRole('tooltip', { name: 'Skanowanie Shelly' });
-
-      await waitFor(() => {
-        const left = Number.parseFloat(popover.style.left);
-        const top = Number.parseFloat(popover.style.top);
-        expect(left).toBeGreaterThanOrEqual(16);
-        expect(left + 352).toBeLessThanOrEqual(374);
-        expect(top).toBeGreaterThanOrEqual(16);
-        expect(top + 180).toBeLessThanOrEqual(828);
-      });
-    } finally {
-      rectSpy.mockRestore();
-      Object.defineProperty(window, 'innerWidth', {
-        configurable: true,
-        value: originalInnerWidth
-      });
-      Object.defineProperty(window, 'innerHeight', {
-        configurable: true,
-        value: originalInnerHeight
-      });
-    }
+    const manualTab = within(page).getByRole('tab', { name: 'Dodaj ręcznie' });
+    fireEvent.click(manualTab);
+    expect(
+      within(page).getByRole('tabpanel', { name: 'Dodaj ręcznie' })
+    ).toBeInTheDocument();
+    fireEvent.click(within(page).getByRole('tab', { name: 'Skanuj sieć' }));
+    expect(
+      within(page).getByRole('tabpanel', { name: 'Skanuj sieć' })
+    ).toBeInTheDocument();
   });
 
   it('uses the discovered model as the default scanner name without populating the manual form', async () => {
@@ -2226,15 +2119,15 @@ describe('HardwareSetupScreen', () => {
     let xiaomiAddress = await findBleScanCandidate(page);
     let xiaomiItem = xiaomiAddress.closest('article');
     expect(xiaomiItem).not.toBeNull();
-    expect(within(xiaomiItem!).getByRole('button', { name: 'Dodaj' })).toHaveAttribute(
-      'title',
-      'Zapisz ten termometr w aplikacji'
-    );
-    expect(
-      within(xiaomiItem!).getByRole('textbox', {
-        name: 'Nazwa termometru: A4:C1:38:4F:24:CD'
-      })
-    ).toHaveValue('Termometr 24:CD');
+    expect(xiaomiItem).toHaveClass('device-discovery-card');
+    const xiaomiAddButton = within(xiaomiItem!).getByRole('button', { name: 'Dodaj' });
+    expect(xiaomiAddButton).toHaveAttribute('title', 'Zapisz ten termometr w aplikacji');
+    expect(xiaomiAddButton).toHaveClass('device-discovery-card__action');
+    const xiaomiNameInput = within(xiaomiItem!).getByRole('textbox', {
+      name: 'Nazwa termometru: A4:C1:38:4F:24:CD'
+    });
+    expect(xiaomiNameInput).toHaveValue('Termometr 24:CD');
+    expect(xiaomiNameInput).toHaveClass('device-discovery-card__name-input');
     expect(within(xiaomiItem!).getByText('BTHome v2')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('21.3°C')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('45.7%')).toBeInTheDocument();

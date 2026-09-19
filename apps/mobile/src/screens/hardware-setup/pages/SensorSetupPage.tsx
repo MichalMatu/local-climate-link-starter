@@ -158,11 +158,15 @@ export const SensorSetupPage = ({
             const displayName = savedSensor?.name ?? scannedSensorName(candidate);
 
             return (
-              <article key={candidate.runtimeAddress} className="ble-candidate-item">
-                <div className="ble-candidate-content">
-                  <label className="ble-candidate-name">
+              <article
+                key={candidate.runtimeAddress}
+                className="device-discovery-card ble-candidate-item"
+              >
+                <div className="device-discovery-card__primary">
+                  <label className="device-discovery-card__name ble-candidate-name">
                     <span>{t('hardware.sensor.nameLabel')}</span>
                     <input
+                      className="device-discovery-card__name-input"
                       aria-label={`${t('hardware.sensor.nameLabel')}: ${candidate.runtimeAddress}`}
                       type="text"
                       value={displayName}
@@ -172,63 +176,58 @@ export const SensorSetupPage = ({
                       }
                     />
                   </label>
-                  <div className="ble-candidate-main">
-                    <strong>{candidate.runtimeAddress}</strong>
-                    <span>{sensorProfileDisplayLabels[candidate.profileId]}</span>
+                  <button
+                    className="primary-action device-discovery-card__action ble-candidate-action"
+                    type="button"
+                    disabled={isSavedSensor || displayName.trim().length === 0}
+                    title={
+                      isSavedSensor
+                        ? t('hardware.sensor.saveThermometerSavedTitle')
+                        : t('hardware.sensor.saveThermometerTitle')
+                    }
+                    onClick={() => saveScannedSensor(candidate)}
+                  >
+                    {isSavedSensor ? t('hardware.sensor.saved') : t('common.add')}
+                  </button>
+                </div>
+                <div className="device-discovery-card__meta ble-candidate-main">
+                  <strong>{candidate.runtimeAddress}</strong>
+                  <span>{sensorProfileDisplayLabels[candidate.profileId]}</span>
+                </div>
+                <dl className="device-discovery-card__metrics ble-candidate-metrics">
+                  <div>
+                    <dt>RSSI</dt>
+                    <dd>
+                      {formatSensorMetric(candidate.rssi, ' dBm', 0, t('common.missing'))}
+                    </dd>
                   </div>
-                  <dl className="ble-candidate-metrics">
+                  {hasTemperature && (
                     <div>
-                      <dt>RSSI</dt>
+                      <dt>{t('hardware.metrics.temperatureShort')}</dt>
                       <dd>
                         {formatSensorMetric(
-                          candidate.rssi,
-                          ' dBm',
-                          0,
+                          candidate.temperatureC,
+                          '°C',
+                          1,
                           t('common.missing')
                         )}
                       </dd>
                     </div>
-                    {hasTemperature && (
-                      <div>
-                        <dt>{t('hardware.metrics.temperatureShort')}</dt>
-                        <dd>
-                          {formatSensorMetric(
-                            candidate.temperatureC,
-                            '°C',
-                            1,
-                            t('common.missing')
-                          )}
-                        </dd>
-                      </div>
-                    )}
-                    {hasHumidity && (
-                      <div>
-                        <dt>{t('hardware.metrics.humidityShort')}</dt>
-                        <dd>
-                          {formatSensorMetric(
-                            candidate.humidityPct,
-                            '%',
-                            1,
-                            t('common.missing')
-                          )}
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
-                </div>
-                <button
-                  className="primary-action ble-candidate-action"
-                  type="button"
-                  disabled={isSavedSensor || displayName.trim().length === 0}
-                  title={
-                    isSavedSensor
-                      ? t('hardware.sensor.saveThermometerSavedTitle')
-                      : t('hardware.sensor.saveThermometerTitle')
-                  }
-                  onClick={() => saveScannedSensor(candidate)}
-                >
-                  {isSavedSensor ? t('hardware.sensor.saved') : t('common.add')}
-                </button>
+                  )}
+                  {hasHumidity && (
+                    <div>
+                      <dt>{t('hardware.metrics.humidityShort')}</dt>
+                      <dd>
+                        {formatSensorMetric(
+                          candidate.humidityPct,
+                          '%',
+                          1,
+                          t('common.missing')
+                        )}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
               </article>
             );
           })}

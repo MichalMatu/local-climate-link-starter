@@ -3223,3 +3223,112 @@ select {
     width: auto;
   }
 }
+
+/* Shared scan-result card contract: editable name + compact action, then metadata. */
+.device-discovery-card {
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--lcl-spacing-md);
+}
+
+.device-discovery-card__primary {
+  align-items: end;
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+}
+
+.device-discovery-card__name {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.device-discovery-card__name > span {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+  line-height: var(--lcl-line-height-normal);
+}
+
+.device-discovery-card__name-input {
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text);
+  min-height: var(--lcl-size-compact-control-min-height);
+  min-width: 0;
+  padding: 0 var(--lcl-spacing-md);
+  width: 100%;
+}
+
+.device-discovery-card__name-input:focus-visible {
+  border-color: var(--lcl-color-accent);
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: var(--lcl-border-width-sm);
+}
+
+.device-discovery-card__name-input:disabled {
+  background: var(--lcl-color-surface-muted);
+  color: var(--lcl-color-text-muted);
+}
+
+.device-discovery-card__action {
+  align-self: end;
+  min-height: var(--lcl-size-compact-control-min-height);
+  padding-inline: var(--lcl-spacing-md);
+  width: auto;
+}
+
+.device-discovery-card__meta {
+  color: var(--lcl-color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--lcl-font-size-sm);
+  gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
+  line-height: var(--lcl-line-height-normal);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.device-discovery-card__metrics {
+  margin: 0;
+}
+
+.device-discovery-card.ble-candidate-item {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.device-discovery-card .ble-candidate-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
+}
+
+.device-discovery-card .ble-candidate-main strong,
+.device-discovery-card .ble-candidate-main span {
+  font-size: var(--lcl-font-size-sm);
+  line-height: var(--lcl-line-height-normal);
+}
+
+@media (max-width: 30rem) {
+  .device-discovery-card {
+    padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+  }
+
+  .device-discovery-card__primary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .device-discovery-card__action,
+  .ble-candidate-action,
+  .shelly-scan-result__add {
+    justify-self: end;
+    width: auto;
+  }
+}
