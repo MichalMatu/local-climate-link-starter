@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-installation-missing-page-chrome-v146",
+  "task_digest": "6350905e23eaf25f36fc5ef8ba2f620a395c2ffff4605e295c93ae871a636cf9",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T16:08:48.231614+00:00",
+  "attempt_id": "6f2e68655582d6d0b52f1957",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 14350,
+  "updated_at": "2026-09-19T16:08:48.231681+00:00",
+  "pid": 14350
+}
