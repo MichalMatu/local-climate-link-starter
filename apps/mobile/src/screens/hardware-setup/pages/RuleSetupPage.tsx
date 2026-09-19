@@ -26,6 +26,7 @@ import {
 import { useToastQueue } from '../useToastQueue.js';
 import { RuleAdvancedSettingsInline } from './RuleAdvancedSettingsInline.js';
 import { stripTrailingUnit } from './formUnits.js';
+import { correctedOffThresholdInput } from './ruleThresholdPair.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 const formatCompactSensorMetric = (
@@ -265,6 +266,29 @@ export const RuleSetupPage = ({
     flow.safeRelayTestMutation.mutate();
   };
 
+  const setOnThresholdWithAutoGap = (value: string) => {
+    flow.setOnThresholdInput(value);
+    const correctedOff = correctedOffThresholdInput({
+      direction,
+      onThresholdInput: value,
+      offThresholdInput: flow.offThresholdInput
+    });
+    if (correctedOff !== null) {
+      flow.setOffThresholdInput(correctedOff);
+    }
+  };
+
+  const normalizeOffThreshold = () => {
+    const correctedOff = correctedOffThresholdInput({
+      direction,
+      onThresholdInput: flow.onThresholdInput,
+      offThresholdInput: flow.offThresholdInput
+    });
+    if (correctedOff !== null) {
+      flow.setOffThresholdInput(correctedOff);
+    }
+  };
+
   const closeRelayTestModal = () => {
     if (flow.safeRelayTestMutation.isPending) {
       return;
@@ -359,7 +383,7 @@ export const RuleSetupPage = ({
               type="number"
               step="0.1"
               value={flow.onThresholdInput}
-              onChange={(event) => flow.setOnThresholdInput(event.currentTarget.value)}
+              onChange={(event) => setOnThresholdWithAutoGap(event.currentTarget.value)}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               {copy.unit}
@@ -377,6 +401,7 @@ export const RuleSetupPage = ({
               step="0.1"
               value={flow.offThresholdInput}
               onChange={(event) => flow.setOffThresholdInput(event.currentTarget.value)}
+              onBlur={normalizeOffThreshold}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               {copy.unit}
