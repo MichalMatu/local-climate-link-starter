@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git diff --check; git add -A; git commit -m 'Move installation tools into page tree'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
-  "pid": 41817,
+  "command": "pnpm android:phone-alpha",
+  "pid": 42238,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T10:36:37.571814+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-19T10:36:43.199639+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-page-tree-shell-v113",
@@ -18,5 +18,5 @@
   "task_digest": "8af8b6356e773aea1bcc823b51eb89705239c08dd9f4a81650000b535854030a",
   "daemon_version": "4.18.22",
   "daemon_pid": 29500,
-  "updated_at": "2026-09-19T10:36:37.589755+00:00"
+  "updated_at": "2026-09-19T10:36:43.277702+00:00"
 }
