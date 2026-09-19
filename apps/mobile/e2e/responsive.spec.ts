@@ -1036,3 +1036,68 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
     .toContain('m: xiaomi-bthome-minimal');
   expect(consoleProblems).toEqual([]);
 });
+
+test('keeps app toasts anchored above bottom navigation at every viewport', async ({
+  page
+}) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], {
+    origin: e2eOrigin
+  });
+  await seedDraft(page);
+  await mockShellyRpc(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/admin#rule');
+  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+  await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
+  await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
+
+  for (const viewport of viewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.getByRole('button', { name: 'Shelly Script' }).click();
+
+    const scriptDialog = page.getByRole('dialog', { name: 'Shelly Script' });
+    await scriptDialog.getByRole('button', { name: 'Kopiuj skrypt' }).click();
+    await expect(page.getByText('Skopiowano skrypt.')).toBeVisible();
+    await scriptDialog.getByRole('button', { name: 'Zamknij' }).click();
+
+    const toastViewport = page.locator('.lcl-toast-viewport');
+    await expect(toastViewport).toBeVisible();
+    await expect(page.locator('#app-toast-host > .lcl-toast-viewport')).toHaveCount(1);
+    await expect(
+      page.locator('.app-root-shell__content .lcl-toast-viewport')
+    ).toHaveCount(0);
+
+    const geometry = await page.evaluate(() => {
+      const toast = document.querySelector<HTMLElement>('.lcl-toast-viewport');
+      const nav = document.querySelector<HTMLElement>('.app-bottom-nav');
+      if (!toast || !nav) return null;
+      const toastRect = toast.getBoundingClientRect();
+      const navRect = nav.getBoundingClientRect();
+      return {
+        toastBottom: toastRect.bottom,
+        toastLeft: toastRect.left,
+        toastRight: toastRect.right,
+        navTop: navRect.top,
+        viewportWidth: window.innerWidth
+      };
+    });
+
+    expect(geometry).not.toBeNull();
+    const gap = geometry!.navTop - geometry!.toastBottom;
+    expect(gap).toBeGreaterThanOrEqual(0);
+    expect(gap).toBeLessThanOrEqual(16);
+    expect(geometry!.toastLeft).toBeGreaterThanOrEqual(0);
+    expect(geometry!.toastRight).toBeLessThanOrEqual(geometry!.viewportWidth);
+
+    const screenshotDir = process.env.LCL_TOAST_SCREENSHOT_DIR;
+    if (screenshotDir) {
+      await page.screenshot({
+        path: `${screenshotDir}/toast-${viewport.name}-${viewport.width}x${viewport.height}.png`,
+        fullPage: false
+      });
+    }
+
+    await page.locator('.lcl-toast__dismiss').click();
+    await expect(page.locator('.lcl-toast-viewport')).toHaveCount(0);
+  }
+});

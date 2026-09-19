@@ -1,16 +1,11 @@
-import {
-  FeedbackPanel,
-  Modal,
-  ToastViewport,
-  type ToastMessage,
-  type ToastTone
-} from '@lcl/ui';
+import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { IconCode } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { AppPageBack } from '../components/AppPageBack.js';
+import { AppToastViewport } from '../components/AppToastViewport.js';
 import { EditablePlugName } from '../components/EditablePlugName.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
@@ -451,7 +446,7 @@ const InstalledAutomationDetail = ({
         </FeedbackPanel>
       </Modal>
 
-      <ToastViewport
+      <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
         toasts={toasts}

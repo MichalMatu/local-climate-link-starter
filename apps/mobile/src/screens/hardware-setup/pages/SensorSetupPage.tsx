@@ -1,6 +1,7 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
-import { Modal, ToastViewport } from '@lcl/ui';
+import { Modal } from '@lcl/ui';
+import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus, IconTemperature } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -307,7 +308,7 @@ export const SensorSetupPage = ({
             </div>
           </section>
         )}
-        <ToastViewport
+        <AppToastViewport
           dismissLabel={t('toast.dismiss')}
           label={t('toast.regionLabel')}
           toasts={toasts}
@@ -374,7 +375,7 @@ export const SensorSetupPage = ({
       >
         <p>{t('hardware.sensor.deleteDescription')}</p>
       </Modal>
-      <ToastViewport
+      <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
         toasts={toasts}

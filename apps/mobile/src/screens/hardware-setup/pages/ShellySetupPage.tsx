@@ -1,5 +1,6 @@
 import type { ShellySetupFlow } from '../pageContracts.js';
-import { InfoLabel, Modal, ToastViewport } from '@lcl/ui';
+import { InfoLabel, Modal } from '@lcl/ui';
+import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -661,7 +662,7 @@ export const ShellySetupPage = ({
           ))}
         </div>
       )}
-      <ToastViewport
+      <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
         toasts={toasts}

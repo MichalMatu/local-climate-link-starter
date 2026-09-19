@@ -1,15 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  FeedbackPanel,
-  Modal,
-  ToastViewport,
-  type ToastMessage,
-  type ToastTone
-} from '@lcl/ui';
+import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { AppPageBack } from '../components/AppPageBack.js';
+import { AppToastViewport } from '../components/AppToastViewport.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
@@ -327,7 +322,7 @@ export const TimeInstallationDetail = ({
         </FeedbackPanel>
       </Modal>
 
-      <ToastViewport
+      <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
         toasts={toasts}

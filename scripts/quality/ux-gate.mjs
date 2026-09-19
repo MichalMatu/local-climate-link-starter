@@ -120,6 +120,8 @@ const checkBottomNavigationShell = async () => {
   }
 
   const shellSource = await readRepoFile(shellPath);
+  const toastViewportPath = 'apps/mobile/src/components/AppToastViewport.tsx';
+  const toastViewportSource = await readRepoFile(toastViewportPath);
   if (
     !shellSource.includes('<AppBottomNavigation') ||
     !shellSource.includes('app-bottom-nav-shell')
@@ -135,11 +137,34 @@ const checkBottomNavigationShell = async () => {
       'root AppShell must isolate scrollable page content from bottom navigation'
     );
   }
+  if (
+    !shellSource.includes('APP_TOAST_HOST_ID') ||
+    !shellSource.includes('app-toast-host') ||
+    !toastViewportSource.includes('createPortal(viewport, host)')
+  ) {
+    addFailure(
+      shellPath,
+      'root AppShell must own the portal target for all app toast viewports'
+    );
+  }
+
+  for (const path of tsxPaths) {
+    if (!path.startsWith('apps/mobile/src/screens/')) continue;
+    const source = await readRepoFile(path);
+    if (source.includes('<ToastViewport')) {
+      addFailure(
+        path,
+        'mobile screens must use AppToastViewport so fixed toasts cannot be trapped by filtered/transformed surfaces'
+      );
+    }
+  }
   const navCssPath = 'apps/mobile/src/components/AppBottomNavigation.css';
   const navCss = await readRepoFile(navCssPath);
   if (
     !navCss.includes('grid-template-rows: minmax(0, 1fr) auto') ||
     !navCss.includes('.app-root-shell__content') ||
+    !navCss.includes('.app-toast-host') ||
+    !navCss.includes('.app-bottom-nav-shell .lcl-toast-viewport') ||
     !navCss.includes('overflow-y: auto')
   ) {
     addFailure(
@@ -262,8 +287,8 @@ const checkFeedbackContractPatterns = async () => {
       );
     }
 
-    if (source.includes('pushToast(') && !source.includes('<ToastViewport')) {
-      addFailure(path, 'pushToast usage must render the shared ToastViewport');
+    if (source.includes('pushToast(') && !source.includes('<AppToastViewport')) {
+      addFailure(path, 'pushToast usage must render the app-hosted AppToastViewport');
     }
   }
 

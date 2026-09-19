@@ -1,4 +1,5 @@
-import { FeedbackPanel, ScriptPreview, ToastViewport, type ToastMessage } from '@lcl/ui';
+import { FeedbackPanel, ScriptPreview, type ToastMessage } from '@lcl/ui';
+import { AppToastViewport } from '../components/AppToastViewport.js';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
@@ -113,7 +114,7 @@ export const InstallationScriptScreen = ({
         )}
       </section>
 
-      <ToastViewport
+      <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
         toasts={toasts}

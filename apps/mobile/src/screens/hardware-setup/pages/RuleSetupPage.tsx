@@ -1,16 +1,10 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
 import { IconDeviceMobile, IconPlug } from '@tabler/icons-react';
-import {
-  FeedbackPanel,
-  InfoLabel,
-  Modal,
-  ScriptPreview,
-  SelectField,
-  ToastViewport
-} from '@lcl/ui';
+import { FeedbackPanel, InfoLabel, Modal, ScriptPreview, SelectField } from '@lcl/ui';
 import type { ThresholdDirection, RulePresetId } from '@lcl/automation-core';
 import { useCallback, useId, useState } from 'react';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
+import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import {
   useTranslation,
   type Translate,
@@ -577,7 +571,7 @@ export const RuleSetupPage = ({
           />
         )}
       </Modal>
-      <ToastViewport
+      <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
         toasts={toasts}
