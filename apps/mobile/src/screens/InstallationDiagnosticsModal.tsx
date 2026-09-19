@@ -1,5 +1,5 @@
 import { DiagnosticRow, Modal } from '@lcl/ui';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import {
@@ -33,28 +33,6 @@ const formatNumber = (
   missing: string,
   digits = 1
 ): string => (value == null ? missing : `${value.toFixed(digits)}${suffix}`);
-
-type TechnicalGroupProps = {
-  title: string;
-  description: string;
-  defaultOpen?: boolean;
-  children: ReactNode;
-};
-
-const TechnicalGroup = ({
-  title,
-  description,
-  defaultOpen = false,
-  children
-}: TechnicalGroupProps) => (
-  <details className="diagnostic-group" open={defaultOpen || undefined}>
-    <summary>
-      <strong>{title}</strong>
-      <span>{description}</span>
-    </summary>
-    <div className="status-stack diagnostic-group__rows">{children}</div>
-  </details>
-);
 
 type InstallationDiagnosticsModalProps = {
   installation: ClimateInstalledAutomation;
@@ -102,8 +80,7 @@ export const InstallationDiagnosticsModal = ({
     <Modal
       closeLabel={t('common.close')}
       open={open}
-      size="workspace"
-      title={`${t('common.diagnostics')} · ${installation.shelly.name}`}
+      title={t('common.diagnostics')}
       onClose={onClose}
     >
       {diagnosticsQuery.isPending && (
@@ -117,75 +94,78 @@ export const InstallationDiagnosticsModal = ({
         </p>
       )}
       {snapshot && diagnostics && (
-        <div className="diagnostic-groups">
-          <TechnicalGroup
-            defaultOpen
-            title={t('hardware.diagnostics.groupRuntime')}
-            description={t('hardware.diagnostics.groupRuntimeHint')}
+        <div className="installation-diagnostics">
+          <section
+            className="installation-diagnostics__section"
+            aria-label={t('hardware.rule.script')}
           >
-            <DiagnosticRow
-              label={t('hardware.rule.script')}
-              value={
-                script?.running === true
-                  ? t('hardware.status.running')
-                  : script?.running === false
-                    ? t('hardware.diagnostics.scriptMissingConfirm')
-                    : missing
-              }
-              tone={script?.running === false ? 'warning' : 'normal'}
-            />
-            <DiagnosticRow
-              label={t('hardware.diagnostics.scriptRpcState')}
-              value={
-                resources?.script?.running === true
-                  ? 'RUNNING'
-                  : resources?.script?.running === false
-                    ? 'STOPPED'
-                    : missing
-              }
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.configHash')}
-              value={script?.configHash ?? missing}
-            />
-            <DiagnosticRow
-              label={t('hardware.diagnostics.scriptMemUsed')}
-              value={formatBytes(resources?.script?.memUsedBytes, missing)}
-            />
-            <DiagnosticRow
-              label={t('hardware.diagnostics.scriptMemPeak')}
-              value={formatBytes(resources?.script?.memPeakBytes, missing)}
-            />
-            <DiagnosticRow
-              label={t('hardware.diagnostics.scriptMemFree')}
-              value={formatBytes(resources?.script?.memFreeBytes, missing)}
-            />
-            <DiagnosticRow
-              label={t('hardware.diagnostics.scriptCpu')}
-              value={formatNumber(resources?.script?.cpuPercent, '%', missing, 1)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.snapshotAge')}
-              value={snapshotAge}
-            />
-          </TechnicalGroup>
-          <TechnicalGroup
-            title={t('hardware.diagnostics.groupShelly')}
-            description={t('hardware.diagnostics.groupShellyHint')}
-          >
-            <DiagnosticRow
-              label={t('hardware.diagnostics.deviceRamFree')}
-              value={formatBytes(resources?.system?.ramFreeBytes, missing)}
-            />
-            <DiagnosticRow
-              label={t('hardware.diagnostics.deviceRamTotal')}
-              value={formatBytes(resources?.system?.ramSizeBytes, missing)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.clockShelly')}
-              value={snapshot.time.localTime ?? missing}
-            />
-          </TechnicalGroup>
+            <h3>{t('hardware.rule.script')}</h3>
+            <div className="installation-diagnostics__rows">
+              <DiagnosticRow
+                label={t('hardware.rule.script')}
+                value={
+                  script?.running === true
+                    ? t('hardware.status.running')
+                    : script?.running === false
+                      ? t('hardware.diagnostics.scriptMissingConfirm')
+                      : missing
+                }
+                tone={script?.running === false ? 'warning' : 'normal'}
+              />
+              <DiagnosticRow
+                label={t('hardware.diagnostics.scriptRpcState')}
+                value={
+                  resources?.script?.running === true
+                    ? 'RUNNING'
+                    : resources?.script?.running === false
+                      ? 'STOPPED'
+                      : missing
+                }
+              />
+              <DiagnosticRow
+                label={t('hardware.metrics.configHash')}
+                value={script?.configHash ?? missing}
+              />
+              <DiagnosticRow
+                label={t('hardware.diagnostics.scriptCpu')}
+                value={formatNumber(resources?.script?.cpuPercent, '%', missing, 1)}
+              />
+              <DiagnosticRow
+                label={t('hardware.diagnostics.scriptMemUsed')}
+                value={formatBytes(resources?.script?.memUsedBytes, missing)}
+              />
+              <DiagnosticRow
+                label={t('hardware.diagnostics.scriptMemPeak')}
+                value={formatBytes(resources?.script?.memPeakBytes, missing)}
+              />
+              <DiagnosticRow
+                label={t('hardware.diagnostics.scriptMemFree')}
+                value={formatBytes(resources?.script?.memFreeBytes, missing)}
+              />
+              <DiagnosticRow
+                label={t('hardware.metrics.snapshotAge')}
+                value={snapshotAge}
+              />
+            </div>
+          </section>
+
+          <section className="installation-diagnostics__section" aria-label="Shelly">
+            <h3>Shelly</h3>
+            <div className="installation-diagnostics__rows">
+              <DiagnosticRow
+                label={t('hardware.diagnostics.deviceRamFree')}
+                value={formatBytes(resources?.system?.ramFreeBytes, missing)}
+              />
+              <DiagnosticRow
+                label={t('hardware.diagnostics.deviceRamTotal')}
+                value={formatBytes(resources?.system?.ramSizeBytes, missing)}
+              />
+              <DiagnosticRow
+                label={t('hardware.metrics.clockShelly')}
+                value={snapshot.time.localTime ?? missing}
+              />
+            </div>
+          </section>
         </div>
       )}
     </Modal>

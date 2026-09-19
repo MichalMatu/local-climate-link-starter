@@ -431,15 +431,27 @@ describe('InstallationDetailScreen', () => {
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
-  it('opens auto-refreshing scoped technical diagnostics in the shared workspace', async () => {
+  it('opens compact auto-refreshing technical diagnostics without progressive disclosure', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
     renderDetail(saved.id);
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka · Salon' });
-    expect(dialog).toHaveClass('lcl-modal--workspace');
+    const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka' });
+    expect(dialog).toHaveClass('lcl-modal--default');
+    expect(dialog).not.toHaveClass('lcl-modal--workspace');
+    expect(
+      within(dialog).getByRole('heading', { name: 'Skrypt', level: 3 })
+    ).toBeVisible();
+    expect(
+      within(dialog).getByRole('heading', { name: 'Shelly', level: 3 })
+    ).toBeVisible();
+    expect(within(dialog).queryAllByRole('group')).toHaveLength(0);
+    expect(dialog.querySelectorAll('details')).toHaveLength(0);
+    expect(
+      within(dialog).queryByText('Stan skryptu, hash konfiguracji i zegar Shelly.')
+    ).toBeNull();
     expect(within(dialog).queryByRole('button', { name: 'Odśwież' })).toBeNull();
     expect(await within(dialog).findByText('JS użyte teraz')).toBeVisible();
     expect(within(dialog).getByText('CPU skryptu')).toBeVisible();
@@ -466,7 +478,7 @@ describe('InstallationDetailScreen', () => {
       { timeout: INSTALLATION_DIAGNOSTICS_REFRESH_MS + 2000 }
     );
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
-    expect(screen.queryByRole('dialog', { name: 'Diagnostyka · Salon' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Diagnostyka' })).toBeNull();
   });
 
   it('shows the current deployed script for the saved climate automation', async () => {

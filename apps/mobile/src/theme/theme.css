@@ -3033,3 +3033,28 @@ select {
   border-top: 0;
   padding-top: 0;
 }
+
+.installation-diagnostics {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+}
+
+.installation-diagnostics__section {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+}
+
+.installation-diagnostics__section + .installation-diagnostics__section {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding-top: var(--lcl-spacing-md);
+}
+
+.installation-diagnostics__section h3 {
+  font-size: var(--lcl-font-size-md);
+  line-height: var(--lcl-line-height-compact);
+  margin: 0;
+}
+
+.installation-diagnostics__rows .lcl-diagnostic-row:last-child {
+  border-bottom: 0;
+}
