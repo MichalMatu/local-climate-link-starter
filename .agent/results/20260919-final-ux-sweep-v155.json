@@ -1,0 +1,9 @@
+{
+  "id": "20260919-final-ux-sweep-v155",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-19T17:00:55.212106+00:00",
+  "daemon_version": "4.18.22",
+  "error": "JSONDecodeError: Invalid \\escape: line 12 column 566 (char 1137)"
+}
