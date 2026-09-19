@@ -1,0 +1,9 @@
+{
+  "id": "20260919-docs-checkpoint-v139",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-19T15:11:17.904283+00:00",
+  "daemon_version": "4.18.22",
+  "error": "ValueError: resources must be declared explicitly"
+}
