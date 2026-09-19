@@ -80,16 +80,13 @@ export const InstallationDetailScreen = ({
   if (!installation) {
     return (
       <main className="demo-shell installation-detail-shell">
-        <header className="demo-header installation-detail-header">
-          <div>
-            <p className="demo-kicker">Local Climate Link</p>
+        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
+        <section className="automation-card installation-detail-identity">
+          <div className="installation-detail-identity__copy">
             <h1>{t('detail.notFoundTitle')}</h1>
-            <p>{t('detail.notFoundDescription')}</p>
+            <p className="installation-detail-note">{t('detail.notFoundDescription')}</p>
           </div>
-          <button className="secondary-action" type="button" onClick={onBack}>
-            {t('detail.backToDashboard')}
-          </button>
-        </header>
+        </section>
       </main>
     );
   }

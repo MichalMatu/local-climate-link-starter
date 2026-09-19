@@ -381,11 +381,58 @@ describe('InstallationDetailScreen', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows a stable not-found route instead of falling back to another installation', () => {
-    renderDetail('missing-installation');
+  it('shows a stable not-found child page instead of falling back to another installation', () => {
+    const onBack = vi.fn();
+    renderDetail('missing-installation', onBack);
+
     expect(
       screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
     ).toBeVisible();
+    expect(screen.queryByText('Local Climate Link')).toBeNull();
+    const back = screen.getByRole('button', { name: '‹ Gniazdka' });
+    expect(back).toBeVisible();
+    fireEvent.click(back);
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps missing diagnostics and script routes in the same child-page chrome', () => {
+    const diagnosticsBack = vi.fn();
+    const diagnostics = render(
+      <I18nProvider>
+        <InstallationDiagnosticsScreen
+          installationId="missing-installation"
+          onBack={diagnosticsBack}
+        />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
+    expect(diagnosticsBack).toHaveBeenCalledTimes(1);
+    diagnostics.unmount();
+
+    const scriptBack = vi.fn();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
+    });
+    render(
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <InstallationScriptScreen
+            installationId="missing-installation"
+            onBack={scriptBack}
+          />
+        </QueryClientProvider>
+      </I18nProvider>
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
+    expect(scriptBack).toHaveBeenCalledTimes(1);
   });
 
   it('shows unique diagnostic detail without duplicating dashboard controls or climate values', async () => {

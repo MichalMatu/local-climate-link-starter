@@ -53,11 +53,7 @@ export const InstallationDiagnosticsScreen = ({
   if (!installation || installation.kind !== 'climate') {
     return (
       <main className="demo-shell installation-detail-shell">
-        <div className="setup-context">
-          <button className="setup-context__back" type="button" onClick={onBack}>
-            {t('detail.backToDashboard')}
-          </button>
-        </div>
+        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
         <section className="automation-card">
           <h1>{t('detail.notFoundTitle')}</h1>
         </section>
