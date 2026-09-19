@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 19138,
+  "command": "set -euo pipefail; adb shell am force-stop link.localclimate.app; adb logcat -c; adb shell am start -W -n link.localclimate.app/.MainActivity; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+  "pid": 20058,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T16:10:47.085999+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-19T16:11:18.411614+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-installation-missing-page-chrome-v146",
@@ -18,5 +18,5 @@
   "task_digest": "6350905e23eaf25f36fc5ef8ba2f620a395c2ffff4605e295c93ae871a636cf9",
   "daemon_version": "4.18.22",
   "daemon_pid": 14350,
-  "updated_at": "2026-09-19T16:10:47.155573+00:00"
+  "updated_at": "2026-09-19T16:11:18.469605+00:00"
 }
