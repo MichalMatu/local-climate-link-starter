@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 7,
-  "command": "pnpm android:phone-alpha",
-  "pid": 42238,
+  "command": "set -euo pipefail; adb shell am force-stop link.localclimate.app; adb logcat -c; adb shell am start -W -n link.localclimate.app/.MainActivity; adb shell dumpsys package link.localclimate.app | grep -E 'versionName=|versionCode=' | head -n 2; adb shell pidof link.localclimate.app; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; ! adb logcat -d -v brief '*:E' | grep -E 'FATAL EXCEPTION|ANR in link.localclimate.app'; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; test -z \"$(git status --porcelain)\"",
+  "pid": 43023,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T10:36:43.199639+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-09-19T10:37:14.183867+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-page-tree-shell-v113",
@@ -18,5 +18,5 @@
   "task_digest": "8af8b6356e773aea1bcc823b51eb89705239c08dd9f4a81650000b535854030a",
   "daemon_version": "4.18.22",
   "daemon_pid": 29500,
-  "updated_at": "2026-09-19T10:36:43.277702+00:00"
+  "updated_at": "2026-09-19T10:37:14.248666+00:00"
 }
