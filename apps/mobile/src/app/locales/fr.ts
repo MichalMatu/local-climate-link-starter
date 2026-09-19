@@ -543,7 +543,7 @@ export const fr = {
       rssiMinLabel: 'RSSI minimal dBm',
       ruleMode: 'Mode de règle',
       script: 'Script',
-      scriptPreview: 'Aperçu Shelly Script',
+      scriptPreview: 'Shelly Script',
       scriptPreviewAria: 'Afficher le script',
       scriptPreviewTitle: 'Afficher le Shelly Script généré',
       selectedShelly: 'Prise Shelly',

@@ -938,38 +938,43 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await seedDraft(page);
   await mockShellyRpc(page);
   await page.goto('/admin#rule');
-  await page.locator('.dashboard-fab').click();
+  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
   await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
-  await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
-  await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
+  await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
+    0
+  );
+  await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
 
-  await page.getByLabel('Tryb reguły').selectOption('humidifying');
+  await page.getByRole('button', { name: 'Tryb reguły' }).click();
+  await page.getByRole('option', { name: 'Nawilżanie' }).click();
 
   await expect(page.getByLabel('Włącz poniżej %')).toHaveValue('45');
   await expect(page.getByLabel('Wyłącz powyżej %')).toHaveValue('55');
-  await page.getByRole('button', { name: 'Podsumowanie reguły' }).click();
-  let summaryDialog = page.getByRole('dialog', { name: 'Podsumowanie reguły' });
+  const summaryTrigger = page.getByRole('button', { name: 'Podsumowanie reguły' });
+  await summaryTrigger.click();
+  let summaryPopover = page.getByRole('tooltip', { name: 'Podsumowanie reguły' });
   await expect(
-    summaryDialog.getByText(/Nawilżanie włączy się poniżej 45\.0%/)
+    summaryPopover.getByText(/Nawilżanie włączy się poniżej 45\.0%/)
   ).toBeVisible();
-  await summaryDialog.getByRole('button', { name: 'Zamknij' }).click();
-  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
-  let scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
+  await summaryTrigger.click();
+  await page.getByRole('button', { name: 'Shelly Script' }).click();
+  let scriptDialog = page.getByRole('dialog', { name: 'Shelly Script' });
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"m":1');
   await scriptDialog.getByRole('button', { name: 'Zamknij' }).click();
 
-  await page.getByLabel('Tryb reguły').selectOption('dehumidifying');
+  await page.getByRole('button', { name: 'Tryb reguły' }).click();
+  await page.getByRole('option', { name: 'Osuszanie' }).click();
 
   await expect(page.getByLabel('Włącz powyżej %')).toHaveValue('65');
   await expect(page.getByLabel('Wyłącz poniżej %')).toHaveValue('55');
-  await page.getByRole('button', { name: 'Podsumowanie reguły' }).click();
-  summaryDialog = page.getByRole('dialog', { name: 'Podsumowanie reguły' });
+  await summaryTrigger.click();
+  summaryPopover = page.getByRole('tooltip', { name: 'Podsumowanie reguły' });
   await expect(
-    summaryDialog.getByText(/Osuszanie włączy się powyżej 65\.0%/)
+    summaryPopover.getByText(/Osuszanie włączy się powyżej 65\.0%/)
   ).toBeVisible();
-  await summaryDialog.getByRole('button', { name: 'Zamknij' }).click();
-  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
-  scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
+  await summaryTrigger.click();
+  await page.getByRole('button', { name: 'Shelly Script' }).click();
+  scriptDialog = page.getByRole('dialog', { name: 'Shelly Script' });
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"m":1');
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"d":1');
   await scriptDialog.getByRole('button', { name: 'Zamknij' }).click();
@@ -985,20 +990,22 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await page.getByLabel('Brak odczytu przez min').fill('10');
   await page.getByLabel('Ponowne ON po min').fill('3');
   await page.getByLabel('Maksymalny czas pracy h').fill('3');
-  await page.getByRole('button', { name: 'Podsumowanie reguły' }).click();
-  summaryDialog = page.getByRole('dialog', { name: 'Podsumowanie reguły' });
+  await summaryTrigger.click();
+  summaryPopover = page.getByRole('tooltip', { name: 'Podsumowanie reguły' });
   await expect(
-    summaryDialog.getByText(/VPD assist uwzględni cel 1\.25 kPa/)
+    summaryPopover.getByText(/VPD assist uwzględni cel 1\.25 kPa/)
   ).toBeVisible();
-  await expect(summaryDialog.getByText(/Ponowne ON najwcześniej po 3 min/)).toBeVisible();
   await expect(
-    summaryDialog.getByText(/Sygnał termometru musi mieć co najmniej -80 dBm/)
+    summaryPopover.getByText(/Ponowne ON najwcześniej po 3 min/)
   ).toBeVisible();
-  await summaryDialog.getByRole('button', { name: 'Zamknij' }).click();
+  await expect(
+    summaryPopover.getByText(/Sygnał termometru musi mieć co najmniej -80 dBm/)
+  ).toBeVisible();
+  await summaryTrigger.click();
 
   await expectNoHorizontalOverflow(page);
-  await page.getByRole('button', { name: 'Podgląd Shelly Script' }).click();
-  scriptDialog = page.getByRole('dialog', { name: 'Podgląd Shelly Script' });
+  await page.getByRole('button', { name: 'Shelly Script' }).click();
+  scriptDialog = page.getByRole('dialog', { name: 'Shelly Script' });
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"vp":1.25');
   await expectScriptPreviewFillsModalBody(page, 'Wygenerowany skrypt');
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText('"r":-80');

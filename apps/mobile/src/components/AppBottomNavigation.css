@@ -30,8 +30,11 @@
 
 .app-bottom-nav {
   align-items: stretch;
+  -webkit-backdrop-filter: blur(var(--app-glass-blur)) saturate(140%);
+  backdrop-filter: blur(var(--app-glass-blur)) saturate(140%);
   background: var(--lcl-color-surface);
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  background: var(--app-glass-surface-strong);
+  border-top: var(--lcl-border-width-sm) solid var(--app-glass-border);
   box-shadow: var(--lcl-shadow-sm);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -73,4 +76,12 @@
 .app-bottom-nav__icon {
   height: var(--lcl-size-control-icon-size);
   width: var(--lcl-size-control-icon-size);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .app-bottom-nav {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--lcl-color-surface);
+  }
 }

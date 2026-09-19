@@ -308,8 +308,8 @@ const openSensorAddDialog = async () => {
 
 const openRuleScriptDialog = async () => {
   openRuleDeveloperTools();
-  fireEvent.click(screen.getByRole('button', { name: 'Podgląd Shelly Script' }));
-  return screen.findByRole('dialog', { name: 'Podgląd Shelly Script' });
+  fireEvent.click(screen.getByRole('button', { name: 'Shelly Script' }));
+  return screen.findByRole('dialog', { name: 'Shelly Script' });
 };
 
 const closeCurrentAddPage = () => {
@@ -1757,7 +1757,7 @@ describe('HardwareSetupScreen', () => {
       screen.queryByText('Narzędzia deweloperskie', { selector: 'summary' })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole('dialog', { name: 'Podgląd Shelly Script' })
+      screen.queryByRole('dialog', { name: 'Shelly Script' })
     ).not.toBeInTheDocument();
     const advancedSection = openRuleDisclosure('Zaawansowane');
     expect(
@@ -1770,7 +1770,7 @@ describe('HardwareSetupScreen', () => {
       screen.queryByRole('dialog', { name: 'Opcje zaawansowane' })
     ).not.toBeInTheDocument();
     openRuleDeveloperTools();
-    expect(screen.getByRole('button', { name: 'Podgląd Shelly Script' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Shelly Script' })).toHaveAttribute(
       'title',
       'Pokaż wygenerowany Shelly Script'
     );

@@ -533,7 +533,7 @@ export const en = {
       rssiMinLabel: 'Minimum RSSI dBm',
       ruleMode: 'Rule mode',
       script: 'Script',
-      scriptPreview: 'Shelly Script preview',
+      scriptPreview: 'Shelly Script',
       scriptPreviewAria: 'Show script',
       scriptPreviewTitle: 'Show generated Shelly Script',
       selectedShelly: 'Shelly plug',

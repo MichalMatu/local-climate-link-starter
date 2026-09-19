@@ -1,6 +1,10 @@
 .lcl-card {
+  -webkit-backdrop-filter: blur(var(--app-glass-blur, 0px)) saturate(135%);
+  backdrop-filter: blur(var(--app-glass-blur, 0px)) saturate(135%);
   background: var(--lcl-color-surface);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  background: var(--app-glass-surface, var(--lcl-color-surface));
+  border: var(--lcl-border-width-sm) solid
+    var(--app-glass-border, var(--lcl-color-border));
   border-radius: var(--lcl-radius-md);
   box-shadow: var(--lcl-shadow-sm);
   color: var(--lcl-color-text);
@@ -189,6 +193,10 @@
 }
 
 .lcl-info-label__text {
+  align-items: center;
+  display: inline-flex;
+  line-height: var(--lcl-line-height-compact);
+  min-height: var(--lcl-size-toast-dismiss-size);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -502,6 +510,8 @@
 
 .lcl-modal-backdrop {
   align-items: center;
+  -webkit-backdrop-filter: blur(var(--lcl-spacing-xs));
+  backdrop-filter: blur(var(--lcl-spacing-xs));
   background: var(--lcl-color-overlay);
   display: flex;
   inset: 0;
@@ -512,22 +522,26 @@
 }
 
 .lcl-modal {
+  -webkit-backdrop-filter: blur(var(--app-glass-blur, 0px)) saturate(135%);
+  backdrop-filter: blur(var(--app-glass-blur, 0px)) saturate(135%);
   background: var(--lcl-color-surface);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  background: var(--app-glass-surface-strong, var(--lcl-color-surface));
+  border: var(--lcl-border-width-sm) solid
+    var(--app-glass-border, var(--lcl-color-border));
   border-radius: var(--lcl-radius-lg);
   box-shadow: var(--lcl-shadow-lg);
   box-sizing: border-box;
   color: var(--lcl-color-text);
   display: grid;
   gap: var(--lcl-spacing-lg);
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  height: min(
+  grid-template-rows: auto minmax(0, auto) auto;
+  max-height: min(
     var(--lcl-size-modal-height),
     calc(
       100vh - var(--lcl-size-modal-viewport-inset) - var(--lcl-size-modal-viewport-inset)
     )
   );
-  height: min(
+  max-height: min(
     var(--lcl-size-modal-height),
     calc(
       100dvh - var(--lcl-size-modal-viewport-inset) - var(--lcl-size-modal-viewport-inset)
@@ -639,5 +653,19 @@
 
   .lcl-modal__close {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .lcl-card,
+  .lcl-modal {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--lcl-color-surface);
+  }
+
+  .lcl-modal-backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

@@ -533,7 +533,7 @@ export const ptBr = {
       rssiMinLabel: 'RSSI mínimo dBm',
       ruleMode: 'Modo da regra',
       script: 'Script',
-      scriptPreview: 'Prévia do Shelly Script',
+      scriptPreview: 'Shelly Script',
       scriptPreviewAria: 'Mostrar script',
       scriptPreviewTitle: 'Mostrar Shelly Script gerado',
       selectedShelly: 'Tomada Shelly',
