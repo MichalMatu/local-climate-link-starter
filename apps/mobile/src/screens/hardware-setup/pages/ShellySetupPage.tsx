@@ -1,5 +1,5 @@
 import type { ShellySetupFlow } from '../pageContracts.js';
-import { Modal, ToastViewport } from '@lcl/ui';
+import { InfoLabel, Modal, ToastViewport } from '@lcl/ui';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -39,6 +39,7 @@ type ShellySetupPageProps = HardwarePageProps<ShellySetupFlow> & {
   bleScanOnlyDeviceId?: string;
   onAddRequest?: () => void;
   onSettingsClose?: () => void;
+  onSettingsPageRequest?: (device: ShellyDraftDevice) => void;
   onBleScanPageRequest?: (device: ShellyDraftDevice) => void;
   onBleScanClose?: () => void;
 };
@@ -51,6 +52,7 @@ export const ShellySetupPage = ({
   bleScanOnlyDeviceId,
   onAddRequest,
   onSettingsClose,
+  onSettingsPageRequest,
   onBleScanPageRequest,
   onBleScanClose
 }: ShellySetupPageProps) => {
@@ -265,7 +267,7 @@ export const ShellySetupPage = ({
     );
 
   const openBleScanModal = (device: ShellyDraftDevice) => {
-    if (settingsOnlyDeviceId && onBleScanPageRequest) {
+    if (onBleScanPageRequest) {
       onBleScanPageRequest(device);
       return;
     }
@@ -299,6 +301,10 @@ export const ShellySetupPage = ({
   const openInfoModal = (device: ShellyDraftDevice) => {
     flow.checkShellyMutation.reset();
     flow.recheckShellyMutation.reset();
+    if (onSettingsPageRequest) {
+      onSettingsPageRequest(device);
+      return;
+    }
     setDialog({ kind: 'info', deviceId: device.id });
     flow.recheckShellyMutation.mutate(device);
   };
@@ -570,7 +576,15 @@ export const ShellySetupPage = ({
           <div className="installation-section-heading">
             <div>
               <h1>{t('hardware.shelly.scanBleTitle')}</h1>
-              <p>{bleScanOnlyShelly.name}</p>
+              <p>
+                <InfoLabel
+                  label={bleScanOnlyShelly.name}
+                  infoLabel={t('hardware.shelly.scanBleInfoLabel')}
+                  title={t('hardware.shelly.scanBleInfoTitle')}
+                >
+                  {t('hardware.shelly.scanBleInfo')}
+                </InfoLabel>
+              </p>
             </div>
           </div>
           <ShellyBleDiscoveryContent

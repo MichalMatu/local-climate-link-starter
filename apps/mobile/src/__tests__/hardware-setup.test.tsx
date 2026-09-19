@@ -244,6 +244,22 @@ const requestBody = (init?: RequestInit): { method?: string; params?: unknown } 
 const findBleScanCandidate = async (dialog: HTMLElement, mac = 'A4:C1:38:4F:24:CD') =>
   within(dialog).findByText(mac, undefined, { timeout: 3000 });
 
+const findShellySettingsPage = async (name: string) => {
+  const heading = await screen.findByRole('heading', { name });
+  const page = heading.closest('.plug-settings-page');
+  expect(page).not.toBeNull();
+  expect(screen.queryByRole('dialog', { name })).toBeNull();
+  return page as HTMLElement;
+};
+
+const findShellyBleScanPage = async () => {
+  const heading = await screen.findByRole('heading', { name: 'Skanuj termometry BLE' });
+  const page = heading.closest('.plug-ble-discovery-page');
+  expect(page).not.toBeNull();
+  expect(screen.queryByRole('dialog', { name: 'Skanuj termometry BLE' })).toBeNull();
+  return page as HTMLElement;
+};
+
 const createAbortableFetchMock = () => {
   let abortCount = 0;
   const fetchImpl = vi.fn(
@@ -771,6 +787,63 @@ describe('HardwareSetupScreen', () => {
     expect(onBackToIntent).toHaveBeenCalledTimes(1);
   });
 
+  it('opens saved Shelly settings and BLE discovery as nested child pages', async () => {
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'http://192.168.0.20/',
+      name: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptIdInput: '1'
+    });
+    renderHardwareSetup({ setupIntent: 'temperature', onBackToIntent: vi.fn() });
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
+
+    expect(screen.queryByRole('dialog', { name: 'Salon' })).toBeNull();
+    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Shelly' })).toBeVisible();
+    expect(screen.queryByRole('navigation', { name: 'Menu konfiguracji' })).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
+    );
+    expect(screen.queryByRole('dialog', { name: 'Skanuj termometry BLE' })).toBeNull();
+    expect(
+      await screen.findByRole('heading', { name: 'Skanuj termometry BLE' })
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Salon' })).toBeVisible();
+    expect(screen.queryByRole('navigation', { name: 'Menu konfiguracji' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '‹ Salon' }));
+    await waitFor(
+      () => {
+        const rpcBodies = vi
+          .mocked(fetch)
+          .mock.calls.map((call) => requestBody(call[1]))
+          .filter((body) => body.method);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Delete' &&
+              (body.params as { id?: number } | undefined)?.id === 4
+          )
+        ).toBe(true);
+        expect(
+          rpcBodies.some(
+            (body) =>
+              body.method === 'Script.Start' &&
+              (body.params as { id?: number } | undefined)?.id === 1
+          )
+        ).toBe(true);
+      },
+      { timeout: 5000 }
+    );
+    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    expect(screen.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
+  });
+
   it('keeps standalone device-add pages free of duplicate top navigation and titles', () => {
     const { unmount } = renderHardwareSetup({ plugAddOnly: true });
     expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
@@ -914,7 +987,7 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(
       within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
     );
-    const infoDialog = await screen.findByRole('dialog', { name: 'Salon testowy' });
+    const infoDialog = await findShellySettingsPage('Salon testowy');
     expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
     const shellyPanelLink = within(infoDialog).getByRole('link', {
       name: 'Otwórz panel Shelly: http://192.168.0.20/'
@@ -933,10 +1006,8 @@ describe('HardwareSetupScreen', () => {
       within(detailRows as HTMLElement).queryByText('Przekaźnik')
     ).not.toBeInTheDocument();
     expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
-    fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
-    expect(
-      screen.queryByRole('dialog', { name: 'Salon testowy' })
-    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    expect(document.querySelector('.plug-settings-page')).toBeNull();
 
     const firstCallUrl = rawRequestUrl(vi.mocked(fetch).mock.calls[0]?.[0] as URL);
     expect(firstCallUrl.pathname).toBe('/__lcl_shelly_proxy');
@@ -1097,7 +1168,7 @@ describe('HardwareSetupScreen', () => {
     ).toHaveClass('icon-action--danger');
 
     fireEvent.click(infoToggle);
-    const infoDialog = await screen.findByRole('dialog', { name: 'Przedpokój' });
+    const infoDialog = await findShellySettingsPage('Przedpokój');
     expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
     expect(
       within(infoDialog).getByRole('link', {
@@ -1114,7 +1185,7 @@ describe('HardwareSetupScreen', () => {
       within(detailRows as HTMLElement).queryByText('Przekaźnik')
     ).not.toBeInTheDocument();
     expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
-    fireEvent.click(within(infoDialog).getByRole('button', { name: 'Zamknij' }));
+    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
 
     const rpcMethods = vi
       .mocked(fetch)
@@ -1905,7 +1976,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByText('1.23 kWh')).toBeInTheDocument();
     expect(screen.getByText('09:31')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
-    const infoDialog = await screen.findByRole('dialog', { name: 'Salon' });
+    const infoDialog = await findShellySettingsPage('Salon');
     await waitFor(() =>
       expect(
         within(infoDialog).getByText('NTP').closest('.lcl-diagnostic-row')
@@ -2609,13 +2680,11 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     await openShellyBleScanFromSettings();
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     const bleInfoButton = within(dialog).getByRole('button', {
       name: 'Informacja o skanowaniu BLE'
     });
-    expect(bleInfoButton.closest('.lcl-modal__title-row')).not.toBeNull();
+    expect(bleInfoButton.closest('.installation-section-heading')).not.toBeNull();
     expect(bleInfoButton).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(bleInfoButton);
     expect(bleInfoButton).toHaveAttribute('aria-expanded', 'true');
@@ -2644,9 +2713,7 @@ describe('HardwareSetupScreen', () => {
       within(dialog).queryByRole('button', { name: 'Skanuj ponownie' })
     ).not.toBeInTheDocument();
 
-    const shellyBleBackdrop = document.querySelector('.lcl-modal-backdrop');
-    expect(shellyBleBackdrop).not.toBeNull();
-    fireEvent.click(shellyBleBackdrop!);
+    expect(document.querySelector('.lcl-modal-backdrop')).toBeNull();
     expect(dialog).toBeInTheDocument();
 
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
@@ -2655,12 +2722,10 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Zapisz termometr' }));
 
-    expect(
-      screen.getByRole('dialog', { name: 'Skanuj termometry BLE' })
-    ).toBeInTheDocument();
+    expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Już zapisany' })).toBeDisabled();
     expect(await screen.findByText('Zapisano termometr.')).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
+    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     expect(screen.getByText('31.2°C')).toBeInTheDocument();
     expect(
@@ -2731,9 +2796,7 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     await openShellyBleScanFromSettings();
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
     const rpcBodies = vi
@@ -2763,11 +2826,10 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     await openShellyBleScanFromSettings();
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
 
     await waitFor(() => {
@@ -2798,7 +2860,7 @@ describe('HardwareSetupScreen', () => {
       ).toBe(true);
     });
     expect(
-      screen.queryByRole('dialog', { name: 'Skanuj termometry BLE' })
+      screen.queryByRole('heading', { name: 'Skanuj termometry BLE' })
     ).not.toBeInTheDocument();
   });
 
@@ -2808,9 +2870,7 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     await openShellyBleScanFromSettings();
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
     window.dispatchEvent(new Event('pagehide'));
@@ -2888,9 +2948,7 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
     await openShellyBleScanFromSettings();
 
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     const firstAddress = await findBleScanCandidate(dialog);
     const firstItem = firstAddress.closest('article');
     expect(firstItem).not.toBeNull();
@@ -2965,9 +3023,7 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     await openShellyBleScanFromSettings();
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Skanuj ponownie' }));
@@ -3006,12 +3062,10 @@ describe('HardwareSetupScreen', () => {
     await addShellyThroughUi();
 
     await openShellyBleScanFromSettings();
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skanuj termometry BLE'
-    });
+    const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
+    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
 
     const bleStopError = await screen.findByText('Nie udało się zamknąć skanera BLE.');
     expect(bleStopError.closest('[role="status"]')).not.toBeNull();

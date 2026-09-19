@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { generateShellyBleDiscoveryScript } from '@lcl/script-generator';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { BleDiscoverySnapshot } from './schemas.js';
 import {
@@ -25,11 +25,20 @@ type StartBleDiscoveryResult = {
   snapshot: BleDiscoverySnapshot;
 };
 
+const stopBleDiscoverySession = (session: BleDiscoverySession): Promise<void> =>
+  stopShellyBleDiscovery(session.baseUrl, {
+    discoveryScriptId: session.discoveryScriptId,
+    automationScriptId: session.automationScriptId,
+    restartAutomation: session.automationWasRunning
+  });
+
 export const useShellyBleDiscoveryFlow = () => {
   const [bleDiscoverySession, setBleDiscoverySession] =
     useState<BleDiscoverySession | null>(null);
   const [bleDiscoverySnapshot, setBleDiscoverySnapshot] =
     useState<BleDiscoverySnapshot | null>(null);
+  const bleDiscoverySessionRef = useRef<BleDiscoverySession | null>(null);
+  const cleanupAfterStartRef = useRef(false);
 
   const startBleDiscoveryMutation = useMutation({
     mutationFn: async (device: ShellyDraftDevice): Promise<StartBleDiscoveryResult> => {
@@ -81,10 +90,21 @@ export const useShellyBleDiscoveryFlow = () => {
       }
     },
     onSuccess: ({ session, snapshot }) => {
+      if (cleanupAfterStartRef.current) {
+        cleanupAfterStartRef.current = false;
+        bleDiscoverySessionRef.current = null;
+        setBleDiscoverySession(null);
+        setBleDiscoverySnapshot(null);
+        void stopBleDiscoverySession(session).catch(() => undefined);
+        return;
+      }
+      bleDiscoverySessionRef.current = session;
       setBleDiscoverySession(session);
       setBleDiscoverySnapshot(snapshot);
     },
     onError: () => {
+      cleanupAfterStartRef.current = false;
+      bleDiscoverySessionRef.current = null;
       setBleDiscoverySession(null);
       setBleDiscoverySnapshot(null);
     }
@@ -105,16 +125,16 @@ export const useShellyBleDiscoveryFlow = () => {
   });
 
   const stopBleDiscoveryMutation = useMutation({
-    mutationFn: async (session: BleDiscoverySession): Promise<void> =>
-      stopShellyBleDiscovery(session.baseUrl, {
-        discoveryScriptId: session.discoveryScriptId,
-        automationScriptId: session.automationScriptId,
-        restartAutomation: session.automationWasRunning
-      }),
-    onSuccess: () => setBleDiscoverySession(null)
+    mutationFn: stopBleDiscoverySession,
+    onSuccess: () => {
+      bleDiscoverySessionRef.current = null;
+      setBleDiscoverySession(null);
+    }
   });
 
   const startBleDiscovery = (device: ShellyDraftDevice) => {
+    cleanupAfterStartRef.current = false;
+    bleDiscoverySessionRef.current = null;
     setBleDiscoverySnapshot(null);
     setBleDiscoverySession(null);
     refreshBleDiscoveryMutation.reset();
@@ -139,17 +159,27 @@ export const useShellyBleDiscoveryFlow = () => {
   };
 
   const stopBleDiscovery = () => {
-    if (!bleDiscoverySession || stopBleDiscoveryMutation.isPending) {
+    const session = bleDiscoverySessionRef.current;
+    if (!session) {
+      cleanupAfterStartRef.current = true;
       return;
     }
-    stopBleDiscoveryMutation.mutate(bleDiscoverySession);
+    if (stopBleDiscoveryMutation.isPending) {
+      return;
+    }
+    stopBleDiscoveryMutation.mutate(session);
   };
 
   const cleanupBleDiscovery = () => {
-    if (!bleDiscoverySession || stopBleDiscoveryMutation.isPending) {
+    const session = bleDiscoverySessionRef.current;
+    if (!session) {
+      cleanupAfterStartRef.current = true;
       return;
     }
-    stopBleDiscoveryMutation.mutate(bleDiscoverySession);
+    if (stopBleDiscoveryMutation.isPending) {
+      return;
+    }
+    stopBleDiscoveryMutation.mutate(session);
   };
 
   const resetBleDiscovery = () => {

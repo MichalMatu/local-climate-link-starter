@@ -51,6 +51,10 @@ type PrimaryHardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
 type HardwareTabId = PrimaryHardwareTabId;
 type SensorAddMode = 'manual' | 'phone-scan';
 type LocalAddPage = 'plug' | 'sensor' | null;
+type LocalShellyPage =
+  | { kind: 'settings'; deviceId: string }
+  | { kind: 'ble'; deviceId: string; returnTo: 'shelly' | 'settings' }
+  | null;
 
 const availableTabsForIntent = (
   setupIntent?: SetupIntent,
@@ -125,6 +129,7 @@ export const HardwareSetupScreen = ({
     currentTabFromHash(availableTabs)
   );
   const [localAddPage, setLocalAddPage] = useState<LocalAddPage>(null);
+  const [localShellyPage, setLocalShellyPage] = useState<LocalShellyPage>(null);
   const [localSensorAddMode, setLocalSensorAddMode] = useState<SensorAddMode>('manual');
   const selectableRulePresets = useMemo(
     () => rulePresetsForSetupIntent(setupIntent),
@@ -197,6 +202,58 @@ export const HardwareSetupScreen = ({
     setLocalAddPage(null);
   };
 
+  if (localShellyPage !== null) {
+    const localShelly = flow.shellyDevices.find(
+      (device) => device.id === localShellyPage.deviceId
+    );
+
+    if (localShellyPage.kind === 'settings') {
+      const closeSettings = () => setLocalShellyPage(null);
+      return (
+        <main className="demo-shell hardware-shell">
+          <AppPageBack label={t('hardware.nav.shelly')} onBack={closeSettings} />
+          <ShellySetupPage
+            flow={flow}
+            enableBleDiscovery={setupIntent !== 'time'}
+            settingsOnlyDeviceId={localShellyPage.deviceId}
+            onSettingsClose={closeSettings}
+            onBleScanPageRequest={(device) =>
+              setLocalShellyPage({
+                kind: 'ble',
+                deviceId: device.id,
+                returnTo: 'settings'
+              })
+            }
+          />
+        </main>
+      );
+    }
+
+    const closeBleScan = () =>
+      setLocalShellyPage(
+        localShellyPage.returnTo === 'settings'
+          ? { kind: 'settings', deviceId: localShellyPage.deviceId }
+          : null
+      );
+    return (
+      <main className="demo-shell hardware-shell">
+        <AppPageBack
+          label={
+            localShellyPage.returnTo === 'settings'
+              ? (localShelly?.name ?? t('hardware.nav.shelly'))
+              : t('hardware.nav.shelly')
+          }
+          onBack={closeBleScan}
+        />
+        <ShellySetupPage
+          flow={flow}
+          bleScanOnlyDeviceId={localShellyPage.deviceId}
+          onBleScanClose={closeBleScan}
+        />
+      </main>
+    );
+  }
+
   if (localAddPage !== null) {
     const isPlug = localAddPage === 'plug';
     return (
@@ -255,6 +312,18 @@ export const HardwareSetupScreen = ({
           enableBleDiscovery={setupIntent !== 'time'}
           addOnly={plugAddOnly}
           onAddRequest={openPlugAdd}
+          {...(!plugAddOnly && !sensorAddOnly
+            ? {
+                onSettingsPageRequest: (device) =>
+                  setLocalShellyPage({ kind: 'settings', deviceId: device.id }),
+                onBleScanPageRequest: (device) =>
+                  setLocalShellyPage({
+                    kind: 'ble',
+                    deviceId: device.id,
+                    returnTo: 'shelly'
+                  })
+              }
+            : {})}
         />
       )}
       {setupIntent !== 'time' && activeTab === 'sensor' && (
