@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core';
 import { DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { AppBottomNavigation } from '../components/AppBottomNavigation.js';
 import {
   getLocalePreference,
   localePreferenceChangeEvent,
@@ -34,8 +33,8 @@ export type SupportDiagnosticRow = {
 };
 
 type AppSettingsScreenProps = {
-  onOpenClimate(): void;
-  onOpenTime(): void;
+  onOpenClimate?: () => void;
+  onOpenTime?: () => void;
 };
 
 const localeLabelKeys: Record<Locale, TranslationKey> = {
@@ -64,10 +63,8 @@ const copyToClipboard = async (value: string): Promise<void> => {
   await navigator.clipboard.writeText(value);
 };
 
-export const AppSettingsScreen = ({
-  onOpenClimate,
-  onOpenTime
-}: AppSettingsScreenProps) => {
+export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
+  void _props;
   const { locale, t } = useTranslation();
   const platform = Capacitor.getPlatform();
   const [localePreference, setLocalePreferenceState] = useState<LocalePreference>(() =>
@@ -138,7 +135,7 @@ export const AppSettingsScreen = ({
   };
 
   return (
-    <main className="demo-shell app-settings-screen app-bottom-nav-shell">
+    <main className="demo-shell app-settings-screen">
       <header className="demo-header app-settings-screen__header app-page-header">
         <h1>{t('dashboard.settingsTab')}</h1>
       </header>
@@ -248,12 +245,6 @@ export const AppSettingsScreen = ({
           </div>
         </details>
       </div>
-
-      <AppBottomNavigation
-        activeKind="settings"
-        onOpenClimate={onOpenClimate}
-        onOpenTime={onOpenTime}
-      />
     </main>
   );
 };

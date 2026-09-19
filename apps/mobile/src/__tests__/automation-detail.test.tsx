@@ -21,7 +21,11 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
-import { INSTALLATION_DIAGNOSTICS_REFRESH_MS } from '../screens/InstallationDiagnosticsModal.js';
+import {
+  INSTALLATION_DIAGNOSTICS_REFRESH_MS,
+  InstallationDiagnosticsScreen
+} from '../screens/InstallationDiagnosticsScreen.js';
+import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
   new Response(JSON.stringify(payload), {
@@ -334,7 +338,9 @@ const renderDetail = (
   installationId: string,
   onBack = vi.fn(),
   onNavigateDashboard = vi.fn(),
-  onOpenSettings = vi.fn()
+  onOpenSettings = vi.fn(),
+  onOpenDiagnostics = vi.fn(),
+  onOpenScript = vi.fn()
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
@@ -343,6 +349,8 @@ const renderDetail = (
     onBack,
     onNavigateDashboard,
     onOpenSettings,
+    onOpenDiagnostics,
+    onOpenScript,
     ...render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
@@ -351,6 +359,8 @@ const renderDetail = (
             onBack={onBack}
             onNavigateDashboard={onNavigateDashboard}
             onOpenSettings={onOpenSettings}
+            onOpenDiagnostics={onOpenDiagnostics}
+            onOpenScript={onOpenScript}
           />
         </QueryClientProvider>
       </I18nProvider>
@@ -382,7 +392,7 @@ describe('InstallationDetailScreen', () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     installShellyFetchMock();
-    const { onBack, onNavigateDashboard, onOpenSettings } = renderDetail(saved.id);
+    renderDetail(saved.id);
 
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     const identityCard = screen
@@ -423,50 +433,40 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByText('55.2%')).toBeNull();
     expect(screen.queryByText('1.31 kPa')).toBeNull();
     expect(screen.queryByText('19°C / 20°C')).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(onNavigateDashboard).toHaveBeenCalledWith('time');
-    expect(onBack).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
-    expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
-  it('opens compact auto-refreshing technical diagnostics without progressive disclosure', async () => {
+  it('opens technical diagnostics as a child page and keeps auto-refreshing there', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
-    renderDetail(saved.id);
+    const onOpenDiagnostics = vi.fn();
+    const detail = renderDetail(saved.id, vi.fn(), vi.fn(), vi.fn(), onOpenDiagnostics);
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka' });
-    expect(dialog).toHaveClass('lcl-modal');
-    expect(dialog.className).toBe('lcl-modal');
+    expect(onOpenDiagnostics).toHaveBeenCalledTimes(1);
+    detail.unmount();
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
+    });
+    render(
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <InstallationDiagnosticsScreen installationId={saved.id} onBack={vi.fn()} />
+        </QueryClientProvider>
+      </I18nProvider>
+    );
+
+    expect(await screen.findByRole('heading', { name: 'Diagnostyka' })).toBeVisible();
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(
-      within(dialog).getByRole('heading', { name: 'Skrypt', level: 3 })
+      await screen.findByRole('heading', { name: 'Skrypt', level: 2 })
     ).toBeVisible();
-    expect(
-      within(dialog).getByRole('heading', { name: 'Shelly', level: 3 })
-    ).toBeVisible();
-    expect(within(dialog).queryAllByRole('group')).toHaveLength(0);
-    expect(dialog.querySelectorAll('details')).toHaveLength(0);
-    expect(
-      within(dialog).queryByText('Stan skryptu, hash konfiguracji i zegar Shelly.')
-    ).toBeNull();
-    expect(within(dialog).queryByRole('button', { name: 'Odśwież' })).toBeNull();
-    expect(await within(dialog).findByText('JS użyte teraz')).toBeVisible();
-    expect(within(dialog).getByText('CPU skryptu')).toBeVisible();
-    expect(within(dialog).getByText('RAM Shelly wolny')).toBeInTheDocument();
-    expect(within(dialog).getByText('Stan skryptu RPC')).toBeVisible();
-    expect(within(dialog).queryByText('Temperatura', { exact: true })).toBeNull();
-    expect(within(dialog).queryByText('Wilgotność', { exact: true })).toBeNull();
-    expect(within(dialog).queryByText('VPD', { exact: true })).toBeNull();
-    expect(
-      within(dialog).queryByText('Aktywne progi ON / OFF', { exact: true })
-    ).toBeNull();
-    expect(within(dialog).queryByText('Wyjście', { exact: true })).toBeNull();
-    expect(within(dialog).queryByText('Bateria', { exact: true })).toBeNull();
-    expect(within(dialog).queryByText('RSSI', { exact: true })).toBeNull();
-    expect(within(dialog).queryByText('Prąd', { exact: true })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Shelly', level: 2 })).toBeVisible();
+    expect(await screen.findByText('JS użyte teraz')).toBeVisible();
+    expect(screen.getByText('CPU skryptu')).toBeVisible();
+    expect(screen.getByText('RAM Shelly wolny')).toBeInTheDocument();
+    expect(screen.getByText('Stan skryptu RPC')).toBeVisible();
     await waitFor(() => expect(rpcMethods).toContain('Script.GetStatus'));
     expect(rpcMethods).toContain('Sys.GetStatus');
     const before = rpcMethods.filter((method) => method === 'Script.GetStatus').length;
@@ -477,28 +477,46 @@ describe('InstallationDetailScreen', () => {
         ).toBeGreaterThan(before),
       { timeout: INSTALLATION_DIAGNOSTICS_REFRESH_MS + 2000 }
     );
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Zamknij' }));
-    expect(screen.queryByRole('dialog', { name: 'Diagnostyka' })).toBeNull();
   });
 
-  it('shows the current deployed script for the saved climate automation', async () => {
+  it('opens the deployed script as a child page instead of a modal', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
-
-    renderDetail(saved.id);
+    const onOpenScript = vi.fn();
+    const detail = renderDetail(
+      saved.id,
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      onOpenScript
+    );
 
     const showScript = await screen.findByRole('button', {
       name: 'Pokaż wdrożony skrypt'
     });
     await waitFor(() => expect(showScript).toBeEnabled());
-
     fireEvent.click(showScript);
+    expect(onOpenScript).toHaveBeenCalledTimes(1);
+    detail.unmount();
 
-    const dialog = await screen.findByRole('dialog', {
-      name: 'Skrypt wdrożony w Shelly'
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
     });
-    expect(await within(dialog).findByText('// deployed exact source')).toBeVisible();
+    render(
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <InstallationScriptScreen installationId={saved.id} onBack={vi.fn()} />
+        </QueryClientProvider>
+      </I18nProvider>
+    );
+
+    expect(
+      await screen.findByRole('heading', { name: 'Skrypt wdrożony w Shelly' })
+    ).toBeVisible();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(await screen.findByText('// deployed exact source')).toBeVisible();
     expect(rpcMethods).toContain('Script.GetCode');
   });
 

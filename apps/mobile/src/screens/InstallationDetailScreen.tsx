@@ -1,19 +1,15 @@
 import {
   FeedbackPanel,
   Modal,
-  ScriptPreview,
   ToastViewport,
   type ToastMessage,
   type ToastTone
 } from '@lcl/ui';
 import { IconCode } from '@tabler/icons-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
+import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
@@ -32,12 +28,8 @@ import {
   deleteInstalledAutomation,
   installedAutomationScriptMatch
 } from '../flows/installations/runtimeControl.js';
-import {
-  installedAutomationScriptSourceQueryKey,
-  loadInstalledAutomationScriptSource
-} from '../flows/installations/scriptPreview.js';
+import { installedAutomationScriptSourceQueryKey } from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
-import { InstallationDiagnosticsModal } from './InstallationDiagnosticsModal.js';
 import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
@@ -54,13 +46,15 @@ type InstallationDetailScreenProps = {
   onBack(): void;
   onNavigateDashboard?: (kind: AppNavigationKind) => void;
   onOpenSettings?: () => void;
+  onOpenDiagnostics?: () => void;
+  onOpenScript?: () => void;
 };
 
 export const InstallationDetailScreen = ({
   installationId,
   onBack,
-  onNavigateDashboard,
-  onOpenSettings
+  onOpenDiagnostics,
+  onOpenScript
 }: InstallationDetailScreenProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -84,7 +78,7 @@ export const InstallationDetailScreen = ({
 
   if (!installation) {
     return (
-      <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
+      <main className="demo-shell installation-detail-shell">
         <header className="demo-header installation-detail-header">
           <div>
             <p className="demo-kicker">Local Climate Link</p>
@@ -95,29 +89,12 @@ export const InstallationDetailScreen = ({
             {t('detail.backToDashboard')}
           </button>
         </header>
-        <AppBottomNavigation
-          activeKind="climate"
-          onOpenClimate={() =>
-            onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
-          }
-          onOpenTime={() =>
-            onNavigateDashboard ? onNavigateDashboard('time') : onBack()
-          }
-          {...(onOpenSettings ? { onOpenSettings } : {})}
-        />
       </main>
     );
   }
 
   if (installation.kind === 'time') {
-    return (
-      <TimeInstallationDetail
-        installation={installation}
-        onBack={onBack}
-        {...(onNavigateDashboard ? { onNavigateDashboard } : {})}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
-    );
+    return <TimeInstallationDetail installation={installation} onBack={onBack} />;
   }
 
   return (
@@ -128,8 +105,8 @@ export const InstallationDetailScreen = ({
       dismissToast={dismissToast}
       toasts={toasts}
       queryClient={queryClient}
-      {...(onNavigateDashboard ? { onNavigateDashboard } : {})}
-      {...(onOpenSettings ? { onOpenSettings } : {})}
+      {...(onOpenDiagnostics ? { onOpenDiagnostics } : {})}
+      {...(onOpenScript ? { onOpenScript } : {})}
     />
   );
 };
@@ -143,6 +120,8 @@ type InstalledAutomationDetailProps = {
   queryClient: ReturnType<typeof useQueryClient>;
   onNavigateDashboard?: (kind: AppNavigationKind) => void;
   onOpenSettings?: () => void;
+  onOpenDiagnostics?: () => void;
+  onOpenScript?: () => void;
 };
 
 const InstalledAutomationDetail = ({
@@ -152,8 +131,8 @@ const InstalledAutomationDetail = ({
   dismissToast,
   toasts,
   queryClient,
-  onNavigateDashboard,
-  onOpenSettings
+  onOpenDiagnostics,
+  onOpenScript
 }: InstalledAutomationDetailProps) => {
   const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
@@ -163,19 +142,9 @@ const InstalledAutomationDetail = ({
     (state) => state.removeInstallation
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
-  const [scriptOpen, setScriptOpen] = useState(false);
   const deleteCopy = installationDeleteCopy[locale];
   const scriptCopy = installationScriptPreviewCopy[locale];
   const scriptQueryKey = installedAutomationScriptSourceQueryKey(installation);
-  const scriptSourceQuery = useQuery({
-    queryKey: scriptQueryKey,
-    queryFn: () => loadInstalledAutomationScriptSource(installation),
-    enabled: scriptOpen,
-    retry: false,
-    refetchOnWindowFocus: false,
-    staleTime: 0
-  });
   const snapshot = diagnosticsQuery.isSuccess ? diagnosticsQuery.data : undefined;
   const control = controlQuery.data;
   const scriptMatch = control
@@ -221,24 +190,6 @@ const InstalledAutomationDetail = ({
     await Promise.allSettled([diagnosticsQuery.refetch(), controlQuery.refetch()]);
   };
 
-  const closeScriptPreview = () => {
-    setScriptOpen(false);
-    queryClient.removeQueries({ queryKey: scriptQueryKey, exact: true });
-  };
-
-  const copyScriptSource = () => {
-    const source = scriptSourceQuery.data;
-    if (!source || typeof navigator === 'undefined' || !navigator.clipboard) {
-      pushToast('warning', scriptCopy.copyFailed);
-      return;
-    }
-
-    void navigator.clipboard
-      .writeText(source)
-      .then(() => pushToast('ok', scriptCopy.copyDone))
-      .catch(() => pushToast('warning', scriptCopy.copyFailed));
-  };
-
   const missing = t('common.missing');
   const diagnostics = snapshot?.diagnostics;
   const shellyRelayState = snapshot?.plug?.relayState ?? control?.relayOn;
@@ -254,7 +205,12 @@ const InstalledAutomationDetail = ({
       : t('intent.temperature.context');
 
   return (
-    <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
+    <main className="demo-shell installation-detail-shell">
+      <div className="setup-context app-page-back-row">
+        <button className="setup-context__back" type="button" onClick={onBack}>
+          ‹ {t('dashboard.climateTab')}
+        </button>
+      </div>
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
         <article className="automation-card installation-detail-identity">
           <div className="installation-detail-identity__copy">
@@ -317,7 +273,7 @@ const InstalledAutomationDetail = ({
               disabled={scriptMatch !== 'matched' || deleteMutation.isPending}
               title={scriptCopy.action}
               type="button"
-              onClick={() => setScriptOpen(true)}
+              onClick={() => onOpenScript?.()}
             >
               <IconCode className="icon-action__svg" aria-hidden="true" />
             </button>
@@ -432,7 +388,7 @@ const InstalledAutomationDetail = ({
             <button
               className="secondary-action"
               type="button"
-              onClick={() => setDiagnosticsOpen(true)}
+              onClick={() => onOpenDiagnostics?.()}
             >
               {t('common.diagnostics')}
             </button>
@@ -449,55 +405,6 @@ const InstalledAutomationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
-
-      <AppBottomNavigation
-        activeKind="climate"
-        onOpenClimate={() =>
-          onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
-        }
-        onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
-
-      <InstallationDiagnosticsModal
-        installation={installation}
-        open={diagnosticsOpen}
-        onClose={() => setDiagnosticsOpen(false)}
-      />
-
-      <Modal
-        closeLabel={t('common.close')}
-        open={scriptOpen}
-        title={scriptCopy.title}
-        onClose={closeScriptPreview}
-      >
-        {scriptSourceQuery.isPending && (
-          <p className="installation-detail-note" role="status">
-            {scriptCopy.loading}
-          </p>
-        )}
-        {scriptSourceQuery.isError && (
-          <FeedbackPanel tone="danger" title={scriptCopy.failed}>
-            <button
-              className="secondary-action"
-              type="button"
-              onClick={() => void scriptSourceQuery.refetch()}
-            >
-              {scriptCopy.retry}
-            </button>
-          </FeedbackPanel>
-        )}
-        {scriptSourceQuery.isSuccess && (
-          <ScriptPreview
-            code={scriptSourceQuery.data}
-            copyAriaLabel={scriptCopy.copy}
-            copyLabel={scriptCopy.copy}
-            label={scriptCopy.label}
-            variant="fill"
-            onCopy={copyScriptSource}
-          />
-        )}
-      </Modal>
 
       <Modal
         actions={

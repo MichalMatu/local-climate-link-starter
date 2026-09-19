@@ -1,16 +1,24 @@
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react';
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
+import { AppShell } from '../components/AppShell.js';
+import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
+import { InstallationDiagnosticsScreen } from '../screens/InstallationDiagnosticsScreen.js';
+import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
@@ -19,6 +27,7 @@ const HardwareSetupScreen = lazy(async () => {
 });
 
 type SetupRouteIntent = SetupIntent;
+type InstallationPage = 'detail' | 'diagnostics' | 'script';
 type PrimaryAppRoute =
   | { type: 'dashboard'; kind?: AppNavigationKind }
   | { type: 'plug-add' }
@@ -29,49 +38,44 @@ type PrimaryAppRoute =
       sourceKind: AppNavigationKind;
       shellyId?: string;
     }
-  | { type: 'installation'; installationId: string; kind: AppNavigationKind };
+  | {
+      type: 'installation';
+      installationId: string;
+      kind: AppNavigationKind;
+      page: InstallationPage;
+    };
 type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
-type RouteFallbackProps = {
-  activeKind: AppNavigationKind;
-  onOpenClimate(): void;
-  onOpenTime(): void;
-  onOpenSettings(): void;
-};
-
-const RouteFallback = ({
-  activeKind,
-  onOpenClimate,
-  onOpenTime,
-  onOpenSettings
-}: RouteFallbackProps) => {
+const RouteFallback = () => {
   const { t } = useTranslation();
-
   return (
-    <main className="demo-shell hardware-shell app-bottom-nav-shell">
+    <main className="demo-shell hardware-shell">
       <section className="demo-panel">
         <p role="status">{t('app.loadingConfigurator')}</p>
       </section>
-      <AppBottomNavigation
-        activeKind={activeKind}
-        onOpenClimate={onOpenClimate}
-        onOpenTime={onOpenTime}
-        onOpenSettings={onOpenSettings}
-      />
     </main>
   );
 };
 
+const activeNavigationForRoute = (route: AppRoute): AppNavigationKind | 'settings' => {
+  if (route.type === 'settings') return 'settings';
+  if (route.type === 'dashboard') return route.kind ?? 'climate';
+  if (route.type === 'installation') return route.kind;
+  if (route.type === 'plug-add') return 'climate';
+  return route.sourceKind;
+};
+
+const installationDetailRoute = (
+  route: Extract<PrimaryAppRoute, { type: 'installation' }>
+): PrimaryAppRoute => ({ ...route, page: 'detail' });
+
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
-  if (route.type === 'settings') {
-    return route.returnTo;
-  }
+  if (route.type === 'settings') return route.returnTo;
   if (route.type === 'installation') {
+    if (route.page !== 'detail') return installationDetailRoute(route);
     return { type: 'dashboard', kind: route.kind };
   }
-  if (route.type === 'plug-add') {
-    return { type: 'dashboard', kind: 'climate' };
-  }
+  if (route.type === 'plug-add') return { type: 'dashboard', kind: 'climate' };
   if (route.type === 'setup') {
     return {
       type: 'intent',
@@ -79,9 +83,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
       ...(route.shellyId ? { shellyId: route.shellyId } : {})
     };
   }
-  if (route.type === 'intent') {
-    return { type: 'dashboard', kind: route.sourceKind };
-  }
+  if (route.type === 'intent') return { type: 'dashboard', kind: route.sourceKind };
   return null;
 };
 
@@ -97,20 +99,15 @@ export const AppRoutes = () => {
   }, []);
   const openSettings = useCallback(() => {
     const current = routeRef.current;
-    if (current.type === 'settings') {
-      return;
-    }
+    if (current.type === 'settings') return;
     navigate({ type: 'settings', returnTo: current });
   }, [navigate]);
 
   useEffect(() => {
-    if (Capacitor.getPlatform() !== 'android') {
-      return;
-    }
+    if (Capacitor.getPlatform() !== 'android') return;
 
     let active = true;
     let removeListener: (() => Promise<void>) | undefined;
-
     void App.addListener('backButton', () => {
       const nextRoute = resolveAndroidBackRoute(routeRef.current);
       if (nextRoute === null) {
@@ -128,9 +125,7 @@ export const AppRoutes = () => {
 
     return () => {
       active = false;
-      if (removeListener !== undefined) {
-        void removeListener();
-      }
+      if (removeListener !== undefined) void removeListener();
     };
   }, [navigate]);
 
@@ -148,30 +143,19 @@ export const AppRoutes = () => {
     });
   };
 
-  if (route.type === 'settings') {
-    return (
-      <AppSettingsScreen
-        onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-        onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-      />
-    );
-  }
+  let content: ReactNode;
 
-  if (route.type === 'intent') {
-    return (
+  if (route.type === 'settings') {
+    content = <AppSettingsScreen />;
+  } else if (route.type === 'intent') {
+    content = (
       <SetupIntentScreen
-        activeKind={route.sourceKind}
         onCancel={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
-        onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-        onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-        onOpenSettings={openSettings}
         onSelect={(intent) => selectIntent(intent, route.sourceKind, route.shellyId)}
       />
     );
-  }
-
-  if (route.type === 'dashboard') {
-    return (
+  } else if (route.type === 'dashboard') {
+    content = (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
         onAddPlug={() => navigate({ type: 'plug-add' })}
@@ -187,78 +171,80 @@ export const AppRoutes = () => {
             ...(shellyId ? { shellyId } : {})
           });
         }}
-        onOpenInstallation={(installationId) => {
+        onOpenInstallation={(installationId) =>
           navigate({
             type: 'installation',
             installationId,
-            kind: 'climate'
-          });
-        }}
-        onOpenSettings={openSettings}
+            kind: 'climate',
+            page: 'detail'
+          })
+        }
       />
     );
-  }
-
-  if (route.type === 'plug-add') {
+  } else if (route.type === 'plug-add') {
     const backToPlugs = () => navigate({ type: 'dashboard', kind: 'climate' });
-    return (
-      <Suspense
-        fallback={
-          <RouteFallback
-            activeKind="climate"
-            onOpenClimate={backToPlugs}
-            onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-            onOpenSettings={openSettings}
-          />
-        }
-      >
+    content = (
+      <Suspense fallback={<RouteFallback />}>
         <HardwareSetupScreen
           plugAddOnly
-          navigationKind="climate"
           onPlugAddComplete={backToPlugs}
           onPlugAddCancel={backToPlugs}
         />
       </Suspense>
     );
-  }
-
-  if (route.type === 'installation') {
-    return (
-      <InstallationDetailScreen
-        installationId={route.installationId}
-        onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
-        onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
-        onOpenSettings={openSettings}
-      />
+  } else if (route.type === 'installation') {
+    const backToDetail = () => navigate(installationDetailRoute(route));
+    if (route.page === 'diagnostics') {
+      content = (
+        <InstallationDiagnosticsScreen
+          installationId={route.installationId}
+          onBack={backToDetail}
+        />
+      );
+    } else if (route.page === 'script') {
+      content = (
+        <InstallationScriptScreen
+          installationId={route.installationId}
+          onBack={backToDetail}
+        />
+      );
+    } else {
+      content = (
+        <InstallationDetailScreen
+          installationId={route.installationId}
+          onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
+          onOpenDiagnostics={() => navigate({ ...route, page: 'diagnostics' })}
+          onOpenScript={() => navigate({ ...route, page: 'script' })}
+        />
+      );
+    }
+  } else {
+    content = (
+      <Suspense fallback={<RouteFallback />}>
+        <HardwareSetupScreen
+          setupIntent={route.intent}
+          {...(route.shellyId ? { fixedShellyId: route.shellyId } : {})}
+          onBackToIntent={() =>
+            navigate({
+              type: 'intent',
+              sourceKind: route.sourceKind,
+              ...(route.shellyId ? { shellyId: route.shellyId } : {})
+            })
+          }
+          onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
+        />
+      </Suspense>
     );
   }
 
   return (
-    <Suspense
-      fallback={
-        <RouteFallback
-          activeKind={route.sourceKind}
-          onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-          onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
-          onOpenSettings={openSettings}
-        />
-      }
+    <AppShell
+      activeKind={activeNavigationForRoute(route)}
+      onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
+      onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
+      onOpenSettings={openSettings}
     >
-      <HardwareSetupScreen
-        navigationKind={route.sourceKind}
-        setupIntent={route.intent}
-        {...(route.shellyId ? { fixedShellyId: route.shellyId } : {})}
-        onBackToIntent={() =>
-          navigate({
-            type: 'intent',
-            sourceKind: route.sourceKind,
-            ...(route.shellyId ? { shellyId: route.shellyId } : {})
-          })
-        }
-        onNavigateDashboard={(kind) => navigate({ type: 'dashboard', kind })}
-        onOpenSettings={openSettings}
-        onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
-      />
-    </Suspense>
+      {content}
+    </AppShell>
   );
 };

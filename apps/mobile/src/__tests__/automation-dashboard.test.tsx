@@ -202,29 +202,34 @@ const renderDashboard = (
   onAddAutomation = vi.fn(),
   onOpenInstallation = vi.fn(),
   onOpenSettings = vi.fn(),
-  onAddPlug = vi.fn()
+  onAddPlug = vi.fn(),
+  initialKind: 'climate' | 'time' = 'climate'
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
   });
+  const view = (kind: 'climate' | 'time') => (
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
+        <AutomationDashboardScreen
+          initialKind={kind}
+          onAddPlug={onAddPlug}
+          onAddAutomation={onAddAutomation}
+          onOpenInstallation={onOpenInstallation}
+          onOpenSettings={onOpenSettings}
+        />
+      </QueryClientProvider>
+    </I18nProvider>
+  );
+  const rendered = render(view(initialKind));
   return {
     onAddAutomation,
     onOpenInstallation,
     onOpenSettings,
     onAddPlug,
     queryClient,
-    ...render(
-      <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          <AutomationDashboardScreen
-            onAddPlug={onAddPlug}
-            onAddAutomation={onAddAutomation}
-            onOpenInstallation={onOpenInstallation}
-            onOpenSettings={onOpenSettings}
-          />
-        </QueryClientProvider>
-      </I18nProvider>
-    )
+    ...rendered,
+    rerenderKind: (kind: 'climate' | 'time') => rendered.rerender(view(kind))
   };
 };
 
@@ -259,9 +264,7 @@ describe('AutomationDashboardScreen', () => {
   });
 
   it('uses the same centered empty-state treatment for Thermometers', () => {
-    renderDashboard();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    renderDashboard(vi.fn(), vi.fn(), vi.fn(), vi.fn(), 'time');
 
     const thermometerEmptyState = screen
       .getByText('Brak dodanych termometrów.')
@@ -459,7 +462,7 @@ describe('AutomationDashboardScreen', () => {
       vi.fn(async () => jsonResponse(diagnosticPayload()))
     );
 
-    renderDashboard();
+    const { rerenderKind } = renderDashboard();
 
     expect(await screen.findByText('21.4°C')).toBeVisible();
     expect(screen.getByText('55.2%')).toBeVisible();
@@ -479,13 +482,7 @@ describe('AutomationDashboardScreen', () => {
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('19°C / 20°C')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    const thermometerNav = screen.getByRole('button', { name: 'Termometry' });
-    expect(thermometerNav).toBeEnabled();
-    fireEvent.click(thermometerNav);
+    rerenderKind('time');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Termometry' })).toBeNull();
     expect(document.querySelector('.sensor-setup-panel--embedded')).not.toBeNull();
@@ -493,8 +490,7 @@ describe('AutomationDashboardScreen', () => {
     expect(
       screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
     ).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
-    expect(screen.getByRole('button', { name: 'Ustawienia' })).toBeVisible();
+    rerenderKind('climate');
     expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
     expect(
       document.querySelector('.automation-card__menu svg.tabler-icon')
@@ -648,7 +644,7 @@ describe('AutomationDashboardScreen', () => {
     installTimeShellyFetchMock();
     const onOpenInstallation = vi.fn();
 
-    renderDashboard(vi.fn(), onOpenInstallation);
+    const { rerenderKind } = renderDashboard(vi.fn(), onOpenInstallation);
 
     expect(await screen.findByText('Harmonogram dzienny')).toBeVisible();
     expect(screen.getByText('Lampa')).toBeVisible();
@@ -661,15 +657,9 @@ describe('AutomationDashboardScreen', () => {
     const timeLeadingIcon = timeCard.querySelector('.automation-card__leading-icon');
     expect(timeLeadingIcon?.querySelector('.tabler-icon-plug')).not.toBeNull();
     expect(timeLeadingIcon).toHaveClass('automation-card__leading-icon--active');
-    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
-    const thermometerNav = screen.getByRole('button', { name: 'Termometry' });
-    expect(thermometerNav).toBeEnabled();
-    fireEvent.click(thermometerNav);
+    rerenderKind('time');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
+    rerenderKind('climate');
     expect(screen.getByText('Harmonogram dzienny')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));

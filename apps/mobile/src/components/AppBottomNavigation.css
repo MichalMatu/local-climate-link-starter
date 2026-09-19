@@ -1,3 +1,7 @@
+.app-root-shell {
+  min-height: 100dvh;
+}
+
 .app-bottom-nav-shell {
   --app-bottom-nav-height: calc(
     var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)

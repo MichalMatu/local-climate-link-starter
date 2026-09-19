@@ -11,10 +11,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
+import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -499,8 +496,7 @@ export const AutomationDashboardScreen = ({
   initialKind,
   onAddPlug,
   onAddAutomation,
-  onOpenInstallation,
-  onOpenSettings
+  onOpenInstallation
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
   const installations = useInstalledAutomationStore((state) => state.installations);
@@ -509,9 +505,7 @@ export const AutomationDashboardScreen = ({
     (state) => state.setShellyDeviceName
   );
   const queryClient = useQueryClient();
-  const [activeKind, setActiveKind] = useState<AppNavigationKind>(
-    () => initialKind ?? 'climate'
-  );
+  const activeKind = initialKind ?? 'climate';
   const [settingsDeviceId, setSettingsDeviceId] = useState<string | null>(null);
   const closePlugSettings = useCallback(() => setSettingsDeviceId(null), []);
 
@@ -559,7 +553,7 @@ export const AutomationDashboardScreen = ({
 
   return (
     <main
-      className="demo-shell dashboard-shell app-bottom-nav-shell"
+      className="demo-shell dashboard-shell"
       aria-label={
         activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.timeTab')
       }
@@ -621,13 +615,6 @@ export const AutomationDashboardScreen = ({
           <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
         </button>
       )}
-
-      <AppBottomNavigation
-        activeKind={activeKind}
-        onOpenClimate={() => setActiveKind('climate')}
-        onOpenTime={() => setActiveKind('time')}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
     </main>
   );
 };

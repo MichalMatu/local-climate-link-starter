@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../../components/AppBottomNavigation.js';
+import type { AppNavigationKind } from '../../components/AppBottomNavigation.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import {
   defaultRulePresetForSetupIntent,
@@ -103,10 +100,7 @@ type HardwareSetupScreenProps = {
 
 export const HardwareSetupScreen = ({
   setupIntent,
-  navigationKind,
   onBackToIntent,
-  onNavigateDashboard,
-  onOpenSettings,
   onSetupComplete,
   fixedShellyId,
   plugAddOnly = false,
@@ -120,8 +114,6 @@ export const HardwareSetupScreen = ({
     () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly),
     [fixedShellyId, plugAddOnly, setupIntent]
   );
-  const activeNavigationKind =
-    navigationKind ?? (setupIntent === 'time' ? 'time' : 'climate');
   const [activeTab, setActiveTab] = useState<HardwareTabId>(() =>
     currentTabFromHash(availableTabs)
   );
@@ -183,7 +175,7 @@ export const HardwareSetupScreen = ({
   };
 
   return (
-    <main className="demo-shell hardware-shell app-bottom-nav-shell">
+    <main className="demo-shell hardware-shell">
       {setupIntent && onBackToIntent && (
         <div className="setup-context">
           <button className="setup-context__back" type="button" onClick={onBackToIntent}>
@@ -237,15 +229,6 @@ export const HardwareSetupScreen = ({
         <TimeScheduleSetupPage
           flow={flow}
           {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
-        />
-      )}
-
-      {onNavigateDashboard && !plugAddOnly && (
-        <AppBottomNavigation
-          activeKind={activeNavigationKind}
-          onOpenClimate={() => onNavigateDashboard('climate')}
-          onOpenTime={() => onNavigateDashboard('time')}
-          {...(onOpenSettings ? { onOpenSettings } : {})}
         />
       )}
     </main>

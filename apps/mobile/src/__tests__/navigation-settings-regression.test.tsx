@@ -12,19 +12,14 @@ import {
 
 vi.mock('../screens/AutomationDashboardScreen.js', () => ({
   AutomationDashboardScreen: ({
-    onAddAutomation,
-    onOpenSettings
+    onAddAutomation
   }: {
     onAddAutomation(kind: 'climate' | 'time'): void;
-    onOpenSettings?: () => void;
   }) => (
     <main>
       <h1>dashboard-test</h1>
       <button type="button" onClick={() => onAddAutomation('climate')}>
         add-automation-test
-      </button>
-      <button type="button" onClick={onOpenSettings}>
-        Ustawienia aplikacji
       </button>
     </main>
   )
@@ -49,7 +44,7 @@ describe('navigation and settings regression coverage', () => {
   it('opens language and appearance settings from the normal app shell', () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia aplikacji' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
 
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();

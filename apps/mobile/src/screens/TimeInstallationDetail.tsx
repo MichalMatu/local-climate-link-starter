@@ -8,10 +8,7 @@ import {
 } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppBottomNavigation,
-  type AppNavigationKind
-} from '../components/AppBottomNavigation.js';
+import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
@@ -50,9 +47,7 @@ type TimeInstallationDetailProps = {
 
 export const TimeInstallationDetail = ({
   installation,
-  onBack,
-  onNavigateDashboard,
-  onOpenSettings
+  onBack
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -172,7 +167,7 @@ export const TimeInstallationDetail = ({
   }).success;
 
   return (
-    <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
+    <main className="demo-shell installation-detail-shell">
       <header className="demo-header installation-detail-header">
         <div>
           <div className="automation-status-row">
@@ -303,15 +298,6 @@ export const TimeInstallationDetail = ({
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>
-
-      <AppBottomNavigation
-        activeKind="time"
-        onOpenClimate={() =>
-          onNavigateDashboard ? onNavigateDashboard('climate') : onBack()
-        }
-        onOpenTime={() => (onNavigateDashboard ? onNavigateDashboard('time') : onBack())}
-        {...(onOpenSettings ? { onOpenSettings } : {})}
-      />
 
       <Modal
         actions={

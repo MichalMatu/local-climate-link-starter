@@ -2504,7 +2504,7 @@ select {
 }
 
 /* Shared-shell Climate Detail alignment with the compact Dashboard visual language. */
-.installation-detail-shell.app-bottom-nav-shell {
+.installation-detail-shell {
   gap: var(--lcl-spacing-md);
 }
 
@@ -3057,4 +3057,34 @@ select {
 
 .installation-diagnostics__rows .lcl-diagnostic-row:last-child {
   border-bottom: 0;
+}
+
+.app-page-back-row {
+  margin-bottom: var(--lcl-spacing-sm);
+}
+
+.installation-diagnostics-page__card,
+.installation-script-page__card {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+}
+
+.installation-diagnostics-page__card h1,
+.installation-script-page__card h1 {
+  font-size: var(--lcl-font-size-2xl);
+  margin: 0;
+}
+
+.installation-diagnostics__section h2 {
+  font-size: var(--lcl-font-size-lg);
+  margin: 0;
+}
+
+.installation-script-page__card {
+  min-height: calc(100dvh - (var(--lcl-spacing-2xl) * 7));
+}
+
+.installation-script-page__card .lcl-script-preview {
+  height: 100%;
+  min-height: var(--lcl-size-code-preview-max-height);
 }

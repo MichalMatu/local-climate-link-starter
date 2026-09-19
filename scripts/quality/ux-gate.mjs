@@ -56,21 +56,33 @@ const addFailure = (path, message) => {
 };
 
 const checkBottomNavigationShell = async () => {
+  const shellPath = 'apps/mobile/src/components/AppShell.tsx';
   const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
     path.endsWith('.tsx')
   );
+
   for (const path of tsxPaths) {
     const source = await readRepoFile(path);
-    if (
-      source.includes('<AppBottomNavigation') &&
-      source.includes('<main') &&
-      !source.includes('app-bottom-nav-shell')
-    ) {
+    if (path !== shellPath && source.includes('<AppBottomNavigation')) {
       addFailure(
         path,
-        'screens rendering AppBottomNavigation must opt into app-bottom-nav-shell spacing'
+        'AppBottomNavigation must be owned only by the root AppShell, never by individual screens'
       );
     }
+    if (path !== shellPath && source.includes('app-bottom-nav-shell')) {
+      addFailure(path, 'app-bottom-nav-shell spacing belongs only to the root AppShell');
+    }
+  }
+
+  const shellSource = await readRepoFile(shellPath);
+  if (
+    !shellSource.includes('<AppBottomNavigation') ||
+    !shellSource.includes('app-bottom-nav-shell')
+  ) {
+    addFailure(
+      shellPath,
+      'root AppShell must own the persistent bottom navigation and its spacing'
+    );
   }
 };
 
