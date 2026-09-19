@@ -1035,20 +1035,6 @@ select {
   color: var(--lcl-color-accent);
 }
 
-.shelly-scan-result__row {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(8rem, 1fr) auto;
-}
-
-.shelly-scan-result__name-input {
-  min-width: 0;
-  width: 100%;
-}
-
-.shelly-scan-result__add {
-  align-self: end;
-  min-width: var(--lcl-size-action-min-width);
-}
-
 .shelly-network-scan__progress {
   align-items: center;
   color: var(--lcl-color-text-muted);
@@ -1774,14 +1760,6 @@ select {
   .control-action-row .secondary-action {
     flex: 1 1 var(--lcl-size-action-min-width);
     width: auto;
-  }
-
-  .shelly-scan-result__row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .shelly-scan-result__add {
-    width: 100%;
   }
 
   .advanced-settings__readonly {
@@ -3181,49 +3159,6 @@ select {
   overflow-wrap: anywhere;
 }
 
-.shelly-scan-result__add,
-.ble-candidate-action {
-  align-self: center;
-  min-height: var(--lcl-size-compact-control-min-height);
-  padding-inline: var(--lcl-spacing-md);
-  width: auto;
-}
-
-.ble-candidate-item {
-  align-items: center;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.ble-candidate-content,
-.ble-candidate-name {
-  display: grid;
-  gap: var(--lcl-spacing-sm);
-  min-width: 0;
-}
-
-.ble-candidate-name {
-  gap: var(--lcl-spacing-xs);
-}
-
-.ble-candidate-name input,
-.shelly-scan-result__name-input {
-  min-width: 0;
-  width: 100%;
-}
-
-@media (max-width: 30rem) {
-  .ble-candidate-item,
-  .shelly-scan-result__row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ble-candidate-action,
-  .shelly-scan-result__add {
-    justify-self: end;
-    width: auto;
-  }
-}
-
 /* Shared scan-result card contract: editable name + compact action, then metadata. */
 .device-discovery-card {
   background: var(--lcl-color-surface);
@@ -3281,6 +3216,7 @@ select {
 .device-discovery-card__action {
   align-self: end;
   min-height: var(--lcl-size-compact-control-min-height);
+  min-width: 0;
   padding-inline: var(--lcl-spacing-md);
   width: auto;
 }
@@ -3296,8 +3232,33 @@ select {
   overflow-wrap: anywhere;
 }
 
+.device-discovery-card__identity {
+  color: var(--lcl-color-text);
+  font-weight: var(--lcl-font-weight-bold);
+}
+
 .device-discovery-card__metrics {
   margin: 0;
+}
+
+.device-scan-action {
+  gap: var(--lcl-spacing-sm);
+}
+
+.device-scan-action__spinner {
+  animation: lcl-scan-spin 0.85s linear infinite;
+  border: var(--lcl-border-width-md) solid var(--lcl-color-border);
+  border-radius: 50%;
+  border-top-color: var(--lcl-color-accent);
+  flex: 0 0 auto;
+  height: 1rem;
+  width: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .device-scan-action__spinner {
+    animation: none;
+  }
 }
 
 .device-discovery-card.ble-candidate-item {
@@ -3325,9 +3286,7 @@ select {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .device-discovery-card__action,
-  .ble-candidate-action,
-  .shelly-scan-result__add {
+  .device-discovery-card__action {
     justify-self: end;
     width: auto;
   }

@@ -451,7 +451,9 @@ export const ShellySetupPage = ({
                             </button>
                           </div>
                           <div className="device-discovery-card__meta shelly-scan-result__meta">
-                            <span>{result.baseUrl}</span>
+                            <strong className="device-discovery-card__identity">
+                              {result.baseUrl}
+                            </strong>
                             <span>
                               {result.deviceInfo.model}, gen {result.deviceInfo.gen}
                             </span>
@@ -462,8 +464,9 @@ export const ShellySetupPage = ({
                   )}
                   <div className="action-row shelly-network-scan__actions device-add-page__scan-control">
                     <button
-                      className="secondary-action"
+                      className="secondary-action device-scan-action"
                       type="button"
+                      aria-busy={isShellyScanActive || undefined}
                       title={
                         isShellyScanActive
                           ? t('hardware.shelly.scanStopTitle')
@@ -471,9 +474,17 @@ export const ShellySetupPage = ({
                       }
                       onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
                     >
-                      {isShellyScanActive
-                        ? t('hardware.shelly.scanStop')
-                        : t('hardware.shelly.scanStart')}
+                      {isShellyScanActive && (
+                        <span
+                          className="device-scan-action__spinner"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span>
+                        {isShellyScanActive
+                          ? t('hardware.shelly.scanStop')
+                          : t('hardware.shelly.scanStart')}
+                      </span>
                     </button>
                   </div>
                 </div>

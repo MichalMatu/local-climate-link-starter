@@ -1307,7 +1307,13 @@ describe('HardwareSetupScreen', () => {
     expect(within(page).getByLabelText('Od')).toHaveValue('192.168.0.1');
     expect(within(page).getByLabelText('Do')).toHaveValue('192.168.0.254');
 
-    fireEvent.click(within(page).getByRole('button', { name: 'Rozpocznij skan' }));
+    const shellyScanControl = within(page).getByRole('button', {
+      name: 'Rozpocznij skan'
+    });
+    expect(shellyScanControl).toHaveClass('device-scan-action');
+    expect(shellyScanControl).not.toHaveAttribute('aria-busy');
+    expect(shellyScanControl.querySelector('.device-scan-action__spinner')).toBeNull();
+    fireEvent.click(shellyScanControl);
 
     expect(await within(page).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(page).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
@@ -1322,7 +1328,9 @@ describe('HardwareSetupScreen', () => {
     expect(scannedRow).toHaveClass('shelly-scan-result');
     expect(scannedName).toHaveClass('device-discovery-card__name-input');
     expect(within(scannedRow!).getAllByRole('textbox')).toHaveLength(1);
-    expect(within(scannedRow!).getByText('http://192.168.0.20/')).toBeVisible();
+    expect(within(scannedRow!).getByText('http://192.168.0.20/')).toHaveClass(
+      'device-discovery-card__identity'
+    );
     expect(within(scannedRow!).getByText('S3PL-00112EU, gen 3')).toBeVisible();
     expect(
       within(scannedRow!).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
@@ -1504,6 +1512,9 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
 
     const stopButton = await within(dialog).findByRole('button', { name: 'Stop skanu' });
+    expect(stopButton).toHaveClass('device-scan-action');
+    expect(stopButton).toHaveAttribute('aria-busy', 'true');
+    expect(stopButton.querySelector('.device-scan-action__spinner')).not.toBeNull();
     fireEvent.click(stopButton);
 
     await waitFor(() => expect(abortableFetch.getAbortCount()).toBeGreaterThan(0));
@@ -2128,10 +2139,17 @@ describe('HardwareSetupScreen', () => {
     });
     expect(xiaomiNameInput).toHaveValue('Termometr 24:CD');
     expect(xiaomiNameInput).toHaveClass('device-discovery-card__name-input');
+    expect(within(xiaomiItem!).getByText('A4:C1:38:4F:24:CD')).toHaveClass(
+      'device-discovery-card__identity'
+    );
     expect(within(xiaomiItem!).getByText('BTHome v2')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('21.3°C')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('45.7%')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('-58 dBm')).toBeInTheDocument();
+    const bleScanControl = within(page).getByRole('button', { name: 'Stop skanu' });
+    expect(bleScanControl).toHaveClass('device-scan-action');
+    expect(bleScanControl).toHaveAttribute('aria-busy', 'true');
+    expect(bleScanControl.querySelector('.device-scan-action__spinner')).not.toBeNull();
 
     await waitFor(() => expect(within(page).getAllByRole('article')).toHaveLength(2));
     const candidateItems = within(page).getAllByRole('article');

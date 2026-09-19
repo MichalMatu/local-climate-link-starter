@@ -191,7 +191,9 @@ export const SensorSetupPage = ({
                   </button>
                 </div>
                 <div className="device-discovery-card__meta ble-candidate-main">
-                  <strong>{candidate.runtimeAddress}</strong>
+                  <strong className="device-discovery-card__identity">
+                    {candidate.runtimeAddress}
+                  </strong>
                   <span>{sensorProfileDisplayLabels[candidate.profileId]}</span>
                 </div>
                 <dl className="device-discovery-card__metrics ble-candidate-metrics">
@@ -235,8 +237,9 @@ export const SensorSetupPage = ({
       )}
       <div className="action-row device-add-page__actions device-add-page__scan-control">
         <button
-          className="secondary-action"
+          className="secondary-action device-scan-action"
           type="button"
+          aria-busy={isPhoneBleScanPending || undefined}
           title={
             isPhoneBleScanPending
               ? t('hardware.sensor.scanStopTitle')
@@ -244,9 +247,14 @@ export const SensorSetupPage = ({
           }
           onClick={isPhoneBleScanPending ? flow.stopPhoneBleScan : startPhoneBleScan}
         >
-          {isPhoneBleScanPending
-            ? t('hardware.shelly.scanStop')
-            : t('hardware.shelly.scanBleAgain')}
+          {isPhoneBleScanPending && (
+            <span className="device-scan-action__spinner" aria-hidden="true" />
+          )}
+          <span>
+            {isPhoneBleScanPending
+              ? t('hardware.shelly.scanStop')
+              : t('hardware.shelly.scanBleAgain')}
+          </span>
         </button>
       </div>
     </section>
