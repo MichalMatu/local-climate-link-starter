@@ -1,4 +1,4 @@
-# Next chat handoff — post device-add UX checkpoint
+# Next chat handoff — post remaining-screen UX consistency audit
 
 Updated: 2026-09-19
 
@@ -30,26 +30,37 @@ Every `.agent/tasks/*.json` must contain exactly:
 
 ## Verified product-code checkpoint
 
-The app-code checkpoint closed in:
+Current app-code checkpoint:
 
 ```text
-2b0c045a16a1bc974191701fc73b05f054e65023
-Polish discovery scan controls
+965618b0023946a16acee6dc46a33eea9be7df50
+Stabilize BLE child-page cleanup callback
 ```
 
-Later commits in this checkpoint are documentation-only unless a fresh branch check proves otherwise. Always fetch before continuing.
+The remaining-screen UX consistency pass is closed at this checkpoint.
 
-The final app-code run passed:
+Key commits in the completed pass:
 
-- focused mobile typecheck and architecture/UX gates,
-- focused Vitest suite: 87/87,
-- one full `pnpm check`,
-- clean push,
-- clean Android reinstall and cold-start smoke on Samsung `SM-S906B`,
-- `versionName=2.0.10`, `versionCode=20010`,
-- `MainActivity` top-resumed with no matched app FATAL/ANR.
+```text
+d8606f8c  Unify missing installation page chrome
+55e80fce  Move Plug settings into page tree
+45919dd2  Move Plug BLE discovery into page tree
+a9efc38b  Unify setup flow back chrome
+2465521e  Move configurator Shelly tools into page tree
+2a164a34  Remove dead advanced settings modal
+965618b0  Stabilize BLE child-page cleanup callback
+```
 
-No phone reinstall is required for documentation-only commits.
+Final validation on `965618b0` passed:
+
+- mobile ESLint for the touched page with `--max-warnings=0`;
+- mobile typecheck;
+- UX and repository quality gates;
+- focused Vitest suite: 58/58;
+- one full `pnpm check` with no lint warnings;
+- clean commit and push.
+
+Android alpha build also completed successfully during the preceding `2465521e` validation. Installation/cold-start smoke did not run because ADB reported exactly zero authorized devices. Treat physical Samsung S22+ smoke as **outstanding validation only**, not as a code failure. The app version remains `versionName=2.0.10`, `versionCode=20010` unless a fresh branch check proves otherwise.
 
 ## Product model that must remain stable
 
@@ -60,15 +71,15 @@ physical Plug -> optional installed automation
 Accepted invariants:
 
 - bottom navigation is **Plugs | Thermometers | Settings**;
-- `AppShell` owns the persistent bottom navigation;
-- page content scrolls independently of that bottom navigation;
+- `AppShell` owns persistent bottom navigation;
+- page content scrolls independently of that navigation;
 - automation setup starts from a concrete Plug;
 - Time is a Plug automation type, not a global dashboard section;
 - `InstalledAutomation` remains the durable installed-automation entity;
 - a saved Plug remains useful without an automation;
 - the phone configures, manages and diagnoses; the installed Shelly runtime executes independently;
 - one relay has one managed automation owner at a time;
-- delete/uninstall paths must preserve the existing safe OFF / identity verification behavior.
+- delete/uninstall paths preserve safe OFF / identity verification behavior.
 
 ## Closed UX scope: add Plug / add Thermometer
 
@@ -89,9 +100,32 @@ Current contract:
 - active scan control shows a small inline spinner and `aria-busy`;
 - BLE phone discovery starts automatically because it has no pre-scan parameters;
 - Shelly LAN discovery starts manually because the IP range is configurable and the scan actively probes the network;
-- changing away from a scan task stops the owned scan; the BLE rerender lifecycle regression is covered by tests.
+- changing away from a scan task stops the owned scan.
 
-Do not reintroduce `STA/AP` presets, scan-help chrome, card-in-card page wrappers, or a separate progress row without a concrete requirement.
+Do not reopen these screens without a concrete regression.
+
+## Closed UX scope: remaining-screen consistency audit
+
+The broad remaining-screen audit is also **closed**. Do not restart it from scratch in the next chat.
+
+Completed navigation/page-tree work:
+
+- missing Installation detail/diagnostics/script states use shared `AppPageBack` chrome;
+- saved Plug settings are a child page from the Plug dashboard;
+- saved Plug BLE discovery is a deeper child page from Plug settings;
+- configurator saved-Shelly settings are a child page instead of a working modal;
+- configurator Shelly BLE discovery is a deeper child page and preserves BLE cleanup when Back is pressed during scanner startup;
+- setup-flow back chrome uses shared `AppPageBack`;
+- the dead `RuleAdvancedSettingsModal.tsx` was removed; active advanced settings remain inline.
+
+Audit conclusions that should remain stable unless a concrete regression appears:
+
+- full working tasks belong in the page tree;
+- remaining confirmation/error/picker/preview modals are transient and are acceptable as modals;
+- `TimeInstallationDetail` has intentional status/mode/refresh header content and was not changed merely because it uses older header classes;
+- diagnostics technical fields remain intentional diagnostics, not editable settings;
+- rule script preview is a transient read-only preview/copy surface and remains a modal;
+- `ShellySettingsModal` and `ShellyBleDiscoveryModal` are still referenced fallback components inside `ShellySetupPage`; do not delete them merely because normal dashboard/configurator navigation now routes the working surfaces as pages.
 
 ## Navigation / page-tree contract
 
@@ -105,17 +139,11 @@ AppShell
            -> modal only for a transient decision / confirmation
 ```
 
-Examples already implemented:
-
-- Plug -> installation detail -> diagnostics / deployed script,
-- Plugs -> add Plug,
-- Thermometers -> add Thermometer.
-
-A full working screen should not be placed in a modal just because the old implementation used one.
+A full working screen should not be placed in a modal just because an older implementation used one.
 
 ## Architecture checkpoint
 
-There is no current architecture-gate failure and no single app-level god object that needs an emergency rewrite.
+There is no current architecture-gate failure and no app-level god object requiring a broad rewrite.
 
 Healthy boundaries:
 
@@ -124,60 +152,60 @@ Healthy boundaries:
 - hardware pages consume narrow `ShellySetupFlow`, `SensorSetupFlow`, `RuleSetupFlow`, and `TimeScheduleSetupFlow` contracts;
 - screens do not own raw `fetch` or Capacitor BLE transport;
 - domain packages remain independent of React/Ionic;
-- repository quality gates enforce these boundaries and line-budget alarms.
+- repository quality gates enforce these boundaries and line-budget alarms;
+- `RuleAdvancedSettingsInline.tsx` now carries the 220-line responsibility budget formerly attached to the deleted modal.
 
 Watchlist, not immediate rewrite targets:
 
-1. `apps/mobile/src/__tests__/hardware-setup.test.tsx` — very large scenario file. Split by real feature scenario when the area is next materially changed; do not rewrite tests just to reduce line count.
-2. `apps/mobile/src/theme/theme.css` — large global stylesheet. Prefer extracting feature-cohesive styles when a screen is actively refactored; remove dead selectors opportunistically.
-3. `ShellySetupPage.tsx` and `flows/hardware-setup/shellyRequests.ts` — responsibility-dense. If they grow, split by a concrete setup/transport responsibility, not arbitrary file size.
-4. `useHardwareSetupFlow.ts` — still broad as a facade, but currently composes dedicated flows and is guarded by repository budgets. Keep its public surface from regrowing.
+1. `apps/mobile/src/__tests__/hardware-setup.test.tsx` — large scenario file. Split only when materially extending a cohesive feature area. Existing React `act(...)` warnings in the frozen standalone-add regression test are test-harness noise, not a reason to reopen the add screens by themselves.
+2. `apps/mobile/src/theme/theme.css` — large global stylesheet. Remove stale selectors opportunistically only when touching the related surface.
+3. `ShellySetupPage.tsx` and `flows/hardware-setup/shellyRequests.ts` — responsibility-dense. Split only at concrete setup/transport boundaries if they grow.
+4. `useHardwareSetupFlow.ts` — broad facade by design. Keep new transport loops/timers/parsers in focused flows/services.
 
-Do not raise architecture budgets to make a new change pass. Extract a cohesive responsibility instead.
+Do not raise architecture budgets just to make a change pass.
 
-## Next work in a new chat
+## Next work
 
-The recommended next phase is **remaining-screen UX consistency**, one bounded surface at a time.
+Do **not** start another broad UX consistency sweep. The next implementation should come from an explicit product requirement or a concrete regression.
 
-Start with a read-only visual/code audit of the remaining screens before choosing the next implementation slice. Look specifically for:
+Reasonable future product categories remain:
 
-- working screens still implemented as modals,
-- duplicate page navigation or headers,
-- card-in-card layout inherited from old modal UX,
-- inconsistent action sizing/spacing,
-- technical data presented as editable controls when it is read-only,
-- page content that scrolls the persistent shell/navigation,
-- duplicated state or transport logic leaking into presentation.
+- richer Plug management/configuration;
+- additional supported sensor/device profiles;
+- additional Plug-owned automation types;
+- targeted polish on a specific screen when a real usability issue is observed.
 
-Do not reopen the completed device-add screens unless the audit finds an actual regression.
+Preserve the Plug-owned automation model and single runtime owner.
 
-When a next screen is selected, keep the normal workflow:
+If the Samsung S22+ becomes visible again, it is useful to complete the outstanding physical install/cold-start smoke for the current checkpoint before a native/device-sensitive change, but do not treat device absence as blocking unrelated web/TypeScript work.
+
+## Normal workflow for the next implementation slice
 
 ```text
 fresh branch + daemon
--> preimplementation audit
+-> bounded preimplementation audit
 -> smallest cohesive implementation
 -> focused typecheck/gates/tests
 -> exactly one final full pnpm check
 -> commit/push
--> physical S22+ smoke for native/device/UI behavior that needs it
+-> physical S22+ smoke when native/device/UI behavior needs it
 ```
 
 ## Documentation map
 
 Canonical/current:
 
-- `AGENTS.md` — operating rules and Local Agent contract,
-- `docs/HANDOFF_NEXT_CHAT.md` — continuation state,
-- `docs/architecture/overview.md` — current product/runtime architecture,
-- `docs/architecture/refactor-boundaries.md` — code responsibility boundaries and hotspot policy,
+- `AGENTS.md` — operating rules and Local Agent contract;
+- `docs/HANDOFF_NEXT_CHAT.md` — continuation state;
+- `docs/architecture/overview.md` — current product/runtime architecture;
+- `docs/architecture/refactor-boundaries.md` — responsibility boundaries and hotspot policy;
 - `docs/product/next-functional-steps.md` — active roadmap.
 
 Historical/reference only:
 
-- `docs/plan.md` — historical MVP context,
-- `docs/implementation/device-rule-decoupling-plan.md` — historical implementation plan for the now-implemented device/rule decoupling,
-- `docs/prompts/` — historical prompts, not continuation state,
+- `docs/plan.md` — historical MVP context;
+- `docs/implementation/device-rule-decoupling-plan.md` — historical implementation plan;
+- `docs/prompts/` — historical prompts;
 - older implementation notes and ADRs remain evidence/context unless explicitly superseded.
 
 If current behavior and an old historical plan disagree, current code + canonical docs above win.
