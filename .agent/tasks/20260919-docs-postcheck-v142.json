@@ -1,0 +1,13 @@
+{
+  "id": "20260919-docs-postcheck-v142",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 600,
+  "task_timeout": 1800,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = \"a7bcb903f9247cc329c222b1674ea5e0cfdcfe37\"; test -z \"$(git status --porcelain)\"; if grep -R -n --exclude-dir=.git 'ux-polish-backlog\\.md' AGENTS.md README.md docs; then echo 'stale ux backlog reference found' >&2; exit 1; fi; if grep -n 'Klimat | Czas | Ustawienia' docs/HANDOFF_NEXT_CHAT.md docs/architecture/overview.md docs/product/next-functional-steps.md; then echo 'stale bottom-nav wording found' >&2; exit 1; fi; test ! -e docs/ux-polish-backlog.md; git status --short --branch"
+  ]
+}
