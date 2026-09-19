@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-unify-modal-geometry-v106",
+  "task_digest": "56f6217ed271e9ebccd81e9172726d385fb21b3d05783d2b92d41dd88b0249fb",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T00:45:51.852240+00:00",
+  "attempt_id": "ccd90a7aad61fa95a020b099",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 51244,
+  "updated_at": "2026-09-19T00:45:51.852352+00:00",
+  "pid": 51244
+}
