@@ -1,5 +1,6 @@
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { AppPageBack } from '../components/AppPageBack.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
 type SetupIntentScreenProps = {
@@ -29,16 +30,19 @@ const INTENT_CHOICES = [
   }
 ] as const;
 
-export const SetupIntentScreen = ({ onSelect, onCancel }: SetupIntentScreenProps) => {
+export const SetupIntentScreen = ({
+  activeKind = 'climate',
+  onSelect,
+  onCancel
+}: SetupIntentScreenProps) => {
   const { t } = useTranslation();
 
   return (
     <main className="demo-shell intent-shell">
-      <div className="setup-context">
-        <button className="setup-context__back" type="button" onClick={onCancel}>
-          {t('common.cancel')}
-        </button>
-      </div>
+      <AppPageBack
+        label={activeKind === 'time' ? t('dashboard.timeTab') : t('dashboard.climateTab')}
+        onBack={onCancel}
+      />
 
       <header className="demo-header intent-header app-page-header">
         <div>

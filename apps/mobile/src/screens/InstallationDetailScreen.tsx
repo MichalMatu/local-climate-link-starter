@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { AppPageBack } from '../components/AppPageBack.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
@@ -206,11 +207,7 @@ const InstalledAutomationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <div className="setup-context app-page-back-row">
-        <button className="setup-context__back" type="button" onClick={onBack}>
-          ‹ {t('dashboard.climateTab')}
-        </button>
-      </div>
+      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
         <article className="automation-card installation-detail-identity">
           <div className="installation-detail-identity__copy">

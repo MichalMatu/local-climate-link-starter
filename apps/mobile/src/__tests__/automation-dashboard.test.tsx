@@ -203,6 +203,7 @@ const renderDashboard = (
   onOpenInstallation = vi.fn(),
   onOpenSettings = vi.fn(),
   onAddPlug = vi.fn(),
+  onAddThermometer = vi.fn(),
   initialKind: 'climate' | 'time' = 'climate'
 ) => {
   const queryClient = new QueryClient({
@@ -214,6 +215,7 @@ const renderDashboard = (
         <AutomationDashboardScreen
           initialKind={kind}
           onAddPlug={onAddPlug}
+          onAddThermometer={onAddThermometer}
           onAddAutomation={onAddAutomation}
           onOpenInstallation={onOpenInstallation}
           onOpenSettings={onOpenSettings}
@@ -227,6 +229,7 @@ const renderDashboard = (
     onOpenInstallation,
     onOpenSettings,
     onAddPlug,
+    onAddThermometer,
     queryClient,
     ...rendered,
     rerenderKind: (kind: 'climate' | 'time') => rendered.rerender(view(kind))
@@ -264,7 +267,7 @@ describe('AutomationDashboardScreen', () => {
   });
 
   it('uses the same centered empty-state treatment for Thermometers', () => {
-    renderDashboard(vi.fn(), vi.fn(), vi.fn(), vi.fn(), 'time');
+    renderDashboard(vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), 'time');
 
     const thermometerEmptyState = screen
       .getByText('Brak dodanych termometrów.')

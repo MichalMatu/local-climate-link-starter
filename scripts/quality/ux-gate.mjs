@@ -55,6 +55,33 @@ const addFailure = (path, message) => {
   failures.push(`${path}: ${message}`);
 };
 
+const checkDeviceAddPageBoundary = async () => {
+  const sensorPath = 'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx';
+  const shellyPath = 'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx';
+  const routesPath = 'apps/mobile/src/routes/AppRoutes.tsx';
+  const [sensorSource, shellySource, routesSource] = await Promise.all([
+    readRepoFile(sensorPath),
+    readRepoFile(shellyPath),
+    readRepoFile(routesPath)
+  ]);
+
+  if (
+    sensorSource.includes('isAddSensorModalOpen') ||
+    sensorSource.includes("kind: 'add'")
+  ) {
+    addFailure(sensorPath, 'thermometer add flow must be a child page, not a modal');
+  }
+  if (
+    shellySource.includes('isAddShellyModalOpen') ||
+    shellySource.includes("kind: 'add'")
+  ) {
+    addFailure(shellyPath, 'plug add flow must be a child page, not a modal');
+  }
+  if (!routesSource.includes("type: 'device-add'")) {
+    addFailure(routesPath, 'device add flows must be represented in the app page tree');
+  }
+};
+
 const checkBottomNavigationShell = async () => {
   const shellPath = 'apps/mobile/src/components/AppShell.tsx';
   const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
@@ -612,6 +639,7 @@ const checkPackageRuntimeCopy = async () => {
   }
 };
 
+await checkDeviceAddPageBoundary();
 await checkBottomNavigationShell();
 await checkSavedShellyCardFeedback();
 await checkTokenizedCssCoverage();

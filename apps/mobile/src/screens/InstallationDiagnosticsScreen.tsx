@@ -1,6 +1,7 @@
 import { DiagnosticRow } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
+import { AppPageBack } from '../components/AppPageBack.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import {
   useInstalledAutomationDiagnostics,
@@ -118,11 +119,7 @@ const InstallationDiagnosticsContent = ({
 
   return (
     <main className="demo-shell installation-detail-shell installation-diagnostics-page">
-      <div className="setup-context app-page-back-row">
-        <button className="setup-context__back" type="button" onClick={onBack}>
-          ‹ {installation.shelly.name}
-        </button>
-      </div>
+      <AppPageBack label={installation.shelly.name} onBack={onBack} />
 
       <section className="automation-card installation-diagnostics-page__card">
         <div className="installation-section-heading">

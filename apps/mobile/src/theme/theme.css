@@ -3088,3 +3088,33 @@ select {
   height: 100%;
   min-height: var(--lcl-size-code-preview-max-height);
 }
+
+/* Full-page device add flow: page content owns the viewport; only confirmations use Modal. */
+.device-add-page {
+  display: grid;
+  gap: var(--lcl-spacing-lg);
+  min-width: 0;
+}
+
+.device-add-page__body,
+.sensor-add-scan,
+.sensor-manual-add {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  min-width: 0;
+}
+
+.device-add-page__hint {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  margin: 0;
+}
+
+.device-add-page__actions {
+  margin-top: 0;
+}
+
+.device-add-page .installation-section-heading h1 {
+  font-size: var(--lcl-font-size-xl);
+  margin: 0;
+}

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
+import { AppPageBack } from '../components/AppPageBack.js';
 import {
   installedAutomationScriptSourceQueryKey,
   loadInstalledAutomationScriptSource
@@ -82,11 +83,7 @@ export const InstallationScriptScreen = ({
 
   return (
     <main className="demo-shell installation-detail-shell installation-script-page">
-      <div className="setup-context app-page-back-row">
-        <button className="setup-context__back" type="button" onClick={onBack}>
-          ‹ {installation.shelly.name}
-        </button>
-      </div>
+      <AppPageBack label={installation.shelly.name} onBack={onBack} />
 
       <section className="automation-card installation-script-page__card">
         <div className="installation-section-heading">

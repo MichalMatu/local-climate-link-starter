@@ -79,6 +79,7 @@ describe('AutomationDashboardScreen controls', () => {
         <QueryClientProvider client={queryClient}>
           <AutomationDashboardScreen
             onAddPlug={vi.fn()}
+            onAddThermometer={vi.fn()}
             onAddAutomation={vi.fn()}
             onOpenInstallation={vi.fn()}
           />

@@ -9,6 +9,7 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { AppPageBack } from '../components/AppPageBack.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
@@ -168,6 +169,7 @@ export const TimeInstallationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
+      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
       <header className="demo-header installation-detail-header">
         <div>
           <div className="automation-status-row">

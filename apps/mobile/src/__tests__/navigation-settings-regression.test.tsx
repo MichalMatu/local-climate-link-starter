@@ -82,7 +82,11 @@ describe('navigation and settings regression coverage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'add-automation-test' }));
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
+    const back = document.querySelector<HTMLButtonElement>(
+      '.app-page-back-row .setup-context__back'
+    );
+    expect(back).not.toBeNull();
+    fireEvent.click(back!);
     expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
   });
 });

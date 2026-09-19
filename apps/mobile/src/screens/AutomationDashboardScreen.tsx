@@ -340,9 +340,16 @@ const AutomationCard = ({ installation, onOpen }: AutomationCardProps) =>
     <ClimateAutomationCard installation={installation} onOpen={onOpen} />
   );
 
-const ThermometerDashboardSection = () => {
+const ThermometerDashboardSection = ({ onAdd }: { onAdd(): void }) => {
   const flow = useHardwareSetupFlow();
-  return <SensorSetupPage flow={flow} primaryAddAction="phone-scan" embedded />;
+  return (
+    <SensorSetupPage
+      flow={flow}
+      primaryAddAction="phone-scan"
+      embedded
+      onAddRequest={onAdd}
+    />
+  );
 };
 
 const PlugSettingsOverlay = ({
@@ -487,6 +494,7 @@ const PlainPlugCard = ({
 type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
   onAddPlug(): void;
+  onAddThermometer(): void;
   onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
   onOpenSettings?: () => void;
@@ -495,6 +503,7 @@ type AutomationDashboardScreenProps = {
 export const AutomationDashboardScreen = ({
   initialKind,
   onAddPlug,
+  onAddThermometer,
   onAddAutomation,
   onOpenInstallation
 }: AutomationDashboardScreenProps) => {
@@ -560,7 +569,7 @@ export const AutomationDashboardScreen = ({
     >
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
         {activeKind === 'time' ? (
-          <ThermometerDashboardSection />
+          <ThermometerDashboardSection onAdd={onAddThermometer} />
         ) : hasPlugEntries ? (
           <>
             {plugEntries.map(({ device, installation }) =>

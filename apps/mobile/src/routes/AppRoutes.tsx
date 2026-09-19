@@ -28,16 +28,26 @@ const HardwareSetupScreen = lazy(async () => {
 
 type SetupRouteIntent = SetupIntent;
 type InstallationPage = 'detail' | 'diagnostics' | 'script';
+type DashboardRoute = { type: 'dashboard'; kind?: AppNavigationKind };
+type SetupRoute = {
+  type: 'setup';
+  intent: SetupRouteIntent;
+  sourceKind: AppNavigationKind;
+  shellyId?: string;
+};
+type DeviceAddReturnRoute = DashboardRoute | SetupRoute;
+type DeviceAddRoute = {
+  type: 'device-add';
+  device: 'plug' | 'sensor';
+  sourceKind: AppNavigationKind;
+  returnTo: DeviceAddReturnRoute;
+  sensorMode?: 'manual' | 'phone-scan';
+};
 type PrimaryAppRoute =
-  | { type: 'dashboard'; kind?: AppNavigationKind }
-  | { type: 'plug-add' }
+  | DashboardRoute
+  | DeviceAddRoute
   | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
-  | {
-      type: 'setup';
-      intent: SetupRouteIntent;
-      sourceKind: AppNavigationKind;
-      shellyId?: string;
-    }
+  | SetupRoute
   | {
       type: 'installation';
       installationId: string;
@@ -61,7 +71,7 @@ const activeNavigationForRoute = (route: AppRoute): AppNavigationKind | 'setting
   if (route.type === 'settings') return 'settings';
   if (route.type === 'dashboard') return route.kind ?? 'climate';
   if (route.type === 'installation') return route.kind;
-  if (route.type === 'plug-add') return 'climate';
+  if (route.type === 'device-add') return route.sourceKind;
   return route.sourceKind;
 };
 
@@ -75,7 +85,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     if (route.page !== 'detail') return installationDetailRoute(route);
     return { type: 'dashboard', kind: route.kind };
   }
-  if (route.type === 'plug-add') return { type: 'dashboard', kind: 'climate' };
+  if (route.type === 'device-add') return route.returnTo;
   if (route.type === 'setup') {
     return {
       type: 'intent',
@@ -150,24 +160,42 @@ export const AppRoutes = () => {
   } else if (route.type === 'intent') {
     content = (
       <SetupIntentScreen
+        activeKind={route.sourceKind}
         onCancel={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
         onSelect={(intent) => selectIntent(intent, route.sourceKind, route.shellyId)}
       />
     );
   } else if (route.type === 'dashboard') {
+    const dashboardKind = route.kind ?? 'climate';
     content = (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
-        onAddPlug={() => navigate({ type: 'plug-add' })}
+        onAddPlug={() =>
+          navigate({
+            type: 'device-add',
+            device: 'plug',
+            sourceKind: 'climate',
+            returnTo: { type: 'dashboard', kind: 'climate' }
+          })
+        }
+        onAddThermometer={() =>
+          navigate({
+            type: 'device-add',
+            device: 'sensor',
+            sourceKind: 'time',
+            returnTo: { type: 'dashboard', kind: 'time' },
+            sensorMode: 'phone-scan'
+          })
+        }
         onAddAutomation={(kind, shellyId) => {
           if (shellyId) selectShellyDevice(shellyId);
           if (kind === 'time') {
-            navigate({ type: 'setup', intent: 'time', sourceKind: 'time' });
+            navigate({ type: 'setup', intent: 'time', sourceKind: dashboardKind });
             return;
           }
           navigate({
             type: 'intent',
-            sourceKind: 'climate',
+            sourceKind: dashboardKind,
             ...(shellyId ? { shellyId } : {})
           });
         }}
@@ -181,14 +209,23 @@ export const AppRoutes = () => {
         }
       />
     );
-  } else if (route.type === 'plug-add') {
-    const backToPlugs = () => navigate({ type: 'dashboard', kind: 'climate' });
+  } else if (route.type === 'device-add') {
+    const leaveAddPage = () => navigate(route.returnTo);
     content = (
       <Suspense fallback={<RouteFallback />}>
         <HardwareSetupScreen
-          plugAddOnly
-          onPlugAddComplete={backToPlugs}
-          onPlugAddCancel={backToPlugs}
+          {...(route.device === 'plug'
+            ? { plugAddOnly: true }
+            : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
+          {...(route.device === 'plug'
+            ? {
+                onPlugAddComplete: leaveAddPage,
+                onPlugAddCancel: leaveAddPage
+              }
+            : {
+                onSensorAddComplete: leaveAddPage,
+                onSensorAddCancel: leaveAddPage
+              })}
         />
       </Suspense>
     );
@@ -219,6 +256,17 @@ export const AppRoutes = () => {
       );
     }
   } else {
+    const openDeviceAdd = (
+      device: 'plug' | 'sensor',
+      sensorMode?: 'manual' | 'phone-scan'
+    ) =>
+      navigate({
+        type: 'device-add',
+        device,
+        sourceKind: route.sourceKind,
+        returnTo: route,
+        ...(sensorMode ? { sensorMode } : {})
+      });
     content = (
       <Suspense fallback={<RouteFallback />}>
         <HardwareSetupScreen
@@ -231,6 +279,8 @@ export const AppRoutes = () => {
               ...(route.shellyId ? { shellyId: route.shellyId } : {})
             })
           }
+          onOpenPlugAdd={() => openDeviceAdd('plug')}
+          onOpenSensorAdd={(mode) => openDeviceAdd('sensor', mode)}
           onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
         />
       </Suspense>
