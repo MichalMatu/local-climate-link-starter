@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-plug-settings-page-v151",
+  "task_digest": "28ad5f424ae5426a39327dcadf1c04c4926679e561f16780f6b619387b100305",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T16:21:12.717956+00:00",
+  "attempt_id": "4211349886c878c199ba11a9",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 30299,
+  "updated_at": "2026-09-19T16:21:12.718081+00:00",
+  "pid": 30299
+}
