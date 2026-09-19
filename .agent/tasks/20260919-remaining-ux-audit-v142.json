@@ -1,0 +1,16 @@
+{
+  "id": "20260919-remaining-ux-audit-v142",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": ["android-device"],
+  "command_timeout": 900,
+  "task_timeout": 1800,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = a7bcb903f9247cc329c222b1674ea5e0cfdcfe37; mkdir -p /tmp/lcl-ux-v142",
+    "set -euo pipefail; adb shell am start -W -n link.localclimate.app/.MainActivity >/dev/null; sleep 1; adb shell input tap 540 2200; sleep 1; adb exec-out screencap -p > /tmp/lcl-ux-v142/thermometers.png; sips -Z 480 -s format jpeg -s formatOptions 55 /tmp/lcl-ux-v142/thermometers.png --out /tmp/lcl-ux-v142/thermometers.jpg >/dev/null; base64 < /tmp/lcl-ux-v142/thermometers.jpg | tr -d '\\n' > /tmp/lcl-ux-v142/thermometers.jpg.b64; split -b 1800 -a 2 /tmp/lcl-ux-v142/thermometers.jpg.b64 /tmp/lcl-ux-v142/thermometers-; echo THERMOMETERS_CAPTURED; adb shell input tap 900 2200; sleep 1; adb exec-out screencap -p > /tmp/lcl-ux-v142/settings.png; sips -Z 480 -s format jpeg -s formatOptions 55 /tmp/lcl-ux-v142/settings.png --out /tmp/lcl-ux-v142/settings.jpg >/dev/null; base64 < /tmp/lcl-ux-v142/settings.jpg | tr -d '\\n' > /tmp/lcl-ux-v142/settings.jpg.b64; split -b 1800 -a 2 /tmp/lcl-ux-v142/settings.jpg.b64 /tmp/lcl-ux-v142/settings-; echo SETTINGS_CAPTURED; wc -c /tmp/lcl-ux-v142/thermometers-* /tmp/lcl-ux-v142/settings-*; test -z \"$(git status --porcelain)\"",
+    "set -euo pipefail; for attempt in 1 2 3 4 5; do git fetch origin agent-control; rm -rf /tmp/lcl-ux-control-v142; git worktree prune; git worktree add --detach /tmp/lcl-ux-control-v142 origin/agent-control >/dev/null; mkdir -p /tmp/lcl-ux-control-v142/.agent/artifacts/20260919-remaining-ux-audit-v142; cp /tmp/lcl-ux-v142/thermometers-[a-z][a-z] /tmp/lcl-ux-v142/settings-[a-z][a-z] /tmp/lcl-ux-control-v142/.agent/artifacts/20260919-remaining-ux-audit-v142/; cd /tmp/lcl-ux-control-v142; git add .agent/artifacts/20260919-remaining-ux-audit-v142; git commit -m 'Add remaining bottom-nav UX captures' >/dev/null; if git push origin HEAD:agent-control; then echo ARTIFACT_COMMIT=$(git rev-parse HEAD); exit 0; fi; cd - >/dev/null; rm -rf /tmp/lcl-ux-control-v142; sleep 1; done; exit 1",
+    "set -euo pipefail; cd /Users/michal/agent-workspace/repos/local-climate-link-starter/work; test -z \"$(git status --porcelain)\"; test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\"; echo FINAL_WORK_HEAD=$(git rev-parse HEAD)"
+  ]
+}
