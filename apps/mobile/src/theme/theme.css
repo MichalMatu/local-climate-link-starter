@@ -3010,3 +3010,26 @@ select {
 .rule-sensor-option-live--stale {
   opacity: var(--lcl-opacity-muted);
 }
+
+/* Climate installation detail: identity and diagnostics-first layout. */
+.installation-detail-identity,
+.installation-detail-recovery,
+.installation-detail-management {
+  grid-column: 1 / -1;
+}
+
+.installation-detail-identity__copy {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+}
+
+.installation-detail-identity h1 {
+  font-size: var(--lcl-font-size-2xl);
+  line-height: var(--lcl-line-height-tight);
+  margin: 0;
+}
+
+.installation-detail-management__actions {
+  border-top: 0;
+  padding-top: 0;
+}

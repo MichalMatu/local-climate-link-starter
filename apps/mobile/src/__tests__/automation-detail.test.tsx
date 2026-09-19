@@ -378,70 +378,51 @@ describe('InstallationDetailScreen', () => {
     ).toBeVisible();
   });
 
-  it('shows Shelly runtime and safely pauses and resumes the exact installed script', async () => {
+  it('shows unique diagnostic detail without duplicating dashboard controls or climate values', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
-    const { rpcMethods } = installShellyFetchMock();
+    installShellyFetchMock();
     const { onBack, onNavigateDashboard, onOpenSettings } = renderDetail(saved.id);
 
-    expect(await screen.findByText('21.4°C')).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
+    const identityCard = screen
+      .getByRole('heading', { name: 'Salon' })
+      .closest('article');
+    expect(identityCard).toHaveClass('installation-detail-identity');
     expect(screen.getByText('Sterowanie temperaturą')).toBeVisible();
-    expect(screen.getByText('55.2%')).toBeVisible();
-    expect(screen.getByText('1.31 kPa')).toBeVisible();
-    expect(screen.getAllByText('19°C / 20°C').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Przedpokój')).toBeVisible();
-    expect(
-      document.querySelector('.installation-detail-header .detail-back-link')
-    ).toBeNull();
-    expect(
-      document.querySelector('.installation-detail-header .runtime-refresh-action')
-    ).toBeNull();
-    expect(document.querySelector('.app-bottom-nav')).not.toBeNull();
-    expect(
-      document.querySelectorAll('.installation-detail-shell svg:not(.tabler-icon)')
-    ).toHaveLength(0);
 
     const automationCard = screen
       .getByRole('heading', { name: 'Automatyka' })
       .closest('article');
     expect(automationCard).not.toBeNull();
-    const auto = within(automationCard!).getByRole('button', { name: 'AUTO' });
-    const manual = within(automationCard!).getByRole('button', { name: 'MANUAL' });
-    const relayOnButton = within(automationCard!).getByRole('button', { name: 'ON' });
-    const relayOffButton = within(automationCard!).getByRole('button', { name: 'OFF' });
-    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
-    expect(relayOnButton).toBeDisabled();
-    expect(relayOffButton).toBeDisabled();
+    expect(within(automationCard!).getByText('Powód')).toBeVisible();
+    expect(within(automationCard!).getByText('Przekaźnik reguły')).toBeVisible();
+    expect(within(automationCard!).getByText('Przekaźnik Shelly')).toBeVisible();
+    expect(within(automationCard!).queryByRole('button', { name: 'AUTO' })).toBeNull();
+    expect(within(automationCard!).queryByRole('button', { name: 'MANUAL' })).toBeNull();
+    expect(within(automationCard!).queryByRole('button', { name: 'ON' })).toBeNull();
+    expect(within(automationCard!).queryByRole('button', { name: 'OFF' })).toBeNull();
 
-    fireEvent.click(manual);
+    const sensorCard = screen
+      .getByRole('heading', { name: 'BLE i sensor' })
+      .closest('article');
+    expect(sensorCard).not.toBeNull();
+    expect(within(sensorCard!).getByText('Przedpokój')).toBeVisible();
+    expect(await within(sensorCard!).findByText('91%')).toBeVisible();
+    expect(await within(sensorCard!).findByText('-51 dBm')).toBeVisible();
 
-    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
-    expect(
-      await within(toastRegion).findByText(
-        'Automatyka zatrzymana, wyjście potwierdzone jako OFF.'
-      )
-    ).toBeVisible();
-    await waitFor(() => expect(manual).toHaveAttribute('aria-pressed', 'true'));
-    await waitFor(() => expect(relayOnButton).toBeEnabled());
-    expect(relayOffButton).toBeEnabled();
-    expect(relayOffButton).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(relayOnButton);
-    await waitFor(() => expect(relayOnButton).toHaveAttribute('aria-pressed', 'true'));
-    fireEvent.click(relayOffButton);
-    await waitFor(() => expect(relayOffButton).toHaveAttribute('aria-pressed', 'true'));
-    expect(screen.queryByRole('heading', { name: 'Skrypt zatrzymany' })).toBeNull();
-    expect(rpcMethods).toContain('Script.Eval');
-    expect(rpcMethods).not.toContain('Script.Stop');
-    expect(screen.getByText('21.4°C')).toBeVisible();
-    expect(rpcMethods).toContain('Switch.Set');
+    const shellyCard = screen
+      .getByRole('heading', { name: 'Telemetria Shelly' })
+      .closest('article');
+    expect(shellyCard).not.toBeNull();
+    expect(await within(shellyCard!).findByText('0.20 A')).toBeVisible();
+    expect(await within(shellyCard!).findByText('32.4°C')).toBeVisible();
+    expect(within(shellyCard!).getByText('OK')).toBeVisible();
 
-    fireEvent.click(auto);
-
-    expect(await within(toastRegion).findByText('Automatyka uruchomiona.')).toBeVisible();
-    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
-    expect(rpcMethods).not.toContain('Script.Start');
-    expect(screen.getByText('21.4°C')).toBeVisible();
+    expect(screen.queryByText('21.4°C')).toBeNull();
+    expect(screen.queryByText('55.2%')).toBeNull();
+    expect(screen.queryByText('1.31 kPa')).toBeNull();
+    expect(screen.queryByText('19°C / 20°C')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     expect(onNavigateDashboard).toHaveBeenCalledWith('time');
@@ -455,7 +436,7 @@ describe('InstallationDetailScreen', () => {
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
     renderDetail(saved.id);
-    expect(await screen.findByText('21.4°C')).toBeVisible();
+    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
     const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka · Salon' });
     expect(dialog).toHaveClass('lcl-modal--workspace');
@@ -463,8 +444,7 @@ describe('InstallationDetailScreen', () => {
     expect(await within(dialog).findByText('JS użyte teraz')).toBeVisible();
     expect(within(dialog).getByText('CPU skryptu')).toBeVisible();
     expect(within(dialog).getByText('RAM Shelly wolny')).toBeInTheDocument();
-    expect(within(dialog).getByText('Bateria')).toBeInTheDocument();
-    expect(within(dialog).getByText('RSSI')).toBeInTheDocument();
+    expect(within(dialog).getByText('Stan skryptu RPC')).toBeVisible();
     expect(within(dialog).queryByText('Temperatura', { exact: true })).toBeNull();
     expect(within(dialog).queryByText('Wilgotność', { exact: true })).toBeNull();
     expect(within(dialog).queryByText('VPD', { exact: true })).toBeNull();
@@ -472,6 +452,9 @@ describe('InstallationDetailScreen', () => {
       within(dialog).queryByText('Aktywne progi ON / OFF', { exact: true })
     ).toBeNull();
     expect(within(dialog).queryByText('Wyjście', { exact: true })).toBeNull();
+    expect(within(dialog).queryByText('Bateria', { exact: true })).toBeNull();
+    expect(within(dialog).queryByText('RSSI', { exact: true })).toBeNull();
+    expect(within(dialog).queryByText('Prąd', { exact: true })).toBeNull();
     await waitFor(() => expect(rpcMethods).toContain('Script.GetStatus'));
     expect(rpcMethods).toContain('Sys.GetStatus');
     const before = rpcMethods.filter((method) => method === 'Script.GetStatus').length;

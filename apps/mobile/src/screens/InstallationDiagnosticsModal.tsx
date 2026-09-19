@@ -34,11 +34,6 @@ const formatNumber = (
   digits = 1
 ): string => (value == null ? missing : `${value.toFixed(digits)}${suffix}`);
 
-const formatEnergy = (value: number | null | undefined, missing: string): string => {
-  if (value == null) return missing;
-  return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
-};
-
 type TechnicalGroupProps = {
   title: string;
   description: string;
@@ -93,22 +88,8 @@ export const InstallationDiagnosticsModal = ({
   const snapshot = diagnosticsQuery.data;
   const diagnostics = snapshot?.diagnostics;
   const script = snapshot?.script;
-  const plug = snapshot?.plug;
   const resources = resourcesQuery.data;
   const missing = t('common.missing');
-
-  const formatUptimeAge = (valueUptimeMs: number | null | undefined): string => {
-    if (valueUptimeMs == null) return missing;
-    const currentUptimeSec = snapshot?.time.uptimeSec;
-    if (currentUptimeSec == null || !Number.isFinite(currentUptimeSec)) {
-      return t('hardware.diagnostics.uptimeAt', {
-        duration: formatDuration(valueUptimeMs)
-      });
-    }
-    return t('hardware.diagnostics.ageAgo', {
-      duration: formatDuration(currentUptimeSec * 1000 - valueUptimeMs)
-    });
-  };
 
   const snapshotAge =
     diagnosticsQuery.dataUpdatedAt === 0
@@ -116,8 +97,6 @@ export const InstallationDiagnosticsModal = ({
       : t('hardware.diagnostics.ageAgo', {
           duration: formatDuration(nowMs - diagnosticsQuery.dataUpdatedAt)
         });
-
-  const resourceScriptRunning = resources?.script?.running ?? script?.running ?? null;
 
   return (
     <Modal
@@ -147,13 +126,23 @@ export const InstallationDiagnosticsModal = ({
             <DiagnosticRow
               label={t('hardware.rule.script')}
               value={
-                resourceScriptRunning === true
+                script?.running === true
                   ? t('hardware.status.running')
-                  : resourceScriptRunning === false
+                  : script?.running === false
                     ? t('hardware.diagnostics.scriptMissingConfirm')
                     : missing
               }
-              tone={resourceScriptRunning === false ? 'warning' : 'normal'}
+              tone={script?.running === false ? 'warning' : 'normal'}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.scriptRpcState')}
+              value={
+                resources?.script?.running === true
+                  ? 'RUNNING'
+                  : resources?.script?.running === false
+                    ? 'STOPPED'
+                    : missing
+              }
             />
             <DiagnosticRow
               label={t('hardware.metrics.configHash')}
@@ -181,50 +170,9 @@ export const InstallationDiagnosticsModal = ({
             />
           </TechnicalGroup>
           <TechnicalGroup
-            title={t('hardware.diagnostics.groupSensor')}
-            description={t('hardware.diagnostics.groupSensorHint')}
-          >
-            <DiagnosticRow
-              label={t('hardware.metrics.lastMeasurement')}
-              value={formatUptimeAge(diagnostics.lastSeenUptimeMs)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.lastBlePacket')}
-              value={formatUptimeAge(diagnostics.lastPacketSeenUptimeMs)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.battery')}
-              value={formatNumber(diagnostics.lastBattery, '%', missing, 0)}
-            />
-            <DiagnosticRow
-              label="RSSI"
-              value={formatNumber(diagnostics.lastRssi, ' dBm', missing, 0)}
-            />
-          </TechnicalGroup>
-          <TechnicalGroup
             title={t('hardware.diagnostics.groupShelly')}
             description={t('hardware.diagnostics.groupShellyHint')}
           >
-            <DiagnosticRow
-              label={t('hardware.metrics.power')}
-              value={formatNumber(plug?.powerW, ' W', missing, 1)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.voltage')}
-              value={formatNumber(plug?.voltageV, ' V', missing, 0)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.current')}
-              value={formatNumber(plug?.currentA, ' A', missing, 2)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.energy')}
-              value={formatEnergy(plug?.energyWh, missing)}
-            />
-            <DiagnosticRow
-              label={t('hardware.metrics.plugTemperature')}
-              value={formatNumber(plug?.deviceTemperatureC, '°C', missing, 1)}
-            />
             <DiagnosticRow
               label={t('hardware.diagnostics.deviceRamFree')}
               value={formatBytes(resources?.system?.ramFreeBytes, missing)}
@@ -236,11 +184,6 @@ export const InstallationDiagnosticsModal = ({
             <DiagnosticRow
               label={t('hardware.metrics.clockShelly')}
               value={snapshot.time.localTime ?? missing}
-            />
-            <DiagnosticRow
-              label={t('hardware.shelly.clockSync')}
-              value={snapshot.time.isSynced ? 'OK' : t('hardware.status.unsynced')}
-              tone={snapshot.time.isSynced ? 'normal' : 'warning'}
             />
           </TechnicalGroup>
         </div>

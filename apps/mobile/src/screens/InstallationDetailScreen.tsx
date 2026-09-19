@@ -20,10 +20,13 @@ import { installationScriptPreviewCopy } from '../app/locales/installationScript
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
 import {
-  formatInstallationMetric,
-  INSTALLATION_MODE_KEYS,
-  installationThresholdSummary
-} from '../flows/installations/presentation.js';
+  formatBleDataState,
+  formatDiagnosticNumber,
+  formatDiagnosticReason,
+  formatDiagnosticUptimeAge,
+  formatRelayState
+} from '../flows/installations/diagnosticPresentation.js';
+import { INSTALLATION_MODE_KEYS } from '../flows/installations/presentation.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
   deleteInstalledAutomation,
@@ -35,7 +38,6 @@ import {
 } from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import { InstallationDiagnosticsModal } from './InstallationDiagnosticsModal.js';
-import { InstallationRuntimeControls } from './InstallationRuntimeControls.js';
 import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
@@ -53,9 +55,6 @@ type InstallationDetailScreenProps = {
   onNavigateDashboard?: (kind: AppNavigationKind) => void;
   onOpenSettings?: () => void;
 };
-
-const configuredThresholdSummary = (installation: ClimateInstalledAutomation) =>
-  installationThresholdSummary(installation);
 
 export const InstallationDetailScreen = ({
   installationId,
@@ -182,10 +181,6 @@ const InstalledAutomationDetail = ({
   const scriptMatch = control
     ? installedAutomationScriptMatch(installation, control)
     : null;
-  const isPaused = scriptMatch === 'matched' && control?.automationMode === 'manual';
-  const canToggleAutomation =
-    scriptMatch === 'matched' &&
-    (control?.automationMode === 'auto' || control?.automationMode === 'manual');
   const runtimeHealth = snapshot ? installedAutomationHealth(snapshot) : null;
   const recovery = installationRecoveryState({
     diagnosticsError: diagnosticsQuery.isError,
@@ -244,8 +239,15 @@ const InstalledAutomationDetail = ({
       .catch(() => pushToast('warning', scriptCopy.copyFailed));
   };
 
-  const relayState =
-    control?.relayOn ?? snapshot?.plug?.relayState ?? snapshot?.diagnostics.relayState;
+  const missing = t('common.missing');
+  const diagnostics = snapshot?.diagnostics;
+  const shellyRelayState = snapshot?.plug?.relayState ?? control?.relayOn;
+  const diagnosticSensorLabel =
+    snapshot?.sensor?.displayName ??
+    snapshot?.sensor?.runtimeAddress ??
+    installation.config.sensor.displayName ??
+    installation.config.sensor.runtimeAddress ??
+    missing;
   const purposeLabel =
     installation.config.rule.control.metric === 'humidity'
       ? t('intent.humidity.context')
@@ -253,14 +255,14 @@ const InstalledAutomationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell app-bottom-nav-shell">
-      <header className="demo-header installation-detail-header">
-        <div>
-          <h1>{installation.shelly.name}</h1>
-          <p className="installation-detail-purpose">{purposeLabel}</p>
-        </div>
-      </header>
-
       <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
+        <article className="automation-card installation-detail-identity">
+          <div className="installation-detail-identity__copy">
+            <h1>{installation.shelly.name}</h1>
+            <p className="installation-detail-purpose">{purposeLabel}</p>
+          </div>
+        </article>
+
         {visibleRecovery && recoveryCopy && (
           <article className="automation-card installation-detail-recovery" role="status">
             <div className="installation-section-heading">
@@ -306,55 +308,9 @@ const InstalledAutomationDetail = ({
           </article>
         )}
 
-        <article className="automation-card installation-detail-live">
-          <div className="installation-section-heading">
-            <h2>{t('detail.climateNow')}</h2>
-          </div>
-
-          <div className="automation-metrics" aria-label={t('dashboard.currentValues')}>
-            <div>
-              <span>{t('dashboard.temperature')}</span>
-              <strong>
-                {formatInstallationMetric(snapshot?.diagnostics.lastTemp, '°C')}
-              </strong>
-            </div>
-            <div>
-              <span>{t('dashboard.humidity')}</span>
-              <strong>
-                {formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')}
-              </strong>
-            </div>
-            <div>
-              <span>{t('dashboard.vpd')}</span>
-              <strong>
-                {formatInstallationMetric(snapshot?.diagnostics.lastVpd, ' kPa', 2)}
-              </strong>
-            </div>
-          </div>
-
-          <dl className="automation-summary installation-detail-summary">
-            <div>
-              <dt>{t('dashboard.output')}</dt>
-              <dd>{relayState == null ? '—' : relayState ? 'ON' : 'OFF'}</dd>
-            </div>
-            <div>
-              <dt>{t('detail.activeThresholds')}</dt>
-              <dd>
-                {installationThresholdSummary(
-                  installation,
-                  snapshot?.diagnostics.lastEffectiveOnThreshold,
-                  snapshot?.diagnostics.lastEffectiveOffThreshold
-                )}
-              </dd>
-            </div>
-          </dl>
-        </article>
-
         <article className="automation-card installation-detail-config">
           <div className="installation-section-heading">
-            <div>
-              <h2>{t('detail.automation')}</h2>
-            </div>
+            <h2>{t('detail.automation')}</h2>
             <button
               aria-label={scriptCopy.action}
               className="icon-action"
@@ -366,60 +322,129 @@ const InstalledAutomationDetail = ({
               <IconCode className="icon-action__svg" aria-hidden="true" />
             </button>
           </div>
-
           <dl className="automation-summary installation-detail-summary">
             <div>
               <dt>{t('hardware.metrics.mode')}</dt>
               <dd>{t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}</dd>
             </div>
             <div>
-              <dt>{t('dashboard.thresholds')}</dt>
-              <dd>{configuredThresholdSummary(installation)}</dd>
+              <dt>{t('hardware.metrics.reason')}</dt>
+              <dd>
+                {diagnostics
+                  ? formatDiagnosticReason(diagnostics.lastReason, t)
+                  : missing}
+              </dd>
             </div>
             <div>
-              <dt>{t('dashboard.sensor')}</dt>
-              <dd>{installation.config.sensor.displayName}</dd>
+              <dt>{t('hardware.metrics.relayRule')}</dt>
+              <dd>{formatRelayState(diagnostics?.relayState, missing)}</dd>
+            </div>
+            <div>
+              <dt>{t('hardware.metrics.shellyRelay')}</dt>
+              <dd>{formatRelayState(shellyRelayState, missing)}</dd>
             </div>
           </dl>
+        </article>
 
-          <InstallationRuntimeControls
-            actionBusy={automationAction.isPending}
-            automationMode={control?.automationMode ?? null}
-            canToggleAutomation={canToggleAutomation}
-            deleteBusy={deleteMutation.isPending}
-            deleteLabel={deleteCopy.action}
-            relayState={relayState}
-            onAuto={() => {
-              if (isPaused) {
-                automationAction.mutate('auto', {
-                  onSuccess: () => pushToast('ok', t('detail.resumeSuccess'))
-                });
-              }
-            }}
-            onManual={() => {
-              if (control?.automationMode === 'auto') {
-                automationAction.mutate('manual', {
-                  onSuccess: () => pushToast('ok', t('detail.pauseSuccess'))
-                });
-              }
-            }}
-            onRelayOn={() => {
-              if (relayState !== true) {
-                automationAction.mutate('on', {
-                  onError: () => pushToast('warning', t('detail.actionFailed'))
-                });
-              }
-            }}
-            onRelayOff={() => {
-              if (relayState !== false) {
-                automationAction.mutate('off', {
-                  onError: () => pushToast('warning', t('detail.actionFailed'))
-                });
-              }
-            }}
-            onOpenDiagnostics={() => setDiagnosticsOpen(true)}
-            onDelete={() => setDeleteOpen(true)}
-          />
+        <article className="automation-card installation-detail-sensor">
+          <div className="installation-section-heading">
+            <h2>{t('hardware.diagnostics.groupSensor')}</h2>
+          </div>
+          <dl className="automation-summary installation-detail-summary">
+            <div>
+              <dt>{t('hardware.metrics.thermometer')}</dt>
+              <dd>{diagnosticSensorLabel}</dd>
+            </div>
+            <div>
+              <dt>{t('hardware.metrics.lastMeasurement')}</dt>
+              <dd>
+                {formatDiagnosticUptimeAge(
+                  diagnostics?.lastSeenUptimeMs,
+                  snapshot?.time.uptimeSec,
+                  missing,
+                  t
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('hardware.metrics.lastBlePacket')}</dt>
+              <dd>
+                {formatDiagnosticUptimeAge(
+                  diagnostics?.lastPacketSeenUptimeMs,
+                  snapshot?.time.uptimeSec,
+                  missing,
+                  t
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('hardware.metrics.battery')}</dt>
+              <dd>{formatDiagnosticNumber(diagnostics?.lastBattery, '%', missing, 0)}</dd>
+            </div>
+            <div>
+              <dt>RSSI</dt>
+              <dd>{formatDiagnosticNumber(diagnostics?.lastRssi, ' dBm', missing, 0)}</dd>
+            </div>
+            <div>
+              <dt>{t('hardware.metrics.dataBle')}</dt>
+              <dd>{diagnostics ? formatBleDataState(diagnostics, t) : missing}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <article className="automation-card installation-detail-shelly">
+          <div className="installation-section-heading">
+            <h2>{t('hardware.diagnostics.groupShelly')}</h2>
+          </div>
+          <dl className="automation-summary installation-detail-summary">
+            <div>
+              <dt>{t('hardware.metrics.current')}</dt>
+              <dd>
+                {formatDiagnosticNumber(snapshot?.plug?.currentA, ' A', missing, 2)}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('hardware.metrics.plugTemperature')}</dt>
+              <dd>
+                {formatDiagnosticNumber(
+                  snapshot?.plug?.deviceTemperatureC,
+                  '°C',
+                  missing,
+                  1
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('hardware.shelly.clockSync')}</dt>
+              <dd>
+                {snapshot
+                  ? snapshot.time.isSynced
+                    ? 'OK'
+                    : t('hardware.status.unsynced')
+                  : missing}
+              </dd>
+            </div>
+          </dl>
+        </article>
+
+        <article className="automation-card installation-detail-management">
+          <div className="installation-detail-actions installation-detail-management__actions">
+            <button
+              className="secondary-action"
+              type="button"
+              onClick={() => setDiagnosticsOpen(true)}
+            >
+              {t('common.diagnostics')}
+            </button>
+            <button
+              className="secondary-action secondary-action--danger"
+              type="button"
+              disabled={deleteMutation.isPending}
+              onClick={() => setDeleteOpen(true)}
+            >
+              {deleteCopy.action}
+            </button>
+          </div>
         </article>
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
