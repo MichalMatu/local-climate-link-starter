@@ -761,6 +761,16 @@ describe('HardwareSetupScreen', () => {
     );
   });
 
+  it('uses the shared child-page back chrome for the setup flow', () => {
+    const onBackToIntent = vi.fn();
+    renderHardwareSetup({ setupIntent: 'temperature', onBackToIntent });
+
+    const back = screen.getByRole('button', { name: '‹ Zmień cel' });
+    expect(back.closest('.app-page-back-row')).not.toBeNull();
+    fireEvent.click(back);
+    expect(onBackToIntent).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps standalone device-add pages free of duplicate top navigation and titles', () => {
     const { unmount } = renderHardwareSetup({ plugAddOnly: true });
     expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
