@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 6,
-  "command": "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-plug-settings-page-v150-tests.py | python3 -; git show origin/agent-control:.agent/scripts/20260919-plug-settings-page-v152-test-harness.py | python3 -; git show origin/agent-control:.agent/scripts/20260919-plug-settings-page-v150-impl.py | python3 -; pnpm exec prettier --write apps/mobile/src/__tests__/automation-dashboard.test.tsx apps/mobile/src/__tests__/automation-dashboard-controls.test.tsx apps/mobile/src/__tests__/navigation-settings-regression.test.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/routes/AppRoutes.tsx apps/mobile/src/screens/PlugSettingsScreen.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySettingsModal.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySettingsContent.tsx >/dev/null; git diff --check; changed=$(git status --porcelain | sed -E 's/^.. //' | sort); printf '%s\\n' \"$changed\"; expected=$(printf '%s\\n' apps/mobile/src/__tests__/automation-dashboard.test.tsx apps/mobile/src/__tests__/automation-dashboard-controls.test.tsx apps/mobile/src/__tests__/navigation-settings-regression.test.tsx apps/mobile/src/routes/AppRoutes.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/screens/PlugSettingsScreen.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySettingsContent.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySettingsModal.tsx apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx | sort); test \"$changed\" = \"$expected\"; pnpm --filter @lcl/mobile typecheck; pnpm quality:ux; pnpm quality:repo; pnpm --filter @lcl/mobile exec vitest run src/__tests__/automation-dashboard.test.tsx src/__tests__/automation-dashboard-controls.test.tsx src/__tests__/navigation-settings-regression.test.tsx src/__tests__/hardware-setup.test.tsx --passWithNoTests",
-  "pid": 32464,
+  "command": "pnpm check",
+  "pid": 33200,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T16:23:16.492292+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-19T16:23:57.927505+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 6,
   "stage_phase": "commands",
   "task_id": "20260919-plug-settings-page-v152",
@@ -18,5 +18,5 @@
   "task_digest": "244f33c3a03e4d9e957eb7e1f357493d363ffbdf3f31c51ca97cabf7f23f920b",
   "daemon_version": "4.18.22",
   "daemon_pid": 32212,
-  "updated_at": "2026-09-19T16:23:16.564848+00:00"
+  "updated_at": "2026-09-19T16:23:57.998019+00:00"
 }
