@@ -43,7 +43,6 @@ export const ShellyBleDiscoveryModal = ({
       closeLabel={t('common.close')}
       description={device?.name ?? ''}
       open={open}
-      size="task"
       title={t('hardware.shelly.scanBleTitle')}
       titleInfo={{
         label: t('hardware.shelly.scanBleInfoLabel'),

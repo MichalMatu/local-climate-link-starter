@@ -238,7 +238,6 @@ export const TimeScheduleSetupPage = ({
         }
         closeLabel={t('common.cancel')}
         open={editingTime !== null}
-        size="task"
         title={editingTime === 'off' ? t('time.offTime') : t('time.onTime')}
         onClose={() => setEditingTime(null)}
       >

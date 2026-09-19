@@ -468,7 +468,6 @@ const InstalledAutomationDetail = ({
       <Modal
         closeLabel={t('common.close')}
         open={scriptOpen}
-        size="workspace"
         title={scriptCopy.title}
         onClose={closeScriptPreview}
       >

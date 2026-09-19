@@ -31,6 +31,20 @@ describe('Modal dismissal policy', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('renders one canonical modal shell without size variants', () => {
+    const onClose = vi.fn();
+    render(
+      <Modal closeLabel="Close" open title="Canonical modal" onClose={onClose}>
+        <p>Body</p>
+      </Modal>
+    );
+
+    const dialog = screen.getByRole('dialog', { name: 'Canonical modal' });
+    const backdrop = document.querySelector('.lcl-modal-backdrop');
+    expect(dialog.className).toBe('lcl-modal');
+    expect(backdrop?.className).toBe('lcl-modal-backdrop');
+  });
+
   it('blocks ambient dismissal while a modal is busy', () => {
     const onClose = vi.fn();
     render(

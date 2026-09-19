@@ -158,7 +158,6 @@ export const SensorSetupPage = ({
       <Modal
         closeLabel={t('common.close')}
         open={isAddSensorModalOpen}
-        size="task"
         title={t('hardware.sensor.add')}
         headerActions={
           <button
@@ -190,7 +189,6 @@ export const SensorSetupPage = ({
         busy={isPhoneBleScanPending}
         closeLabel={t('common.close')}
         open={isPhoneBleScanModalOpen}
-        size="task"
         title={t('hardware.sensor.phoneBleTitle')}
         actions={
           isPhoneBleScanPending ? (

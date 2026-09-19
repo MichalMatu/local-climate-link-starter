@@ -439,8 +439,8 @@ describe('InstallationDetailScreen', () => {
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
     const dialog = await screen.findByRole('dialog', { name: 'Diagnostyka' });
-    expect(dialog).toHaveClass('lcl-modal--default');
-    expect(dialog).not.toHaveClass('lcl-modal--workspace');
+    expect(dialog).toHaveClass('lcl-modal');
+    expect(dialog.className).toBe('lcl-modal');
     expect(
       within(dialog).getByRole('heading', { name: 'Skrypt', level: 3 })
     ).toBeVisible();

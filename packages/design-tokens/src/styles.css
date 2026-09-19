@@ -68,11 +68,12 @@
   --lcl-size-control-icon-size: 1.1rem;
   --lcl-size-code-preview-max-height: 22rem;
   --lcl-size-modal-max-width: 42rem;
-  --lcl-size-modal-workspace-min-height: 32rem;
   --lcl-size-tooltip-max-width: 22rem;
   --lcl-size-toast-max-width: 28rem;
   --lcl-size-toast-dismiss-size: 1.6rem;
   --lcl-size-select-indicator-size: 0.55rem;
+  --lcl-size-modal-height: 36rem;
+  --lcl-size-modal-viewport-inset: 0.5rem;
   --lcl-fluid-shell-padding: clamp(0.75rem, 4vw, 1.5rem);
   --lcl-fluid-panel-padding: clamp(1rem, 3vw, 1.5rem);
   --lcl-fluid-hero-title: clamp(2rem, 6vw, 3.8rem);

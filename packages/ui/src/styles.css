@@ -506,15 +506,9 @@
   display: flex;
   inset: 0;
   justify-content: center;
-  padding: var(--lcl-spacing-lg);
+  padding: var(--lcl-size-modal-viewport-inset);
   position: fixed;
   z-index: var(--lcl-z-index-modal);
-}
-
-.lcl-modal-backdrop--diagnostic,
-.lcl-modal-backdrop--task,
-.lcl-modal-backdrop--workspace {
-  padding: var(--lcl-spacing-sm);
 }
 
 .lcl-modal {
@@ -522,33 +516,31 @@
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-lg);
   box-shadow: var(--lcl-shadow-lg);
+  box-sizing: border-box;
   color: var(--lcl-color-text);
   display: grid;
   gap: var(--lcl-spacing-lg);
   grid-template-rows: auto minmax(0, 1fr) auto;
-  max-height: calc(100vh - (var(--lcl-spacing-xl) * 2));
-  max-width: min(
-    var(--lcl-size-modal-max-width),
-    calc(100vw - (var(--lcl-spacing-lg) * 2))
+  height: min(
+    var(--lcl-size-modal-height),
+    calc(
+      100vh - var(--lcl-size-modal-viewport-inset) - var(--lcl-size-modal-viewport-inset)
+    )
   );
-  overflow: visible;
+  height: min(
+    var(--lcl-size-modal-height),
+    calc(
+      100dvh - var(--lcl-size-modal-viewport-inset) - var(--lcl-size-modal-viewport-inset)
+    )
+  );
+  overflow: hidden;
   padding: var(--lcl-spacing-xl);
-  width: 100%;
-}
-
-.lcl-modal--workspace {
-  height: calc(100vh - (var(--lcl-spacing-sm) * 2));
-  max-height: calc(100vh - (var(--lcl-spacing-sm) * 2));
-  min-height: min(
-    var(--lcl-size-modal-workspace-min-height),
-    calc(100vh - (var(--lcl-spacing-sm) * 2))
+  width: min(
+    var(--lcl-size-modal-max-width),
+    calc(
+      100vw - var(--lcl-size-modal-viewport-inset) - var(--lcl-size-modal-viewport-inset)
+    )
   );
-}
-
-.lcl-modal--diagnostic .lcl-modal__body,
-.lcl-modal--task .lcl-modal__body,
-.lcl-modal--workspace .lcl-modal__body {
-  align-content: start;
 }
 
 .lcl-modal__header {
@@ -632,32 +624,8 @@
     justify-items: stretch;
   }
 
-  .lcl-modal-backdrop {
-    align-items: center;
-    padding: var(--lcl-spacing-sm);
-  }
-
   .lcl-modal {
-    height: auto;
-    max-height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
-    max-width: calc(100vw - (var(--lcl-spacing-sm) * 2));
     padding: var(--lcl-fluid-panel-padding);
-  }
-
-  .lcl-modal-backdrop--diagnostic,
-  .lcl-modal-backdrop--task,
-  .lcl-modal-backdrop--workspace {
-    align-items: stretch;
-  }
-
-  .lcl-modal--diagnostic,
-  .lcl-modal--task,
-  .lcl-modal--workspace {
-    height: calc(100dvh - (var(--lcl-spacing-sm) * 2));
-  }
-
-  .lcl-modal--workspace {
-    min-height: auto;
   }
 
   .lcl-modal__footer {

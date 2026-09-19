@@ -538,7 +538,6 @@ export const RuleSetupPage = ({
       <Modal
         closeLabel={t('common.close')}
         open={dialog === 'script' && flow.configState.ok}
-        size="workspace"
         title={t('hardware.rule.scriptPreview')}
         onClose={() => setDialog('none')}
       >

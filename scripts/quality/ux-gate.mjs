@@ -434,72 +434,67 @@ const checkResponsiveCss = async () => {
 const checkModalSizingPatterns = async () => {
   const uiThemePath = 'packages/ui/src/styles.css';
   const modalPath = 'packages/ui/src/primitives/Modal.tsx';
+  const tokenCssPath = 'packages/design-tokens/src/styles.css';
+  const tokenSourcePath = 'packages/design-tokens/tokens/tokens.json';
   const uiTheme = await readRepoFile(uiThemePath);
   const modalSource = await readRepoFile(modalPath);
+  const tokenCss = await readRepoFile(tokenCssPath);
+  const tokenSource = JSON.parse(await readRepoFile(tokenSourcePath));
 
-  if (uiTheme.includes('--lcl-size-modal-diagnostic-min-height')) {
+  const expectedGeometry = {
+    modalMaxWidth: '42rem',
+    modalHeight: '36rem',
+    modalViewportInset: '0.5rem'
+  };
+  for (const [token, expected] of Object.entries(expectedGeometry)) {
+    if (tokenSource.size?.[token] !== expected) {
+      addFailure(
+        tokenSourcePath,
+        `canonical modal token size.${token} must equal ${expected}`
+      );
+    }
+    const cssName = token.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+    if (!tokenCss.includes(`--lcl-size-${cssName}: ${expected};`)) {
+      addFailure(tokenCssPath, `generated modal token --lcl-size-${cssName} is missing`);
+    }
+    if (!uiTheme.includes(`var(--lcl-size-${cssName})`)) {
+      addFailure(uiThemePath, `shared modal geometry must consume --lcl-size-${cssName}`);
+    }
+  }
+
+  if ('modalWorkspaceMinHeight' in (tokenSource.size ?? {})) {
     addFailure(
-      uiThemePath,
-      'diagnostic modals must be content-sized; use workspace modal tokens for full-height previews'
+      tokenSourcePath,
+      'legacy modalWorkspaceMinHeight token must not exist; all modals share one geometry'
     );
   }
 
-  const diagnosticModalRule =
-    uiTheme.match(/\.lcl-modal--diagnostic\s*\{(?<body>[^}]*)\}/)?.groups?.body ?? '';
-  if (/\b(?:height|min-height):/.test(diagnosticModalRule)) {
+  if (/\.lcl-modal(?:-backdrop)?--/.test(uiTheme)) {
     addFailure(
       uiThemePath,
-      'lcl-modal--diagnostic must not set height/min-height; compact diagnostics should shrink to content'
+      'modal size modifier classes are forbidden; every modal must use the canonical geometry'
     );
   }
 
   if (
-    !uiTheme.includes('.lcl-modal--workspace') ||
-    !uiTheme.includes('--lcl-size-modal-workspace-min-height')
+    modalSource.includes('size?:') ||
+    modalSource.includes("size = 'default'") ||
+    modalSource.includes('lcl-modal--${') ||
+    modalSource.includes('lcl-modal-backdrop--${')
   ) {
-    addFailure(
-      uiThemePath,
-      'full-height modal sizing must live in lcl-modal--workspace with workspace size tokens'
-    );
+    addFailure(modalPath, 'Modal must not expose or render size variants');
   }
 
-  if (!modalSource.includes("'workspace'")) {
-    addFailure(
-      modalPath,
-      'Modal size union must include workspace for full-height previews'
-    );
-  }
-
-  for (const path of feedbackContractPagePaths) {
+  const mobileTsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
+    path.endsWith('.tsx')
+  );
+  for (const path of mobileTsxPaths) {
     const source = await readRepoFile(path);
-    const modalBlocks = source.matchAll(/<Modal\b[\s\S]*?<\/Modal>/g);
-
-    for (const match of modalBlocks) {
-      const block = match[0];
-      const hasFillPreview = block.includes('variant="fill"');
-      const hasWorkspaceSize = block.includes('size="workspace"');
-      const hasDiagnosticSize = block.includes('size="diagnostic"');
-
-      if (hasFillPreview && !hasWorkspaceSize) {
-        addFailure(
-          path,
-          'ScriptPreview variant="fill" requires Modal size="workspace" so diagnostic modals stay content-sized'
-        );
-      }
-
-      if (hasDiagnosticSize && hasFillPreview) {
-        addFailure(
-          path,
-          'diagnostic modals must not contain fill previews; use size="workspace"'
-        );
-      }
-
-      if (hasWorkspaceSize && !hasFillPreview) {
-        addFailure(
-          path,
-          'workspace modals must be reserved for content that intentionally fills the modal body'
-        );
-      }
+    if (/\bsize=["'](?:default|diagnostic|task|workspace)["']/.test(source)) {
+      addFailure(
+        path,
+        'legacy modal size variants are forbidden; use the shared Modal geometry without size'
+      );
     }
   }
 };

@@ -359,7 +359,6 @@ export const ShellySetupPage = ({
           )
         }}
         open={isAddShellyModalOpen}
-        size="task"
         title={t('hardware.shelly.add')}
         onClose={closeAddShellyModal}
       >

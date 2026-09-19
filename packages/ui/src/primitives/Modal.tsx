@@ -17,7 +17,6 @@ export interface ModalProps {
   busy?: boolean;
   dismissible?: boolean;
   initialFocus?: ModalInitialFocus;
-  size?: 'default' | 'diagnostic' | 'task' | 'workspace';
   children: ReactNode;
   titleInfo?: ModalTitleInfo;
   headerActions?: ReactNode;
@@ -50,7 +49,6 @@ export const Modal = ({
   busy = false,
   dismissible = true,
   initialFocus = 'dialog',
-  size = 'default',
   children,
   titleInfo,
   headerActions,
@@ -156,7 +154,7 @@ export const Modal = ({
 
   return (
     <div
-      className={`lcl-modal-backdrop lcl-modal-backdrop--${size}`}
+      className="lcl-modal-backdrop"
       role="presentation"
       onClick={canDismiss ? onClose : undefined}
     >
@@ -164,7 +162,7 @@ export const Modal = ({
         aria-describedby={description ? descriptionId : undefined}
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`lcl-modal lcl-modal--${size}`}
+        className="lcl-modal"
         ref={modalRef}
         role="dialog"
         tabIndex={-1}

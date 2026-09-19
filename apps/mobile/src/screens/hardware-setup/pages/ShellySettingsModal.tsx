@@ -39,7 +39,6 @@ export const ShellySettingsModal = ({
       busy={flow.recheckShellyMutation.isPending}
       closeLabel={t('common.close')}
       open={device !== null}
-      size="diagnostic"
       title={device?.name ?? t('hardware.shelly.settings')}
       onClose={onClose}
     >

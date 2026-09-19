@@ -530,7 +530,7 @@ const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
     };
   });
 
-  expect(metrics.modalClassName).toContain('lcl-modal--workspace');
+  expect(metrics.modalClassName).toBe('lcl-modal');
   expect(metrics.previewHeight).toBeGreaterThan(metrics.bodyHeight * 0.85);
   expect(metrics.codeHeight).toBeGreaterThan(metrics.bodyHeight * 0.7);
 };

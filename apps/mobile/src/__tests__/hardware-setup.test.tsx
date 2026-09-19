@@ -1780,7 +1780,7 @@ describe('HardwareSetupScreen', () => {
       screen.getByRole('button', { name: 'Wyślij' }).closest('.action-row')
     ).toHaveClass('rule-action-row');
     const scriptDialog = await openRuleScriptDialog();
-    expect(scriptDialog).toHaveClass('lcl-modal--workspace');
+    expect(scriptDialog).toHaveClass('lcl-modal');
     const generatedScriptPreview =
       within(scriptDialog).getByLabelText('Wygenerowany skrypt');
     expect(generatedScriptPreview).toHaveClass('lcl-script-preview--fill');
