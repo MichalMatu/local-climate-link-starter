@@ -1,0 +1,9 @@
+{
+  "event": "invalid_task_rejected",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "updated_at": "2026-09-19T16:06:40.561892+00:00",
+  "task_id": "20260919-installation-missing-page-chrome-v145",
+  "daemon_version": "4.18.22",
+  "pid": 12350
+}
