@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-docs-checkpoint-v141",
+  "task_digest": "cb2a6312a54bcd7ee30f6cdcf8c1f197d4816cd11752347940a8183febb83060",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T15:14:08.385973+00:00",
+  "attempt_id": "8bee4cf4eed60fa90117ae73",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 34629,
+  "updated_at": "2026-09-19T15:14:08.386187+00:00",
+  "pid": 34629
+}
