@@ -1,179 +1,116 @@
 # Refactor boundaries
 
-Updated: 2026-09-17
+Updated: 2026-09-19
 
-Current cleanup checkpoint:
+File size is an alarm, not a refactor goal. Split code only at a real responsibility boundary, to remove duplicate state/transport ownership, or when a quality budget proves that a boundary is regrowing.
 
-```text
-c67ac66c10e076e4b5d798e11bf117eefca49ea3
-Tighten hardware setup boundaries
-```
-
-File size remains an alarm, not a refactor goal. Split only at a real responsibility boundary or to remove a concrete duplicate state/RPC path.
-
-## Product/domain ownership
-
-The product remains Plug-centric:
+## Enforced direction
 
 ```text
-physical Plug -> zero or one installed automation for that relay
+packages/domain + adapters
+        ^
+        |
+mobile flows / stores
+        ^
+        |
+screens / route composition
+        ^
+        |
+shared UI primitives
 ```
 
-Keep these boundaries:
+More concretely:
 
-- `InstalledAutomation` is the durable installed-automation entity.
-- `setupDraftStore.ts` owns setup inputs plus saved Plug/Sensor metadata; it is not a second automation registry.
-- physical Plug metadata and user display name are not automation identity.
-- Time is attached to a concrete Plug, not a global Time domain/surface.
-- phone BLE and Shelly-side BLE discovery feed the same saved-sensor/readings model.
+- domain packages do not import React/Ionic;
+- screens do not call raw `fetch`;
+- screens do not import the Capacitor BLE plugin;
+- transport/runtime implementation belongs in clients/adapters/flows;
+- pages consume narrow flow contracts;
+- UI primitives do not make product/runtime ownership decisions.
 
-Do not introduce a global ownership registry unless a concrete product requirement demands it.
+`scripts/quality/repository-gate.mjs` is the executable boundary contract. Keep it green; do not increase budgets just to land a change.
 
-## Dashboard boundary
+## Hardware setup boundary
 
-`AutomationDashboardScreen.tsx` still composes installed automation cards, plain Plug cards, Plug settings and Thermometer embedding. Do not split it merely for line count.
+`HardwareSetupScreen.tsx` is a coordinator. Its responsibilities are limited to:
 
-Two real seams remain:
+- selecting the current setup page/tab,
+- applying route/setup context,
+- opening/closing local child pages where needed,
+- lifecycle cleanup when the whole setup surface leaves.
 
-1. saved Plug -> `InstalledAutomation` reconciliation by normalized `baseUrl` can become a small pure selector if that area is next changed,
-2. `PlainPlugCard` can be extracted when doing so removes duplicated physical-control state or makes a concrete change safer.
+It must not own Shelly RPC details, BLE parsing/scanning implementation or page-specific presentation.
 
-The final cleanup also fixed a transient refresh-loop regression discovered during verification. Physical Plug refresh is keyed to `device.id` / `baseUrl`; a ref holds the latest refresh function so effect dependencies do not create repeated refreshes.
+`useHardwareSetupFlow.ts` is a facade over cohesive subsystems. Current extracted responsibilities include:
 
-## Physical Plug control versus installed automation control
-
-An unconfigured Plug may use the physical-device control path for status/direct relay control on the dashboard. Installed climate/time automation must use `flows/installations/*` runtime ownership and safety checks.
-
-The previous generic hardware-setup AUTO/MANUAL path has now been removed. Generic setup no longer exposes `setAutomationAuto` / `setAutomationManual` or the old `Script.Start` / `Script.Stop` mode semantics.
-
-Accepted installed-runtime invariants remain:
-
-- AUTO/MANUAL changes happen inside the running managed runtime,
-- normal mode switching does not stop/start the managed script,
-- MANUAL keeps the exact managed script running while blocking automatic output decisions,
-- direct ON/OFF requires verified ownership/capability.
-
-Temporary script stop/restart used specifically by Shelly BLE-discovery cleanup remains a separate lifecycle concern and is intentionally preserved.
-
-## Hardware setup facade
-
-`useHardwareSetupFlow.ts` remains a composing facade. It delegates the main subsystems:
-
-- `useShellySetupScanFlow.ts` — LAN scan inputs, execution, progressive results and cancellation,
-- `useHardwareDiagnosticsFlow.ts` — diagnostic/resource snapshots,
-- `useClimateAutomationInstallFlow.ts` — install/conflict handling and safe relay test,
-- `useShellyControlFlow.ts` — physical Shelly status/direct relay control only,
-- `useShellyBleDiscoveryFlow.ts` — temporary Shelly-side BLE discovery lifecycle and cleanup,
-- `usePhoneSensorFlow.ts` — phone BLE scan/live scan/GATT coordination and sensor ingestion.
-
-It still owns the older residual setup/script orchestration cluster (`check/recheck`, `setupStatus`, setup-script load/delete). Do not extract those during unrelated UX work unless a concrete lifecycle conflict appears.
-
-## LAN scan boundary
-
-`useShellySetupScanFlow.ts` stays focused. Preserve:
-
-- full requested-range scanning,
-- progressive result publication,
-- duplicate URL suppression,
-- AbortController cancellation,
-- tolerant editing with validation when scan starts.
-
-Do not move scan lifecycle back into `ShellySetupPage.tsx`.
-
-## Shelly setup presentation
-
-The previous 811-line composition regression was resolved without raising the repository budget.
-
-Shelly setup now uses focused presentation/modal boundaries including:
-
-- `ShellySetupPresentation.tsx`,
-- `ShellySettingsModal.tsx`,
-- `ShellyBleDiscoveryModal.tsx`.
-
-Transport and lifecycle remain behind existing flows/hooks. No new setup store or RPC layer was introduced.
-
-Generic saved-Shelly setup presentation no longer owns runtime automation mode controls. It retains setup/status/settings/BLE-discovery responsibilities.
-
-## Sensor setup presentation
-
-The previous 691-line `SensorSetupPage.tsx` composition regression was also resolved without raising its budget.
-
-Saved thermometer presentation is now separated into `SensorSetupPresentation.tsx`. Phone BLE lifecycle remains in `usePhoneSensorFlow`; the page remains composition/orchestration rather than radio ownership.
-
-This saved-sensor presentation boundary is the preferred place for the pending thermometer leading icon and fresh-sample pulse.
-
-### Fresh-sample semantics
-
-`sensorReadingsStore.ts` remains the single per-sensor reading source. A genuinely new sample is represented by a strictly newer `seenAtMs`.
-
-For the future blue icon pulse:
-
-- derive it from `seenAtMs` advancing,
-- do not pulse on mount, tab switch or ordinary rerender,
-- do not use global scan timestamps as per-sensor freshness,
-- do not add a second freshness store.
-
-Component-local animation state is acceptable only as transient presentation.
-
-## Rule setup presentation
-
-`RuleSetupPage.tsx` keeps page-level rule composition and dialog intent. Advanced safety/resilience fields render inline through `RuleAdvancedSettingsInline.tsx`; they are draft inputs for the same final rule `Send` action, not a nested modal or separate save flow. VPD remains part of the same rule draft, with its help affordance local to the VPD row and the overall rule-summary help anchored to the Rule mode row.
-
-## Store boundaries
-
-`setupDraftStore.ts` remains setup/device metadata. Persisted rule fields there are setup inputs, not installed automation ownership.
-
-`sensorReadingsStore.ts` remains ephemeral latest-reading state shared by both BLE discovery paths.
-
-Do not create source-specific copies or a second installed-automation ownership model.
-
-## Diagnostics/logging boundary
-
-Do not create a second logger package.
-
-Existing boundaries already cover the two required concerns:
-
-- `@lcl/diagnostics` — bounded diagnostic events, redaction and support export,
-- `runtimeDiagnostics.ts` — WebView/browser runtime errors and unhandled rejections.
-
-Any future logging improvement should add sparse structured events through these existing boundaries. Avoid noisy `console.log` instrumentation and avoid raw sensitive identifiers where they are not required.
-
-## Test boundaries
-
-Prefer roles, accessible names, visible state and RPC effects over implementation-class assertions when tests are touched.
-
-The generic Shelly setup tests now explicitly prove absence of `AUTO`, `MANUAL`, `ON`, `OFF` runtime controls and absence of `Script.Start`, `Script.Stop`, `Switch.Set` mutations from that setup surface.
-
-Do not split large scenario tests solely for file size.
-
-## Current quality state
-
-Final Local Agent verification on `c67ac66c...` restored the repository architecture gate and completed the full standard check:
-
-```text
-pnpm check
-```
-
-It passed before commit and again in the pre-push hook. Mobile tests in both complete runs reported:
-
-```text
-Test Files  31 passed (31)
-Tests       171 passed (171)
-```
-
-Formatting, lint, `quality:ux`, `quality:repo`, typecheck, workspace tests, core coverage gate and production build all passed.
-
-The cleanup is therefore accepted at code/test/build level. Physical S22+ install/smoke/logcat remains pending because the phone was unavailable.
-
-## What to leave alone
-
-Do not currently refactor:
-
+- `useShellyControlFlow`,
 - `useShellySetupScanFlow`,
 - `useShellyBleDiscoveryFlow`,
 - `usePhoneSensorFlow`,
-- the readings/store split,
-- `setupDraftStore` into a new ownership model,
-- `useHardwareSetupFlow` solely because it is large,
-- installed-runtime safety modules,
-- locale dictionaries or scenario-heavy tests by line count alone.
+- `useClimateAutomationInstallFlow`.
+
+Do not move those implementations back into the facade.
+
+Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`, `RuleSetupFlow` and `TimeScheduleSetupFlow`. A page must not recover the complete `HardwareSetupFlow` indirectly.
+
+## Navigation/presentation boundary
+
+`AppShell` owns persistent bottom navigation. Child pages own their own working content. A full working task should be a page/subpage; modal scope is limited to transient decisions or confirmations.
+
+The completed Plug/Thermometer add pages establish the discovery-card presentation contract. Reuse its principles before inventing another one-off layout, but do not prematurely generalize unrelated screens into one component.
+
+## Current architecture checkpoint
+
+At product-code checkpoint `2b0c045a16a1bc974191701fc73b05f054e65023`:
+
+- repository architecture/UX gates pass;
+- `HardwareSetupScreen` is a coordinator rather than the previous all-purpose setup screen;
+- `useHardwareSetupFlow` composes dedicated flows and remains protected by a 650-line alarm plus a bounded public surface;
+- Shelly/Sensor/Rule pages have explicit composition budgets;
+- phone BLE and Shelly discovery lifecycle ownership remains outside route/shell code.
+
+There is no current reason for a broad architecture rewrite before continuing screen-by-screen UX work.
+
+## Watchlist
+
+### `apps/mobile/src/__tests__/hardware-setup.test.tsx`
+
+This is the clearest god-file risk. It is intentionally scenario-heavy and provides valuable end-to-end regression coverage, but it has accumulated many unrelated hardware-setup scenarios.
+
+When this area is next materially expanded, prefer moving cohesive scenario groups into separate test files while preserving behavior and shared helpers. Do not rewrite it solely to make it shorter.
+
+### `apps/mobile/src/theme/theme.css`
+
+This is a large global stylesheet and can hide stale selectors or cross-screen overrides. The recent discovery-card width mismatch was an example of old selectors affecting a new contract.
+
+When a screen is actively refactored:
+
+- remove dead selectors in the touched area,
+- prefer a feature-cohesive style boundary when there is a natural one,
+- keep design tokens shared,
+- avoid a repository-wide CSS rewrite as an unrelated side quest.
+
+### `ShellySetupPage.tsx`
+
+The page is bounded to Shelly setup, but it still coordinates saved-device management, add/manual/scan presentation and several transient management dialogs. If new responsibilities are added, extract by concrete task (for example scan result presentation or management surface), not by arbitrary line slices.
+
+### `flows/hardware-setup/shellyRequests.ts`
+
+This service is a dense Shelly RPC boundary. Keep RPC details here/out of screens, but split into cohesive request families if new unrelated RPC responsibilities make it harder to reason about or test.
+
+### `useHardwareSetupFlow.ts`
+
+Broad by design as a facade. Keep it composition-focused. New transport loops, timers, parsers or runtime ownership should become focused flows/services rather than new inline sections.
+
+## When to refactor
+
+Refactor now when at least one is true:
+
+- two places own the same state or lifecycle,
+- transport logic leaks into presentation,
+- a screen/page needs the full flow only to reach one subsystem,
+- a quality budget is exceeded,
+- a change requires touching several unrelated branches of one file,
+- stale CSS/test coupling causes repeated regressions.
+
+Otherwise prefer the smallest product change and leave stable code alone.

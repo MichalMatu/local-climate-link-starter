@@ -1,8 +1,10 @@
 # Device and rule decoupling implementation plan
 
-Status: implementation-ready plan  
-Audited product baseline: `47116b57faba21e03276ba7185ea04c4ec50da4b` (`main`, v2.0.10 integration baseline)  
-Target implementation branch: `work/device-rule-decoupling-20260913`
+> Historical implementation record. The device/rule decoupling described here is implemented in the current 2.0.x product architecture. Do not use this file as the active continuation plan; use `docs/HANDOFF_NEXT_CHAT.md`, `docs/architecture/overview.md`, and `docs/product/next-functional-steps.md`.
+
+Original audited baseline: `47116b57faba21e03276ba7185ea04c4ec50da4b` (`main`, v2.0.10 integration baseline)
+
+Original implementation branch: `work/device-rule-decoupling-20260913`
 
 ## 1. Goal
 
