@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git diff --check; git add apps/mobile/src/__tests__/automation-detail.test.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx apps/mobile/src/screens/InstallationScriptScreen.tsx; git commit -m 'Unify missing installation page chrome'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
-  "pid": 18739,
+  "command": "pnpm android:phone-alpha",
+  "pid": 19138,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T16:10:42.716065+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-19T16:10:47.085999+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-installation-missing-page-chrome-v146",
@@ -18,5 +18,5 @@
   "task_digest": "6350905e23eaf25f36fc5ef8ba2f620a395c2ffff4605e295c93ae871a636cf9",
   "daemon_version": "4.18.22",
   "daemon_pid": 14350,
-  "updated_at": "2026-09-19T16:10:42.785760+00:00"
+  "updated_at": "2026-09-19T16:10:47.155573+00:00"
 }
