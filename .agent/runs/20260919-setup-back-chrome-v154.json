@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 5,
+  "index": 6,
   "total": 7,
-  "command": "set -euo pipefail; git diff --check; git add apps/mobile/src/__tests__/hardware-setup.test.tsx apps/mobile/src/components/AppPageBack.tsx apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx; git commit -m 'Unify setup flow back chrome'; git push --no-verify origin HEAD:work/plug-screen-automation-entry-20260917; test -z \"$(git status --porcelain)\"; git rev-parse HEAD",
-  "pid": 71266,
+  "command": "pnpm android:phone-alpha",
+  "pid": 71656,
   "timeout": 3000,
   "idle_timeout": 300,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-19T16:58:50.527031+00:00",
-  "stage_name": "command-5",
-  "stage_index": 5,
+  "started_at": "2026-09-19T16:58:54.931512+00:00",
+  "stage_name": "command-6",
+  "stage_index": 6,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "20260919-setup-back-chrome-v154",
@@ -18,5 +18,5 @@
   "task_digest": "a2f440b613a0bc37d931dfd47d7becd42b4ccd385a339624327b52dae87dba04",
   "daemon_version": "4.18.22",
   "daemon_pid": 67394,
-  "updated_at": "2026-09-19T16:58:50.541899+00:00"
+  "updated_at": "2026-09-19T16:58:54.945565+00:00"
 }
