@@ -82,6 +82,7 @@ describe('AutomationDashboardScreen controls', () => {
             onAddThermometer={vi.fn()}
             onAddAutomation={vi.fn()}
             onOpenInstallation={vi.fn()}
+            onOpenPlugSettings={vi.fn()}
           />
         </QueryClientProvider>
       </I18nProvider>

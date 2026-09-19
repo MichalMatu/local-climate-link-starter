@@ -14,6 +14,7 @@ import {
 import type { HardwarePageProps } from '../helpers.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { ShellyBleDiscoveryModal } from './ShellyBleDiscoveryModal.js';
+import { ShellySettingsContent } from './ShellySettingsContent.js';
 import { ShellySettingsModal } from './ShellySettingsModal.js';
 import { useShellySetupFeedback } from './useShellySetupFeedback.js';
 
@@ -518,14 +519,29 @@ export const ShellySetupPage = ({
         <p>{t('hardware.shelly.deleteDescription')}</p>
       </Modal>
 
-      <ShellySettingsModal
-        flow={flow}
-        device={infoShelly}
-        enableBleDiscovery={enableBleDiscovery}
-        onClose={closeInfoModal}
-        onBleScan={openBleScanModal}
-        onRemove={removeSavedShelly}
-      />
+      {settingsOnlyDeviceId && infoShelly ? (
+        <div className="plug-settings-page">
+          <div className="installation-section-heading">
+            <h1>{infoShelly.name}</h1>
+          </div>
+          <ShellySettingsContent
+            flow={flow}
+            device={infoShelly}
+            enableBleDiscovery={enableBleDiscovery}
+            onBleScan={openBleScanModal}
+            onRemove={removeSavedShelly}
+          />
+        </div>
+      ) : (
+        <ShellySettingsModal
+          flow={flow}
+          device={infoShelly}
+          enableBleDiscovery={enableBleDiscovery}
+          onClose={closeInfoModal}
+          onBleScan={openBleScanModal}
+          onRemove={removeSavedShelly}
+        />
+      )}
 
       <ShellyBleDiscoveryModal
         flow={flow}

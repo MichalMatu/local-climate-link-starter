@@ -201,7 +201,7 @@ const installTimeShellyFetchMock = () => {
 const renderDashboard = (
   onAddAutomation = vi.fn(),
   onOpenInstallation = vi.fn(),
-  onOpenSettings = vi.fn(),
+  onOpenPlugSettings = vi.fn(),
   onAddPlug = vi.fn(),
   onAddThermometer = vi.fn(),
   initialKind: 'climate' | 'time' = 'climate'
@@ -218,7 +218,7 @@ const renderDashboard = (
           onAddThermometer={onAddThermometer}
           onAddAutomation={onAddAutomation}
           onOpenInstallation={onOpenInstallation}
-          onOpenSettings={onOpenSettings}
+          onOpenPlugSettings={onOpenPlugSettings}
         />
       </QueryClientProvider>
     </I18nProvider>
@@ -227,7 +227,7 @@ const renderDashboard = (
   return {
     onAddAutomation,
     onOpenInstallation,
-    onOpenSettings,
+    onOpenPlugSettings,
     onAddPlug,
     onAddThermometer,
     queryClient,
@@ -328,7 +328,7 @@ describe('AutomationDashboardScreen', () => {
       baseUrl: 'http://192.168.0.30/',
       scriptIdInput: '1'
     });
-    renderDashboard(onAddAutomation);
+    const { onOpenPlugSettings } = renderDashboard(onAddAutomation);
 
     const card = screen.getByText('Nawilżacz').closest('article');
     expect(card).not.toBeNull();
@@ -352,27 +352,8 @@ describe('AutomationDashboardScreen', () => {
         name: 'Ustawienia gniazdka: Nawilżacz salon'
       })
     );
-    const settingsDialog = screen.getByRole('dialog', { name: 'Nawilżacz salon' });
-    expect(settingsDialog.querySelector('.status-stack')).not.toBeNull();
-    expect(await within(settingsDialog).findByText('S3PL-00112EU, gen 3')).toBeVisible();
-    expect(within(settingsDialog).getByText('zgodne')).toBeVisible();
-    await waitFor(() =>
-      expect(useHardwareSetupDraftStore.getState().shellyDevices[0]).toMatchObject({
-        model: 'S3PL-00112EU',
-        gen: 3
-      })
-    );
-    expect(
-      within(settingsDialog).getByRole('button', {
-        name: 'Skanuj termometry BLE przez to gniazdko'
-      })
-    ).toBeVisible();
-    expect(
-      within(settingsDialog).getByRole('button', {
-        name: 'Usuń gniazdko tylko z aplikacji'
-      })
-    ).toBeVisible();
-    fireEvent.click(within(settingsDialog).getByRole('button', { name: 'Zamknij' }));
+    expect(onOpenPlugSettings).toHaveBeenCalledWith('http://192.168.0.30/');
+    expect(screen.queryByRole('dialog')).toBeNull();
 
     const onButton = within(plugCard).getByRole('button', { name: 'ON' });
     const offButton = within(plugCard).getByRole('button', { name: 'OFF' });

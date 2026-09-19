@@ -9,17 +9,26 @@ import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
+import {
+  resetHardwareSetupDraftStore,
+  useHardwareSetupDraftStore
+} from '../flows/hardware-setup/setupDraftStore.js';
 
 vi.mock('../screens/AutomationDashboardScreen.js', () => ({
   AutomationDashboardScreen: ({
-    onAddAutomation
+    onAddAutomation,
+    onOpenPlugSettings
   }: {
     onAddAutomation(kind: 'climate' | 'time'): void;
+    onOpenPlugSettings(deviceId: string): void;
   }) => (
     <main>
       <h1>dashboard-test</h1>
       <button type="button" onClick={() => onAddAutomation('climate')}>
         add-automation-test
+      </button>
+      <button type="button" onClick={() => onOpenPlugSettings('plug-settings-test')}>
+        open-plug-settings-test
       </button>
     </main>
   )
@@ -29,6 +38,7 @@ describe('navigation and settings regression coverage', () => {
   beforeEach(() => {
     window.localStorage.clear();
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
     setLocalePreference('pl');
     setThemeMode('system');
   });
@@ -36,6 +46,8 @@ describe('navigation and settings regression coverage', () => {
   afterEach(() => {
     cleanup();
     resetInstalledAutomationStore();
+    resetHardwareSetupDraftStore();
+    vi.unstubAllGlobals();
     setLocalePreference('system');
     setThemeMode('system');
     window.localStorage.clear();
@@ -94,6 +106,62 @@ describe('navigation and settings regression coverage', () => {
     );
     expect(back).not.toBeNull();
     fireEvent.click(back!);
+    expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
+  });
+  it('opens saved Plug settings as a child page instead of a modal', async () => {
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: 'plug-settings-test',
+      name: 'Nawilżacz',
+      baseUrl: 'http://192.168.0.30/',
+      scriptIdInput: '1'
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number | string;
+          method?: string;
+        };
+        let result: unknown = {};
+        if (body.method === 'Shelly.GetDeviceInfo') {
+          result = { id: 'shellyplugsg3-settings', model: 'S3PL-00112EU', gen: 3 };
+        } else if (body.method === 'Shelly.GetStatus') {
+          result = {
+            matter: { enabled: false },
+            script: { enable: true },
+            ble: { enable: true },
+            'switch:0': { id: 0, output: false },
+            wifi: { rssi: -55 },
+            sys: { time: '12:00', unixtime: 1_800_000_000, uptime: 3600 }
+          };
+        } else if (body.method === 'Script.List') {
+          result = { scripts: [] };
+        }
+        return new Response(JSON.stringify({ id: body.id ?? 1, result }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' }
+        });
+      })
+    );
+
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'open-plug-settings-test' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Gniazdka' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
     expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
   });
 });

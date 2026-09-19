@@ -19,6 +19,7 @@ import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { InstallationDiagnosticsScreen } from '../screens/InstallationDiagnosticsScreen.js';
 import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
+import { PlugSettingsScreen } from '../screens/PlugSettingsScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
@@ -46,6 +47,7 @@ type DeviceAddRoute = {
 type PrimaryAppRoute =
   | DashboardRoute
   | DeviceAddRoute
+  | { type: 'plug-settings'; deviceId: string }
   | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
   | SetupRoute
   | {
@@ -71,6 +73,7 @@ const activeNavigationForRoute = (route: AppRoute): AppNavigationKind | 'setting
   if (route.type === 'settings') return 'settings';
   if (route.type === 'dashboard') return route.kind ?? 'climate';
   if (route.type === 'installation') return route.kind;
+  if (route.type === 'plug-settings') return 'climate';
   if (route.type === 'device-add') return route.sourceKind;
   return route.sourceKind;
 };
@@ -86,6 +89,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     return { type: 'dashboard', kind: route.kind };
   }
   if (route.type === 'device-add') return route.returnTo;
+  if (route.type === 'plug-settings') return { type: 'dashboard', kind: 'climate' };
   if (route.type === 'setup') {
     return {
       type: 'intent',
@@ -207,6 +211,14 @@ export const AppRoutes = () => {
             page: 'detail'
           })
         }
+        onOpenPlugSettings={(deviceId) => navigate({ type: 'plug-settings', deviceId })}
+      />
+    );
+  } else if (route.type === 'plug-settings') {
+    content = (
+      <PlugSettingsScreen
+        deviceId={route.deviceId}
+        onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
       />
     );
   } else if (route.type === 'device-add') {
