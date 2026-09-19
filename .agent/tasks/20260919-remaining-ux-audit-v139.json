@@ -1,0 +1,17 @@
+{
+  "id": "20260919-remaining-ux-audit-v139",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": ["android-device"],
+  "command_timeout": 3000,
+  "task_timeout": 10800,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test -z \"$(git status --porcelain)\"; echo WORK_HEAD=$(git rev-parse HEAD); git status --short --branch",
+    "set -euo pipefail; pnpm android:phone-alpha",
+    "set -euo pipefail; adb shell am force-stop link.localclimate.app; adb logcat -c; adb shell am start -W -n link.localclimate.app/.MainActivity; sleep 2; adb shell uiautomator dump /sdcard/lcl-ux.xml >/dev/null; mkdir -p /tmp/lcl-ux-v139; adb pull /sdcard/lcl-ux.xml /tmp/lcl-ux-v139/window.xml >/dev/null; adb exec-out screencap -p > /tmp/lcl-ux-v139/screen.png; sips -Z 480 -s format jpeg -s formatOptions 55 /tmp/lcl-ux-v139/screen.png --out /tmp/lcl-ux-v139/screen.jpg >/dev/null; base64 < /tmp/lcl-ux-v139/screen.jpg | tr -d '\\n' > /tmp/lcl-ux-v139/screen.jpg.b64; echo '=== UI TEXT ==='; sed -E 's/></>\\n</g' /tmp/lcl-ux-v139/window.xml | grep -E 'text=|content-desc=' | head -n 120; echo '=== ACTIVITY ==='; adb shell dumpsys activity activities | grep -m 1 'link.localclimate.app/.MainActivity'; echo '=== SCREEN ==='; sips -g pixelWidth -g pixelHeight /tmp/lcl-ux-v139/screen.jpg; test -z \"$(git status --porcelain)\"",
+    "set -euo pipefail; rm -rf /tmp/lcl-ux-control-v139; git worktree add --detach /tmp/lcl-ux-control-v139 origin/agent-control >/dev/null; mkdir -p /tmp/lcl-ux-control-v139/.agent/artifacts/20260919-remaining-ux-audit-v139; cp /tmp/lcl-ux-v139/window.xml /tmp/lcl-ux-v139/screen.jpg.b64 /tmp/lcl-ux-control-v139/.agent/artifacts/20260919-remaining-ux-audit-v139/; cd /tmp/lcl-ux-control-v139; git add .agent/artifacts/20260919-remaining-ux-audit-v139; git commit -m 'Add remaining UX audit baseline artifact'; git push origin HEAD:agent-control; echo ARTIFACT_COMMIT=$(git rev-parse HEAD)",
+    "set -euo pipefail; cd - >/dev/null 2>&1 || true; test -z \"$(git status --porcelain)\"; echo FINAL_WORK_HEAD=$(git rev-parse HEAD); test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/plug-screen-automation-entry-20260917)\""
+  ]
+}
