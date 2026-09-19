@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "20260919-page-tree-shell-v112",
+  "task_digest": "37f0d03a199d917cc8bff6e7d70057241443d62ca8dad4dba1fdae89b6c2b451",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-19T10:28:31.800963+00:00",
+  "attempt_id": "12d3ffee2982d02e1ff4c979",
+  "daemon_version": "4.18.22",
+  "daemon_pid": 14180,
+  "updated_at": "2026-09-19T10:28:31.801082+00:00",
+  "pid": 14180
+}
