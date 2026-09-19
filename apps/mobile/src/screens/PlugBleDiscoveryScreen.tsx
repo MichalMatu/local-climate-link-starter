@@ -3,28 +3,29 @@ import { AppPageBack } from '../components/AppPageBack.js';
 import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
 import { ShellySetupPage } from './hardware-setup/pages/ShellySetupPage.js';
 
-type PlugSettingsScreenProps = {
+type PlugBleDiscoveryScreenProps = {
   deviceId: string;
   onBack(): void;
-  onOpenBleDiscovery(deviceId: string): void;
 };
 
-export const PlugSettingsScreen = ({
+export const PlugBleDiscoveryScreen = ({
   deviceId,
-  onBack,
-  onOpenBleDiscovery
-}: PlugSettingsScreenProps) => {
+  onBack
+}: PlugBleDiscoveryScreenProps) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow();
+  const device = flow.shellyDevices.find((candidate) => candidate.id === deviceId);
 
   return (
     <main className="demo-shell hardware-shell">
-      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
+      <AppPageBack
+        label={device?.name ?? t('hardware.shelly.settings')}
+        onBack={onBack}
+      />
       <ShellySetupPage
         flow={flow}
-        settingsOnlyDeviceId={deviceId}
-        onSettingsClose={onBack}
-        onBleScanPageRequest={(device) => onOpenBleDiscovery(device.id)}
+        bleScanOnlyDeviceId={deviceId}
+        onBleScanClose={onBack}
       />
     </main>
   );

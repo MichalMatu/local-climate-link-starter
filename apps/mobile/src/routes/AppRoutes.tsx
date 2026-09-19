@@ -19,6 +19,7 @@ import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { InstallationDiagnosticsScreen } from '../screens/InstallationDiagnosticsScreen.js';
 import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
+import { PlugBleDiscoveryScreen } from '../screens/PlugBleDiscoveryScreen.js';
 import { PlugSettingsScreen } from '../screens/PlugSettingsScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 
@@ -48,6 +49,7 @@ type PrimaryAppRoute =
   | DashboardRoute
   | DeviceAddRoute
   | { type: 'plug-settings'; deviceId: string }
+  | { type: 'plug-ble-discovery'; deviceId: string }
   | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
   | SetupRoute
   | {
@@ -73,7 +75,9 @@ const activeNavigationForRoute = (route: AppRoute): AppNavigationKind | 'setting
   if (route.type === 'settings') return 'settings';
   if (route.type === 'dashboard') return route.kind ?? 'climate';
   if (route.type === 'installation') return route.kind;
-  if (route.type === 'plug-settings') return 'climate';
+  if (route.type === 'plug-settings' || route.type === 'plug-ble-discovery') {
+    return 'climate';
+  }
   if (route.type === 'device-add') return route.sourceKind;
   return route.sourceKind;
 };
@@ -89,6 +93,9 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     return { type: 'dashboard', kind: route.kind };
   }
   if (route.type === 'device-add') return route.returnTo;
+  if (route.type === 'plug-ble-discovery') {
+    return { type: 'plug-settings', deviceId: route.deviceId };
+  }
   if (route.type === 'plug-settings') return { type: 'dashboard', kind: 'climate' };
   if (route.type === 'setup') {
     return {
@@ -219,6 +226,16 @@ export const AppRoutes = () => {
       <PlugSettingsScreen
         deviceId={route.deviceId}
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
+        onOpenBleDiscovery={(deviceId) =>
+          navigate({ type: 'plug-ble-discovery', deviceId })
+        }
+      />
+    );
+  } else if (route.type === 'plug-ble-discovery') {
+    content = (
+      <PlugBleDiscoveryScreen
+        deviceId={route.deviceId}
+        onBack={() => navigate({ type: 'plug-settings', deviceId: route.deviceId })}
       />
     );
   } else if (route.type === 'device-add') {
