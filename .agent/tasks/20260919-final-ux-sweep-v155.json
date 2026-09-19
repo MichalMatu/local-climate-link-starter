@@ -1,0 +1,14 @@
+{
+  "id": "20260919-final-ux-sweep-v155",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "task_timeout": 1800,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = a9efc38bad8b5b3c6bbd2779ef75c5b36e40e622; test -z \"$(git status --porcelain)\"; git status --short --branch",
+    "set -euo pipefail; echo '=== MODALS ==='; grep -RIn '<Modal' apps/mobile/src/screens apps/mobile/src/app | sort; echo '=== OLD PAGE CHROME ==='; grep -RInE 'demo-header|setup-context__back' apps/mobile/src/screens apps/mobile/src/app apps/mobile/src/routes | sort; echo '=== APP PAGE BACK USAGES ==='; grep -RIn 'AppPageBack' apps/mobile/src/screens apps/mobile/src/routes | sort; echo '=== ADVANCED MODAL REFERENCES ==='; grep -RIn 'RuleAdvancedSettingsModal' apps/mobile/src || true; echo '=== READONLY OR DISABLED INPUTS ==='; grep -RInE 'readOnly|disabled=\{true\}|aria-readonly' apps/mobile/src/screens apps/mobile/src/app | head -n 160 || true; echo '=== TECH PRESENTATION TOKENS ==='; grep -RInE 'DiagnosticRow|status-stack|runtimeAddress|baseUrl|scriptId|firmware|uptime|RSSI|dBm' apps/mobile/src/screens | head -n 260 || true; echo '=== SCROLL/FIXED CSS ==='; grep -RInE 'overflow(-[xy])?:|position:[[:space:]]*(fixed|sticky)|100vh|100dvh|min-height:[[:space:]]*100' apps/mobile/src --include='*.css' | head -n 260 || true; echo '=== NESTED CARD HINTS ==='; grep -RInE 'automation-card|demo-panel|settings-modal-layout|installation-detail-identity|status-stack' apps/mobile/src/screens --include='*.tsx' | head -n 300 || true; test -z \"$(git status --porcelain)\""
+  ]
+}
