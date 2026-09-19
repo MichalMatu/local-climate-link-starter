@@ -1,0 +1,133 @@
+{
+  "id": "20260919-installation-missing-page-chrome-v144",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": true,
+  "started_at": "2026-09-19T16:05:20.921845+00:00",
+  "command_timeout": 3000,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = a7bcb903f9247cc329c222b1674ea5e0cfdcfe37; test -z \"$(git status --porcelain)\"; git status --short --branch",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/local-climate-link-starter\n   29f22c3a..c4801b8a  agent-control -> origin/agent-control\nHEAD is now at a7bcb903 Refresh architecture checkpoint and handoff\n## agent-work...origin/work/plug-screen-automation-entry-20260917\n",
+      "elapsed_seconds": 1.187,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.02,
+      "output_policy": "stream",
+      "captured_output_chars": 257,
+      "output_truncated": false,
+      "current_rss_mb": 3.02,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 7,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-installation-missing-page-chrome-v143-tests.py | python3 -; python3 - <<'PY'\np='apps/mobile/src/__tests__/automation-detail.test.tsx'\ns=open(p).read().replace(\"‹ Klimat\", \"‹ Gniazdka\")\nopen(p,'w').write(s)\nPY\npnpm exec prettier --write apps/mobile/src/__tests__/automation-detail.test.tsx >/dev/null; set +e; output=$(pnpm --filter @lcl/mobile exec vitest run src/__tests__/automation-detail.test.tsx --passWithNoTests 2>&1); status=$?; set -e; printf '%s\\n' \"$output\" | tail -n 80; test $status -ne 0; printf '%s\\n' \"$output\" | grep -q '‹ Gniazdka'; echo RED_CONFIRMED",
+      "exit_code": 0,
+      "output": "Missing-installation chrome tests patched\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  src/__tests__/automation-detail.test.tsx > InstallationDetailScreen > keeps missing diagnostics and script routes in the same child-page chrome\nTestingLibraryElementError: Unable to find an accessible element with the role \"button\" and name \"‹ Gniazdka\"\n\nHere are the accessible roles:\n\n  main:\n\n  Name \"\":\n  \u001b[36m<main\u001b[39m\n    \u001b[33mclass\u001b[39m=\u001b[32m\"demo-shell installation-detail-shell\"\u001b[39m\n  \u001b[36m/>\u001b[39m\n\n  --------------------------------------------------\n  button:\n\n  Name \"Wróć do automatyki\":\n  \u001b[36m<button\u001b[39m\n    \u001b[33mclass\u001b[39m=\u001b[32m\"setup-context__back\"\u001b[39m\n    \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n  \u001b[36m/>\u001b[39m\n\n  --------------------------------------------------\n  heading:\n\n  Name \"Nie znaleziono automatyki\":\n  \u001b[36m<h1 />\u001b[39m\n\n  --------------------------------------------------\n\nIgnored nodes: comments, script, style\n\u001b[36m<body>\u001b[39m\n  \u001b[36m<div>\u001b[39m\n    \u001b[36m<main\u001b[39m\n      \u001b[33mclass\u001b[39m=\u001b[32m\"demo-shell installation-detail-shell\"\u001b[39m\n    \u001b[36m>\u001b[39m\n      \u001b[36m<div\u001b[39m\n        \u001b[33mclass\u001b[39m=\u001b[32m\"setup-context\"\u001b[39m\n      \u001b[36m>\u001b[39m\n        \u001b[36m<button\u001b[39m\n          \u001b[33mclass\u001b[39m=\u001b[32m\"setup-context__back\"\u001b[39m\n          \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n        \u001b[36m>\u001b[39m\n          \u001b[0mWróć do automatyki\u001b[0m\n        \u001b[36m</button>\u001b[39m\n      \u001b[36m</div>\u001b[39m\n      \u001b[36m<section\u001b[39m\n        \u001b[33mclass\u001b[39m=\u001b[32m\"automation-card\"\u001b[39m\n      \u001b[36m>\u001b[39m\n        \u001b[36m<h1>\u001b[39m\n          \u001b[0mNie znaleziono automatyki\u001b[0m\n        \u001b[36m</h1>\u001b[39m\n      \u001b[36m</section>\u001b[39m\n    \u001b[36m</main>\u001b[39m\n  \u001b[36m</div>\u001b[39m\n\u001b[36m</body>\u001b[39m\n ❯ Object.getElementError ../../node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19\n ❯ ../../node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38\n ❯ ../../node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17\n ❯ ../../node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19\n ❯ src/__tests__/automation-detail.test.tsx:412:28\n    410|       screen.getByRole('heading', { name: 'Nie znaleziono automatyki' …\n    411|     ).toBeVisible();\n    412|     fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' })…\n       |                            ^\n    413|     expect(diagnosticsBack).toHaveBeenCalledTimes(1);\n    414|     diagnostics.unmount();\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 7 passed (9)\n   Start at  18:05:26\n   Duration  5.99s (transform 394ms, setup 104ms, collect 765ms, tests 4.28s, environment 335ms, prepare 63ms)\n\nundefined\n/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile:\n ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/__tests__/automation-detail.test.tsx --passWithNoTests\nRED_CONFIRMED\n",
+      "elapsed_seconds": 8.946,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 700.66,
+      "output_policy": "stream",
+      "captured_output_chars": 3007,
+      "output_truncated": false,
+      "current_rss_mb": 617.16,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 7,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set -euo pipefail; git show origin/agent-control:.agent/scripts/20260919-installation-missing-page-chrome-v143-impl.py | python3 -; pnpm exec prettier --write apps/mobile/src/__tests__/automation-detail.test.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx apps/mobile/src/screens/InstallationScriptScreen.tsx >/dev/null; git diff --check; changed=$(git diff --name-only | sort); printf '%s\\n' \"$changed\"; test \"$changed\" = \"$(printf '%s\\n' apps/mobile/src/__tests__/automation-detail.test.tsx apps/mobile/src/screens/InstallationDetailScreen.tsx apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx apps/mobile/src/screens/InstallationScriptScreen.tsx | sort)\"; pnpm --filter @lcl/mobile typecheck; pnpm quality:ux; pnpm quality:repo; pnpm --filter @lcl/mobile exec vitest run src/__tests__/automation-detail.test.tsx src/__tests__/navigation-settings-regression.test.tsx --passWithNoTests",
+      "exit_code": 1,
+      "output": "Patched apps/mobile/src/screens/InstallationDetailScreen.tsx\nPatched apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\nPatched apps/mobile/src/screens/InstallationScriptScreen.tsx\napps/mobile/src/__tests__/automation-detail.test.tsx\napps/mobile/src/screens/InstallationDetailScreen.tsx\napps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\napps/mobile/src/screens/InstallationScriptScreen.tsx\n\n> @lcl/mobile@2.0.10 typecheck /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile\n> tsc -p tsconfig.json --noEmit\n\n\n> local-climate-link-starter@2.0.10 quality:ux /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n\n> local-climate-link-starter@2.0.10 quality:repo /Users/michal/agent-workspace/repos/local-climate-link-starter/work\n> node scripts/quality/repository-gate.mjs\n\nRepository quality gate passed.\n\n RUN  v3.2.6 /Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile\n\n(node:11132) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:11133) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/__tests__/navigation-settings-regression.test.tsx (2 tests) 119ms\n ❯ src/__tests__/automation-detail.test.tsx (9 tests | 1 failed) 4232ms\n   ✓ InstallationDetailScreen > shows a stable not-found child page instead of falling back to another installation 62ms\n   × InstallationDetailScreen > keeps missing diagnostics and script routes in the same child-page chrome 18ms\n     → No QueryClient set, use QueryClientProvider to set one\n   ✓ InstallationDetailScreen > shows unique diagnostic detail without duplicating dashboard controls or climate values 64ms\n   ✓ InstallationDetailScreen > opens technical diagnostics as a child page and keeps auto-refreshing there  3042ms\n   ✓ InstallationDetailScreen > opens the deployed script as a child page instead of a modal 60ms\n   ✓ InstallationDetailScreen > offers read-only recovery for 'offline' state 27ms\n   ✓ InstallationDetailScreen > offers read-only recovery for 'stale sensor' state 24ms\n   ✓ InstallationDetailScreen > offers read-only recovery for 'ownership mismatch' state 31ms\n   ✓ InstallationDetailScreen > manages a native daily schedule end to end without a climate script owner  904ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/__tests__/automation-detail.test.tsx > InstallationDetailScreen > keeps missing diagnostics and script routes in the same child-page chrome\nError: No QueryClient set, use QueryClientProvider to set one\n ❯ useQueryClient ../../node_modules/.pnpm/@tanstack+react-query@5.101.2_react@19.2.7/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:18:11\n ❯ useBaseQuery ../../node_modules/.pnpm/@tanstack+react-query@5.101.2_react@19.2.7/node_modules/@tanstack/react-query/src/useBaseQuery.ts:54:18\n ❯ useQuery ../../node_modules/.pnpm/@tanstack+react-query@5.101.2_react@19.2.7/node_modules/@tanstack/react-query/src/useQuery.ts:46:10\n ❯ InstallationScriptScreen src/screens/InstallationScriptScreen.tsx:41:23\n     39| \n     40|   const isClimate = installation?.kind === 'climate';\n     41|   const scriptQuery = useQuery({\n       |                       ^\n     42|     queryKey: isClimate\n     43|       ? installedAutomationScriptSourceQueryKey(installation)\n ❯ Object.react_stack_bottom_frame ../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20\n ❯ renderWithHooks ../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22\n ❯ updateFunctionComponent ../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19\n ❯ beginWork ../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18\n ❯ runWithFiberInDEV ../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js:874:13\n ❯ performUnitOfWork ../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n\n Test Files  1 failed | 1 passed (2)\n      Tests  1 failed | 10 passed (11)\n   Start at  18:05:40\n   Duration  5.57s (transform 458ms, setup 199ms, collect 1.25s, tests 4.35s, environment 577ms, prepare 124ms)\n\nundefined\n/Users/michal/agent-workspace/repos/local-climate-link-starter/work/apps/mobile:\n ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/__tests__/automation-detail.test.tsx src/__tests__/navigation-settings-regression.test.tsx --passWithNoTests\n",
+      "elapsed_seconds": 13.435,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 848.36,
+      "output_policy": "stream",
+      "captured_output_chars": 4946,
+      "output_truncated": false,
+      "current_rss_mb": 609.81,
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 7,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 7,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.187
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 7,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 8.946
+    },
+    {
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 7,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 13.435
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": " M apps/mobile/src/__tests__/automation-detail.test.tsx\n M apps/mobile/src/screens/InstallationDetailScreen.tsx\n M apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\n M apps/mobile/src/screens/InstallationScriptScreen.tsx\n",
+    "elapsed_seconds": 0.082
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "diff --git a/apps/mobile/src/__tests__/automation-detail.test.tsx b/apps/mobile/src/__tests__/automation-detail.test.tsx\nindex 9ded0cab..a66409c4 100644\n--- a/apps/mobile/src/__tests__/automation-detail.test.tsx\n+++ b/apps/mobile/src/__tests__/automation-detail.test.tsx\n@@ -381,11 +381,53 @@ describe('InstallationDetailScreen', () => {\n     vi.unstubAllGlobals();\n   });\n \n-  it('shows a stable not-found route instead of falling back to another installation', () => {\n-    renderDetail('missing-installation');\n+  it('shows a stable not-found child page instead of falling back to another installation', () => {\n+    const onBack = vi.fn();\n+    renderDetail('missing-installation', onBack);\n+\n+    expect(\n+      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n+    ).toBeVisible();\n+    expect(screen.queryByText('Local Climate Link')).toBeNull();\n+    const back = screen.getByRole('button', { name: '‹ Gniazdka' });\n+    expect(back).toBeVisible();\n+    fireEvent.click(back);\n+    expect(onBack).toHaveBeenCalledTimes(1);\n+  });\n+\n+  it('keeps missing diagnostics and script routes in the same child-page chrome', () => {\n+    const diagnosticsBack = vi.fn();\n+    const diagnostics = render(\n+      <I18nProvider>\n+        <InstallationDiagnosticsScreen\n+          installationId=\"missing-installation\"\n+          onBack={diagnosticsBack}\n+        />\n+      </I18nProvider>\n+    );\n+\n+    expect(\n+      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n+    ).toBeVisible();\n+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));\n+    expect(diagnosticsBack).toHaveBeenCalledTimes(1);\n+    diagnostics.unmount();\n+\n+    const scriptBack = vi.fn();\n+    render(\n+      <I18nProvider>\n+        <InstallationScriptScreen\n+          installationId=\"missing-installation\"\n+          onBack={scriptBack}\n+        />\n+      </I18nProvider>\n+    );\n+\n     expect(\n       screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n     ).toBeVisible();\n+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));\n+    expect(scriptBack).toHaveBeenCalledTimes(1);\n   });\n \n   it('shows unique diagnostic detail without duplicating dashboard controls or climate values', async () => {\ndiff --git a/apps/mobile/src/screens/InstallationDetailScreen.tsx b/apps/mobile/src/screens/InstallationDetailScreen.tsx\nindex dc8fac0b..def87b7b 100644\n--- a/apps/mobile/src/screens/InstallationDetailScreen.tsx\n+++ b/apps/mobile/src/screens/InstallationDetailScreen.tsx\n@@ -80,16 +80,13 @@ export const InstallationDetailScreen = ({\n   if (!installation) {\n     return (\n       <main className=\"demo-shell installation-detail-shell\">\n-        <header className=\"demo-header installation-detail-header\">\n-          <div>\n-            <p className=\"demo-kicker\">Local Climate Link</p>\n+        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />\n+        <section className=\"automation-card installation-detail-identity\">\n+          <div className=\"installation-detail-identity__copy\">\n             <h1>{t('detail.notFoundTitle')}</h1>\n-            <p>{t('detail.notFoundDescription')}</p>\n+            <p className=\"installation-detail-note\">{t('detail.notFoundDescription')}</p>\n           </div>\n-          <button className=\"secondary-action\" type=\"button\" onClick={onBack}>\n-            {t('detail.backToDashboard')}\n-          </button>\n-        </header>\n+        </section>\n       </main>\n     );\n   }\ndiff --git a/apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx b/apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\nindex 625d4b79..ed7cbad6 100644\n--- a/apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\n+++ b/apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\n@@ -53,11 +53,7 @@ export const InstallationDiagnosticsScreen = ({\n   if (!installation || installation.kind !== 'climate') {\n     return (\n       <main className=\"demo-shell installation-detail-shell\">\n-        <div className=\"setup-context\">\n-          <button className=\"setup-context__back\" type=\"button\" onClick={onBack}>\n-            {t('detail.backToDashboard')}\n-          </button>\n-        </div>\n+        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />\n         <section className=\"automation-card\">\n           <h1>{t('detail.notFoundTitle')}</h1>\n         </section>\ndiff --git a/apps/mobile/src/screens/InstallationScriptScreen.tsx b/apps/mobile/src/screens/InstallationScriptScreen.tsx\nindex 6b551aa1..a5b876ac 100644\n--- a/apps/mobile/src/screens/InstallationScriptScreen.tsx\n+++ b/apps/mobile/src/screens/InstallationScriptScreen.tsx\n@@ -57,11 +57,7 @@ export const InstallationScriptScreen = ({\n   if (!installation || installation.kind !== 'climate') {\n     return (\n       <main className=\"demo-shell installation-detail-shell\">\n-        <div className=\"setup-context\">\n-          <button className=\"setup-context__back\" type=\"button\" onClick={onBack}>\n-            {t('detail.backToDashboard')}\n-          </button>\n-        </div>\n+        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />\n         <section className=\"automation-card\">\n           <h1>{t('detail.notFoundTitle')}</h1>\n         </section>\n",
+    "elapsed_seconds": 0.017
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-19T16:05:46.212272+00:00",
+  "workspace_checkpoint": {
+    "version": 2,
+    "task_id": "20260919-installation-missing-page-chrome-v144",
+    "reason": "task-exit",
+    "created_at": "2026-09-19T16:05:46.733703+00:00",
+    "base_head": "a7bcb903f9247cc329c222b1674ea5e0cfdcfe37",
+    "work_branch": "agent-work",
+    "path": "/Users/michal/agent-workspace/repos/local-climate-link-starter/checkpoints/20260919-installation-missing-page-chrome-v144/1789833946600002000-task-exit",
+    "tracked_patch": "tracked.patch",
+    "untracked_root": "untracked",
+    "untracked_files": [],
+    "tracked_patch_bytes": 5497,
+    "untracked_bytes": 0,
+    "total_bytes": 5497,
+    "status": " M apps/mobile/src/__tests__/automation-detail.test.tsx\n M apps/mobile/src/screens/InstallationDetailScreen.tsx\n M apps/mobile/src/screens/InstallationDiagnosticsScreen.tsx\n M apps/mobile/src/screens/InstallationScriptScreen.tsx\n"
+  },
+  "task_digest": "982f409911bd014ca7b269f8a16caaf514ab2a9417ad31813f7f1eab429d5f00",
+  "idle_timeout": 300,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "attempt_id": "41ce769fc6ba43308063baf1",
+  "daemon_version": "4.18.22"
+}
