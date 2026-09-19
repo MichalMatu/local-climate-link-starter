@@ -1,0 +1,14 @@
+{
+  "id": "20260919-remaining-modal-audit-v148",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/plug-screen-automation-entry-20260917",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "task_timeout": 1800,
+  "commands": [
+    "set -euo pipefail; git fetch origin --prune; git reset --hard origin/work/plug-screen-automation-entry-20260917; git clean -fd; test \"$(git rev-parse HEAD)\" = d8606f8cb1f4e8157bea6a991c9a425270d29cc4; test -z \"$(git status --porcelain)\"; git status --short --branch",
+    "set -euo pipefail; echo '=== MODAL IMPORTS/USAGES ==='; rg -n \"RuleAdvancedSettingsModal|ShellySettingsModal|ShellyBleDiscoveryModal|<Modal\" apps/mobile/src/screens apps/mobile/src/routes || true; echo '=== SETTINGS ROUTING ==='; rg -n \"settingsOnlyDeviceId|openInfoModal|SavedShellyDeviceCard|onOpenPlugAdd|onOpenSensorAdd\" apps/mobile/src apps/mobile/src/__tests__ || true; echo '=== MODAL TEST COVERAGE ==='; rg -n \"settings|BLE|dialog|modal|advanced\" apps/mobile/src/__tests__/hardware-setup.test.tsx | head -n 220 || true; test -z \"$(git status --porcelain)\""
+  ]
+}
