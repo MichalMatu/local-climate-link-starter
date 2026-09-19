@@ -1,0 +1,10 @@
+from pathlib import Path
+
+path = Path('apps/mobile/src/__tests__/automation-detail.test.tsx')
+text = path.read_text()
+old = """  it('shows a stable not-found route instead of falling back to another installation', () => {\n    renderDetail('missing-installation');\n    expect(\n      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n    ).toBeVisible();\n  });\n"""
+new = """  it('shows a stable not-found child page instead of falling back to another installation', () => {\n    const onBack = vi.fn();\n    renderDetail('missing-installation', onBack);\n\n    expect(\n      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n    ).toBeVisible();\n    expect(screen.queryByText('Local Climate Link')).toBeNull();\n    const back = screen.getByRole('button', { name: '‹ Klimat' });\n    expect(back).toBeVisible();\n    fireEvent.click(back);\n    expect(onBack).toHaveBeenCalledTimes(1);\n  });\n\n  it('keeps missing diagnostics and script routes in the same child-page chrome', () => {\n    const diagnosticsBack = vi.fn();\n    const diagnostics = render(\n      <I18nProvider>\n        <InstallationDiagnosticsScreen\n          installationId=\"missing-installation\"\n          onBack={diagnosticsBack}\n        />\n      </I18nProvider>\n    );\n\n    expect(\n      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n    ).toBeVisible();\n    fireEvent.click(screen.getByRole('button', { name: '‹ Klimat' }));\n    expect(diagnosticsBack).toHaveBeenCalledTimes(1);\n    diagnostics.unmount();\n\n    const scriptBack = vi.fn();\n    render(\n      <I18nProvider>\n        <InstallationScriptScreen installationId=\"missing-installation\" onBack={scriptBack} />\n      </I18nProvider>\n    );\n\n    expect(\n      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })\n    ).toBeVisible();\n    fireEvent.click(screen.getByRole('button', { name: '‹ Klimat' }));\n    expect(scriptBack).toHaveBeenCalledTimes(1);\n  });\n"""
+if old not in text:
+    raise SystemExit('target test block not found')
+path.write_text(text.replace(old, new, 1))
+print('Missing-installation chrome tests patched')
