@@ -128,6 +128,8 @@ export const ShellySetupPage = ({
     suppressControlFeedbackDeviceId: settingsOnlyDeviceId ?? null,
     t
   });
+  const resetBleStopErrorRef = useRef(resetBleStopError);
+  resetBleStopErrorRef.current = resetBleStopError;
 
   useEffect(() => {
     settingsOnlyShellyRef.current = settingsOnlyShelly;
@@ -170,7 +172,7 @@ export const ShellySetupPage = ({
       return undefined;
     }
     resetBleDiscoveryRef.current();
-    resetBleStopError();
+    resetBleStopErrorRef.current();
     startBleDiscoveryRef.current(device);
     return () => {
       stopBleDiscoveryRef.current();
