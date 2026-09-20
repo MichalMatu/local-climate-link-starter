@@ -1,4 +1,4 @@
-# Next chat handoff — clean main + Phase 0 agent contracts
+# Next chat handoff — clean main + Phase 1 architecture guardrails
 
 Updated: 2026-09-20
 
@@ -26,14 +26,12 @@ Local Agent binding: e75c77cb-7589-4452-94b2-decc97ff85a1
 managed workspace: /Users/michal/agent-workspace/repos/local-climate-link-starter/work
 ```
 
-There is no active product work branch to resume. The old
-`work/device-rule-decoupling-20260913` and
-`work/plug-screen-automation-entry-20260917` branches were consolidated/removed.
-Always treat fresh `main` as the source of truth.
+There is no active product work branch to resume. Always treat fresh `main` as the source
+of truth.
 
-## Phase 0 development contract
+## Phase 0 + Phase 1 development contract
 
-The repository now uses hierarchical agent instructions:
+The repository uses hierarchical agent instructions:
 
 ```text
 AGENTS.md
@@ -43,9 +41,11 @@ packages/ui/AGENTS.md
 ```
 
 Root rules are intentionally concise. More specific rules live near the code they govern.
+`scripts/quality/repository-gate.mjs` now mechanically protects this structure and rejects
+regrowth of the contracts into large catch-all files.
 
-The key development rule is the **preimplementation architecture gate**. Before coding,
-identify:
+The key development rule remains the **preimplementation architecture gate**. Before
+coding, identify:
 
 ```text
 product owner
@@ -61,6 +61,61 @@ If the change would make a hotspot own a new unrelated concern, extract the cohe
 boundary in the same slice.
 
 File size remains an alarm, not a refactor target.
+
+## Phase 1 mechanical enforcement
+
+`pnpm quality:repo` now additionally enforces:
+
+- required root/mobile/packages/UI `AGENTS.md` contracts and their size ceilings;
+- the current workspace package dependency DAG;
+- `packages/*` must not import from `apps/*`;
+- `@lcl/ui` may depend only on `@lcl/design-tokens` among workspace packages and remains
+  platform-agnostic;
+- a default 350-line hard ceiling for production TS/TSX modules;
+- explicit higher budgets only for known existing hotspots;
+- existing hardware-setup ownership/public-surface checks.
+
+Do not raise a budget simply because a new feature does not fit in the current file.
+Choose/extract the correct responsibility owner instead. A budget change is an
+architecture change and must be justified in the canonical architecture docs.
+
+The dependency DAG protected by the gate is:
+
+```text
+automation-core  ->
+ble-core         -> device-profiles
+design-tokens    ->
+device-profiles  ->
+diagnostics      ->
+script-generator -> automation-core + device-profiles
+shelly-client    -> diagnostics
+ui               -> design-tokens
+```
+
+## Phase 1 audit result
+
+A fresh production-source audit was completed before adding the new budgets. No current
+package dependency violation or architecture-gate failure was found, so **no broad
+refactor was started**.
+
+Important existing hotspots include:
+
+```text
+723  apps/mobile/src/flows/hardware-setup/shellyRequests.ts
+673  apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx
+599  apps/mobile/src/screens/AutomationDashboardScreen.tsx
+582  apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx
+523  apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
+629  packages/shelly-client/src/scripts/install.ts
+564  packages/script-generator/src/shelly/generate.ts
+3333 apps/mobile/src/theme/theme.css
+```
+
+These are watchpoints, not immediate cleanup tasks. Exact hard budgets and ownership notes
+are documented in `docs/architecture/refactor-boundaries.md`.
+
+The Phase 1 gate implementation was validated by `pnpm quality:repo`, precommit gates and
+a full pre-push `pnpm check` before this documentation closeout.
 
 ## Product model that must remain stable
 
@@ -135,7 +190,7 @@ AppShell
 Screens use `AppToastViewport`; they do not render raw `ToastViewport` or own
 screen-specific toast offsets.
 
-## Validation
+## Validation workflow
 
 Normal workflow:
 
@@ -167,13 +222,14 @@ the standing authorization in root `AGENTS.md`; leave the final state explicit.
 
 ## Next work
 
-Start from an explicit product requirement or concrete regression.
+Phase 0 and Phase 1 are infrastructure/quality work and are complete after the final docs
+check. Do not invent a Phase 2 broad refactor.
 
-Do not begin with another broad refactor. The architecture contract is designed so that
-future features improve structure incrementally: choose the owner first, then implement
-the smallest cohesive slice.
+Start the next implementation from an explicit product requirement or concrete
+regression. Before writing code, use the ownership gate and let the new mechanical limits
+force extraction only where the active feature genuinely needs it.
 
-Reasonable future categories remain:
+Reasonable product categories remain:
 
 - richer Plug management/configuration;
 - additional supported sensor/device profiles;
@@ -190,7 +246,7 @@ Current:
 - `packages/ui/AGENTS.md` — shared UI contract;
 - this file — continuation state;
 - `docs/architecture/overview.md` — product/runtime architecture;
-- `docs/architecture/refactor-boundaries.md` — ownership and refactor policy;
+- `docs/architecture/refactor-boundaries.md` — ownership, budgets and refactor policy;
 - `docs/product/next-functional-steps.md` — product roadmap.
 
 Historical/reference:
