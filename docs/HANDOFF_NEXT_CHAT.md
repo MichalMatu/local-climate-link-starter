@@ -1,6 +1,6 @@
-# Next chat handoff — Slice 1B complete, Slice 2A next
+# Next chat handoff — Slice 2A complete, Slice 2B next
 
-Updated: 2026-09-20
+Updated: 2026-09-21
 
 This is the canonical continuation state for `MichalMatu/local-climate-link-starter`.
 
@@ -68,93 +68,110 @@ fresh main + idle daemon
 -> review pushed diff
 -> fast-forward main
 -> verify main
+-> cleanup completed work branch
 ```
 
 Do not raise architecture baselines to make a slice fit. New cohesive product modules belong under `apps/mobile/src/features/<feature>`; protocol/domain behavior stays in packages; screens do not own transport or persistence.
 
-## Baseline repair completed before Slice 1A
+## Last completed product slice — Slice 2A
 
-A fresh GitHub CI checkout exposed a stale dependency ownership problem: root `package.json` no longer owned `@vitest/coverage-v8`, while core package coverage scripts still required it. This was fixed before Slice 1A.
-
-```text
-commit: 13168d29a21c1c85e2690399bff10a3c0875ade9
-message: Fix workspace coverage dependencies
-```
-
-`@vitest/coverage-v8` now belongs to the two packages that actually run `vitest --coverage`: `@lcl/automation-core` and `@lcl/script-generator`. A frozen install and full `pnpm check` passed.
-
-## Last completed product slice — Slice 1B
-
-Slice 1B is complete and integrated.
+Slice 2A is complete and integrated.
 
 ```text
-product commit: 7aba04414abda1d0eb269e67599b574a4658404e
-message: Reconcile installed automation when re-adding plug
-validated work branch: work/slice1b-readd-reconcile
-Local Agent final task: 20260920-slice1b-readd-reconcile-v6
+product commit: 05f7eb4b8c83c1583222f374c8f3ebabff7e7703
+message: Edit installed climate automation in place
+validated work branch: work/slice2a-edit-climate
+Local Agent final task: 20260921-slice2a-edit-climate-v20-final
+plan-finalization commit: 62b649ba64cedc58f493f965c28aa47436559d9f
+work branch disposition: deleted from origin by 20260921-slice2a-z-cleanup-v2
 ```
 
 Implemented contract:
 
-- saved Plug identity is the normalized physical Shelly `deviceId` returned by `Shelly.GetDeviceInfo`;
-- `baseUrl` is reachability only and no longer participates in automation ownership matching;
-- dashboard/detail/scan matching uses stable physical identity;
-- `features/automations` owns re-add reconciliation;
-- the same physical Shelly can return at a new endpoint and refresh the durable automation endpoint without replacing ownership;
-- climate runtime verification requires the expected managed script id, running state and exact code hash;
-- Time runtime verification reuses exact schedule id/timespec/call matching;
-- reconciliation distinguishes no local owner, verified runtime, changed runtime, unavailable verification and relay-owner conflict;
-- unrelated scripts/schedules are never silently adopted.
-
-The real regression is covered: an `InstalledAutomation` recorded at one endpoint is retained through Forget Plug, the same physical `deviceId` is added at another endpoint, the saved Plug and durable automation reconnect, and the automation remains visible rather than becoming an unconfigured Plug.
+- climate installation detail exposes Edit;
+- the existing climate editor is hydrated from durable `InstalledAutomation` config rather than introducing a second edit-only form;
+- `features/automations` owns edit-draft derivation and remote edit orchestration;
+- stable Shelly `deviceId` is verified before mutation;
+- relay ownership and conflicting native Shelly schedules are checked before mutation;
+- the remote managed script must still match the durable script id/hash before replacement;
+- relay OFF is explicitly requested and confirmed before replacement and again after replacement;
+- replacement must preserve the managed script id;
+- final runtime verification requires the expected script id, running state and exact generated-code hash;
+- durable automation identity and `installedAtMs` remain stable;
+- `updatedAtMs` and edited config are persisted only after verified remote success;
+- failure/conflict paths do not persist the edited config as installed;
+- route/detail/hardware-setup composition returns the user to the same installed automation after a successful edit;
+- hardware setup tab/hash routing was extracted instead of increasing hotspot budgets.
 
 Verification:
 
-- focused iterations covered reconciliation, hardware setup, dashboard/detail and routing regressions;
-- final mobile typecheck passed;
-- final full `pnpm check` passed on the accepted v6 implementation;
-- postimplementation diff audit passed with no architecture-baseline change;
-- no physical Shelly smoke was required for this identity/re-association slice.
+- focused edit/runtime/route/detail/hardware-setup iterations passed, including 84/84 focused tests and a final 56/56 hardware-setup regression run;
+- `pnpm quality:repo` passed without architecture-baseline changes;
+- accepted final full `pnpm check` passed in `20260921-slice2a-edit-climate-v20-final`, including formatting, lint, UX/repository gates, typecheck, tests, core coverage and production builds;
+- pushed diff was reviewed after validation and was a clean one-commit fast-forward onto `main`;
+- no physical Shelly smoke was required for this slice because mutation/verification behavior is covered by deterministic service fixtures and existing Shelly client lifecycle tests.
 
-Known limitation: complete reconstruction after Local Climate Link storage loss remains out of scope. Do not heuristically adopt device runtime without durable ownership evidence.
+Transport note: climate edit currently reaches Shelly through the existing `platform/shellyHttpTransport` adapter and `@lcl/shelly-client` RPC APIs. Product UI does not call raw HTTP. Do not invent BLE selection in Slice 2B; generic transport selection belongs to the later real-hardware BLE work.
 
-The completed branch must not be resumed for new product work. Start Slice 2A from fresh `main` after branch cleanup.
+Known limitation carried forward: if a remote script upload fails after the existing script has begun to mutate, durable state intentionally does not claim the new config; runtime health/reconciliation must expose the resulting mismatch. Do not hide such a state by overwriting local ownership evidence.
 
-## Immediate next slice — Slice 2A
+## Immediate next slice — Slice 2B
 
-**Edit an installed climate automation in place instead of forcing delete/reinstall.**
+**Edit an installed Time automation in place while keeping Shelly native schedules as the runtime owner.**
+
+Existing runtime foundation already provides `updateDailyTimeAutomation` under `features/automations/data/timeAutomationRuntime.ts`; do not build a parallel schedule mutation path before auditing and reusing it.
 
 Required product flow:
 
 ```text
 Plug
--> installed climate automation
+-> installed Time automation
 -> Edit
--> existing InstalledAutomation config pre-fills the editor
+-> existing Time config pre-fills the schedule editor
 -> Save
--> mutate/replace only the managed Shelly runtime owned by that automation
--> verify resulting runtime
--> persist the updated InstalledAutomation
+-> verify exact currently-owned schedule pair
+-> update the same managed native schedule pair safely
+-> verify resulting schedule pair/runtime
+-> persist updated InstalledAutomation
+-> return to the same automation detail
 ```
 
-Preimplementation ownership expectations:
+Preimplementation architecture gate for 2B:
 
-- `features/automations` owns edit orchestration and durable installed-automation updates;
-- reuse the existing climate editor/config model rather than creating an edit-only form;
-- `@lcl/shelly-client` remains the protocol/runtime mutation owner;
-- screens/routes only enter the edit flow and render feature-owned state;
-- preserve `installedAtMs`; advance `updatedAtMs` only after verified remote success;
-- preserve automation identity when relay ownership does not change;
-- verify stable Shelly identity and relay/sensor ownership before destructive runtime changes;
-- failed remote mutation must not leave durable local state claiming the new config is installed;
-- do not introduce BLE-specific implementation into this slice, but keep all new Shelly calls transport-neutral through existing client/transport boundaries.
+```text
+product owner      -> features/automations
+state owner        -> InstalledAutomation feature state/repository
+side-effect owner  -> existing Time runtime + @lcl/shelly-client schedule clients
+UI owner           -> existing Time setup/editor/detail composition
+route owner        -> app routes only for edit navigation context
+```
 
-Acceptance must include editing at least thresholds/preset/sensor-relevant climate config through the existing editor pipeline, successful runtime verification, local durable-state update after success, and failure/conflict coverage proving local state does not lie.
+Audit before coding:
+
+- `apps/mobile/src/features/automations/data/timeAutomationRuntime.ts` and tests;
+- `timeAutomationRuntimeState.ts`, `timeAutomationSchedule.ts`, `timeAutomationClients.ts`;
+- `apps/mobile/src/flows/time-automation/useTimeAutomationSetupFlow.ts`;
+- `apps/mobile/src/screens/TimeInstallationDetail.tsx`;
+- `apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx`;
+- `packages/shelly-client` schedule API and validators;
+- app route/detail tests that should prove edit entry/return.
+
+2B invariants:
+
+- do not route Time through the climate script runtime or climate editor;
+- verify the exact stored `onJobId` / `offJobId` schedule pair before mutation;
+- preserve schedule job IDs when the current runtime API can update them safely;
+- preserve automation id and `installedAtMs`;
+- update `updatedAtMs`, config and schedule metadata only after verified remote success;
+- preserve running versus paused state across edit;
+- enforce safe relay behavior throughout mutation and rollback;
+- reject another managed automation/native schedule taking the relay;
+- if mutation fails, do not claim the edited config as installed; preserve enough evidence for runtime health to show attention if rollback is incomplete;
+- do not create a generic climate/Time edit manager merely because both have an Edit button.
 
 ## What follows
 
 ```text
-2A  edit installed climate automation in place
 2B  edit installed Time automation in place
 3A  device-settings foundation + complete LED settings
 3B+ additional Shelly settings families
