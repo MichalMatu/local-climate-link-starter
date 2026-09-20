@@ -81,7 +81,7 @@ Phase 3 closes the tooling loop:
 Current exact shared-style baselines:
 
 ```text
-apps/mobile/src/theme/theme.css   3334 lines by gate parser
+apps/mobile/src/theme/theme.css   3322 lines by gate parser
 packages/ui/src/styles.css         672 lines by gate parser
 ```
 

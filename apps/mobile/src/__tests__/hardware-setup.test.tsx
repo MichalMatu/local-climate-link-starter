@@ -2288,13 +2288,21 @@ describe('HardwareSetupScreen', () => {
     );
   });
 
-  it('keeps the rule setup compact and ends with the primary send action', () => {
+  it('keeps rule thresholds manual and preserves the compact setup action order', () => {
     renderHardwareSetup();
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
 
-    const thresholdRow = document.querySelector('.rule-threshold-row');
-    expect(thresholdRow).not.toBeNull();
-    expect(thresholdRow!.querySelectorAll('input[type="number"]')).toHaveLength(2);
+    const onThreshold = screen.getByLabelText('Włącz poniżej °C');
+    const offThreshold = screen.getByLabelText('Wyłącz powyżej °C');
+    expect(onThreshold.closest('.field-row')).toBe(offThreshold.closest('.field-row'));
+    expect(onThreshold.closest('.rule-threshold-row')).toBeNull();
+
+    fireEvent.change(onThreshold, { target: { value: '21' } });
+    expect(onThreshold).toHaveValue(21);
+    expect(offThreshold).toHaveValue(20);
+    expect(
+      screen.getByText('Próg włączenia musi być niższy niż próg wyłączenia.')
+    ).toBeVisible();
 
     const developerActions = document.querySelector('.rule-developer-actions--compact');
     expect(developerActions).not.toBeNull();

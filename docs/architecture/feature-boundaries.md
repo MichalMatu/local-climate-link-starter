@@ -128,7 +128,7 @@ Feature-specific CSS should stay with the feature rather than grow the global th
 The feature gate protects exact reviewed shared-style baselines:
 
 ```text
-apps/mobile/src/theme/theme.css   3334 lines by the gate parser
+apps/mobile/src/theme/theme.css   3322 lines by the gate parser
 packages/ui/src/styles.css         672 lines by the gate parser
 ```
 

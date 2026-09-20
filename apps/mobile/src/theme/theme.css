@@ -2887,18 +2887,6 @@ select {
   grid-column: 1 / -1;
 }
 
-.rule-threshold-row {
-  gap: var(--lcl-spacing-sm);
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(min(45%, var(--lcl-size-form-column-min)), 1fr)
-  );
-}
-
-.rule-threshold-row .field {
-  min-width: 0;
-}
-
 .rule-action-row .primary-action {
   flex: 1 1 100%;
   width: 100%;

@@ -225,7 +225,7 @@ parser counts in `scripts/quality/architecture-baseline.mjs`:
 apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  724
 apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx       674
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
-apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         583
+apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
 apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           524
 apps/mobile/src/screens/InstallationDetailScreen.tsx                   458
 apps/mobile/src/flows/time-automation/runtime.ts                       447

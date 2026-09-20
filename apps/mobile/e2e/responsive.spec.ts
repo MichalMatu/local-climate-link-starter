@@ -948,8 +948,34 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await page.getByRole('button', { name: 'Tryb reguły' }).click();
   await page.getByRole('option', { name: 'Nawilżanie' }).click();
 
-  await expect(page.getByLabel('Włącz poniżej %')).toHaveValue('45');
-  await expect(page.getByLabel('Wyłącz powyżej %')).toHaveValue('55');
+  const onThreshold = page.getByLabel('Włącz poniżej %');
+  const offThreshold = page.getByLabel('Wyłącz powyżej %');
+  await expect(onThreshold).toHaveValue('45');
+  await expect(offThreshold).toHaveValue('55');
+
+  await onThreshold.fill('65');
+  await expect(offThreshold).toHaveValue('55');
+  await expect(
+    page.getByText('Próg włączenia musi być niższy niż próg wyłączenia.')
+  ).toBeVisible();
+
+  const viewport = page.viewportSize();
+  if (viewport && viewport.width <= 412) {
+    const [onThresholdBox, offThresholdBox] = await Promise.all([
+      requiredBox(onThreshold),
+      requiredBox(offThreshold)
+    ]);
+    expect(offThresholdBox.y).toBeGreaterThan(
+      onThresholdBox.y + onThresholdBox.height - 1
+    );
+    expect(Math.abs(offThresholdBox.x - onThresholdBox.x)).toBeLessThanOrEqual(2);
+  }
+  await expectNoHorizontalOverflow(page);
+
+  await onThreshold.fill('45');
+  await expect(
+    page.getByText('Próg włączenia musi być niższy niż próg wyłączenia.')
+  ).toHaveCount(0);
   const summaryTrigger = page.getByRole('button', { name: 'Podsumowanie reguły' });
   await summaryTrigger.click();
   let summaryPopover = page.getByRole('tooltip', { name: 'Podsumowanie reguły' });
