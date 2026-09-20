@@ -1,14 +1,11 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
-import {
-  readShellyControlStatus,
-  type ShellyControlStatus,
-  unwrapShellyResult
-} from './shellyRequests.js';
+import { readShellyControlStatus, type ShellyControlStatus } from './shellyRequests.js';
 import type { ShellyDraftDevice } from './setupDraftStore.js';
 
 export type ShellyControlAction = 'status' | 'on' | 'off';

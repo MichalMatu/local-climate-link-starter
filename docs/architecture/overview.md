@@ -150,7 +150,7 @@ Important packages include:
 
 Plug add presentation/local state and Plug management-surface navigation state live under `apps/mobile/src/features/plugs`; Shelly transport and mutations remain in the hardware setup flows and are injected through narrow callbacks.
 
-Shelly protocol response parsing and raw RPC request shapes belong to `@lcl/shelly-client`. Mobile Shelly flows own platform transport selection (browser/dev proxy/Capacitor) and user-facing error translation.
+Shelly protocol response parsing and raw RPC request shapes belong to `@lcl/shelly-client`. `src/platform` owns cross-feature Shelly HTTP transport selection (browser/dev proxy/Capacitor) and the shared localized Result-to-Error boundary; product flows own orchestration.
 
 ### Screens
 

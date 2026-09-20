@@ -1,5 +1,5 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import type { RpcShellyClient } from '@lcl/shelly-client';
-import { unwrapShellyResult } from '../hardware-setup/shellyRequests.js';
 
 export const forceRelayOffAndConfirm = async (
   client: RpcShellyClient,

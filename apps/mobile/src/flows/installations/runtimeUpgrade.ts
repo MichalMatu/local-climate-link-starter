@@ -1,10 +1,8 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { generateShellyThermostatScript } from '@lcl/script-generator';
 import { createInstallPlan, RpcShellyClient } from '@lcl/shelly-client';
-import {
-  readShellyControlStatus,
-  unwrapShellyResult
-} from '../hardware-setup/shellyRequests.js';
+import { readShellyControlStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
 import {

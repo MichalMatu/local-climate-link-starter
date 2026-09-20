@@ -1,9 +1,7 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
-import {
-  readShellySetupStatus,
-  unwrapShellyResult
-} from '../hardware-setup/shellyRequests.js';
+import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
 import { setInstalledAutomationRuntimeMode } from './runtimeModeTransport.js';

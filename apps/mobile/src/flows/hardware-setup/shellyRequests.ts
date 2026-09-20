@@ -6,8 +6,6 @@ import {
   createBleDiscoveryInstallPlan,
   readShellyScriptCode as readShellyScriptCodeResult,
   readShellyScriptList as readShellyScriptListResult,
-  type Result,
-  type ShellyClientError,
   type ShellyDeviceInfo,
   type ShellyInstallResult
 } from '@lcl/shelly-client';
@@ -22,42 +20,16 @@ import {
   createShellyFetch,
   createShellyTransport
 } from '../../platform/shellyHttpTransport.js';
+import {
+  shellyInvalidResponseMessage,
+  shellyResultErrorMessage as resultErrorMessage,
+  unwrapShellyResult
+} from '../../platform/shellyResult.js';
 
-const shellyInvalidResponseMessage = (): string => t('hardware.shelly.invalidResponse');
 const shellyOutOfMemoryMessage = (): string => t('hardware.shelly.outOfMemory');
-const shellyScriptsMissingMessage = (): string => t('hardware.shelly.scriptsMissing');
-const shellyScriptsDisabledMessage = (): string => t('hardware.shelly.scriptsDisabled');
-const shellyBleMissingMessage = (): string => t('hardware.shelly.bleMissing');
-const shellyBleDisabledMessage = (): string => t('hardware.shelly.bleDisabled');
 
 export const SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS = 3000;
 const BLE_DISCOVERY_ENDPOINT_TIMEOUT_MS = 5000;
-
-const resultErrorMessage = (result: Result<unknown, ShellyClientError>): string =>
-  result.ok
-    ? 'OK'
-    : result.error.kind === 'matter-enabled'
-      ? t('hardware.safety.matterBlocked')
-      : result.error.userMessageKey === 'errors.shellyInvalidResponse' ||
-          result.error.technicalMessage?.startsWith('Shelly RPC HTTP ')
-        ? shellyInvalidResponseMessage()
-        : result.error.technicalMessage?.includes('Scripts component') ||
-            result.error.technicalMessage?.includes('Script.List')
-          ? shellyScriptsMissingMessage()
-          : result.error.technicalMessage?.includes('Scripts are disabled')
-            ? shellyScriptsDisabledMessage()
-            : result.error.technicalMessage?.includes('BLE component')
-              ? shellyBleMissingMessage()
-              : result.error.technicalMessage?.includes('BLE is disabled')
-                ? shellyBleDisabledMessage()
-                : (result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`);
-
-export const unwrapShellyResult = <T>(result: Result<T, ShellyClientError>): T => {
-  if (!result.ok) {
-    throw new Error(resultErrorMessage(result));
-  }
-  return result.value;
-};
 
 export type ShellySetupScanResult = {
   baseUrl: string;

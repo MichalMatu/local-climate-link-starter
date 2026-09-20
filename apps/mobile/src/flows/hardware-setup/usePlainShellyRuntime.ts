@@ -1,12 +1,9 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { RpcShellyClient } from '@lcl/shelly-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import {
-  readShellyRuntimeStatus,
-  type ShellyRuntimeStatus,
-  unwrapShellyResult
-} from './shellyRequests.js';
+import { readShellyRuntimeStatus, type ShellyRuntimeStatus } from './shellyRequests.js';
 import type { ShellyDraftDevice } from './setupDraftStore.js';
 
 export const PLAIN_SHELLY_RUNTIME_REFRESH_MS = 5000;

@@ -1,3 +1,4 @@
+import { unwrapShellyResult } from '../platform/shellyResult.js';
 import { act, cleanup, render, waitFor } from '@testing-library/react';
 import { useEffect } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -8,7 +9,6 @@ import {
   useTranslation,
   type Locale
 } from '../app/i18n.js';
-import { unwrapShellyResult } from '../flows/hardware-setup/shellyRequests.js';
 
 const invalidResponse = {
   ok: false as const,

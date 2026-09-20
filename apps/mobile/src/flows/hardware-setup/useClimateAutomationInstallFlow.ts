@@ -1,3 +1,4 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import {
@@ -19,10 +20,7 @@ import {
 import { useInstalledAutomationStore } from '../installations/store.js';
 import { findScheduleRelayConflict } from '../time-automation/runtime.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
-import {
-  cleanupStaleShellyBleDiscoveryScripts,
-  unwrapShellyResult
-} from './shellyRequests.js';
+import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 
 type HardwareInstallState = {

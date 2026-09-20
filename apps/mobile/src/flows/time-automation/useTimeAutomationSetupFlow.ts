@@ -1,3 +1,4 @@
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import { RpcShellyClient, RpcShellyScheduleClient } from '@lcl/shelly-client';
@@ -8,10 +9,7 @@ import {
   findInstalledRelayOwner
 } from '../installations/model.js';
 import { useInstalledAutomationStore } from '../installations/store.js';
-import {
-  readShellyControlStatus,
-  unwrapShellyResult
-} from '../hardware-setup/shellyRequests.js';
+import { readShellyControlStatus } from '../hardware-setup/shellyRequests.js';
 import type { ShellyDraftDevice } from '../hardware-setup/setupDraftStore.js';
 import { dailyTimeAutomationConfigSchema } from './config.js';
 import { installDailyTimeAutomation, TimeAutomationRuntimeError } from './runtime.js';
