@@ -181,6 +181,88 @@ instead of increasing an architecture budget.
 
 Repository-gate hard budgets remain authoritative for protected hotspots.
 
+## Phase 1 mechanical guardrails
+
+The Phase 0 ownership rules are now enforced mechanically by
+`scripts/quality/repository-gate.mjs`.
+
+The gate protects the hierarchical agent-contract structure:
+
+```text
+AGENTS.md                 <= 300 lines
+apps/mobile/AGENTS.md     <= 260 lines
+packages/AGENTS.md        <= 220 lines
+packages/ui/AGENTS.md     <= 140 lines
+```
+
+These limits are intended to stop the root contract from becoming another historical
+catch-all. Area-specific rules belong in the nearest nested contract.
+
+The gate also freezes the current workspace package direction:
+
+```text
+automation-core  -> no @lcl package dependency
+ble-core         -> device-profiles
+design-tokens    -> no @lcl package dependency
+device-profiles  -> no @lcl package dependency
+diagnostics      -> no @lcl package dependency
+script-generator -> automation-core + device-profiles
+shelly-client    -> diagnostics
+ui               -> design-tokens
+```
+
+Any new cross-package dependency is an architecture change, not a convenience import.
+The gate also rejects package-source imports from `apps/*`; `@lcl/ui` may not gain another
+`@lcl/*` dependency besides design tokens or become Capacitor/Ionic-aware.
+
+For production TypeScript modules, the default hard growth budget is **350 lines**.
+Tests and locale data are excluded because line count there does not represent runtime
+ownership in the same way. Current larger modules are explicit baseline exceptions rather
+than a new default:
+
+```text
+apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  750
+apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx       700
+apps/mobile/src/screens/AutomationDashboardScreen.tsx                  625
+apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         675
+apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           650
+apps/mobile/src/screens/InstallationDetailScreen.tsx                   500
+apps/mobile/src/flows/time-automation/runtime.ts                       475
+apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       650
+apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 450
+apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 400
+apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         400
+packages/shelly-client/src/scripts/install.ts                          650
+packages/script-generator/src/shelly/generate.ts                       600
+```
+
+Do not increase an exception because a feature was implemented in the easiest existing
+file. If a hotspot needs a new responsibility, create/extract the correct owner. Change a
+budget only when the responsibility is still demonstrably cohesive and the architecture
+contract is updated with the reason.
+
+## Current audit baseline
+
+The Phase 1 audit on 2026-09-20 found no package dependency violation or current
+repository-gate architecture failure. It intentionally did **not** trigger a broad
+refactor.
+
+Largest production ownership hotspots at that checkpoint were:
+
+```text
+723  apps/mobile/src/flows/hardware-setup/shellyRequests.ts
+673  apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx
+599  apps/mobile/src/screens/AutomationDashboardScreen.tsx
+582  apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx
+523  apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
+629  packages/shelly-client/src/scripts/install.ts
+564  packages/script-generator/src/shelly/generate.ts
+3333 apps/mobile/src/theme/theme.css
+```
+
+These numbers are evidence for where to be careful, not targets to preserve and not a
+request to split files mechanically.
+
 ## Current watchlist
 
 ### `apps/mobile/src/__tests__/hardware-setup.test.tsx`
@@ -204,10 +286,27 @@ extract by task boundary rather than arbitrary line slices.
 Dense Shelly RPC boundary. Keep RPC details out of screens. Split into request families
 only when unrelated RPC responsibilities make the current module hard to reason about.
 
+### `AutomationDashboardScreen.tsx`
+
+Large root Plug surface. Keep it at screen-composition/presentation level. New device
+transport, persistence or automation-domain behavior must not be added directly here; a
+materially new dashboard task should get a focused feature owner.
+
 ### `useHardwareSetupFlow.ts`
 
 Broad by design as a facade. New transport loops, timers, parsers or runtime ownership
 must become focused flows/services rather than inline facade sections.
+
+### `packages/shelly-client/src/scripts/install.ts`
+
+Large but cohesive install/runtime-mutation pipeline. New unrelated Shelly management
+operations should get their own module instead of extending the install pipeline.
+
+### `packages/script-generator/src/shelly/generate.ts`
+
+Large deterministic generator. Keep generated behavior derived from typed configuration.
+When adding a genuinely different automation/runtime family, prefer a cohesive generator
+boundary rather than another unrelated branch in this file.
 
 ## When to refactor now
 
