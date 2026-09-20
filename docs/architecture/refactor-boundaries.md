@@ -134,6 +134,8 @@ Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`
 `RuleSetupFlow` and `TimeScheduleSetupFlow`. A page must not recover the complete
 `HardwareSetupFlow` indirectly.
 
+`features/plugs` owns the migrated Plug-add surface (manual entry and LAN scan presentation/local UI state). `ShellySetupPage` remains a legacy coordinator/adapter while the rest of the Plug setup surface is migrated incrementally.
+
 ## Navigation/presentation boundary
 
 `AppShell` owns persistent bottom navigation and application-frame overlay geometry.
@@ -223,7 +225,7 @@ parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
 apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  682
-apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx       674
+apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx               474
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
 apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
 apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           443
@@ -231,7 +233,6 @@ apps/mobile/src/screens/InstallationDetailScreen.tsx                   458
 apps/mobile/src/flows/time-automation/runtime.ts                       447
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       416
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 411
-apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 353
 apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         353
 packages/shelly-client/src/scripts/install.ts                          604
 packages/script-generator/src/shelly/generate.ts                       565

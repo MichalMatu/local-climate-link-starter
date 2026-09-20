@@ -17,7 +17,7 @@ export const defaultProductionModuleMaxLines = 350;
 
 export const mobileProductionBaselines = Object.freeze({
   'apps/mobile/src/flows/hardware-setup/shellyRequests.ts': 682,
-  'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 674,
+  'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 474,
   'apps/mobile/src/screens/AutomationDashboardScreen.tsx': 600,
   'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 558,
   'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts': 443,
@@ -25,7 +25,6 @@ export const mobileProductionBaselines = Object.freeze({
   'apps/mobile/src/flows/time-automation/runtime.ts': 447,
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 416,
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx': 411,
-  'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx': 353,
   'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx': 353
 });
 

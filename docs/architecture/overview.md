@@ -150,6 +150,8 @@ Shelly protocol response parsing and raw RPC request shapes belong to `@lcl/shel
 
 Screens compose flows into product UI. They must not call raw `fetch` or import the Capacitor BLE plugin directly. Hardware setup pages receive narrow page contracts rather than the full setup flow.
 
+The first migrated `features/plugs` slice owns the manual/LAN Plug-add presentation and local UI state; the legacy hardware setup page remains the adapter from `ShellySetupFlow` to that feature surface.
+
 `HardwareSetupScreen` coordinates setup navigation and lifecycle cleanup; it should not absorb page-specific presentation or transport logic.
 
 ## Automation ownership and safety

@@ -2,12 +2,12 @@ import type { ShellySetupFlow } from '../pageContracts.js';
 import { InfoLabel, Modal } from '@lcl/ui';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
-import type { ShellySetupScanResult } from '../../../flows/hardware-setup/shellyRequests.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
-import { SavedShellyDeviceCard, ShellyAddForm } from './ShellySetupPresentation.js';
+import { SavedShellyDeviceCard } from './ShellySetupPresentation.js';
+import { PlugAddPage, type PlugScanResultView } from '../../../features/plugs/index.js';
 import {
   countIpv4RangeScanAddresses,
   normalizeShellyUrl
@@ -68,23 +68,16 @@ export const ShellySetupPage = ({
       ? { kind: 'info', deviceId: settingsOnlyDeviceId }
       : { kind: 'none' }
   );
-  const [didSubmitShellyAdd, setDidSubmitShellyAdd] = useState(false);
-  const [didSubmitShellyScan, setDidSubmitShellyScan] = useState(false);
-  const [scanResultNames, setScanResultNames] = useState<Record<string, string>>({});
-  const [activeAddSection, setActiveAddSection] = useState<'manual' | 'scan'>('scan');
   const { dismissToast, pushToast, toasts } = useToastQueue('shelly-toast');
   const isBleScanModalOpen = dialog.kind === 'ble';
   const isBleDiscoverySurfaceOpen = isBleScanModalOpen || Boolean(bleScanOnlyDeviceId);
   const bleScanShelly = dialog.kind === 'ble' ? dialog.device : null;
   const infoShellyId = dialog.kind === 'info' ? dialog.deviceId : null;
   const shellyDevicePendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
-  const scanRangeErrorId = useId();
   const scanResults = flow.shellyScanResults;
   const shellyDevices = flow.shellyDevices;
   const isScanStopped =
     flow.shellyScanStopped || flow.shellyScanMutation.data?.stopped === true;
-  const shouldShowEmptyScanResult =
-    flow.shellyScanMutation.isSuccess && !isScanStopped && scanResults.length === 0;
   const shellyScanRangeError = (() => {
     try {
       countIpv4RangeScanAddresses(flow.shellyScanStartInput, flow.shellyScanEndInput);
@@ -95,7 +88,6 @@ export const ShellySetupPage = ({
         : t('hardware.shelly.scanRangeFailed');
     }
   })();
-  const showShellyScanRangeError = didSubmitShellyScan && shellyScanRangeError !== null;
   const isBleDiscoveryBusy =
     flow.startBleDiscoveryMutation.isPending ||
     flow.refreshBleDiscoveryMutation.isPending ||
@@ -180,8 +172,7 @@ export const ShellySetupPage = ({
     };
   }, [bleScanOnlyDeviceId]);
 
-  const checkShelly = () => {
-    setDidSubmitShellyAdd(true);
+  const addManualShelly = (onSuccess: () => void) => {
     flow.recheckShellyMutation.reset();
     flow.checkShellyMutation.reset();
     if (!flow.shellyInputState.ok) {
@@ -189,7 +180,7 @@ export const ShellySetupPage = ({
     }
     flow.checkShellyMutation.mutate(undefined, {
       onSuccess: () => {
-        setDidSubmitShellyAdd(false);
+        onSuccess();
         setDialog({ kind: 'none' });
         pushToast('ok', t('hardware.shelly.added'));
       },
@@ -203,51 +194,15 @@ export const ShellySetupPage = ({
     });
   };
 
-  const startShellyScan = () => {
-    setDidSubmitShellyScan(true);
-    if (shellyScanRangeError) {
-      return;
-    }
-    setScanResultNames({});
-    flow.startShellyScan();
-  };
-
-  const stopShellyScan = () => {
-    flow.stopShellyScan();
-  };
-
-  const selectAddSection = (section: 'manual' | 'scan') => {
-    if (section === activeAddSection) {
-      return;
-    }
-    if (activeAddSection === 'scan' && isShellyScanActive) {
-      flow.stopShellyScan();
-    }
-    setActiveAddSection(section);
-  };
-
-  const scannedShellyName = (result: ShellySetupScanResult) =>
-    scanResultNames[result.baseUrl] ?? result.deviceInfo.model;
-
-  const setScannedShellyName = (result: ShellySetupScanResult, value: string) => {
-    setScanResultNames((current) => ({ ...current, [result.baseUrl]: value }));
-  };
-
-  const isAddingScannedShelly = (result: ShellySetupScanResult) =>
-    flow.checkShellyMutation.isPending &&
-    flow.checkShellyMutation.variables != null &&
-    normalizeScanBaseUrl(flow.checkShellyMutation.variables.baseUrl) ===
-      normalizeScanBaseUrl(result.baseUrl);
-
-  const addScannedShellyDevice = (result: ShellySetupScanResult) => {
-    const name = scannedShellyName(result).trim();
-    if (!name) {
+  const addScannedShellyDevice = (baseUrl: string, name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
       return;
     }
     flow.recheckShellyMutation.reset();
     flow.checkShellyMutation.reset();
     flow.checkShellyMutation.mutate(
-      { baseUrl: result.baseUrl, name },
+      { baseUrl, name: trimmedName },
       {
         onSuccess: () => {
           pushToast('ok', t('hardware.shelly.added'));
@@ -263,11 +218,20 @@ export const ShellySetupPage = ({
     );
   };
 
-  const isSavedShellyScanResult = (result: ShellySetupScanResult) =>
-    shellyDevices.some(
+  const plugScanResults: PlugScanResultView[] = scanResults.map((result) => ({
+    baseUrl: result.baseUrl,
+    model: result.deviceInfo.model,
+    generation: result.deviceInfo.gen,
+    saved: shellyDevices.some(
       (device) =>
         normalizeScanBaseUrl(device.baseUrl) === normalizeScanBaseUrl(result.baseUrl)
-    );
+    ),
+    adding:
+      flow.checkShellyMutation.isPending &&
+      flow.checkShellyMutation.variables != null &&
+      normalizeScanBaseUrl(flow.checkShellyMutation.variables.baseUrl) ===
+        normalizeScanBaseUrl(result.baseUrl)
+  }));
 
   const openBleScanModal = (device: ShellyDraftDevice) => {
     if (onBleScanPageRequest) {
@@ -351,203 +315,39 @@ export const ShellySetupPage = ({
       )}
 
       {addOnly && (
-        <>
-          <div className="device-add-page__body">
-            <div
-              className="shelly-add-tabs"
-              role="tablist"
-              aria-label={t('hardware.shelly.add')}
-            >
-              <button
-                className="shelly-add-tabs__tab"
-                type="button"
-                role="tab"
-                aria-selected={activeAddSection === 'scan'}
-                onClick={() => selectAddSection('scan')}
-              >
-                {t('hardware.shelly.scanNetwork')}
-              </button>
-              <button
-                className="shelly-add-tabs__tab"
-                type="button"
-                role="tab"
-                aria-selected={activeAddSection === 'manual'}
-                onClick={() => selectAddSection('manual')}
-              >
-                {t('hardware.shelly.addManual')}
-              </button>
-            </div>
-            {activeAddSection === 'manual' && (
-              <section
-                className="shelly-manual-add"
-                role="tabpanel"
-                aria-label={t('hardware.shelly.addManual')}
-              >
-                <div className="shelly-manual-add__body">
-                  <ShellyAddForm flow={flow} showValidationErrors={didSubmitShellyAdd} />
-                  <div className="shelly-manual-add__actions">
-                    <button
-                      className="primary-action"
-                      type="button"
-                      aria-busy={flow.checkShellyMutation.isPending || undefined}
-                      disabled={isAnyShellyCheckPending}
-                      title={t('hardware.shelly.addCheckedTitle')}
-                      onClick={checkShelly}
-                    >
-                      {flow.checkShellyMutation.isPending
-                        ? t('hardware.shelly.checking')
-                        : t('common.add')}
-                    </button>
-                  </div>
-                </div>
-              </section>
-            )}
-            {activeAddSection === 'scan' && (
-              <section
-                className="shelly-network-scan"
-                role="tabpanel"
-                aria-label={t('hardware.shelly.scanNetwork')}
-              >
-                <div className="shelly-network-scan__body">
-                  <div className="shelly-network-scan__range">
-                    <label
-                      className={
-                        showShellyScanRangeError ? 'field field--invalid' : 'field'
-                      }
-                    >
-                      {t('hardware.shelly.scanRangeStart')}
-                      <input
-                        aria-describedby={
-                          showShellyScanRangeError ? scanRangeErrorId : undefined
-                        }
-                        aria-invalid={showShellyScanRangeError}
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="192.168.0.1"
-                        value={flow.shellyScanStartInput}
-                        onChange={(event) =>
-                          flow.setShellyScanStartInput(event.currentTarget.value)
-                        }
-                      />
-                    </label>
-                    <label
-                      className={
-                        showShellyScanRangeError ? 'field field--invalid' : 'field'
-                      }
-                    >
-                      {t('hardware.shelly.scanRangeEnd')}
-                      <input
-                        aria-describedby={
-                          showShellyScanRangeError ? scanRangeErrorId : undefined
-                        }
-                        aria-invalid={showShellyScanRangeError}
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="192.168.0.99"
-                        value={flow.shellyScanEndInput}
-                        onChange={(event) =>
-                          flow.setShellyScanEndInput(event.currentTarget.value)
-                        }
-                      />
-                      {showShellyScanRangeError && (
-                        <span className="field__error" id={scanRangeErrorId}>
-                          {shellyScanRangeError}
-                        </span>
-                      )}
-                    </label>
-                  </div>
-                  {shouldShowEmptyScanResult && (
-                    <p>{t('hardware.shelly.scanResultEmpty')}</p>
-                  )}
-                  {scanResults.length > 0 && (
-                    <div
-                      className="saved-list"
-                      aria-label={t('hardware.shelly.foundListLabel')}
-                    >
-                      {scanResults.map((result) => (
-                        <article
-                          key={result.baseUrl}
-                          className="device-discovery-card shelly-scan-result"
-                        >
-                          <div className="device-discovery-card__primary">
-                            <label className="device-discovery-card__name">
-                              <span>{t('hardware.shelly.deviceNameLabel')}</span>
-                              <input
-                                className="device-discovery-card__name-input shelly-scan-result__name-input"
-                                aria-label={`${t('hardware.shelly.deviceNameLabel')}: ${result.baseUrl}`}
-                                type="text"
-                                value={scannedShellyName(result)}
-                                disabled={isSavedShellyScanResult(result)}
-                                onChange={(event) =>
-                                  setScannedShellyName(result, event.currentTarget.value)
-                                }
-                              />
-                            </label>
-                            <button
-                              aria-label={
-                                isSavedShellyScanResult(result)
-                                  ? `${t('hardware.shelly.alreadyAdded')}: ${result.baseUrl}`
-                                  : `${t('common.add')}: ${result.baseUrl}`
-                              }
-                              aria-busy={isAddingScannedShelly(result) || undefined}
-                              className="primary-action device-discovery-card__action shelly-scan-result__add"
-                              type="button"
-                              disabled={
-                                isSavedShellyScanResult(result) ||
-                                flow.checkShellyMutation.isPending ||
-                                scannedShellyName(result).trim().length === 0
-                              }
-                              onClick={() => addScannedShellyDevice(result)}
-                            >
-                              {isSavedShellyScanResult(result)
-                                ? t('hardware.shelly.alreadyAdded')
-                                : isAddingScannedShelly(result)
-                                  ? t('hardware.shelly.checking')
-                                  : t('common.add')}
-                            </button>
-                          </div>
-                          <div className="device-discovery-card__meta shelly-scan-result__meta">
-                            <strong className="device-discovery-card__identity">
-                              {result.baseUrl}
-                            </strong>
-                            <span>
-                              {result.deviceInfo.model}, gen {result.deviceInfo.gen}
-                            </span>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  )}
-                  <div className="action-row shelly-network-scan__actions device-add-page__scan-control">
-                    <button
-                      className="secondary-action device-scan-action"
-                      type="button"
-                      aria-busy={isShellyScanActive || undefined}
-                      title={
-                        isShellyScanActive
-                          ? t('hardware.shelly.scanStopTitle')
-                          : t('hardware.shelly.scanStartTitle')
-                      }
-                      onClick={isShellyScanActive ? stopShellyScan : startShellyScan}
-                    >
-                      {isShellyScanActive && (
-                        <span
-                          className="device-scan-action__spinner"
-                          aria-hidden="true"
-                        />
-                      )}
-                      <span>
-                        {isShellyScanActive
-                          ? t('hardware.shelly.scanStop')
-                          : t('hardware.shelly.scanStart')}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </section>
-            )}
-          </div>
-        </>
+        <PlugAddPage
+          manual={{
+            name: flow.shellyNameInput,
+            url: flow.shellyUrlInput,
+            valid: flow.shellyInputState.ok,
+            nameError: flow.shellyInputState.ok
+              ? undefined
+              : flow.shellyInputState.fieldErrors.name,
+            urlError: flow.shellyInputState.ok
+              ? undefined
+              : flow.shellyInputState.fieldErrors.url,
+            pending: flow.checkShellyMutation.isPending,
+            disabled: isAnyShellyCheckPending,
+            onNameChange: flow.setShellyNameInput,
+            onUrlChange: flow.setShellyUrlInput,
+            onSubmit: addManualShelly
+          }}
+          scan={{
+            startInput: flow.shellyScanStartInput,
+            endInput: flow.shellyScanEndInput,
+            rangeError: shellyScanRangeError,
+            active: isShellyScanActive,
+            success: flow.shellyScanMutation.isSuccess,
+            stopped: isScanStopped,
+            results: plugScanResults,
+            checkPending: flow.checkShellyMutation.isPending,
+            onStartInputChange: flow.setShellyScanStartInput,
+            onEndInputChange: flow.setShellyScanEndInput,
+            onStart: flow.startShellyScan,
+            onStop: flow.stopShellyScan,
+            onAddResult: addScannedShellyDevice
+          }}
+        />
       )}
 
       <Modal

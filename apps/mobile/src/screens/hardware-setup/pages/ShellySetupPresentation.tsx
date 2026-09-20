@@ -1,6 +1,6 @@
 import type { ShellyClockStatus, ShellyComponentState } from '@lcl/shelly-client';
 import { IconBluetooth, IconSettings, IconPencil, IconTrash } from '@tabler/icons-react';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import {
   useTranslation,
   type Locale,
@@ -182,66 +182,6 @@ export const formatShellyScanEstimate = (
 };
 
 type ShellyControlCardState = ShellySetupFlow['shellyControlStates'][string];
-
-type ShellyAddFormProps = {
-  flow: ShellySetupFlow;
-  showValidationErrors: boolean;
-};
-
-export const ShellyAddForm = ({ flow, showValidationErrors }: ShellyAddFormProps) => {
-  const { t } = useTranslation();
-  const nameInputId = useId();
-  const nameErrorId = useId();
-  const urlInputId = useId();
-  const urlErrorId = useId();
-  const nameError =
-    showValidationErrors && !flow.shellyInputState.ok
-      ? flow.shellyInputState.fieldErrors.name
-      : undefined;
-  const urlError =
-    showValidationErrors && !flow.shellyInputState.ok
-      ? flow.shellyInputState.fieldErrors.url
-      : undefined;
-
-  return (
-    <>
-      <div className={nameError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={nameInputId}>{t('hardware.shelly.deviceNameLabel')}</label>
-        <input
-          id={nameInputId}
-          aria-describedby={nameError ? nameErrorId : undefined}
-          aria-invalid={nameError ? true : undefined}
-          type="text"
-          value={flow.shellyNameInput}
-          onChange={(event) => flow.setShellyNameInput(event.currentTarget.value)}
-        />
-        {nameError && (
-          <span className="field__error" id={nameErrorId}>
-            {nameError}
-          </span>
-        )}
-      </div>
-      <div className={urlError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={urlInputId}>{t('hardware.shelly.addressInputLabel')}</label>
-        <input
-          id={urlInputId}
-          aria-describedby={urlError ? urlErrorId : undefined}
-          aria-invalid={urlError ? true : undefined}
-          type="url"
-          inputMode="url"
-          placeholder={t('hardware.shelly.addressPlaceholder')}
-          value={flow.shellyUrlInput}
-          onChange={(event) => flow.setShellyUrlInput(event.currentTarget.value)}
-        />
-        {urlError && (
-          <span className="field__error" id={urlErrorId}>
-            {urlError}
-          </span>
-        )}
-      </div>
-    </>
-  );
-};
 
 type SavedShellyDeviceCardProps = {
   device: ShellyDraftDevice;
