@@ -15,9 +15,9 @@ import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import {
-  climateAutomationDetailRoute,
-  prepareClimateAutomationEditRoute
-} from './climateAutomationEditNavigation.js';
+  automationDetailRoute,
+  prepareAutomationEditRoute
+} from './automationEditNavigation.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
@@ -104,7 +104,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'plug-settings') return { type: 'dashboard', kind: 'climate' };
   if (route.type === 'setup') {
     if (route.editInstallationId) {
-      return climateAutomationDetailRoute(route.editInstallationId);
+      return automationDetailRoute(route.editInstallationId);
     }
     return {
       type: 'intent',
@@ -175,8 +175,8 @@ export const AppRoutes = () => {
     });
   };
 
-  const openClimateAutomationEdit = (installationId: string) => {
-    const editRoute = prepareClimateAutomationEditRoute(
+  const openAutomationEdit = (installationId: string) => {
+    const editRoute = prepareAutomationEditRoute(
       installationId,
       loadClimateAutomationDraft
     );
@@ -290,7 +290,7 @@ export const AppRoutes = () => {
           onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
           onOpenDiagnostics={() => navigate({ ...route, page: 'diagnostics' })}
           onOpenScript={() => navigate({ ...route, page: 'script' })}
-          onEdit={() => openClimateAutomationEdit(route.installationId)}
+          onEdit={() => openAutomationEdit(route.installationId)}
         />
       );
     }
@@ -316,7 +316,7 @@ export const AppRoutes = () => {
             : {})}
           onBackToIntent={() =>
             route.editInstallationId
-              ? navigate(climateAutomationDetailRoute(route.editInstallationId))
+              ? navigate(automationDetailRoute(route.editInstallationId))
               : navigate({
                   type: 'intent',
                   sourceKind: route.sourceKind,
@@ -327,7 +327,7 @@ export const AppRoutes = () => {
           onOpenSensorAdd={(mode) => openDeviceAdd('sensor', mode)}
           onSetupComplete={() =>
             route.editInstallationId
-              ? navigate(climateAutomationDetailRoute(route.editInstallationId))
+              ? navigate(automationDetailRoute(route.editInstallationId))
               : navigate({ type: 'dashboard', kind: route.sourceKind })
           }
         />

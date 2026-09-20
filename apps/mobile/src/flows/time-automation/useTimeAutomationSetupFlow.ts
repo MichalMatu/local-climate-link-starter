@@ -2,22 +2,22 @@ import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import { RpcShellyClient, RpcShellyScheduleClient } from '@lcl/shelly-client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
   createTimeInstalledAutomation,
-  findInstalledRelayOwner
-} from '../installations/model.js';
-import { useInstalledAutomationStore } from '../installations/store.js';
-import {
+  findInstalledRelayOwner,
   installDailyTimeAutomation,
   readShellyControlStatus,
-  TimeAutomationRuntimeError
+  TimeAutomationRuntimeError,
+  updateTimeInstalledAutomation,
+  useInstalledAutomationStore,
+  type TimeInstalledAutomation
 } from '../../features/automations/index.js';
 import type { ShellyDraftDevice } from '../hardware-setup/setupDraftStore.js';
 import { dailyTimeAutomationConfigSchema } from './config.js';
 
-const localizedRuntimeInstallError = (error: unknown): Error | unknown => {
+const localizedRuntimeError = (error: unknown): Error | unknown => {
   if (!(error instanceof TimeAutomationRuntimeError)) {
     return error;
   }
@@ -35,25 +35,38 @@ const localizedRuntimeInstallError = (error: unknown): Error | unknown => {
 };
 
 export const useTimeAutomationSetupFlow = (
-  selectedShelly: ShellyDraftDevice | null | undefined
+  selectedShelly: ShellyDraftDevice | null | undefined,
+  editInstallationId?: string
 ) => {
-  const [onTime, setOnTime] = useState('08:00');
-  const [offTime, setOffTime] = useState('20:00');
   const installations = useInstalledAutomationStore((state) => state.installations);
+  const editingInstallation = editInstallationId
+    ? (installations.find(
+        (installation): installation is TimeInstalledAutomation =>
+          installation.id === editInstallationId && installation.kind === 'time'
+      ) ?? null)
+    : null;
+  const [onTime, setOnTime] = useState(editingInstallation?.config.onTime ?? '08:00');
+  const [offTime, setOffTime] = useState(editingInstallation?.config.offTime ?? '20:00');
   const upsertInstallation = useInstalledAutomationStore(
     (state) => state.upsertInstallation
   );
 
+  useEffect(() => {
+    if (!editingInstallation) return;
+    setOnTime(editingInstallation.config.onTime);
+    setOffTime(editingInstallation.config.offTime);
+  }, [editingInstallation]);
+
   const configState = useMemo(() => {
     const parsed = dailyTimeAutomationConfigSchema.safeParse({
-      relayId: 0,
+      relayId: editingInstallation?.config.relayId ?? 0,
       onTime,
       offTime
     });
     return parsed.success
       ? ({ ok: true, config: parsed.data } as const)
       : ({ ok: false, error: t('time.validation.invalidTimes') } as const);
-  }, [offTime, onTime]);
+  }, [editingInstallation?.config.relayId, offTime, onTime]);
 
   const installMutation = useMutation({
     mutationFn: async () => {
@@ -62,6 +75,29 @@ export const useTimeAutomationSetupFlow = (
       }
       if (!configState.ok) {
         throw new Error(configState.error);
+      }
+
+      if (editInstallationId) {
+        if (!editingInstallation) {
+          throw new Error(t('detail.notFoundTitle'));
+        }
+        try {
+          const edited = await updateTimeInstalledAutomation({
+            installation: {
+              ...editingInstallation,
+              shelly: {
+                ...editingInstallation.shelly,
+                name: selectedShelly.name,
+                baseUrl: selectedShelly.baseUrl
+              }
+            },
+            config: configState.config,
+            installations
+          });
+          return edited.installation;
+        } catch (error) {
+          throw localizedRuntimeError(error);
+        }
       }
 
       const transport = createShellyTransport(selectedShelly.baseUrl);
@@ -98,7 +134,7 @@ export const useTimeAutomationSetupFlow = (
           config: configState.config
         });
       } catch (error) {
-        throw localizedRuntimeInstallError(error);
+        throw localizedRuntimeError(error);
       }
       return createTimeInstalledAutomation({
         shelly: deviceInfo,
@@ -118,6 +154,7 @@ export const useTimeAutomationSetupFlow = (
     offTime,
     setOffTime,
     configState,
+    isEditingTimeAutomation: editInstallationId !== undefined,
     installMutation
   };
 };

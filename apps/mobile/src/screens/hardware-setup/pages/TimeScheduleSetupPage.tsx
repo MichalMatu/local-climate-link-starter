@@ -6,6 +6,7 @@ import { useTimeAutomationSetupFlow } from '../../../flows/time-automation/useTi
 import { mutationError, type HardwarePageProps } from '../helpers.js';
 
 type TimeScheduleSetupPageProps = HardwarePageProps<TimeScheduleSetupFlow> & {
+  editInstallationId?: string;
   onInstalled?(): void;
 };
 
@@ -48,10 +49,11 @@ const centerWheelOption = (
 
 export const TimeScheduleSetupPage = ({
   flow,
+  editInstallationId,
   onInstalled
 }: TimeScheduleSetupPageProps) => {
   const { t } = useTranslation();
-  const timeFlow = useTimeAutomationSetupFlow(flow.selectedShelly);
+  const timeFlow = useTimeAutomationSetupFlow(flow.selectedShelly, editInstallationId);
   const [isInstallErrorOpen, setIsInstallErrorOpen] = useState(false);
   const [editingTime, setEditingTime] = useState<TimePickerTarget | null>(null);
   const [draftHour, setDraftHour] = useState('00');
@@ -171,7 +173,11 @@ export const TimeScheduleSetupPage = ({
       <div className="installation-section-heading">
         <div>
           <p className="automation-card__eyebrow">{t('time.eyebrow')}</p>
-          <h1>{t('time.title')}</h1>
+          <h1>
+            {timeFlow.isEditingTimeAutomation
+              ? t('time.detail.editTitle')
+              : t('time.title')}
+          </h1>
           <p>{t('time.description')}</p>
         </div>
       </div>
@@ -226,7 +232,13 @@ export const TimeScheduleSetupPage = ({
           }
           onClick={() => void install()}
         >
-          {timeFlow.installMutation.isPending ? t('time.installing') : t('time.install')}
+          {timeFlow.isEditingTimeAutomation
+            ? timeFlow.installMutation.isPending
+              ? t('time.updating')
+              : t('time.detail.save')
+            : timeFlow.installMutation.isPending
+              ? t('time.installing')
+              : t('time.install')}
         </button>
       </div>
 

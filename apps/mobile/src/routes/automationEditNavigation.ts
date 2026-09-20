@@ -2,36 +2,44 @@ import {
   useInstalledAutomationStore,
   type ClimateInstalledAutomation
 } from '../features/automations/index.js';
+import type { SetupIntent } from '../flows/setup-intent.js';
 
-export type ClimateAutomationEditSetupRoute = {
+export type AutomationEditSetupRoute = {
   type: 'setup';
-  intent: 'temperature' | 'humidity';
+  intent: SetupIntent;
   sourceKind: 'climate';
   shellyId: string;
   editInstallationId: string;
 };
 
-export const climateAutomationDetailRoute = (installationId: string) => ({
+export const automationDetailRoute = (installationId: string) => ({
   type: 'installation' as const,
   installationId,
   kind: 'climate' as const,
   page: 'detail' as const
 });
 
-export const prepareClimateAutomationEditRoute = (
+export const prepareAutomationEditRoute = (
   installationId: string,
-  loadDraft: (installation: ClimateInstalledAutomation) => void
-): ClimateAutomationEditSetupRoute | null => {
+  loadClimateDraft: (installation: ClimateInstalledAutomation) => void
+): AutomationEditSetupRoute | null => {
   const installation = useInstalledAutomationStore
     .getState()
     .installations.find((candidate) => candidate.id === installationId);
-  if (!installation || installation.kind !== 'climate') return null;
+  if (!installation) return null;
 
-  loadDraft(installation);
+  if (installation.kind === 'climate') {
+    loadClimateDraft(installation);
+  }
+
   return {
     type: 'setup',
     intent:
-      installation.config.rule.control.metric === 'humidity' ? 'humidity' : 'temperature',
+      installation.kind === 'time'
+        ? 'time'
+        : installation.config.rule.control.metric === 'humidity'
+          ? 'humidity'
+          : 'temperature',
     sourceKind: 'climate',
     shellyId: installation.shelly.deviceId,
     editInstallationId: installation.id

@@ -93,7 +93,13 @@ export const InstallationDetailScreen = ({
   }
 
   if (installation.kind === 'time') {
-    return <TimeInstallationDetail installation={installation} onBack={onBack} />;
+    return (
+      <TimeInstallationDetail
+        installation={installation}
+        onBack={onBack}
+        {...(onEdit ? { onEdit } : {})}
+      />
+    );
   }
 
   return (

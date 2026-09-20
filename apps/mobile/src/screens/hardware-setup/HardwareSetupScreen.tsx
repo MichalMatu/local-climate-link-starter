@@ -49,7 +49,9 @@ export const HardwareSetupScreen = ({
   sensorAddMode = 'phone-scan'
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
-  const flow = useHardwareSetupFlow(editInstallationId);
+  const flow = useHardwareSetupFlow(
+    setupIntent === 'time' ? undefined : editInstallationId
+  );
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
     () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly, sensorAddOnly),
@@ -279,6 +281,7 @@ export const HardwareSetupScreen = ({
       {setupIntent === 'time' && activeTab === 'schedule' && (
         <TimeScheduleSetupPage
           flow={flow}
+          {...(editInstallationId ? { editInstallationId } : {})}
           {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
         />
       )}

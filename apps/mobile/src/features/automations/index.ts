@@ -81,6 +81,10 @@ export {
   type ClimateAutomationEditServices
 } from './flows/updateClimateInstalledAutomation.js';
 export {
+  updateTimeInstalledAutomation,
+  type TimeAutomationEditServices
+} from './flows/updateTimeInstalledAutomation.js';
+export {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from './state/installedAutomationStore.js';

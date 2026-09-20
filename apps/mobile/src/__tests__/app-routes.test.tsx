@@ -3,7 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
-import { createInstalledAutomation } from '../flows/installations/model.js';
+import {
+  createInstalledAutomation,
+  createTimeInstalledAutomation
+} from '../flows/installations/model.js';
 import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
@@ -131,6 +134,26 @@ const addClimateInstallation = (suffix = 'route') => {
     nowMs: 1000
   });
   useInstalledAutomationStore.getState().upsertInstallation(installation);
+  return installation;
+};
+
+const addTimeInstallation = (suffix = 'time-route') => {
+  const installation = createTimeInstalledAutomation({
+    shelly: { id: `shellyplugsg3-${suffix}`, model: 'S3PL-00112EU', gen: 3 },
+    shellyName: 'Lampa',
+    baseUrl: 'http://192.168.0.24/',
+    onJobId: 7,
+    offJobId: 8,
+    config: { relayId: 0, onTime: '08:00', offTime: '20:00' },
+    nowMs: 1000
+  });
+  useInstalledAutomationStore.getState().upsertInstallation(installation);
+  useHardwareSetupDraftStore.getState().upsertShellyDevice({
+    id: installation.shelly.deviceId,
+    name: installation.shelly.name,
+    baseUrl: installation.shelly.baseUrl,
+    scriptIdInput: '1'
+  });
   return installation;
 };
 
@@ -309,6 +332,29 @@ describe('AppRoutes navigation shell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+  });
+
+  it('opens Time edit from detail and returns to the same installed automation', async () => {
+    const installation = addTimeInstallation('edit-time');
+    renderRoutes();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
+
+    expect(await screen.findByText('mock-setup-time')).toBeVisible();
+    expect(
+      screen.getByText(`mock-fixed-shelly-${installation.shelly.deviceId}`)
+    ).toBeVisible();
+    expect(screen.getByText(`mock-edit-installation-${installation.id}`)).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
+    expect(await screen.findByText('mock-setup-time')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
   });

@@ -663,7 +663,7 @@ describe('InstallationDetailScreen', () => {
     const shelly = installTimeShellyFetchMock();
     const onBack = vi.fn();
 
-    renderDetail(saved.id, onBack);
+    const rendered = renderDetail(saved.id, onBack);
 
     expect(await screen.findByText('Działa')).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Lampa' })).toBeVisible();
@@ -682,28 +682,9 @@ describe('InstallationDetailScreen', () => {
     expect(shelly.relayOn).toBe(true);
     expect(shelly.jobs.every((job) => job.enable)).toBe(true);
 
-    fireEvent.change(screen.getByLabelText('Włącz o'), { target: { value: '18:00' } });
-    fireEvent.change(screen.getByLabelText('Wyłącz o'), { target: { value: '23:00' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
-
-    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
-    expect(
-      await within(toastRegion).findByText('Harmonogram zaktualizowany.')
-    ).toBeVisible();
-    expect(shelly.jobs.find((job) => job.id === 7)?.timespec).toBe(
-      dailyScheduleTimespec('18:00')
-    );
-    expect(shelly.jobs.find((job) => job.id === 8)?.timespec).toBe(
-      dailyScheduleTimespec('23:00')
-    );
-    expect(shelly.relayOn).toBe(false);
-    const stored = useInstalledAutomationStore
-      .getState()
-      .installations.find((item) => item.id === saved.id);
-    expect(stored).toMatchObject({
-      kind: 'time',
-      config: { onTime: '18:00', offTime: '23:00' }
-    });
+    const edit = screen.getByRole('button', { name: 'Edytuj' });
+    fireEvent.click(edit);
+    expect(rendered.onEdit).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
     const dialog = screen.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });

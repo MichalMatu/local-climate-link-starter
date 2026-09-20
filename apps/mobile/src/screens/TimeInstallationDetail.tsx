@@ -2,18 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { AppPageBack } from '../components/AppPageBack.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
-import type { TimeInstalledAutomation } from '../flows/installations/model.js';
-import { useInstalledAutomationStore } from '../flows/installations/store.js';
-import { dailyTimeAutomationConfigSchema } from '../flows/time-automation/config.js';
 import {
   deleteTimeAutomation,
   pauseTimeAutomation,
   resumeTimeAutomation,
-  updateDailyTimeAutomation
+  useInstalledAutomationStore,
+  type TimeInstalledAutomation
 } from '../features/automations/index.js';
 import {
   timeAutomationRuntimeQueryKey,
@@ -37,25 +34,20 @@ const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'lo
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
   onBack(): void;
-  onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
+  onEdit?: () => void;
 };
 
 export const TimeInstallationDetail = ({
   installation,
-  onBack
+  onBack,
+  onEdit
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const runtimeQuery = useTimeAutomationRuntime(installation);
-  const upsertInstallation = useInstalledAutomationStore(
-    (state) => state.upsertInstallation
-  );
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
-  const [onTime, setOnTime] = useState(installation.config.onTime);
-  const [offTime, setOffTime] = useState(installation.config.offTime);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
@@ -90,42 +82,6 @@ export const TimeInstallationDetail = ({
     onError: () => pushToast('warning', t('time.detail.actionFailed'))
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      const parsed = dailyTimeAutomationConfigSchema.safeParse({
-        relayId: installation.config.relayId,
-        onTime,
-        offTime
-      });
-      if (!parsed.success) {
-        throw new Error(t('time.validation.invalidTimes'));
-      }
-      const runtime = await updateDailyTimeAutomation({
-        installation,
-        config: parsed.data
-      });
-      const updatedInstallation: TimeInstalledAutomation = {
-        ...installation,
-        config: parsed.data,
-        updatedAtMs: Date.now()
-      };
-      upsertInstallation(updatedInstallation);
-      return { runtime, updatedInstallation };
-    },
-    onSuccess: ({ runtime, updatedInstallation }) => {
-      queryClient.removeQueries({
-        queryKey: timeAutomationRuntimeQueryKey(installation),
-        exact: true
-      });
-      queryClient.setQueryData(
-        timeAutomationRuntimeQueryKey(updatedInstallation),
-        runtime
-      );
-      pushToast('ok', t('time.detail.updateSuccess'));
-    },
-    onError: () => pushToast('warning', t('time.detail.updateFailed'))
-  });
-
   const deleteMutation = useMutation({
     mutationFn: () => deleteTimeAutomation(installation),
     onSuccess: () => {
@@ -156,11 +112,6 @@ export const TimeInstallationDetail = ({
             ? t('dashboard.health.loading')
             : t('dashboard.health.attention');
   const actionBusy = pauseMutation.isPending || resumeMutation.isPending;
-  const timesValid = dailyTimeAutomationConfigSchema.safeParse({
-    relayId: installation.config.relayId,
-    onTime,
-    offTime
-  }).success;
 
   return (
     <main className="demo-shell installation-detail-shell">
@@ -241,44 +192,12 @@ export const TimeInstallationDetail = ({
           <div className="installation-section-heading">
             <h2>{t('time.detail.editTitle')}</h2>
           </div>
-
-          <div className="time-schedule-grid">
-            <label className="field-stack">
-              <span>{t('time.onTime')}</span>
-              <input
-                type="time"
-                value={onTime}
-                onChange={(event) => setOnTime(event.target.value)}
-              />
-            </label>
-            <label className="field-stack">
-              <span>{t('time.offTime')}</span>
-              <input
-                type="time"
-                value={offTime}
-                onChange={(event) => setOffTime(event.target.value)}
-              />
-            </label>
-          </div>
-          {!timesValid && (
-            <p className="field__error" role="alert">
-              {t('time.validation.invalidTimes')}
-            </p>
-          )}
-
           <div className="installation-detail-actions">
-            <button
-              className="primary-action"
-              type="button"
-              disabled={
-                !timesValid ||
-                updateMutation.isPending ||
-                (runtimeState !== 'running' && runtimeState !== 'paused')
-              }
-              onClick={() => updateMutation.mutate()}
-            >
-              {updateMutation.isPending ? t('time.updating') : t('time.detail.save')}
-            </button>
+            {onEdit && (
+              <button className="primary-action" type="button" onClick={onEdit}>
+                {t('detail.edit')}
+              </button>
+            )}
             <button
               className="secondary-action secondary-action--danger"
               type="button"
