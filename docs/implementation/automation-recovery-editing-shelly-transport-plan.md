@@ -222,20 +222,38 @@ Transport note carried forward: 2A uses the existing `platform/shellyHttpTranspo
 
 ## Slice 2B — edit installed Time automation in place
 
-Status: **next**.
+Status: **done**.
 
-Use the same product-level edit/navigation semantics as 2A but keep Time's native Shelly schedule lifecycle separate. Update durable schedule IDs/config only after verified remote mutation. Do not force climate and Time runtimes through one artificial implementation.
+Completed product commit:
 
-Required 2B preimplementation audit:
+```text
+e1a4c63e32000a90c22bd02b6c01ae9b37bff536
+Edit installed Time automation in place
+```
 
-- inspect the existing Time detail/setup/runtime ownership before coding;
-- identify exact `Schedule.Update`/create/delete behavior and whether existing job IDs can be preserved safely;
-- verify the exact stored schedule pair before any destructive mutation;
-- preserve stable `InstalledAutomation` identity and `installedAtMs`;
-- advance `updatedAtMs` and durable schedule IDs/config only after the resulting remote schedule pair is verified;
-- detect relay ownership conflicts before mutation;
-- failed mutation must leave an explainable local/remote state and must not claim the edited config as installed;
-- reuse shared navigation/edit semantics only where genuinely shared; do not route Time through the climate script editor/runtime.
+Result:
+
+- Time installation detail exposes Edit and returns to the same installed automation after save/back;
+- the existing Time schedule setup page is reused and prefilled from durable `InstalledAutomation` config;
+- `features/automations` owns the edit orchestration that verifies live Shelly `deviceId`, durable relay ownership and absence of a managed climate script before mutation;
+- the existing `updateDailyTimeAutomation` remains the single owner of native Shelly schedule mutation;
+- the exact stored ON/OFF schedule pair is verified before mutation and the same `onJobId` / `offJobId` values are updated in place;
+- safe relay OFF, paused/running preservation, post-update verification and rollback remain inside the Time runtime;
+- durable automation id, schedule ids and `installedAtMs` are preserved; edited config and `updatedAtMs` are persisted only after verified remote success;
+- failed/conflicting remote updates do not persist the edited config as installed;
+- `TimeInstallationDetail` no longer owns inline schedule editing or durable edit persistence;
+- climate and Time share only the route-level Edit navigation contract; their runtimes remain separate.
+
+Verification before integration:
+
+- focused validation passed 6 test files / 94 tests, including feature edit orchestration, Time runtime, edit prefill, route/detail and hardware-setup regressions;
+- mobile typecheck and `pnpm quality:repo` passed, including feature-boundary and quality-gate self-tests;
+- exactly one accepted final full `pnpm check` passed in Local Agent task `20260921-slice2b-edit-time-v3-final`, including formatting, lint, UX/repository gates, workspace typechecks/tests, core coverage and production builds;
+- postimplementation audit passed without dependency, lockfile or architecture-baseline changes;
+- the work branch was squashed to one reviewed product commit and `main` was a clean one-commit fast-forward;
+- no physical Shelly smoke was required for 2B because the schedule mutation/rollback contract is already covered by deterministic Time runtime fixtures and typed Shelly schedule-client tests.
+
+Known failure semantics: if a partial remote update fails, the Time runtime attempts to restore both previous schedule definitions and safe relay state. The durable record intentionally remains on the previous config because edited state is not persisted until success. If remote rollback itself cannot be fully restored, runtime health/reconciliation must expose the resulting attention state rather than overwriting ownership evidence.
 
 ## Slice 3A — device-settings foundation + complete LED settings
 
@@ -312,8 +330,8 @@ Do not perform a schema rewrite solely to match this diagram.
 1A  Forget vs uninstall semantics         DONE  b0b80e37f
 1B  Re-add + reconciliation               DONE  7aba04414
 2A  Edit climate automation               DONE  05f7eb4b8
-2B  Edit Time automation                  NEXT
-3A  Full LED settings                     pending
+2B  Edit Time automation                  DONE  e1a4c63e3
+3A  Full LED settings                     NEXT
 3B+ Additional settings families          pending
 4A  BLE feasibility spike                 pending
 4B  BLE transport                         pending

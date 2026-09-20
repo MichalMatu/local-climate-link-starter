@@ -1,4 +1,4 @@
-# Next chat handoff — Slice 2A complete, Slice 2B next
+# Next chat handoff — Slice 2B complete, Slice 3A next
 
 Updated: 2026-09-21
 
@@ -71,108 +71,91 @@ fresh main + idle daemon
 -> cleanup completed work branch
 ```
 
-Do not raise architecture baselines to make a slice fit. New cohesive product modules belong under `apps/mobile/src/features/<feature>`; protocol/domain behavior stays in packages; screens do not own transport or persistence.
+Do not raise architecture baselines to make a slice fit. New cohesive product modules belong under `apps/mobile/src/features/<feature>`; protocol/domain behavior stays in packages; screens do not own raw transport or persistence.
 
-## Last completed product slice — Slice 2A
+## Last completed product slice — Slice 2B
 
-Slice 2A is complete and integrated.
+Slice 2B is complete and integrated.
 
 ```text
-product commit: 05f7eb4b8c83c1583222f374c8f3ebabff7e7703
-message: Edit installed climate automation in place
-validated work branch: work/slice2a-edit-climate
-Local Agent final task: 20260921-slice2a-edit-climate-v20-final
-plan-finalization commit: 62b649ba64cedc58f493f965c28aa47436559d9f
-work branch disposition: deleted from origin by 20260921-slice2a-z-cleanup-v2
+product commit: e1a4c63e32000a90c22bd02b6c01ae9b37bff536
+message: Edit installed Time automation in place
+validated work branch: work/slice2b-edit-time
+Local Agent focused task: 20260921-slice2b-edit-time-v2
+Local Agent final task: 20260921-slice2b-edit-time-v3-final
 ```
 
 Implemented contract:
 
-- climate installation detail exposes Edit;
-- the existing climate editor is hydrated from durable `InstalledAutomation` config rather than introducing a second edit-only form;
-- `features/automations` owns edit-draft derivation and remote edit orchestration;
-- stable Shelly `deviceId` is verified before mutation;
-- relay ownership and conflicting native Shelly schedules are checked before mutation;
-- the remote managed script must still match the durable script id/hash before replacement;
-- relay OFF is explicitly requested and confirmed before replacement and again after replacement;
-- replacement must preserve the managed script id;
-- final runtime verification requires the expected script id, running state and exact generated-code hash;
-- durable automation identity and `installedAtMs` remain stable;
-- `updatedAtMs` and edited config are persisted only after verified remote success;
-- failure/conflict paths do not persist the edited config as installed;
-- route/detail/hardware-setup composition returns the user to the same installed automation after a successful edit;
-- hardware setup tab/hash routing was extracted instead of increasing hotspot budgets.
+- installed Time automation detail exposes Edit;
+- existing Time schedule setup UI is reused and prefilled from durable ON/OFF config;
+- `features/automations/flows/updateTimeInstalledAutomation.ts` verifies live physical Shelly identity and product ownership before allowing remote mutation;
+- relay ownership conflict and a managed climate script are rejected before the Time edit runtime runs;
+- `updateDailyTimeAutomation` remains the only native Shelly schedule mutation path;
+- it verifies the exact stored schedule pair, forces a safe relay state, updates the same job IDs, preserves paused versus running state, verifies the resulting runtime and performs rollback on failure;
+- durable automation id, `onJobId`, `offJobId` and `installedAtMs` remain stable;
+- edited config and `updatedAtMs` are committed locally only after verified runtime success;
+- `TimeInstallationDetail` no longer owns edit mutation/persistence; it owns management/status/pause/resume/delete presentation;
+- climate and Time share Edit routing only, not runtime implementation;
+- the Time edit route remains under the Plug dashboard context (`kind: climate` in the current internal navigation naming), because Time automation is still attached to a Plug.
 
 Verification:
 
-- focused edit/runtime/route/detail/hardware-setup iterations passed, including 84/84 focused tests and a final 56/56 hardware-setup regression run;
-- `pnpm quality:repo` passed without architecture-baseline changes;
-- accepted final full `pnpm check` passed in `20260921-slice2a-edit-climate-v20-final`, including formatting, lint, UX/repository gates, typecheck, tests, core coverage and production builds;
-- pushed diff was reviewed after validation and was a clean one-commit fast-forward onto `main`;
-- no physical Shelly smoke was required for this slice because mutation/verification behavior is covered by deterministic service fixtures and existing Shelly client lifecycle tests.
+- focused validation: 6 files / 94 tests passed;
+- `pnpm quality:repo`, feature-boundary gate and gate self-test passed;
+- exactly one accepted final full `pnpm check` passed in `20260921-slice2b-edit-time-v3-final`;
+- final gate covered format, lint, UX/repository gates, all workspace typechecks/tests, core coverage and production builds;
+- postimplementation audit found no baseline/dependency/lockfile changes;
+- final branch was squashed to one commit and reviewed as a clean one-commit fast-forward;
+- no physical-device smoke was required because native schedule update/rollback behavior is deterministically covered at the Time runtime and Shelly schedule-client boundaries.
 
-Transport note: climate edit currently reaches Shelly through the existing `platform/shellyHttpTransport` adapter and `@lcl/shelly-client` RPC APIs. Product UI does not call raw HTTP. Do not invent BLE selection in Slice 2B; generic transport selection belongs to the later real-hardware BLE work.
+Failure semantics carried forward: if remote mutation fails, the durable record remains on the previous config. The runtime attempts to restore both old schedule definitions and safe relay state. If that remote rollback itself cannot be completed, runtime health/reconciliation must surface the mismatch instead of pretending the edit succeeded.
 
-Known limitation carried forward: if a remote script upload fails after the existing script has begun to mutate, durable state intentionally does not claim the new config; runtime health/reconciliation must expose the resulting mismatch. Do not hide such a state by overwriting local ownership evidence.
+## Immediate next slice — Slice 3A
 
-## Immediate next slice — Slice 2B
+**Build the device-settings foundation and complete LED settings for the supported Shelly Plug family.**
 
-**Edit an installed Time automation in place while keeping Shelly native schedules as the runtime owner.**
+Do not start by copying or expanding the current UI blindly. First inventory actual supported hardware/protocol capabilities and the partial implementation already present.
 
-Existing runtime foundation already provides `updateDailyTimeAutomation` under `features/automations/data/timeAutomationRuntime.ts`; do not build a parallel schedule mutation path before auditing and reusing it.
-
-Required product flow:
-
-```text
-Plug
--> installed Time automation
--> Edit
--> existing Time config pre-fills the schedule editor
--> Save
--> verify exact currently-owned schedule pair
--> update the same managed native schedule pair safely
--> verify resulting schedule pair/runtime
--> persist updated InstalledAutomation
--> return to the same automation detail
-```
-
-Preimplementation architecture gate for 2B:
+Read/audit first:
 
 ```text
-product owner      -> features/automations
-state owner        -> InstalledAutomation feature state/repository
-side-effect owner  -> existing Time runtime + @lcl/shelly-client schedule clients
-UI owner           -> existing Time setup/editor/detail composition
-route owner        -> app routes only for edit navigation context
+packages/AGENTS.md
+apps/mobile/src/features/AGENTS.md
+packages/shelly-client/src/plugsUi.ts
+packages/shelly-client/src/model.ts
+apps/mobile/src/flows/installations/deviceLed.ts
+apps/mobile/src/screens/ShellyLedSettingsCard.tsx
+apps/mobile/src/screens/hardware-setup/pages/ShellySettingsContent.tsx
+apps/mobile/src/screens/PlugSettingsScreen.tsx
+relevant LED/settings tests
+current official Shelly RPC / Plug UI documentation for the target device family
 ```
 
-Audit before coding:
+Preimplementation ownership target:
 
-- `apps/mobile/src/features/automations/data/timeAutomationRuntime.ts` and tests;
-- `timeAutomationRuntimeState.ts`, `timeAutomationSchedule.ts`, `timeAutomationClients.ts`;
-- `apps/mobile/src/flows/time-automation/useTimeAutomationSetupFlow.ts`;
-- `apps/mobile/src/screens/TimeInstallationDetail.tsx`;
-- `apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx`;
-- `packages/shelly-client` schedule API and validators;
-- app route/detail tests that should prove edit entry/return.
+```text
+features/plugs settings UI/flow
+        -> @lcl/shelly-client typed LED settings/capabilities API
+        -> ShellyRpcTransport
+```
 
-2B invariants:
+3A requirements:
 
-- do not route Time through the climate script runtime or climate editor;
-- verify the exact stored `onJobId` / `offJobId` schedule pair before mutation;
-- preserve schedule job IDs when the current runtime API can update them safely;
-- preserve automation id and `installedAtMs`;
-- update `updatedAtMs`, config and schedule metadata only after verified remote success;
-- preserve running versus paused state across edit;
-- enforce safe relay behavior throughout mutation and rollback;
-- reject another managed automation/native schedule taking the relay;
-- if mutation fails, do not claim the edited config as installed; preserve enough evidence for runtime health to show attention if rollback is incomplete;
-- do not create a generic climate/Time edit manager merely because both have an Edit button.
+- confirm the real target device family and actual `PLUGS_UI.GetConfig` / `PLUGS_UI.SetConfig` shape from current official documentation and physical hardware;
+- inventory what the existing LCL code already supports versus what the device exposes;
+- feature code receives typed LED settings/capabilities, never raw RPC JSON;
+- protocol parsing/validation and Shelly-specific config shapes live in `@lcl/shelly-client`;
+- partial writes preserve unrelated/unknown config fields;
+- unsupported options are capability-driven, not scattered model-name checks;
+- no generic `ShellySettingsManager`, raw JSON editor or God object;
+- HTTP remains just the current transport implementation under the existing client boundary; do not add speculative BLE behavior in 3A;
+- complete the LED family before moving to another Shelly settings family;
+- physical Shelly verification is required before 3A can be marked done.
 
 ## What follows
 
 ```text
-2B  edit installed Time automation in place
 3A  device-settings foundation + complete LED settings
 3B+ additional Shelly settings families
 4A  real-hardware BLE feasibility/protocol spike
