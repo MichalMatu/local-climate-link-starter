@@ -1,13 +1,18 @@
 import type { ShellySetupFlow } from '../pageContracts.js';
-import { InfoLabel, Modal } from '@lcl/ui';
+import { InfoLabel } from '@lcl/ui';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import { SavedShellyDeviceCard } from './ShellySetupPresentation.js';
-import { PlugAddPage, type PlugScanResultView } from '../../../features/plugs/index.js';
+import {
+  PlugAddPage,
+  PlugDeleteConfirmModal,
+  type PlugScanResultView,
+  usePlugManagementSurface
+} from '../../../features/plugs/index.js';
 import {
   countIpv4RangeScanAddresses,
   normalizeShellyUrl
@@ -20,11 +25,6 @@ import { ShellySettingsContent } from './ShellySettingsContent.js';
 import { ShellySettingsModal } from './ShellySettingsModal.js';
 import { useShellySetupFeedback } from './useShellySetupFeedback.js';
 
-type ShellyDialogState =
-  | { kind: 'none' }
-  | { kind: 'ble'; device: ShellyDraftDevice }
-  | { kind: 'info'; deviceId: string }
-  | { kind: 'remove'; device: ShellyDraftDevice };
 const normalizeScanBaseUrl = (value: string): string => {
   try {
     return normalizeShellyUrl(value);
@@ -63,17 +63,7 @@ export const ShellySetupPage = ({
     flow.checkShellyMutation.isPending ||
     flow.recheckShellyMutation.isPending ||
     isShellyScanActive;
-  const [dialog, setDialog] = useState<ShellyDialogState>(() =>
-    settingsOnlyDeviceId
-      ? { kind: 'info', deviceId: settingsOnlyDeviceId }
-      : { kind: 'none' }
-  );
   const { dismissToast, pushToast, toasts } = useToastQueue('shelly-toast');
-  const isBleScanModalOpen = dialog.kind === 'ble';
-  const isBleDiscoverySurfaceOpen = isBleScanModalOpen || Boolean(bleScanOnlyDeviceId);
-  const bleScanShelly = dialog.kind === 'ble' ? dialog.device : null;
-  const infoShellyId = dialog.kind === 'info' ? dialog.deviceId : null;
-  const shellyDevicePendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
   const scanResults = flow.shellyScanResults;
   const shellyDevices = flow.shellyDevices;
   const isScanStopped =
@@ -93,84 +83,34 @@ export const ShellySetupPage = ({
     flow.refreshBleDiscoveryMutation.isPending ||
     flow.restartBleDiscoveryMutation.isPending ||
     flow.stopBleDiscoveryMutation.isPending;
-  const infoShelly =
-    infoShellyId === null
-      ? null
-      : (shellyDevices.find((device) => device.id === infoShellyId) ?? null);
-  const settingsOnlyShelly =
-    settingsOnlyDeviceId == null
-      ? null
-      : (shellyDevices.find((device) => device.id === settingsOnlyDeviceId) ?? null);
-  const bleScanOnlyShelly =
-    bleScanOnlyDeviceId == null
-      ? null
-      : (shellyDevices.find((device) => device.id === bleScanOnlyDeviceId) ?? null);
-  const settingsOnlyShellyRef = useRef(settingsOnlyShelly);
-  const bleScanOnlyShellyRef = useRef(bleScanOnlyShelly);
-  const resetBleDiscoveryRef = useRef(flow.resetBleDiscovery);
-  const startBleDiscoveryRef = useRef(flow.startBleDiscovery);
-  const stopBleDiscoveryRef = useRef(flow.stopBleDiscovery);
-  const onBleScanCloseRef = useRef(onBleScanClose);
-  const recheckShellyRef = useRef(flow.recheckShellyMutation.mutate);
-  const resetRecheckShellyRef = useRef(flow.recheckShellyMutation.reset);
-  const onSettingsCloseRef = useRef(onSettingsClose);
+  const resetBleStopErrorRef = useRef<() => void>(() => undefined);
+  const management = usePlugManagementSurface({
+    devices: shellyDevices,
+    settingsOnlyDeviceId,
+    bleScanOnlyDeviceId,
+    bleBusy: isBleDiscoveryBusy,
+    onSettingsPageRequest,
+    onBleScanPageRequest,
+    onSettingsClose,
+    onBleScanClose,
+    resetPlugCheck: flow.checkShellyMutation.reset,
+    resetSettingsCheck: flow.recheckShellyMutation.reset,
+    recheckSettings: (device) => flow.recheckShellyMutation.mutate(device),
+    resetBleDiscovery: flow.resetBleDiscovery,
+    beforeBleStart: () => resetBleStopErrorRef.current(),
+    startBleDiscovery: flow.startBleDiscovery,
+    stopBleDiscovery: flow.stopBleDiscovery,
+    removeDevice: flow.removeShellyDevice,
+    onDeviceRemoved: () => pushToast('ok', t('hardware.shelly.removed'))
+  });
   const { resetBleStopError } = useShellySetupFeedback({
     flow,
-    isBleScanModalOpen: isBleDiscoverySurfaceOpen,
+    isBleScanModalOpen: management.isBleDiscoverySurfaceOpen,
     pushToast,
     suppressControlFeedbackDeviceId: settingsOnlyDeviceId ?? null,
     t
   });
-  const resetBleStopErrorRef = useRef(resetBleStopError);
   resetBleStopErrorRef.current = resetBleStopError;
-
-  useEffect(() => {
-    settingsOnlyShellyRef.current = settingsOnlyShelly;
-    bleScanOnlyShellyRef.current = bleScanOnlyShelly;
-    recheckShellyRef.current = flow.recheckShellyMutation.mutate;
-    resetRecheckShellyRef.current = flow.recheckShellyMutation.reset;
-    resetBleDiscoveryRef.current = flow.resetBleDiscovery;
-    startBleDiscoveryRef.current = flow.startBleDiscovery;
-    stopBleDiscoveryRef.current = flow.stopBleDiscovery;
-    onSettingsCloseRef.current = onSettingsClose;
-    onBleScanCloseRef.current = onBleScanClose;
-  }, [
-    bleScanOnlyShelly,
-    flow.recheckShellyMutation.mutate,
-    flow.recheckShellyMutation.reset,
-    flow.resetBleDiscovery,
-    flow.startBleDiscovery,
-    flow.stopBleDiscovery,
-    onBleScanClose,
-    onSettingsClose,
-    settingsOnlyShelly
-  ]);
-
-  useEffect(() => {
-    if (!settingsOnlyDeviceId) return;
-    const device = settingsOnlyShellyRef.current;
-    if (!device) {
-      onSettingsCloseRef.current?.();
-      return;
-    }
-    resetRecheckShellyRef.current();
-    recheckShellyRef.current(device);
-  }, [settingsOnlyDeviceId]);
-
-  useEffect(() => {
-    if (!bleScanOnlyDeviceId) return undefined;
-    const device = bleScanOnlyShellyRef.current;
-    if (!device) {
-      onBleScanCloseRef.current?.();
-      return undefined;
-    }
-    resetBleDiscoveryRef.current();
-    resetBleStopErrorRef.current();
-    startBleDiscoveryRef.current(device);
-    return () => {
-      stopBleDiscoveryRef.current();
-    };
-  }, [bleScanOnlyDeviceId]);
 
   const addManualShelly = (onSuccess: () => void) => {
     flow.recheckShellyMutation.reset();
@@ -181,7 +121,6 @@ export const ShellySetupPage = ({
     flow.checkShellyMutation.mutate(undefined, {
       onSuccess: () => {
         onSuccess();
-        setDialog({ kind: 'none' });
         pushToast('ok', t('hardware.shelly.added'));
       },
       onError: () => {
@@ -233,68 +172,9 @@ export const ShellySetupPage = ({
         normalizeScanBaseUrl(result.baseUrl)
   }));
 
-  const openBleScanModal = (device: ShellyDraftDevice) => {
-    if (onBleScanPageRequest) {
-      onBleScanPageRequest(device);
-      return;
-    }
-    flow.resetBleDiscovery();
-    resetBleStopError();
-    setDialog({ kind: 'ble', device });
-    flow.startBleDiscovery(device);
-  };
-
-  const closeBleScanModal = () => {
-    if (isBleDiscoveryBusy) {
-      return;
-    }
-    flow.stopBleDiscovery();
-    if (settingsOnlyDeviceId && bleScanShelly) {
-      setDialog({ kind: 'info', deviceId: bleScanShelly.id });
-      return;
-    }
-    setDialog({ kind: 'none' });
-  };
-
-  const restartBleDiscovery = () => {
-    flow.restartBleDiscovery();
-  };
-
   const handleDiscoveredSensor = (candidate: BleDiscoveryCandidate) => {
     flow.addDiscoveredSensor(candidate, 'shelly-scan');
     pushToast('ok', t('hardware.shelly.thermometerSaved'));
-  };
-
-  const openInfoModal = (device: ShellyDraftDevice) => {
-    flow.checkShellyMutation.reset();
-    flow.recheckShellyMutation.reset();
-    if (onSettingsPageRequest) {
-      onSettingsPageRequest(device);
-      return;
-    }
-    setDialog({ kind: 'info', deviceId: device.id });
-    flow.recheckShellyMutation.mutate(device);
-  };
-
-  const closeInfoModal = () => {
-    flow.recheckShellyMutation.reset();
-    setDialog({ kind: 'none' });
-    if (settingsOnlyDeviceId) onSettingsClose?.();
-  };
-
-  const removeSavedShelly = (device: ShellyDraftDevice) => {
-    setDialog({ kind: 'remove', device });
-  };
-
-  const confirmRemoveSavedShelly = () => {
-    if (!shellyDevicePendingRemoval) {
-      return;
-    }
-
-    flow.removeShellyDevice(shellyDevicePendingRemoval.id);
-    setDialog({ kind: 'none' });
-    pushToast('ok', t('hardware.shelly.removed'));
-    if (settingsOnlyDeviceId) onSettingsClose?.();
   };
 
   return (
@@ -350,38 +230,20 @@ export const ShellySetupPage = ({
         />
       )}
 
-      <Modal
-        closeLabel={t('common.cancel')}
-        description={shellyDevicePendingRemoval?.name ?? ''}
-        open={shellyDevicePendingRemoval !== null}
-        title={t('hardware.shelly.deleteConfirmTitle')}
-        actions={
-          <button
-            className="secondary-action secondary-action--danger"
-            type="button"
-            title={t('hardware.shelly.deleteTitle')}
-            onClick={confirmRemoveSavedShelly}
-          >
-            {t('common.delete')}
-          </button>
-        }
-        onClose={() =>
-          settingsOnlyDeviceId
-            ? setDialog({ kind: 'info', deviceId: settingsOnlyDeviceId })
-            : setDialog({ kind: 'none' })
-        }
-      >
-        <p>{t('hardware.shelly.deleteDescription')}</p>
-      </Modal>
+      <PlugDeleteConfirmModal
+        deviceName={management.removePendingDevice?.name ?? null}
+        onClose={management.cancelRemove}
+        onConfirm={management.confirmRemove}
+      />
 
-      {bleScanOnlyDeviceId && bleScanOnlyShelly && (
+      {bleScanOnlyDeviceId && management.bleScanOnlyDevice && (
         <div className="plug-settings-page plug-ble-discovery-page">
           <div className="installation-section-heading">
             <div>
               <h1>{t('hardware.shelly.scanBleTitle')}</h1>
               <p>
                 <InfoLabel
-                  label={bleScanOnlyShelly.name}
+                  label={management.bleScanOnlyDevice.name}
                   infoLabel={t('hardware.shelly.scanBleInfoLabel')}
                   title={t('hardware.shelly.scanBleInfoTitle')}
                 >
@@ -402,7 +264,7 @@ export const ShellySetupPage = ({
                 aria-busy={flow.restartBleDiscoveryMutation.isPending}
                 disabled={isBleDiscoveryBusy}
                 title={t('hardware.shelly.scanBleAgainTitle')}
-                onClick={restartBleDiscovery}
+                onClick={flow.restartBleDiscovery}
               >
                 {t('hardware.shelly.scanBleAgain')}
               </button>
@@ -411,36 +273,36 @@ export const ShellySetupPage = ({
         </div>
       )}
 
-      {settingsOnlyDeviceId && infoShelly ? (
+      {settingsOnlyDeviceId && management.infoDevice ? (
         <div className="plug-settings-page">
           <div className="installation-section-heading">
-            <h1>{infoShelly.name}</h1>
+            <h1>{management.infoDevice.name}</h1>
           </div>
           <ShellySettingsContent
             flow={flow}
-            device={infoShelly}
+            device={management.infoDevice}
             enableBleDiscovery={enableBleDiscovery}
-            onBleScan={openBleScanModal}
-            onRemove={removeSavedShelly}
+            onBleScan={management.openBleScan}
+            onRemove={management.requestRemove}
           />
         </div>
       ) : (
         <ShellySettingsModal
           flow={flow}
-          device={infoShelly}
+          device={management.infoDevice}
           enableBleDiscovery={enableBleDiscovery}
-          onClose={closeInfoModal}
-          onBleScan={openBleScanModal}
-          onRemove={removeSavedShelly}
+          onClose={management.closeInfo}
+          onBleScan={management.openBleScan}
+          onRemove={management.requestRemove}
         />
       )}
 
       <ShellyBleDiscoveryModal
         flow={flow}
-        device={bleScanShelly}
-        open={isBleScanModalOpen}
-        onClose={closeBleScanModal}
-        onRestart={restartBleDiscovery}
+        device={management.bleModalDevice}
+        open={management.isBleModalOpen}
+        onClose={management.closeBleScan}
+        onRestart={flow.restartBleDiscovery}
         onSaveCandidate={handleDiscoveredSensor}
       />
 
@@ -452,12 +314,12 @@ export const ShellySetupPage = ({
               key={device.id}
               controlState={flow.shellyControlStates[device.id]}
               device={device}
-              {...(enableBleDiscovery ? { onBleScan: openBleScanModal } : {})}
-              onInfoOpen={openInfoModal}
+              {...(enableBleDiscovery ? { onBleScan: management.openBleScan } : {})}
+              onInfoOpen={management.openInfo}
               onNameChange={(savedDevice, value) =>
                 flow.setShellyDeviceName(savedDevice.id, value)
               }
-              onRemove={removeSavedShelly}
+              onRemove={management.requestRemove}
             />
           ))}
         </div>
