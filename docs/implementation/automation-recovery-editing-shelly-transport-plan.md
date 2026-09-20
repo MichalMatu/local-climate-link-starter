@@ -156,27 +156,35 @@ The user-visible recovery defect therefore belongs to Slice 1B: saved Plug ident
 
 ## Slice 1B — re-add and reconcile existing managed automation
 
-Goal: when the same physical Shelly is added again, reconnect it to the existing managed automation and verify the remote runtime still matches what Local Climate Link owns.
+Status: **done**.
 
-Identity contract:
-
-- match normalized stable `deviceId`;
-- never match ownership by IP / `baseUrl`;
-- refresh last-known HTTP endpoint independently if the same device appears at a new address.
-
-Reconciliation must distinguish at least:
+Completed product commit:
 
 ```text
-local record + verified managed runtime
-local record + remote runtime missing/changed
-remote unreachable / verification unavailable
-relay ownership conflict
-no local managed record
+7aba04414abda1d0eb269e67599b574a4658404e
+Reconcile installed automation when re-adding plug
 ```
 
-Do not silently adopt an unrelated script/schedule. Acceptance includes the real regression: Plug with installed automation -> Forget Plug -> add same physical Plug -> existing automation is shown, including changed-IP coverage.
+Result:
 
-Full reconstruction after app storage loss is a separate future problem unless verified device-resident metadata makes it safe.
+- verified `Shelly.GetDeviceInfo.id` is now the saved Plug identity; `baseUrl` remains reachability only;
+- stable Shelly identity normalization lives in `@lcl/shelly-client`, while Plug-facing identity comparison is exposed by `features/plugs`;
+- `features/automations` owns reconciliation of durable `InstalledAutomation` records with the verified physical Shelly;
+- re-adding the same `deviceId` at a changed endpoint refreshes the durable automation endpoint/name/model metadata without changing automation identity or `installedAtMs`;
+- climate reconciliation verifies the managed script id, running state and exact code hash;
+- Time reconciliation reuses the existing exact schedule-pair verification contract;
+- reconciliation reports `none`, `verified`, `changed`, `unavailable` or `conflict` and never adopts an unrelated runtime heuristically;
+- dashboard, detail and scan saved-state association now use stable physical identity rather than URL matching.
+
+Verification before integration:
+
+- focused iterations covered reconciliation, hardware setup, dashboard/detail and routing regressions;
+- final mobile typecheck passed;
+- exactly one final full `pnpm check` on the accepted v6 implementation passed;
+- postimplementation diff audit passed and architecture baselines were unchanged;
+- no physical-device smoke was required because the regression is identity/re-association logic and the RPC behavior is covered by deterministic fixtures.
+
+Known limitation carried forward: reconstruction after complete app-storage loss is still intentionally out of scope; recovery assumes Local Climate Link retains its durable `InstalledAutomation` record.
 
 ## Slice 2A — edit installed climate automation in place
 
@@ -272,8 +280,8 @@ Do not perform a schema rewrite solely to match this diagram.
 ```text
 0   InstalledAutomation foundation        DONE  60295d576
 1A  Forget vs uninstall semantics         DONE  b0b80e37f
-1B  Re-add + reconciliation               NEXT
-2A  Edit climate automation               pending
+1B  Re-add + reconciliation               DONE  7aba04414
+2A  Edit climate automation               NEXT
 2B  Edit Time automation                  pending
 3A  Full LED settings                     pending
 3B+ Additional settings families          pending
