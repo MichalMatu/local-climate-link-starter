@@ -1,11 +1,13 @@
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type * as AutomationsFeature from '../features/automations/index.js';
 import { createInstalledAutomation } from '../flows/installations/model.js';
 import { loadInstalledAutomationScriptSource } from '../flows/installations/scriptPreview.js';
 
 const readShellyManagedAutomationScriptCode = vi.hoisted(() => vi.fn());
 
-vi.mock('../features/automations/index.js', () => ({
+vi.mock('../features/automations/index.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof AutomationsFeature>()),
   readShellyManagedAutomationScriptCode
 }));
 
