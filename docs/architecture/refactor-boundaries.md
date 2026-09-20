@@ -189,7 +189,7 @@ instead of increasing an architecture budget.
 
 Repository-gate hard budgets remain authoritative for protected hotspots.
 
-`@lcl/shelly-client` keeps Shelly device/status response normalization in `src/rpc/deviceStatus.ts`; `scripts/install.ts` owns script install/mutation orchestration and delegates response parsing to that RPC boundary.
+`@lcl/shelly-client` keeps Shelly device/status response normalization in `src/rpc/deviceStatus.ts`. `scripts/installLifecycle.ts` owns backup/upload/start/verification for script installation, while `scripts/install.ts` remains the public client facade.
 `src/rpc/relay.ts` owns relay mutation and safe relay-test orchestration, while `src/rpc/errors.ts` owns shared client-side validation/relay error construction.
 
 ## Phase 1 mechanical guardrails
@@ -241,7 +241,6 @@ apps/mobile/src/flows/time-automation/runtime.ts                       447
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       416
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 411
 apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         353
-packages/shelly-client/src/scripts/install.ts                          393
 packages/script-generator/src/shelly/generate.ts                       565
 ```
 
