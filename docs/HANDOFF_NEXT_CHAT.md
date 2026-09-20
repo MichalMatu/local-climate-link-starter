@@ -133,11 +133,15 @@ No extra separator and no `Type` / `MAC` labels. Metadata typography is intentio
 
 A restrained glass treatment was added to major shared surfaces. Do not solve future glass-related layout issues by adding page-specific positioning exceptions. Keep geometry-critical overlays (toast host, modal layer, persistent nav) outside filtered page surfaces when appropriate.
 
-## Device validation state
+## Device and visual validation state
 
 A physical Samsung S22+ install/cold-start smoke succeeded for the preceding `49e641f7` polish build (`versionName=2.0.10`, `versionCode=20010`). The user disconnected the phone after the toast-host change and explicitly authorized autonomous emulator/screenshot validation instead.
 
-Physical-device absence is not a blocker for unrelated TypeScript/web/UI work. For native-only behavior, use an Android emulator when available and document whether the check was emulator or physical device.
+The current toast-host implementation was validated with real Playwright screenshots at all five canonical viewports: 360×800, 390×844, 412×915, 768×1024 and 1440×900. A compact contact-sheet review confirmed the same visual contract in every capture: the toast sits immediately above the persistent bottom navigation, remains fully inside the viewport, does not overlap or get clipped by the nav, fills the available mobile width with normal margins, and uses the existing right-aligned max-width presentation on larger tablet/desktop viewports.
+
+The local Android `medium_phone` AVD is configured as Android 36 / `arm64-v8a`; emulator 37.1.11 sees Hypervisor.Framework and the system image correctly. However, autonomous headless cold-boot attempts did not make the AVD visible to ADB. The latest bounded attempt waited 120 × 5 seconds (about ten minutes) and ended in `BOOT_TIMEOUT` with the emulator process still alive. No current app build was installed to that emulator, so native emulator smoke for `8ad5b152` remains unverified. Treat this as local emulator infrastructure evidence, not an app-code failure, and do not claim native emulator validation until the AVD actually reaches ADB `device` state.
+
+Physical-device absence is not a blocker for unrelated TypeScript/web/UI work. For layout-only regressions, responsive Playwright remains valid evidence. For native-only behavior, use a working Android emulator or a physical device and state explicitly which one provided the evidence.
 
 ## Product model that must remain stable
 
@@ -232,9 +236,9 @@ Do not raise architecture budgets or weaken UX gates merely to make a change pas
 
 ## Repository hygiene after this slice
 
-Temporary screenshot/contact-sheet branches created by Local Agent are validation artifacts only and are not product branches. They may be deleted after evidence has been reviewed/recorded. Do not merge `.agent/screenshots/**` into the work branch.
+Temporary screenshot/contact-sheet branches created by Local Agent are validation artifacts only and are not product branches. After the evidence was recorded and visually reviewed, all remaining `agent-artifacts/*` validation branches were deleted.
 
-The work branch itself must remain clean after Local Agent tasks. Generated test outputs, Playwright traces, APKs and screenshots must not be committed to the product branch unless a specific long-lived test fixture is intentionally added.
+The active product branch contains no `.agent/screenshots/**` or `.agent/artifacts/**` files, and the Local Agent worktree was verified clean after the cleanup task. Generated test outputs, Playwright traces, APKs and screenshots must not be committed to the product branch unless a specific long-lived test fixture is intentionally added.
 
 ## Next work
 

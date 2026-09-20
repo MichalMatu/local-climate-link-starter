@@ -560,6 +560,7 @@ Rules:
 - No hardcoded spacing except trivial `0`.
 - No one-off CSS classes for repeated patterns; create a UI primitive.
 - Transient success/error/loading feedback must not be inserted into cards, saved-device rows, toolbars, or button groups in a way that shifts primary controls. Use the shared toast primitive for short-lived feedback, and use modals or reserved diagnostic panels for blocking or persistent detail.
+- Mobile screen toasts must render through `AppToastViewport` into the `AppShell`-owned `#app-toast-host`. Never render raw `<ToastViewport>` inside `apps/mobile/src/screens/**` or add page-specific toast `bottom` offsets; `AppBottomNavigation.css` owns the persistent-nav and safe-area offset.
 - Use accessible contrast for status colors.
 - Use status language consistently: OK, warning, blocked, error, inactive.
 
@@ -656,6 +657,7 @@ Required test layers:
 - Demo mode can complete the full flow without hardware.
 - Sample config generates valid script.
 - App can build as web preview.
+- Shell-overlay regressions that depend on viewport geometry must use responsive E2E/screenshot coverage at representative phone, tablet and desktop sizes; for the current toast/nav contract the canonical set is 360×800, 390×844, 412×915, 768×1024 and 1440×900.
 
 ### Manual hardware tests
 

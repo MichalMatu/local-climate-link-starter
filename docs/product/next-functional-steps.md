@@ -97,8 +97,9 @@ A physical Samsung S22+ install/cold-start smoke succeeded for the preceding gla
 
 When native verification is useful:
 
-- use the existing Android `medium_phone` AVD when a physical device is unavailable;
-- clearly distinguish emulator evidence from physical-device evidence;
+- use the existing Android `medium_phone` AVD when a physical device is unavailable and the AVD actually reaches ADB `device` state;
+- if the local AVD does not boot, use responsive Playwright only for layout/web-shell evidence and record native smoke as unverified rather than treating the emulator failure as an app failure;
+- clearly distinguish Playwright, emulator and physical-device evidence;
 - verify `versionName=2.0.10` / `versionCode=20010` unless intentionally changed;
 - cold-start `MainActivity`;
 - confirm the app process is alive and no app FATAL/ANR is present;
