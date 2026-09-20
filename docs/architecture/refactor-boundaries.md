@@ -257,7 +257,7 @@ Largest production ownership hotspots at that checkpoint were:
 523  apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts
 629  packages/shelly-client/src/scripts/install.ts
 564  packages/script-generator/src/shelly/generate.ts
-3333 apps/mobile/src/theme/theme.css
+3334 apps/mobile/src/theme/theme.css
 ```
 
 These numbers are evidence for where to be careful, not targets to preserve and not a
