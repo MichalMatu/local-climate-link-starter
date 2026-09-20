@@ -108,6 +108,7 @@ const checkMobileRootShape = async () => {
     'flows',
     'mocks',
     'permissions',
+    'platform',
     'routes',
     'screens',
     'test',

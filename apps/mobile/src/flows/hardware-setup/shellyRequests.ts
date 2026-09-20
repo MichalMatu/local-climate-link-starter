@@ -1,7 +1,7 @@
 import {
   LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  FetchShellyRpcTransport,
+  type FetchShellyRpcTransport,
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
   readShellyScriptCode as readShellyScriptCodeResult,
@@ -12,18 +12,16 @@ import {
   type ShellyInstallResult
 } from '@lcl/shelly-client';
 import {
-  Capacitor,
-  CapacitorHttp,
-  type HttpHeaders,
-  type HttpResponse
-} from '@capacitor/core';
-import {
   bleDiscoverySnapshotSchema,
   type BleDiscoverySnapshot,
   type HardwareSetupStatus,
   type ScriptListEntry
 } from './schemas.js';
 import { t } from '../../app/i18n.js';
+import {
+  createShellyFetch,
+  createShellyTransport
+} from '../../platform/shellyHttpTransport.js';
 
 const shellyInvalidResponseMessage = (): string => t('hardware.shelly.invalidResponse');
 const shellyOutOfMemoryMessage = (): string => t('hardware.shelly.outOfMemory');
@@ -32,113 +30,9 @@ const shellyScriptsDisabledMessage = (): string => t('hardware.shelly.scriptsDis
 const shellyBleMissingMessage = (): string => t('hardware.shelly.bleMissing');
 const shellyBleDisabledMessage = (): string => t('hardware.shelly.bleDisabled');
 
-const SHELLY_DEV_PROXY_PATH = '/__lcl_shelly_proxy';
 export const SHELLY_SETUP_SCAN_CONCURRENCY = 8;
 export const SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS = 3000;
 const BLE_DISCOVERY_ENDPOINT_TIMEOUT_MS = 5000;
-
-const shouldUseShellyDevProxy = (): boolean =>
-  import.meta.env.DEV &&
-  typeof window !== 'undefined' &&
-  window.location.protocol.startsWith('http');
-
-const shouldUseNativeShellyHttp = (): boolean =>
-  !shouldUseShellyDevProxy() &&
-  Capacitor.isNativePlatform() &&
-  Capacitor.isPluginAvailable('CapacitorHttp');
-
-const resolveShellyRequestUrl = (targetUrl: URL): URL => {
-  if (!shouldUseShellyDevProxy()) {
-    return targetUrl;
-  }
-
-  const proxyUrl = new URL(SHELLY_DEV_PROXY_PATH, window.location.origin);
-  proxyUrl.searchParams.set('target', targetUrl.toString());
-  return proxyUrl;
-};
-
-const headersToRecord = (headers: HeadersInit | undefined): HttpHeaders => {
-  if (!headers) {
-    return {};
-  }
-  if (headers instanceof Headers) {
-    return Object.fromEntries(headers.entries());
-  }
-  if (Array.isArray(headers)) {
-    return Object.fromEntries(headers.map(([key, value]) => [key, value]));
-  }
-  return Object.fromEntries(
-    Object.entries(headers).map(([key, value]) => [key, String(value)])
-  );
-};
-
-const responseBodyToText = (response: HttpResponse): string => {
-  if (typeof response.data === 'string') {
-    return response.data;
-  }
-  if (response.data === undefined || response.data === null) {
-    return '';
-  }
-  return JSON.stringify(response.data);
-};
-
-const abortError = (): DOMException =>
-  new DOMException('Shelly request was canceled.', 'AbortError');
-
-const nativeShellyFetch = async (
-  targetUrl: URL,
-  init: RequestInit | undefined,
-  timeoutMs: number
-): Promise<Response> => {
-  if (init?.signal?.aborted) {
-    throw abortError();
-  }
-
-  const method = init?.method ?? 'GET';
-  const body = typeof init?.body === 'string' ? init.body : undefined;
-  let abortListener: (() => void) | undefined;
-  const abortPromise = new Promise<never>((_, reject) => {
-    abortListener = () => reject(abortError());
-    init?.signal?.addEventListener('abort', abortListener, { once: true });
-  });
-
-  try {
-    const nativeResponse = await Promise.race([
-      CapacitorHttp.request({
-        url: targetUrl.toString(),
-        method,
-        headers: headersToRecord(init?.headers),
-        ...(body === undefined ? {} : { data: body }),
-        connectTimeout: timeoutMs,
-        readTimeout: timeoutMs,
-        responseType: 'text'
-      }),
-      abortPromise
-    ]);
-
-    return new Response(responseBodyToText(nativeResponse), {
-      status: nativeResponse.status,
-      headers: nativeResponse.headers
-    });
-  } finally {
-    if (abortListener) {
-      init?.signal?.removeEventListener('abort', abortListener);
-    }
-  }
-};
-
-const createShellyFetch =
-  (timeoutMs: number): typeof fetch =>
-  async (input, init) => {
-    const targetUrl =
-      input instanceof URL
-        ? input
-        : new URL(typeof input === 'string' ? input : input.url);
-    if (shouldUseNativeShellyHttp()) {
-      return nativeShellyFetch(targetUrl, init, timeoutMs);
-    }
-    return fetch(resolveShellyRequestUrl(targetUrl), init);
-  };
 
 const combineAbortSignals = (signals: AbortSignal[]): AbortSignal => {
   const controller = new AbortController();
@@ -262,13 +156,6 @@ export const fetchShellyJson = async (
   }
 };
 
-export const createShellyTransport = (baseUrl: string): FetchShellyRpcTransport =>
-  new FetchShellyRpcTransport({
-    baseUrl,
-    defaultTimeoutMs: 8000,
-    fetchImpl: createShellyFetch(8000)
-  });
-
 export const readShellyRuntimeStatus = async (
   baseUrl: string
 ): Promise<ShellyRuntimeStatus> => {
@@ -281,14 +168,9 @@ export const readShellyRuntimeStatus = async (
   };
 };
 
-const createShellyScanTransport = (
-  baseUrl: string,
-  signal?: AbortSignal
-): FetchShellyRpcTransport =>
-  new FetchShellyRpcTransport({
-    baseUrl,
-    defaultTimeoutMs: SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS,
-    fetchImpl: createShellyFetch(SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS),
+const createShellyScanTransport = (baseUrl: string, signal?: AbortSignal) =>
+  createShellyTransport(baseUrl, {
+    timeoutMs: SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS,
     ...(signal ? { signal } : {})
   });
 

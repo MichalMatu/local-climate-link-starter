@@ -1,6 +1,6 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { RPC_METHODS, type ShellyRpcRequest } from '@lcl/shelly-client';
 import { z } from 'zod';
-import { createShellyTransport } from './shellyRequests.js';
 
 const optionalMetric = z.number().nonnegative().nullable().optional();
 

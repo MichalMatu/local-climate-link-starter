@@ -1,3 +1,4 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import {
   createLedOffPatch,
   createRelayStateLedPatch,
@@ -5,7 +6,6 @@ import {
   type Result,
   type ShellyPlugsUiReadResult
 } from '@lcl/shelly-client';
-import { createShellyTransport } from '../hardware-setup/shellyRequests.js';
 import type { InstalledAutomation } from './model.js';
 
 export type InstalledShellyLedPreset = 'relay-state' | 'off';

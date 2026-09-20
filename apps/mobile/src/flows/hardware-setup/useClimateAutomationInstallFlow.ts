@@ -1,3 +1,4 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import {
   createInstallPlan,
@@ -20,7 +21,6 @@ import { findScheduleRelayConflict } from '../time-automation/runtime.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import {
   cleanupStaleShellyBleDiscoveryScripts,
-  createShellyTransport,
   unwrapShellyResult
 } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';

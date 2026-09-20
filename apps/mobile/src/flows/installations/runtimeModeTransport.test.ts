@@ -1,14 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
-import type * as ShellyRequestsModule from '../hardware-setup/shellyRequests.js';
 import { createInstalledAutomation } from './model.js';
 
 const mocks = vi.hoisted(() => ({ call: vi.fn() }));
 
-vi.mock('../hardware-setup/shellyRequests.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof ShellyRequestsModule>();
+vi.mock('../../platform/shellyHttpTransport.js', () => {
   return {
-    ...actual,
     createShellyTransport: vi.fn(() => ({ call: mocks.call }))
   };
 });

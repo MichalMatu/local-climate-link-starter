@@ -1,12 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type * as ShellyRequestsModule from './shellyRequests.js';
 
 const mocks = vi.hoisted(() => ({ call: vi.fn() }));
 
-vi.mock('./shellyRequests.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof ShellyRequestsModule>();
+vi.mock('../../platform/shellyHttpTransport.js', () => {
   return {
-    ...actual,
     createShellyTransport: vi.fn(() => ({ call: mocks.call }))
   };
 });

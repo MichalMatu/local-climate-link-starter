@@ -1,3 +1,4 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import { RpcShellyClient, RpcShellyScheduleClient } from '@lcl/shelly-client';
 import { useMemo, useState } from 'react';
@@ -8,7 +9,6 @@ import {
 } from '../installations/model.js';
 import { useInstalledAutomationStore } from '../installations/store.js';
 import {
-  createShellyTransport,
   readShellyControlStatus,
   unwrapShellyResult
 } from '../hardware-setup/shellyRequests.js';

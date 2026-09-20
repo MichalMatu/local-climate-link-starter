@@ -1,6 +1,6 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
 import {
-  createShellyTransport,
   readShellySetupStatus,
   unwrapShellyResult
 } from '../hardware-setup/shellyRequests.js';

@@ -1,10 +1,10 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
 import {
-  createShellyTransport,
   readShellyControlStatus,
   type ShellyControlStatus,
   unwrapShellyResult

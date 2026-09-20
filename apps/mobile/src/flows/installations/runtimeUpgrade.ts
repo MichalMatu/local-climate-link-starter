@@ -1,7 +1,7 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { generateShellyThermostatScript } from '@lcl/script-generator';
 import { createInstallPlan, RpcShellyClient } from '@lcl/shelly-client';
 import {
-  createShellyTransport,
   readShellyControlStatus,
   unwrapShellyResult
 } from '../hardware-setup/shellyRequests.js';

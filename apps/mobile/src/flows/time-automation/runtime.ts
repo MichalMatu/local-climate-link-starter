@@ -1,3 +1,4 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import {
   RpcShellyClient,
   RpcShellyScheduleClient,
@@ -5,10 +6,7 @@ import {
   type ShellyScheduleJobConfig,
   type ShellyStatus
 } from '@lcl/shelly-client';
-import {
-  createShellyTransport,
-  unwrapShellyResult
-} from '../hardware-setup/shellyRequests.js';
+import { unwrapShellyResult } from '../hardware-setup/shellyRequests.js';
 import type { TimeInstalledAutomation } from '../installations/model.js';
 import {
   dailyScheduleTimespec,

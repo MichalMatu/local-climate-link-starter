@@ -1,9 +1,7 @@
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { RPC_METHODS } from '@lcl/shelly-client';
 import { z } from 'zod';
-import {
-  createShellyTransport,
-  unwrapShellyResult
-} from '../hardware-setup/shellyRequests.js';
+import { unwrapShellyResult } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 
 export type InstalledAutomationRuntimeMode = 'auto' | 'manual';

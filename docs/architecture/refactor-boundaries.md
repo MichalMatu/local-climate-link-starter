@@ -107,6 +107,10 @@ presentation belongs in `@lcl/ui`.
 Avoid catch-all folders such as `features/common`, `misc`, `helpers` or generic service
 containers.
 
+## Mobile platform-adapter boundary
+
+`apps/mobile/src/platform/*` is the neutral owner for cross-feature browser/Capacitor bindings. Platform adapters may construct package transports and normalize platform APIs, but must not own feature state, product workflows or user-facing translations. Product flows depend on platform adapters; platform adapters must not depend on product flows/screens/features.
+
 ## Hardware setup boundary
 
 `HardwareSetupScreen.tsx` is a coordinator. Its responsibilities are limited to:
@@ -224,7 +228,7 @@ ownership in the same way. Phase 3 tightened known larger modules to their exact
 parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
-apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  682
+apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  564
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
 apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
 apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           443

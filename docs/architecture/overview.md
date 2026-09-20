@@ -132,6 +132,10 @@ Important packages include:
 - `@lcl/diagnostics` — bounded/redacted diagnostics,
 - `@lcl/ui` — shared presentation primitives.
 
+### Mobile platform adapters
+
+`apps/mobile/src/platform/*` owns cross-feature bindings to native/browser platform APIs. It may adapt Capacitor/browser transport into package clients, but it does not own product state, user-facing i18n decisions or feature orchestration. Shelly HTTP selection (browser dev proxy versus Capacitor native HTTP) lives here so installation, time-automation and hardware-setup flows do not depend on each other for transport.
+
 ### Mobile flows
 
 `apps/mobile/src/flows/*` owns app orchestration and transport use. Hardware setup is composed from focused flows including:
