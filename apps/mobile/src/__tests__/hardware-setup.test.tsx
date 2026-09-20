@@ -155,6 +155,7 @@ import {
 import { I18nProvider, setLocalePreference, t } from '../app/i18n.js';
 import { setThemeMode } from '../app/themeMode.js';
 import { resetHardwareSetupReadingsStore } from '../flows/hardware-setup/sensorReadingsStore.js';
+import { createInstalledAutomation } from '../features/automations/index.js';
 import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
@@ -1253,9 +1254,23 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).getByText('1.23 kWh')).toBeInTheDocument();
   });
 
-  it('removes a saved Shelly plug from the card action icon after confirmation', async () => {
+  it('forgets a saved Shelly plug without deleting durable automation ownership', async () => {
     renderHardwareSetup();
     await addShellyThroughUi('Salon');
+
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptId: 1,
+      scriptHash: 'owned-script',
+      config: createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      ),
+      nowMs: 1000
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
@@ -1277,6 +1292,7 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText('Brak dodanych gniazdek.')).toBeInTheDocument();
     expect(await screen.findByText('Usunięto gniazdko z aplikacji.')).toBeInTheDocument();
+    expect(useInstalledAutomationStore.getState().installations).toEqual([installation]);
   });
 
   it('keeps a saved Shelly plug when the styled removal modal is cancelled', async () => {
