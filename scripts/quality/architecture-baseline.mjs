@@ -27,7 +27,7 @@ export const mobileProductionBaselines = Object.freeze({
 });
 
 export const packageProductionBaselines = Object.freeze({
-  'packages/shelly-client/src/scripts/install.ts': 604,
+  'packages/shelly-client/src/scripts/install.ts': 497,
   'packages/script-generator/src/shelly/generate.ts': 565
 });
 

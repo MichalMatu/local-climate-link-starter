@@ -6,12 +6,9 @@ import {
   type RelayTestResult,
   type ShellyClient,
   type ShellyClientError,
-  type ShellyClockStatus,
-  type ShellyComponentState,
   type ShellyDeviceInfo,
   type ShellyInstallPlan,
   type ShellyInstallResult,
-  type ShellyPlugTelemetry,
   type ShellyScriptBackup,
   type ShellyRpcRequest,
   type ShellyRpcTransport,
@@ -20,18 +17,18 @@ import {
 import {
   scriptCreateResponseSchema,
   scriptStatusSchema,
-  shellyDeviceInfoSchema,
-  switchStatusSchema,
-  sysStatusSchema,
-  wifiStatusSchema
+  switchStatusSchema
 } from '../rpc/validators.js';
+import {
+  parseShellyDeviceInfoResponse,
+  parseShellyStatusResponse
+} from '../rpc/deviceStatus.js';
 import { hashScriptCode } from './hash.js';
 import { readShellyScriptCode, readShellyScriptList } from './read.js';
 
 const DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES = 1024;
 const DEFAULT_SCRIPT_MUTATION_DELAY_MS = 100;
 const BLE_SCANNER_CLEANUP_DELAY_MS = 1000;
-const MIN_SYNCED_UNIX_TIME_SEC = 1_600_000_000;
 const STOP_BLE_SCANNER_EVAL_CODE =
   'if(typeof BLE!=="undefined"&&BLE.Scanner){var s=BLE.Scanner.stop||BLE.Scanner.Stop;if(s)s.call(BLE.Scanner);}"ok"';
 
@@ -71,85 +68,6 @@ const relayTestError = (message: string): ShellyClientError => ({
   technicalMessage: message,
   retryable: true
 });
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const componentState = (value: unknown): ShellyComponentState => {
-  if (value === undefined || value === null) {
-    return 'missing';
-  }
-  if (value === false) {
-    return 'disabled';
-  }
-  if (value === true) {
-    return 'enabled';
-  }
-  if (isRecord(value) && (value.enable === false || value.enabled === false)) {
-    return 'disabled';
-  }
-  return isRecord(value) ? 'enabled' : 'missing';
-};
-
-const matterEnabled = (value: unknown): boolean =>
-  value === true ||
-  (isRecord(value) && (value.enable === true || value.enabled === true));
-
-const toShellyPlugTelemetry = (
-  switchStatus: ReturnType<typeof switchStatusSchema.safeParse>,
-  wifiStatus: ReturnType<typeof wifiStatusSchema.safeParse>
-): ShellyPlugTelemetry => {
-  const telemetry: ShellyPlugTelemetry = {};
-  if (switchStatus.success) {
-    const data = switchStatus.data;
-    if (data.apower !== undefined) {
-      telemetry.powerW = data.apower;
-    }
-    if (data.voltage !== undefined) {
-      telemetry.voltageV = data.voltage;
-    }
-    if (data.current !== undefined) {
-      telemetry.currentA = data.current;
-    }
-    if (data.aenergy?.total !== undefined) {
-      telemetry.energyWh = data.aenergy.total;
-    }
-    if (data.temperature?.tC !== undefined) {
-      telemetry.deviceTemperatureC = data.temperature.tC;
-    }
-  }
-  if (wifiStatus.success && wifiStatus.data.rssi !== undefined) {
-    telemetry.wifiRssiDbm = wifiStatus.data.rssi;
-  }
-  return telemetry;
-};
-
-const finiteNumber = (value: number | null | undefined): number | undefined =>
-  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-
-const toShellyClockStatus = (
-  sysStatus: ReturnType<typeof sysStatusSchema.safeParse>
-): ShellyClockStatus => {
-  if (!sysStatus.success) {
-    return { timeSynced: false };
-  }
-
-  const localTime =
-    typeof sysStatus.data.time === 'string' && sysStatus.data.time.trim() !== ''
-      ? sysStatus.data.time
-      : undefined;
-  const unixTimeSec = finiteNumber(sysStatus.data.unixtime);
-  const uptimeSec = finiteNumber(sysStatus.data.uptime);
-  const lastSyncUnixTimeSec = finiteNumber(sysStatus.data.last_sync_ts);
-
-  return {
-    ...(localTime ? { localTime } : {}),
-    ...(unixTimeSec !== undefined ? { unixTimeSec } : {}),
-    ...(uptimeSec !== undefined ? { uptimeSec } : {}),
-    ...(lastSyncUnixTimeSec !== undefined ? { lastSyncUnixTimeSec } : {}),
-    timeSynced: unixTimeSec !== undefined && unixTimeSec >= MIN_SYNCED_UNIX_TIME_SEC
-  };
-};
 
 const chunkUtf8String = (value: string, maxBytes: number): string[] => {
   const encoder = new TextEncoder();
@@ -216,39 +134,14 @@ export class RpcShellyClient implements ShellyClient {
     const response = await this.transport.call<unknown>({
       method: RPC_METHODS.ShellyGetDeviceInfo
     });
-    if (!response.ok) {
-      return response;
-    }
-
-    const parsed = shellyDeviceInfoSchema.safeParse(response.value);
-    return parsed.success
-      ? { ok: true, value: parsed.data }
-      : { ok: false, error: validationError(parsed.error.message) };
+    return response.ok ? parseShellyDeviceInfoResponse(response.value) : response;
   }
 
   async getStatus(): Promise<Result<ShellyStatus>> {
     const response = await this.transport.call<unknown>({
       method: RPC_METHODS.ShellyGetStatus
     });
-    if (!response.ok) {
-      return response;
-    }
-
-    const status = isRecord(response.value) ? response.value : {};
-    const switchStatus = switchStatusSchema.safeParse(status['switch:0']);
-    const wifiStatus = wifiStatusSchema.safeParse(status.wifi);
-    const sysStatus = sysStatusSchema.safeParse(status.sys);
-    return {
-      ok: true,
-      value: {
-        matterEnabled: matterEnabled(status.matter),
-        scripts: componentState(status.script),
-        bluetooth: componentState(status.ble),
-        relayOn: switchStatus.success ? switchStatus.data.output : false,
-        telemetry: toShellyPlugTelemetry(switchStatus, wifiStatus),
-        clock: toShellyClockStatus(sysStatus)
-      }
-    };
+    return response.ok ? parseShellyStatusResponse(response.value) : response;
   }
 
   private async backupExistingScript(
