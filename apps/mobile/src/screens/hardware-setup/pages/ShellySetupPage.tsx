@@ -9,6 +9,7 @@ import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraft
 import { SavedShellyDeviceCard } from './ShellySetupPresentation.js';
 import {
   PlugAddPage,
+  isSameShellyDevice,
   PlugDeleteConfirmModal,
   type PlugScanResultView,
   usePlugManagementSurface
@@ -161,10 +162,11 @@ export const ShellySetupPage = ({
     baseUrl: result.baseUrl,
     model: result.deviceInfo.model,
     generation: result.deviceInfo.gen,
-    saved: shellyDevices.some(
-      (device) =>
-        normalizeScanBaseUrl(device.baseUrl) === normalizeScanBaseUrl(result.baseUrl)
-    ),
+    saved:
+      Boolean(result.deviceInfo.id?.trim()) &&
+      shellyDevices.some((device) =>
+        isSameShellyDevice(device.id, result.deviceInfo.id ?? '')
+      ),
     adding:
       flow.checkShellyMutation.isPending &&
       flow.checkShellyMutation.variables != null &&

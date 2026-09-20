@@ -1,3 +1,4 @@
+import { isSameShellyDevice } from '../features/plugs/index.js';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { IconCode } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -207,12 +208,8 @@ const InstalledAutomationDetail = ({
       : t('intent.temperature.context');
   const renamePlug = (value: string) => {
     renameShellyDevice(installation.shelly.deviceId, value);
-    const normalizedBaseUrl = (url: string) =>
-      url.trim().replace(/\/+$/, '').toLowerCase();
-    const savedDevice = shellyDevices.find(
-      (device) =>
-        normalizedBaseUrl(device.baseUrl) ===
-        normalizedBaseUrl(installation.shelly.baseUrl)
+    const savedDevice = shellyDevices.find((device) =>
+      isSameShellyDevice(device.id, installation.shelly.deviceId)
     );
     if (savedDevice) {
       setShellyDeviceName(savedDevice.id, value);

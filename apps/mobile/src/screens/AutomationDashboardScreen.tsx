@@ -1,5 +1,6 @@
 import { App as CapacitorApp } from '@capacitor/app';
 import { calculateVpdKpa } from '@lcl/automation-core';
+import { isSameShellyDevice } from '../features/plugs/index.js';
 import { Capacitor } from '@capacitor/core';
 import {
   IconAlertTriangle,
@@ -506,14 +507,10 @@ export const AutomationDashboardScreen = ({
     };
   }, [queryClient]);
 
-  const normalizedBaseUrl = (value: string) =>
-    value.trim().replace(/\/+$/, '').toLowerCase();
   const renameInstalledPlug = (installation: InstalledAutomation, value: string) => {
     renameShellyDevice(installation.shelly.deviceId, value);
-    const savedDevice = shellyDevices.find(
-      (device) =>
-        normalizedBaseUrl(device.baseUrl) ===
-        normalizedBaseUrl(installation.shelly.baseUrl)
+    const savedDevice = shellyDevices.find((device) =>
+      isSameShellyDevice(device.id, installation.shelly.deviceId)
     );
     if (savedDevice) {
       setShellyDeviceName(savedDevice.id, value);
@@ -522,10 +519,8 @@ export const AutomationDashboardScreen = ({
   const matchedInstallationIds = new Set<string>();
   const plugEntries = shellyDevices.map((device) => {
     const installation =
-      installations.find(
-        (candidate) =>
-          normalizedBaseUrl(candidate.shelly.baseUrl) ===
-          normalizedBaseUrl(device.baseUrl)
+      installations.find((candidate) =>
+        isSameShellyDevice(candidate.shelly.deviceId, device.id)
       ) ?? null;
     if (installation) matchedInstallationIds.add(installation.id);
     return { device, installation };

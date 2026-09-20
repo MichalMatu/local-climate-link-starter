@@ -1,7 +1,11 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
-import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
+import {
+  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+  normalizeShellyDeviceId,
+  RpcShellyClient
+} from '@lcl/shelly-client';
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
@@ -9,6 +13,7 @@ import { deriveShellyInputState } from './ruleConfigDerivation.js';
 import { readShellySetupStatus } from './shellyRequests.js';
 import {
   readShellyControlStatus,
+  reconcileInstalledAutomationsForShelly,
   type ShellyControlStatus
 } from '../../features/automations/index.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
@@ -140,20 +145,29 @@ export const useShellyControlFlow = () => {
       }
       const { baseUrl, name } = inputState;
       const status = await readShellySetupStatus(baseUrl);
+      const stableDeviceId = status.deviceInfo.id?.trim();
+      if (!stableDeviceId) {
+        throw new Error(t('hardware.flow.shellyIdentityMissing'));
+      }
       const existingScript = status.scripts.find(
         (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
       );
-      return {
-        ...status,
-        checkedDevice: {
-          id: baseUrl,
-          name,
-          baseUrl,
-          scriptIdInput: existingScript ? String(existingScript.id) : '1',
-          model: status.deviceInfo.model,
-          gen: status.deviceInfo.gen
-        }
+      const checkedDevice: ShellyDraftDevice = {
+        id: normalizeShellyDeviceId(stableDeviceId),
+        name,
+        baseUrl,
+        scriptIdInput: existingScript ? String(existingScript.id) : '1',
+        model: status.deviceInfo.model,
+        gen: status.deviceInfo.gen
       };
+      await reconcileInstalledAutomationsForShelly({
+        deviceId: checkedDevice.id,
+        name: checkedDevice.name,
+        baseUrl: checkedDevice.baseUrl,
+        model: status.deviceInfo.model,
+        gen: status.deviceInfo.gen
+      });
+      return { ...status, checkedDevice };
     },
     onSuccess: (status) => {
       setSetupStatus(status);

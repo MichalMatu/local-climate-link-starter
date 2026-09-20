@@ -272,6 +272,32 @@ describe('AutomationDashboardScreen', () => {
     expect(onAddAutomation).not.toHaveBeenCalled();
   });
 
+  it('associates a saved Plug with its automation by stable device id, not endpoint', () => {
+    const saved = installedAutomation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    useHardwareSetupDraftStore.getState().upsertShellyDevice({
+      id: saved.shelly.deviceId,
+      name: saved.shelly.name,
+      baseUrl: 'http://192.168.0.99/',
+      scriptIdInput: '1'
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number | string;
+          method?: string;
+        };
+        return jsonResponse({ id: body.id ?? 1, result: controlRpcResult(body.method) });
+      })
+    );
+
+    renderDashboard();
+
+    expect(screen.queryByText('Brak automatyzacji')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Dodaj automatykę' })).toBeNull();
+  });
+
   it('uses the same centered empty-state treatment for Thermometers', () => {
     renderDashboard(vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), 'time');
 
@@ -448,7 +474,7 @@ describe('AutomationDashboardScreen', () => {
   it('renames a configured Plug inline and keeps draft and installed names synchronized', async () => {
     const saved = installedAutomation();
     useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.20/',
+      id: saved.shelly.deviceId,
       name: 'Salon',
       baseUrl: 'http://192.168.0.20/',
       scriptIdInput: '1'

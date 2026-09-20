@@ -1,3 +1,4 @@
+export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
   PlugAddPage,
   type PlugAddPageProps,

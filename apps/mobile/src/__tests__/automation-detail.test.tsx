@@ -445,7 +445,7 @@ describe('InstallationDetailScreen', () => {
   it('keeps Plug detail free of redundant Plugs back chrome and supports inline rename', async () => {
     const saved = installation();
     useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.20/',
+      id: saved.shelly.deviceId,
       name: 'Salon',
       baseUrl: 'http://192.168.0.20/',
       scriptIdInput: '1'

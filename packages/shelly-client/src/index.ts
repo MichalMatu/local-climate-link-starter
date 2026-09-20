@@ -1,4 +1,5 @@
 export * from './model.js';
+export * from './deviceIdentity.js';
 export * from './rpc/timeout.js';
 export * from './rpc/validators.js';
 export * from './rpc/fetch.js';

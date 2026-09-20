@@ -70,6 +70,11 @@ export {
   type InstalledAutomationRepository
 } from './data/installedAutomationRepository.js';
 export {
+  reconcileInstalledAutomationsForShelly,
+  type InstalledAutomationReconciliationResult,
+  type InstalledAutomationReconciliationStatus
+} from './flows/reconcileInstalledAutomation.js';
+export {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from './state/installedAutomationStore.js';

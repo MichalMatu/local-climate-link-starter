@@ -7,6 +7,7 @@ import {
   createDefaultShellyThermostatConfig,
   generateShellyThermostatScript
 } from '@lcl/script-generator';
+import { hashScriptCode, LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
 
 const phoneBleScannerMock = vi.hoisted(() => ({
   failureMessage: null as string | null,
@@ -1295,6 +1296,42 @@ describe('HardwareSetupScreen', () => {
     expect(useInstalledAutomationStore.getState().installations).toEqual([installation]);
   });
 
+  it('re-adds the same physical Shelly at a new endpoint and reconciles its automation', async () => {
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Old name',
+      baseUrl: 'http://192.168.0.19/',
+      scriptId: 1,
+      scriptHash: hashScriptCode(
+        `${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${createStoredThermostatScript()}`
+      ),
+      config: createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      ),
+      nowMs: 1000
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
+
+    renderHardwareSetup();
+    await addShellyThroughUi('Salon');
+
+    expect(useHardwareSetupDraftStore.getState().shellyDevices).toContainEqual(
+      expect.objectContaining({
+        id: 'shellyplugsg3-test',
+        name: 'Salon',
+        baseUrl: 'http://192.168.0.20/'
+      })
+    );
+    const reconciled = useInstalledAutomationStore.getState().installations[0];
+    expect(reconciled?.shelly).toMatchObject({
+      deviceId: 'shellyplugsg3-test',
+      name: 'Salon',
+      baseUrl: 'http://192.168.0.20/'
+    });
+    expect(reconciled?.installedAtMs).toBe(1000);
+  });
+
   it('keeps a saved Shelly plug when the styled removal modal is cancelled', async () => {
     renderHardwareSetup();
     await addShellyThroughUi('Salon');
@@ -1347,7 +1384,11 @@ describe('HardwareSetupScreen', () => {
 
         switch (body.method) {
           case 'Shelly.GetDeviceInfo':
-            return rpcResult({ model: 'S3PL-00112EU', gen: 3 });
+            return rpcResult({
+              id: `shellyplugsg3-${url.hostname.split('.').join('-')}`,
+              model: 'S3PL-00112EU',
+              gen: 3
+            });
           case 'Shelly.GetStatus':
             return rpcResult({
               ble: {},
@@ -1462,7 +1503,11 @@ describe('HardwareSetupScreen', () => {
 
         switch (body.method) {
           case 'Shelly.GetDeviceInfo':
-            return rpcResult({ model: 'S3PL-00112EU', gen: 3 });
+            return rpcResult({
+              id: `shellyplugsg3-${url.hostname.split('.').join('-')}`,
+              model: 'S3PL-00112EU',
+              gen: 3
+            });
           case 'Shelly.GetStatus':
             return rpcResult({
               ble: {},
@@ -1723,7 +1768,7 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
     expect(screen.getByLabelText('Gniazdko Shelly')).toHaveAttribute(
       'value',
-      'http://192.168.0.20/'
+      'shellyplugsg3-test'
     );
     expect(screen.getByLabelText('Termometr')).toHaveAttribute(
       'value',
