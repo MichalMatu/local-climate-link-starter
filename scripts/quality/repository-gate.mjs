@@ -20,6 +20,10 @@ const listRepoFiles = async (directory) => {
 };
 
 const addFailure = (path, message) => failures.push(`${path}: ${message}`);
+const lineCount = (source) => source.split('\n').length;
+const isTypeScriptSource = (path) => /\.(?:ts|tsx)$/.test(path);
+const isTestSource = (path) =>
+  /(?:^|\/)__tests__\//.test(path) || /\.(?:test|spec)\.(?:ts|tsx)$/.test(path);
 
 const parseVersionCode = (version) => {
   const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
@@ -33,6 +37,53 @@ const parseVersionCode = (version) => {
     );
   }
   return major * 10000 + minor * 100 + patch;
+};
+
+const checkAgentContractStructure = async () => {
+  const contracts = {
+    'AGENTS.md': {
+      maxLines: 300,
+      markers: ['Preimplementation architecture gate', 'apps/mobile/AGENTS.md']
+    },
+    'apps/mobile/AGENTS.md': {
+      maxLines: 260,
+      markers: ['Source organization', 'Mobile preimplementation gate']
+    },
+    'packages/AGENTS.md': {
+      maxLines: 220,
+      markers: ['Package preimplementation gate', 'packages/ui/AGENTS.md']
+    },
+    'packages/ui/AGENTS.md': {
+      maxLines: 140,
+      markers: ['@lcl/ui', 'product-agnostic']
+    }
+  };
+
+  for (const [path, contract] of Object.entries(contracts)) {
+    let source;
+    try {
+      source = await readRepoFile(path);
+    } catch (error) {
+      if (error?.code === 'ENOENT') {
+        addFailure(path, 'required hierarchical agent contract is missing');
+        continue;
+      }
+      throw error;
+    }
+
+    const lines = lineCount(source);
+    if (lines > contract.maxLines) {
+      addFailure(
+        path,
+        `agent contract exceeds ${contract.maxLines} lines (${lines}); move area-specific rules to the nearest nested AGENTS.md instead of regrowing the root contract`
+      );
+    }
+    for (const marker of contract.markers) {
+      if (!source.includes(marker)) {
+        addFailure(path, `agent contract lost required boundary marker: ${marker}`);
+      }
+    }
+  }
 };
 
 const checkReleaseVersionConsistency = async () => {
@@ -110,6 +161,36 @@ const checkWorkspaceDependencyCycles = async () => {
     graph.set(name, dependencies);
   }
 
+  const allowedPackageDependencies = new Map([
+    ['@lcl/automation-core', new Set()],
+    ['@lcl/ble-core', new Set(['@lcl/device-profiles'])],
+    ['@lcl/design-tokens', new Set()],
+    ['@lcl/device-profiles', new Set()],
+    ['@lcl/diagnostics', new Set()],
+    [
+      '@lcl/script-generator',
+      new Set(['@lcl/automation-core', '@lcl/device-profiles'])
+    ],
+    ['@lcl/shelly-client', new Set(['@lcl/diagnostics'])],
+    ['@lcl/ui', new Set(['@lcl/design-tokens'])]
+  ]);
+
+  for (const [name, allowed] of allowedPackageDependencies) {
+    const packageInfo = packages.get(name);
+    if (!packageInfo) {
+      addFailure('packages', `expected workspace package is missing: ${name}`);
+      continue;
+    }
+    for (const dependency of graph.get(name) ?? []) {
+      if (dependency.startsWith('@lcl/') && !allowed.has(dependency)) {
+        addFailure(
+          packageInfo.path,
+          `${name} must not depend on ${dependency}; preserve the package dependency direction or update the architecture contract explicitly`
+        );
+      }
+    }
+  }
+
   const visited = new Set();
   const active = new Set();
   const stack = [];
@@ -142,6 +223,41 @@ const checkWorkspaceDependencyCycles = async () => {
 
 const importStatements = (source) =>
   source.match(/import[\s\S]*?from\s+['"][^'"]+['"];?|import\s+['"][^'"]+['"];?/g) ?? [];
+
+const importSpecifier = (statement) =>
+  /(?:from\s+|import\s+)['"]([^'"]+)['"]/.exec(statement)?.[1] ?? '';
+
+const checkPackageSourceDirection = async () => {
+  const sourceFiles = (await listRepoFiles('packages')).filter(
+    (path) => path.includes('/src/') && isTypeScriptSource(path) && !isTestSource(path)
+  );
+
+  for (const path of sourceFiles) {
+    const source = await readRepoFile(path);
+    for (const statement of importStatements(source)) {
+      const specifier = importSpecifier(statement);
+      if (
+        specifier === '@lcl/mobile' ||
+        specifier.includes('apps/mobile') ||
+        /(?:^|\/)apps\//.test(specifier)
+      ) {
+        addFailure(path, `package source must not import application code: ${specifier}`);
+      }
+
+      if (path.startsWith('packages/ui/')) {
+        if (specifier.startsWith('@lcl/') && specifier !== '@lcl/design-tokens') {
+          addFailure(
+            path,
+            `@lcl/ui may depend only on @lcl/design-tokens among workspace packages; found ${specifier}`
+          );
+        }
+        if (/^(?:@ionic\/|@capacitor)/.test(specifier)) {
+          addFailure(path, `@lcl/ui must remain platform-agnostic; found ${specifier}`);
+        }
+      }
+    }
+  }
+};
 
 const checkScreenBoundaries = async () => {
   const screenFiles = (await listRepoFiles('apps/mobile/src/screens')).filter((path) =>
@@ -203,6 +319,58 @@ const checkDomainPackageBoundaries = async () => {
           );
         }
       }
+    }
+  }
+};
+
+const checkProductionFileGrowth = async () => {
+  const mobileOverrides = new Map([
+    ['apps/mobile/src/flows/hardware-setup/shellyRequests.ts', 750],
+    ['apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx', 700],
+    ['apps/mobile/src/screens/AutomationDashboardScreen.tsx', 625],
+    ['apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx', 675],
+    ['apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts', 650],
+    ['apps/mobile/src/screens/InstallationDetailScreen.tsx', 500],
+    ['apps/mobile/src/flows/time-automation/runtime.ts', 475],
+    ['apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx', 650],
+    ['apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx', 450],
+    ['apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx', 400],
+    ['apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx', 400]
+  ]);
+  const mobileFiles = (await listRepoFiles('apps/mobile/src')).filter(
+    (path) =>
+      isTypeScriptSource(path) &&
+      !isTestSource(path) &&
+      !path.startsWith('apps/mobile/src/app/locales/')
+  );
+
+  for (const path of mobileFiles) {
+    const lines = lineCount(await readRepoFile(path));
+    const maxLines = mobileOverrides.get(path) ?? 350;
+    if (lines > maxLines) {
+      addFailure(
+        path,
+        `production mobile module exceeds ${maxLines} lines (${lines}); keep one cohesive responsibility, extract a real boundary, or explicitly document a justified hotspot budget`
+      );
+    }
+  }
+
+  const packageOverrides = new Map([
+    ['packages/shelly-client/src/scripts/install.ts', 650],
+    ['packages/script-generator/src/shelly/generate.ts', 600]
+  ]);
+  const packageFiles = (await listRepoFiles('packages')).filter(
+    (path) => path.includes('/src/') && isTypeScriptSource(path) && !isTestSource(path)
+  );
+
+  for (const path of packageFiles) {
+    const lines = lineCount(await readRepoFile(path));
+    const maxLines = packageOverrides.get(path) ?? 350;
+    if (lines > maxLines) {
+      addFailure(
+        path,
+        `production package module exceeds ${maxLines} lines (${lines}); extract by responsibility instead of growing a package god object`
+      );
     }
   }
 };
@@ -317,10 +485,13 @@ const checkHardwareSetupArchitecture = async () => {
   }
 };
 
+await checkAgentContractStructure();
 await checkReleaseVersionConsistency();
 await checkWorkspaceDependencyCycles();
+await checkPackageSourceDirection();
 await checkScreenBoundaries();
 await checkDomainPackageBoundaries();
+await checkProductionFileGrowth();
 await checkHardwareSetupArchitecture();
 
 if (failures.length > 0) {
