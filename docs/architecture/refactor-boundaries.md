@@ -140,6 +140,8 @@ Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`
 
 `features/plugs` owns the migrated Plug-add surface (manual entry and LAN scan presentation/local UI state). `ShellySetupPage` remains a legacy coordinator/adapter while the rest of the Plug setup surface is migrated incrementally.
 
+`features/automations` owns managed Shelly automation status and deployed-script reads used across hardware setup, installations and time automation. Those callers use the feature public API rather than importing automation semantics from `hardware-setup/shellyRequests.ts`.
+
 ## Navigation/presentation boundary
 
 `AppShell` owns persistent bottom navigation and application-frame overlay geometry.
@@ -228,7 +230,6 @@ ownership in the same way. Phase 3 tightened known larger modules to their exact
 parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
-apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  453
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
 apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
 apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           443

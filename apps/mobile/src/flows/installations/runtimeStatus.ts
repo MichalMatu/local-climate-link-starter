@@ -1,5 +1,7 @@
-import type { ShellyControlStatus } from '../hardware-setup/shellyRequests.js';
-import { readShellyControlStatus } from '../hardware-setup/shellyRequests.js';
+import {
+  readShellyControlStatus,
+  type ShellyControlStatus
+} from '../../features/automations/index.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { readInstalledAutomationRuntimeMode } from './runtimeModeTransport.js';
 

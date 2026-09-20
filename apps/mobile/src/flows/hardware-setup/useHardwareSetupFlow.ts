@@ -10,9 +10,9 @@ import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
 import {
   readShellyAutomationScriptState,
-  readShellySetupStatus,
   type ShellyAutomationScriptState
-} from './shellyRequests.js';
+} from '../../features/automations/index.js';
+import { readShellySetupStatus } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {

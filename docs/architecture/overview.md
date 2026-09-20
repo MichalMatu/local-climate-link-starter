@@ -160,6 +160,8 @@ The first migrated `features/plugs` slice owns the manual/LAN Plug-add presentat
 
 `HardwareSetupScreen` coordinates setup navigation and lifecycle cleanup; it should not absorb page-specific presentation or transport logic.
 
+`features/automations` owns cross-feature managed Shelly automation status, deployed-script identity and deployed-source reads. Hardware setup retains setup checks and temporary BLE-discovery orchestration.
+
 ## Automation ownership and safety
 
 - one Plug relay has one managed automation owner at a time;

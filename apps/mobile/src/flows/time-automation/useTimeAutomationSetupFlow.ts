@@ -9,7 +9,7 @@ import {
   findInstalledRelayOwner
 } from '../installations/model.js';
 import { useInstalledAutomationStore } from '../installations/store.js';
-import { readShellyControlStatus } from '../hardware-setup/shellyRequests.js';
+import { readShellyControlStatus } from '../../features/automations/index.js';
 import type { ShellyDraftDevice } from '../hardware-setup/setupDraftStore.js';
 import { dailyTimeAutomationConfigSchema } from './config.js';
 import { installDailyTimeAutomation, TimeAutomationRuntimeError } from './runtime.js';

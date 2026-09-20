@@ -5,7 +5,10 @@ import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-cli
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
-import { readShellyControlStatus, type ShellyControlStatus } from './shellyRequests.js';
+import {
+  readShellyControlStatus,
+  type ShellyControlStatus
+} from '../../features/automations/index.js';
 import type { ShellyDraftDevice } from './setupDraftStore.js';
 
 export type ShellyControlAction = 'status' | 'on' | 'off';

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readShellyManagedAutomationScriptCode } from '../flows/hardware-setup/shellyRequests.js';
+import { readShellyManagedAutomationScriptCode } from '../features/automations/index.js';
 
 const jsonResponse = (payload: unknown) =>
   new Response(JSON.stringify(payload), {

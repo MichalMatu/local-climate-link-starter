@@ -2,7 +2,7 @@ import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { generateShellyThermostatScript } from '@lcl/script-generator';
 import { createInstallPlan, RpcShellyClient } from '@lcl/shelly-client';
-import { readShellyControlStatus } from '../hardware-setup/shellyRequests.js';
+import { readShellyControlStatus } from '../../features/automations/index.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
 import {

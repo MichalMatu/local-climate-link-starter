@@ -427,22 +427,27 @@ await executeCase({
   expectedFailure: `production mobile module exceeds ${defaultProductionModuleMaxLines} lines`
 });
 
+const protectedMobileHotspot = Object.entries(mobileProductionBaselines)[0];
+if (!protectedMobileHotspot) {
+  throw new Error('Expected at least one protected mobile production baseline.');
+}
+const [protectedMobileHotspotPath, protectedMobileHotspotMaxLines] =
+  protectedMobileHotspot;
+
 await executeCase({
   name: 'repository/protected hotspot growth',
   gatePath: repositoryGate,
   setup: async (root) => {
     await setupRepositoryFixture(root);
-    const hotspot = 'apps/mobile/src/flows/hardware-setup/shellyRequests.ts';
-    const maxLines = mobileProductionBaselines[hotspot];
     await writeFixture(
       root,
-      hotspot,
-      Array.from({ length: maxLines + 1 }, () => 'export {};').join('\n')
+      protectedMobileHotspotPath,
+      Array.from({ length: protectedMobileHotspotMaxLines + 1 }, () => 'export {};').join(
+        '\n'
+      )
     );
   },
-  expectedFailure: `production mobile module exceeds ${
-    mobileProductionBaselines['apps/mobile/src/flows/hardware-setup/shellyRequests.ts']
-  } lines`
+  expectedFailure: `production mobile module exceeds ${protectedMobileHotspotMaxLines} lines`
 });
 
 if (failures.length > 0) {

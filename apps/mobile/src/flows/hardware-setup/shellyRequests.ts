@@ -4,9 +4,7 @@ import {
   type FetchShellyRpcTransport,
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
-  readShellyScriptCode as readShellyScriptCodeResult,
   readShellyScriptList as readShellyScriptListResult,
-  type ShellyDeviceInfo,
   type ShellyInstallResult
 } from '@lcl/shelly-client';
 import {
@@ -41,36 +39,11 @@ export type ShellyBleDiscoveryPreparation = {
   automationWasRunning: boolean;
 };
 
-export type ShellyAutomationMode = 'auto' | 'manual' | 'missing';
-
-export type ShellyControlStatus = {
+export type ShellyRuntimeStatus = {
   relayOn: boolean;
-  automationMode: ShellyAutomationMode;
-  automationScriptId: number | null;
-  firmwareId: string | null;
   telemetry: HardwareSetupStatus['status']['telemetry'];
   clock: HardwareSetupStatus['status']['clock'];
 };
-
-export type ShellyRuntimeStatus = Pick<
-  ShellyControlStatus,
-  'relayOn' | 'telemetry' | 'clock'
->;
-
-export type ShellyAutomationScriptState = {
-  script: ScriptListEntry | null;
-  code: string | null;
-  status: ShellyControlStatus;
-};
-
-export class ShellyAutomationDeleteError extends Error {
-  constructor(
-    message: string,
-    readonly relayOffConfirmed: boolean
-  ) {
-    super(message);
-  }
-}
 
 export const fetchShellyJson = async (
   targetUrl: URL,
@@ -178,32 +151,6 @@ const deleteBleDiscoveryScripts = async (
   return deletedCount;
 };
 
-const toControlStatus = (
-  deviceInfo: ShellyDeviceInfo,
-  status: HardwareSetupStatus['status'],
-  scripts: ScriptListEntry[]
-): ShellyControlStatus => {
-  const automationScript = findAutomationScript(scripts);
-  return {
-    relayOn: status.relayOn,
-    automationMode: automationScript
-      ? automationScript.running
-        ? 'auto'
-        : 'manual'
-      : 'missing',
-    automationScriptId: automationScript?.id ?? null,
-    firmwareId: deviceInfo.firmwareId ?? null,
-    telemetry: status.telemetry,
-    clock: status.clock
-  };
-};
-
-const readScriptCode = async (
-  transport: FetchShellyRpcTransport,
-  scriptId: number
-): Promise<string> =>
-  unwrapShellyResult(await readShellyScriptCodeResult(transport, scriptId));
-
 export const readShellySetupStatus = async (
   baseUrl: string
 ): Promise<HardwareSetupStatus> => {
@@ -265,24 +212,6 @@ export const prepareShellyBleDiscovery = async (
   };
 };
 
-export const readShellyControlStatus = async (
-  baseUrl: string
-): Promise<ShellyControlStatus> => {
-  const transport = createShellyTransport(baseUrl);
-  const client = new RpcShellyClient(transport);
-  const [deviceInfo, status, scripts] = await Promise.all([
-    client.getDeviceInfo(),
-    client.getStatus(),
-    readScriptList(transport)
-  ]);
-
-  return toControlStatus(
-    unwrapShellyResult(deviceInfo),
-    unwrapShellyResult(status),
-    scripts
-  );
-};
-
 export const cleanupStaleShellyBleDiscoveryScripts = async (
   baseUrl: string
 ): Promise<number> => {
@@ -290,96 +219,6 @@ export const cleanupStaleShellyBleDiscoveryScripts = async (
   const client = new RpcShellyClient(transport);
   const scripts = await readScriptList(transport);
   return deleteBleDiscoveryScripts(client, scripts);
-};
-
-export const readShellyManagedAutomationScriptCode = async (
-  baseUrl: string,
-  scriptId: number
-): Promise<string> => {
-  const transport = createShellyTransport(baseUrl);
-  const scripts = await readScriptList(transport);
-  const script = scripts.find((candidate) => candidate.id === scriptId);
-
-  if (!script || script.name !== LOCAL_CLIMATE_LINK_SCRIPT_NAME) {
-    throw new Error('Shelly did not return the exact managed automation script.');
-  }
-
-  return readScriptCode(transport, scriptId);
-};
-
-export const readShellyAutomationScriptState = async (
-  baseUrl: string
-): Promise<ShellyAutomationScriptState> => {
-  const transport = createShellyTransport(baseUrl);
-  const client = new RpcShellyClient(transport);
-  const [deviceInfo, status, scripts] = await Promise.all([
-    client.getDeviceInfo(),
-    client.getStatus(),
-    readScriptList(transport)
-  ]);
-  const automationScript = findAutomationScript(scripts);
-
-  return {
-    script: automationScript,
-    code: automationScript ? await readScriptCode(transport, automationScript.id) : null,
-    status: toControlStatus(
-      unwrapShellyResult(deviceInfo),
-      unwrapShellyResult(status),
-      scripts
-    )
-  };
-};
-
-export const deleteShellyAutomationScript = async (
-  baseUrl: string
-): Promise<ShellyControlStatus> => {
-  const transport = createShellyTransport(baseUrl);
-  const client = new RpcShellyClient(transport);
-  const scripts = await readScriptList(transport);
-  const automationScript = findAutomationScript(scripts);
-
-  if (automationScript) {
-    try {
-      unwrapShellyResult(await client.setRelayOff());
-      const status = unwrapShellyResult(await client.getStatus());
-      if (status.relayOn) {
-        throw new Error(t('hardware.shelly.relayStillOn'));
-      }
-    } catch (error) {
-      throw new ShellyAutomationDeleteError(
-        t('hardware.shelly.requireOffBeforeDelete', {
-          error: error instanceof Error ? error.message : ''
-        }).trim(),
-        false
-      );
-    }
-
-    let stopError: string | null = null;
-    if (automationScript.running) {
-      const stopResult = await client.stopScript(automationScript.id);
-      if (!stopResult.ok) {
-        stopError = resultErrorMessage(stopResult);
-      }
-    }
-
-    const deleteResult = await client.deleteScript(automationScript.id);
-    if (!deleteResult.ok) {
-      const details = [
-        t('hardware.shelly.deleteScriptPartial'),
-        stopError
-          ? t('hardware.shelly.stopAutomationScriptDetail', { error: stopError })
-          : null,
-        t('hardware.shelly.deleteAutomationScriptDetail', {
-          error: resultErrorMessage(deleteResult)
-        })
-      ]
-        .filter(Boolean)
-        .join(' ');
-      throw new ShellyAutomationDeleteError(details, true);
-    }
-  }
-
-  return readShellyControlStatus(baseUrl);
 };
 
 export const installShellyBleDiscoveryScript = async (

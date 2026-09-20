@@ -1,4 +1,4 @@
-import { readShellyManagedAutomationScriptCode } from '../hardware-setup/shellyRequests.js';
+import { readShellyManagedAutomationScriptCode } from '../../features/automations/index.js';
 import type { ClimateInstalledAutomation } from './model.js';
 
 export const installedAutomationScriptSourceQueryKey = (

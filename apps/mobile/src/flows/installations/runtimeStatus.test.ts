@@ -1,6 +1,6 @@
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type * as ShellyRequestsModule from '../hardware-setup/shellyRequests.js';
+import type * as AutomationsFeatureModule from '../../features/automations/index.js';
 import type * as RuntimeModeModule from './runtimeModeTransport.js';
 import { createInstalledAutomation } from './model.js';
 
@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
   readRuntimeMode: vi.fn()
 }));
 
-vi.mock('../hardware-setup/shellyRequests.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof ShellyRequestsModule>();
+vi.mock('../../features/automations/index.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof AutomationsFeatureModule>();
   return { ...actual, readShellyControlStatus: mocks.readControlStatus };
 });
 

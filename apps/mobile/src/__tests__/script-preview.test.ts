@@ -5,7 +5,7 @@ import { loadInstalledAutomationScriptSource } from '../flows/installations/scri
 
 const readShellyManagedAutomationScriptCode = vi.hoisted(() => vi.fn());
 
-vi.mock('../flows/hardware-setup/shellyRequests.js', () => ({
+vi.mock('../features/automations/index.js', () => ({
   readShellyManagedAutomationScriptCode
 }));
 
