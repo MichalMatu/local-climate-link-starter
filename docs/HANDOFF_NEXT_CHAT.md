@@ -1,4 +1,4 @@
-# Next chat handoff — Slice 0 complete, Slice 1A next
+# Next chat handoff — Slice 1A complete, Slice 1B next
 
 Updated: 2026-09-20
 
@@ -30,7 +30,7 @@ Local Agent binding: e75c77cb-7589-4452-94b2-decc97ff85a1
 managed workspace: /Users/michal/agent-workspace/repos/local-climate-link-starter/work
 ```
 
-Always fetch fresh `main`; do not resume a historical work branch unless this handoff explicitly says to do so.
+Always fetch fresh `main`. Do not resume a historical work branch unless this handoff explicitly says to do so.
 
 ## Product invariants
 
@@ -44,17 +44,15 @@ Shelly: execute installed automation locally
 Keep these invariants:
 
 - a saved Plug remains useful without automation;
-- Time is a Plug automation type, not a global dashboard section;
-- `InstalledAutomation` is the durable managed-automation record;
+- `InstalledAutomation` is durable managed-automation ownership;
 - one Plug relay has one managed automation owner at a time;
-- uninstall/delete keeps managed-identity verification and safe-OFF behavior;
-- `deviceId` is physical Shelly identity;
-- IP / `baseUrl` is HTTP reachability and must not become the ownership key;
-- future BLE is another transport under the Shelly client boundary, not a second product implementation.
+- Forget Plug is local-only and is not Uninstall Automation;
+- explicit uninstall preserves managed-identity verification and safe OFF;
+- stable Shelly `deviceId` is physical identity;
+- IP / `baseUrl` is reachability only and must not become the ownership key;
+- future BLE remains another transport under the same Shelly client/product behavior.
 
 ## Slice lifecycle
-
-For every product slice:
 
 ```text
 fresh main + idle daemon
@@ -65,119 +63,110 @@ fresh main + idle daemon
 -> exactly one final full pnpm check
 -> hardware/native smoke only when acceptance requires it
 -> postimplementation full-diff re-audit
--> update canonical docs + execution plan + handoff
+-> update canonical docs + plan + handoff
 -> commit/push
 -> review pushed diff
 -> fast-forward main
 -> verify main
 ```
 
-Do not raise architecture baselines to make a slice fit. New cohesive product modules belong under `apps/mobile/src/features/<feature>`; package protocol/domain behavior stays in packages; screens do not own transport or persistence.
+Do not raise architecture baselines to make a slice fit. New cohesive product modules belong under `apps/mobile/src/features/<feature>`; protocol/domain behavior stays in packages; screens do not own transport or persistence.
 
-## Last completed slice — Slice 0
+## Baseline repair completed before Slice 1A
 
-Slice 0 is complete and integrated.
+A fresh GitHub CI checkout exposed a stale dependency ownership problem: root `package.json` no longer owned `@vitest/coverage-v8`, while core package coverage scripts still required it. This was fixed before Slice 1A.
 
 ```text
-product commit: 60295d5769a798bd20bdf70869ae8e256491ed18
-message: Move installed automation state to feature
-validated work branch: work/installed-automation-feature-foundation-v7
-Local Agent final task: 20260920-installed-automation-feature-foundation-v8
+commit: 13168d29a21c1c85e2690399bff10a3c0875ade9
+message: Fix workspace coverage dependencies
 ```
 
-Verification before integration:
+`@vitest/coverage-v8` now belongs to the two packages that actually run `vitest --coverage`: `@lcl/automation-core` and `@lcl/script-generator`. A frozen install and full `pnpm check` passed.
 
-- 8 focused mobile test files / 94 tests passed;
+## Last completed product slice — Slice 1A
+
+Slice 1A is complete and integrated.
+
+```text
+product commit: b0b80e37fde234f2c0e1cbe8375d9235e5d91379
+message: Protect automation ownership when forgetting plug
+validated work branch: work/slice1a-forget-preserves-automation
+Local Agent task: 20260920-slice1a-forget-preserves-automation-v1
+```
+
+Audit result:
+
+- `setupDraftStore.removeShellyDevice` only removes the saved Plug entry/selection;
+- `useHardwareSetupFlow.removeShellyDevice` additionally clears transient control/setup/install state only;
+- `usePlugManagementSurface` delegates the confirmed local removal;
+- production `removeInstallation` calls remain in explicit climate/Time uninstall detail flows;
+- Forget Plug therefore did not need a production code change.
+
+Verification:
+
+- focused `hardware-setup.test.tsx` passed;
 - `pnpm quality:repo` passed;
-- exactly one final full `pnpm check` passed, including format, lint, UX/repository gates, typecheck, full tests, core coverage and build;
-- postimplementation ownership/public-API re-audit passed;
-- no physical Shelly test was required because the slice is behavior-preserving ownership work.
+- exactly one final full `pnpm check` passed;
+- postimplementation diff audit passed;
+- no physical Shelly smoke was required.
 
-Resulting ownership:
+The regression test now creates a durable `InstalledAutomation`, forgets the saved Plug through the real UI confirmation path, and proves the automation ownership record remains unchanged.
 
-```text
-features/automations
-  data/installedAutomation.ts
-  data/installedAutomationRepository.ts
-  data/timeAutomationConfig.ts
-  state/installedAutomationStore.ts
-  index.ts public API
+The completed branch should not be resumed for new product work. Start Slice 1B from fresh `main`.
 
-legacy flows/installations/{model,repository,store}.ts
-legacy flows/time-automation/config.ts
-  -> thin compatibility shims only
-```
+## Immediate next slice — Slice 1B
 
-The work branch is complete and should not be resumed for new product work. Start Slice 1A from fresh `main`.
+**Re-add the same physical Shelly and reconcile its existing managed automation.**
 
-## Important unresolved regression
-
-Slice 0 intentionally did **not** fix the user-visible recovery bug.
-
-Current problem to preserve as the test scenario:
+The preimplementation audit has already located the primary identity bug:
 
 ```text
-Plug has a managed automation
--> user forgets/removes the Plug from Local Climate Link
--> same physical Plug is added again
--> app shows it as a Plug without its old automation
+useShellyControlFlow.checkShellyMutation
+  -> reads Shelly.GetDeviceInfo and receives stable deviceInfo.id
+  -> currently discards that id
+  -> saves ShellyDraftDevice.id = baseUrl
+
+AutomationDashboardScreen / InstallationDetailScreen
+  -> currently associate saved Plug and InstalledAutomation by baseUrl
 ```
 
-The fix is split deliberately:
+That is the wrong boundary. Slice 1B must make stable device identity authoritative without turning IP into an ownership key.
+
+Required behavior:
 
 ```text
-Slice 1A: Forget Plug must not destroy durable automation ownership
-Slice 1B: re-adding same deviceId must reconcile and show the existing managed automation
+existing local InstalledAutomation(deviceId=A, old baseUrl=X)
+-> Forget Plug
+-> same physical Shelly A is discovered/added at baseUrl=Y
+-> verified deviceId A reconnects the saved Plug to existing ownership
+-> last-known endpoint becomes Y independently of ownership
+-> managed climate script / Time schedule is verified remotely
+-> existing automation is shown, not replaced or silently adopted
 ```
 
-Do not collapse both into an unreviewed broad rewrite.
-
-## Immediate next slice — Slice 1A
-
-**Separate Forget Plug from Uninstall Automation.**
-
-First reproduce and audit the current path. Determine exactly where Plug removal affects:
+Reconciliation must distinguish at least:
 
 ```text
-saved Plug record
-InstalledAutomation record/store
-screen filtering/composition
-remote Shelly runtime
+no local managed record
+local record + verified managed runtime
+local record + remote runtime missing/changed
+remote verification unavailable
+local relay ownership conflict
 ```
 
-Do not assume the local record is deleted until the code proves it; the visible bug could also be caused by filtering or identity association.
+Known reusable owners:
 
-Required post-1A semantics:
+- `features/automations` owns durable `InstalledAutomation` state and should own automation reconciliation logic;
+- `readShellyAutomationScriptState` / exact managed-script reads can verify climate runtime without heuristic adoption;
+- `readTimeAutomationRuntime` + schedule pair matching already verifies exact Time schedule ids/calls;
+- the saved Plug check/add flow already owns physical Shelly verification and receives `deviceInfo.id`;
+- dashboard/detail must associate by stable identity, not normalized URL.
 
-```text
-Forget Plug
-  -> removes the saved Plug management/discovery entry
-  -> does NOT uninstall the Shelly runtime
-  -> does NOT destroy durable InstalledAutomation ownership
-
-Explicit Uninstall Automation
-  -> remains the destructive remote-removal path
-  -> verifies managed identity
-  -> preserves safe-OFF behavior
-```
-
-Minimum acceptance scenario:
-
-```text
-add Plug
--> install managed automation
--> Forget Plug without uninstall
--> durable InstalledAutomation ownership still exists
-```
-
-Test both climate and Time ownership if they share the affected path. If they do not, document the difference instead of forcing one abstraction.
-
-Do not implement full re-add/reconciliation in 1A unless the audit proves a tiny inseparable boundary. Slice 1B owns stable-`deviceId` matching, endpoint refresh and remote-runtime reconciliation.
+Do not create a broad device-registry rewrite unless the touched slice proves it is required. Do not add baseUrl fallback ownership matching.
 
 ## What follows
 
 ```text
-1B  re-add same physical Plug + reconcile managed automation
 2A  edit installed climate automation in place
 2B  edit installed Time automation in place
 3A  device-settings foundation + complete LED settings
@@ -187,17 +176,9 @@ Do not implement full re-add/reconciliation in 1A unless the audit proves a tiny
 4C+ incremental BLE-backed capabilities
 ```
 
-The detailed acceptance criteria and cross-cutting transport/identity rules live in `docs/implementation/automation-recovery-editing-shelly-transport-plan.md`.
-
-## Local Agent state note
-
-The product Slice 0 task completed successfully. Afterward the daemon stopped consuming newly queued documentation-only tasks while its status file still reported `idle`; therefore Slice 0 handoff finalization was performed through deterministic GitHub Git-data writes rather than pretending the daemon had executed it.
-
-Before Slice 1A, fetch `agent-control:.agent/status/daemon.json` again. If its `updated_at` is stale or it does not consume a fresh task, treat Local Agent availability as a tooling issue and do not claim local command execution occurred.
+Detailed acceptance criteria live in `docs/implementation/automation-recovery-editing-shelly-transport-plan.md`.
 
 ## Canonical docs
-
-Current sources of truth:
 
 ```text
 AGENTS.md
@@ -214,4 +195,4 @@ docs/architecture/feature-boundaries.md
 scripts/quality/architecture-baseline.mjs
 ```
 
-Historical plans are reference only. When historical material conflicts with current code/canonical docs, current code + canonical docs + the active execution plan win.
+Historical plans are reference only. Current code + canonical docs + the active execution plan win on conflict.

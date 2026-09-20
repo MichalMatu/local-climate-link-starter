@@ -131,34 +131,28 @@ Known limitation carried forward: the Forget Plug / re-add recovery regression i
 
 ## Slice 1A — separate Forget Plug from Uninstall Automation
 
-Goal: fix the semantic coupling that allows forgetting a saved Plug to destroy or hide durable automation ownership.
+Status: **done**.
 
-Required behavior:
-
-```text
-Forget Plug
-  -> removes saved Plug management/discovery entry
-  -> does not uninstall managed runtime from Shelly
-  -> does not destroy durable InstalledAutomation ownership
-
-Explicit Uninstall Automation
-  -> remains the destructive remote-removal path
-  -> verifies managed identity
-  -> preserves safe-OFF behavior
-```
-
-Audit the current delete/forget path before implementation. Do not assume whether the defect is persistence, store composition or UI filtering.
-
-Acceptance must cover:
+Completed product commit:
 
 ```text
-add Plug
--> install managed automation
--> Forget Plug without uninstalling automation
--> durable automation ownership record remains
+b0b80e37fde234f2c0e1cbe8375d9235e5d91379
+Protect automation ownership when forgetting plug
 ```
 
-Do not pull re-add reconciliation into 1A unless the audit proves a tiny inseparable boundary.
+Audit result: the production Forget Plug path already had the required semantics. `removeShellyDevice` removes only the saved Plug entry plus transient setup/control state. It does not call `removeInstallation` and does not mutate Shelly runtime. Destructive remote automation removal remains owned by the explicit climate/Time uninstall detail flows.
+
+Slice 1A therefore added a regression test rather than unnecessary product logic. The acceptance test now creates a durable `InstalledAutomation`, forgets the saved Plug through the real confirmation UI, and proves the durable automation record remains unchanged.
+
+Verification before integration:
+
+- focused `hardware-setup.test.tsx` passed;
+- `pnpm quality:repo` passed;
+- exactly one final full `pnpm check` passed;
+- postimplementation diff audit confirmed the slice changes only the regression test;
+- no physical-device test was required because no runtime behavior changed.
+
+The user-visible recovery defect therefore belongs to Slice 1B: saved Plug identity/re-association and remote-runtime reconciliation after re-add.
 
 ## Slice 1B — re-add and reconcile existing managed automation
 
@@ -277,8 +271,8 @@ Do not perform a schema rewrite solely to match this diagram.
 
 ```text
 0   InstalledAutomation foundation        DONE  60295d576
-1A  Forget vs uninstall semantics         NEXT
-1B  Re-add + reconciliation               pending
+1A  Forget vs uninstall semantics         DONE  b0b80e37f
+1B  Re-add + reconciliation               NEXT
 2A  Edit climate automation               pending
 2B  Edit Time automation                  pending
 3A  Full LED settings                     pending
