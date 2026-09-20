@@ -1,4 +1,4 @@
-# Next chat handoff — clean main + Phase 3 architecture tooling closed
+# Next chat handoff — product execution plan active
 
 Updated: 2026-09-20
 
@@ -11,10 +11,11 @@ Before any write:
 1. read root `AGENTS.md`;
 2. read the nearest nested `AGENTS.md` for the area being changed;
 3. read this file;
-4. read `docs/architecture/overview.md`, `docs/architecture/refactor-boundaries.md` and
+4. read `docs/implementation/automation-recovery-editing-shelly-transport-plan.md`;
+5. read `docs/architecture/overview.md`, `docs/architecture/refactor-boundaries.md` and
    `docs/architecture/feature-boundaries.md`;
-5. fetch fresh `main`;
-6. fetch `agent-control:.agent/status/daemon.json` and verify no duplicate task.
+6. fetch fresh `main`;
+7. fetch `agent-control:.agent/status/daemon.json` and verify no duplicate task.
 
 Repository/runtime identity:
 
@@ -106,6 +107,10 @@ Accepted invariants:
 - one relay has one managed automation owner at a time;
 - delete/uninstall preserves safe OFF and managed-identity verification.
 
+For the active execution plan, also preserve the distinction between stable physical
+Shelly identity and transport reachability: `deviceId` is identity; an IP/`baseUrl` is an
+HTTP endpoint and must not become the ownership key.
+
 ## Feature-first direction
 
 Do not mass-migrate the current technical-layer source tree.
@@ -173,17 +178,22 @@ screen-specific toast offsets.
 
 ## Validation workflow
 
-Normal workflow:
+The active execution plan strengthens the normal loop with a mandatory postimplementation
+re-audit and handoff update:
 
 ```text
 fresh main + daemon
--> preimplementation ownership gate
+-> preimplementation ownership/identity/transport gate
 -> smallest cohesive implementation
 -> focused checks
 -> pnpm quality:repo when architecture boundaries are touched
 -> exactly one final full pnpm check
+-> postimplementation re-audit of the complete diff
+-> update canonical docs + this handoff + plan progress
 -> commit/push
--> emulator/physical-device smoke only when native/device behavior needs it
+-> review pushed diff
+-> fast-forward main
+-> verify main + cleanup branch
 ```
 
 Useful quality commands:
@@ -208,21 +218,49 @@ Canonical geometry-sensitive viewports:
 Use Local Agent for local command execution, builds/tests, native or hardware work. Do not
 run another coding agent through it.
 
-## Next work
+## Active execution plan
 
-Phase 0–3 architecture/tooling hardening is complete. **Do not invent another broad
-hardening or refactor phase.**
+The canonical next-work sequence is now:
 
-The next work should be a concrete product feature or regression. Exercise the existing
-boundaries from day one and improve tooling only when real product work exposes a specific
-hole.
+```text
+Slice 0   close InstalledAutomation feature-foundation move
+Slice 1A  separate Forget Plug from Uninstall Automation
+Slice 1B  re-add same physical Plug + reconcile managed automation
+Slice 2A  edit installed climate automation in place
+Slice 2B  edit installed Time automation in place
+Slice 3A  device-settings foundation + complete LED settings
+Slice 3B+ additional Shelly settings capability families
+Slice 4A  real-hardware BLE feasibility/protocol spike
+Slice 4B  BLE ShellyRpcTransport implementation
+Slice 4C+ incrementally enable BLE-backed product capabilities
+```
 
-Reasonable product categories remain:
+Detailed acceptance criteria and the mandatory per-slice lifecycle live in
+`docs/implementation/automation-recovery-editing-shelly-transport-plan.md`.
 
-- richer Plug management/configuration;
-- additional supported sensor/device profiles;
-- additional Plug-owned automation types;
-- targeted UX work tied to a concrete usability problem.
+Do not reorder later slices around a red/incomplete earlier slice unless a newly discovered
+blocker is documented in both that plan and this handoff.
+
+### Immediate next slice: Slice 0
+
+Close the already-attempted `InstalledAutomation` ownership move before implementing the
+re-add regression.
+
+Known previous attempt:
+
+```text
+task: 20260920-installed-automation-feature-foundation-v3
+result: failed final full check
+work branch: work/installed-automation-feature-foundation
+branch state after failure: identical to main; no partial product change to resume
+```
+
+The focused tests and architecture gates passed, but the full mobile suite failed in
+`src/__tests__/script-preview.test.ts` because `createInstalledAutomation` was no longer
+resolved after the intended public-API move. Fix the public API/caller boundary rather than
+reverting ownership back to legacy flows.
+
+After Slice 0 is green and merged, update this handoff and advance to Slice 1A only.
 
 ## Canonical documentation
 
@@ -236,10 +274,12 @@ Current:
 - `scripts/quality/AGENTS.md` — quality-tool ownership/self-test contract;
 - `scripts/quality/architecture-baseline.mjs` — executable reviewed baselines;
 - this file — continuation state;
+- `docs/implementation/automation-recovery-editing-shelly-transport-plan.md` — active
+  product execution plan and progress log;
 - `docs/architecture/overview.md` — product/runtime architecture;
 - `docs/architecture/refactor-boundaries.md` — ownership, baselines and refactor policy;
 - `docs/architecture/feature-boundaries.md` — executable feature structure contract;
-- `docs/product/next-functional-steps.md` — product roadmap.
+- `docs/product/next-functional-steps.md` — broader product roadmap.
 
 Historical/reference:
 
@@ -249,4 +289,4 @@ Historical/reference:
 - older implementation notes/ADRs unless explicitly marked current.
 
 When historical material disagrees with current code/canonical docs, current code +
-canonical docs win.
+canonical docs + the active execution plan win.
