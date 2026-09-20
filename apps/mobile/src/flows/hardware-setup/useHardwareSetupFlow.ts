@@ -1,19 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
 import type { RulePresetId } from '@lcl/automation-core';
-import {
-  decodeShellyThermostatScript,
-  type DecodedShellyThermostatScript
-} from '@lcl/script-generator';
-import { LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
-import { useMemo, useState } from 'react';
-import { t } from '../../app/i18n.js';
-import type { HardwareSetupStatus } from './schemas.js';
-import {
-  readShellyAutomationScriptState,
-  type ShellyAutomationScriptState
-} from '../../features/automations/index.js';
-import { readShellySetupStatus } from './shellyRequests.js';
-import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
+import { useMemo } from 'react';
+import { useClimateAutomationScriptLoadFlow } from '../../features/automations/index.js';
+import { useHardwareSetupDraftStore } from './setupDraftStore.js';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {
   deriveClimateRuleState,
@@ -23,33 +11,7 @@ import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFl
 import { useSensorSetupFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
-import {
-  shellyControlStatusFromSetupStatus,
-  useShellyControlFlow
-} from './useShellyControlFlow.js';
-
-type ShellyCheckMutationInput = {
-  baseUrl: string;
-  name: string;
-};
-
-type ShellyCheckMutationResult = HardwareSetupStatus & {
-  checkedDevice: ShellyDraftDevice;
-};
-
-type LoadedShellyAutomationScriptState = Omit<
-  ShellyAutomationScriptState,
-  'script' | 'code'
-> & {
-  script: NonNullable<ShellyAutomationScriptState['script']>;
-  code: string;
-};
-
-type ShellyAutomationScriptLoadMutationResult = {
-  device: ShellyDraftDevice;
-  state: LoadedShellyAutomationScriptState;
-  decoded: DecodedShellyThermostatScript;
-};
+import { useShellyControlFlow } from './useShellyControlFlow.js';
 
 const numberInput = (value: number): string => String(Number(value.toFixed(4)));
 
@@ -69,9 +31,6 @@ export const useHardwareSetupFlow = () => {
   );
   const setShellyDeviceName = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceName
-  );
-  const setShellyDeviceMetadata = useHardwareSetupDraftStore(
-    (state) => state.setShellyDeviceMetadata
   );
   const setShellyScriptIdDraft = useHardwareSetupDraftStore(
     (state) => state.setShellyScriptId
@@ -124,11 +83,14 @@ export const useHardwareSetupFlow = () => {
   const setMaxOnHoursInput = useHardwareSetupDraftStore(
     (state) => state.setMaxOnHoursInput
   );
-  const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
   const { upsertSensorDevice, ...sensorSetupFlow } = useSensorSetupFlow();
   const { sensorDevices } = sensorSetupFlow;
 
   const {
+    setupStatus,
+    checkShellyMutation,
+    recheckShellyMutation,
+    resetShellySetupStatus,
     shellyControlStates,
     refreshShellyControl,
     acknowledgeShellyControlFeedback,
@@ -165,7 +127,7 @@ export const useHardwareSetupFlow = () => {
 
   const updateShellyUrlInput = (value: string) => {
     setShellyUrlInputDraft(value);
-    setSetupStatus(null);
+    resetShellySetupStatus();
   };
 
   const selectedShelly = useMemo(
@@ -225,123 +187,39 @@ export const useHardwareSetupFlow = () => {
     isVpdAssistValid
   });
 
-  const checkShellyMutation = useMutation({
-    mutationFn: async (
-      input?: ShellyCheckMutationInput
-    ): Promise<ShellyCheckMutationResult> => {
-      const inputState = input
-        ? deriveShellyInputState({
-            shellyNameInput: input.name,
-            shellyUrlInput: input.baseUrl
-          })
-        : shellyInputState;
-      if (!inputState.ok) {
-        throw new Error(
-          inputState.fieldErrors.url ??
-            inputState.fieldErrors.name ??
-            t('hardware.flow.fixShellyData')
+  const { loadAutomationScriptMutation, loadAutomationScript } =
+    useClimateAutomationScriptLoadFlow({
+      onSuccess: ({ device, state, decoded }) => {
+        const settings = decoded.settings;
+        setShellyScriptIdDraft(device.id, String(state.script.id));
+        upsertSensorDevice({
+          id: settings.runtimeAddress,
+          name: settings.sensorDisplayName,
+          runtimeAddress: settings.runtimeAddress,
+          profileId: settings.sensorProfileId
+        });
+        setRulePreset(settings.mode);
+        setOnThresholdInput(numberInput(settings.control.onThreshold));
+        setOffThresholdInput(numberInput(settings.control.offThreshold));
+        setVpdAssistEnabled(settings.vpdAssist.enabled);
+        setVpdTargetInput(
+          settings.vpdAssist.targetKpa === null
+            ? DEFAULT_RULE_ADVANCED_SETTINGS.vpdTargetInput
+            : numberInput(settings.vpdAssist.targetKpa)
         );
-      }
-      const { baseUrl, name } = inputState;
-      const status = await readShellySetupStatus(baseUrl);
-      const existingScript = status.scripts.find(
-        (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
-      );
-      return {
-        ...status,
-        checkedDevice: {
-          id: baseUrl,
-          name,
-          baseUrl,
-          scriptIdInput: existingScript ? String(existingScript.id) : '1',
-          model: status.deviceInfo.model,
-          gen: status.deviceInfo.gen
-        }
-      };
-    },
-    onSuccess: (status) => {
-      setSetupStatus(status);
-      upsertShellyDevice(status.checkedDevice);
-      applyControlStatus(
-        status.checkedDevice,
-        shellyControlStatusFromSetupStatus(status),
-        null
-      );
-    },
-    onError: () => {
-      setSetupStatus(null);
-    }
-  });
-
-  const recheckShellyMutation = useMutation({
-    mutationFn: async (device: ShellyDraftDevice): Promise<HardwareSetupStatus> =>
-      readShellySetupStatus(device.baseUrl),
-    onSuccess: (status, device) => {
-      setSetupStatus(status);
-      setShellyDeviceMetadata(device.id, {
-        model: status.deviceInfo.model,
-        gen: status.deviceInfo.gen
-      });
-      applyControlStatus(device, shellyControlStatusFromSetupStatus(status), null);
-    },
-    onError: () => {
-      setSetupStatus(null);
-    }
-  });
-
-  const loadAutomationScriptMutation = useMutation({
-    mutationFn: async (
-      device: ShellyDraftDevice
-    ): Promise<ShellyAutomationScriptLoadMutationResult> => {
-      const state = await readShellyAutomationScriptState(device.baseUrl);
-      if (!state.script || !state.code) {
-        throw new Error(t('hardware.rule.loadScriptMissing'));
-      }
-      const script = state.script;
-      const code = state.code;
-
-      const decoded = decodeShellyThermostatScript(code);
-      if (!decoded) {
-        throw new Error(t('hardware.rule.loadScriptUnknown'));
-      }
-
-      return { device, state: { ...state, script, code }, decoded };
-    },
-    onSuccess: ({ device, state, decoded }) => {
-      const settings = decoded.settings;
-      setShellyScriptIdDraft(device.id, String(state.script.id));
-      upsertSensorDevice({
-        id: settings.runtimeAddress,
-        name: settings.sensorDisplayName,
-        runtimeAddress: settings.runtimeAddress,
-        profileId: settings.sensorProfileId
-      });
-      setRulePreset(settings.mode);
-      setOnThresholdInput(numberInput(settings.control.onThreshold));
-      setOffThresholdInput(numberInput(settings.control.offThreshold));
-      setVpdAssistEnabled(settings.vpdAssist.enabled);
-      setVpdTargetInput(
-        settings.vpdAssist.targetKpa === null
-          ? DEFAULT_RULE_ADVANCED_SETTINGS.vpdTargetInput
-          : numberInput(settings.vpdAssist.targetKpa)
-      );
-      setRssiMinInput(String(settings.rssiMin));
-      setStaleTimeoutMinInput(numberInput(settings.staleTimeoutSec / 60));
-      setMinChangeMinInput(numberInput(settings.minChangeMs / 60_000));
-      setMaxOnHoursInput(numberInput(settings.maxOnMs / 3_600_000));
-      resetInstallState();
-      applyControlStatus(device, state.status, null);
-    },
-    onError: (error, device) => applyControlError(device, error)
-  });
-
-  const loadAutomationScript = (device: ShellyDraftDevice) => {
-    loadAutomationScriptMutation.mutate(device);
-  };
+        setRssiMinInput(String(settings.rssiMin));
+        setStaleTimeoutMinInput(numberInput(settings.staleTimeoutSec / 60));
+        setMinChangeMinInput(numberInput(settings.minChangeMs / 60_000));
+        setMaxOnHoursInput(numberInput(settings.maxOnMs / 3_600_000));
+        resetInstallState();
+        applyControlStatus(device, state.status, null);
+      },
+      onError: (error, device) => applyControlError(device, error)
+    });
 
   const selectShellyDevice = (id: string) => {
     selectShellyDeviceDraft(id);
-    setSetupStatus(null);
+    resetShellySetupStatus();
     resetInstallState();
   };
 
@@ -353,7 +231,7 @@ export const useHardwareSetupFlow = () => {
   const removeShellyDevice = (id: string) => {
     removeShellyDeviceDraft(id);
     removeShellyControlState(id);
-    setSetupStatus(null);
+    resetShellySetupStatus();
     resetInstallState();
   };
 

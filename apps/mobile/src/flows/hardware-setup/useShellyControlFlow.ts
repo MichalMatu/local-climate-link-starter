@@ -5,11 +5,13 @@ import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-cli
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
+import { deriveShellyInputState } from './ruleConfigDerivation.js';
+import { readShellySetupStatus } from './shellyRequests.js';
 import {
   readShellyControlStatus,
   type ShellyControlStatus
 } from '../../features/automations/index.js';
-import type { ShellyDraftDevice } from './setupDraftStore.js';
+import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
 
 export type ShellyControlAction = 'status' | 'on' | 'off';
 
@@ -26,6 +28,15 @@ type ShellyControlTarget = Pick<ShellyDraftDevice, 'id' | 'baseUrl'>;
 type ShellyControlMutationResult = {
   device: ShellyControlTarget;
   status: ShellyControlStatus;
+};
+
+type ShellyCheckMutationInput = {
+  baseUrl: string;
+  name: string;
+};
+
+type ShellyCheckMutationResult = HardwareSetupStatus & {
+  checkedDevice: ShellyDraftDevice;
 };
 
 const createInitialShellyControlState = (): ShellyControlViewState => ({
@@ -57,6 +68,15 @@ export const shellyControlStatusFromSetupStatus = (
 };
 
 export const useShellyControlFlow = () => {
+  const shellyNameInput = useHardwareSetupDraftStore((state) => state.shellyNameInput);
+  const shellyUrlInput = useHardwareSetupDraftStore((state) => state.shellyUrlInput);
+  const upsertShellyDevice = useHardwareSetupDraftStore(
+    (state) => state.upsertShellyDevice
+  );
+  const setShellyDeviceMetadata = useHardwareSetupDraftStore(
+    (state) => state.setShellyDeviceMetadata
+  );
+  const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
   const [shellyControlStates, setShellyControlStates] = useState<
     Record<string, ShellyControlViewState>
   >({});
@@ -100,6 +120,68 @@ export const useShellyControlFlow = () => {
       updatedAtMs: Date.now()
     });
   };
+
+  const checkShellyMutation = useMutation({
+    mutationFn: async (
+      input?: ShellyCheckMutationInput
+    ): Promise<ShellyCheckMutationResult> => {
+      const inputState = input
+        ? deriveShellyInputState({
+            shellyNameInput: input.name,
+            shellyUrlInput: input.baseUrl
+          })
+        : deriveShellyInputState({ shellyNameInput, shellyUrlInput });
+      if (!inputState.ok) {
+        throw new Error(
+          inputState.fieldErrors.url ??
+            inputState.fieldErrors.name ??
+            t('hardware.flow.fixShellyData')
+        );
+      }
+      const { baseUrl, name } = inputState;
+      const status = await readShellySetupStatus(baseUrl);
+      const existingScript = status.scripts.find(
+        (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
+      );
+      return {
+        ...status,
+        checkedDevice: {
+          id: baseUrl,
+          name,
+          baseUrl,
+          scriptIdInput: existingScript ? String(existingScript.id) : '1',
+          model: status.deviceInfo.model,
+          gen: status.deviceInfo.gen
+        }
+      };
+    },
+    onSuccess: (status) => {
+      setSetupStatus(status);
+      upsertShellyDevice(status.checkedDevice);
+      applyControlStatus(
+        status.checkedDevice,
+        shellyControlStatusFromSetupStatus(status),
+        null
+      );
+    },
+    onError: () => setSetupStatus(null)
+  });
+
+  const recheckShellyMutation = useMutation({
+    mutationFn: async (device: ShellyDraftDevice): Promise<HardwareSetupStatus> =>
+      readShellySetupStatus(device.baseUrl),
+    onSuccess: (status, device) => {
+      setSetupStatus(status);
+      setShellyDeviceMetadata(device.id, {
+        model: status.deviceInfo.model,
+        gen: status.deviceInfo.gen
+      });
+      applyControlStatus(device, shellyControlStatusFromSetupStatus(status), null);
+    },
+    onError: () => setSetupStatus(null)
+  });
+
+  const resetShellySetupStatus = useCallback(() => setSetupStatus(null), []);
 
   const refreshShellyControlMutation = useMutation({
     mutationFn: async (
@@ -207,6 +289,10 @@ export const useShellyControlFlow = () => {
   }, []);
 
   return {
+    setupStatus,
+    checkShellyMutation,
+    recheckShellyMutation,
+    resetShellySetupStatus,
     shellyControlStates,
     refreshShellyControlMutation,
     turnRelayOnMutation,

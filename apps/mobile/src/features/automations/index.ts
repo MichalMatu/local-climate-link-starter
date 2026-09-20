@@ -20,3 +20,8 @@ export {
   type TimeAutomationRuntimeSnapshot
 } from './data/timeAutomationRuntimeState.js';
 export { findScheduleRelayConflict } from './data/timeAutomationSchedule.js';
+export {
+  useClimateAutomationScriptLoadFlow,
+  type ClimateAutomationScriptLoadResult,
+  type ClimateAutomationScriptLoadTarget
+} from './flows/useClimateAutomationScriptLoadFlow.js';
