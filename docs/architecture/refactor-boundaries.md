@@ -127,7 +127,7 @@ presentation.
 responsibilities include:
 
 - `useShellyControlFlow`;
-- `useShellySetupScanFlow`;
+- `useShellySetupScanFlow` (including LAN scan concurrency/abort orchestration);
 - `useShellyBleDiscoveryFlow`;
 - `useSensorSetupFlow` composing `usePhoneSensorFlow`;
 - `useClimateAutomationInstallFlow`.
@@ -228,7 +228,7 @@ ownership in the same way. Phase 3 tightened known larger modules to their exact
 parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
-apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  564
+apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  481
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
 apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
 apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           443

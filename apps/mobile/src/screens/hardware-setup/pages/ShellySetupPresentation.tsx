@@ -8,10 +8,8 @@ import {
   type TranslationKey
 } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
-import {
-  SHELLY_SETUP_SCAN_CONCURRENCY,
-  SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS
-} from '../../../flows/hardware-setup/shellyRequests.js';
+import { SHELLY_SETUP_SCAN_RPC_TIMEOUT_MS } from '../../../flows/hardware-setup/shellyRequests.js';
+import { SHELLY_SETUP_SCAN_CONCURRENCY } from '../../../flows/hardware-setup/useShellySetupScanFlow.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import { countIpv4RangeScanAddresses } from '../../../flows/hardware-setup/validation.js';
 import type { ShellySetupFlow } from '../pageContracts.js';

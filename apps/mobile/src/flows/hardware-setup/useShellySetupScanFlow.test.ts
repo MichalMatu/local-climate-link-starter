@@ -4,11 +4,11 @@ import { createElement, type PropsWithChildren } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type * as ShellyRequestsModule from './shellyRequests.js';
 
-const scanShellySetupUrlsMock = vi.hoisted(() => vi.fn());
+const readShellySetupScanResultMock = vi.hoisted(() => vi.fn());
 
 vi.mock('./shellyRequests.js', async (importOriginal) => {
   const actual = await importOriginal<typeof ShellyRequestsModule>();
-  return { ...actual, scanShellySetupUrls: scanShellySetupUrlsMock };
+  return { ...actual, readShellySetupScanResult: readShellySetupScanResultMock };
 });
 import { buildShellyScanUrls, useShellySetupScanFlow } from './useShellySetupScanFlow.js';
 
@@ -48,13 +48,17 @@ describe('Shelly setup scan derivation', () => {
     const keepScanning = new Promise<void>((resolve) => {
       finishScan = resolve;
     });
-    scanShellySetupUrlsMock.mockImplementationOnce(async ({ onResult }) => {
-      onResult?.(found);
+    readShellySetupScanResultMock.mockImplementation(async (baseUrl: string) => {
+      if (baseUrl === found.baseUrl) return found;
       await keepScanning;
-      return { results: [found], stopped: false };
+      throw new Error('not a Shelly device');
     });
 
     const { result } = renderHook(() => useShellySetupScanFlow(), { wrapper });
+    act(() => {
+      result.current.setShellyScanStartInput('192.168.0.10');
+      result.current.setShellyScanEndInput('192.168.0.11');
+    });
     act(() => result.current.startShellyScan());
 
     await waitFor(() => expect(result.current.shellyScanResults).toEqual([found]));
