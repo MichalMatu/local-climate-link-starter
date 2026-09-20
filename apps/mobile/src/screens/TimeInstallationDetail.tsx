@@ -14,7 +14,7 @@ import {
   pauseTimeAutomation,
   resumeTimeAutomation,
   updateDailyTimeAutomation
-} from '../flows/time-automation/runtime.js';
+} from '../features/automations/index.js';
 import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { TimeInstalledAutomation } from '../installations/model.js';
-import { readTimeAutomationRuntime } from './runtime.js';
+import { readTimeAutomationRuntime } from '../../features/automations/index.js';
 
 export const timeAutomationRuntimeQueryKey = (installation: TimeInstalledAutomation) =>
   [

@@ -1,21 +1,24 @@
-import { unwrapShellyResult } from '../../platform/shellyResult.js';
-import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import {
-  RpcShellyClient,
-  RpcShellyScheduleClient,
-  type ShellyScheduleJob,
-  type ShellyScheduleJobConfig,
-  type ShellyStatus
-} from '@lcl/shelly-client';
-
-import type { TimeInstalledAutomation } from '../installations/model.js';
-import {
-  dailyScheduleTimespec,
   expectedRelayOnForClockTime,
   type DailyTimeAutomationConfig
-} from './config.js';
-
-export type TimeAutomationScheduleState = 'running' | 'paused' | 'attention';
+} from '@lcl/automation-core';
+import type { ShellyScheduleJobConfig, ShellyStatus } from '@lcl/shelly-client';
+import { unwrapShellyResult } from '../../../platform/shellyResult.js';
+import {
+  createTimeAutomationClients,
+  type TimeAutomationClients
+} from './timeAutomationClients.js';
+import {
+  readTimeAutomationRuntime,
+  type TimeAutomationRuntimeInstallation,
+  type TimeAutomationRuntimeSnapshot
+} from './timeAutomationRuntimeState.js';
+import {
+  createDailyScheduleJob,
+  findScheduleRelayConflict,
+  schedulePairState,
+  type TimeAutomationScheduleState
+} from './timeAutomationSchedule.js';
 
 export type TimeAutomationRuntimeErrorCode =
   | 'clock-unsynced'
@@ -43,103 +46,6 @@ const runtimeError = (
   code: TimeAutomationRuntimeErrorCode,
   message: string
 ): TimeAutomationRuntimeError => new TimeAutomationRuntimeError(code, message);
-
-export type TimeAutomationRuntimeSnapshot = {
-  relayOn: boolean;
-  clock: ShellyStatus['clock'];
-  scheduleState: TimeAutomationScheduleState;
-  onJob: ShellyScheduleJob | null;
-  offJob: ShellyScheduleJob | null;
-};
-
-export type TimeAutomationClients = {
-  device: Pick<RpcShellyClient, 'getStatus' | 'setRelayOn' | 'setRelayOff'>;
-  schedules: Pick<RpcShellyScheduleClient, 'list' | 'create' | 'update' | 'delete'>;
-};
-
-export const createTimeAutomationClients = (baseUrl: string): TimeAutomationClients => {
-  const transport = createShellyTransport(baseUrl);
-  return {
-    device: new RpcShellyClient(transport),
-    schedules: new RpcShellyScheduleClient(transport)
-  };
-};
-
-const switchScheduleCall = (relayId: number, on: boolean) => ({
-  method: 'Switch.Set',
-  params: { id: relayId, on }
-});
-
-export const createDailyScheduleJob = (
-  config: DailyTimeAutomationConfig,
-  on: boolean,
-  enable = true
-): ShellyScheduleJobConfig => ({
-  enable,
-  timespec: dailyScheduleTimespec(on ? config.onTime : config.offTime),
-  calls: [switchScheduleCall(config.relayId, on)]
-});
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-export const scheduleJobControlsRelay = (
-  job: ShellyScheduleJob,
-  relayId: number
-): boolean =>
-  job.calls.some((call) => {
-    if (call.method !== 'Switch.Set' || !isRecord(call.params)) {
-      return false;
-    }
-    return call.params.id === relayId;
-  });
-
-export const findScheduleRelayConflict = (
-  jobs: readonly ShellyScheduleJob[],
-  relayId: number,
-  ignoredJobIds: readonly number[] = []
-): ShellyScheduleJob | null =>
-  jobs.find(
-    (job) => !ignoredJobIds.includes(job.id) && scheduleJobControlsRelay(job, relayId)
-  ) ?? null;
-
-const jobMatches = (
-  job: ShellyScheduleJob | null,
-  expected: ShellyScheduleJobConfig
-): boolean => {
-  if (!job || job.timespec !== expected.timespec || job.calls.length !== 1) {
-    return false;
-  }
-  const actualCall = job.calls[0];
-  const expectedCall = expected.calls[0];
-  if (!actualCall || !expectedCall || actualCall.method !== expectedCall.method) {
-    return false;
-  }
-  return (
-    JSON.stringify(actualCall.params ?? {}) === JSON.stringify(expectedCall.params ?? {})
-  );
-};
-
-const schedulePairState = (
-  installation: Pick<TimeInstalledAutomation, 'schedule' | 'config'>,
-  jobs: readonly ShellyScheduleJob[]
-): Pick<TimeAutomationRuntimeSnapshot, 'scheduleState' | 'onJob' | 'offJob'> => {
-  const onJob = jobs.find((job) => job.id === installation.schedule.onJobId) ?? null;
-  const offJob = jobs.find((job) => job.id === installation.schedule.offJobId) ?? null;
-  if (
-    !jobMatches(onJob, createDailyScheduleJob(installation.config, true)) ||
-    !jobMatches(offJob, createDailyScheduleJob(installation.config, false))
-  ) {
-    return { scheduleState: 'attention', onJob, offJob };
-  }
-  if (onJob?.enable && offJob?.enable) {
-    return { scheduleState: 'running', onJob, offJob };
-  }
-  if (onJob && offJob && !onJob.enable && !offJob.enable) {
-    return { scheduleState: 'paused', onJob, offJob };
-  }
-  return { scheduleState: 'attention', onJob, offJob };
-};
 
 const requireSyncedClock = (status: ShellyStatus): string => {
   if (!status.clock.timeSynced || !status.clock.localTime) {
@@ -176,23 +82,6 @@ const deleteIfPresent = async (
   if (list.jobs.some((job) => job.id === jobId)) {
     unwrapShellyResult(await clients.schedules.delete(jobId));
   }
-};
-
-export const readTimeAutomationRuntime = async (
-  installation: TimeInstalledAutomation,
-  clients = createTimeAutomationClients(installation.shelly.baseUrl)
-): Promise<TimeAutomationRuntimeSnapshot> => {
-  const [statusResult, schedulesResult] = await Promise.all([
-    clients.device.getStatus(),
-    clients.schedules.list()
-  ]);
-  const status = unwrapShellyResult(statusResult);
-  const scheduleList = unwrapShellyResult(schedulesResult);
-  return {
-    relayOn: status.relayOn,
-    clock: status.clock,
-    ...schedulePairState(installation, scheduleList.jobs)
-  };
 };
 
 export const installDailyTimeAutomation = async ({
@@ -250,7 +139,7 @@ export const installDailyTimeAutomation = async ({
 };
 
 const updatePairEnabled = async (
-  installation: TimeInstalledAutomation,
+  installation: TimeAutomationRuntimeInstallation,
   clients: TimeAutomationClients,
   enable: boolean
 ): Promise<void> => {
@@ -265,7 +154,7 @@ const updatePairEnabled = async (
 };
 
 export const pauseTimeAutomation = async (
-  installation: TimeInstalledAutomation,
+  installation: TimeAutomationRuntimeInstallation,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<TimeAutomationRuntimeSnapshot> => {
   await setRelayStateAndConfirm(clients, installation.config.relayId, false);
@@ -282,7 +171,7 @@ export const pauseTimeAutomation = async (
 };
 
 export const resumeTimeAutomation = async (
-  installation: TimeInstalledAutomation,
+  installation: TimeAutomationRuntimeInstallation,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<TimeAutomationRuntimeSnapshot> => {
   const status = await setRelayStateAndConfirm(
@@ -309,7 +198,7 @@ export const updateDailyTimeAutomation = async ({
   config,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 }: {
-  installation: TimeInstalledAutomation;
+  installation: TimeAutomationRuntimeInstallation;
   config: DailyTimeAutomationConfig;
   clients?: TimeAutomationClients;
 }): Promise<TimeAutomationRuntimeSnapshot> => {
@@ -368,7 +257,7 @@ export const updateDailyTimeAutomation = async ({
       )
     );
 
-    const updatedInstallation: TimeInstalledAutomation = {
+    const updatedInstallation: TimeAutomationRuntimeInstallation = {
       ...installation,
       config
     };
@@ -416,7 +305,7 @@ export const updateDailyTimeAutomation = async ({
 };
 
 export const deleteTimeAutomation = async (
-  installation: TimeInstalledAutomation,
+  installation: TimeAutomationRuntimeInstallation,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
   await setRelayStateAndConfirm(clients, installation.config.relayId, false);

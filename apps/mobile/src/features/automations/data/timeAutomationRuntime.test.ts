@@ -7,17 +7,19 @@ import type {
   ShellyStatus
 } from '@lcl/shelly-client';
 import { describe, expect, it } from 'vitest';
-import { createTimeInstalledAutomation } from '../installations/model.js';
-import type { TimeAutomationClients } from './runtime.js';
+import type { TimeAutomationClients } from './timeAutomationClients.js';
+import { createDailyScheduleJob } from './timeAutomationSchedule.js';
 import {
-  createDailyScheduleJob,
   deleteTimeAutomation,
   installDailyTimeAutomation,
   pauseTimeAutomation,
-  readTimeAutomationRuntime,
   resumeTimeAutomation,
   updateDailyTimeAutomation
-} from './runtime.js';
+} from './timeAutomationRuntime.js';
+import {
+  readTimeAutomationRuntime,
+  type TimeAutomationRuntimeInstallation
+} from './timeAutomationRuntimeState.js';
 
 const ok = <T>(value: T): Result<T> => ({ ok: true, value });
 
@@ -134,19 +136,14 @@ const normalizeJob = (job: ShellyScheduleJobConfig): Omit<ShellyScheduleJob, 'id
 });
 
 const installationFor = (
-  fake: FakeTimeAutomationClients,
+  _fake: FakeTimeAutomationClients,
   onJobId: number,
   offJobId: number
-) =>
-  createTimeInstalledAutomation({
-    shelly: { id: 'shelly-a', model: 'S3PL-00112EU', gen: 3 },
-    shellyName: 'Lamp',
-    baseUrl: 'http://192.168.0.20/',
-    onJobId,
-    offJobId,
-    config: { relayId: 0, onTime: '08:00', offTime: '20:00' },
-    nowMs: 1
-  });
+): TimeAutomationRuntimeInstallation => ({
+  shelly: { baseUrl: 'http://192.168.0.20/' },
+  schedule: { onJobId, offJobId },
+  config: { relayId: 0, onTime: '08:00', offTime: '20:00' }
+});
 
 describe('native Shelly time automation runtime', () => {
   it('installs two jobs and immediately applies the expected relay state', async () => {
