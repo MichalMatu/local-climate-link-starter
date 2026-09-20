@@ -37,7 +37,7 @@
     "sandbox:full": "bash tools/sandbox/run-sandbox-check.sh full",
     "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build",
     "check:full": "pnpm check && pnpm e2e:responsive",
-    "quality:repo": "node scripts/quality/repository-gate.mjs"
+    "quality:repo": "node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
@@ -57,8 +57,6 @@
     "@types/node": "^24.0.4",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "@vitest/coverage-v8": "^3.2.6",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react-hooks": "^5.2.0",
