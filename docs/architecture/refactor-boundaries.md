@@ -2,7 +2,42 @@
 
 Updated: 2026-09-20
 
-File size is an alarm, not a refactor goal. Split code only at a real responsibility boundary, to remove duplicate state/transport ownership, or when a quality budget proves that a boundary is regrowing.
+File size is an alarm, not a refactor goal. Refactor when ownership is unclear, lifecycle
+or side effects are duplicated, transport leaks into presentation, or a touched file
+would gain another unrelated responsibility.
+
+## Preimplementation architecture gate
+
+Before implementation, identify:
+
+```text
+product owner
+state owner
+side-effect owner
+UI owner
+final file layout
+test owner
+```
+
+For a tiny local fix this may be one short note. For a cross-file change it must be
+explicit enough that a reviewer can answer: **where does this responsibility belong after
+the change?**
+
+Do not intentionally implement a feature into the wrong owner with a plan to clean it up
+later.
+
+Ask these questions before coding:
+
+- Does one module clearly own the mutable state?
+- Does one flow/client clearly own the side-effect lifecycle?
+- Will a screen remain presentation/composition rather than transport/domain code?
+- Will a facade remain composition rather than absorb another subsystem?
+- Will a shared UI primitive stay product-agnostic?
+- Will the proposed file structure make the next related change easier to locate?
+- Does a touched hotspot need a cohesive extraction before it grows again?
+
+If the answer is no, repair the boundary as part of the implementation slice. Do not do a
+broad repository rewrite.
 
 ## Enforced direction
 
@@ -10,7 +45,7 @@ File size is an alarm, not a refactor goal. Split code only at a real responsibi
 packages/domain + adapters
         ^
         |
-mobile flows / stores
+mobile feature flows / stores
         ^
         |
 screens / route composition
@@ -22,13 +57,55 @@ shared UI primitives
 More concretely:
 
 - domain packages do not import React/Ionic;
+- packages do not import from apps;
 - screens do not call raw `fetch`;
 - screens do not import the Capacitor BLE plugin;
 - transport/runtime implementation belongs in clients/adapters/flows;
+- durable persistence belongs behind repositories;
 - pages consume narrow flow contracts;
 - UI primitives do not make product/runtime ownership decisions.
 
-`scripts/quality/repository-gate.mjs` is the executable boundary contract. Keep it green; do not increase budgets just to land a change.
+`scripts/quality/repository-gate.mjs` is the executable boundary contract. Keep it green;
+do not increase budgets merely to land a change.
+
+## Mobile source organization
+
+The current mobile source tree is historically organized by technical layer:
+
+```text
+src/
+  app/
+  components/
+  flows/
+  routes/
+  screens/
+```
+
+Do not mass-migrate it.
+
+For a new cohesive product capability, prefer gradual feature ownership:
+
+```text
+src/features/<feature>/
+  screens/
+  components/
+  flows/
+  state/
+  data/
+```
+
+Only create the subdirectories the feature needs.
+
+When materially changing an existing feature, migrate the touched cohesive slice only if
+that reduces scatter and can be kept behavior-preserving. Do not mix a broad folder move
+with unrelated product behavior.
+
+`src/app` and `src/routes` remain app-composition boundaries. Truly cross-feature,
+mobile-only presentation may remain in `src/components`. Product-agnostic reusable
+presentation belongs in `@lcl/ui`.
+
+Avoid catch-all folders such as `features/common`, `misc`, `helpers` or generic service
+containers.
 
 ## Hardware setup boundary
 
@@ -36,12 +113,14 @@ More concretely:
 
 - selecting the current setup page/tab;
 - applying route/setup context;
-- opening/closing local child pages where needed;
-- lifecycle cleanup when the whole setup surface leaves.
+- opening/closing local child pages;
+- lifecycle cleanup for the setup surface.
 
-It must not own Shelly RPC details, BLE parsing/scanning implementation or page-specific presentation.
+It must not own Shelly RPC details, BLE parsing/scanning implementation or page-specific
+presentation.
 
-`useHardwareSetupFlow.ts` is a facade over cohesive subsystems. Current extracted responsibilities include:
+`useHardwareSetupFlow.ts` is a facade over cohesive subsystems. Current extracted
+responsibilities include:
 
 - `useShellyControlFlow`;
 - `useShellySetupScanFlow`;
@@ -51,13 +130,26 @@ It must not own Shelly RPC details, BLE parsing/scanning implementation or page-
 
 Do not move those implementations back into the facade.
 
-Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`, `RuleSetupFlow` and `TimeScheduleSetupFlow`. A page must not recover the complete `HardwareSetupFlow` indirectly.
+Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`,
+`RuleSetupFlow` and `TimeScheduleSetupFlow`. A page must not recover the complete
+`HardwareSetupFlow` indirectly.
 
 ## Navigation/presentation boundary
 
-`AppShell` owns persistent bottom navigation and application-frame overlay geometry. Child pages own their working content. A full working task should be a page/subpage; modal scope is limited to transient decisions, confirmations, short previews, pickers or errors.
+`AppShell` owns persistent bottom navigation and application-frame overlay geometry.
+Child pages own their working content.
 
-The global mobile toast host is part of that shell boundary:
+Use:
+
+```text
+AppShell
+  -> root page
+     -> child page
+        -> deeper child page
+           -> modal only for a transient decision/confirmation
+```
+
+The mobile toast host is part of the shell boundary:
 
 ```text
 AppShell
@@ -66,87 +158,67 @@ AppShell
   -> persistent bottom navigation
 ```
 
-Screens may own their toast message/queue state, but they render through `AppToastViewport`, which portals the shared `@lcl/ui` `ToastViewport` into `#app-toast-host`. Do not render raw `<ToastViewport>` in `apps/mobile/src/screens/**`, add screen-specific toast `bottom` offsets, or move the host into filtered/transformed page surfaces. `scripts/quality/ux-gate.mjs` protects this contract.
+Screens may own their toast message/queue state, but render through `AppToastViewport`.
+Do not render raw `<ToastViewport>` in `apps/mobile/src/screens/**`, add screen-specific
+toast offsets, or move the host into filtered/transformed page surfaces.
 
-The completed Plug/Thermometer add pages establish the discovery-card presentation contract. Reuse its principles before inventing another one-off layout, but do not prematurely generalize unrelated screens into one component.
+## File growth policy
 
-Saved Plug settings and BLE discovery follow the same page-tree rule both from the main dashboard and inside the configurator. Do not regress those working surfaces back into modal-first navigation.
-
-## Current architecture checkpoint
-
-Latest verified app-code checkpoint:
+New-file review alarms:
 
 ```text
-8ad5b152bdbf861a8e6620414245dfbcb06c0ead
-Anchor app toasts above bottom navigation
+mobile screen/page        ~300 lines
+mobile flow/hook          ~350 lines
+presentational component  ~250 lines
 ```
 
-Documentation commits follow that app-code checkpoint on the active work branch, so always fetch the fresh branch before writing.
+These are not targets and do not override responsibility. A cohesive file may exceed an
+alarm with a clear reason; an incohesive file should be split before reaching it.
 
-At this checkpoint:
+Existing large files are not an invitation to a mass cleanup. When a hotspot is touched,
+ask whether the new change adds a responsibility. If yes, extract that responsibility
+instead of increasing an architecture budget.
 
-- repository architecture and UX gates pass;
-- one full `pnpm check` passes;
-- `HardwareSetupScreen` remains a coordinator rather than an all-purpose setup screen;
-- `useHardwareSetupFlow` composes dedicated flows and remains protected by its size/public-surface alarms;
-- Shelly/Sensor/Rule pages keep explicit composition budgets;
-- phone BLE and Shelly discovery lifecycle ownership remains outside route/shell code;
-- BLE child-page cleanup safely handles Back during scanner startup;
-- `RuleAdvancedSettingsModal.tsx` remains deleted as dead code and active advanced settings remain inline;
-- `AppShell` owns the global toast host while `@lcl/ui` owns the reusable toast primitive;
-- `quality:ux` rejects raw screen-level toast viewports and protects the shell host/nav geometry;
-- responsive toast/nav coverage exercises 360×800, 390×844, 412×915, 768×1024 and 1440×900.
+Repository-gate hard budgets remain authoritative for protected hotspots.
 
-There is no current reason for a broad architecture rewrite or another broad UX consistency sweep before explicit product work.
-
-## Watchlist
+## Current watchlist
 
 ### `apps/mobile/src/__tests__/hardware-setup.test.tsx`
 
-This is the clearest god-file risk. It is intentionally scenario-heavy and provides valuable end-to-end regression coverage, but it has accumulated many unrelated hardware-setup scenarios.
-
-When this area is next materially expanded, prefer moving cohesive scenario groups into separate test files while preserving behavior and shared helpers. Do not rewrite it solely to make it shorter.
-
-The focused suite still emits React Testing Library `act(...)` warnings from the frozen standalone device-add regression test. These do not fail lint/tests and are not by themselves a reason to reopen the completed Add Plug/Add Thermometer UI.
+Large scenario file with valuable regression coverage. Split cohesive scenario groups
+when this area is materially extended; do not rewrite it merely for line count.
 
 ### `apps/mobile/src/theme/theme.css`
 
-This is a large global stylesheet and can hide stale selectors or cross-screen overrides.
-
-When a screen is actively refactored:
-
-- remove dead selectors in the touched area;
-- prefer a feature-cohesive style boundary when there is a natural one;
-- keep design tokens shared;
-- avoid a repository-wide CSS rewrite as an unrelated side quest.
-
-Glass styling is allowed on major surfaces, but geometry-critical overlays must remain outside filtered/transformed page containers unless their positioning contract explicitly accounts for that.
+Large global stylesheet. When touching a surface, remove stale selectors in that area and
+prefer a feature-cohesive style boundary where natural. Do not start a repository-wide
+CSS rewrite as a side quest.
 
 ### `ShellySetupPage.tsx`
 
-The page is bounded to Shelly setup, but it still coordinates saved-device management, add/manual/scan presentation, transient removal confirmation and fallback settings/BLE modal components.
-
-The normal dashboard/configurator working flows use page callbacks for saved settings and BLE discovery. Keep those page routes primary. If the fallback modal path is later proven unreachable, remove it in a dedicated cleanup with exact reference/tests rather than assuming it is dead.
-
-If new responsibilities are added, extract by concrete task, not by arbitrary line slices.
+Responsibility-dense but bounded to Shelly setup. If it gains another distinct task,
+extract by task boundary rather than arbitrary line slices.
 
 ### `flows/hardware-setup/shellyRequests.ts`
 
-This service is a dense Shelly RPC boundary. Keep RPC details here/out of screens, but split into cohesive request families if new unrelated RPC responsibilities make it harder to reason about or test.
+Dense Shelly RPC boundary. Keep RPC details out of screens. Split into request families
+only when unrelated RPC responsibilities make the current module hard to reason about.
 
 ### `useHardwareSetupFlow.ts`
 
-Broad by design as a facade. Keep it composition-focused. New transport loops, timers, parsers or runtime ownership should become focused flows/services rather than new inline sections.
+Broad by design as a facade. New transport loops, timers, parsers or runtime ownership
+must become focused flows/services rather than inline facade sections.
 
-## When to refactor
+## When to refactor now
 
-Refactor now when at least one is true:
+Refactor as part of the active task when at least one is true:
 
 - two places own the same state or lifecycle;
 - transport logic leaks into presentation;
 - a screen/page needs the full flow only to reach one subsystem;
 - a quality budget is exceeded;
 - a change requires touching several unrelated branches of one file;
-- stale CSS/test coupling causes repeated regressions.
+- stale CSS/test coupling repeatedly causes regressions;
+- the proposed implementation would create a new god object or catch-all module.
 
-Otherwise prefer the smallest product change and leave stable code alone.
+Otherwise prefer the smallest cohesive product change and leave stable code alone.
