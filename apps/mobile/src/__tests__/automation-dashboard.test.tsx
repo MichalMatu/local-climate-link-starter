@@ -26,6 +26,12 @@ import {
 } from '../flows/hardware-setup/setupDraftStore.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 
+vi.mock('../flows/hardware-setup/useHardwareSetupFlow.js', () => ({
+  useHardwareSetupFlow: () => {
+    throw new Error('Thermometer dashboard must not mount the full hardware setup flow.');
+  }
+}));
+
 const jsonResponse = (payload: unknown) =>
   new Response(JSON.stringify(payload), {
     status: 200,

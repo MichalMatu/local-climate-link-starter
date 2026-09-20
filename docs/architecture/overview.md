@@ -139,7 +139,7 @@ Important packages include:
 - Shelly control/status,
 - Shelly LAN scan,
 - Shelly-side BLE discovery,
-- phone BLE discovery/live readings,
+- sensor setup composition plus phone BLE discovery/live readings,
 - climate automation installation.
 
 `useHardwareSetupFlow` is a facade/composition hook. Do not move subsystem implementations back into it.

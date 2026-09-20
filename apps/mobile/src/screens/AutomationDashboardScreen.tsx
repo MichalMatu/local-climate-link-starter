@@ -35,7 +35,7 @@ import {
   useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { usePlainShellyRuntime } from '../flows/hardware-setup/usePlainShellyRuntime.js';
-import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
+import { useSensorSetupFlow } from '../flows/hardware-setup/usePhoneSensorFlow.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
 import './AutomationDashboardScreen.css';
@@ -351,7 +351,7 @@ const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardPr
   );
 
 const ThermometerDashboardSection = ({ onAdd }: { onAdd(): void }) => {
-  const flow = useHardwareSetupFlow();
+  const flow = useSensorSetupFlow();
   return (
     <SensorSetupPage
       flow={flow}

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import type { HardwareSetupFlow } from './useHardwareSetupFlow.js';
+import type { SensorSetupFlow } from './usePhoneSensorFlow.js';
 
 type SavedSensorLiveScanFlow = Pick<
-  HardwareSetupFlow,
+  SensorSetupFlow,
   | 'restartSavedSensorLiveScan'
   | 'savedSensorLiveScanState'
   | 'startSavedSensorLiveScan'

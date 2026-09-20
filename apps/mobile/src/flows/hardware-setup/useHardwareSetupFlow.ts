@@ -14,15 +14,13 @@ import {
   type ShellyAutomationScriptState
 } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
-import { useHardwareSetupReadingsStore } from './sensorReadingsStore.js';
 import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {
   deriveClimateRuleState,
-  deriveSensorInputState,
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
 import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
-import { usePhoneSensorFlow } from './usePhoneSensorFlow.js';
+import { useSensorSetupFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
 import {
@@ -84,33 +82,9 @@ export const useHardwareSetupFlow = () => {
   const upsertShellyDevice = useHardwareSetupDraftStore(
     (state) => state.upsertShellyDevice
   );
-  const sensorMacInput = useHardwareSetupDraftStore((state) => state.sensorMacInput);
-  const setSensorMacInput = useHardwareSetupDraftStore(
-    (state) => state.setSensorMacInput
-  );
-  const sensorProfileInput = useHardwareSetupDraftStore(
-    (state) => state.sensorProfileInput
-  );
-  const setSensorProfileInput = useHardwareSetupDraftStore(
-    (state) => state.setSensorProfileInput
-  );
-  const sensorNameInput = useHardwareSetupDraftStore((state) => state.sensorNameInput);
-  const setSensorNameInput = useHardwareSetupDraftStore(
-    (state) => state.setSensorNameInput
-  );
-  const sensorDevices = useHardwareSetupDraftStore((state) => state.sensorDevices);
   const selectedSensorId = useHardwareSetupDraftStore((state) => state.selectedSensorId);
   const selectSensorDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.selectSensorDevice
-  );
-  const setSensorDeviceName = useHardwareSetupDraftStore(
-    (state) => state.setSensorDeviceName
-  );
-  const removeSensorDeviceDraft = useHardwareSetupDraftStore(
-    (state) => state.removeSensorDevice
-  );
-  const upsertSensorDevice = useHardwareSetupDraftStore(
-    (state) => state.upsertSensorDevice
   );
   const rulePreset = useHardwareSetupDraftStore((state) => state.rulePreset);
   const setRulePreset = useHardwareSetupDraftStore((state) => state.setRulePreset);
@@ -150,13 +124,9 @@ export const useHardwareSetupFlow = () => {
   const setMaxOnHoursInput = useHardwareSetupDraftStore(
     (state) => state.setMaxOnHoursInput
   );
-  const sensorSamplesById = useHardwareSetupReadingsStore(
-    (state) => state.samplesBySensorId
-  );
-  const clearSensorReadings = useHardwareSetupReadingsStore(
-    (state) => state.clearSensorReadings
-  );
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
+  const { upsertSensorDevice, ...sensorSetupFlow } = useSensorSetupFlow();
+  const { sensorDevices } = sensorSetupFlow;
 
   const {
     shellyControlStates,
@@ -180,19 +150,6 @@ export const useHardwareSetupFlow = () => {
     cleanupBleDiscovery,
     resetBleDiscovery
   } = useShellyBleDiscoveryFlow();
-  const {
-    phoneBleScanCandidates,
-    phoneBleScanMutation,
-    startPhoneBleScan,
-    stopPhoneBleScan,
-    resetPhoneBleScan,
-    savedSensorLiveScanState,
-    startSavedSensorLiveScan,
-    restartSavedSensorLiveScan,
-    stopSavedSensorLiveScan,
-    addDiscoveredSensor,
-    setPvvxTimeMutation
-  } = usePhoneSensorFlow(sensorDevices);
   const {
     shellyScanStartInput,
     setShellyScanStartInput,
@@ -226,22 +183,6 @@ export const useHardwareSetupFlow = () => {
     () => deriveShellyInputState({ shellyNameInput, shellyUrlInput }),
     [shellyNameInput, shellyUrlInput]
   );
-
-  const sensorInputState = useMemo(
-    () =>
-      deriveSensorInputState({
-        sensorMacInput,
-        sensorNameInput,
-        sensorProfileInput
-      }),
-    [sensorMacInput, sensorNameInput, sensorProfileInput]
-  );
-
-  const addSensorDraft = () => {
-    if (sensorInputState.ok) {
-      upsertSensorDevice(sensorInputState.device);
-    }
-  };
 
   const { advancedSettingsValidation, configState, isThresholdValid, isVpdAssistValid } =
     useMemo(
@@ -417,8 +358,7 @@ export const useHardwareSetupFlow = () => {
   };
 
   const removeSensorDevice = (id: string) => {
-    removeSensorDeviceDraft(id);
-    clearSensorReadings(id);
+    sensorSetupFlow.removeSensorDevice(id);
     resetInstallState();
   };
 
@@ -435,20 +375,10 @@ export const useHardwareSetupFlow = () => {
     setShellyDeviceName,
     upsertShellyDevice,
     removeShellyDevice,
-    sensorProfileInput,
-    setSensorProfileInput,
-    sensorMacInput,
-    setSensorMacInput,
-    sensorNameInput,
-    setSensorNameInput,
-    sensorDevices,
-    sensorSamplesById,
+    ...sensorSetupFlow,
     selectedSensorId,
     selectedSensor,
-    sensorInputState,
-    addSensorDraft,
     selectSensorDevice,
-    setSensorDeviceName,
     removeSensorDevice,
     rulePreset,
     setRulePreset: (value: RulePresetId) => setRulePreset(value),
@@ -504,17 +434,6 @@ export const useHardwareSetupFlow = () => {
     stopBleDiscovery,
     cleanupBleDiscovery,
     resetBleDiscovery,
-    phoneBleScanCandidates,
-    phoneBleScanMutation,
-    startPhoneBleScan,
-    stopPhoneBleScan,
-    resetPhoneBleScan,
-    savedSensorLiveScanState,
-    startSavedSensorLiveScan,
-    restartSavedSensorLiveScan,
-    stopSavedSensorLiveScan,
-    addDiscoveredSensor,
-    setPvvxTimeMutation,
     installMutation,
     safeRelayTestMutation
   };

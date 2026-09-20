@@ -20,7 +20,7 @@ export const mobileProductionBaselines = Object.freeze({
   'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 674,
   'apps/mobile/src/screens/AutomationDashboardScreen.tsx': 600,
   'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 558,
-  'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts': 524,
+  'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts': 443,
   'apps/mobile/src/screens/InstallationDetailScreen.tsx': 458,
   'apps/mobile/src/flows/time-automation/runtime.ts': 447,
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 416,

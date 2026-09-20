@@ -1,4 +1,5 @@
 import type { HardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
+import type { SensorSetupFlow as SensorSubsystemFlow } from '../../flows/hardware-setup/usePhoneSensorFlow.js';
 
 export type ShellySetupFlow = Pick<
   HardwareSetupFlow,
@@ -44,7 +45,7 @@ export type ShellySetupFlow = Pick<
 >;
 
 export type SensorSetupFlow = Pick<
-  HardwareSetupFlow,
+  SensorSubsystemFlow,
   | 'addDiscoveredSensor'
   | 'addSensorDraft'
   | 'phoneBleScanCandidates'

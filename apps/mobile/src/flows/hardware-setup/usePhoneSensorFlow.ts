@@ -19,6 +19,7 @@ import {
   useHardwareSetupReadingsStore
 } from './sensorReadingsStore.js';
 import { useHardwareSetupDraftStore, type SensorDraftDevice } from './setupDraftStore.js';
+import { deriveSensorInputState } from './ruleConfigDerivation.js';
 import { normalizeRuntimeAddress } from './validation.js';
 
 type SavedSensorLiveScanState = {
@@ -265,3 +266,68 @@ export const usePhoneSensorFlow = (sensorDevices: readonly SensorDraftDevice[]) 
     setPvvxTimeMutation
   };
 };
+
+export const useSensorSetupFlow = () => {
+  const sensorProfileInput = useHardwareSetupDraftStore(
+    (state) => state.sensorProfileInput
+  );
+  const setSensorProfileInput = useHardwareSetupDraftStore(
+    (state) => state.setSensorProfileInput
+  );
+  const sensorMacInput = useHardwareSetupDraftStore((state) => state.sensorMacInput);
+  const setSensorMacInput = useHardwareSetupDraftStore(
+    (state) => state.setSensorMacInput
+  );
+  const sensorNameInput = useHardwareSetupDraftStore((state) => state.sensorNameInput);
+  const setSensorNameInput = useHardwareSetupDraftStore(
+    (state) => state.setSensorNameInput
+  );
+  const sensorDevices = useHardwareSetupDraftStore((state) => state.sensorDevices);
+  const setSensorDeviceName = useHardwareSetupDraftStore(
+    (state) => state.setSensorDeviceName
+  );
+  const removeSensorDeviceDraft = useHardwareSetupDraftStore(
+    (state) => state.removeSensorDevice
+  );
+  const upsertSensorDevice = useHardwareSetupDraftStore(
+    (state) => state.upsertSensorDevice
+  );
+  const sensorSamplesById = useHardwareSetupReadingsStore(
+    (state) => state.samplesBySensorId
+  );
+  const clearSensorReadings = useHardwareSetupReadingsStore(
+    (state) => state.clearSensorReadings
+  );
+  const sensorInputState = useMemo(
+    () => deriveSensorInputState({ sensorMacInput, sensorNameInput, sensorProfileInput }),
+    [sensorMacInput, sensorNameInput, sensorProfileInput]
+  );
+  const phoneSensorFlow = usePhoneSensorFlow(sensorDevices);
+
+  const addSensorDraft = () => {
+    if (sensorInputState.ok) upsertSensorDevice(sensorInputState.device);
+  };
+  const removeSensorDevice = (id: string) => {
+    removeSensorDeviceDraft(id);
+    clearSensorReadings(id);
+  };
+
+  return {
+    sensorProfileInput,
+    setSensorProfileInput,
+    sensorMacInput,
+    setSensorMacInput,
+    sensorNameInput,
+    setSensorNameInput,
+    sensorDevices,
+    sensorSamplesById,
+    sensorInputState,
+    addSensorDraft,
+    setSensorDeviceName,
+    removeSensorDevice,
+    upsertSensorDevice,
+    ...phoneSensorFlow
+  };
+};
+
+export type SensorSetupFlow = ReturnType<typeof useSensorSetupFlow>;
