@@ -1,4 +1,4 @@
-# Next chat handoff — clean main + Phase 2 feature boundaries
+# Next chat handoff — clean main + Phase 3 architecture tooling closed
 
 Updated: 2026-09-20
 
@@ -30,7 +30,7 @@ There is no product work branch to resume. Fresh `main` is the source of truth.
 
 ## Development contracts
 
-The repository now uses hierarchical instructions:
+Hierarchical instructions:
 
 ```text
 AGENTS.md
@@ -41,7 +41,7 @@ packages/ui/AGENTS.md
 scripts/quality/AGENTS.md
 ```
 
-Before implementation, always identify:
+Before implementation identify:
 
 ```text
 product owner
@@ -52,53 +52,40 @@ final file layout
 test owner
 ```
 
-Do not knowingly implement into the wrong owner and schedule a cleanup refactor later.
-File size is an alarm, not a refactor target.
+Do not knowingly implement into the wrong owner and schedule cleanup later. File size is
+an alarm; responsibility is the boundary.
 
-## Phase 0–2 tooling state
+## Phase 0–3 architecture tooling
 
-Phase 0 made the agent contracts hierarchical and introduced the preimplementation
-ownership gate.
+Phase 0 introduced hierarchical agent contracts and the preimplementation ownership gate.
 
-Phase 1 made repository/package/layer boundaries mechanical in
+Phase 1 made repository/package/layer boundaries executable in
 `scripts/quality/repository-gate.mjs`, including package dependency direction, package to
-app isolation, known hotspot budgets and the default 350-line production-module ceiling.
+app isolation and production-module growth protection.
 
-Phase 2 adds `scripts/quality/feature-boundary-gate.mjs`. `pnpm quality:repo` now runs
-both repository and feature gates.
+Phase 2 added `scripts/quality/feature-boundary-gate.mjs` and feature-first boundaries.
 
-The feature gate enforces:
+Phase 3 closes the tooling loop:
 
-- the allowed `apps/mobile/src` architectural roots;
-- a freeze on new top-level production modules in legacy `screens/`, `flows` and
-  `components`;
-- new cohesive product capabilities under `apps/mobile/src/features/<feature>`;
-- one narrow public `index.ts` for every feature;
-- no wildcard feature barrels;
-- private feature internals and no cross-feature deep imports;
-- no feature-to-feature dependencies by default;
-- any reviewed feature dependency must still use the target public API;
-- no dependency from a feature back to legacy `src/screens`, `src/routes` or `src/flows`;
-- workspace `@lcl/*` subpath imports must match explicit `package.json#exports` entries;
-- presentation code cannot directly own raw `fetch`, Capacitor BLE or durable browser /
-  Capacitor Preferences storage;
-- catch-all feature/module names such as `common`, `shared`, `utils`, `helpers`, `manager`
-  and `service` are rejected;
-- global stylesheet growth is bounded so feature CSS does not leak back into a shared
-  dumping ground.
+- mutable reviewed baselines live in `scripts/quality/architecture-baseline.mjs`;
+- known oversized production hotspots are frozen at their exact current parser counts;
+- package DAG and reviewed feature dependency exceptions are centralized there;
+- the complete current production path set under legacy `screens/`, `flows` and
+  `components` is frozen recursively, so nested-directory bypasses are rejected;
+- `pnpm quality:selftest` runs deterministic temporary-fixture regression tests for both
+  repository and feature gates;
+- `pnpm quality:repo` runs repository gate, feature gate and the self-test suite;
+- `scripts/quality/AGENTS.md` is itself protected by `repository-gate.mjs`;
+- no product behavior or product code was refactored by Phase 3.
 
-The current style guardrails are:
+Current exact shared-style baselines:
 
 ```text
 apps/mobile/src/theme/theme.css   3334 lines by gate parser
-packages/ui/src/styles.css         750 line guardrail
+packages/ui/src/styles.css         672 lines by gate parser
 ```
 
-The theme number is a baseline freeze, not spare capacity. The gate uses
-`split('\n').length`, which is one greater than `wc -l` for the current newline-terminated
-file.
-
-No product code was migrated or refactored as part of Phase 2.
+These are accepted baselines, not spare capacity.
 
 ## Product model that must remain stable
 
@@ -110,7 +97,7 @@ Accepted invariants:
 
 - bottom navigation is **Plugs | Thermometers | Settings**;
 - `AppShell` owns persistent bottom navigation and the global toast host;
-- page content scrolls independently of that navigation;
+- page content scrolls independently;
 - automation setup starts from a concrete Plug;
 - Time is a Plug automation type, not a global dashboard section;
 - `InstalledAutomation` remains the durable installed-automation entity;
@@ -123,7 +110,7 @@ Accepted invariants:
 
 Do not mass-migrate the current technical-layer source tree.
 
-For a new cohesive product capability use:
+New cohesive product capabilities use:
 
 ```text
 apps/mobile/src/features/<feature>/
@@ -135,19 +122,27 @@ apps/mobile/src/features/<feature>/
   data/
 ```
 
-Create only the directories actually needed.
+Create only directories actually needed. External callers use the feature `index.ts`;
+internal files remain private.
 
-External callers use the feature `index.ts`; internal files stay private. Shared domain
-behavior should normally move to a package rather than create feature coupling.
+Existing legacy files can remain where they are. A bug fix or cohesive change does not
+require refactoring the whole file. But new product modules must not be added anywhere
+under legacy `screens/`, `flows` or `components`; a new cohesive capability belongs under
+`features/<feature>`.
 
-When materially changing an existing capability, move only the touched cohesive slice if
-that creates clearer ownership and can remain behavior-preserving. Otherwise leave stable
-legacy code alone.
+Shared domain behavior should normally move to a package instead of creating feature
+coupling.
 
-## Existing hotspot policy
+## Baseline and hotspot policy
 
-Do not start a broad refactor merely because these files are large. Current important
-watchpoints include:
+The default production TS/TSX module ceiling remains 350 lines. Larger existing files are
+listed with exact reviewed counts in `scripts/quality/architecture-baseline.mjs`.
+
+A protected old file may remain large. Do not raise its baseline merely because a new
+change is easiest there. If the file shrinks, lower the baseline when practical. If a new
+responsibility would make it grow, create/extract the correct owner instead.
+
+Important watchpoints remain:
 
 ```text
 apps/mobile/src/flows/hardware-setup/shellyRequests.ts
@@ -159,18 +154,12 @@ packages/script-generator/src/shelly/generate.ts
 apps/mobile/src/theme/theme.css
 ```
 
-Exact budgets and responsibility notes are in
-`docs/architecture/refactor-boundaries.md`.
-
-If a touched hotspot needs a new unrelated responsibility, extract the responsibility
-instead of raising the budget.
-
 ## Stable UX/shell boundaries
 
 Do not restart a broad UI consistency sweep without a concrete regression or product
 requirement.
 
-The global toast contract remains:
+The toast/navigation contract remains:
 
 ```text
 AppShell
@@ -182,9 +171,6 @@ AppShell
 Screens use `AppToastViewport`; they do not render raw `ToastViewport` or own
 screen-specific toast offsets.
 
-The completed standalone Add Plug/Add Thermometer UX remains closed unless a real
-regression is found.
-
 ## Validation workflow
 
 Normal workflow:
@@ -194,9 +180,19 @@ fresh main + daemon
 -> preimplementation ownership gate
 -> smallest cohesive implementation
 -> focused checks
+-> pnpm quality:repo when architecture boundaries are touched
 -> exactly one final full pnpm check
 -> commit/push
 -> emulator/physical-device smoke only when native/device behavior needs it
+```
+
+Useful quality commands:
+
+```text
+pnpm quality:ux
+pnpm quality:selftest
+pnpm quality:repo
+pnpm check
 ```
 
 Canonical geometry-sensitive viewports:
@@ -212,17 +208,14 @@ Canonical geometry-sensitive viewports:
 Use Local Agent for local command execution, builds/tests, native or hardware work. Do not
 run another coding agent through it.
 
-The local development Shelly relay may be toggled ON/OFF during relevant smoke tests under
-the standing authorization in root `AGENTS.md`; leave the final state explicit.
-
 ## Next work
 
-Phase 0–2 tooling/architecture hardening is complete. Do **not** follow it with a broad
-code refactor.
+Phase 0–3 architecture/tooling hardening is complete. **Do not invent another broad
+hardening or refactor phase.**
 
-The next concrete product feature or regression should exercise these boundaries from day
-one. New feature code goes to the correct owner immediately; existing code moves only
-when the active slice gains a real ownership benefit.
+The next work should be a concrete product feature or regression. Exercise the existing
+boundaries from day one and improve tooling only when real product work exposes a specific
+hole.
 
 Reasonable product categories remain:
 
@@ -240,10 +233,11 @@ Current:
 - `apps/mobile/src/features/AGENTS.md` — feature isolation/public API contract;
 - `packages/AGENTS.md` — package/domain contract;
 - `packages/ui/AGENTS.md` — shared UI contract;
-- `scripts/quality/AGENTS.md` — executable quality-tool ownership contract;
+- `scripts/quality/AGENTS.md` — quality-tool ownership/self-test contract;
+- `scripts/quality/architecture-baseline.mjs` — executable reviewed baselines;
 - this file — continuation state;
 - `docs/architecture/overview.md` — product/runtime architecture;
-- `docs/architecture/refactor-boundaries.md` — ownership, budgets and refactor policy;
+- `docs/architecture/refactor-boundaries.md` — ownership, baselines and refactor policy;
 - `docs/architecture/feature-boundaries.md` — executable feature structure contract;
 - `docs/product/next-functional-steps.md` — product roadmap.
 

@@ -21,6 +21,7 @@
     "prepush": "pnpm check",
     "prepare": "husky",
     "quality:ux": "node scripts/quality/ux-gate.mjs",
+    "quality:selftest": "node scripts/quality/gate-selftest.mjs",
     "e2e:responsive": "playwright test -c apps/mobile/playwright.config.ts",
     "tokens:build": "pnpm --filter @lcl/design-tokens build",
     "check:landing": "pnpm --filter @lcl/landing check",
@@ -37,7 +38,7 @@
     "sandbox:full": "bash tools/sandbox/run-sandbox-check.sh full",
     "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build",
     "check:full": "pnpm check && pnpm e2e:responsive",
-    "quality:repo": "node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs"
+    "quality:repo": "node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [

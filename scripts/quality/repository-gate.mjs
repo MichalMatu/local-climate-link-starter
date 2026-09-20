@@ -1,6 +1,17 @@
 import { readFile, readdir } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const repoRoot = new URL('../../', import.meta.url);
+import {
+  allowedPackageDependencies as allowedPackageDependencyBaseline,
+  defaultProductionModuleMaxLines,
+  mobileProductionBaselines,
+  packageProductionBaselines
+} from './architecture-baseline.mjs';
+
+const repoRoot = process.env.LCL_QUALITY_ROOT
+  ? pathToFileURL(`${resolve(process.env.LCL_QUALITY_ROOT)}${sep}`)
+  : new URL('../../', import.meta.url);
 const failures = [];
 
 const readRepoFile = async (path) => readFile(new URL(path, repoRoot), 'utf8');
@@ -56,6 +67,10 @@ const checkAgentContractStructure = async () => {
     'packages/ui/AGENTS.md': {
       maxLines: 140,
       markers: ['@lcl/ui', 'product-agnostic']
+    },
+    'scripts/quality/AGENTS.md': {
+      maxLines: 180,
+      markers: ['Gate design', 'Quality self-tests']
     }
   };
 
@@ -161,16 +176,12 @@ const checkWorkspaceDependencyCycles = async () => {
     graph.set(name, dependencies);
   }
 
-  const allowedPackageDependencies = new Map([
-    ['@lcl/automation-core', new Set()],
-    ['@lcl/ble-core', new Set(['@lcl/device-profiles'])],
-    ['@lcl/design-tokens', new Set()],
-    ['@lcl/device-profiles', new Set()],
-    ['@lcl/diagnostics', new Set()],
-    ['@lcl/script-generator', new Set(['@lcl/automation-core', '@lcl/device-profiles'])],
-    ['@lcl/shelly-client', new Set(['@lcl/diagnostics'])],
-    ['@lcl/ui', new Set(['@lcl/design-tokens'])]
-  ]);
+  const allowedPackageDependencies = new Map(
+    Object.entries(allowedPackageDependencyBaseline).map(([name, dependencies]) => [
+      name,
+      new Set(dependencies)
+    ])
+  );
 
   for (const [name, allowed] of allowedPackageDependencies) {
     const packageInfo = packages.get(name);
@@ -321,19 +332,7 @@ const checkDomainPackageBoundaries = async () => {
 };
 
 const checkProductionFileGrowth = async () => {
-  const mobileOverrides = new Map([
-    ['apps/mobile/src/flows/hardware-setup/shellyRequests.ts', 750],
-    ['apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx', 700],
-    ['apps/mobile/src/screens/AutomationDashboardScreen.tsx', 625],
-    ['apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx', 675],
-    ['apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts', 650],
-    ['apps/mobile/src/screens/InstallationDetailScreen.tsx', 500],
-    ['apps/mobile/src/flows/time-automation/runtime.ts', 475],
-    ['apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx', 650],
-    ['apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx', 450],
-    ['apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx', 400],
-    ['apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx', 400]
-  ]);
+  const mobileOverrides = new Map(Object.entries(mobileProductionBaselines));
   const mobileFiles = (await listRepoFiles('apps/mobile/src')).filter(
     (path) =>
       isTypeScriptSource(path) &&
@@ -343,7 +342,7 @@ const checkProductionFileGrowth = async () => {
 
   for (const path of mobileFiles) {
     const lines = lineCount(await readRepoFile(path));
-    const maxLines = mobileOverrides.get(path) ?? 350;
+    const maxLines = mobileOverrides.get(path) ?? defaultProductionModuleMaxLines;
     if (lines > maxLines) {
       addFailure(
         path,
@@ -352,17 +351,14 @@ const checkProductionFileGrowth = async () => {
     }
   }
 
-  const packageOverrides = new Map([
-    ['packages/shelly-client/src/scripts/install.ts', 650],
-    ['packages/script-generator/src/shelly/generate.ts', 600]
-  ]);
+  const packageOverrides = new Map(Object.entries(packageProductionBaselines));
   const packageFiles = (await listRepoFiles('packages')).filter(
     (path) => path.includes('/src/') && isTypeScriptSource(path) && !isTestSource(path)
   );
 
   for (const path of packageFiles) {
     const lines = lineCount(await readRepoFile(path));
-    const maxLines = packageOverrides.get(path) ?? 350;
+    const maxLines = packageOverrides.get(path) ?? defaultProductionModuleMaxLines;
     if (lines > maxLines) {
       addFailure(
         path,
@@ -376,7 +372,7 @@ const checkHardwareSetupArchitecture = async () => {
   const orchestratorPath = 'apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts';
   const orchestrator = await readRepoFile(orchestratorPath);
   const orchestratorLines = orchestrator.split('\n').length;
-  const orchestratorBudget = 650;
+  const orchestratorBudget = mobileProductionBaselines[orchestratorPath];
   if (orchestratorLines > orchestratorBudget) {
     addFailure(
       orchestratorPath,
@@ -432,9 +428,18 @@ const checkHardwareSetupArchitecture = async () => {
   }
 
   const compositionBudgets = {
-    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 700,
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 650,
-    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 675,
+    'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx':
+      mobileProductionBaselines[
+        'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx'
+      ],
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx':
+      mobileProductionBaselines[
+        'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
+      ],
+    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx':
+      mobileProductionBaselines[
+        'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx'
+      ],
     'apps/mobile/src/screens/hardware-setup/pages/useShellySetupFeedback.ts': 200,
     'apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts': 200,
     'apps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts': 180,

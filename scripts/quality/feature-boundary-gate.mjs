@@ -1,7 +1,16 @@
 import { access, readFile, readdir } from 'node:fs/promises';
-import { posix as path } from 'node:path';
+import { posix as path, resolve, sep } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const repoRoot = new URL('../../', import.meta.url);
+import {
+  allowedFeatureDependencies as allowedFeatureDependencyBaseline,
+  legacyProductionPaths as legacyProductionPathBaseline,
+  sharedStylesheetBaselines
+} from './architecture-baseline.mjs';
+
+const repoRoot = process.env.LCL_QUALITY_ROOT
+  ? pathToFileURL(`${resolve(process.env.LCL_QUALITY_ROOT)}${sep}`)
+  : new URL('../../', import.meta.url);
 const failures = [];
 
 const readRepoFile = async (repoPath) => readFile(new URL(repoPath, repoRoot), 'utf8');
@@ -118,53 +127,24 @@ const checkMobileRootShape = async () => {
   }
 };
 
-const legacyTopLevelModules = new Map([
-  [
-    'apps/mobile/src/screens',
-    new Set([
-      'AutomationDashboardScreen.tsx',
-      'InstallationDetailScreen.tsx',
-      'InstallationDiagnosticsScreen.tsx',
-      'InstallationScriptScreen.tsx',
-      'PlugBleDiscoveryScreen.tsx',
-      'PlugSettingsScreen.tsx',
-      'SetupIntentScreen.tsx',
-      'ShellyLedSettingsCard.tsx',
-      'TimeAutomationCard.tsx',
-      'TimeInstallationDetail.tsx'
-    ])
-  ],
-  ['apps/mobile/src/flows', new Set(['setup-intent.ts'])],
-  [
-    'apps/mobile/src/components',
-    new Set([
-      'AppBottomNavigation.tsx',
-      'AppPageBack.tsx',
-      'AppShell.tsx',
-      'AppToastViewport.tsx',
-      'EditablePlugName.tsx',
-      'RefreshIconButton.tsx'
-    ])
-  ]
-]);
+const legacyProductionPaths = new Map(
+  Object.entries(legacyProductionPathBaseline).map(([directory, files]) => [
+    directory,
+    new Set(files)
+  ])
+);
 
-const checkLegacyTopLevelFreeze = async () => {
-  for (const [directory, allowedFiles] of legacyTopLevelModules) {
-    const entries = await readdir(new URL(`${directory}/`, repoRoot), {
-      withFileTypes: true
-    });
-    for (const entry of entries) {
-      if (
-        !entry.isFile() ||
-        !isTypeScriptSource(entry.name) ||
-        isTestSource(entry.name)
-      ) {
-        continue;
-      }
-      if (!allowedFiles.has(entry.name)) {
+const checkLegacyProductionFreeze = async () => {
+  for (const [directory, allowedFiles] of legacyProductionPaths) {
+    const files = (await listRepoFiles(directory)).filter(
+      (repoPath) => isTypeScriptSource(repoPath) && !isTestSource(repoPath)
+    );
+    for (const repoPath of files) {
+      const relativePath = repoPath.slice(directory.length + 1);
+      if (!allowedFiles.has(relativePath)) {
         addFailure(
-          `${directory}/${entry.name}`,
-          'new top-level product modules are closed in legacy screens/flows/components; put the cohesive capability under features/<feature> or explicitly revise the architecture boundary'
+          repoPath,
+          'new product modules are closed in legacy screens/flows/components; put the cohesive capability under features/<feature> or explicitly revise the architecture boundary'
         );
       }
     }
@@ -301,7 +281,12 @@ const isFeaturePublicTarget = (resolvedTarget, featureName) => {
   return resolvedTarget === featureRoot || resolvedTarget === `${featureRoot}/index`;
 };
 
-const allowedFeatureDependencies = new Map();
+const allowedFeatureDependencies = new Map(
+  Object.entries(allowedFeatureDependencyBaseline).map(([feature, dependencies]) => [
+    feature,
+    new Set(dependencies)
+  ])
+);
 
 const checkFeatureImportBoundaries = async () => {
   const mobileFiles = (await listRepoFiles('apps/mobile/src')).filter(isTypeScriptSource);
@@ -386,10 +371,7 @@ const checkPresentationSideEffectBoundaries = async () => {
 };
 
 const checkSharedStylesheetBudgets = async () => {
-  const budgets = new Map([
-    ['apps/mobile/src/theme/theme.css', 3334],
-    ['packages/ui/src/styles.css', 750]
-  ]);
+  const budgets = new Map(Object.entries(sharedStylesheetBaselines));
 
   for (const [repoPath, maxLines] of budgets) {
     const lines = lineCount(await readRepoFile(repoPath));
@@ -404,7 +386,7 @@ const checkSharedStylesheetBudgets = async () => {
 
 await checkFeatureAgentContract();
 await checkMobileRootShape();
-await checkLegacyTopLevelFreeze();
+await checkLegacyProductionFreeze();
 await checkWorkspacePackagePublicImports();
 await checkFeatureShape();
 await checkFeatureImportBoundaries();

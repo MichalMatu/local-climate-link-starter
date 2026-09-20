@@ -17,7 +17,7 @@ New cohesive product capabilities belong under:
 apps/mobile/src/features/<feature>/
 ```
 
-Existing code in `screens/`, `flows/` and `components/` remains valid until a touched
+Existing code in `screens/`, `flows` and `components` remains valid until a touched
 product slice has a real ownership reason to move.
 
 ## Feature shape
@@ -61,8 +61,8 @@ feature A -> private file in feature B
 ```
 
 A cross-feature deep import always fails. If a genuine feature-to-feature dependency is
-reviewed and accepted, it must be explicitly added to the feature dependency contract in
-`scripts/quality/feature-boundary-gate.mjs` and must still import only through the target
+reviewed and accepted, add it explicitly to `allowedFeatureDependencies` in
+`scripts/quality/architecture-baseline.mjs`; imports must still go through the target
 feature's `index.ts`.
 
 Shared domain behavior should normally move to an appropriate package instead of creating
@@ -72,9 +72,9 @@ A feature also cannot depend back on the legacy `src/screens`, `src/routes` or `
 layers. During gradual migration, either move the touched cohesive ownership boundary or
 leave the capability in legacy structure until that can be done cleanly.
 
-## Legacy root freeze
+## Legacy production freeze
 
-The current top-level production modules in:
+The complete current production TypeScript path set under:
 
 ```text
 apps/mobile/src/screens
@@ -82,12 +82,14 @@ apps/mobile/src/flows
 apps/mobile/src/components
 ```
 
-are an explicit baseline. New top-level product modules there fail the feature gate.
+is an explicit recursive baseline in `scripts/quality/architecture-baseline.mjs`.
+Existing files and directories may remain, but a new product module anywhere below those
+legacy roots fails the feature gate. This includes attempts to bypass the boundary by
+creating a new nested directory such as `screens/new-feature/...`.
 
-This does not force existing code to move. It prevents the old structure from continuing
-to expand horizontally. A genuinely cross-feature mobile component may be added only by
-an explicit architecture change to the baseline; a new product capability belongs in a
-feature.
+This does not force existing code to move. A genuinely cross-feature mobile component may
+be added only by an explicit architecture decision and baseline update; a new cohesive
+product capability belongs in `features/<feature>`.
 
 ## Package public APIs
 
@@ -123,19 +125,19 @@ package boundary.
 
 Feature-specific CSS should stay with the feature rather than grow the global theme.
 
-The feature gate currently protects these shared stylesheet baselines:
+The feature gate protects exact reviewed shared-style baselines:
 
 ```text
 apps/mobile/src/theme/theme.css   3334 lines by the gate parser
-packages/ui/src/styles.css         750 line guardrail
+packages/ui/src/styles.css         672 lines by the gate parser
 ```
 
-The `theme.css` value is a freeze of the current parser count, not spare capacity. The
-parser uses `split('\n').length`, which is one greater than `wc -l` for the current
+These values freeze the current accepted parser counts; they are not spare capacity. The
+parser uses `split('\n').length`, which is one greater than `wc -l` for a
 newline-terminated file.
 
-If reusable UI styling grows beyond the `@lcl/ui` shared-style budget, split cohesive
-primitive styles instead of increasing a global dumping ground.
+If reusable UI styling needs genuinely new responsibility, split cohesive primitive
+styles instead of increasing a global dumping ground.
 
 ## Executable enforcement
 
@@ -144,19 +146,24 @@ primitive styles instead of increasing a global dumping ground.
 ```text
 scripts/quality/repository-gate.mjs
 scripts/quality/feature-boundary-gate.mjs
+pnpm quality:selftest
 ```
 
 The feature gate enforces:
 
 - mobile root-directory shape;
-- legacy top-level module freeze;
+- recursive legacy production-path freeze;
 - feature naming and public API shape;
 - feature isolation and private internals;
 - reviewed feature dependency direction;
 - package export surfaces;
 - presentation side-effect boundaries;
-- shared stylesheet budgets;
+- exact shared stylesheet baselines;
 - presence of the feature-level `AGENTS.md` contract.
+
+The self-test suite creates temporary fixture roots and proves both legal and rejected
+architectural shapes. It is network- and hardware-independent and leaves product source
+untouched.
 
 Do not weaken a gate because a feature was implemented in the easiest location. Fix the
 ownership or make an explicit architecture decision and document why the contract needs
@@ -164,6 +171,21 @@ to change.
 
 ## Phase 2 baseline
 
-Phase 2 introduced these guardrails without moving or refactoring product code. The
+Phase 2 introduced feature boundaries without moving or refactoring product code. The
 purpose is to make future feature work improve the architecture naturally as touched
 slices evolve.
+
+## Phase 3 closeout
+
+Phase 3 made the tooling itself auditable and regression-tested:
+
+- reviewed mutable baselines moved to `scripts/quality/architecture-baseline.mjs`;
+- broad hotspot allowances were tightened to the exact current parser counts;
+- legacy freeze became recursive, closing nested-directory bypasses;
+- `quality:selftest` became part of every `quality:repo` run;
+- the gate self-test suite covers legal feature shape plus dependency, deep-import,
+  presentation-side-effect, legacy-growth, stylesheet-growth, file-growth and quality
+  contract failures;
+- `scripts/quality/AGENTS.md` is itself protected by `repository-gate.mjs`.
+
+No product behavior or product source ownership was refactored as part of Phase 3.

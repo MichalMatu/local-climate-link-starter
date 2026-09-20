@@ -193,6 +193,7 @@ AGENTS.md                 <= 300 lines
 apps/mobile/AGENTS.md     <= 260 lines
 packages/AGENTS.md        <= 220 lines
 packages/ui/AGENTS.md     <= 140 lines
+scripts/quality/AGENTS.md <= 180 lines
 ```
 
 These limits are intended to stop the root contract from becoming another historical
@@ -217,29 +218,49 @@ The gate also rejects package-source imports from `apps/*`; `@lcl/ui` may not ga
 
 For production TypeScript modules, the default hard growth budget is **350 lines**.
 Tests and locale data are excluded because line count there does not represent runtime
-ownership in the same way. Current larger modules are explicit baseline exceptions rather
-than a new default:
+ownership in the same way. Phase 3 tightened known larger modules to their exact current
+parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
-apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  750
-apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx       700
-apps/mobile/src/screens/AutomationDashboardScreen.tsx                  625
-apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         675
-apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           650
-apps/mobile/src/screens/InstallationDetailScreen.tsx                   500
-apps/mobile/src/flows/time-automation/runtime.ts                       475
-apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       650
-apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 450
-apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 400
-apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         400
-packages/shelly-client/src/scripts/install.ts                          650
-packages/script-generator/src/shelly/generate.ts                       600
+apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  724
+apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx       674
+apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
+apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         583
+apps/mobile/src/flows/hardware-setup/useHardwareSetupFlow.ts           524
+apps/mobile/src/screens/InstallationDetailScreen.tsx                   458
+apps/mobile/src/flows/time-automation/runtime.ts                       447
+apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       416
+apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 411
+apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 353
+apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         353
+packages/shelly-client/src/scripts/install.ts                          630
+packages/script-generator/src/shelly/generate.ts                       565
 ```
 
-Do not increase an exception because a feature was implemented in the easiest existing
-file. If a hotspot needs a new responsibility, create/extract the correct owner. Change a
-budget only when the responsibility is still demonstrably cohesive and the architecture
-contract is updated with the reason.
+These values are accepted debt, not spare capacity. Do not raise a baseline because a
+feature was implemented in the easiest existing file. If a hotspot needs a new
+responsibility, create/extract the correct owner. If a protected hotspot shrinks, lower
+its baseline when practical.
+
+## Phase 3 tooling closeout
+
+Phase 3 closes the architecture-tooling loop without refactoring product behavior:
+
+- reviewed mutable baselines are centralized in
+  `scripts/quality/architecture-baseline.mjs`;
+- the workspace package DAG, exact oversized-module counts, recursive legacy mobile paths,
+  reviewed feature dependencies and shared stylesheet counts have one executable source of
+  truth;
+- legacy `screens/`, `flows/` and `components/` are frozen recursively, so a new
+  product capability cannot bypass `features/<feature>` by nesting deeper in legacy
+  folders;
+- `pnpm quality:selftest` exercises deterministic positive and negative fixture cases for
+  both architecture gates;
+- `pnpm quality:repo` runs repository gate, feature gate and the gate self-test suite;
+- `scripts/quality/AGENTS.md` is itself protected by the repository gate.
+
+The tooling should now be changed only when concrete product work exposes a specific gap.
+Do not invent another broad hardening phase.
 
 ## Current audit baseline
 
