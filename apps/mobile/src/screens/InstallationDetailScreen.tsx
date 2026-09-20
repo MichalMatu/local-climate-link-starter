@@ -1,3 +1,4 @@
+import { ClimateAutomationManagementActions } from '../features/automations/index.js';
 import { isSameShellyDevice } from '../features/plugs/index.js';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { IconCode } from '@tabler/icons-react';
@@ -47,13 +48,15 @@ type InstallationDetailScreenProps = {
   onOpenSettings?: () => void;
   onOpenDiagnostics?: () => void;
   onOpenScript?: () => void;
+  onEdit?: () => void;
 };
 
 export const InstallationDetailScreen = ({
   installationId,
   onBack,
   onOpenDiagnostics,
-  onOpenScript
+  onOpenScript,
+  onEdit
 }: InstallationDetailScreenProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -103,6 +106,7 @@ export const InstallationDetailScreen = ({
       queryClient={queryClient}
       {...(onOpenDiagnostics ? { onOpenDiagnostics } : {})}
       {...(onOpenScript ? { onOpenScript } : {})}
+      {...(onEdit ? { onEdit } : {})}
     />
   );
 };
@@ -118,6 +122,7 @@ type InstalledAutomationDetailProps = {
   onOpenSettings?: () => void;
   onOpenDiagnostics?: () => void;
   onOpenScript?: () => void;
+  onEdit?: () => void;
 };
 
 const InstalledAutomationDetail = ({
@@ -128,7 +133,8 @@ const InstalledAutomationDetail = ({
   toasts,
   queryClient,
   onOpenDiagnostics,
-  onOpenScript
+  onOpenScript,
+  onEdit
 }: InstalledAutomationDetailProps) => {
   const { locale, t } = useTranslation();
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
@@ -394,25 +400,15 @@ const InstalledAutomationDetail = ({
           </dl>
         </article>
 
-        <article className="automation-card installation-detail-management">
-          <div className="installation-detail-actions installation-detail-management__actions">
-            <button
-              className="secondary-action"
-              type="button"
-              onClick={() => onOpenDiagnostics?.()}
-            >
-              {t('common.diagnostics')}
-            </button>
-            <button
-              className="secondary-action secondary-action--danger"
-              type="button"
-              disabled={deleteMutation.isPending}
-              onClick={() => setDeleteOpen(true)}
-            >
-              {deleteCopy.action}
-            </button>
-          </div>
-        </article>
+        <ClimateAutomationManagementActions
+          editLabel={t('detail.edit')}
+          diagnosticsLabel={t('common.diagnostics')}
+          deleteLabel={deleteCopy.action}
+          deletePending={deleteMutation.isPending}
+          onEdit={onEdit}
+          onDiagnostics={onOpenDiagnostics}
+          onDelete={() => setDeleteOpen(true)}
+        />
 
         <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
       </section>

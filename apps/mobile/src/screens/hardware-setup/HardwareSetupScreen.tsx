@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
-import type { AppNavigationKind } from '../../components/AppBottomNavigation.js';
 import { AppPageBack } from '../../components/AppPageBack.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import {
@@ -8,103 +7,33 @@ import {
   rulePresetsForSetupIntent,
   type SetupIntent
 } from '../../flows/setup-intent.js';
+import {
+  availableTabsForIntent,
+  currentTabFromHash,
+  setHashTab,
+  type HardwareTabId
+} from '../../routes/hardwareSetupTabNavigation.js';
 import { RuleSetupPage } from './pages/RuleSetupPage.js';
 import { SensorSetupPage } from './pages/SensorSetupPage.js';
 import { ShellySetupPage } from './pages/ShellySetupPage.js';
 import { TimeScheduleSetupPage } from './pages/TimeScheduleSetupPage.js';
 
-const CLIMATE_HARDWARE_TABS = [
-  {
-    id: 'shelly',
-    labelKey: 'hardware.nav.shelly',
-    titleKey: 'hardware.nav.shellyTitle'
-  },
-  {
-    id: 'sensor',
-    labelKey: 'hardware.nav.sensor',
-    titleKey: 'hardware.nav.sensorTitle'
-  },
-  {
-    id: 'rule',
-    labelKey: 'hardware.nav.rule',
-    titleKey: 'hardware.nav.ruleTitle'
-  }
-] as const;
-
-const PLUG_ADD_HARDWARE_TABS = [CLIMATE_HARDWARE_TABS[0]] as const;
-const SENSOR_ADD_HARDWARE_TABS = [CLIMATE_HARDWARE_TABS[1]] as const;
-
-const TIME_HARDWARE_TABS = [
-  {
-    id: 'shelly',
-    labelKey: 'hardware.nav.shelly',
-    titleKey: 'hardware.nav.shellyTitle'
-  },
-  {
-    id: 'schedule',
-    labelKey: 'time.nav.schedule',
-    titleKey: 'time.nav.scheduleTitle'
-  }
-] as const;
-
-type PrimaryHardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
-type HardwareTabId = PrimaryHardwareTabId;
-type SensorAddMode = 'manual' | 'phone-scan';
-type LocalAddPage = 'plug' | 'sensor' | null;
 type LocalShellyPage =
   | { kind: 'settings'; deviceId: string }
   | { kind: 'ble'; deviceId: string; returnTo: 'shelly' | 'settings' }
   | null;
 
-const availableTabsForIntent = (
-  setupIntent?: SetupIntent,
-  fixedShellyId?: string,
-  plugAddOnly = false,
-  sensorAddOnly = false
-) => {
-  if (plugAddOnly) return PLUG_ADD_HARDWARE_TABS;
-  if (sensorAddOnly) return SENSOR_ADD_HARDWARE_TABS;
-  if (setupIntent === 'time') {
-    return fixedShellyId
-      ? TIME_HARDWARE_TABS.filter((tab) => tab.id === 'schedule')
-      : TIME_HARDWARE_TABS;
-  }
-  return fixedShellyId
-    ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id === 'rule')
-    : CLIMATE_HARDWARE_TABS;
-};
-
-const currentTabFromHash = (availableTabs: readonly { id: string }[]): HardwareTabId => {
-  if (typeof window === 'undefined') {
-    return (availableTabs[0]?.id as HardwareTabId | undefined) ?? 'shelly';
-  }
-
-  const hashValue = window.location.hash.replace(/^#/, '');
-  return availableTabs.some((tab) => tab.id === hashValue)
-    ? (hashValue as PrimaryHardwareTabId)
-    : ((availableTabs[0]?.id as PrimaryHardwareTabId | undefined) ?? 'shelly');
-};
-
-const setHashTab = (tabId: HardwareTabId) => {
-  if (typeof window === 'undefined') return;
-  const url = new URL(window.location.href);
-  url.hash = tabId;
-  window.history.replaceState(null, '', url);
-};
-
 type HardwareSetupScreenProps = {
   setupIntent?: SetupIntent;
-  navigationKind?: AppNavigationKind;
   onBackToIntent?: () => void;
-  onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
   onSetupComplete?: () => void;
   onOpenPlugAdd?: () => void;
-  onOpenSensorAdd?: (mode: SensorAddMode) => void;
+  onOpenSensorAdd?: (mode: 'manual' | 'phone-scan') => void;
   fixedShellyId?: string;
+  editInstallationId?: string;
   plugAddOnly?: boolean;
   sensorAddOnly?: boolean;
-  sensorAddMode?: SensorAddMode;
+  sensorAddMode?: 'manual' | 'phone-scan';
 };
 
 export const HardwareSetupScreen = ({
@@ -114,12 +43,13 @@ export const HardwareSetupScreen = ({
   onOpenPlugAdd,
   onOpenSensorAdd,
   fixedShellyId,
+  editInstallationId,
   plugAddOnly = false,
   sensorAddOnly = false,
   sensorAddMode = 'phone-scan'
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
-  const flow = useHardwareSetupFlow();
+  const flow = useHardwareSetupFlow(editInstallationId);
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
     () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly, sensorAddOnly),
@@ -128,9 +58,11 @@ export const HardwareSetupScreen = ({
   const [activeTab, setActiveTab] = useState<HardwareTabId>(() =>
     currentTabFromHash(availableTabs)
   );
-  const [localAddPage, setLocalAddPage] = useState<LocalAddPage>(null);
+  const [localAddPage, setLocalAddPage] = useState<'plug' | 'sensor' | null>(null);
   const [localShellyPage, setLocalShellyPage] = useState<LocalShellyPage>(null);
-  const [localSensorAddMode, setLocalSensorAddMode] = useState<SensorAddMode>('manual');
+  const [localSensorAddMode, setLocalSensorAddMode] = useState<'manual' | 'phone-scan'>(
+    'manual'
+  );
   const selectableRulePresets = useMemo(
     () => rulePresetsForSetupIntent(setupIntent),
     [setupIntent]
@@ -192,7 +124,7 @@ export const HardwareSetupScreen = ({
   const openPlugAdd = onOpenPlugAdd ?? (() => setLocalAddPage('plug'));
   const openSensorAdd =
     onOpenSensorAdd ??
-    ((mode: SensorAddMode) => {
+    ((mode: 'manual' | 'phone-scan') => {
       setLocalSensorAddMode(mode);
       setLocalAddPage('sensor');
     });
@@ -280,7 +212,7 @@ export const HardwareSetupScreen = ({
       {setupIntent && onBackToIntent && !plugAddOnly && !sensorAddOnly && (
         <AppPageBack
           context={t(`intent.${setupIntent}.context`)}
-          label={t('intent.back')}
+          label={editInstallationId ? t('detail.automation') : t('intent.back')}
           onBack={onBackToIntent}
         />
       )}
@@ -339,6 +271,9 @@ export const HardwareSetupScreen = ({
           flow={flow}
           selectablePresets={selectableRulePresets}
           showShellySelector={!fixedShellyId}
+          {...(editInstallationId && onSetupComplete
+            ? { onEditSaved: onSetupComplete }
+            : {})}
         />
       )}
       {setupIntent === 'time' && activeTab === 'schedule' && (

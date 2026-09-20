@@ -28,6 +28,7 @@ export {
   type RuleAdvancedSettingsInput,
   type RuleAdvancedSettingsValidation
 } from './data/climateRuleSettings.js';
+export { ClimateAutomationManagementActions } from './components/ClimateAutomationManagementActions.js';
 export {
   ClimateRuleEditor,
   type ClimateRuleEditorProps,
@@ -47,6 +48,7 @@ export {
   parseClockMinutes,
   type DailyTimeAutomationConfig
 } from './data/timeAutomationConfig.js';
+export { createClimateAutomationEditDraftPatch } from './data/climateAutomationEditDraft.js';
 export {
   INSTALLED_AUTOMATION_VERSION,
   climateInstalledAutomationSchema,
@@ -74,6 +76,10 @@ export {
   type InstalledAutomationReconciliationResult,
   type InstalledAutomationReconciliationStatus
 } from './flows/reconcileInstalledAutomation.js';
+export {
+  updateClimateInstalledAutomation,
+  type ClimateAutomationEditServices
+} from './flows/updateClimateInstalledAutomation.js';
 export {
   resetInstalledAutomationStore,
   useInstalledAutomationStore

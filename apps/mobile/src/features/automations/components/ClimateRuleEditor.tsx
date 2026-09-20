@@ -66,6 +66,7 @@ export type ClimateRuleEditorProps = {
   installPending: boolean;
   safeRelayTestPending: boolean;
   install(): void;
+  submitMode?: 'install' | 'edit';
 };
 
 export const ClimateRuleEditor = ({
@@ -290,10 +291,20 @@ export const ClimateRuleEditor = ({
           disabled={
             !props.canInstall || props.installPending || props.safeRelayTestPending
           }
-          title={t('hardware.rule.sendTitle')}
+          title={
+            props.submitMode === 'edit'
+              ? t('hardware.rule.saveChangesTitle')
+              : t('hardware.rule.sendTitle')
+          }
           onClick={props.install}
         >
-          {props.installPending ? t('common.sending') : t('common.send')}
+          {props.submitMode === 'edit'
+            ? props.installPending
+              ? t('hardware.rule.savingChanges')
+              : t('hardware.rule.saveChanges')
+            : props.installPending
+              ? t('common.sending')
+              : t('common.send')}
         </button>
       </div>
     </>

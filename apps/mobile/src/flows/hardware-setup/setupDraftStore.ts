@@ -2,7 +2,11 @@ import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { sensorProfileIdSchema, type SensorProfileId } from '@lcl/device-profiles';
 import { create } from 'zustand';
 import { z } from 'zod';
-import { DEFAULT_RULE_ADVANCED_SETTINGS } from '../../features/automations/index.js';
+import {
+  createClimateAutomationEditDraftPatch,
+  DEFAULT_RULE_ADVANCED_SETTINGS,
+  type ClimateInstalledAutomation
+} from '../../features/automations/index.js';
 
 export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v8';
 
@@ -100,6 +104,7 @@ type HardwareSetupDraftState = HardwareSetupDraft & {
   setStaleTimeoutMinInput(value: string): void;
   setMinChangeMinInput(value: string): void;
   setMaxOnHoursInput(value: string): void;
+  loadClimateAutomationDraft(installation: ClimateInstalledAutomation): void;
 };
 
 const isStorageAvailable = (): boolean =>
@@ -311,7 +316,11 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setStaleTimeoutMinInput: (staleTimeoutMinInput) =>
       updateDraft({ staleTimeoutMinInput }),
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
-    setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput })
+    setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
+    loadClimateAutomationDraft: (installation) =>
+      set((state) =>
+        persistPatch(state, createClimateAutomationEditDraftPatch(state, installation))
+      )
   };
 });
 

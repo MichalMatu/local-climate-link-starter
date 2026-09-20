@@ -345,7 +345,8 @@ const renderDetail = (
   onNavigateDashboard = vi.fn(),
   onOpenSettings = vi.fn(),
   onOpenDiagnostics = vi.fn(),
-  onOpenScript = vi.fn()
+  onOpenScript = vi.fn(),
+  onEdit = vi.fn()
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
@@ -356,6 +357,7 @@ const renderDetail = (
     onOpenSettings,
     onOpenDiagnostics,
     onOpenScript,
+    onEdit,
     ...renderWithAppToastHost(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
@@ -366,6 +368,7 @@ const renderDetail = (
             onOpenSettings={onOpenSettings}
             onOpenDiagnostics={onOpenDiagnostics}
             onOpenScript={onOpenScript}
+            onEdit={onEdit}
           />
         </QueryClientProvider>
       </I18nProvider>
@@ -400,6 +403,18 @@ describe('InstallationDetailScreen', () => {
     expect(back).toBeVisible();
     fireEvent.click(back);
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('exposes Edit for an installed climate automation', async () => {
+    const saved = installation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    installShellyFetchMock();
+    const onEdit = vi.fn();
+    renderDetail(saved.id, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), onEdit);
+
+    const edit = await screen.findByRole('button', { name: 'Edytuj' });
+    fireEvent.click(edit);
+    expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
   it('keeps missing diagnostics and script routes in the same child-page chrome', () => {

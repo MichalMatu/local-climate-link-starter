@@ -1,7 +1,7 @@
 import type { RuleSetupFlow } from '../pageContracts.js';
 import type { RulePresetId } from '@lcl/automation-core';
 import { FeedbackPanel, Modal, ScriptPreview } from '@lcl/ui';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
@@ -24,12 +24,14 @@ const copyToClipboard = async (value: string): Promise<void> => {
 type RuleSetupPageProps = HardwarePageProps<RuleSetupFlow> & {
   selectablePresets?: readonly RulePresetId[];
   showShellySelector?: boolean;
+  onEditSaved?: () => void;
 };
 
 export const RuleSetupPage = ({
   flow,
   selectablePresets = ALL_RULE_PRESETS,
-  showShellySelector = true
+  showShellySelector = true,
+  onEditSaved
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<RuleDialogState>('none');
@@ -61,6 +63,12 @@ export const RuleSetupPage = ({
   }, [flow.configState, pushToast, t]);
 
   useRuleSetupFeedback({ flow, pushToast, setDialog, t });
+  useEffect(() => {
+    if (!flow.installMutation.isSuccess || !flow.isEditingClimateAutomation) return;
+    pushToast('ok', t('hardware.rule.editSaved'));
+    flow.installMutation.reset();
+    onEditSaved?.();
+  }, [flow.installMutation, flow.isEditingClimateAutomation, onEditSaved, pushToast, t]);
 
   const loadScriptFromShelly = () => {
     if (!flow.selectedShelly) {
@@ -129,6 +137,7 @@ export const RuleSetupPage = ({
         installPending={flow.installMutation.isPending}
         safeRelayTestPending={flow.safeRelayTestMutation.isPending}
         install={() => flow.installMutation.mutate()}
+        submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
       />
 
       <Modal

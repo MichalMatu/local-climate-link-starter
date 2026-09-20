@@ -15,10 +15,11 @@ import { t } from '../../app/i18n.js';
 import {
   createInstalledAutomation,
   findRelayOwnerConflict,
-  type InstalledAutomation
-} from '../installations/model.js';
-import { useInstalledAutomationStore } from '../installations/store.js';
-import { findScheduleRelayConflict } from '../../features/automations/index.js';
+  findScheduleRelayConflict,
+  updateClimateInstalledAutomation,
+  useInstalledAutomationStore,
+  type ClimateInstalledAutomation
+} from '../../features/automations/index.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
@@ -31,8 +32,9 @@ type HardwareInstallState = {
 
 type HardwareInstallMutationResult = {
   install: ShellyInstallResult;
-  installation: InstalledAutomation;
+  installation: ClimateInstalledAutomation;
   shellyDraftId: string;
+  requiresSafeRelayTest: boolean;
 };
 
 type SafeRelayTestMutationResult = {
@@ -55,12 +57,14 @@ export const useClimateAutomationInstallFlow = ({
   selectedShelly,
   configState,
   isThresholdValid,
-  isVpdAssistValid
+  isVpdAssistValid,
+  editInstallationId
 }: {
   selectedShelly: ShellyDraftDevice | null;
   configState: ClimateConfigState;
   isThresholdValid: boolean;
   isVpdAssistValid: boolean;
+  editInstallationId?: string;
 }) => {
   const installedAutomations = useInstalledAutomationStore(
     (state) => state.installations
@@ -68,6 +72,13 @@ export const useClimateAutomationInstallFlow = ({
   const upsertInstalledAutomation = useInstalledAutomationStore(
     (state) => state.upsertInstallation
   );
+  const editingInstallation = editInstallationId
+    ? (installedAutomations.find(
+        (installation): installation is ClimateInstalledAutomation =>
+          installation.id === editInstallationId && installation.kind === 'climate'
+      ) ?? null)
+    : null;
+  const isEditingClimateAutomation = editInstallationId !== undefined;
   const setShellyScriptIdDraft = useHardwareSetupDraftStore(
     (state) => state.setShellyScriptId
   );
@@ -114,6 +125,28 @@ export const useClimateAutomationInstallFlow = ({
 
       const shelly = selectedShelly;
       const config = configState.config;
+      if (isEditingClimateAutomation) {
+        if (!editingInstallation) {
+          throw new Error('Installed climate automation was not found.');
+        }
+        const edited = await updateClimateInstalledAutomation({
+          installation: {
+            ...editingInstallation,
+            shelly: {
+              ...editingInstallation.shelly,
+              name: shelly.name,
+              baseUrl: shelly.baseUrl
+            }
+          },
+          config,
+          installations: installedAutomations
+        });
+        return {
+          ...edited,
+          shellyDraftId: shelly.id,
+          requiresSafeRelayTest: false
+        };
+      }
       await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
       const transport = createShellyTransport(shelly.baseUrl);
       const client = new RpcShellyClient(transport);
@@ -150,10 +183,11 @@ export const useClimateAutomationInstallFlow = ({
           scriptHash: install.scriptHash,
           config
         }),
-        shellyDraftId: shelly.id
+        shellyDraftId: shelly.id,
+        requiresSafeRelayTest: true
       };
     },
-    onSuccess: ({ install, installation, shellyDraftId }) => {
+    onSuccess: ({ install, installation, shellyDraftId, requiresSafeRelayTest }) => {
       setShellyScriptIdDraft(shellyDraftId, String(install.scriptId));
       upsertInstalledAutomation(installation);
       setLastInstallState({
@@ -161,7 +195,15 @@ export const useClimateAutomationInstallFlow = ({
         scriptId: install.scriptId,
         scriptHash: install.scriptHash
       });
-      setSafeRelayTestState(null);
+      setSafeRelayTestState(
+        requiresSafeRelayTest
+          ? null
+          : {
+              shellyId: shellyDraftId,
+              scriptId: install.scriptId,
+              scriptHash: install.scriptHash
+            }
+      );
     }
   });
 
@@ -195,6 +237,7 @@ export const useClimateAutomationInstallFlow = ({
 
   return {
     canRunSafeRelayTest,
+    isEditingClimateAutomation,
     installMutation,
     safeRelayTestMutation,
     resetInstallState

@@ -49,11 +49,13 @@ vi.mock('../screens/InstallationDetailScreen.js', () => ({
   InstallationDetailScreen: ({
     installationId,
     onBack,
-    onNavigateDashboard
+    onNavigateDashboard,
+    onEdit
   }: {
     installationId: string;
     onBack: () => void;
     onNavigateDashboard?: (kind: 'climate' | 'time') => void;
+    onEdit?: () => void;
   }) => (
     <section>
       <p>{`mock-installation-${installationId}`}</p>
@@ -63,6 +65,9 @@ vi.mock('../screens/InstallationDetailScreen.js', () => ({
       <button type="button" onClick={() => onNavigateDashboard?.('time')}>
         mock-dashboard-time
       </button>
+      <button type="button" onClick={onEdit}>
+        mock-edit
+      </button>
     </section>
   )
 }));
@@ -71,12 +76,14 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
   HardwareSetupScreen: ({
     setupIntent,
     fixedShellyId,
+    editInstallationId,
     onBackToIntent,
     onSetupComplete,
     plugAddOnly
   }: {
     setupIntent?: SetupIntent;
     fixedShellyId?: string;
+    editInstallationId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
     plugAddOnly?: boolean;
@@ -84,6 +91,7 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
       <p>{`mock-fixed-shelly-${fixedShellyId ?? 'none'}`}</p>
+      <p>{`mock-edit-installation-${editInstallationId ?? 'none'}`}</p>
       <p>{`mock-plug-add-${plugAddOnly ? 'yes' : 'no'}`}</p>
       <button type="button" onClick={onBackToIntent}>
         mock-back
@@ -269,6 +277,40 @@ describe('AppRoutes navigation shell', () => {
       'aria-current',
       'page'
     );
+  });
+
+  it('opens climate edit from detail, hydrates the existing editor draft, and returns to detail', async () => {
+    const installation = addClimateInstallation('edit');
+    renderRoutes();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
+
+    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
+    expect(
+      screen.getByText(`mock-fixed-shelly-${installation.shelly.deviceId}`)
+    ).toBeVisible();
+    expect(screen.getByText(`mock-edit-installation-${installation.id}`)).toBeVisible();
+
+    const draft = useHardwareSetupDraftStore.getState();
+    expect(draft.selectedShellyId).toBe(installation.shelly.deviceId);
+    expect(draft.selectedSensorId).toBe(installation.config.sensor.sensorId);
+    expect(draft.rulePreset).toBe(installation.config.rule.mode);
+    expect(draft.onThresholdInput).toBe(
+      String(installation.config.rule.control.onThreshold)
+    );
+    expect(draft.offThresholdInput).toBe(
+      String(installation.config.rule.control.offThreshold)
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
+    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
+    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
   });
 
   it('completes per-plug Time setup back to the Plugs dashboard', async () => {

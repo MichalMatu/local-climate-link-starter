@@ -14,6 +14,10 @@ import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
+import {
+  climateAutomationDetailRoute,
+  prepareClimateAutomationEditRoute
+} from './climateAutomationEditNavigation.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
@@ -36,6 +40,7 @@ type SetupRoute = {
   intent: SetupRouteIntent;
   sourceKind: AppNavigationKind;
   shellyId?: string;
+  editInstallationId?: string;
 };
 type DeviceAddReturnRoute = DashboardRoute | SetupRoute;
 type DeviceAddRoute = {
@@ -98,6 +103,9 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   }
   if (route.type === 'plug-settings') return { type: 'dashboard', kind: 'climate' };
   if (route.type === 'setup') {
+    if (route.editInstallationId) {
+      return climateAutomationDetailRoute(route.editInstallationId);
+    }
     return {
       type: 'intent',
       sourceKind: route.sourceKind,
@@ -111,6 +119,9 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
 export const AppRoutes = () => {
   const selectShellyDevice = useHardwareSetupDraftStore(
     (state) => state.selectShellyDevice
+  );
+  const loadClimateAutomationDraft = useHardwareSetupDraftStore(
+    (state) => state.loadClimateAutomationDraft
   );
   const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
   const routeRef = useRef(route);
@@ -162,6 +173,14 @@ export const AppRoutes = () => {
       sourceKind,
       ...(shellyId ? { shellyId } : {})
     });
+  };
+
+  const openClimateAutomationEdit = (installationId: string) => {
+    const editRoute = prepareClimateAutomationEditRoute(
+      installationId,
+      loadClimateAutomationDraft
+    );
+    if (editRoute) navigate(editRoute);
   };
 
   let content: ReactNode;
@@ -271,6 +290,7 @@ export const AppRoutes = () => {
           onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
           onOpenDiagnostics={() => navigate({ ...route, page: 'diagnostics' })}
           onOpenScript={() => navigate({ ...route, page: 'script' })}
+          onEdit={() => openClimateAutomationEdit(route.installationId)}
         />
       );
     }
@@ -291,16 +311,25 @@ export const AppRoutes = () => {
         <HardwareSetupScreen
           setupIntent={route.intent}
           {...(route.shellyId ? { fixedShellyId: route.shellyId } : {})}
+          {...(route.editInstallationId
+            ? { editInstallationId: route.editInstallationId }
+            : {})}
           onBackToIntent={() =>
-            navigate({
-              type: 'intent',
-              sourceKind: route.sourceKind,
-              ...(route.shellyId ? { shellyId: route.shellyId } : {})
-            })
+            route.editInstallationId
+              ? navigate(climateAutomationDetailRoute(route.editInstallationId))
+              : navigate({
+                  type: 'intent',
+                  sourceKind: route.sourceKind,
+                  ...(route.shellyId ? { shellyId: route.shellyId } : {})
+                })
           }
           onOpenPlugAdd={() => openDeviceAdd('plug')}
           onOpenSensorAdd={(mode) => openDeviceAdd('sensor', mode)}
-          onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
+          onSetupComplete={() =>
+            route.editInstallationId
+              ? navigate(climateAutomationDetailRoute(route.editInstallationId))
+              : navigate({ type: 'dashboard', kind: route.sourceKind })
+          }
         />
       </Suspense>
     );

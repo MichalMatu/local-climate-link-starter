@@ -17,7 +17,7 @@ import { useShellyControlFlow } from './useShellyControlFlow.js';
 
 const numberInput = (value: number): string => String(Number(value.toFixed(4)));
 
-export const useHardwareSetupFlow = () => {
+export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const shellyNameInput = useHardwareSetupDraftStore((state) => state.shellyNameInput);
   const setShellyNameInput = useHardwareSetupDraftStore(
     (state) => state.setShellyNameInput
@@ -179,6 +179,7 @@ export const useHardwareSetupFlow = () => {
 
   const {
     canRunSafeRelayTest,
+    isEditingClimateAutomation,
     installMutation,
     safeRelayTestMutation,
     resetInstallState
@@ -186,7 +187,8 @@ export const useHardwareSetupFlow = () => {
     selectedShelly,
     configState,
     isThresholdValid,
-    isVpdAssistValid
+    isVpdAssistValid,
+    ...(editInstallationId ? { editInstallationId } : {})
   });
 
   const { loadAutomationScriptMutation, loadAutomationScript } =
@@ -284,6 +286,7 @@ export const useHardwareSetupFlow = () => {
     isThresholdValid,
     isVpdAssistValid,
     canRunSafeRelayTest,
+    isEditingClimateAutomation,
     setupStatus,
     checkShellyMutation,
     recheckShellyMutation,

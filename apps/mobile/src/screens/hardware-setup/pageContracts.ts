@@ -77,6 +77,7 @@ export type RuleSetupFlow = Pick<
   | 'configState'
   | 'installMutation'
   | 'isAdvancedSettingsValid'
+  | 'isEditingClimateAutomation'
   | 'isThresholdValid'
   | 'isVpdAssistValid'
   | 'loadAutomationScript'
