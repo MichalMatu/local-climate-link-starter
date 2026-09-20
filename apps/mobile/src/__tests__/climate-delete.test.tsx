@@ -1,12 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within
-} from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, type ShellyRpcMethod } from '@lcl/shelly-client';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,6 +11,7 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
+import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
   new Response(JSON.stringify(payload), {
@@ -174,7 +168,7 @@ const renderDetail = (installationId: string, onBack = vi.fn()) => {
   });
   return {
     onBack,
-    ...render(
+    ...renderWithAppToastHost(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <InstallationDetailScreen installationId={installationId} onBack={onBack} />

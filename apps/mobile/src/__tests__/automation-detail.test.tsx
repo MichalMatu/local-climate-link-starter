@@ -30,6 +30,7 @@ import {
   InstallationDiagnosticsScreen
 } from '../screens/InstallationDiagnosticsScreen.js';
 import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
+import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
   new Response(JSON.stringify(payload), {
@@ -355,7 +356,7 @@ const renderDetail = (
     onOpenSettings,
     onOpenDiagnostics,
     onOpenScript,
-    ...render(
+    ...renderWithAppToastHost(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <InstallationDetailScreen

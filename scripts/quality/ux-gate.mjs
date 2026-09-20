@@ -140,11 +140,24 @@ const checkBottomNavigationShell = async () => {
   if (
     !shellSource.includes('APP_TOAST_HOST_ID') ||
     !shellSource.includes('app-toast-host') ||
-    !toastViewportSource.includes('createPortal(viewport, host)')
+    !toastViewportSource.includes('createPortal(<ToastViewport {...props} />, host)')
   ) {
     addFailure(
       shellPath,
       'root AppShell must own the portal target for all app toast viewports'
+    );
+  }
+  if (
+    !toastViewportSource.includes('useLayoutEffect') ||
+    !toastViewportSource.includes('useState<HTMLElement | null>(null)') ||
+    !toastViewportSource.includes(
+      'return host ? createPortal(<ToastViewport {...props} />, host) : null;'
+    ) ||
+    toastViewportSource.includes(': viewport')
+  ) {
+    addFailure(
+      toastViewportPath,
+      'AppToastViewport must wait for the shell host and must never fall back to a screen-local fixed viewport'
     );
   }
 

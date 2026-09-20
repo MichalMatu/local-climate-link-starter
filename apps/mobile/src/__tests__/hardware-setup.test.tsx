@@ -1,13 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within
-} from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Capacitor } from '@capacitor/core';
 import type { NormalizedBleAdvertisement } from '@lcl/ble-core';
@@ -174,6 +166,7 @@ import {
 } from '../flows/hardware-setup/shellyRequests.js';
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
+import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 
 const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = {}) => {
   const queryClient = new QueryClient({
@@ -183,7 +176,7 @@ const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = 
     }
   });
 
-  return render(
+  return renderWithAppToastHost(
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <HardwareSetupScreen {...props} />
