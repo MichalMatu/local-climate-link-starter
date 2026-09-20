@@ -26,9 +26,7 @@ export const mobileProductionBaselines = Object.freeze({
   'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx': 353
 });
 
-export const packageProductionBaselines = Object.freeze({
-  'packages/script-generator/src/shelly/generate.ts': 565
-});
+export const packageProductionBaselines = Object.freeze({});
 
 export const legacyProductionPaths = Object.freeze({
   'apps/mobile/src/screens': [

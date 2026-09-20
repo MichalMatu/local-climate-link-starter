@@ -142,6 +142,13 @@ Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`
 
 `features/automations` owns managed Shelly automation status and deployed-script reads used across hardware setup, installations and time automation. Those callers use the feature public API rather than importing automation semantics from `hardware-setup/shellyRequests.ts`.
 
+## Script generator boundary
+
+`@lcl/script-generator` keeps generated-runtime responsibilities separate: `shelly/generate.ts`
+owns thermostat runtime composition, `shelly/discovery.ts` owns BLE discovery scan/endpoint
+composition, and `shelly/discoveryParsing.ts` owns the generated advertisement parsing
+runtime. These private modules preserve the existing package public API.
+
 ## Navigation/presentation boundary
 
 `AppShell` owns persistent bottom navigation and application-frame overlay geometry.
@@ -241,7 +248,6 @@ apps/mobile/src/flows/time-automation/runtime.ts                       447
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       416
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 411
 apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         353
-packages/script-generator/src/shelly/generate.ts                       565
 ```
 
 These values are accepted debt, not spare capacity. Do not raise a baseline because a
