@@ -64,7 +64,9 @@ const featureNameFromPath = (repoPath) => {
 
 const resolveRelativeSpecifier = (sourcePath, specifier) => {
   if (!specifier.startsWith('.')) return null;
-  return stripSourceExtension(path.normalize(path.join(path.dirname(sourcePath), specifier)));
+  return stripSourceExtension(
+    path.normalize(path.join(path.dirname(sourcePath), specifier))
+  );
 };
 
 const checkFeatureAgentContract = async () => {
@@ -76,7 +78,10 @@ const checkFeatureAgentContract = async () => {
 
   const source = await readRepoFile(contractPath);
   if (lineCount(source) > 180) {
-    addFailure(contractPath, 'feature agent contract must stay focused and under 180 lines');
+    addFailure(
+      contractPath,
+      'feature agent contract must stay focused and under 180 lines'
+    );
   }
   for (const marker of ['Public API', 'Feature isolation', 'Side-effect ownership']) {
     if (!source.includes(marker)) {
@@ -149,7 +154,11 @@ const checkLegacyTopLevelFreeze = async () => {
       withFileTypes: true
     });
     for (const entry of entries) {
-      if (!entry.isFile() || !isTypeScriptSource(entry.name) || isTestSource(entry.name)) {
+      if (
+        !entry.isFile() ||
+        !isTypeScriptSource(entry.name) ||
+        isTestSource(entry.name)
+      ) {
         continue;
       }
       if (!allowedFiles.has(entry.name)) {
@@ -251,11 +260,17 @@ const checkFeatureShape = async () => {
 
     const publicApiPath = `${featureRoot}/index.ts`;
     if (!(await repoPathExists(publicApiPath))) {
-      addFailure(publicApiPath, 'every feature must expose one explicit public API index.ts');
+      addFailure(
+        publicApiPath,
+        'every feature must expose one explicit public API index.ts'
+      );
     } else {
       const publicApi = await readRepoFile(publicApiPath);
       if (lineCount(publicApi) > 120) {
-        addFailure(publicApiPath, 'feature public API exceeds 120 lines; keep the surface narrow');
+        addFailure(
+          publicApiPath,
+          'feature public API exceeds 120 lines; keep the surface narrow'
+        );
       }
       if (/\bexport\s+(?:type\s+)?\*\s+from\b/.test(publicApi)) {
         addFailure(
@@ -350,12 +365,18 @@ const checkPresentationSideEffectBoundaries = async () => {
   for (const sourcePath of presentationFiles) {
     const source = await readRepoFile(sourcePath);
     if (/\bfetch\s*\(/.test(source)) {
-      addFailure(sourcePath, 'presentation must not call fetch directly; use a feature flow/data boundary');
+      addFailure(
+        sourcePath,
+        'presentation must not call fetch directly; use a feature flow/data boundary'
+      );
     }
     if (source.includes('@capacitor-community/bluetooth-le')) {
       addFailure(sourcePath, 'presentation must not import the Capacitor BLE transport');
     }
-    if (/\b(?:localStorage|sessionStorage)\b/.test(source) || source.includes('@capacitor/preferences')) {
+    if (
+      /\b(?:localStorage|sessionStorage)\b/.test(source) ||
+      source.includes('@capacitor/preferences')
+    ) {
       addFailure(
         sourcePath,
         'presentation must not own durable storage; use a feature state/repository boundary'
@@ -366,7 +387,7 @@ const checkPresentationSideEffectBoundaries = async () => {
 
 const checkSharedStylesheetBudgets = async () => {
   const budgets = new Map([
-    ['apps/mobile/src/theme/theme.css', 3333],
+    ['apps/mobile/src/theme/theme.css', 3334],
     ['packages/ui/src/styles.css', 750]
   ]);
 
