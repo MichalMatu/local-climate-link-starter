@@ -57,6 +57,24 @@ Rules:
 
 The goal is gradual feature ownership, not churn.
 
+### Enforced feature boundary
+
+`scripts/quality/feature-boundary-gate.mjs` makes this direction executable.
+
+- legacy top-level `src/screens`, `src/flows` and `src/components` are frozen to their
+  current production modules; new top-level product capabilities belong under
+  `src/features/<feature>`;
+- every feature has one public `index.ts` and private internal folders;
+- external callers must use that feature public API;
+- features do not depend on each other by default;
+- a reviewed feature-to-feature dependency must still use the target public API;
+- feature code must not depend back on legacy `src/screens`, `src/routes` or `src/flows`;
+- package subpath imports must match an explicit workspace `package.json#exports` entry;
+- feature presentation cannot own raw fetch/BLE/storage;
+- feature-specific CSS stays out of the global theme.
+
+Read `src/features/AGENTS.md` before changing or creating any feature.
+
 ## Mobile preimplementation gate
 
 Before adding a screen/flow/store, name the owners:
