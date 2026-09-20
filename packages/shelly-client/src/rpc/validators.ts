@@ -33,6 +33,10 @@ export const scriptListResponseSchema = z.object({
   )
 });
 
+export type ShellyScriptListEntry = z.infer<
+  typeof scriptListResponseSchema
+>['scripts'][number];
+
 export const scriptCodeResponseSchema = z.object({
   data: z.string().default(''),
   left: z.number().int().min(0).default(0)

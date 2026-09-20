@@ -16,7 +16,7 @@ export const allowedPackageDependencies = Object.freeze({
 export const defaultProductionModuleMaxLines = 350;
 
 export const mobileProductionBaselines = Object.freeze({
-  'apps/mobile/src/flows/hardware-setup/shellyRequests.ts': 724,
+  'apps/mobile/src/flows/hardware-setup/shellyRequests.ts': 682,
   'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx': 674,
   'apps/mobile/src/screens/AutomationDashboardScreen.tsx': 600,
   'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 558,
@@ -30,7 +30,7 @@ export const mobileProductionBaselines = Object.freeze({
 });
 
 export const packageProductionBaselines = Object.freeze({
-  'packages/shelly-client/src/scripts/install.ts': 630,
+  'packages/shelly-client/src/scripts/install.ts': 604,
   'packages/script-generator/src/shelly/generate.ts': 565
 });
 

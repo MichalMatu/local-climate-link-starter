@@ -222,7 +222,7 @@ ownership in the same way. Phase 3 tightened known larger modules to their exact
 parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
-apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  724
+apps/mobile/src/flows/hardware-setup/shellyRequests.ts                  682
 apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx       674
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
 apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
@@ -233,7 +233,7 @@ apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       416
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 411
 apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 353
 apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx         353
-packages/shelly-client/src/scripts/install.ts                          630
+packages/shelly-client/src/scripts/install.ts                          604
 packages/script-generator/src/shelly/generate.ts                       565
 ```
 
@@ -304,8 +304,9 @@ extract by task boundary rather than arbitrary line slices.
 
 ### `flows/hardware-setup/shellyRequests.ts`
 
-Dense Shelly RPC boundary. Keep RPC details out of screens. Split into request families
-only when unrelated RPC responsibilities make the current module hard to reason about.
+Mobile Shelly adapter/orchestration boundary. Raw Shelly RPC request shapes and response
+validation belong to `@lcl/shelly-client`; this module keeps platform transport selection and
+user-facing error translation. Split further only along a real request-family ownership boundary.
 
 ### `AutomationDashboardScreen.tsx`
 

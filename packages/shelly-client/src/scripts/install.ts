@@ -18,9 +18,7 @@ import {
   type ShellyStatus
 } from '../model.js';
 import {
-  scriptCodeResponseSchema,
   scriptCreateResponseSchema,
-  scriptListResponseSchema,
   scriptStatusSchema,
   shellyDeviceInfoSchema,
   switchStatusSchema,
@@ -28,6 +26,7 @@ import {
   wifiStatusSchema
 } from '../rpc/validators.js';
 import { hashScriptCode } from './hash.js';
+import { readShellyScriptCode, readShellyScriptList } from './read.js';
 
 const DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES = 1024;
 const DEFAULT_SCRIPT_MUTATION_DELAY_MS = 100;
@@ -262,38 +261,19 @@ export class RpcShellyClient implements ShellyClient {
       enable: script.enable,
       running: script.running
     };
-    const chunks: string[] = [];
-    const encoder = new TextEncoder();
-    let offset = 0;
-    let left = 0;
+    const codeResult = await readShellyScriptCode(this.transport, script.id, {
+      chunkSizeBytes
+    });
+    if (!codeResult.ok) {
+      return {
+        ...backupBase,
+        errorMessage:
+          codeResult.error.technicalMessage ??
+          `Script.GetCode failed with ${codeResult.error.kind}.`
+      };
+    }
 
-    do {
-      const response = await this.transport.call<unknown>({
-        method: RPC_METHODS.ScriptGetCode,
-        params: { id: script.id, offset, len: chunkSizeBytes }
-      });
-      if (!response.ok) {
-        return {
-          ...backupBase,
-          errorMessage:
-            response.error.technicalMessage ??
-            `Script.GetCode failed with ${response.error.kind}.`
-        };
-      }
-      const parsed = scriptCodeResponseSchema.safeParse(response.value);
-      if (!parsed.success) {
-        return {
-          ...backupBase,
-          errorMessage: parsed.error.message
-        };
-      }
-
-      chunks.push(parsed.data.data);
-      offset += encoder.encode(parsed.data.data).length;
-      left = parsed.data.left;
-    } while (left > 0);
-
-    const code = chunks.join('');
+    const code = codeResult.value;
     return {
       ...backupBase,
       code,
@@ -323,7 +303,7 @@ export class RpcShellyClient implements ShellyClient {
         }
       };
     }
-    const list = await this.transport.call<unknown>({ method: RPC_METHODS.ScriptList });
+    const list = await readShellyScriptList(this.transport);
     if (!list.ok) {
       return {
         ok: false,
@@ -331,10 +311,6 @@ export class RpcShellyClient implements ShellyClient {
           `Script.List failed: ${list.error.technicalMessage ?? list.error.kind}`
         )
       };
-    }
-    const parsedList = scriptListResponseSchema.safeParse(list.value);
-    if (!parsedList.success) {
-      return { ok: false, error: validationError(parsedList.error.message) };
     }
 
     if (status.value.scripts === 'disabled') {
@@ -355,9 +331,7 @@ export class RpcShellyClient implements ShellyClient {
     }
 
     const chunkSizeBytes = plan.chunkSizeBytes ?? DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES;
-    const existingScript = parsedList.data.scripts.find(
-      (script) => script.name === plan.scriptName
-    );
+    const existingScript = list.value.find((script) => script.name === plan.scriptName);
     let backup: ShellyScriptBackup | undefined;
     let scriptId: number;
 

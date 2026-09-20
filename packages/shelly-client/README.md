@@ -17,7 +17,7 @@ Examples:
 import { FakeShellyClient, createInstallPlan } from '@lcl/shelly-client';
 ```
 
-Install flow parses `Script.List`, reuses and backs up the existing Local Climate Link script when found, uploads code with chunked `Script.PutCode`, enables run-on-boot, starts the script, and verifies `Script.GetStatus`.
+Dedicated `readShellyScriptList` / `readShellyScriptCode` helpers own validated script-read RPC shapes. Install flow parses `Script.List`, reuses and backs up the existing Local Climate Link script when found, uploads code with chunked `Script.PutCode`, enables run-on-boot, starts the script, and verifies `Script.GetStatus`.
 
 `FetchShellyRpcTransport` sends JSON-RPC style `{ id, method, params }` envelopes to `/rpc` and accepts Shelly-style `{ result }`, `{ params }`, `{ error }`, and direct object payloads.
 

@@ -1,20 +1,13 @@
-import type { ShellyDeviceInfo, ShellyStatus } from '@lcl/shelly-client';
+import type {
+  ShellyDeviceInfo,
+  ShellyScriptListEntry,
+  ShellyStatus
+} from '@lcl/shelly-client';
 import { z } from 'zod';
 
 const MIN_SYNCED_UNIX_TIME_SEC = 1_600_000_000;
 
-export const scriptListSchema = z.object({
-  scripts: z.array(
-    z.object({
-      id: z.number(),
-      name: z.string(),
-      enable: z.boolean().default(false),
-      running: z.boolean().default(false)
-    })
-  )
-});
-
-export type ScriptListEntry = z.infer<typeof scriptListSchema>['scripts'][number];
+export type ScriptListEntry = ShellyScriptListEntry;
 
 export type HardwareSetupStatus = {
   deviceInfo: ShellyDeviceInfo;

@@ -152,7 +152,7 @@ import {
   resetHardwareSetupDraftStore,
   useHardwareSetupDraftStore
 } from '../flows/hardware-setup/setupDraftStore.js';
-import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+import { I18nProvider, setLocalePreference, t } from '../app/i18n.js';
 import { setThemeMode } from '../app/themeMode.js';
 import { resetHardwareSetupReadingsStore } from '../flows/hardware-setup/sensorReadingsStore.js';
 import {
@@ -161,8 +161,7 @@ import {
 } from '../flows/installations/store.js';
 import {
   cleanupStaleShellyBleDiscoveryScripts,
-  fetchShellyJson,
-  SHELLY_OUT_OF_MEMORY_MESSAGE
+  fetchShellyJson
 } from '../flows/hardware-setup/shellyRequests.js';
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
@@ -877,7 +876,7 @@ describe('HardwareSetupScreen', () => {
 
     await expect(
       fetchShellyJson(new URL('http://192.168.0.20/script/2/ble-scan'), 5000)
-    ).rejects.toThrow(SHELLY_OUT_OF_MEMORY_MESSAGE);
+    ).rejects.toThrow(t('hardware.shelly.outOfMemory'));
   });
 
   it('attempts every stale BLE discovery cleanup before reporting partial failures', async () => {

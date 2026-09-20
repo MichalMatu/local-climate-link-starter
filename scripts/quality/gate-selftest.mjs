@@ -440,7 +440,9 @@ await executeCase({
       Array.from({ length: maxLines + 1 }, () => 'export {};').join('\n')
     );
   },
-  expectedFailure: 'production mobile module exceeds 724 lines'
+  expectedFailure: `production mobile module exceeds ${
+    mobileProductionBaselines['apps/mobile/src/flows/hardware-setup/shellyRequests.ts']
+  } lines`
 });
 
 if (failures.length > 0) {

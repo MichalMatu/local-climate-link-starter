@@ -8,6 +8,8 @@ import {
   createBleDiscoveryInstallPlan,
   createInstallPlan,
   isLocalShellyHost,
+  readShellyScriptCode,
+  readShellyScriptList,
   withTimeout,
   type ShellyClientError,
   type ShellyRpcRequest,
@@ -215,6 +217,68 @@ class RecordingTransport implements ShellyRpcTransport {
 }
 
 describe('RpcShellyClient', () => {
+  it('owns Script.List response parsing at the package boundary', async () => {
+    const transport = new RecordingTransport({
+      scripts: [
+        {
+          id: 9,
+          name: 'Managed script',
+          enable: true,
+          running: false,
+          code: '// code'
+        }
+      ]
+    });
+
+    await expect(readShellyScriptList(transport)).resolves.toEqual({
+      ok: true,
+      value: [
+        {
+          id: 9,
+          name: 'Managed script',
+          enable: true,
+          running: false
+        }
+      ]
+    });
+    expect(transport.requests.at(-1)?.method).toBe(RPC_METHODS.ScriptList);
+  });
+
+  it('reads UTF-8 script code in bounded chunks at the package boundary', async () => {
+    const code = 'const label = "żółw🔥";';
+    const transport = new RecordingTransport({
+      scripts: [
+        {
+          id: 7,
+          name: 'Managed script',
+          enable: true,
+          running: true,
+          code
+        }
+      ]
+    });
+
+    await expect(
+      readShellyScriptCode(transport, 7, { chunkSizeBytes: 6 })
+    ).resolves.toEqual({ ok: true, value: code });
+    expect(
+      transport.requests.filter((request) => request.method === RPC_METHODS.ScriptGetCode)
+        .length
+    ).toBeGreaterThan(1);
+  });
+
+  it('rejects invalid script ids before sending Script.GetCode', async () => {
+    const transport = new RecordingTransport();
+
+    await expect(readShellyScriptCode(transport, -1)).resolves.toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed' }
+    });
+    expect(
+      transport.requests.some((request) => request.method === RPC_METHODS.ScriptGetCode)
+    ).toBe(false);
+  });
+
   it('sends the expected RPC request shape during script install', async () => {
     const transport = new RecordingTransport();
     const client = new RpcShellyClient(transport);

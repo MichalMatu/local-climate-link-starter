@@ -2,9 +2,10 @@ import {
   LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   FetchShellyRpcTransport,
-  RPC_METHODS,
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
+  readShellyScriptCode as readShellyScriptCodeResult,
+  readShellyScriptList as readShellyScriptListResult,
   type Result,
   type ShellyClientError,
   type ShellyDeviceInfo,
@@ -18,19 +19,18 @@ import {
 } from '@capacitor/core';
 import {
   bleDiscoverySnapshotSchema,
-  scriptListSchema,
   type BleDiscoverySnapshot,
   type HardwareSetupStatus,
   type ScriptListEntry
 } from './schemas.js';
 import { t } from '../../app/i18n.js';
 
-export const SHELLY_INVALID_RESPONSE_MESSAGE = t('hardware.shelly.invalidResponse');
-export const SHELLY_OUT_OF_MEMORY_MESSAGE = t('hardware.shelly.outOfMemory');
-const SHELLY_SCRIPTS_MISSING_MESSAGE = t('hardware.shelly.scriptsMissing');
-const SHELLY_SCRIPTS_DISABLED_MESSAGE = t('hardware.shelly.scriptsDisabled');
-const SHELLY_BLE_MISSING_MESSAGE = t('hardware.shelly.bleMissing');
-const SHELLY_BLE_DISABLED_MESSAGE = t('hardware.shelly.bleDisabled');
+const shellyInvalidResponseMessage = (): string => t('hardware.shelly.invalidResponse');
+const shellyOutOfMemoryMessage = (): string => t('hardware.shelly.outOfMemory');
+const shellyScriptsMissingMessage = (): string => t('hardware.shelly.scriptsMissing');
+const shellyScriptsDisabledMessage = (): string => t('hardware.shelly.scriptsDisabled');
+const shellyBleMissingMessage = (): string => t('hardware.shelly.bleMissing');
+const shellyBleDisabledMessage = (): string => t('hardware.shelly.bleDisabled');
 
 const SHELLY_DEV_PROXY_PATH = '/__lcl_shelly_proxy';
 export const SHELLY_SETUP_SCAN_CONCURRENCY = 8;
@@ -162,16 +162,16 @@ const resultErrorMessage = (result: Result<unknown, ShellyClientError>): string 
       ? t('hardware.safety.matterBlocked')
       : result.error.userMessageKey === 'errors.shellyInvalidResponse' ||
           result.error.technicalMessage?.startsWith('Shelly RPC HTTP ')
-        ? SHELLY_INVALID_RESPONSE_MESSAGE
+        ? shellyInvalidResponseMessage()
         : result.error.technicalMessage?.includes('Scripts component') ||
             result.error.technicalMessage?.includes('Script.List')
-          ? SHELLY_SCRIPTS_MISSING_MESSAGE
+          ? shellyScriptsMissingMessage()
           : result.error.technicalMessage?.includes('Scripts are disabled')
-            ? SHELLY_SCRIPTS_DISABLED_MESSAGE
+            ? shellyScriptsDisabledMessage()
             : result.error.technicalMessage?.includes('BLE component')
-              ? SHELLY_BLE_MISSING_MESSAGE
+              ? shellyBleMissingMessage()
               : result.error.technicalMessage?.includes('BLE is disabled')
-                ? SHELLY_BLE_DISABLED_MESSAGE
+                ? shellyBleDisabledMessage()
                 : (result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`);
 
 export const unwrapShellyResult = <T>(result: Result<T, ShellyClientError>): T => {
@@ -247,7 +247,7 @@ export const fetchShellyJson = async (
     });
     const body = await response.text();
     if (body.trim() === 'out_of_memory') {
-      throw new Error(SHELLY_OUT_OF_MEMORY_MESSAGE);
+      throw new Error(shellyOutOfMemoryMessage());
     }
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`.trim());
@@ -255,7 +255,7 @@ export const fetchShellyJson = async (
     try {
       return JSON.parse(body) as unknown;
     } catch {
-      throw new Error(SHELLY_INVALID_RESPONSE_MESSAGE);
+      throw new Error(shellyInvalidResponseMessage());
     }
   } finally {
     window.clearTimeout(timeout);
@@ -294,16 +294,8 @@ const createShellyScanTransport = (
 
 const readScriptList = async (
   transport: FetchShellyRpcTransport
-): Promise<HardwareSetupStatus['scripts']> => {
-  const scriptListResult = await transport.call<unknown>({
-    method: RPC_METHODS.ScriptList
-  });
-  const parsedScripts = scriptListSchema.safeParse(unwrapShellyResult(scriptListResult));
-  if (!parsedScripts.success) {
-    throw new Error(parsedScripts.error.message);
-  }
-  return parsedScripts.data.scripts;
-};
+): Promise<HardwareSetupStatus['scripts']> =>
+  unwrapShellyResult(await readShellyScriptListResult(transport));
 
 const findAutomationScript = (scripts: ScriptListEntry[]): ScriptListEntry | null =>
   scripts.find((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME) ?? null;
@@ -384,42 +376,8 @@ const toControlStatus = (
 const readScriptCode = async (
   transport: FetchShellyRpcTransport,
   scriptId: number
-): Promise<string> => {
-  const chunks: string[] = [];
-  const encoder = new TextEncoder();
-  let offset = 0;
-  let left = 0;
-
-  do {
-    const response = await transport.call<unknown>({
-      method: RPC_METHODS.ScriptGetCode,
-      params: { id: scriptId, offset, len: 1024 }
-    });
-    const parsed = unwrapShellyResult(response) as unknown;
-    const codeChunk = zScriptCodeResponse(parsed);
-    chunks.push(codeChunk.data);
-    offset += encoder.encode(codeChunk.data).length;
-    left = codeChunk.left;
-  } while (left > 0);
-
-  return chunks.join('');
-};
-
-const zScriptCodeResponse = (payload: unknown): { data: string; left: number } => {
-  if (
-    typeof payload === 'object' &&
-    payload !== null &&
-    'data' in payload &&
-    typeof payload.data === 'string'
-  ) {
-    const left =
-      'left' in payload && typeof payload.left === 'number'
-        ? Math.max(0, Math.trunc(payload.left))
-        : 0;
-    return { data: payload.data, left };
-  }
-  throw new Error(t('hardware.shelly.invalidScriptCode'));
-};
+): Promise<string> =>
+  unwrapShellyResult(await readShellyScriptCodeResult(transport, scriptId));
 
 export const readShellySetupStatus = async (
   baseUrl: string
