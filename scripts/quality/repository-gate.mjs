@@ -167,10 +167,7 @@ const checkWorkspaceDependencyCycles = async () => {
     ['@lcl/design-tokens', new Set()],
     ['@lcl/device-profiles', new Set()],
     ['@lcl/diagnostics', new Set()],
-    [
-      '@lcl/script-generator',
-      new Set(['@lcl/automation-core', '@lcl/device-profiles'])
-    ],
+    ['@lcl/script-generator', new Set(['@lcl/automation-core', '@lcl/device-profiles'])],
     ['@lcl/shelly-client', new Set(['@lcl/diagnostics'])],
     ['@lcl/ui', new Set(['@lcl/design-tokens'])]
   ]);
