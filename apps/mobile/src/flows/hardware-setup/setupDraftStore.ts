@@ -2,7 +2,7 @@ import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { sensorProfileIdSchema, type SensorProfileId } from '@lcl/device-profiles';
 import { create } from 'zustand';
 import { z } from 'zod';
-import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
+import { DEFAULT_RULE_ADVANCED_SETTINGS } from '../../features/automations/index.js';
 
 export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v8';
 

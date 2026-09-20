@@ -17,7 +17,6 @@ export const defaultProductionModuleMaxLines = 350;
 
 export const mobileProductionBaselines = Object.freeze({
   'apps/mobile/src/screens/AutomationDashboardScreen.tsx': 600,
-  'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 558,
   'apps/mobile/src/screens/InstallationDetailScreen.tsx': 458,
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx': 416,
   'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx': 411,
@@ -41,7 +40,6 @@ export const legacyProductionPaths = Object.freeze({
     'hardware-setup/HardwareSetupScreen.tsx',
     'hardware-setup/helpers.ts',
     'hardware-setup/pageContracts.ts',
-    'hardware-setup/pages/RuleAdvancedSettingsInline.tsx',
     'hardware-setup/pages/RuleSetupPage.tsx',
     'hardware-setup/pages/SensorSetupPage.tsx',
     'hardware-setup/pages/SensorSetupPresentation.tsx',
@@ -52,7 +50,6 @@ export const legacyProductionPaths = Object.freeze({
     'hardware-setup/pages/ShellySetupPage.tsx',
     'hardware-setup/pages/ShellySetupPresentation.tsx',
     'hardware-setup/pages/TimeScheduleSetupPage.tsx',
-    'hardware-setup/pages/formUnits.ts',
     'hardware-setup/pages/useRuleSetupFeedback.ts',
     'hardware-setup/pages/useSensorSetupFeedback.ts',
     'hardware-setup/pages/useShellySetupFeedback.ts',
@@ -61,7 +58,6 @@ export const legacyProductionPaths = Object.freeze({
   'apps/mobile/src/flows': [
     'hardware-setup/phoneBleScan.ts',
     'hardware-setup/resourceDiagnostics.ts',
-    'hardware-setup/ruleAdvancedSettings.ts',
     'hardware-setup/ruleConfigDerivation.ts',
     'hardware-setup/schemas.ts',
     'hardware-setup/sensorReadingsStore.ts',

@@ -1,8 +1,10 @@
 import type { RulePresetId } from '@lcl/automation-core';
 import { useMemo } from 'react';
-import { useClimateAutomationScriptLoadFlow } from '../../features/automations/index.js';
+import {
+  DEFAULT_RULE_ADVANCED_SETTINGS,
+  useClimateAutomationScriptLoadFlow
+} from '../../features/automations/index.js';
 import { useHardwareSetupDraftStore } from './setupDraftStore.js';
-import { DEFAULT_RULE_ADVANCED_SETTINGS } from './ruleAdvancedSettings.js';
 import {
   deriveClimateRuleState,
   deriveShellyInputState

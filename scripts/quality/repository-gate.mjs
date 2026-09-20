@@ -436,14 +436,10 @@ const checkHardwareSetupArchitecture = async () => {
       mobileProductionBaselines[
         'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
       ],
-    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx':
-      mobileProductionBaselines[
-        'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx'
-      ],
+    'apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx': 350,
     'apps/mobile/src/screens/hardware-setup/pages/useShellySetupFeedback.ts': 200,
     'apps/mobile/src/screens/hardware-setup/pages/useSensorSetupFeedback.ts': 200,
     'apps/mobile/src/screens/hardware-setup/pages/useRuleSetupFeedback.ts': 180,
-    'apps/mobile/src/screens/hardware-setup/pages/RuleAdvancedSettingsInline.tsx': 220,
     'apps/mobile/src/flows/hardware-setup/useShellySetupScanFlow.ts': 350,
     'apps/mobile/src/flows/hardware-setup/useClimateAutomationInstallFlow.ts': 350
   };

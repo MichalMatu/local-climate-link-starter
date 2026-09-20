@@ -21,6 +21,20 @@ export {
 } from './data/timeAutomationRuntimeState.js';
 export { findScheduleRelayConflict } from './data/timeAutomationSchedule.js';
 export {
+  DEFAULT_RULE_ADVANCED_SETTINGS,
+  RULE_ADVANCED_LIMITS,
+  parseRuleAdvancedSettings,
+  validateRuleAdvancedSettings,
+  type RuleAdvancedSettingsInput,
+  type RuleAdvancedSettingsValidation
+} from './data/climateRuleSettings.js';
+export {
+  ClimateRuleEditor,
+  type ClimateRuleEditorProps,
+  type ClimateRuleLiveReading
+} from './components/ClimateRuleEditor.js';
+export { ALL_RULE_PRESETS } from './presentation/climateRulePresentation.js';
+export {
   useClimateAutomationScriptLoadFlow,
   type ClimateAutomationScriptLoadResult,
   type ClimateAutomationScriptLoadTarget

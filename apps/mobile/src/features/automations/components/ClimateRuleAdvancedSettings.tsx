@@ -1,28 +1,35 @@
-import type { RuleSetupFlow } from '../pageContracts.js';
 import { useTranslation } from '../../../app/i18n.js';
-import { stripTrailingUnit } from './formUnits.js';
+import { stripTrailingUnit } from '../presentation/climateRulePresentation.js';
 import {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS,
-  validateRuleAdvancedSettings
-} from '../../../flows/hardware-setup/ruleAdvancedSettings.js';
+  validateRuleAdvancedSettings,
+  type RuleAdvancedSettingsInput
+} from '../data/climateRuleSettings.js';
 
-export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) => {
+export type ClimateRuleAdvancedSettingsProps = RuleAdvancedSettingsInput & {
+  setRssiMinInput(value: string): void;
+  setStaleTimeoutMinInput(value: string): void;
+  setMinChangeMinInput(value: string): void;
+  setMaxOnHoursInput(value: string): void;
+};
+
+export const ClimateRuleAdvancedSettings = (props: ClimateRuleAdvancedSettingsProps) => {
   const { t } = useTranslation();
   const validation = validateRuleAdvancedSettings({
-    vpdAssistEnabled: flow.vpdAssistEnabled,
-    vpdTargetInput: flow.vpdTargetInput,
-    rssiMinInput: flow.rssiMinInput,
-    staleTimeoutMinInput: flow.staleTimeoutMinInput,
-    minChangeMinInput: flow.minChangeMinInput,
-    maxOnHoursInput: flow.maxOnHoursInput
+    vpdAssistEnabled: props.vpdAssistEnabled,
+    vpdTargetInput: props.vpdTargetInput,
+    rssiMinInput: props.rssiMinInput,
+    staleTimeoutMinInput: props.staleTimeoutMinInput,
+    minChangeMinInput: props.minChangeMinInput,
+    maxOnHoursInput: props.maxOnHoursInput
   });
 
   const resetDefaults = () => {
-    flow.setRssiMinInput(DEFAULT_RULE_ADVANCED_SETTINGS.rssiMinInput);
-    flow.setStaleTimeoutMinInput(DEFAULT_RULE_ADVANCED_SETTINGS.staleTimeoutMinInput);
-    flow.setMinChangeMinInput(DEFAULT_RULE_ADVANCED_SETTINGS.minChangeMinInput);
-    flow.setMaxOnHoursInput(DEFAULT_RULE_ADVANCED_SETTINGS.maxOnHoursInput);
+    props.setRssiMinInput(DEFAULT_RULE_ADVANCED_SETTINGS.rssiMinInput);
+    props.setStaleTimeoutMinInput(DEFAULT_RULE_ADVANCED_SETTINGS.staleTimeoutMinInput);
+    props.setMinChangeMinInput(DEFAULT_RULE_ADVANCED_SETTINGS.minChangeMinInput);
+    props.setMaxOnHoursInput(DEFAULT_RULE_ADVANCED_SETTINGS.maxOnHoursInput);
   };
 
   return (
@@ -46,8 +53,8 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
               min={RULE_ADVANCED_LIMITS.minChangeMinMin}
               step="0.25"
               type="number"
-              value={flow.minChangeMinInput}
-              onChange={(event) => flow.setMinChangeMinInput(event.currentTarget.value)}
+              value={props.minChangeMinInput}
+              onChange={(event) => props.setMinChangeMinInput(event.currentTarget.value)}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               min
@@ -79,8 +86,8 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
               min={RULE_ADVANCED_LIMITS.maxOnHoursMin}
               step="0.25"
               type="number"
-              value={flow.maxOnHoursInput}
-              onChange={(event) => flow.setMaxOnHoursInput(event.currentTarget.value)}
+              value={props.maxOnHoursInput}
+              onChange={(event) => props.setMaxOnHoursInput(event.currentTarget.value)}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               h
@@ -129,9 +136,9 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
               min={RULE_ADVANCED_LIMITS.staleTimeoutMinMin}
               step="1"
               type="number"
-              value={flow.staleTimeoutMinInput}
+              value={props.staleTimeoutMinInput}
               onChange={(event) =>
-                flow.setStaleTimeoutMinInput(event.currentTarget.value)
+                props.setStaleTimeoutMinInput(event.currentTarget.value)
               }
             />
             <span className="field-unit-control__unit" aria-hidden="true">
@@ -164,8 +171,8 @@ export const RuleAdvancedSettingsInline = ({ flow }: { flow: RuleSetupFlow }) =>
               min={RULE_ADVANCED_LIMITS.rssiMinMin}
               step="1"
               type="number"
-              value={flow.rssiMinInput}
-              onChange={(event) => flow.setRssiMinInput(event.currentTarget.value)}
+              value={props.rssiMinInput}
+              onChange={(event) => props.setRssiMinInput(event.currentTarget.value)}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               dBm

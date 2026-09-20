@@ -160,7 +160,7 @@ The first migrated `features/plugs` slice owns the manual/LAN Plug-add presentat
 
 `HardwareSetupScreen` coordinates setup navigation and lifecycle cleanup; it should not absorb page-specific presentation or transport logic.
 
-`features/automations` owns cross-feature managed Shelly automation status, deployed-script identity/source reads, the deployed climate-script load/decode lifecycle and the native Shelly time-schedule runtime lifecycle. Pure daily-time schedule calculations live in `@lcl/automation-core`; hardware setup retains device verification/setup status and temporary BLE-discovery orchestration.
+`features/automations` owns cross-feature managed Shelly automation status, deployed-script identity/source reads, the deployed climate-script load/decode lifecycle, climate-rule editor presentation/advanced-settings rules and the native Shelly time-schedule runtime lifecycle. `RuleSetupPage` remains a legacy adapter for live readings, feedback and safety dialogs. Pure daily-time schedule calculations live in `@lcl/automation-core`; hardware setup retains device verification/setup status and temporary BLE-discovery orchestration.
 
 ## Automation ownership and safety
 

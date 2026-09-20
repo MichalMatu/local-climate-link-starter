@@ -140,7 +140,7 @@ Hardware pages use narrow contracts such as `ShellySetupFlow`, `SensorSetupFlow`
 
 `features/plugs` owns the migrated Plug-add surface (manual entry and LAN scan presentation/local UI state). `ShellySetupPage` remains a legacy coordinator/adapter while the rest of the Plug setup surface is migrated incrementally.
 
-`features/automations` owns managed Shelly automation status, deployed-script reads, the deployed climate-script load/decode lifecycle and the native Shelly time-schedule runtime lifecycle. Legacy setup/query hooks compose that feature through its public API rather than owning those implementations. Pure daily-clock and relay-window calculations live in `@lcl/automation-core`.
+`features/automations` owns managed Shelly automation status, deployed-script reads, the deployed climate-script load/decode lifecycle, climate-rule editor presentation/advanced-settings rules and the native Shelly time-schedule runtime lifecycle. `RuleSetupPage` is now a legacy adapter for live-reading orchestration, feedback and safety dialogs rather than the owner of the editor. Legacy setup/query hooks compose the feature through its public API rather than owning those implementations. Pure daily-clock and relay-window calculations live in `@lcl/automation-core`.
 
 ## Script generator boundary
 
@@ -241,7 +241,6 @@ parser counts in `scripts/quality/architecture-baseline.mjs`:
 
 ```text
 apps/mobile/src/screens/AutomationDashboardScreen.tsx                  600
-apps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx         558
 apps/mobile/src/screens/InstallationDetailScreen.tsx                   458
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx       416
 apps/mobile/src/screens/hardware-setup/pages/SensorSetupPresentation.tsx 411

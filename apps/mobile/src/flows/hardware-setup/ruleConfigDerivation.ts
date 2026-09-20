@@ -8,7 +8,7 @@ import { t } from '../../app/i18n.js';
 import {
   parseRuleAdvancedSettings,
   validateRuleAdvancedSettings
-} from './ruleAdvancedSettings.js';
+} from '../../features/automations/index.js';
 import type { SensorDraftDevice } from './setupDraftStore.js';
 import {
   formatSensorId,
