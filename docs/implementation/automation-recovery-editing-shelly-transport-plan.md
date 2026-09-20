@@ -1,6 +1,6 @@
 # Automation recovery, editing and Shelly transport execution plan
 
-Updated: 2026-09-20
+Updated: 2026-09-21
 Status: active execution plan
 
 This is the canonical execution sequence after the Phase 0–3 architecture/tooling closeout. Work in small mergeable slices. Do not start the next slice while the previous one is red, unreviewed or only present on a work branch.
@@ -188,24 +188,54 @@ Known limitation carried forward: reconstruction after complete app-storage loss
 
 ## Slice 2A — edit installed climate automation in place
 
-Expected UX:
+Status: **done**.
+
+Completed product commit:
 
 ```text
-Plug
--> installed climate automation
--> Edit
--> editor prefilled from InstalledAutomation config
--> Save
--> update/replace managed Shelly runtime
--> verify runtime
--> persist updated InstalledAutomation
+05f7eb4b8c83c1583222f374c8f3ebabff7e7703
+Edit installed climate automation in place
 ```
 
-Reuse the current editor and runtime pipeline. Preserve `installedAtMs`; update `updatedAtMs` only after verified success. Preserve automation identity when relay ownership is unchanged. Detect sensor/relay ownership conflicts before destructive mutation. Failed remote mutation must not leave local state claiming success.
+Result:
+
+- climate detail exposes Edit and returns to the same installed automation after save/back;
+- the existing climate editor is hydrated from durable `InstalledAutomation` config rather than creating an edit-only form;
+- `features/automations` owns edit-draft derivation, management actions and remote edit orchestration;
+- stable Shelly `deviceId`, relay ownership and native-schedule conflict are verified before destructive mutation;
+- the currently owned managed script must still match the durable script id/hash before replacement;
+- relay is forced and confirmed OFF before mutation and again after replacement;
+- replacement must retain the managed Shelly script id and the resulting runtime must be running with the exact expected code hash;
+- durable automation identity and `installedAtMs` are preserved; `updatedAtMs` advances only after verified remote success;
+- failed/conflicting remote edits do not persist the edited durable config as successful;
+- hardware setup tab/hash navigation was extracted to a route-owned helper instead of raising architecture budgets.
+
+Verification before integration:
+
+- focused edit-flow, route/detail and hardware-setup suites passed during iteration, including 84/84 focused tests and a final hardware-setup regression run of 56/56;
+- `pnpm quality:repo` passed without changing architecture baselines;
+- exactly one accepted final full `pnpm check` passed in Local Agent task `20260921-slice2a-edit-climate-v20-final`, including formatting, lint, UX/repository gates, typecheck, tests, core coverage and production builds;
+- postimplementation full-diff review found no blocker and confirmed `main` was a clean one-commit fast-forward;
+- no physical Shelly smoke was required for 2A because runtime mutation/verification behavior is covered by deterministic service fixtures and existing Shelly client lifecycle tests.
+
+Transport note carried forward: 2A uses the existing `platform/shellyHttpTransport` adapter through `@lcl/shelly-client` RPC APIs and does not call raw HTTP from product UI. Do not introduce speculative BLE selection here; transport selection is generalized only after the real-hardware BLE feasibility slice proves the protocol.
 
 ## Slice 2B — edit installed Time automation in place
 
+Status: **next**.
+
 Use the same product-level edit/navigation semantics as 2A but keep Time's native Shelly schedule lifecycle separate. Update durable schedule IDs/config only after verified remote mutation. Do not force climate and Time runtimes through one artificial implementation.
+
+Required 2B preimplementation audit:
+
+- inspect the existing Time detail/setup/runtime ownership before coding;
+- identify exact `Schedule.Update`/create/delete behavior and whether existing job IDs can be preserved safely;
+- verify the exact stored schedule pair before any destructive mutation;
+- preserve stable `InstalledAutomation` identity and `installedAtMs`;
+- advance `updatedAtMs` and durable schedule IDs/config only after the resulting remote schedule pair is verified;
+- detect relay ownership conflicts before mutation;
+- failed mutation must leave an explainable local/remote state and must not claim the edited config as installed;
+- reuse shared navigation/edit semantics only where genuinely shared; do not route Time through the climate script editor/runtime.
 
 ## Slice 3A — device-settings foundation + complete LED settings
 
@@ -281,8 +311,8 @@ Do not perform a schema rewrite solely to match this diagram.
 0   InstalledAutomation foundation        DONE  60295d576
 1A  Forget vs uninstall semantics         DONE  b0b80e37f
 1B  Re-add + reconciliation               DONE  7aba04414
-2A  Edit climate automation               NEXT
-2B  Edit Time automation                  pending
+2A  Edit climate automation               DONE  05f7eb4b8
+2B  Edit Time automation                  NEXT
 3A  Full LED settings                     pending
 3B+ Additional settings families          pending
 4A  BLE feasibility spike                 pending
