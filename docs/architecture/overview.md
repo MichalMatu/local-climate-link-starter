@@ -64,6 +64,8 @@ A modal is appropriate for delete/safety confirmation or another short decision.
 
 `AppShell` also owns the single mobile toast host. Page-level flows may own their local toast queue/message state, but they must render it through `AppToastViewport`, which portals the shared `@lcl/ui` `ToastViewport` into `#app-toast-host`.
 
+`AppToastViewport` never falls back to rendering a fixed toast inside the calling screen, including on the first render. Until the shell host exists it renders nothing; once the host is available it portals there. Direct screen tests that bypass `AppShell` use the shared `renderWithAppToastHost` test helper rather than weakening this production contract.
+
 The host sits outside the scrollable page-content subtree and outside page cards/glass surfaces:
 
 ```text
