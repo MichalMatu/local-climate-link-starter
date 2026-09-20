@@ -395,18 +395,18 @@ Do not perform a schema rewrite merely to match this diagram. Apply the separati
 
 Update this table only after a slice has passed its full completion lifecycle.
 
-| Slice | Status | Main commit | Verification / note |
-| --- | --- | --- | --- |
+| Slice                            | Status  | Main commit          | Verification / note                                        |
+| -------------------------------- | ------- | -------------------- | ---------------------------------------------------------- |
 | 0 InstalledAutomation foundation | pending | `0c52c75b2` baseline | Previous attempt failed final full check; no change merged |
-| 1A Forget vs uninstall semantics | pending | — | — |
-| 1B Re-add + reconciliation | pending | — | — |
-| 2A Edit climate automation | pending | — | — |
-| 2B Edit Time automation | pending | — | — |
-| 3A Full LED settings | pending | — | — |
-| 3B+ Additional settings families | pending | — | Order chosen after capability audit |
-| 4A BLE feasibility spike | pending | — | Real hardware required |
-| 4B BLE transport | pending | — | Depends on 4A |
-| 4C+ BLE-backed capabilities | pending | — | Incremental enablement |
+| 1A Forget vs uninstall semantics | pending | —                    | —                                                          |
+| 1B Re-add + reconciliation       | pending | —                    | —                                                          |
+| 2A Edit climate automation       | pending | —                    | —                                                          |
+| 2B Edit Time automation          | pending | —                    | —                                                          |
+| 3A Full LED settings             | pending | —                    | —                                                          |
+| 3B+ Additional settings families | pending | —                    | Order chosen after capability audit                        |
+| 4A BLE feasibility spike         | pending | —                    | Real hardware required                                     |
+| 4B BLE transport                 | pending | —                    | Depends on 4A                                              |
+| 4C+ BLE-backed capabilities      | pending | —                    | Incremental enablement                                     |
 
 ## Handoff rule
 
