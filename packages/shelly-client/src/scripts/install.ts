@@ -14,15 +14,13 @@ import {
   type ShellyRpcTransport,
   type ShellyStatus
 } from '../model.js';
-import {
-  scriptCreateResponseSchema,
-  scriptStatusSchema,
-  switchStatusSchema
-} from '../rpc/validators.js';
+import { scriptCreateResponseSchema, scriptStatusSchema } from '../rpc/validators.js';
 import {
   parseShellyDeviceInfoResponse,
   parseShellyStatusResponse
 } from '../rpc/deviceStatus.js';
+import { validationError } from '../rpc/errors.js';
+import { runSafeShellyRelayTest, setShellyRelayState } from '../rpc/relay.js';
 import { hashScriptCode } from './hash.js';
 import { readShellyScriptCode, readShellyScriptList } from './read.js';
 
@@ -36,13 +34,6 @@ export interface RpcShellyClientOptions {
   mutationDelayMs?: number | undefined;
   sleepMs?: ((durationMs: number) => Promise<void>) | undefined;
 }
-
-const validationError = (message: string) => ({
-  kind: 'validation-failed' as const,
-  userMessageKey: 'errors.validationFailed',
-  technicalMessage: message,
-  retryable: false
-});
 
 const validateScriptId = (scriptId: number): Result<number> => {
   if (!Number.isInteger(scriptId) || scriptId < 0) {
@@ -58,13 +49,6 @@ const validateScriptId = (scriptId: number): Result<number> => {
 const scriptUploadError = (message: string): ShellyClientError => ({
   kind: 'script-upload-failed',
   userMessageKey: 'errors.scriptUploadFailed',
-  technicalMessage: message,
-  retryable: true
-});
-
-const relayTestError = (message: string): ShellyClientError => ({
-  kind: 'relay-test-failed',
-  userMessageKey: 'errors.relayTestFailed',
   technicalMessage: message,
   retryable: true
 });
@@ -365,18 +349,11 @@ export class RpcShellyClient implements ShellyClient {
     on: boolean,
     options?: { relayId?: number }
   ): Promise<Result<null>> {
-    const relayId = options?.relayId ?? 0;
-    if (!Number.isInteger(relayId) || relayId < 0) {
-      return Promise.resolve({
-        ok: false,
-        error: validationError(`Invalid Shelly relay id: ${relayId}.`)
-      });
-    }
-
-    return this.callMutation<null>({
-      method: RPC_METHODS.SwitchSet,
-      params: { id: relayId, on }
-    });
+    return setShellyRelayState(
+      (request) => this.callMutation<null>(request),
+      on,
+      options
+    );
   }
 
   async setRelayOn(options?: { relayId?: number }): Promise<Result<null>> {
@@ -390,92 +367,11 @@ export class RpcShellyClient implements ShellyClient {
   async safeRelayTest(options?: {
     onDurationMs?: number;
   }): Promise<Result<RelayTestResult>> {
-    const onDurationMs = options?.onDurationMs ?? 500;
-    let onCommandSent = false;
-    let offCommandSent = false;
-    let onError: ShellyClientError | undefined;
-    let offError: ShellyClientError | undefined;
-
-    try {
-      const on = await this.setRelayOn();
-      if (!on.ok) {
-        onError = on.error;
-      } else {
-        onCommandSent = true;
-        const onStatus = await this.transport.call<unknown>({
-          method: RPC_METHODS.SwitchGetStatus,
-          params: { id: 0 }
-        });
-        if (!onStatus.ok) {
-          onError = relayTestError(
-            `Relay ON state could not be confirmed. ${
-              onStatus.error.technicalMessage ?? onStatus.error.kind
-            }`
-          );
-        } else {
-          const parsedOn = switchStatusSchema.safeParse(onStatus.value);
-          if (!parsedOn.success) {
-            onError = relayTestError(
-              `Relay ON status was invalid. ${parsedOn.error.message}`
-            );
-          } else if (!parsedOn.data.output) {
-            onError = relayTestError(
-              'Relay did not reach ON state during the safe relay test.'
-            );
-          } else {
-            await new Promise((resolve) => setTimeout(resolve, onDurationMs));
-          }
-        }
-      }
-    } finally {
-      const off = await this.setRelayOff();
-      offCommandSent = off.ok;
-      if (!off.ok) {
-        offError = off.error;
-      }
-    }
-
-    if (offError) {
-      return {
-        ok: false,
-        error: relayTestError(
-          `Final relay OFF command failed; final state could not be confirmed. ${
-            offError.technicalMessage ?? offError.kind
-          }`
-        )
-      };
-    }
-
-    if (onError) {
-      return { ok: false, error: onError };
-    }
-
-    const status = await this.transport.call<unknown>({
-      method: RPC_METHODS.SwitchGetStatus,
-      params: { id: 0 }
-    });
-    if (!status.ok) {
-      return status;
-    }
-    const parsed = switchStatusSchema.safeParse(status.value);
-    if (!parsed.success) {
-      return { ok: false, error: validationError(parsed.error.message) };
-    }
-    if (parsed.data.output) {
-      return {
-        ok: false,
-        error: relayTestError('Final relay state is ON after the safe relay test.')
-      };
-    }
-
-    return {
-      ok: true,
-      value: {
-        finalRelayOn: parsed.data.output,
-        onCommandSent,
-        offCommandSent
-      }
-    };
+    return runSafeShellyRelayTest(
+      this.transport,
+      (request) => this.callMutation<null>(request),
+      options
+    );
   }
 }
 

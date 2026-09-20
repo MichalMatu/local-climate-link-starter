@@ -12,15 +12,9 @@ import {
   sysStatusSchema,
   wifiStatusSchema
 } from './validators.js';
+import { validationError } from './errors.js';
 
 const MIN_SYNCED_UNIX_TIME_SEC = 1_600_000_000;
-
-const validationError = (message: string) => ({
-  kind: 'validation-failed' as const,
-  userMessageKey: 'errors.validationFailed',
-  technicalMessage: message,
-  retryable: false
-});
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
