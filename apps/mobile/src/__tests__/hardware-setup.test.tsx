@@ -1289,9 +1289,6 @@ describe('HardwareSetupScreen', () => {
   });
 
   it('forgets a saved Shelly plug without deleting durable automation ownership', async () => {
-    renderHardwareSetup();
-    await addShellyThroughUi('Salon');
-
     const installation = createInstalledAutomation({
       shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
       shellyName: 'Salon',
@@ -1305,6 +1302,9 @@ describe('HardwareSetupScreen', () => {
       nowMs: 1000
     });
     useInstalledAutomationStore.getState().upsertInstallation(installation);
+
+    renderHardwareSetup();
+    await addShellyThroughUi('Salon');
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
