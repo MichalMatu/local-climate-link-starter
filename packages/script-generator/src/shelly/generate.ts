@@ -11,8 +11,8 @@ export type ShellyScriptGeneratorMode = 'climate-engine-v1' | 'discovery-debug';
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
 
 const renderPersistentConfigLoader = (): string => `var E=0;
-function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&typeof c.a==="string"&&typeof c.fa==="string"&&typeof c.n==="string"&&typeof c.k==="string"&&typeof c.i==="number"&&c.i>=0&&typeof c.r==="number"&&c.r>=-100&&c.r<=-20&&typeof c.on==="number"&&typeof c.off==="number"&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&typeof c.h==="number"&&c.h>=1&&c.h<=10&&typeof c.c==="number"&&c.c>0&&typeof c.s==="number"&&c.s>0&&typeof c.x==="number"&&c.x>0&&typeof c.vp==="number"&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off);}
-function lc(d){if(typeof Script==="undefined"||!Script.storage||!Script.storage.getItem)return d;try{var x=Script.storage.getItem(${JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)});if(x===null||x==="")return d;var c=JSON.parse(x);if(vc(c))return c;}catch(e){}E=1;return d;}
+function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&typeof c.a=="string"&&typeof c.fa=="string"&&typeof c.n=="string"&&typeof c.k=="string"&&typeof c.i=="number"&&c.i>=0&&typeof c.r=="number"&&c.r>=-100&&c.r<=-20&&typeof c.on=="number"&&typeof c.off=="number"&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&typeof c.h=="number"&&c.h>=1&&c.h<=10&&typeof c.c=="number"&&c.c>0&&typeof c.s=="number"&&c.s>0&&typeof c.x=="number"&&c.x>0&&typeof c.vp=="number"&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off);}
+function lc(d){if(typeof Script=="undefined"||!Script.storage||!Script.storage.getItem)return d;try{var x=Script.storage.getItem(${JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)});if(x==null||x=="")return d;var c=JSON.parse(x);if(vc(c))return c;}catch(e){}E=1;return d;}
 C=lc(C);`;
 
 const renderThresholdHelper =
@@ -33,7 +33,7 @@ function r2(d,o,s){var a=rb(d,o),b=rb(d,o+1);if(a===null||b===null)return null;v
 function pb(x){var d=sd(x);if(!d){R.ds="bm";return;}var t=null,h=null,b=null,o=1,l=lb(d),k,v;while(o<l){k=rb(d,o++);if(k==0)o++;else if(k==1)b=rb(d,o++);else if(k==12)o+=2;else if(k==2){v=r2(d,o,1);if(v==null){R.ds="bs";return;}t=v/100;o+=2;}else if(k==3){v=r2(d,o,0);if(v==null){R.ds="bs";return;}h=v/100;o+=2;}else if(k==46){h=rb(d,o++);if(h==null){R.ds="bs";return;}}else if(k==69){v=r2(d,o,1);if(v==null){R.ds="bs";return;}t=v/10;o+=2;}else{R.ds="bo";break;}}meas(t,h,b,x.rssi);}
 function mf(d){var l=lb(d),o=0;while(o<l){var n=rb(d,o);if(n===null||n===0)return null;var s=o+1,e=s+n;if(e>l)return null;if(rb(d,s)===255&&n>=7)return s+1;o=e;}return null;}
 function pt(x){var d=x.advData;if(!d){R.ds="ta";return;}var p=mf(d);if(p===null){R.ds="tm";return;}var lo=rb(d,p+1),hi=rb(d,p+2),h=rb(d,p+3),b=rb(d,p+4);if(lo===null||hi===null||h===null||b===null){R.ds="ts";return;}var raw=lo|(hi<<8);if(raw&32768)raw-=65536;var t=raw/10;if(h>100||t<-50||t>100){R.ds="tr";return;}meas(t,h,b,x.rssi);}
-function parse(x){return C.p===1?pt(x):pb(x);}`;
+function parse(x){return C.p==1?pt(x):pb(x);}`;
 
 const renderRuntimeState = (): string =>
   'var R={ls:null,l:0,t:null,h:null,tt:null,ht:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,m:0,sa:0};';
