@@ -20,9 +20,8 @@ describe('multi-sensor config limits', () => {
       sensor: sensor(1),
       sensorSet: {
         aggregation: 'avg',
-        additionalSensors: Array.from(
-          { length: MAX_CLIMATE_SENSORS - 1 },
-          (_, index) => sensor(index + 2)
+        additionalSensors: Array.from({ length: MAX_CLIMATE_SENSORS - 1 }, (_, index) =>
+          sensor(index + 2)
         )
       }
     });
@@ -40,9 +39,8 @@ describe('multi-sensor config limits', () => {
         sensor: sensor(1),
         sensorSet: {
           aggregation: 'avg',
-          additionalSensors: Array.from(
-            { length: MAX_CLIMATE_SENSORS },
-            (_, index) => sensor(index + 2)
+          additionalSensors: Array.from({ length: MAX_CLIMATE_SENSORS }, (_, index) =>
+            sensor(index + 2)
           )
         }
       })

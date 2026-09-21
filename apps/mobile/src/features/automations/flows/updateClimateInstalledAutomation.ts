@@ -97,7 +97,9 @@ const runtimeConfigMatches = (
   config: ShellyThermostatConfig
 ): boolean => {
   const runtimeConfig = effectiveRuntimeConfig(runtime);
-  return runtimeConfig !== null && shellyRuntimeConfigMatchesConfig(runtimeConfig, config);
+  return (
+    runtimeConfig !== null && shellyRuntimeConfigMatchesConfig(runtimeConfig, config)
+  );
 };
 
 const assertManagedRuntimeMatches = async (

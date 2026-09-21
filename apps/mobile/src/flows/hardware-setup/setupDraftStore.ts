@@ -319,7 +319,9 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
         }
         const patch = {
           selectedSensorId: id,
-          additionalSensorIds: state.additionalSensorIds.filter((sensorId) => sensorId !== id)
+          additionalSensorIds: state.additionalSensorIds.filter(
+            (sensorId) => sensorId !== id
+          )
         };
         return persistPatch(state, patch);
       }),
@@ -331,7 +333,10 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
       ),
     toggleAdditionalSensorDevice: (id) =>
       set((state) => {
-        if (id === state.selectedSensorId || !state.sensorDevices.some((item) => item.id === id)) {
+        if (
+          id === state.selectedSensorId ||
+          !state.sensorDevices.some((item) => item.id === id)
+        ) {
           return state;
         }
         const additionalSensorIds = state.additionalSensorIds.includes(id)
@@ -363,7 +368,11 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           selectedSensorId
         );
 
-        return persistPatch(state, { sensorDevices, selectedSensorId, additionalSensorIds });
+        return persistPatch(state, {
+          sensorDevices,
+          selectedSensorId,
+          additionalSensorIds
+        });
       }),
     setRulePreset: (rulePreset) => {
       const thresholds = defaultThresholdInputsForPreset(rulePreset);

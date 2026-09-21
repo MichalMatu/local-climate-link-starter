@@ -84,8 +84,7 @@ export const ClimateRuleDeviceSelectors = ({
   const additionalCandidates = sensorDevices.filter(
     (device) => device.id !== selectedSensorId
   );
-  const additionalLimitReached =
-    additionalSensorIds.length >= MAX_CLIMATE_SENSORS - 1;
+  const additionalLimitReached = additionalSensorIds.length >= MAX_CLIMATE_SENSORS - 1;
 
   return (
     <>

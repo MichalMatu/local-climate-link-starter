@@ -225,9 +225,8 @@ describe('updateClimateInstalledAutomation', () => {
         .mockResolvedValueOnce(runtime())
         .mockResolvedValueOnce(
           runtime({
-            persistedRuntimeConfigJson: serializeShellyRuntimeConfig(
-              recoveredEditedConfig
-            )
+            persistedRuntimeConfigJson:
+              serializeShellyRuntimeConfig(recoveredEditedConfig)
           })
         ),
       updateRuntimeConfig: vi.fn(async () => configHash(recoveredEditedConfig))

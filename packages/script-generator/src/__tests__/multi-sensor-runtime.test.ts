@@ -62,7 +62,8 @@ const createExecutableRuntime = (script: string) => {
     `${script}\nreturn {diag:function(){return JSON.parse(diag());}};`
   )(shelly, ble, timer) as { diag: () => { g: unknown[]; u: unknown[] } };
 
-  if (!scanCallback) throw new Error('Generated runtime did not subscribe to BLE scanner.');
+  if (!scanCallback)
+    throw new Error('Generated runtime did not subscribe to BLE scanner.');
   return { runtime, scan: scanCallback, switchCalls };
 };
 
@@ -107,7 +108,9 @@ describe('multi-sensor climate runtime', () => {
     ['firstValid', 40]
   ] as const)('aggregates fresh humidity with %s', (aggregation, expected) => {
     const config = multiSensorConfig(aggregation);
-    const { runtime, scan } = createExecutableRuntime(generateShellyThermostatScript(config));
+    const { runtime, scan } = createExecutableRuntime(
+      generateShellyThermostatScript(config)
+    );
 
     scan('scan-result', {
       addr: 'AA:BB:CC:DD:EE:01',
@@ -121,7 +124,17 @@ describe('multi-sensor climate runtime', () => {
     });
 
     expect(runtime.diag().g[2]).toBe(expected);
-    expect(runtime.diag().u).toEqual([2, 2, aggregation === 'avg' ? 0 : aggregation === 'min' ? 1 : aggregation === 'max' ? 2 : 3]);
+    expect(runtime.diag().u).toEqual([
+      2,
+      2,
+      aggregation === 'avg'
+        ? 0
+        : aggregation === 'min'
+          ? 1
+          : aggregation === 'max'
+            ? 2
+            : 3
+    ]);
   });
 
   it('ignores stale members while keeping a fresh member actionable', () => {
@@ -129,7 +142,9 @@ describe('multi-sensor climate runtime', () => {
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     try {
       const config = multiSensorConfig('avg');
-      const { runtime, scan } = createExecutableRuntime(generateShellyThermostatScript(config));
+      const { runtime, scan } = createExecutableRuntime(
+        generateShellyThermostatScript(config)
+      );
 
       scan('scan-result', {
         addr: 'AA:BB:CC:DD:EE:01',
@@ -225,6 +240,8 @@ describe('multi-sensor climate runtime', () => {
       sensorSet: { aggregation: 'avg', additionalSensors }
     });
 
-    expect(new TextEncoder().encode(serializeShellyRuntimeConfig(config)).length).toBeLessThanOrEqual(1024);
+    expect(
+      new TextEncoder().encode(serializeShellyRuntimeConfig(config)).length
+    ).toBeLessThanOrEqual(1024);
   });
 });

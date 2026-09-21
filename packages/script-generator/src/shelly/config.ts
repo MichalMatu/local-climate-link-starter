@@ -22,12 +22,7 @@ export const climateSensorSchema = z.object({
   parserValidated: z.boolean().default(false)
 });
 
-export const climateSensorAggregationSchema = z.enum([
-  'avg',
-  'min',
-  'max',
-  'firstValid'
-]);
+export const climateSensorAggregationSchema = z.enum(['avg', 'min', 'max', 'firstValid']);
 
 export type ClimateSensor = z.infer<typeof climateSensorSchema>;
 export type ClimateSensorAggregation = z.infer<typeof climateSensorAggregationSchema>;

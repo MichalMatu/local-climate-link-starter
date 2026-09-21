@@ -23,35 +23,37 @@ const runtimeAggregationSchema = z.union([
   z.literal(3)
 ]);
 
-export const shellyRuntimeConfigSchema = z.object({
-  a: z.string().min(1),
-  fa: z.string().min(1),
-  n: z.string().min(1),
-  k: z.string().min(1),
-  i: z.number().int().min(0),
-  r: z.number().int().min(-100).max(-20),
-  on: z.number(),
-  off: z.number(),
-  d: z.union([z.literal(0), z.literal(1)]),
-  m: z.union([z.literal(0), z.literal(1)]),
-  h: z.number().int().min(1).max(10),
-  c: z.number().int().positive(),
-  s: z.number().int().positive(),
-  x: z.number().int().positive(),
-  v: z.number().int().positive(),
-  vp: z.number().min(0).max(5),
-  p: z.union([z.literal(0), z.literal(1)]).optional(),
-  ss: z.array(runtimeSensorSchema).min(2).max(MAX_CLIMATE_SENSORS).optional(),
-  ag: runtimeAggregationSchema.optional()
-}).superRefine((config, context) => {
-  if ((config.ss === undefined) !== (config.ag === undefined)) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: config.ss === undefined ? ['ss'] : ['ag'],
-      message: 'Multi-sensor runtime config requires both ss and ag.'
-    });
-  }
-});
+export const shellyRuntimeConfigSchema = z
+  .object({
+    a: z.string().min(1),
+    fa: z.string().min(1),
+    n: z.string().min(1),
+    k: z.string().min(1),
+    i: z.number().int().min(0),
+    r: z.number().int().min(-100).max(-20),
+    on: z.number(),
+    off: z.number(),
+    d: z.union([z.literal(0), z.literal(1)]),
+    m: z.union([z.literal(0), z.literal(1)]),
+    h: z.number().int().min(1).max(10),
+    c: z.number().int().positive(),
+    s: z.number().int().positive(),
+    x: z.number().int().positive(),
+    v: z.number().int().positive(),
+    vp: z.number().min(0).max(5),
+    p: z.union([z.literal(0), z.literal(1)]).optional(),
+    ss: z.array(runtimeSensorSchema).min(2).max(MAX_CLIMATE_SENSORS).optional(),
+    ag: runtimeAggregationSchema.optional()
+  })
+  .superRefine((config, context) => {
+    if ((config.ss === undefined) !== (config.ag === undefined)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: config.ss === undefined ? ['ss'] : ['ag'],
+        message: 'Multi-sensor runtime config requires both ss and ag.'
+      });
+    }
+  });
 
 export type ShellyRuntimeConfig = z.infer<typeof shellyRuntimeConfigSchema>;
 export type ShellyRuntimeSensor = z.infer<typeof runtimeSensorSchema>;
@@ -64,7 +66,9 @@ const sensorProfileFlag = (
   profileId: ShellyThermostatConfig['sensor']['profileId']
 ): 0 | 1 => (profileId === 'tp357_custom_v1' ? 1 : 0);
 
-const aggregationFlag = (aggregation: ClimateSensorAggregation): ShellyRuntimeAggregation => {
+const aggregationFlag = (
+  aggregation: ClimateSensorAggregation
+): ShellyRuntimeAggregation => {
   switch (aggregation) {
     case 'avg':
       return 0;
