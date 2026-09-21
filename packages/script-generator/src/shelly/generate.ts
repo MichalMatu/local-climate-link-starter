@@ -45,7 +45,7 @@ const renderMeasurementHelper = (): string => {
 
   return `function fr(x,n){return x!==null&&n-x<=Math.min(${COMPOSITE_MEASUREMENT_WINDOW_MS},C.s);}
 function av(v,t,n){var z=[],q,u,i;for(i=0;i<R.u.length;i++){u=R.u[i];if(u&&fr(u[t],n)&&u[v]!=null)z.push(u[v]);}R.fc=z.length;if(!z.length)return null;if(C.ag===3||C.ag===undefined)return z[0];q=z[0];if(C.ag===1){for(i=1;i<z.length;i++)q=Math.min(q,z[i]);return q;}if(C.ag===2){for(i=1;i<z.length;i++)q=Math.max(q,z[i]);return q;}q=0;for(i=0;i<z.length;i++)q+=z[i];return q/z.length;}
-function meas(t,h,b,r,j){var n=nw(),u=R.u[j];if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.r=r;if(b!=null)R.b=b;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;${commonDecision}}`;
+function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(!p){R.ds="cv";return;}if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;${commonDecision}}`;
 };
 
 export const generateShellyThermostatScript = (input: unknown): string => {
