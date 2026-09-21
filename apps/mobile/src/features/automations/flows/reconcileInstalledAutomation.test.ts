@@ -1,4 +1,7 @@
-import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
+import {
+  createDefaultShellyThermostatConfig,
+  generateShellyThermostatScript
+} from '@lcl/script-generator';
 import { hashScriptCode, LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -35,6 +38,7 @@ const services = (
 ): InstalledAutomationReconciliationServices => ({
   readClimateRuntime: vi.fn(async () => ({
     scriptId: 7,
+    scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
     running: true,
     code: 'owned-code'
   })),
@@ -52,6 +56,87 @@ const target = {
 
 describe('reconcileInstalledAutomationsForShelly', () => {
   beforeEach(() => resetInstalledAutomationStore());
+
+  it('recovers durable climate ownership from a verified managed runtime after local state loss', async () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    config.sensor = {
+      ...config.sensor,
+      sensorId: 'old-local-sensor-id',
+      runtimeAddress: 'A4:C1:38:4F:24:CD',
+      displayName: 'Recovered sensor',
+      parserValidated: true
+    };
+    const code = generateShellyThermostatScript(config);
+
+    const result = await reconcileInstalledAutomationsForShelly(
+      target,
+      services({
+        readClimateRuntime: vi.fn(async () => ({
+          scriptId: 9,
+          scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+          running: true,
+          code
+        }))
+      })
+    );
+    const stored = useInstalledAutomationStore.getState().installations[0];
+
+    expect(result).toEqual({
+      status: 'recovered',
+      installationIds: ['climate:shelly-abc:0']
+    });
+    expect(stored).toMatchObject({
+      id: 'climate:shelly-abc:0',
+      kind: 'climate',
+      shelly: {
+        deviceId: 'shelly-abc',
+        name: 'Grow plug',
+        baseUrl: 'http://192.168.0.77/',
+        model: 'S3PL-00112EU',
+        gen: 3
+      },
+      script: {
+        id: 9,
+        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${code}`)
+      },
+      config: {
+        sensor: {
+          sensorId: 'A4:C1:38:4F:24:CD',
+          runtimeAddress: 'A4:C1:38:4F:24:CD',
+          displayName: 'Recovered sensor',
+          parserValidated: true
+        },
+        output: { relayId: 0 },
+        rule: { mode: 'heating' }
+      }
+    });
+  });
+
+  it('does not claim ownership of metadata-shaped code without the LCL marker', async () => {
+    const generated = generateShellyThermostatScript(
+      createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating')
+    );
+    const firstLineEnd = generated.indexOf(String.fromCharCode(10));
+    const code = generated.slice(firstLineEnd + 1);
+
+    await expect(
+      reconcileInstalledAutomationsForShelly(
+        target,
+        services({
+          readClimateRuntime: vi.fn(async () => ({
+            scriptId: 9,
+            scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+            running: true,
+            code
+          }))
+        })
+      )
+    ).resolves.toEqual({ status: 'none', installationIds: [] });
+    expect(useInstalledAutomationStore.getState().installations).toEqual([]);
+  });
 
   it('returns none when Local Climate Link has no durable ownership record', async () => {
     await expect(
@@ -88,6 +173,7 @@ describe('reconcileInstalledAutomationsForShelly', () => {
       services({
         readClimateRuntime: vi.fn(async () => ({
           scriptId: 7,
+          scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
           running: true,
           code: 'different-code'
         }))
