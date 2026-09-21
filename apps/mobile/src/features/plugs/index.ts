@@ -14,6 +14,11 @@ export {
 } from './components/PlugButtonModeSettingsCard.js';
 export type { PlugButtonModeSettingsTarget } from './data/plugButtonModeSettings.js';
 export {
+  PlugCloudSettingsCard,
+  type PlugCloudSettingsCardProps
+} from './components/PlugCloudSettingsCard.js';
+export type { PlugCloudSettingsTarget } from './data/plugCloudSettings.js';
+export {
   PlugLedSettingsCard,
   type PlugLedSettingsCardProps
 } from './components/PlugLedSettingsCard.js';
