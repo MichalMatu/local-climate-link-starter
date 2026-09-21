@@ -1,4 +1,5 @@
 import type { RulePresetId, ThresholdDirection } from '@lcl/automation-core';
+import type { ClimateSensorAggregation } from '@lcl/script-generator';
 import { InfoLabel, SelectField } from '@lcl/ui';
 import { useId } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -35,8 +36,12 @@ export type ClimateRuleEditorProps = {
   sensorDevices: readonly ClimateRuleSensorDevice[];
   selectedSensorId: string | null;
   selectedSensorName: string | undefined;
+  additionalSensorIds: readonly string[];
+  sensorAggregation: ClimateSensorAggregation;
   sensorLiveReadings: Record<string, ClimateRuleLiveReading>;
   selectSensorDevice(value: string): void;
+  toggleAdditionalSensorDevice(value: string): void;
+  setSensorAggregation(value: ClimateSensorAggregation): void;
   rulePreset: RulePresetId;
   controlDirection: ThresholdDirection | undefined;
   setRulePreset(value: RulePresetId): void;
@@ -118,8 +123,12 @@ export const ClimateRuleEditor = ({
         selectShellyDevice={props.selectShellyDevice}
         sensorDevices={props.sensorDevices}
         selectedSensorId={props.selectedSensorId}
+        additionalSensorIds={props.additionalSensorIds}
+        sensorAggregation={props.sensorAggregation}
         sensorLiveReadings={props.sensorLiveReadings}
         selectSensorDevice={props.selectSensorDevice}
+        toggleAdditionalSensorDevice={props.toggleAdditionalSensorDevice}
+        setSensorAggregation={props.setSensorAggregation}
       />
 
       <div className="field">
