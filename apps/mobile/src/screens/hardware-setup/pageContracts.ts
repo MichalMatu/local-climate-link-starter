@@ -73,6 +73,7 @@ export type SensorSetupFlow = Pick<
 
 export type RuleSetupFlow = Pick<
   HardwareSetupFlow,
+  | 'additionalSensorIds'
   | 'canRunSafeRelayTest'
   | 'configState'
   | 'installMutation'
@@ -97,6 +98,7 @@ export type RuleSetupFlow = Pick<
   | 'selectedSensorId'
   | 'selectedShelly'
   | 'selectedShellyId'
+  | 'sensorAggregation'
   | 'sensorDevices'
   | 'sensorSamplesById'
   | 'setMaxOnHoursInput'
@@ -105,6 +107,7 @@ export type RuleSetupFlow = Pick<
   | 'setOnThresholdInput'
   | 'setRssiMinInput'
   | 'setRulePreset'
+  | 'setSensorAggregation'
   | 'setStaleTimeoutMinInput'
   | 'setVpdAssistEnabled'
   | 'setVpdTargetInput'
@@ -113,6 +116,7 @@ export type RuleSetupFlow = Pick<
   | 'startSavedSensorLiveScan'
   | 'staleTimeoutMinInput'
   | 'stopSavedSensorLiveScan'
+  | 'toggleAdditionalSensorDevice'
   | 'vpdAssistEnabled'
   | 'vpdTargetInput'
 >;
