@@ -931,7 +931,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await expect(page.getByText('Skopiowano skrypt.')).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-    .toContain('m: xiaomi-bthome-minimal');
+    .toContain('m: climate-engine-v1');
   expect(consoleProblems).toEqual([]);
 });
 

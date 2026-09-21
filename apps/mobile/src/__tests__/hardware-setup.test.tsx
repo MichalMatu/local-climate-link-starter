@@ -2191,7 +2191,7 @@ describe('HardwareSetupScreen', () => {
 
     const scriptDialog = await openRuleScriptDialog();
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
-      'm: xiaomi-bthome-minimal'
+      'm: climate-engine-v1'
     );
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
       'A4:C1:38:4F:24:CD'
@@ -2264,7 +2264,7 @@ describe('HardwareSetupScreen', () => {
     expect(getRuleSummary()).not.toHaveTextContent('TP357, C2:C0:00:30:64:01');
     const scriptDialog = await openRuleScriptDialog();
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
-      'm: tp357-minimal'
+      'm: climate-engine-v1'
     );
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
       '"tm"'
@@ -2753,7 +2753,7 @@ describe('HardwareSetupScreen', () => {
 
       await waitFor(() =>
         expect(writeText).toHaveBeenCalledWith(
-          expect.stringContaining('m: xiaomi-bthome-minimal')
+          expect.stringContaining('m: climate-engine-v1')
         )
       );
       expect(writeText).toHaveBeenCalledWith(expect.stringContaining('"vp":1.25'));
