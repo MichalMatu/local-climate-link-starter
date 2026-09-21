@@ -1,6 +1,7 @@
 import {
   createDefaultShellyThermostatConfig,
-  generateShellyThermostatScript
+  generateShellyThermostatScript,
+  serializeShellyRuntimeConfig
 } from '@lcl/script-generator';
 import { hashScriptCode, LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -40,7 +41,8 @@ const services = (
     scriptId: 7,
     scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
     running: true,
-    code: 'owned-code'
+    code: 'owned-code',
+    persistedRuntimeConfigJson: null
   })),
   readTimeScheduleState: vi.fn(async () => 'running' as const),
   ...overrides
@@ -78,7 +80,8 @@ describe('reconcileInstalledAutomationsForShelly', () => {
           scriptId: 9,
           scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
           running: true,
-          code
+          code,
+          persistedRuntimeConfigJson: null
         }))
       })
     );
@@ -115,6 +118,64 @@ describe('reconcileInstalledAutomationsForShelly', () => {
     });
   });
 
+  it('recovers the persisted config instead of stale embedded fallback', async () => {
+    const embedded = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const persistedBase = createDefaultShellyThermostatConfig('tp357_custom_v1', 'cooling');
+    const persisted = {
+      ...persistedBase,
+      sensor: {
+        ...persistedBase.sensor,
+        runtimeAddress: 'C2:C0:00:30:64:01',
+        displayName: 'Persisted TP357'
+      },
+      rule: {
+        ...persistedBase.rule,
+        control: {
+          ...persistedBase.rule.control,
+          onThreshold: 27,
+          offThreshold: 26
+        }
+      }
+    };
+    const code = generateShellyThermostatScript(embedded);
+
+    const result = await reconcileInstalledAutomationsForShelly(
+      target,
+      services({
+        readClimateRuntime: vi.fn(async () => ({
+          scriptId: 9,
+          scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+          running: true,
+          code,
+          persistedRuntimeConfigJson: serializeShellyRuntimeConfig(persisted)
+        }))
+      })
+    );
+    const stored = useInstalledAutomationStore.getState().installations[0];
+
+    expect(result.status).toBe('recovered');
+    expect(stored).toMatchObject({
+      kind: 'climate',
+      config: {
+        sensor: {
+          profileId: 'tp357_custom_v1',
+          runtimeAddress: 'C2:C0:00:30:64:01',
+          displayName: 'Persisted TP357'
+        },
+        rule: {
+          mode: 'cooling',
+          control: {
+            onThreshold: 27,
+            offThreshold: 26
+          }
+        }
+      }
+    });
+  });
+
   it('does not claim ownership of metadata-shaped code without the LCL marker', async () => {
     const generated = generateShellyThermostatScript(
       createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating')
@@ -130,7 +191,8 @@ describe('reconcileInstalledAutomationsForShelly', () => {
             scriptId: 9,
             scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
             running: true,
-            code
+            code,
+            persistedRuntimeConfigJson: null
           }))
         })
       )
@@ -175,7 +237,8 @@ describe('reconcileInstalledAutomationsForShelly', () => {
           scriptId: 7,
           scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
           running: true,
-          code: 'different-code'
+          code: 'different-code',
+          persistedRuntimeConfigJson: null
         }))
       })
     );
