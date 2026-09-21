@@ -3,6 +3,8 @@ import {
   decodeShellyThermostatScript,
   generateShellyRuntimeConfigUpdateEval,
   generateShellyThermostatScript,
+  shellyRuntimeConfigMatchesConfig,
+  supportsShellyMultiSensorRuntime,
   supportsShellyRuntimeConfigPersistence,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
@@ -82,14 +84,20 @@ const defaultServices: ClimateAutomationEditServices = {
 const runtimeHash = (code: string): string =>
   hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${code}`);
 
-const effectiveRuntimeConfigHash = (
-  runtime: ShellyAutomationScriptState
-): string | null => {
+const effectiveRuntimeConfig = (runtime: ShellyAutomationScriptState) => {
   if (runtime.code === null) return null;
   return (
     decodeShellyThermostatScript(runtime.code, runtime.persistedRuntimeConfigJson)
-      ?.runtimeConfig.k ?? null
+      ?.runtimeConfig ?? null
   );
+};
+
+const runtimeConfigMatches = (
+  runtime: ShellyAutomationScriptState,
+  config: ShellyThermostatConfig
+): boolean => {
+  const runtimeConfig = effectiveRuntimeConfig(runtime);
+  return runtimeConfig !== null && shellyRuntimeConfigMatchesConfig(runtimeConfig, config);
 };
 
 const assertManagedRuntimeMatches = async (
@@ -106,7 +114,7 @@ const assertManagedRuntimeMatches = async (
   }
   if (
     supportsShellyRuntimeConfigPersistence(runtime.code) &&
-    effectiveRuntimeConfigHash(runtime) !== configHash(installation.config)
+    !runtimeConfigMatches(runtime, installation.config)
   ) {
     throw new Error('Stored automation config does not match Shelly.');
   }
@@ -128,7 +136,7 @@ const verifyPersistentRuntime = async ({
     runtime.script.running !== true ||
     runtime.code === null ||
     runtimeHash(runtime.code) !== installation.script.hash ||
-    effectiveRuntimeConfigHash(runtime) !== configHash(expectedConfig)
+    !runtimeConfigMatches(runtime, expectedConfig)
   ) {
     throw new Error('Shelly did not confirm the edited automation runtime.');
   }
@@ -198,6 +206,9 @@ const persistentEdit = async ({
   };
 };
 
+const requiresMultiSensorRuntime = (config: ShellyThermostatConfig): boolean =>
+  (config.sensorSet?.additionalSensors.length ?? 0) > 0;
+
 export const updateClimateInstalledAutomation = async ({
   installation,
   config,
@@ -249,7 +260,9 @@ export const updateClimateInstalledAutomation = async ({
     currentRuntime.code !== null &&
     currentRuntime.script?.running === true &&
     supportsShellyRuntimeConfigPersistence(currentRuntime.code) &&
-    currentRuntime.runtimeConfigStorageSupported
+    currentRuntime.runtimeConfigStorageSupported &&
+    (!requiresMultiSensorRuntime(config) ||
+      supportsShellyMultiSensorRuntime(currentRuntime.code))
   ) {
     install = await persistentEdit({ installation, config, services });
   } else {
@@ -266,7 +279,7 @@ export const updateClimateInstalledAutomation = async ({
       verified.script.running !== true ||
       verified.code === null ||
       runtimeHash(verified.code) !== install.scriptHash ||
-      effectiveRuntimeConfigHash(verified) !== configHash(config)
+      !runtimeConfigMatches(verified, config)
     ) {
       throw new Error('Shelly did not confirm the edited automation runtime.');
     }
