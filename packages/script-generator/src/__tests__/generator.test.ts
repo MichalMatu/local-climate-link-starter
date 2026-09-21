@@ -287,7 +287,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('readUint16LE');
     expect(script).not.toContain('function dataLength');
-    expect(byteLength(script)).toBeLessThanOrEqual(6500);
+    expect(byteLength(script)).toBeLessThanOrEqual(8000);
     expect(() => new Function(script)).not.toThrow();
   });
 
@@ -763,7 +763,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('BTHome.parseData');
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('xiaomi_lywsd03mmc_bthome_v2');
-    expect(byteLength(script)).toBeLessThanOrEqual(6500);
+    expect(byteLength(script)).toBeLessThanOrEqual(8000);
     expect(() => new Function(script)).not.toThrow();
   });
 

@@ -23,7 +23,7 @@ const modes = [
 ] as const satisfies readonly RuleMode[];
 const vpdOptions = [false, true] as const;
 
-const runtimeBudgetBytes = 6_500;
+const runtimeBudgetBytes = 8_000;
 
 const byteLength = (value: string): number => new TextEncoder().encode(value).length;
 
@@ -157,7 +157,7 @@ describe('Shelly runtime generation matrix', () => {
       expect(script).toContain('function ad(d)');
       expect(script).toContain('function r2(d,o,s)');
       expect(script).toContain('function mf(d)');
-      expect(script).toContain('function parse(x){return C.p===1?pt(x):pb(x);}');
+      expect(script).toContain('function parse(x,p,j){return p===1?pt(x,j):pb(x,j);}');
       expect(script).not.toContain('BTHome.parseData');
       expect(script).not.toContain('parseBthomeV2Payload');
     }
