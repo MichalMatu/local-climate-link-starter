@@ -9,6 +9,11 @@ export {
   type PlugDeleteConfirmModalProps
 } from './components/PlugDeleteConfirmModal.js';
 export {
+  PlugButtonModeSettingsCard,
+  type PlugButtonModeSettingsCardProps
+} from './components/PlugButtonModeSettingsCard.js';
+export type { PlugButtonModeSettingsTarget } from './data/plugButtonModeSettings.js';
+export {
   PlugLedSettingsCard,
   type PlugLedSettingsCardProps
 } from './components/PlugLedSettingsCard.js';
