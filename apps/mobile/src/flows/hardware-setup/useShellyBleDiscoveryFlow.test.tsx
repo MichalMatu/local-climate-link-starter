@@ -31,7 +31,8 @@ const device = {
   scriptIdInput: '1'
 };
 
-const createWrapper = (queryClient: QueryClient) =>
+const createWrapper =
+  (queryClient: QueryClient) =>
   ({ children }: PropsWithChildren) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
 
@@ -99,7 +100,9 @@ describe('useShellyBleDiscoveryFlow lifecycle', () => {
     });
 
     act(() => result.current.startBleDiscovery(device));
-    await waitFor(() => expect(readShellyBleDiscoverySnapshotMock).toHaveBeenCalledOnce());
+    await waitFor(() =>
+      expect(readShellyBleDiscoverySnapshotMock).toHaveBeenCalledOnce()
+    );
 
     const cleanupBleDiscovery = result.current.cleanupBleDiscovery;
     unmount();
