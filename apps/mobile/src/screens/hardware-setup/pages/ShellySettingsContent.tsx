@@ -3,6 +3,7 @@ import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   PlugButtonModeSettingsCard,
+  PlugCloudSettingsCard,
   PlugLedSettingsCard
 } from '../../../features/plugs/index.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
@@ -125,6 +126,7 @@ export const ShellySettingsContent = ({
       </div>
 
       <PlugButtonModeSettingsCard target={settingsTarget} />
+      <PlugCloudSettingsCard target={settingsTarget} />
       <PlugLedSettingsCard target={settingsTarget} />
 
       <div className="action-row">
