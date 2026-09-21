@@ -86,10 +86,8 @@ const sensorProfileForRuntimeMode = (
 const sensorProfileForFlag = (profileFlag: 0 | 1): SensorProfileId =>
   profileFlag === 1 ? 'tp357_custom_v1' : 'xiaomi_lywsd03mmc_bthome_v2';
 
-const fullAddressFromCompact = (compactAddress: string): string => {
-  const pairs = compactAddress.match(/.{1,2}/g);
-  return pairs?.join(':') ?? compactAddress;
-};
+const fullAddressFromCompact = (compactAddress: string): string =>
+  compactAddress.match(/.{1,2}/g)!.join(':');
 
 const decodedSensors = (
   runtimeMode: DecodedShellyThermostatRuntimeMode,
@@ -178,9 +176,10 @@ export const decodeShellyThermostatScript = (
       runtimeAddress: primarySensor.runtimeAddress,
       compactAddress: primarySensor.compactAddress,
       sensors,
-      aggregation: runtimeConfig.ag === undefined
-        ? 'firstValid'
-        : runtimeAggregationFromFlag(runtimeConfig.ag),
+      aggregation:
+        runtimeConfig.ag === undefined
+          ? 'firstValid'
+          : runtimeAggregationFromFlag(runtimeConfig.ag),
       relayId: runtimeConfig.i,
       mode: modeForControl(metric, direction),
       control: {
