@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_HARDWARE_SETUP_DRAFT,
+  HARDWARE_SETUP_DRAFT_STORAGE_KEY,
   resetHardwareSetupDraftStore,
   useHardwareSetupDraftStore
 } from './setupDraftStore.js';
@@ -76,5 +77,62 @@ describe('hardware setup Plug identity', () => {
     expect(
       useHardwareSetupDraftStore.getState().shellyDevices.map((item) => item.id)
     ).toEqual(['SHELLYPLUGSG3-TEST', 'shellyplugsg3-other']);
+  });
+
+  it('persists additional sensors and aggregation in the v9 hardware draft', () => {
+    const setItem = vi.fn();
+    const originalLocalStorage = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: vi.fn(() => null),
+        setItem,
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+        key: vi.fn(() => null),
+        length: 0
+      }
+    });
+
+    try {
+      useHardwareSetupDraftStore.setState({
+        ...DEFAULT_HARDWARE_SETUP_DRAFT,
+        sensorDevices: [
+          {
+            id: 'sensor-a',
+            name: 'Primary',
+            runtimeAddress: 'C2:C0:00:30:64:01',
+            profileId: 'tp357_custom_v1'
+          },
+          {
+            id: 'sensor-b',
+            name: 'Additional',
+            runtimeAddress: 'C2:C0:00:30:64:02',
+            profileId: 'tp357_custom_v1'
+          }
+        ],
+        selectedSensorId: 'sensor-a'
+      });
+
+      useHardwareSetupDraftStore.getState().setAdditionalSensorIds(['sensor-b']);
+      useHardwareSetupDraftStore.getState().setSensorAggregation('max');
+
+      const lastWrite = setItem.mock.calls.at(-1);
+      expect(lastWrite?.[0]).toBe(HARDWARE_SETUP_DRAFT_STORAGE_KEY);
+      const stored = JSON.parse(String(lastWrite?.[1])) as {
+        selectedSensorId: string | null;
+        additionalSensorIds: string[];
+        sensorAggregation: string;
+      };
+      expect(stored).toMatchObject({
+        selectedSensorId: 'sensor-a',
+        additionalSensorIds: ['sensor-b'],
+        sensorAggregation: 'max'
+      });
+    } finally {
+      if (originalLocalStorage) {
+        Object.defineProperty(window, 'localStorage', originalLocalStorage);
+      }
+    }
   });
 });
