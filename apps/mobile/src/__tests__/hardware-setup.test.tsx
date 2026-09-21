@@ -1149,7 +1149,11 @@ describe('HardwareSetupScreen', () => {
     });
     fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
 
-    expect(await screen.findByText('Script.List test failure')).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        'Nie widzę Shelly Scripts w statusie gniazdka. Sprawdź firmware albo wyłącz Matter.'
+      )
+    ).toBeInTheDocument();
     expect(
       screen.queryByText('Sprawdź IP w routerze albo w ustawieniach Shelly.')
     ).not.toBeInTheDocument();
@@ -1735,7 +1739,7 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeNull();
     expect(
       within(toastRegion)
-        .getByText('Sprawdź IP w routerze albo w ustawieniach Shelly.')
+        .getByText('Pod tym adresem nie dostałem poprawnej odpowiedzi z Shelly.')
         .closest('[role="status"]')
     ).not.toBeNull();
     expect(

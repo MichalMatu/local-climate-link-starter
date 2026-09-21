@@ -18,7 +18,7 @@ import {
   countIpv4RangeScanAddresses,
   normalizeShellyUrl
 } from '../../../flows/hardware-setup/validation.js';
-import type { HardwarePageProps } from '../helpers.js';
+import { mutationError, type HardwarePageProps } from '../helpers.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { ShellyBleDiscoveryContent } from './ShellyBleDiscoveryContent.js';
 import { ShellyBleDiscoveryModal } from './ShellyBleDiscoveryModal.js';
@@ -124,12 +124,8 @@ export const ShellySetupPage = ({
         onSuccess();
         pushToast('ok', t('hardware.shelly.added'));
       },
-      onError: () => {
-        pushToast(
-          'warning',
-          t('hardware.shelly.checkFailedTitle'),
-          t('hardware.shelly.checkFailedDetail')
-        );
+      onError: (error) => {
+        pushToast('warning', t('hardware.shelly.checkFailedTitle'), mutationError(error));
       }
     });
   };
@@ -147,11 +143,11 @@ export const ShellySetupPage = ({
         onSuccess: () => {
           pushToast('ok', t('hardware.shelly.added'));
         },
-        onError: () => {
+        onError: (error) => {
           pushToast(
             'warning',
             t('hardware.shelly.checkFailedTitle'),
-            t('hardware.shelly.checkFailedDetail')
+            mutationError(error)
           );
         }
       }
