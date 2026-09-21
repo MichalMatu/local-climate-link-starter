@@ -6,7 +6,8 @@ import {
   generateShellyRuntimeConfigUpdateEval,
   generateShellyThermostatScript,
   serializeShellyRuntimeConfig,
-  SHELLY_RUNTIME_CONFIG_STORAGE_KEY
+  SHELLY_RUNTIME_CONFIG_STORAGE_KEY,
+  supportsShellyRuntimeConfigPersistence
 } from '../index.js';
 
 describe('persistent Shelly runtime config', () => {
@@ -177,6 +178,18 @@ describe('persistent Shelly runtime config', () => {
     expect(runtime).toEqual({ on: true, ds: 'old' });
     expect(evaluate({}, runtime, () => true, {}, () => 0)).toBe('ns');
     expect(runtime).toEqual({ on: true, ds: 'old' });
+  });
+
+  it('detects the persistence bootstrap only on capable managed engines', () => {
+    const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
+
+    expect(supportsShellyRuntimeConfigPersistence(script)).toBe(true);
+    expect(supportsShellyRuntimeConfigPersistence(script.replace('function vc(c)', ''))).toBe(
+      false
+    );
+    expect(
+      supportsShellyRuntimeConfigPersistence(script.replace('// m: climate-engine-v1', ''))
+    ).toBe(false);
   });
 
   it('embeds the persistent loader and storage key in the stable engine', () => {
