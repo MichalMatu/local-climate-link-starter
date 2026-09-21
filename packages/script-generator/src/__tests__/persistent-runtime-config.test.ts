@@ -1,11 +1,13 @@
 import {
   configHash,
   createDefaultShellyThermostatConfig,
+  createShellyRuntimeConfig,
   decodeShellyRuntimeConfigJson,
   decodeShellyThermostatScript,
   generateShellyRuntimeConfigUpdateEval,
   generateShellyThermostatScript,
   serializeShellyRuntimeConfig,
+  shellyRuntimeConfigMatchesConfig,
   SHELLY_RUNTIME_CONFIG_STORAGE_KEY,
   supportsShellyRuntimeConfigPersistence
 } from '../index.js';
@@ -24,6 +26,32 @@ describe('persistent Shelly runtime config', () => {
     });
     expect(decodeShellyRuntimeConfigJson('{bad')).toBeNull();
     expect(decodeShellyRuntimeConfigJson('{"v":1}')).toBeNull();
+  });
+
+  it('matches runtime semantics without depending on local-only sensor identity', () => {
+    const original = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const runtimeConfig = createShellyRuntimeConfig(original, configHash(original));
+    const recovered = {
+      ...original,
+      sensor: {
+        ...original.sensor,
+        sensorId: original.sensor.runtimeAddress
+      }
+    };
+
+    expect(shellyRuntimeConfigMatchesConfig(runtimeConfig, recovered)).toBe(true);
+    expect(
+      shellyRuntimeConfigMatchesConfig(runtimeConfig, {
+        ...recovered,
+        rule: {
+          ...recovered.rule,
+          control: { ...recovered.rule.control, onThreshold: 18 }
+        }
+      })
+    ).toBe(false);
   });
 
   it('prefers a valid persisted override when decoding a managed engine', () => {
