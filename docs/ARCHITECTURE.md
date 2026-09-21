@@ -51,7 +51,7 @@ Refactor only when it removes a concrete blocker, restores one clear owner, or e
 
 ## Automation Engine direction
 
-The next architectural stage separates a stable Local Climate Engine from automation data/configuration:
+The current architectural stage separates a stable Local Climate Engine from automation data/configuration:
 
 ```text
 mobile automation configuration
@@ -64,7 +64,9 @@ mobile automation configuration
               -> relay
 ```
 
-The goal is to update configuration/data without regenerating and replacing the runtime script whenever the engine itself has not changed. This separation comes before adding more generator complexity.
+The climate generator now emits one `climate-engine-v1` runtime body across the supported Xiaomi BTHome and TP357 sensor profiles and across VPD on/off. Sensor-profile selection, thresholds and other automation-specific values live in the typed compact runtime config. The decoder still recognizes installed 0.2.x profile-specific runtimes for conservative recovery.
+
+The compact config is still embedded in generated script text. The next step is a capability-gated persistent config channel with explicit validation, versioning, upgrade and rollback semantics so ordinary config edits can stop replacing the engine script. This separation comes before adding more automation-generator complexity.
 
 ## Transport direction
 
