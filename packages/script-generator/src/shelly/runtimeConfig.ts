@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import type { ShellyThermostatConfig } from './config.js';
+import { configHash, stableStringify } from './hash.js';
+
+export const SHELLY_RUNTIME_CONFIG_STORAGE_KEY = 'lcl_cfg_v1';
 
 export const shellyRuntimeConfigSchema = z.object({
   a: z.string().min(1),
@@ -49,6 +52,22 @@ export const createShellyRuntimeConfig = (
   p: config.sensor.profileId === 'tp357_custom_v1' ? 1 : 0
 });
 
+export const serializeShellyRuntimeConfig = (config: ShellyThermostatConfig): string =>
+  stableStringify(createShellyRuntimeConfig(config, configHash(config)));
+
+export const parseShellyRuntimeConfig = (input: unknown): ShellyRuntimeConfig | null => {
+  const result = shellyRuntimeConfigSchema.safeParse(input);
+  return result.success ? result.data : null;
+};
+
+export const decodeShellyRuntimeConfigJson = (value: string): ShellyRuntimeConfig | null => {
+  try {
+    return parseShellyRuntimeConfig(JSON.parse(value) as unknown);
+  } catch {
+    return null;
+  }
+};
+
 const runtimeConfigJsonFromScript = (script: string): unknown | null => {
   const start = script.indexOf('var C=');
   if (start < 0) return null;
@@ -64,7 +83,5 @@ const runtimeConfigJsonFromScript = (script: string): unknown | null => {
   }
 };
 
-export const decodeShellyRuntimeConfig = (script: string): ShellyRuntimeConfig | null => {
-  const result = shellyRuntimeConfigSchema.safeParse(runtimeConfigJsonFromScript(script));
-  return result.success ? result.data : null;
-};
+export const decodeShellyRuntimeConfig = (script: string): ShellyRuntimeConfig | null =>
+  parseShellyRuntimeConfig(runtimeConfigJsonFromScript(script));
