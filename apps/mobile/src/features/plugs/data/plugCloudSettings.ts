@@ -7,8 +7,7 @@ import {
 
 export type PlugCloudSettingsTarget = PlugSettingsTarget;
 export type PlugCloudSettingsReadResult =
-  | { supported: false }
-  | { supported: true; enabled: boolean; connected: boolean };
+  { supported: false } | { supported: true; enabled: boolean; connected: boolean };
 
 const cloudSettings = (settings: ShellyCloudReadResult): PlugCloudSettingsReadResult =>
   settings.supported

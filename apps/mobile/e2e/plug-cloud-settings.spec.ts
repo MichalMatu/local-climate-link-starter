@@ -81,7 +81,12 @@ const mockShelly = async (page: Page) => {
         break;
       case 'Shelly.ListMethods':
         result = {
-          methods: ['Shelly.GetStatus', 'Cloud.GetConfig', 'Cloud.SetConfig', 'Cloud.GetStatus']
+          methods: [
+            'Shelly.GetStatus',
+            'Cloud.GetConfig',
+            'Cloud.SetConfig',
+            'Cloud.GetStatus'
+          ]
         };
         break;
       case 'Cloud.GetConfig':
@@ -125,11 +130,15 @@ const expectNoHorizontalOverflow = async (page: Page) => {
         const style = window.getComputedStyle(element);
         const rect = element.getBoundingClientRect();
         const hasSize = rect.width > 0 && rect.height > 0;
-        const allowsHorizontalScroll = style.overflowX === 'auto' || style.overflowX === 'scroll';
+        const allowsHorizontalScroll =
+          style.overflowX === 'auto' || style.overflowX === 'scroll';
         const leavesViewport = rect.left < -1 || rect.right > viewportWidth + 1;
         return !hasSize || allowsHorizontalScroll || !leavesViewport
           ? null
-          : { tag: element.tagName.toLowerCase(), text: element.textContent?.trim().slice(0, 80) ?? '' };
+          : {
+              tag: element.tagName.toLowerCase(),
+              text: element.textContent?.trim().slice(0, 80) ?? ''
+            };
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .slice(0, 6);
@@ -147,15 +156,21 @@ const openPlugSettings = async (page: Page) => {
 };
 
 for (const viewport of viewports) {
-  test(`Shelly Cloud setting fits Plug settings on ${viewport.name}`, async ({ page }) => {
+  test(`Shelly Cloud setting fits Plug settings on ${viewport.name}`, async ({
+    page
+  }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedSavedPlug(page);
     await mockShelly(page);
     await openPlugSettings(page);
 
-    await expect(page.getByRole('checkbox', { name: 'Włącz Shelly Cloud' })).not.toBeChecked();
     await expect(
-      page.getByText('Shelly Cloud jest wyłączona. Local Climate Link nadal działa w sieci lokalnej.')
+      page.getByRole('checkbox', { name: 'Włącz Shelly Cloud' })
+    ).not.toBeChecked();
+    await expect(
+      page.getByText(
+        'Shelly Cloud jest wyłączona. Local Climate Link nadal działa w sieci lokalnej.'
+      )
     ).toBeVisible();
     await expect(page.getByText('Połączenie z chmurą: Brak połączenia')).toBeVisible();
     await expectNoHorizontalOverflow(page);

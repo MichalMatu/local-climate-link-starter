@@ -15,7 +15,9 @@ export type PlugSettingsTarget = {
 export const unwrapPlugSettingsResult = <T>(result: Result<T>): T => {
   if (result.ok) return result.value;
   throw new Error(
-    result.error.technicalMessage ?? result.error.userMessageKey ?? 'Shelly settings request failed.'
+    result.error.technicalMessage ??
+      result.error.userMessageKey ??
+      'Shelly settings request failed.'
   );
 };
 

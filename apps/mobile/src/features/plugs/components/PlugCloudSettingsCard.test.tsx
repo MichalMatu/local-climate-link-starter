@@ -72,7 +72,8 @@ describe('PlugCloudSettingsCard', () => {
           result = { connected: enabled };
         } else if (body.method === 'Cloud.SetConfig') {
           setConfigs.push(body.params?.config);
-          if (body.params?.config?.enable !== undefined) enabled = body.params.config.enable;
+          if (body.params?.config?.enable !== undefined)
+            enabled = body.params.config.enable;
           result = { restart_required: false };
         }
         return jsonResponse({ id: body.id ?? 1, result });

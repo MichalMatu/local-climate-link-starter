@@ -23,10 +23,13 @@ type DeviceCloudCopy = {
 const en: DeviceCloudCopy = {
   eyebrow: 'Device settings',
   title: 'Shelly Cloud',
-  description: 'Choose whether this Plug can connect to Shelly Cloud. Local Climate Link does not require it.',
+  description:
+    'Choose whether this Plug can connect to Shelly Cloud. Local Climate Link does not require it.',
   enable: 'Enable Shelly Cloud',
-  enabledHint: 'The Plug may connect to Shelly Cloud while local control remains available.',
-  disabledHint: 'Shelly Cloud is off. Local Climate Link continues to work over the local network.',
+  enabledHint:
+    'The Plug may connect to Shelly Cloud while local control remains available.',
+  disabledHint:
+    'Shelly Cloud is off. Local Climate Link continues to work over the local network.',
   connection: 'Cloud connection',
   connected: 'Connected',
   disconnected: 'Not connected',
@@ -45,10 +48,13 @@ export const deviceCloudCopy: Record<Locale, DeviceCloudCopy> = {
   pl: {
     ...en,
     eyebrow: 'Ustawienia urządzenia',
-    description: 'Wybierz, czy gniazdko może łączyć się z chmurą Shelly. Local Climate Link jej nie wymaga.',
+    description:
+      'Wybierz, czy gniazdko może łączyć się z chmurą Shelly. Local Climate Link jej nie wymaga.',
     enable: 'Włącz Shelly Cloud',
-    enabledHint: 'Gniazdko może łączyć się z chmurą Shelly; sterowanie lokalne nadal działa.',
-    disabledHint: 'Shelly Cloud jest wyłączona. Local Climate Link nadal działa w sieci lokalnej.',
+    enabledHint:
+      'Gniazdko może łączyć się z chmurą Shelly; sterowanie lokalne nadal działa.',
+    disabledHint:
+      'Shelly Cloud jest wyłączona. Local Climate Link nadal działa w sieci lokalnej.',
     connection: 'Połączenie z chmurą',
     connected: 'Połączono',
     disconnected: 'Brak połączenia',
@@ -65,5 +71,9 @@ export const deviceCloudCopy: Record<Locale, DeviceCloudCopy> = {
   es: { ...en, eyebrow: 'Ajustes del dispositivo', enable: 'Activar Shelly Cloud' },
   fr: { ...en, eyebrow: 'Réglages de l’appareil', enable: 'Activer Shelly Cloud' },
   it: { ...en, eyebrow: 'Impostazioni dispositivo', enable: 'Abilita Shelly Cloud' },
-  'pt-BR': { ...en, eyebrow: 'Configurações do dispositivo', enable: 'Ativar Shelly Cloud' }
+  'pt-BR': {
+    ...en,
+    eyebrow: 'Configurações do dispositivo',
+    enable: 'Ativar Shelly Cloud'
+  }
 };

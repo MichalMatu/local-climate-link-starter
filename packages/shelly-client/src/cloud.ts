@@ -33,7 +33,9 @@ const validationError = (message: string) => ({
   retryable: false
 });
 
-const parseSetConfigResponse = (response: Result<unknown>): Result<ShellyCloudSetResult> => {
+const parseSetConfigResponse = (
+  response: Result<unknown>
+): Result<ShellyCloudSetResult> => {
   if (!response.ok) {
     return response;
   }
