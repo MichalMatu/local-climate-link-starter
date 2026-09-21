@@ -38,6 +38,18 @@ const draft = {
   maxOnHoursInput: '4'
 };
 
+const timeDraft = {
+  ...draft,
+  shellyDevices: draft.shellyDevices.map((device) => ({
+    ...device,
+    id: 'shellyplugsg3-time-e2e',
+    model: 'S3PL-00112EU',
+    gen: 3
+  })),
+  selectedShellyId: 'shellyplugsg3-time-e2e',
+  diagnosticShellyId: 'shellyplugsg3-time-e2e'
+};
+
 const viewports = [
   { name: 'phone-small', width: 360, height: 800 },
   { name: 'phone', width: 390, height: 844 },
@@ -46,12 +58,16 @@ const viewports = [
   { name: 'desktop', width: 1440, height: 900 }
 ] as const;
 
-const tabs = ['Shelly', 'Termometry', 'Reguła'] as const;
-
 const seedDraft = async (page: Page) => {
   await page.addInitScript((value) => {
     window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(value));
   }, draft);
+};
+
+const seedTimeDraft = async (page: Page) => {
+  await page.addInitScript((value) => {
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(value));
+  }, timeDraft);
 };
 
 const mockShellyRpc = async (page: Page) => {
@@ -383,36 +399,6 @@ const expectNoLegacyInlineFeedback = async (page: Page) => {
   expect(offenders.inlineLiveRegions).toEqual([]);
 };
 
-const expectShellyRuntimeControlsLayout = async (page: Page) => {
-  const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
-  const auto = shellyControls.getByRole('button', { name: 'AUTO', exact: true });
-  const manual = shellyControls.getByRole('button', { name: 'MANUAL', exact: true });
-  const info = shellyControls.getByRole('button', { name: 'Ustawienia gniazdka' });
-  const relayOn = shellyControls.getByRole('button', { name: 'ON', exact: true });
-  const relayOff = shellyControls.getByRole('button', { name: 'OFF', exact: true });
-
-  for (const control of [auto, manual, info, relayOn, relayOff]) {
-    await expect(control).toHaveCount(1);
-    await expect(control).toBeVisible();
-  }
-
-  const modeBoxes = await Promise.all([
-    requiredBox(auto),
-    requiredBox(manual),
-    requiredBox(info)
-  ]);
-  const relayBoxes = await Promise.all([requiredBox(relayOn), requiredBox(relayOff)]);
-  const modeSpread =
-    Math.max(...modeBoxes.map((box) => box.y)) -
-    Math.min(...modeBoxes.map((box) => box.y));
-  const relaySpread =
-    Math.max(...relayBoxes.map((box) => box.y)) -
-    Math.min(...relayBoxes.map((box) => box.y));
-  expect(modeSpread).toBeLessThan(3);
-  expect(relaySpread).toBeLessThan(3);
-  expect(relayBoxes[0].y).toBeGreaterThan(modeBoxes[0].y);
-};
-
 const requiredBox = async (locator: Locator) => {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
@@ -420,13 +406,10 @@ const requiredBox = async (locator: Locator) => {
 };
 
 const expectClimateDetailHierarchy = async (page: Page) => {
-  const [gridBox, liveBox] = await Promise.all([
-    requiredBox(page.locator('.installation-detail-grid')),
-    requiredBox(page.locator('.installation-detail-live'))
-  ]);
+  const gridBox = await requiredBox(page.locator('.installation-detail-grid'));
 
-  expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
-  expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
+  expect(gridBox.width).toBeGreaterThan(0);
+  await expect(page.locator('.installation-detail-live')).toHaveCount(0);
   await expect(page.locator('.installation-detail-header .detail-back-link')).toHaveCount(
     0
   );
@@ -434,10 +417,9 @@ const expectClimateDetailHierarchy = async (page: Page) => {
     page.locator('.installation-detail-header .runtime-refresh-action')
   ).toHaveCount(0);
   await expect(page.locator('.app-bottom-nav')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
-    'aria-current',
-    'page'
-  );
+  await expect(
+    page.getByRole('button', { name: 'Gniazdka', exact: true })
+  ).toHaveAttribute('aria-current', 'page');
 };
 
 const expectTimeDetailHierarchy = async (page: Page) => {
@@ -453,64 +435,6 @@ const expectTimeDetailHierarchy = async (page: Page) => {
   expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
   expect(refreshBox.width).toBeLessThanOrEqual(48);
   await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toHaveCount(0);
-};
-
-const expectActionButtonAlignedToActionEdge = async (button: Locator) => {
-  const row = button.locator(
-    'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " action-row ")][1]'
-  );
-  await expect(row).toHaveCount(1);
-
-  const [buttonBox, rowBox] = await Promise.all([requiredBox(button), requiredBox(row)]);
-  const buttonRight = Math.round(buttonBox.x + buttonBox.width);
-  const rowRight = Math.round(rowBox.x + rowBox.width);
-
-  expect(Math.abs(buttonRight - rowRight)).toBeLessThanOrEqual(2);
-};
-
-const expectModalFooterButtonsFillWidth = async (dialog: Locator) => {
-  const metrics = await dialog.locator('.lcl-modal__footer').evaluate((footer) => {
-    const footerRect = footer.getBoundingClientRect();
-    return Array.from(footer.querySelectorAll<HTMLButtonElement>('button')).map(
-      (button) => {
-        const rect = button.getBoundingClientRect();
-        return {
-          label: button.textContent?.trim() ?? '',
-          widthDelta: Math.round(footerRect.width - rect.width)
-        };
-      }
-    );
-  });
-
-  expect(metrics.length).toBeGreaterThan(0);
-  for (const item of metrics) {
-    expect(
-      item.widthDelta,
-      `${item.label} should fill the modal footer`
-    ).toBeLessThanOrEqual(2);
-  }
-};
-
-const expectShellyCardActionsLayout = async (page: Page) => {
-  const settingsToggle = page.getByRole('button', { name: 'Ustawienia gniazdka' });
-  await expect(settingsToggle).toBeVisible();
-  await settingsToggle.click();
-  const settingsDialog = page.getByRole('dialog', { name: 'Shelly Plug S Gen3' });
-  await expect(settingsDialog).toBeVisible();
-  await expect(settingsDialog.getByText('Adres IP')).toBeVisible();
-  await expect(
-    settingsDialog.getByRole('link', {
-      name: 'Otwórz panel Shelly: http://192.168.0.20/'
-    })
-  ).toBeVisible();
-  await expect(settingsDialog.getByText('Firmware')).toBeVisible();
-  await expect(settingsDialog.getByText('20260311-095902/1.7.5-g9979d16')).toBeVisible();
-  await settingsDialog.getByRole('button', { name: 'Zamknij' }).click();
-
-  await expect(
-    page.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
-  ).toBeVisible();
-  await expectShellyRuntimeControlsLayout(page);
 };
 
 const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
@@ -617,20 +541,21 @@ for (const viewport of viewports) {
     await expect(page.getByText('1.31 → 1.20 kPa')).toBeVisible();
     await expect(page.getByText('Działa')).toHaveCount(0);
     await expect(page.getByText('19°C / 20°C')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toHaveCount(0);
+
     await page.getByRole('button', { name: 'Szczegóły: Salon' }).click();
     await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Klimat teraz' })).toBeVisible();
-    await expect(page.getByText('21.4°C')).toBeVisible();
-    await expect(page.getByText('55.2%')).toBeVisible();
-    await expect(page.getByText('1.31 kPa')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveAttribute(
-      'aria-pressed',
-      'true'
+    await expect(page.getByRole('heading', { name: 'Automatyka' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'BLE i sensor' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Telemetria Shelly' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
+      0
     );
-    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toHaveCount(0);
     await expectClimateDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
@@ -638,7 +563,7 @@ for (const viewport of viewports) {
   });
 }
 
-test('installed automation detail safely pauses and resumes on phone', async ({
+test('installed automation dashboard safely switches AUTO and MANUAL on phone', async ({
   page
 }) => {
   const consoleProblems: string[] = [];
@@ -654,24 +579,16 @@ test('installed automation detail safely pauses and resumes on phone', async ({
   await mockShellyRpc(page);
   await page.goto('/');
 
-  await page.getByRole('button', { name: 'Szczegóły: Salon' }).click();
-  await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
   const auto = page.getByRole('button', { name: 'AUTO', exact: true });
   const manual = page.getByRole('button', { name: 'MANUAL', exact: true });
+  const off = page.getByRole('button', { name: 'OFF', exact: true });
   await expect(auto).toHaveAttribute('aria-pressed', 'true');
 
   await manual.click();
-  await expect(
-    page.getByText('Automatyka zatrzymana, wyjście potwierdzone jako OFF.')
-  ).toBeVisible();
   await expect(manual).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('button', { name: 'OFF', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true'
-  );
+  await expect(off).toHaveAttribute('aria-pressed', 'true');
 
   await auto.click();
-  await expect(page.getByText('Automatyka uruchomiona.')).toBeVisible();
   await expect(auto).toHaveAttribute('aria-pressed', 'true');
 
   await expectNoHorizontalOverflow(page);
@@ -692,22 +609,20 @@ for (const viewport of viewports) {
     page.on('pageerror', (error) => consoleProblems.push(error.message));
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await seedDraft(page);
+    await seedTimeDraft(page);
     const rpcState = await mockTimeShellyRpc(page);
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Czas', exact: true }).click();
-    await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    const plugCard = page
+      .getByText('Shelly Plug S Gen3', { exact: true })
+      .locator('xpath=ancestor::article[1]');
+    await plugCard.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    await page.getByRole('button', { name: /Sterować według czasu/ }).click();
 
-    await expect(page.getByRole('button', { name: /Sterować według czasu/ })).toHaveCount(
+    await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
       0
     );
-    await expect(
-      page.getByRole('navigation', { name: 'Menu konfiguracji' })
-    ).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Termometry' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Reguła' })).toHaveCount(0);
-    await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
     await expect(
       page.getByRole('heading', { name: 'Ustaw godziny ON i OFF' })
     ).toBeVisible();
@@ -716,20 +631,22 @@ for (const viewport of viewports) {
     await expectNoHorizontalOverflow(page);
 
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
-    await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
+    await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     await expect(page.getByText('Harmonogram dzienny')).toBeVisible();
     await expect(page.getByText('08:00')).toBeVisible();
     await expect(page.getByText('20:00')).toBeVisible();
     await expect(page.getByText('Działa')).toBeVisible();
     expect(rpcState.createCount).toBe(2);
 
-    await page.getByRole('button', { name: 'Szczegóły' }).click();
+    const timeCard = page
+      .getByRole('heading', { name: 'Shelly Plug S Gen3' })
+      .locator('xpath=ancestor::article[1]');
+    await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Czas', exact: true })).toHaveAttribute(
-      'aria-current',
-      'page'
-    );
+    await expect(
+      page.getByRole('button', { name: 'Gniazdka', exact: true })
+    ).toHaveAttribute('aria-current', 'page');
     await expect(
       page.getByRole('button', { name: 'Ustawienia', exact: true })
     ).toBeVisible();
@@ -752,17 +669,20 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   page.on('pageerror', (error) => consoleProblems.push(error.message));
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await seedDraft(page);
+  await seedTimeDraft(page);
   const rpcState = await mockTimeShellyRpc(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Czas', exact: true }).click();
-  await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
-  await expect(page.getByRole('button', { name: /Sterować według czasu/ })).toHaveCount(
-    0
-  );
-  await page.getByRole('button', { name: 'Harmonogram', exact: true }).click();
+
+  const plugCard = page
+    .getByText('Shelly Plug S Gen3', { exact: true })
+    .locator('xpath=ancestor::article[1]');
+  await plugCard.getByRole('button', { name: 'Dodaj automatykę' }).click();
+  await page.getByRole('button', { name: /Sterować według czasu/ }).click();
   await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
-  await page.getByRole('button', { name: 'Szczegóły' }).click();
+  const timeCard = page
+    .getByRole('heading', { name: 'Shelly Plug S Gen3' })
+    .locator('xpath=ancestor::article[1]');
+  await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
 
   await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
   await expect(
@@ -777,10 +697,23 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   ).toBeVisible();
   await expect(page.getByText('Działa')).toBeVisible();
 
-  await page.getByLabel('Włącz o').fill('06:30');
-  await page.getByLabel('Wyłącz o').fill('22:15');
+  await page.getByRole('button', { name: 'Edytuj' }).click();
+  await expect(page.getByRole('heading', { name: 'Edytuj godziny' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Włącz o: 08:00' }).click();
+  let picker = page.getByRole('dialog', { name: 'Włącz o' });
+  await picker.getByRole('button', { name: 'HH 06' }).click();
+  await picker.getByRole('button', { name: 'MM 30' }).click();
+  await picker.getByRole('button', { name: 'Wybierz' }).click();
+
+  await page.getByRole('button', { name: 'Wyłącz o: 20:00' }).click();
+  picker = page.getByRole('dialog', { name: 'Wyłącz o' });
+  await picker.getByRole('button', { name: 'HH 22' }).click();
+  await picker.getByRole('button', { name: 'MM 15' }).click();
+  await picker.getByRole('button', { name: 'Wybierz' }).click();
+
   await page.getByRole('button', { name: 'Zapisz zmiany' }).click();
-  await expect(page.getByText('Harmonogram zaktualizowany.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
   await expect(page.getByText('06:30')).toBeVisible();
   await expect(page.getByText('22:15')).toBeVisible();
 
@@ -788,22 +721,26 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   const deleteDialog = page.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
   await expect(deleteDialog).toBeVisible();
   await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();
-  await expect(page.getByRole('heading', { name: 'Twoje automatyki' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Czas', exact: true })).toHaveAttribute(
-    'aria-current',
-    'page'
-  );
+  await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
+  const plainPlugCard = page
+    .getByText('Shelly Plug S Gen3', { exact: true })
+    .locator('xpath=ancestor::article[1]');
+  await expect(
+    plainPlugCard.getByRole('button', { name: 'Dodaj automatykę' })
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Gniazdka', exact: true })
+  ).toHaveAttribute('aria-current', 'page');
 
   expect(rpcState.createCount).toBe(2);
-  expect(rpcState.updateCount).toBeGreaterThanOrEqual(8);
+  expect(rpcState.updateCount).toBeGreaterThanOrEqual(6);
   expect(rpcState.deleteCount).toBe(2);
   await expectNoHorizontalOverflow(page);
   expect(consoleProblems).toEqual([]);
 });
 
 for (const viewport of viewports) {
-  test(`hardware setup has no horizontal overflow on ${viewport.name}`, async ({
+  test(`current Plug setup routes have no horizontal overflow on ${viewport.name}`, async ({
     page
   }) => {
     const consoleProblems: string[] = [];
@@ -817,105 +754,40 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedDraft(page);
     await mockShellyRpc(page);
-    await page.goto('/admin#shelly');
+    await page.goto('/');
 
     await expect(page).toHaveTitle('Local Climate Link');
-    await expect(page.getByRole('heading', { name: 'Gniazdka' })).toBeVisible();
-    await expect(page.locator('.dashboard-fab')).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-    await page.locator('.dashboard-fab').click();
-    await page.getByRole('button', { name: /Sterować temperaturą/ }).click();
+    await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     await expect(
-      page.getByRole('navigation', { name: 'Menu konfiguracji' })
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Ustawienia', exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Shelly', exact: true })
+      page.getByRole('button', { name: 'Gniazdka', exact: true })
     ).toHaveAttribute('aria-current', 'page');
-    const setupTouchTargetHeights = await page
-      .locator('.setup-context__back, .setup-top-nav__item')
-      .evaluateAll((elements) =>
-        elements.map((element) => Math.round(element.getBoundingClientRect().height))
-      );
-    expect(Math.min(...setupTouchTargetHeights)).toBeGreaterThanOrEqual(44);
-    await expect(page.getByRole('region', { name: 'Gniazdka Shelly' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Dodaj gniazdko' })).toBeVisible();
-    await expect(page.getByLabel('Dodane gniazdka')).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-    await expectNoLegacyInlineFeedback(page);
-
-    const shellyControls = page.getByLabel('Sterowanie Shelly Plug S Gen3');
-    await expectShellyRuntimeControlsLayout(page);
-    await expect(
-      shellyControls.getByRole('button', { name: 'MANUAL', exact: true })
-    ).toBeVisible();
-    await expect(shellyControls.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
-    await expectShellyCardActionsLayout(page);
     await expectNoHorizontalOverflow(page);
 
-    await page.getByRole('button', { name: 'Dodaj gniazdko' }).click();
-    const addShellyDialog = page.getByRole('dialog', { name: 'Dodaj gniazdko' });
-    await expect(addShellyDialog).toBeVisible();
-    const shellyNameInputBox = await addShellyDialog
-      .getByLabel('Nazwa gniazdka')
-      .boundingBox();
-    expect(shellyNameInputBox?.height).toBeLessThan(90);
-    await expectNoHorizontalOverflow(page);
-    await page.getByRole('button', { name: 'Zamknij' }).click();
-
-    for (const tab of tabs) {
-      await page.getByRole('button', { name: tab, exact: true }).click();
-      if (tab === 'Termometry') {
-        await expect(
-          page.getByRole('button', { name: 'Termometry', exact: true })
-        ).toHaveAttribute('aria-current', 'page');
-        await expect(page.getByRole('region', { name: 'Termometry BLE' })).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Dodaj termometr' })).toBeVisible();
-        await page.getByRole('button', { name: 'Dodaj termometr' }).click();
-        const addSensorDialog = page.getByRole('dialog', { name: 'Dodaj termometr' });
-        await expect(addSensorDialog).toBeVisible();
-        if (viewport.width <= 704) {
-          await expectModalFooterButtonsFillWidth(addSensorDialog);
-        }
-        await expectNoHorizontalOverflow(page);
-        await page.getByRole('button', { name: 'Zamknij' }).click();
-      }
-      await expectNoHorizontalOverflow(page);
-      await expectNoLegacyInlineFeedback(page);
-    }
-
-    await page.getByRole('button', { name: 'Reguła' }).click();
-    await expect(page.getByRole('button', { name: 'Diag' })).toHaveCount(0);
-    await expect(page.getByLabel('VPD assist')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Wczytaj z Shelly' })).toBeHidden();
-    await page.locator('summary').filter({ hasText: 'Zaawansowane' }).click();
-    await expect(page.getByLabel('Ponowne ON po min')).toBeVisible();
-    await expect(page.getByLabel('Maksymalny czas pracy h')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Domyślne' })).toBeVisible();
-    await expect(page.getByRole('dialog', { name: 'Opcje zaawansowane' })).toHaveCount(0);
-    await expectNoHorizontalOverflow(page);
-    await expectNoLegacyInlineFeedback(page);
-
-    await page.locator('summary').filter({ hasText: 'Narzędzia deweloperskie' }).click();
-    await expect(page.getByRole('button', { name: 'Wczytaj z Shelly' })).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Otwórz diagnostykę techniczną' })
-    ).toBeVisible();
-    await page.getByRole('button', { name: 'Otwórz diagnostykę techniczną' }).click();
-    const refreshDiagnosticsButton = page.getByRole('button', {
-      name: 'Odśwież diagnostykę'
-    });
-    await expect(refreshDiagnosticsButton).toBeVisible();
-    await expectActionButtonAlignedToActionEdge(refreshDiagnosticsButton);
-    await expect(page.getByText('Diagnostyka deweloperska')).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-    await page.getByRole('button', { name: 'Wróć do reguły' }).click();
-    await expect(page.getByRole('button', { name: 'Reguła' })).toHaveAttribute(
-      'aria-current',
-      'page'
+    await page.getByRole('button', { name: 'Dodaj gniazdko', exact: true }).click();
+    await expect(page.getByRole('tablist', { name: 'Dodaj gniazdko' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Skanuj sieć' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Dodaj ręcznie' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
+      0
     );
+    await expectNoHorizontalOverflow(page);
+    await expectNoLegacyInlineFeedback(page);
+
+    await page.getByRole('button', { name: 'Gniazdka', exact: true }).click();
+    const plugCard = page
+      .getByText('Shelly Plug S Gen3', { exact: true })
+      .locator('xpath=ancestor::article[1]');
+    await plugCard.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    await page.getByRole('button', { name: /Sterować temperaturą/ }).click();
+
+    await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
+      0
+    );
+    await expect(page.getByLabel('VPD assist')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expectNoLegacyInlineFeedback(page);
     expect(consoleProblems).toEqual([]);
   });
 }
