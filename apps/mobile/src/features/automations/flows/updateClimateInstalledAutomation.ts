@@ -241,7 +241,8 @@ export const updateClimateInstalledAutomation = async ({
   if (
     currentRuntime.code !== null &&
     currentRuntime.script?.running === true &&
-    supportsShellyRuntimeConfigPersistence(currentRuntime.code)
+    supportsShellyRuntimeConfigPersistence(currentRuntime.code) &&
+    currentRuntime.runtimeConfigStorageSupported
   ) {
     install = await persistentEdit({ installation, config, services });
   } else {
