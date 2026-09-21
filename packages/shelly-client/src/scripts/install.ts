@@ -41,6 +41,17 @@ const validateScriptId = (scriptId: number): Result<number> => {
   return { ok: true, value: scriptId };
 };
 
+const parseScriptEvalValue = (value: unknown): Result<string | null> => {
+  if (typeof value !== 'object' || value === null || !('result' in value)) {
+    return { ok: false, error: validationError('Invalid Script.Eval response.') };
+  }
+  const result = (value as { result?: unknown }).result;
+  if (result !== null && typeof result !== 'string') {
+    return { ok: false, error: validationError('Invalid Script.Eval result value.') };
+  }
+  return { ok: true, value: result ?? null };
+};
+
 const defaultSleep = (durationMs: number): Promise<void> =>
   durationMs <= 0
     ? Promise.resolve()
@@ -131,6 +142,30 @@ export class RpcShellyClient implements ShellyClient {
       method: RPC_METHODS.ScriptDelete,
       params: { id: parsedScriptId.value }
     });
+  }
+
+  async evaluateScript(scriptId: number, code: string): Promise<Result<string | null>> {
+    const parsedScriptId = validateScriptId(scriptId);
+    if (!parsedScriptId.ok) return parsedScriptId;
+    if (code.trim().length === 0) {
+      return { ok: false, error: validationError('Script.Eval code must not be empty.') };
+    }
+
+    const response = await this.callMutation<unknown>({
+      method: RPC_METHODS.ScriptEval,
+      params: { id: parsedScriptId.value, code }
+    });
+    return response.ok ? parseScriptEvalValue(response.value) : response;
+  }
+
+  async readScriptStorageItem(scriptId: number, key: string): Promise<Result<string | null>> {
+    if (key.trim().length === 0) {
+      return { ok: false, error: validationError('Script.storage key must not be empty.') };
+    }
+    return this.evaluateScript(
+      scriptId,
+      `Script.storage.getItem(${JSON.stringify(key)})`
+    );
   }
 
   private setRelayState(
