@@ -68,6 +68,11 @@ export const decodeShellyRuntimeConfigJson = (value: string): ShellyRuntimeConfi
   }
 };
 
+export const supportsShellyRuntimeConfigPersistence = (script: string): boolean =>
+  script.includes('// m: climate-engine-v1') &&
+  script.includes('function vc(c)') &&
+  script.includes(`Script.storage.getItem("${SHELLY_RUNTIME_CONFIG_STORAGE_KEY}")`);
+
 const runtimeConfigJsonFromScript = (script: string): unknown | null => {
   const marker = 'var C=';
   const markerStart = script.indexOf(marker);
