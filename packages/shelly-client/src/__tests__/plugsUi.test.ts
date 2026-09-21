@@ -41,7 +41,7 @@ const fullConfig = {
 };
 
 describe('RpcShellyPlugsUiClient', () => {
-  it('detects support, validates the full LED configuration and exposes capabilities', async () => {
+  it('detects support, validates LEDs and controls, and exposes capabilities', async () => {
     const transport = new RecordingTransport([
       {
         ok: true,
@@ -57,12 +57,13 @@ describe('RpcShellyPlugsUiClient', () => {
       ok: true,
       value: {
         supported: true,
-        config: { leds: fullConfig.leds },
+        config: fullConfig,
         capabilities: {
           switchColors: true,
           powerBrightness: true,
           nightMode: true
-        }
+        },
+        controlCapabilities: { buttonInputMode: true }
       }
     });
     expect(transport.requests).toEqual([
@@ -98,7 +99,8 @@ describe('RpcShellyPlugsUiClient', () => {
             night_mode: { enable: false, brightness: 100, active_between: [] }
           }
         },
-        capabilities: { switchColors: false, powerBrightness: false, nightMode: true }
+        capabilities: { switchColors: false, powerBrightness: false, nightMode: true },
+        controlCapabilities: { buttonInputMode: false }
       }
     });
   });
@@ -121,7 +123,8 @@ describe('RpcShellyPlugsUiClient', () => {
           switchColors: false,
           powerBrightness: false,
           nightMode: false
-        }
+        },
+        controlCapabilities: { buttonInputMode: false }
       }
     });
   });
@@ -168,6 +171,32 @@ describe('RpcShellyPlugsUiClient', () => {
     expect(JSON.stringify(transport.requests)).not.toContain('"controls"');
   });
 
+  it('writes only the physical button input mode and never writes LEDs', async () => {
+    const transport = new RecordingTransport([
+      { ok: true, value: { restart_required: false } }
+    ]);
+    const client = new RpcShellyPlugsUiClient(transport);
+
+    await expect(client.setButtonInputMode('detached')).resolves.toEqual({
+      ok: true,
+      value: { restart_required: false }
+    });
+
+    expect(transport.requests).toEqual([
+      {
+        method: 'PLUGS_UI.SetConfig',
+        params: {
+          config: {
+            controls: {
+              'switch:0': { in_mode: 'detached' }
+            }
+          }
+        }
+      }
+    ]);
+    expect(JSON.stringify(transport.requests)).not.toContain('"leds"');
+  });
+
   it('keeps relay-state and off presets as narrow LED-only patches', async () => {
     const transport = new RecordingTransport([
       { ok: true, value: { restart_required: false } },
@@ -193,6 +222,16 @@ describe('RpcShellyPlugsUiClient', () => {
     const result = await new RpcShellyPlugsUiClient(transport).setLeds({
       night_mode: { active_between: ['25:00', '06:00'] }
     });
+
+    expect(result).toMatchObject({ ok: false, error: { kind: 'validation-failed' } });
+    expect(transport.requests).toEqual([]);
+  });
+
+  it('rejects unsupported button input modes before transport', async () => {
+    const transport = new RecordingTransport([]);
+    const result = await new RpcShellyPlugsUiClient(transport).setButtonInputMode(
+      'follow' as never
+    );
 
     expect(result).toMatchObject({ ok: false, error: { kind: 'validation-failed' } });
     expect(transport.requests).toEqual([]);
