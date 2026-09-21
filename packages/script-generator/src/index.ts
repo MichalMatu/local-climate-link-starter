@@ -4,3 +4,4 @@ export * from './shelly/runtimeConfigUpdate.js';
 export * from './shelly/hash.js';
 export * from './shelly/generate.js';
 export * from './shelly/decode.js';
+export * from './shelly/capabilities.js';
