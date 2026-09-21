@@ -106,6 +106,14 @@ export class FakeShellyClient implements ShellyClient {
     return { ok: true, value: null };
   }
 
+  async evaluateScript(): Promise<Result<string | null>> {
+    return { ok: true, value: null };
+  }
+
+  async readScriptStorageItem(): Promise<Result<string | null>> {
+    return { ok: true, value: null };
+  }
+
   async setRelayOn(): Promise<Result<null>> {
     this.relayOn = true;
     return { ok: true, value: null };
