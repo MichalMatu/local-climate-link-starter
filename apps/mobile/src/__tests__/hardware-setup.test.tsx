@@ -1126,6 +1126,35 @@ describe('HardwareSetupScreen', () => {
     expect(vi.mocked(fetch)).not.toHaveBeenCalled();
   });
 
+  it('shows the concrete Shelly Add failure instead of replacing it with generic IP advice', async () => {
+    const defaultFetch = vi.mocked(fetch);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (requestBody(init).method === 'Script.List') {
+          throw new Error('Script.List test failure');
+        }
+        return defaultFetch(input, init);
+      })
+    );
+
+    renderHardwareSetup();
+    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    const addDialog = await openShellyAddDialog();
+    fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
+      target: { value: 'Salon' }
+    });
+    fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
+      target: { value: '192.168.0.20' }
+    });
+    fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
+
+    expect(await screen.findByText('Script.List test failure')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Sprawdź IP w routerze albo w ustawieniach Shelly.')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders saved Shelly status and settings without runtime automation controls', async () => {
     renderHardwareSetup();
     await addShellyThroughUi();
