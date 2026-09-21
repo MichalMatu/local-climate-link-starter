@@ -132,7 +132,10 @@ export const RPC_METHODS = {
   ScheduleUpdate: 'Schedule.Update',
   ScheduleDelete: 'Schedule.Delete',
   PlugsUiGetConfig: 'PLUGS_UI.GetConfig',
-  PlugsUiSetConfig: 'PLUGS_UI.SetConfig'
+  PlugsUiSetConfig: 'PLUGS_UI.SetConfig',
+  CloudGetConfig: 'Cloud.GetConfig',
+  CloudSetConfig: 'Cloud.SetConfig',
+  CloudGetStatus: 'Cloud.GetStatus'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
