@@ -63,9 +63,31 @@ describe('Shelly runtime config boundary', () => {
     expect(decodeShellyRuntimeConfig(script)).toEqual(expected);
   });
 
-  it('rejects missing, malformed and incomplete runtime config data', () => {
+  it('parses embedded config strings with escaped quotes, slashes and braces', () => {
+    const base = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const config = {
+      ...base,
+      sensor: {
+        ...base.sensor,
+        displayName: 'Grow "A\\B" {room}'
+      }
+    };
+    const expected = createShellyRuntimeConfig(config, configHash(config));
+
+    expect(decodeShellyRuntimeConfig(generateShellyThermostatScript(config))).toEqual(
+      expected
+    );
+  });
+
+  it('rejects missing, malformed, non-object, nested and unterminated runtime data', () => {
     expect(decodeShellyRuntimeConfig('var R={};')).toBeNull();
+    expect(decodeShellyRuntimeConfig('var C=null;var R={};')).toBeNull();
     expect(decodeShellyRuntimeConfig('var C={bad};var R={};')).toBeNull();
+    expect(decodeShellyRuntimeConfig('var C={"a":{"nested":1}};var R={};')).toBeNull();
+    expect(decodeShellyRuntimeConfig('var C={"a":"A";var R={};')).toBeNull();
     expect(decodeShellyRuntimeConfig('var C={"a":"A"};var R={};')).toBeNull();
   });
 });
