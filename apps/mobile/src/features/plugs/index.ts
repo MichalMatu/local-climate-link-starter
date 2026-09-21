@@ -24,6 +24,10 @@ export {
 } from './components/PlugLedSettingsCard.js';
 export type { PlugLedSettingsTarget } from './data/plugLedSettings.js';
 export {
+  InstalledPlugSummaryCard,
+  type InstalledPlugSummaryCardProps
+} from './components/InstalledPlugSummaryCard.js';
+export {
   usePlugManagementSurface,
   type PlugManagementDevice,
   type UsePlugManagementSurfaceOptions

@@ -1,5 +1,9 @@
 import { ClimateAutomationManagementActions } from '../features/automations/index.js';
-import { PlugLedSettingsCard, isSameShellyDevice } from '../features/plugs/index.js';
+import {
+  InstalledPlugSummaryCard,
+  PlugLedSettingsCard,
+  isSameShellyDevice
+} from '../features/plugs/index.js';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { IconCode } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -44,7 +48,7 @@ type InstallationDetailScreenProps = {
   installationId: string;
   onBack(): void;
   onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
+  onOpenSettings?: (deviceId: string) => void;
   onOpenDiagnostics?: () => void;
   onOpenScript?: () => void;
   onEdit?: () => void;
@@ -53,6 +57,7 @@ type InstallationDetailScreenProps = {
 export const InstallationDetailScreen = ({
   installationId,
   onBack,
+  onOpenSettings,
   onOpenDiagnostics,
   onOpenScript,
   onEdit
@@ -109,6 +114,7 @@ export const InstallationDetailScreen = ({
       dismissToast={dismissToast}
       toasts={toasts}
       queryClient={queryClient}
+      {...(onOpenSettings ? { onOpenSettings } : {})}
       {...(onOpenDiagnostics ? { onOpenDiagnostics } : {})}
       {...(onOpenScript ? { onOpenScript } : {})}
       {...(onEdit ? { onEdit } : {})}
@@ -124,7 +130,7 @@ type InstalledAutomationDetailProps = {
   toasts: ToastMessage[];
   queryClient: ReturnType<typeof useQueryClient>;
   onNavigateDashboard?: (kind: AppNavigationKind) => void;
-  onOpenSettings?: () => void;
+  onOpenSettings?: (deviceId: string) => void;
   onOpenDiagnostics?: () => void;
   onOpenScript?: () => void;
   onEdit?: () => void;
@@ -137,6 +143,7 @@ const InstalledAutomationDetail = ({
   dismissToast,
   toasts,
   queryClient,
+  onOpenSettings,
   onOpenDiagnostics,
   onOpenScript,
   onEdit
@@ -370,40 +377,29 @@ const InstalledAutomationDetail = ({
           </dl>
         </article>
 
-        <article className="automation-card installation-detail-shelly">
-          <div className="installation-section-heading">
-            <h2>{t('hardware.diagnostics.groupShelly')}</h2>
-          </div>
-          <dl className="automation-summary installation-detail-summary">
-            <div>
-              <dt>{t('hardware.metrics.current')}</dt>
-              <dd>
-                {formatDiagnosticNumber(snapshot?.plug?.currentA, ' A', missing, 2)}
-              </dd>
-            </div>
-            <div>
-              <dt>{t('hardware.metrics.plugTemperature')}</dt>
-              <dd>
-                {formatDiagnosticNumber(
-                  snapshot?.plug?.deviceTemperatureC,
-                  '°C',
-                  missing,
-                  1
-                )}
-              </dd>
-            </div>
-            <div>
-              <dt>{t('hardware.shelly.clockSync')}</dt>
-              <dd>
-                {snapshot
-                  ? snapshot.time.isSynced
-                    ? 'OK'
-                    : t('hardware.status.unsynced')
-                  : missing}
-              </dd>
-            </div>
-          </dl>
-        </article>
+        <InstalledPlugSummaryCard
+          deviceId={installation.shelly.deviceId}
+          currentValue={formatDiagnosticNumber(
+            snapshot?.plug?.currentA,
+            ' A',
+            missing,
+            2
+          )}
+          temperatureValue={formatDiagnosticNumber(
+            snapshot?.plug?.deviceTemperatureC,
+            '°C',
+            missing,
+            1
+          )}
+          clockSyncValue={
+            snapshot
+              ? snapshot.time.isSynced
+                ? 'OK'
+                : t('hardware.status.unsynced')
+              : missing
+          }
+          {...(onOpenSettings ? { onOpenSettings } : {})}
+        />
 
         <ClimateAutomationManagementActions
           editLabel={t('detail.edit')}

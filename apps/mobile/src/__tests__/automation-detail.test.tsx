@@ -412,6 +412,17 @@ describe('InstallationDetailScreen', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
+  it('opens physical Plug settings from an installed climate automation', async () => {
+    const saved = installation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    installShellyFetchMock();
+    const onOpenSettings = vi.fn();
+    renderDetail(saved.id, vi.fn(), vi.fn(), onOpenSettings);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Ustawienia gniazdka' }));
+    expect(onOpenSettings).toHaveBeenCalledWith(saved.shelly.deviceId);
+  });
+
   it('exposes Edit for an installed climate automation', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);

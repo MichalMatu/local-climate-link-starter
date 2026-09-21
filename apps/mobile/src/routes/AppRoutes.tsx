@@ -288,6 +288,7 @@ export const AppRoutes = () => {
         <InstallationDetailScreen
           installationId={route.installationId}
           onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
+          onOpenSettings={(deviceId) => navigate({ type: 'plug-settings', deviceId })}
           onOpenDiagnostics={() => navigate({ ...route, page: 'diagnostics' })}
           onOpenScript={() => navigate({ ...route, page: 'script' })}
           onEdit={() => openAutomationEdit(route.installationId)}
