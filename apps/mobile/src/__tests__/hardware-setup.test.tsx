@@ -2140,7 +2140,39 @@ describe('HardwareSetupScreen', () => {
     );
   });
 
-  it('loads a Shelly script into the rule form from the selected plug', async () => {
+  it('loads a multi-sensor Shelly script into the rule form from the selected plug', async () => {
+    const defaultFetch = vi.mocked(fetch);
+    const base = createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating');
+    const multiSensorCode = generateShellyThermostatScript({
+      ...base,
+      sensor: {
+        ...base.sensor,
+        sensorId: 'tp357-primary',
+        runtimeAddress: 'F7:5F:8D:0F:76:20',
+        displayName: 'TP357 primary'
+      },
+      sensorSet: {
+        aggregation: 'max',
+        additionalSensors: [
+          {
+            ...base.sensor,
+            sensorId: 'tp357-shelf',
+            runtimeAddress: 'C2:C0:00:30:64:02',
+            displayName: 'TP357 shelf'
+          }
+        ]
+      }
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const body = requestBody(init);
+        if (requestUrl(input).pathname === '/rpc' && body.method === 'Script.GetCode') {
+          return rpcResult({ data: multiSensorCode, left: 0 });
+        }
+        return defaultFetch(input, init);
+      })
+    );
     renderHardwareSetup();
 
     await addShellyThroughUi('Salon');
@@ -2177,12 +2209,14 @@ describe('HardwareSetupScreen', () => {
     await waitFor(() =>
       expect(screen.getByLabelText('Termometr')).toHaveAttribute(
         'value',
-        'A4:C1:38:4F:24:CD'
+        'F7:5F:8D:0F:76:20'
       )
     );
     expect(screen.getByRole('button', { name: 'Termometr' })).toHaveTextContent(
-      'Xiaomi salon'
+      'TP357 primary'
     );
+    expect(screen.getByRole('checkbox', { name: 'TP357 shelf' })).toBeChecked();
+    expect(screen.getByLabelText('Agregacja odczytów')).toHaveAttribute('value', 'max');
     expect(screen.getByLabelText('Tryb reguły')).toHaveAttribute('value', 'heating');
     expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue(19);
     expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue(20);
@@ -2201,7 +2235,7 @@ describe('HardwareSetupScreen', () => {
       'm: climate-engine-v1'
     );
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
-      'A4:C1:38:4F:24:CD'
+      'F7:5F:8D:0F:76:20'
     );
     fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
   });
