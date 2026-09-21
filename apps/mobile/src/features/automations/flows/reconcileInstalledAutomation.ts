@@ -1,6 +1,8 @@
 import {
+  configHash,
   createDefaultShellyThermostatConfig,
   decodeShellyThermostatScript,
+  supportsShellyRuntimeConfigPersistence,
   type DecodedShellyThermostatScript,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
@@ -34,6 +36,7 @@ type ClimateRuntimeEvidence = {
   scriptName: string | null;
   running: boolean;
   code: string | null;
+  persistedRuntimeConfigJson: string | null;
 };
 
 export type InstalledAutomationReconciliationServices = {
@@ -50,7 +53,8 @@ const defaultServices: InstalledAutomationReconciliationServices = {
       scriptId: state.script?.id ?? null,
       scriptName: state.script?.name ?? null,
       running: state.script?.running === true,
-      code: state.code
+      code: state.code,
+      persistedRuntimeConfigJson: state.persistedRuntimeConfigJson
     };
   },
   readTimeScheduleState: async (installation) =>
@@ -82,14 +86,19 @@ const climateRuntimeMatches = async (
     evidence.scriptId !== installation.script.id ||
     evidence.scriptName !== LOCAL_CLIMATE_LINK_SCRIPT_NAME ||
     !evidence.running ||
-    evidence.code === null
+    evidence.code === null ||
+    hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${evidence.code}`) !==
+      installation.script.hash
   ) {
     return false;
   }
-  return (
-    hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${evidence.code}`) ===
-    installation.script.hash
+
+  if (!supportsShellyRuntimeConfigPersistence(evidence.code)) return true;
+  const decoded = decodeShellyThermostatScript(
+    evidence.code,
+    evidence.persistedRuntimeConfigJson
   );
+  return decoded?.runtimeConfig.k === configHash(installation.config);
 };
 
 const runtimeMatches = async (
@@ -112,7 +121,10 @@ const decodeRecoverableClimateRuntime = (
     return null;
   }
 
-  const decoded = decodeShellyThermostatScript(evidence.code);
+  const decoded = decodeShellyThermostatScript(
+    evidence.code,
+    evidence.persistedRuntimeConfigJson
+  );
   if (
     !decoded ||
     decoded.generatorVersion === null ||
