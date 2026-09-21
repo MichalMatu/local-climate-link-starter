@@ -48,7 +48,8 @@ describe('Shelly runtime config boundary', () => {
       s: 321_000,
       x: 7_200_000,
       v: 1,
-      vp: 1.17
+      vp: 1.17,
+      p: 0
     });
   });
 
