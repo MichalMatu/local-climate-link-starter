@@ -49,27 +49,31 @@ Screens do not own raw HTTP, Shelly RPC, BLE, persistence or runtime lifecycle. 
 
 Refactor only when it removes a concrete blocker, restores one clear owner, or enables an agreed feature. File size is an alarm, not a reason for mechanical splitting.
 
-## Automation Engine direction
+## Automation Engine and persistent config
 
-The current architectural stage separates a stable Local Climate Engine from automation data/configuration:
+The current architecture separates a stable Local Climate Engine from automation data/configuration:
 
 ```text
 mobile automation configuration
   -> typed domain model
     -> Shelly RPC transport
       -> stable Local Climate Engine script
-        -> runtime config/data
+        -> persistent runtime config/data
           -> sensors + clock
             -> rules/operators
               -> relay
 ```
 
-The climate generator now emits one `climate-engine-v1` runtime body across the supported Xiaomi BTHome and TP357 sensor profiles and across VPD on/off. Sensor-profile selection, thresholds and other automation-specific values live in the typed compact runtime config. The decoder still recognizes installed 0.2.x profile-specific runtimes for conservative recovery.
+The climate generator emits one `climate-engine-v1` runtime body across the supported Xiaomi BTHome and TP357 sensor profiles and across VPD on/off. Sensor-profile selection, thresholds and other automation-specific values live in the typed compact runtime config. The decoder still recognizes installed 0.2.x profile-specific runtimes for conservative recovery.
 
-The compact config is still embedded in generated script text. The next step is a capability-gated persistent config channel with explicit validation, versioning, upgrade and rollback semantics so ordinary config edits can stop replacing the engine script. This separation comes before adding more automation-generator complexity.
+On Shelly firmware that supports `Script.storage`, ordinary Climate edits update only the validated persistent runtime config through `Script.Eval`; they do not replace the engine code. The client probes this capability explicitly. Firmware without the storage capability keeps the compatible `Script.PutCode` path instead of assuming support.
+
+Persistent updates carry the config hash/version, validate the stored payload, update the running in-memory config, survive script restart and retain rollback to the previous persisted config when an update fails. Recovery prefers the persisted config when present while retaining embedded config as the compatibility fallback.
+
+Real Plug S Gen3 acceptance on firmware 1.7.5 confirmed that a config-only update changes effective runtime values while script bytes remain unchanged, and that the persisted config is loaded again after runtime restart.
 
 ## Transport direction
 
-Current production management uses local HTTP RPC. BLE is deferred until the engine/config split is stable and real hardware proves that the required Shelly RPC lifecycle is feasible.
+Current production management uses local HTTP RPC. BLE is deferred until real hardware proves that the required Shelly RPC lifecycle is feasible.
 
 The target transport boundary is a shared `ShellyRpcTransport` with HTTP and BLE adapters so discovery/provisioning, install/upgrade, config update, status and diagnostics can progressively work offline without duplicating product logic.
