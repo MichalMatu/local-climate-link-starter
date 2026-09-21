@@ -1,122 +1,129 @@
 # Local Climate Link — next functional steps
 
-Updated: 2026-09-20
+Updated: 2026-09-21
+Status: stabilization first
 
 ## Current checkpoint
 
-Latest verified app-code baseline:
+The latest accepted product/code baseline before stabilization documentation is:
 
 ```text
-8ad5b152bdbf861a8e6620414245dfbcb06c0ead
-Anchor app toasts above bottom navigation
+ef6ebd56ea3e92122845a31b5b1d70c7a518f397
+Finalize Slice 3C integration handoff
 ```
 
-Documentation commits follow this app-code checkpoint on the active work branch; always fetch the fresh branch before work.
+The next work is **not** another feature slice. The active phase is stabilization of the existing Plug/automation lifecycle after user-visible regressions were observed on the real Android build.
 
-The standalone Plug/Thermometer add-page refactor, remaining-screen UX consistency audit, targeted UI-polish slice and toast-host hardening are closed at this checkpoint.
+Use `docs/HANDOFF_NEXT_CHAT.md` and `docs/implementation/stabilization-baseline-plan.md` as the active continuation sources.
 
-Validation on the app code passed focused checks, responsive toast geometry coverage and one full `pnpm check`. The toast regression is now protected by an app-shell portal contract and `quality:ux`, so page surfaces cannot silently trap fixed toasts again.
+## Why feature expansion is paused
 
-Do not spend the next iteration reopening completed UX surfaces unless a concrete regression is observed.
+The user observed on the Samsung S22+:
 
-## Stable product model
+- one physical Shelly rendered as two cards, one with automation and one without;
+- Plug add/remove behavior was unreliable;
+- LAN scan found the Shelly, but Add did not successfully finish after clearing cache.
+
+These are core lifecycle defects. Adding a BLE control/provisioning layer now would add another large state/transport surface before the LAN baseline is trustworthy.
+
+Therefore:
+
+```text
+stabilize current LAN product
+-> prove native + real-hardware lifecycle
+-> freeze a green baseline
+-> only then resume BLE feasibility/transport work
+```
+
+## Stable product model to preserve
 
 - bottom navigation: **Plugs | Thermometers | Settings**;
 - a physical Plug is the automation anchor;
-- `+` on Plugs adds a Plug;
-- `+` on Thermometers adds a Thermometer;
-- a plain Plug remains manageable/useful without automation;
+- one physical Plug has one stable Shelly `deviceId` identity;
+- IP / `baseUrl` is reachability, not identity;
+- a plain Plug remains manageable without automation;
+- a Plug may own one managed relay automation;
 - Time is a Plug automation type;
-- climate automation runs locally on Shelly after installation;
-- `InstalledAutomation` is the durable automation entity;
-- user display names remain separate from hardware identity;
-- the phone configures and diagnoses, but does not become the runtime automation owner;
-- `AppShell` owns persistent bottom navigation and global toast geometry.
+- Climate and Time automations are editable in place;
+- `InstalledAutomation` is durable automation ownership;
+- Forget Plug does not uninstall the remote automation;
+- the phone configures/manages/diagnoses;
+- Shelly executes installed automation locally without requiring the phone or Shelly Cloud;
+- current production Shelly RPC transport is LAN/HTTP during stabilization.
 
-## Completed UX consistency and polish work
+## Active stabilization outcomes
 
-Keep these decisions unless evidence requires change:
+Before any BLE feature work, establish all of the following:
 
-- full working surfaces use the page tree rather than modal shells;
-- saved Plug settings are a child page;
-- saved Plug BLE discovery is a deeper child page;
-- configurator saved-Shelly settings and BLE discovery follow the same page hierarchy;
-- shared child-page back chrome uses `AppPageBack`;
-- missing Installation states use the same back chrome;
-- rule advanced settings are inline; the obsolete advanced-settings modal was deleted;
-- transient confirmation/error/picker/preview surfaces may remain modals;
-- the standalone Add Plug/Add Thermometer screens remain frozen unless a regression is found;
-- Plug names are editable consistently from the main card and detail surface;
-- Thermometer card hardware metadata is a quiet one-line footer below the existing separator rather than an expandable `Details` section;
-- rule threshold pairs auto-repair only invalid pairs, while valid narrower hysteresis is preserved;
-- shared modal geometry is content-driven up to a common max height;
-- major surfaces use restrained glass styling without moving geometry-critical overlays inside filtered containers.
+1. **Identity coherence** — one physical Shelly equals one stable saved Plug and one dashboard entry.
+2. **Add lifecycle** — scan/manual Add succeeds or returns a specific actionable error.
+3. **Forget/re-add** — local Forget and later re-add of the same physical Plug work predictably.
+4. **Automation recovery** — an existing managed Climate/Time automation re-associates with the re-added Plug instead of creating a duplicate identity.
+5. **Automation editing** — existing Climate and Time edit flows still mutate the owned runtime safely and preserve durable identity.
+6. **Current Plug settings** — LED, button mode and Cloud settings still work without cross-family mutation.
+7. **Relay/runtime behavior** — plain Plug and automation manual controls retain identity checks and safe-OFF rules.
+8. **Code quality** — stale URL-as-id fixtures/paths, duplicated ownership and broad error handling are removed or corrected where evidence requires it.
+9. **Native evidence** — real Samsung S22+ plus real Plug S Gen3 completes fresh-data and retained-data lifecycle smoke.
+10. **Green baseline** — final full repository check, responsive/native acceptance, exact-main CI and Sandbox Pack are green.
 
-The Shelly BLE child page safely cleans up a scanner even when the user presses Back while scanner startup/upload is still in progress.
+## Architecture discipline during stabilization
 
-## Global toast contract
+This is a correctness/quality pass, not a license for a broad rewrite.
 
-All mobile toast visuals still come from the shared `@lcl/ui` `ToastViewport`, but mobile screens render through `AppToastViewport` into the shell-owned `#app-toast-host`.
+Keep:
 
-Do not:
+- feature/product logic out of raw HTTP/BLE/storage;
+- Shelly protocol parsing in `@lcl/shelly-client`;
+- stable physical identity separate from endpoint reachability;
+- durable automation ownership in `features/automations`;
+- Plug-facing product settings/identity behavior in `features/plugs`;
+- `useHardwareSetupFlow` as a facade, not a subsystem owner;
+- screens free of persistence and transport orchestration;
+- current architecture and UX budgets unless a separately justified architectural change is required.
 
-- render raw `<ToastViewport>` inside `apps/mobile/src/screens/**`;
-- add page-specific toast `bottom` values;
-- move the toast host into a card, `.demo-panel`, transformed container or filtered glass surface.
+Do not retain obsolete compatibility paths solely because old development fixtures used them. Prefer one canonical state shape.
 
-The shell-level offset keeps toasts directly above the persistent bottom navigation and safe area. `quality:ux` and responsive E2E protect this contract across phone, tablet and desktop viewports.
+## Verification policy
 
-## Next phase: explicit product work
+For stabilization work:
 
-Do not start another repository-wide or screen-wide UX sweep by default. Select the next slice from a concrete product requirement or observed regression.
+1. reproduce and add failing regression coverage first;
+2. make the smallest cohesive fix at the correct owner;
+3. use focused tests while iterating;
+4. run repository/UX gates when boundaries or UI are touched;
+5. run exactly one accepted final `pnpm check` on the final product tree;
+6. run real Android + Shelly lifecycle acceptance;
+7. update canonical docs;
+8. fast-forward `main` only from a clean reviewed branch;
+9. require exact-main CI and Sandbox Pack green.
 
-Likely product categories include:
+Do not treat “Clear cache” as proof that durable WebView/localStorage state is fresh. Test genuinely fresh app-data and retained-data cases separately.
 
-- richer Plug management/configuration;
-- additional sensor/device profiles;
-- additional Plug-owned automation types;
-- targeted usability polish on a specific screen with observed friction.
+## Deferred: Shelly BLE
 
-Any new work must preserve the Plug-owned automation model, one-runtime-owner rule and shell-owned overlay geometry.
+BLE remains planned, but is explicitly after stabilization.
 
-## Architecture work: only when the next feature touches it
+When the stable baseline is accepted, resume with a fresh bounded feasibility/protocol review before production transport work. Preserve the existing intended ownership:
 
-Do not start a broad cleanup project now. Current architecture and UX gates pass.
+```text
+features
+  -> @lcl/shelly-client
+      -> ShellyRpcTransport
+          -> HTTP/LAN adapter
+          -> future BLE adapter
+```
 
-Use the watchlist in `docs/architecture/refactor-boundaries.md` when the next feature requires related changes. In particular:
+Reuse the existing neutral GATT boundary in `@lcl/ble-core`. Do not build a parallel Shelly product stack and do not assume HTTP/BLE parity without real-hardware evidence.
 
-- split `hardware-setup.test.tsx` by cohesive scenario only when materially extending it;
-- extract feature-cohesive CSS when touching a screen with stale/global selector pressure;
-- keep `ShellySetupPage` and `shellyRequests.ts` from absorbing unrelated responsibilities;
-- keep `useHardwareSetupFlow` as a facade over focused flows;
-- keep the current line budgets and UX gates rather than weakening them to land a change.
+## Active docs
 
-## Native validation policy
+```text
+docs/HANDOFF_NEXT_CHAT.md
+docs/implementation/stabilization-baseline-plan.md
+docs/architecture/overview.md
+docs/architecture/refactor-boundaries.md
+docs/architecture/feature-boundaries.md
+docs/testing/hardware-matrix.md
+```
 
-A physical Samsung S22+ install/cold-start smoke succeeded for the preceding glass/modal polish build. The user may disconnect the phone during autonomous work; that must not block unrelated TypeScript/web/UI validation.
-
-When native verification is useful:
-
-- use the existing Android `medium_phone` AVD when a physical device is unavailable and the AVD actually reaches ADB `device` state;
-- if the local AVD does not boot, use responsive Playwright only for layout/web-shell evidence and record native smoke as unverified rather than treating the emulator failure as an app failure;
-- clearly distinguish Playwright, emulator and physical-device evidence;
-- verify `versionName=2.0.10` / `versionCode=20010` unless intentionally changed;
-- cold-start `MainActivity`;
-- confirm the app process is alive and no app FATAL/ANR is present;
-- capture a screenshot when validating layout/chrome;
-- use physical hardware only for behavior the emulator cannot meaningfully reproduce, such as real BLE/radio/device interaction.
-
-## Verification discipline
-
-For each implementation slice:
-
-1. fetch fresh branch + Local Agent daemon;
-2. do a bounded preimplementation audit first;
-3. implement the smallest cohesive change;
-4. run focused typecheck/quality/tests;
-5. run exactly one final full `pnpm check` on the successful iteration;
-6. commit/push only green state;
-7. use emulator or physical-device smoke when the change affects native/UI behavior enough to merit it;
-8. remove temporary screenshot/build branches after validation evidence has been recorded.
-
-Hardware-mutating tests remain explicit and bounded. Preserve the existing safe relay/uninstall contracts.
+Older implementation plans are historical context unless the active handoff explicitly points to them.
