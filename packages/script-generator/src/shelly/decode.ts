@@ -5,7 +5,11 @@ import type {
 } from '@lcl/automation-core';
 import type { SensorProfileId } from '@lcl/device-profiles';
 import { z } from 'zod';
-import { decodeShellyRuntimeConfig, type ShellyRuntimeConfig } from './runtimeConfig.js';
+import {
+  decodeShellyRuntimeConfig,
+  decodeShellyRuntimeConfigJson,
+  type ShellyRuntimeConfig
+} from './runtimeConfig.js';
 
 export type DecodedShellyThermostatRuntimeMode =
   'climate-engine-v1' | 'xiaomi-bthome-minimal' | 'tp357-minimal';
@@ -85,14 +89,23 @@ const modeForControl = (
 };
 
 export const decodeShellyThermostatScript = (
-  script: string
+  script: string,
+  persistedRuntimeConfigJson?: string | null
 ): DecodedShellyThermostatScript | null => {
   const runtimeModeResult = runtimeModeSchema.safeParse(metadataLine(script, 'm'));
   if (!runtimeModeResult.success) {
     return null;
   }
 
-  const runtimeConfig = decodeShellyRuntimeConfig(script);
+  const persistedRuntimeConfig =
+    persistedRuntimeConfigJson && persistedRuntimeConfigJson.length > 0
+      ? decodeShellyRuntimeConfigJson(persistedRuntimeConfigJson)
+      : null;
+  if (persistedRuntimeConfigJson && persistedRuntimeConfigJson.length > 0 && !persistedRuntimeConfig) {
+    return null;
+  }
+
+  const runtimeConfig = persistedRuntimeConfig ?? decodeShellyRuntimeConfig(script);
   if (!runtimeConfig) {
     return null;
   }
@@ -108,7 +121,7 @@ export const decodeShellyThermostatScript = (
   return {
     generatorVersion: metadataLine(script, 'g'),
     runtimeMode,
-    configHash: metadataLine(script, 'h'),
+    configHash: persistedRuntimeConfig ? runtimeConfig.k : metadataLine(script, 'h'),
     runtimeConfig,
     settings: {
       version: runtimeConfig.v,
