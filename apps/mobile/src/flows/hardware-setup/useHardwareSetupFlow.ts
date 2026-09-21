@@ -1,21 +1,16 @@
 import type { RulePresetId } from '@lcl/automation-core';
 import { useMemo } from 'react';
-import {
-  DEFAULT_RULE_ADVANCED_SETTINGS,
-  useClimateAutomationScriptLoadFlow
-} from '../../features/automations/index.js';
 import { useHardwareSetupDraftStore } from './setupDraftStore.js';
 import {
   deriveClimateRuleState,
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
 import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
+import { useClimateAutomationScriptLoadDraftFlow } from '../../features/automations/index.js';
 import { useSensorSetupFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
 import { useShellyControlFlow } from './useShellyControlFlow.js';
-
-const numberInput = (value: number): string => String(Number(value.toFixed(4)));
 
 export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const shellyNameInput = useHardwareSetupDraftStore((state) => state.shellyNameInput);
@@ -34,9 +29,6 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const setShellyDeviceName = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceName
   );
-  const setShellyScriptIdDraft = useHardwareSetupDraftStore(
-    (state) => state.setShellyScriptId
-  );
   const removeShellyDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.removeShellyDevice
   );
@@ -49,9 +41,6 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   );
   const additionalSensorIds = useHardwareSetupDraftStore(
     (state) => state.additionalSensorIds
-  );
-  const setAdditionalSensorIdsDraft = useHardwareSetupDraftStore(
-    (state) => state.setAdditionalSensorIds
   );
   const toggleAdditionalSensorDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.toggleAdditionalSensorDevice
@@ -218,43 +207,12 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   });
 
   const { loadAutomationScriptMutation, loadAutomationScript } =
-    useClimateAutomationScriptLoadFlow({
-      onSuccess: ({ device, state, decoded }) => {
-        const settings = decoded.settings;
-        setShellyScriptIdDraft(device.id, String(state.script.id));
-        settings.sensors.forEach((sensor) => {
-          upsertSensorDevice({
-            id: sensor.runtimeAddress,
-            name: sensor.sensorDisplayName,
-            runtimeAddress: sensor.runtimeAddress,
-            profileId: sensor.sensorProfileId
-          });
-        });
-        const primarySensor = settings.sensors[0];
-        if (primarySensor) {
-          selectSensorDeviceDraft(primarySensor.runtimeAddress);
-          setAdditionalSensorIdsDraft(
-            settings.sensors.slice(1).map((sensor) => sensor.runtimeAddress)
-          );
-        }
-        setSensorAggregationDraft(settings.aggregation);
-        setRulePreset(settings.mode);
-        setOnThresholdInput(numberInput(settings.control.onThreshold));
-        setOffThresholdInput(numberInput(settings.control.offThreshold));
-        setVpdAssistEnabled(settings.vpdAssist.enabled);
-        setVpdTargetInput(
-          settings.vpdAssist.targetKpa === null
-            ? DEFAULT_RULE_ADVANCED_SETTINGS.vpdTargetInput
-            : numberInput(settings.vpdAssist.targetKpa)
-        );
-        setRssiMinInput(String(settings.rssiMin));
-        setStaleTimeoutMinInput(numberInput(settings.staleTimeoutSec / 60));
-        setMinChangeMinInput(numberInput(settings.minChangeMs / 60_000));
-        setMaxOnHoursInput(numberInput(settings.maxOnMs / 3_600_000));
-        resetInstallState();
-        applyControlStatus(device, state.status, null);
-      },
-      onError: (error, device) => applyControlError(device, error)
+    useClimateAutomationScriptLoadDraftFlow({
+      getDraftActions: useHardwareSetupDraftStore.getState,
+      upsertSensorDevice,
+      resetInstallState,
+      applyControlStatus,
+      applyControlError
     });
 
   const selectShellyDevice = (id: string) => {

@@ -40,6 +40,7 @@ export {
   type ClimateAutomationScriptLoadResult,
   type ClimateAutomationScriptLoadTarget
 } from './flows/useClimateAutomationScriptLoadFlow.js';
+export { useClimateAutomationScriptLoadDraftFlow } from './flows/useClimateAutomationScriptLoadDraftFlow.js';
 
 export {
   dailyScheduleTimespec,
@@ -49,6 +50,15 @@ export {
   type DailyTimeAutomationConfig
 } from './data/timeAutomationConfig.js';
 export { createClimateAutomationEditDraftPatch } from './data/climateAutomationEditDraft.js';
+export {
+  removeSensorSelection,
+  selectSensorSelection,
+  setAdditionalSensorSelection,
+  toggleAdditionalSensorSelection,
+  upsertSensorSelection,
+  validAdditionalSensorIds,
+  type SensorDraftActions
+} from './data/climateSensorDraftSelection.js';
 export {
   INSTALLED_AUTOMATION_VERSION,
   climateInstalledAutomationSchema,
