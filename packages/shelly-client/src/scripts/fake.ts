@@ -5,6 +5,7 @@ import type {
   ShellyDeviceInfo,
   ShellyInstallPlan,
   ShellyInstallResult,
+  ShellyScriptStorageItem,
   ShellyStatus
 } from '../model.js';
 import { hashScriptCode } from './hash.js';
@@ -12,6 +13,8 @@ import { hashScriptCode } from './hash.js';
 export interface FakeShellyClientOptions {
   matterEnabled?: boolean;
   failOnCommand?: boolean;
+  scriptStorageSupported?: boolean;
+  scriptStorage?: Record<string, string>;
   sleepMs?: (durationMs: number) => Promise<void>;
 }
 
@@ -21,10 +24,14 @@ const defaultSleep = (durationMs: number): Promise<void> =>
 export class FakeShellyClient implements ShellyClient {
   private relayOn = false;
   private scriptUploaded = false;
+  private readonly scriptStorage = new Map<string, string>();
   private readonly sleepMs: (durationMs: number) => Promise<void>;
 
   constructor(private readonly options: FakeShellyClientOptions = {}) {
     this.sleepMs = options.sleepMs ?? defaultSleep;
+    for (const [key, value] of Object.entries(options.scriptStorage ?? {})) {
+      this.scriptStorage.set(key, value);
+    }
   }
 
   async getDeviceInfo(): Promise<Result<ShellyDeviceInfo>> {
@@ -110,8 +117,17 @@ export class FakeShellyClient implements ShellyClient {
     return { ok: true, value: null };
   }
 
-  async readScriptStorageItem(): Promise<Result<string | null>> {
-    return { ok: true, value: null };
+  async readScriptStorageItem(
+    _scriptId: number,
+    key: string
+  ): Promise<Result<ShellyScriptStorageItem>> {
+    if (!(this.options.scriptStorageSupported ?? true)) {
+      return { ok: true, value: { supported: false, value: null } };
+    }
+    return {
+      ok: true,
+      value: { supported: true, value: this.scriptStorage.get(key) ?? null }
+    };
   }
 
   async setRelayOn(): Promise<Result<null>> {
