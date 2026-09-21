@@ -83,18 +83,17 @@ LED config: unchanged throughout
 
 The smoke used `FetchShellyRpcTransport`, `RpcShellyClient` and `RpcShellyPlugsUiClient` from the repository rather than raw `curl`. It verified stable identity before mutation and restored the original mode in `finally`.
 
-A pre-push hook ran a full `pnpm check` at intermediate head `880f960df0e70557202d6289d6efcf7054be6644`. Because the final E2E-selector-only commit `64afc789...` came afterward, that run is supporting evidence, not the accepted final check. Before integration, run exactly one accepted final `pnpm check` on the exact final documentation head; do not run another full check after that unless the tree changes.
+A pre-push hook ran a full `pnpm check` at intermediate head `880f960df0e70557202d6289d6efcf7054be6644`. Because later E2E/docs-only commits followed it, that run is supporting evidence only. The accepted final check is Local Agent task `20260921-slice3b-final-check-v1`; integration is permitted only when that task succeeds on the exact tree committed by the task. Do not run another full check unless the tree changes.
 
 ## Exact remaining work for 3B
 
-1. Finish the documentation update on `work/plug-button-input-mode`.
-2. Run exactly one accepted final `pnpm check` on the exact final branch head.
-3. Review `main...work/plug-button-input-mode`; confirm no unintended dependency/lockfile/baseline changes.
-4. Re-fetch `main` and require it to remain an ancestor of the work branch.
-5. Fast-forward `main` to the reviewed work head.
-6. Verify GitHub CI, including responsive smoke, is green on main.
-7. Delete `work/plug-button-input-mode` if the available tooling safely supports branch deletion; otherwise record cleanup debt and do not bypass safety controls.
-8. Only after green main begin Slice 3C.
+1. Require `20260921-slice3b-final-check-v1` to succeed and use the exact SHA committed by that task.
+2. Review `main...work/plug-button-input-mode`; confirm no unintended dependency/lockfile/baseline changes.
+3. Re-fetch `main` and require it to remain an ancestor of the work branch.
+4. Fast-forward `main` to the reviewed work head.
+5. Verify GitHub CI, including responsive smoke, is green on main.
+6. Delete `work/plug-button-input-mode` if the available tooling safely supports branch deletion; otherwise record cleanup debt and do not bypass safety controls.
+7. Only after green main begin Slice 3C.
 
 ## Next slice after integration — 3C
 

@@ -315,7 +315,7 @@ Verification before integration:
 - responsive Playwright task `20260921-slice3b-e2e-v2` passed 4/4 tests at 360x800, 390x844 and 768x1024, including controls-only mutation evidence;
 - hardware task `20260921-slice3b-hardware-smoke-v1` used the typed repository client against real Plug S Gen3 `shellyplugsg3-e4b063d7f530` / firmware 1.7.5 and verified `momentary -> detached -> momentary`;
 - LED config stayed byte-equivalent through the hardware mutation and relay output stayed OFF;
-- an intermediate pre-push hook ran full `pnpm check` at `880f960df...`; because the E2E-selector-only final product/test commit followed it, one accepted final `pnpm check` still must run on the exact final documentation head before integration.
+- an intermediate pre-push hook ran full `pnpm check` at `880f960df...`; later E2E/docs-only commits followed it, so the accepted final check is Local Agent task `20260921-slice3b-final-check-v1`, which must succeed on the exact tree it commits before integration.
 
 ## Slice 3C — next Shelly settings family
 
