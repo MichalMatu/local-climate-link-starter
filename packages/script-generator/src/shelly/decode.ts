@@ -8,7 +8,9 @@ import { z } from 'zod';
 import { decodeShellyRuntimeConfig, type ShellyRuntimeConfig } from './runtimeConfig.js';
 
 export type DecodedShellyThermostatRuntimeMode =
-  'xiaomi-bthome-minimal' | 'tp357-minimal';
+  | 'climate-engine-v1'
+  | 'xiaomi-bthome-minimal'
+  | 'tp357-minimal';
 
 export interface DecodedShellyThermostatSettings {
   version: number;
@@ -45,7 +47,11 @@ export interface DecodedShellyThermostatScript {
   settings: DecodedShellyThermostatSettings;
 }
 
-const runtimeModeSchema = z.enum(['xiaomi-bthome-minimal', 'tp357-minimal']);
+const runtimeModeSchema = z.enum([
+  'climate-engine-v1',
+  'xiaomi-bthome-minimal',
+  'tp357-minimal'
+]);
 
 const metadataLine = (script: string, label: string): string | null => {
   const match = new RegExp(`^// ${label}: (.+)$`, 'm').exec(script);
@@ -53,9 +59,16 @@ const metadataLine = (script: string, label: string): string | null => {
 };
 
 const sensorProfileForRuntimeMode = (
-  runtimeMode: DecodedShellyThermostatRuntimeMode
-): SensorProfileId =>
-  runtimeMode === 'tp357-minimal' ? 'tp357_custom_v1' : 'xiaomi_lywsd03mmc_bthome_v2';
+  runtimeMode: DecodedShellyThermostatRuntimeMode,
+  runtimeConfig: ShellyRuntimeConfig
+): SensorProfileId => {
+  if (runtimeMode === 'climate-engine-v1') {
+    return runtimeConfig.p === 1 ? 'tp357_custom_v1' : 'xiaomi_lywsd03mmc_bthome_v2';
+  }
+  return runtimeMode === 'tp357-minimal'
+    ? 'tp357_custom_v1'
+    : 'xiaomi_lywsd03mmc_bthome_v2';
+};
 
 const controlMetricForFlag = (metricFlag: 0 | 1): RuleControlMetric =>
   metricFlag === 1 ? 'humidity' : 'temperature';
@@ -87,6 +100,10 @@ export const decodeShellyThermostatScript = (
   }
 
   const runtimeMode = runtimeModeResult.data;
+  if (runtimeMode === 'climate-engine-v1' && runtimeConfig.p === undefined) {
+    return null;
+  }
+
   const metric = controlMetricForFlag(runtimeConfig.m);
   const direction = thresholdDirectionForFlag(runtimeConfig.d);
 
@@ -97,7 +114,7 @@ export const decodeShellyThermostatScript = (
     runtimeConfig,
     settings: {
       version: runtimeConfig.v,
-      sensorProfileId: sensorProfileForRuntimeMode(runtimeMode),
+      sensorProfileId: sensorProfileForRuntimeMode(runtimeMode, runtimeConfig),
       sensorDisplayName: runtimeConfig.n,
       runtimeAddress: runtimeConfig.fa,
       compactAddress: runtimeConfig.a,
