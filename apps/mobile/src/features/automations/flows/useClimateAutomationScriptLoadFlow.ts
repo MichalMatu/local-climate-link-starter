@@ -46,7 +46,10 @@ export const useClimateAutomationScriptLoadFlow = (
       }
       const script = state.script;
       const code = state.code;
-      const decoded = decodeShellyThermostatScript(code);
+      const decoded = decodeShellyThermostatScript(
+        code,
+        state.persistedRuntimeConfigJson
+      );
       if (!decoded) {
         throw new Error(t('hardware.rule.loadScriptUnknown'));
       }
