@@ -29,6 +29,7 @@ export type ShellyControlStatus = {
 export type ShellyAutomationScriptState = {
   script: ShellyScriptListEntry | null;
   code: string | null;
+  runtimeConfigStorageSupported: boolean;
   persistedRuntimeConfigJson: string | null;
   status: ShellyControlStatus;
 };
@@ -113,7 +114,7 @@ export const readShellyAutomationScriptState = async (
   ]);
   const automationScript = findAutomationScript(scripts);
   const code = automationScript ? await readScriptCode(transport, automationScript.id) : null;
-  const persistedRuntimeConfigJson =
+  const storage =
     automationScript && code && supportsShellyRuntimeConfigPersistence(code)
       ? unwrapShellyResult(
           await client.readScriptStorageItem(
@@ -121,12 +122,13 @@ export const readShellyAutomationScriptState = async (
             SHELLY_RUNTIME_CONFIG_STORAGE_KEY
           )
         )
-      : null;
+      : { supported: false, value: null };
 
   return {
     script: automationScript,
     code,
-    persistedRuntimeConfigJson,
+    runtimeConfigStorageSupported: storage.supported,
+    persistedRuntimeConfigJson: storage.value,
     status: toControlStatus(
       unwrapShellyResult(deviceInfo),
       unwrapShellyResult(status),
