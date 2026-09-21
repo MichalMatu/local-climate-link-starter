@@ -1,7 +1,7 @@
 import {
-  configHash,
   createDefaultShellyThermostatConfig,
   decodeShellyThermostatScript,
+  shellyRuntimeConfigMatchesConfig,
   supportsShellyRuntimeConfigPersistence,
   type DecodedShellyThermostatScript,
   type ShellyThermostatConfig
@@ -98,7 +98,10 @@ const climateRuntimeMatches = async (
     evidence.code,
     evidence.persistedRuntimeConfigJson
   );
-  return decoded?.runtimeConfig.k === configHash(installation.config);
+  return (
+    decoded !== null &&
+    shellyRuntimeConfigMatchesConfig(decoded.runtimeConfig, installation.config)
+  );
 };
 
 const runtimeMatches = async (
