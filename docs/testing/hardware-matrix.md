@@ -1,437 +1,71 @@
 # Hardware test matrix
 
-Keep this file updated after every real hardware test. Do not mark a device as supported without a dated test row.
+Only dated real-device evidence establishes hardware support. Automated tests prove deterministic logic but do not replace Shelly firmware, BLE reception or relay validation.
 
-## Supported / target hardware
+## Current hardware
 
-| Device                             | Role              | MVP status     | Notes                                                              |
-| ---------------------------------- | ----------------- | -------------- | ------------------------------------------------------------------ |
-| Shelly Plug S Gen3                 | controller/output | test candidate | Stock firmware with Scripts and BLE required for local script path |
-| Xiaomi LYWSD03MMC + PVVX BTHome v2 | sensor            | test candidate | Unencrypted BTHome v2 for MVP                                      |
-| TP357                              | sensor            | test candidate | Parser implemented from MatrixHub model; Shelly-side smoke passed  |
+| Device                             | Role                 | Current evidence                                                                                                |
+| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Shelly Plug S Gen3                 | controller/output    | real HTTP RPC, scripts, BLE, schedules, relay and Plug settings tested; firmware 1.7.5 in current stabilization |
+| Samsung SM-S906B / S22+            | Android configurator | physical app install/navigation/network acceptance; Android 16 in current stabilization                         |
+| Xiaomi LYWSD03MMC / PVVX BTHome v2 | climate sensor       | real Shelly-side BLE/runtime matrix passed                                                                      |
+| TP357                              | climate sensor       | real Shelly-side BLE/runtime matrix passed                                                                      |
 
-## Software demo validation
+## Current acceptance evidence
 
-| Test                         | Expected                              | Result | Date       | Notes                                       |
-| ---------------------------- | ------------------------------------- | ------ | ---------- | ------------------------------------------- |
-| Demo Xiaomi reading          | temperature/humidity/battery visible  | ✅     | 2026-06-28 | Covered by app flow and BTHome parser tests |
-| Demo TP357 reading           | simulated reading visible             | ✅     | 2026-06-28 | Demo path remains available                 |
-| TP357 parser fixture         | MatrixHub payload parses measurements | ✅     | 2026-06-29 | Covered by ble-core parser tests            |
-| Demo Matter ON blocked state | install block copy visible            | ✅     | 2026-06-28 | Covered by component test                   |
-| Generated script preview     | Switch.Set and failsafe visible       | ✅     | 2026-06-28 | Covered by app flow and generator tests     |
-| Fake relay test              | final state OFF                       | ✅     | 2026-06-28 | Covered by Shelly client and app flow tests |
+| Date       | Test                                       | Result | Evidence / final state                                                                                                                                                                           |
+| ---------- | ------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-04 | Full real runtime matrix                   | PASS   | Xiaomi/PVVX + TP357; heating/cooling/humidifying/dehumidifying; VPD off/on; 16/16 cases saw real BLE, relay ON and relay OFF; final relay OFF                                                    |
+| 2026-09-21 | Plug settings regression smoke             | PASS   | Real Plug S Gen3 settings paths retained, including LED, physical-button mode and Shelly Cloud work completed during the stabilization series                                                    |
+| 2026-09-21 | Fresh-store remote recovery                | PASS   | S22+ app data cleared, physical Plug re-added, managed Climate automation reconstructed; AUTO/MANUAL and live values returned; remote runtime was not rewritten                                  |
+| 2026-09-21 | Forget -> re-add lifecycle                 | PASS   | Forget removed only saved Plug state; durable automation stayed visible; scan/re-add produced exactly one Plug and recovered ownership                                                           |
+| 2026-09-21 | Remote immutability during recovery/re-add | PASS   | script 1 `Local Climate Link Thermostat` remained byte-identical, SHA-256 `6b9aa123b72e85828ae4d930d3a7f24df4ce0e2abb55230ae409bcff23538215`; `Schedule.List` remained empty; relay remained OFF |
+| 2026-09-21 | Identity mutation gates                    | PASS   | automated regressions + real lifecycle acceptance; endpoint identity is verified before runtime/destructive mutations                                                                            |
 
-These rows are software validation only. Hardware readiness is based on the
-dated real-device rows below.
+Current stabilization Shelly identity: `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware `1.7.5`. IP addresses are test transport locations and are not durable identity.
 
-## Automated functional matrix
+Observed current climate script footprint is only a few KB; recent real status measurements were roughly `mem_peak` 6.6 KB with about 22.5 KB script memory free. Keep measuring after Automation Engine/config separation changes.
 
-The deterministic logic and script-generation matrix is covered by unit tests:
+## Repeatable commands
 
-```text
-packages/automation-core/src/__tests__/threshold-matrix.test.ts
-  4 rule modes x VPD on/off
-  ON, OFF, inside-band, stale, missing reading, missing control value,
-  boot-safe-off, min-change guard, max-on guard, simulator transition,
-  effective VPD threshold resolution
-
-packages/script-generator/src/__tests__/runtime-matrix.test.ts
-  2 sensor profiles x 4 rule modes x VPD on/off
-  runtime mode selection, profile-specific parser selection, VPD code gating,
-  Shelly safety codes, diagnostics endpoint, placeholder checks,
-  syntax checks, script byte budget
-```
-
-This is 100% functional matrix coverage for deterministic TypeScript logic and
-generated script shape. It does not replace manual hardware validation because
-Shelly firmware, BLE reception, and real relay behavior cannot be fully proven
-inside Vitest.
-
-## Hardware smoke helper
-
-Run repeatable Shelly install and observation tests with:
+Install a physical Android alpha build:
 
 ```bash
-SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> pnpm hardware:shelly:install
+pnpm android:phone-alpha
 ```
 
-The helper installs the generated thermostat script, polls `/script/<id>/diag` when the
-diagnostic endpoint is available, records RPC status snapshots, and sends a final relay
-OFF command.
+Install/observe a generated Shelly climate runtime:
 
-Run the full real hardware matrix with:
+```bash
+SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<sensor-mac> pnpm hardware:shelly:install
+```
+
+Run the real runtime matrix:
 
 ```bash
 SHELLY_URL=http://<shelly-ip> \
-XIAOMI_MAC=<xiaomi-runtime-mac> \
-TP357_MAC=<tp357-runtime-mac> \
+XIAOMI_MAC=<xiaomi-mac> \
+TP357_MAC=<tp357-mac> \
 pnpm hardware:shelly:matrix
 ```
 
-Use optional filters while isolating firmware or sensor issues:
+Useful filters:
 
 ```bash
 SENSOR_FILTER=xiaomi|tp357|all
 VPD_OPTIONS=off|on|both
 ```
 
-The matrix runner tests:
-
-```text
-2 sensor profiles x 4 rule modes x VPD on/off
-real Shelly firmware script upload/start
-real Shelly-side BLE measurement for each runtime
-real relay ON from the selected runtime rule
-Script.Eval threshold update inside the same running runtime
-real relay OFF from the selected runtime rule after the next BLE frame
-final Script.Stop and final relay OFF
-```
-
-The helper scripts read the compact Local Climate Link diagnostic payload:
-
-```text
-{ v, z, s, q, y, p, g }
-```
-
-`z` is the generated config hash, `p` is plug telemetry, and `g` is a compact
-runtime diagnostics array. User-facing labels are mapped in the app UI.
-Within `g`, `g[0]` is the last full measurement usable by the control rule,
-`g[6]` is the last relay decision reason, `g[15]` is the last BLE packet received
-from the target runtime address, and `g[16]` is the BLE data state. Battery-only
-or otherwise incomplete BTHome frames may update battery telemetry, `g[15]`, and
-`g[16]` without changing `g[6]` or relay state.
-For Xiaomi/PVVX, temperature and humidity may be composed from separate
-advertisements while both values are fresh in the bounded runtime window:
-`min(90 seconds, staleTimeoutSec)`. `minChangeMs` guards only a new ON request;
-threshold, stale, max-ON, boot, and error OFF decisions remain immediate.
-
-## Long soak logger
-
-Use the soak logger when BLE/Shelly stability matters more than a short smoke
-result:
-
-```bash
-SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 SOAK_CYCLE_RELAY=1 make shelly-soak-start
-make shelly-soak-status
-make shelly-soak-stop
-```
-
-For an overnight active soak, use:
-
-```bash
-SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-overnight
-```
-
-For supervised terminal sessions, use:
+Run a longer soak when runtime stability matters:
 
 ```bash
 SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-run
 ```
 
-For an active endurance run that should exercise real relay ON/OFF transitions,
-enable threshold cycling:
+Use `SOAK_CYCLE_RELAY=1` only for supervised/endurance tests intended to exercise real rule-driven ON/OFF transitions. Hardware helpers must finish with an explicit safe final relay state.
 
-```bash
-SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 SOAK_CYCLE_RELAY=1 make shelly-soak-run
-```
+## Acceptance rules
 
-The background logger runs until `make shelly-soak-stop`, unless
-`SOAK_DURATION_MS` is set. `make shelly-soak-overnight` sets active cycling and
-an 8-hour `SOAK_OVERNIGHT_DURATION_MS` by default. Foreground mode runs until
-Ctrl-C. Background mode uses `screen` when available, which is the preferred
-path for multi-hour tests on macOS. It writes:
+A hardware-facing slice is complete only when the relevant combination is verified on the real device and the final relay state is known. Recovery/reconciliation tests must also verify that valid remote scripts and schedules are not silently replaced.
 
-```text
-artifacts/hardware/shelly-soak-<timestamp>.jsonl
-artifacts/hardware/shelly-soak-<timestamp>.summary.md
-artifacts/hardware/shelly-soak-<timestamp>.log
-```
-
-With `SOAK_CYCLE_RELAY=1`, the logger uses `Script.Eval` to update the running
-script thresholds around the latest real control value. It alternates an ON
-phase and an OFF phase every `SOAK_CYCLE_PERIOD_MS` and sets test-time
-`minChangeMs`, `maxOnMs`, and `consecutiveHits` through
-`SOAK_CYCLE_MIN_CHANGE_MS`, `SOAK_CYCLE_MAX_ON_MS`, and
-`SOAK_CYCLE_CONSECUTIVE_HITS`. The relay still changes through the generated
-runtime rule after a real BLE packet arrives; the logger does not directly call
-`Switch.Set` for the cycle. Before the first cycle it captures the original
-runtime thresholds, uses a longer test-time `maxOnMs`, stops the script on
-finish, and leaves the relay OFF by default through `SOAK_FINAL_OFF=1` and
-`SOAK_STOP_SCRIPT_ON_FINISH=1`. If the script is not running or no control value
-is available, the JSONL stream records `cycle-skip` entries.
-
-Each JSONL sample includes raw endpoint responses and parsed fields for:
-
-- generated `/script/<id>/diag`,
-- `Script.GetStatus` memory/running state,
-- `Switch.GetStatus` relay and plug telemetry,
-- `Shelly.GetDeviceInfo` firmware,
-- `Shelly.GetStatus` uptime and Wi-Fi RSSI.
-
-The summary reports sample counts, endpoint failures, script-not-running
-samples, relay changes, RSSI range, memory high/low marks, decision reason
-counts, BLE data-state counts, threshold-cycle attempts, and the longest
-observed gap without a new full measurement or target BLE packet.
-
-## Latest observed real hardware results
-
-Current conclusion: deterministic script generation, Shelly-side BLE reception,
-and real relay decisions are validated on Shelly Plug S Gen3 `1.7.5` with
-Xiaomi/PVVX BTHome v2 and TP357. The latest full hardware matrix passed all
-16 real-runtime combinations and ended with the script stopped and relay OFF.
-Earlier humidifier soak tests showed stable memory and safe final OFF state,
-but also showed that VPD target `1.33 kPa` is too permissive for a hard
-`60% RH` ceiling.
-
-| Test                           | Expected                          | Result | Date       | Firmware       | Notes                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------ | --------------------------------- | ------ | ---------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shelly manual IP check         | RPC responds                      | ✅     | 2026-06-29 | unknown        | Shelly Plug S Gen3 reachable at `http://192.168.0.20/` during local network tests                                                                                                                                                                                                                                                                                                                                          |
-| Xiaomi Shelly-side BLE scan    | Shelly sees BTHome sensor         | ✅     | 2026-06-29 | unknown        | Temporary BLE discovery script saw `A4:C1:38:4F:24:CD` with RSSI around `-46 dBm`                                                                                                                                                                                                                                                                                                                                          |
-| BLE discovery cleanup safety   | relay OFF after scan/close        | ✅     | 2026-06-29 | unknown        | Discovery flow stops the scanner script and keeps relay OFF; firmware still unrecorded                                                                                                                                                                                                                                                                                                                                     |
-| ON/OFF and AUTO/MANUAL         | final relay OFF                   | ✅     | 2026-06-29 | unknown        | RPC test: MANUAL stopped script `1`; AUTO restarted it; final `Switch.Set` left OFF                                                                                                                                                                                                                                                                                                                                        |
-| TP357 Shelly-side BLE scan     | Shelly sees TP357 sensor          | ✅     | 2026-06-29 | 1.2.3          | `F7:5F:8D:0F:76:20`, about `30.2°C`, `54%`, `32%`, RSSI around `-72 dBm`; relay OFF                                                                                                                                                                                                                                                                                                                                        |
-| TP357 minimal runtime          | script stays running              | ✅     | 2026-06-29 | 1.2.3          | `tp357-minimal`, 3603 bytes, `mem_peak` 3598, `/diag` 200, relay OFF                                                                                                                                                                                                                                                                                                                                                       |
-| Full real runtime matrix       | 16/16 combinations pass           | ✅     | 2026-06-29 | 1.2.3-matter22 | Xiaomi + TP357, heating/cooling/humidifying/dehumidifying, VPD off/on; each case saw real BLE, relay ON, relay OFF; final script stopped and relay OFF                                                                                                                                                                                                                                                                     |
-| Full real runtime matrix       | 16/16 combinations pass           | ✅     | 2026-06-30 | 1.2.3-matter22 | Xiaomi + TP357, compact `/diag`, heating/cooling/humidifying/dehumidifying, VPD off/on; final script stopped and relay OFF                                                                                                                                                                                                                                                                                                 |
-| Read-only Shelly clock diag    | `/diag` includes time             | ✅     | 2026-06-30 | 1.2.3-matter22 | Smoke install returned `y.t`, `y.u`, `y.p` from `sys`; final relay OFF                                                                                                                                                                                                                                                                                                                                                     |
-| Throttled script install       | script install still works        | ✅     | 2026-06-30 | 1.2.3-matter22 | Smoke install with throttled `Script.*` RPC returned `/diag`, saw Xiaomi BLE, and final relay OFF                                                                                                                                                                                                                                                                                                                          |
-| Current MVP hardware audit     | full flow pass                    | ✅     | 2026-06-30 | 1.2.3-matter22 | Status, Shelly-side BLE scan, runtime upload, safe relay test, `/diag`, RPC reboot, boot OFF, script auto-start, BLE retry after boot, final relay OFF                                                                                                                                                                                                                                                                     |
-| Real BLE runtime matrix        | stable BLE for every case         | ⚠️     | 2026-06-30 | 1.7.5          | Runner updated for compact `/diag`; blocked by unstable sensor advertisements: Xiaomi appeared only in raw scan at about `-96 dBm`, TP357 was not seen; final script stopped and relay OFF                                                                                                                                                                                                                                 |
-| Generated runtime relay matrix | 16/16 combinations pass           | ✅     | 2026-06-30 | 1.7.5          | Synthetic `Script.Eval` measurements on real Shelly; Xiaomi + TP357, heating/cooling/humidifying/dehumidifying, VPD off/on; every generated runtime installed, drove relay ON, drove relay OFF, final relay OFF                                                                                                                                                                                                            |
-| Xiaomi real BLE runtime        | heating VPD off works             | ✅     | 2026-06-30 | 1.7.5          | After scanner cleanup and delayed runtime scan start, Xiaomi non-VPD heating saw real BTHome data, drove relay ON, accepted threshold update, drove relay OFF, final relay OFF                                                                                                                                                                                                                                             |
-| Xiaomi real BLE VPD runtime    | receives BLE measurement          | ❌     | 2026-06-30 | 1.7.5          | Standalone first-after-reboot VPD runtime installed and stayed safe OFF, but `/diag` never received a BLE measurement; synthetic VPD relay logic still passed                                                                                                                                                                                                                                                              |
-| TP357 real BLE runtime         | VPD off matrix starts             | ❌     | 2026-06-30 | 1.7.5          | `SENSOR_FILTER=tp357 VPD_OPTIONS=off`; first runtime was 3637 bytes but `/diag` stayed empty with reason `st`; final script stopped and relay OFF                                                                                                                                                                                                                                                                          |
-| Raw BLE target probe           | Shelly sees both sensors          | ❌     | 2026-06-30 | 1.7.5          | After sensors were moved within about 2 m, minimal raw probe received 67 BLE advertisements in 60 s, but none matched TP357 MAC/payload, Xiaomi MAC, BTHome `d2fc`, or TP357 manufacturer `c23d`; relay OFF                                                                                                                                                                                                                |
-| Runtime reliability regression | generated runtime tested          | ✅     | 2026-07-01 | n/a            | Automated regression only: domain/runtime min-change parity, immediate threshold OFF, monotonic Shelly uptime clock, sparse target advertisements, and Xiaomi VPD temp/humidity composite window. Requires real Shelly smoke.                                                                                                                                                                                              |
-| Xiaomi smoke after hardening   | `/diag` receives Xiaomi           | ✅     | 2026-07-01 | 1.7.5          | `hardware:shelly:install`, VPD off, script 3970 bytes, `mem_used` 2646, Xiaomi `26.4°C/58.88%/100%`, RSSI `-31 dBm`, final relay OFF. VPD-on and TP357 still need real smoke.                                                                                                                                                                                                                                              |
-| Humidifier comprehensive soak  | safe local regulation             | ✅     | 2026-07-02 | 1.7.5          | Reboot safe OFF passed; TP357 58/60, TP357 57/59, TP357 VPD 1.33, Xiaomi 58/60, and Xiaomi VPD 1.33 ran with final script stopped and relay OFF. VPD 1.33 produced RH peaks around 65-66%, so it is not a default for a 60% ceiling.                                                                                                                                                                                       |
-| Xiaomi data-state split        | `cv` no longer masks relay reason | ✅     | 2026-07-02 | n/a            | Generated runtime now reports relay decision in `g[6]` and BLE data state in `g[16]`; Xiaomi composes split temp/humidity advertisements for up to `min(90s, staleTimeoutSec)`. Covered by generator and mobile diagnostics tests.                                                                                                                                                                                         |
-| Full real runtime matrix       | 16/16 combinations pass           | ✅     | 2026-07-04 | 1.7.5          | Xiaomi/PVVX `A4:C1:38:4F:24:CD` and TP357 `F7:5F:8D:0F:76:20`; heating/cooling/humidifying/dehumidifying with VPD off/on; every case saw real BLE, relay ON, relay OFF; final script stopped and relay OFF.                                                                                                                                                                                                                |
-| v2.0.5 hardware smoke          | phone, smoke installs, matrix     | ✅     | 2026-07-04 | 1.7.5          | Android debug `versionName=2.0.5`, `versionCode=20005` installed on `SM-S906B`. Shelly status and `/diag` responded at `http://192.168.0.20/`. Xiaomi smoke saw `25.35°C/46.61%/100%`, RSSI about `-58 dBm`; TP357 smoke saw `23.8°C/40%/34%`, RSSI about `-77 dBm`. Full real matrix passed 16/16 combinations with Xiaomi/PVVX and TP357, VPD off/on, real BLE, relay ON, relay OFF. Final script stopped and relay OFF. |
-
-## Slice 3A Plug S LED settings smoke — 2026-09-21
-
-Hardware:
-
-```text
-URL: http://192.168.0.10/
-deviceId: shellyplugsg3-e4b063d7f530
-model: S3PL-00112EU
-app: PlugSG3
-gen: 3
-firmware: 1.7.5
-fw_id: 20260311-095902/1.7.5-g9979d16
-```
-
-The full `PLUGS_UI.GetConfig` was backed up before mutation. The real firmware returned
-`night_mode.active_between: []` with night mode disabled; this shape is now part of the
-typed client contract and regression coverage.
-
-| Test                              | Result | Evidence                                                                                                                                                                                              |
-| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Typed live LED read               | ✅     | `RpcShellyPlugsUiClient` parsed the real config including `active_between: []`; editor derivation used `22:00–06:00` defaults and produced a brightness-only patch for a brightness-only edit.        |
-| Reversible night-brightness write | ✅     | `PLUGS_UI.SetConfig` changed only `night_mode.brightness` from `100` to `7`; immediate `GetConfig` readback returned `7`.                                                                             |
-| Exact config restoration          | ✅     | The complete pre-smoke `PLUGS_UI` config was restored and the final `GetConfig` matched the backup, including `controls.switch:0.in_mode`, LED mode/colors, power brightness and disabled night mode. |
-| Automation/relay isolation        | ✅     | `Switch.GetStatus` was OFF before and after; script id `1`, `Local Climate Link Thermostat`, remained `enable=true` and `running=true`.                                                               |
-
-No relay, script, schedule, Wi-Fi or BLE configuration was intentionally mutated by this
-Slice 3A smoke.
-
-## Slice 3C Shelly Cloud settings smoke — 2026-09-21
-
-Hardware:
-
-```text
-URL: http://192.168.0.10/
-deviceId: shellyplugsg3-e4b063d7f530
-model: S3PL-00112EU
-gen: 3
-firmware: 1.7.5
-fw_id: 20260311-095902/1.7.5-g9979d16
-```
-
-| Test                     | Result | Evidence                                                                                                                        |
-| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Typed Cloud read         | ✅     | `RpcShellyCloudClient` read real `enable=false`, `connected=false` and current server after stable identity verification.       |
-| Privacy-preserving write | ✅     | Only idempotent `Cloud.SetConfig { config: { enable: false } }` was issued; Cloud was never enabled during hardware acceptance. |
-| Cloud readback           | ✅     | Cloud remained disabled and disconnected; server value was unchanged.                                                           |
-| Relay/settings isolation | ✅     | Relay remained OFF and the complete parsed `PLUGS_UI` config stayed unchanged.                                                  |
-
-The `enable=true` path is intentionally validated by deterministic typed-client/UI/E2E tests rather than by connecting the development Plug to Shelly Cloud.
-
-## Physical phone + Shelly freeze E2E — 2026-09-10
-
-Hardware used: Samsung Galaxy S22+ `SM-S906B` on Android 16 / API 36 and a
-Shelly Plug S Gen3 `S3PL-00112EU` on firmware `1.7.5` at
-`http://192.168.0.16/`. The installed climate automation uses script id `1`,
-`Local Climate Link Thermostat`, with the Xiaomi/PVVX BTHome sensor ending
-`24:CD`, heating thresholds `19°C / 20°C`, and VPD assist OFF.
-
-The physical product flows below were exercised on product SHA
-`771b23456cf7b3fafe62cba3263e1f8f7118580b`. The later handoff commits are
-documentation-only, and freeze candidate `bc8a061e868951c0313d80ff1d93c5235912ce29`
-changes only authoritative `2.0.10 / 20010` release metadata plus current release
-documentation; it does not change climate/runtime behavior.
-
-| Test                                           | Result      | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Android navigation / Back                      | ✅          | Root goal flows, temperature/humidity/time/manage paths, setup Back, modal Back, and root Android Back behaved as intended. Separate Samsung IME instrumentation remained inconclusive and is not claimed as a keyboard PASS.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Real Shelly discovery and setup                | ✅          | LAN discovery found `192.168.0.16`; model/gen/status read succeeded; Shelly-side BLE discovery found real candidates; Xiaomi/PVVX sensor was saved; discovery cleanup restored runtime AUTO/running with relay OFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Climate install / runtime / dashboard          | ✅          | Owned thermostat script id `1` installed and ran; dashboard/details matched live `/script/1/diag`; at about `24.6°C` with heating thresholds `19/20°C`, relay remained OFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Pause -> Start automation                      | ✅          | Pause stopped the script with relay OFF; `Start automation` restored `running=true`; relay remained OFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Shelly LED reversible roundtrip                | ✅          | Full `PLUGS_UI.GetConfig` backed up, LED presets exercised, climate script remained running and relay OFF, then original full LED config restored exactly.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Time automation ownership protection           | ✅          | Save was correctly blocked because climate automation owned the output; `Schedule.List` stayed empty, climate script kept running, relay stayed OFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Offline Shelly recovery                        | ✅          | App installation base URL was temporarily changed to TEST-NET, dashboard showed Offline, exact local state was restored, dashboard returned to Working; physical runtime stayed running and relay OFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Independent Shelly continuity during freeze    | ✅          | On freeze candidate `bc8a061e…`, direct RPC confirmed firmware `1.7.5`, script id `1` named `Local Climate Link Thermostat`, `running=true`, relay `OFF`, zero schedules, and a non-empty compact `/diag`; a second read 5 s later again showed running + relay OFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Final destructive `2.0.10` phone-alpha install | ✅          | On freeze SHA `e75af928…`, `pnpm android:phone-alpha` logged destructive clean uninstall before install, then cold-started the app. Installed `versionName=2.0.10`, `versionCode=20010`, `targetSdk=36`; build APK and pulled installed `base.apk` both matched alpha signer SHA-256 `2909c5fe69d075bde3f18d1f50608880b1c6b8041e08b11d37e9eb4942350b76`. Fresh launch returned `Status: ok`, the process had a PID and `topResumedActivity`/focused activity was `MainActivity`, with no fatal process error in the smoke log. After the phone data wipe, direct Shelly RPC still showed script id `1` running, relay OFF, zero schedules, and a live compact `/diag`; a second read 5 s later confirmed running + relay OFF. |
-| Physical stale-sensor fail-safe                | not run     | Stale BLE was not physically forced. Deterministic/generated-runtime coverage exists, but this row is intentionally not a physical PASS.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Pure visual Android polish                     | not claimed | DOM/CDP/process evidence is not treated as human visual validation for edge-to-edge, insets, keyboard, or layout.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-
-`VPD —` while VPD assist is disabled is intentional and was not treated as a
-failure; configurable VPD ranges remain unchanged.
-
-## Current MVP hardware audit — 2026-06-30
-
-Shelly:
-
-```text
-URL: http://192.168.0.20/
-model: S3PL-00112EU
-firmware: 1.2.3-matter22
-fw_id: 20240820-134301/1.2.3-plugsg3prod0-gec79607
-script id: 1
-runtime bytes: 3967 for Xiaomi/Pokoj smoke config
-```
-
-Checked sequence:
-
-| Step             | Result | Notes                                                                |
-| ---------------- | ------ | -------------------------------------------------------------------- |
-| Status           | ✅     | `Shelly.GetStatus`, `Script.List`, and `Switch.GetStatus` responded  |
-| BLE scan         | ✅     | Temporary discovery saw Xiaomi `A4:C1:38:4F:24:CD` and TP357 sensor  |
-| Upload runtime   | ✅     | Script started with `mem_used` about `2814`, `mem_free` about `4186` |
-| Diagnostics      | ✅     | `/script/1/diag` returned hash, time, plug telemetry, BLE reading    |
-| Safe relay test  | ✅     | ON command sent, OFF command sent, final relay OFF                   |
-| Reboot           | ✅     | `Shelly.Reboot`; script auto-started on boot, relay stayed OFF       |
-| BLE after reboot | ✅     | Runtime recovered scan after boot and reported Xiaomi measurement    |
-| Final safety     | ✅     | Final `Switch.GetStatus` reported `output: false`                    |
-
-Important finding from the audit:
-
-```text
-The first extended diagnostics runtime was 4292 bytes and failed with out_of_memory.
-The runtime was reduced below the 4 KB smoke budget and BLE start retry was added.
-After reboot, the script auto-started, relay stayed OFF, and `/diag` reported
-about 30.46°C, 56.81%, 100% battery, RSSI around -46 dBm.
-```
-
-## Latest full matrix summary
-
-Date: 2026-06-30
-
-Shelly:
-
-```text
-URL: http://192.168.0.20/
-model: S3PL-00112EU
-app: PlugSG3
-firmware: 1.2.3-matter22
-fw_id: 20240820-134301/1.2.3-plugsg3prod0-gec79607
-script id: 1
-final relay: OFF
-final script: stopped
-```
-
-Sensors:
-
-```text
-Xiaomi/PVVX runtime MAC: A4:C1:38:4F:24:CD
-Xiaomi observed range: about 29.55-29.58°C, 56.4-56.7%, 100%, RSSI -31 to -46 dBm
-
-TP357 runtime MAC: F7:5F:8D:0F:76:20
-TP357 observed range: about 28.9-29.0°C, 57%, 34%, RSSI -31 to -45 dBm
-```
-
-Passed combinations:
-
-```text
-xiaomi_lywsd03mmc_bthome_v2: heating VPD off/on
-xiaomi_lywsd03mmc_bthome_v2: cooling VPD off/on
-xiaomi_lywsd03mmc_bthome_v2: humidifying VPD off/on
-xiaomi_lywsd03mmc_bthome_v2: dehumidifying VPD off/on
-tp357_custom_v1: heating VPD off/on
-tp357_custom_v1: cooling VPD off/on
-tp357_custom_v1: humidifying VPD off/on
-tp357_custom_v1: dehumidifying VPD off/on
-```
-
-Important firmware finding:
-
-```text
-Shelly Plug S Gen3 firmware 1.2.3-matter22 did not expose global BTHome in Script.Eval.
-The Xiaomi runtime therefore uses a compact local BTHome v2 parser over advData.
-The hardware helper parses compact `/diag` fields from `{ v, z, s, q, y, p, g }`.
-```
-
-## Manual test checklist — Shelly + Xiaomi BTHome
-
-| Test                             | Expected                            | Result | Date | Firmware | Notes |
-| -------------------------------- | ----------------------------------- | ------ | ---- | -------- | ----- |
-| Shelly reachable by manual IP    | RPC responds                        | ☐      |      |          |       |
-| Shelly.GetDeviceInfo model check | Plug S Gen3 or compatible           | ☐      |      |          |       |
-| Matter ON detection              | Install blocked                     | ☐      |      |          |       |
-| Matter OFF + Scripts available   | Install allowed                     | ☐      |      |          |       |
-| Missing Script.List/BLE status   | Install blocked with clear message  | ☐      |      |          |       |
-| Bluetooth enabled                | BLE scan can start                  | ☐      |      |          |       |
-| Xiaomi phone scan                | temp/humidity visible               | ☐      |      |          |       |
-| Xiaomi Shelly-side scan          | Shelly sees sensor                  | ☐      |      |          |       |
-| Shelly-side scan tab switch      | scanner deleted, automation resumes | ☐      |      |          |       |
-| Shelly-side scan app background  | scanner deleted, automation resumes | ☐      |      |          |       |
-| Script upload                    | Script.PutCode succeeds             | ☐      |      |          |       |
-| Script start                     | Script.GetStatus running            | ☐      |      |          |       |
-| Install completion gate          | Gotowe shown only after relay test  | ☐      |      |          |       |
-| Safe relay test                  | ON briefly, final OFF               | ☐      |      |          |       |
-| Delete while relay ON            | OFF confirmed before stop/delete    | ☐      |      |          |       |
-| Delete with Script.Stop failure  | OFF still attempted before delete   | ☐      |      |          |       |
-| Threshold ON                     | relay ON below threshold            | ☐      |      |          |       |
-| Threshold OFF                    | relay OFF after first crossed frame | ☐      |      |          |       |
-| Xiaomi VPD alternating payloads  | temp/humidity compose safely        | ☐      |      |          |       |
-| Stale timeout                    | relay OFF after timeout             | ☐      |      |          |       |
-| Power cycle                      | boots safe OFF and script restarts  | ☐      |      |          |       |
-| Diagnostics VPD/progi            | VPD and effective thresholds real   | ☐      |      |          |       |
-| Diagnostics export               | no secrets/raw payload by default   | ☐      |      |          |       |
-
-## Manual test checklist — TP357
-
-| Test                      | Expected                                  | Result | Date       | Firmware/app                              | Notes                                          |
-| ------------------------- | ----------------------------------------- | ------ | ---------- | ----------------------------------------- | ---------------------------------------------- |
-| Capture raw advertisement | manufacturer/service data saved           | ☐      |            |                                           |                                                |
-| App parser fixture        | temp/humidity/battery match known reading | ✅     | 2026-06-29 | MatrixHub model fixture in ble-core tests |
-| Shelly generated parser   | same output as app parser                 | ✅     | 2026-06-29 | Generator includes MatrixHub byte offsets |
-| Shelly-side scan          | Shelly sees TP357 at target distance      | ✅     | 2026-06-29 | Shelly Plug S Gen3 firmware 1.2.3         | MAC `F7:5F:8D:0F:76:20`, RSSI around `-72 dBm` |
-| Minimal runtime install   | script runs and `/diag` responds          | ✅     | 2026-06-29 | Shelly Plug S Gen3 firmware 1.2.3         | `30.8°C`, `53%`, `mem_used` 2240 after 15 s    |
-| Threshold ON/OFF          | relay follows heating rule                | ☐      |            |                                           |                                                |
-| Stale timeout             | relay OFF after timeout                   | ☐      |            |                                           |                                                |
-
-## Firmware matrix
-
-| Device             | Firmware version | Tested date | Result | Notes                                                                                                                                                                                                                                          |
-| ------------------ | ---------------- | ----------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shelly Plug S Gen3 | 1.2.3-matter22   | 2026-06-29  | ✅     | BLE discovery and scripts work; Matter flag present                                                                                                                                                                                            |
-| Shelly Plug S Gen3 | 1.7.5            | 2026-07-04  | ✅     | Final real BLE runtime matrix passed 16/16 with Xiaomi/PVVX + TP357, all four modes and VPD off/on; every case saw relay ON/OFF and finished safe OFF. Earlier 2026-06-30 advertisement failures remain recorded above as historical evidence. |
-| Shelly Plug S Gen3 | 1.7.5            | 2026-09-21  | ✅     | Complete `PLUGS_UI` LED settings smoke on `shellyplugsg3-e4b063d7f530`: real disabled `active_between: []`, reversible brightness write/readback, exact config restore, relay OFF and thermostat script still running.                         |
-| Xiaomi PVVX        |                  |             | ☐      | Record BTHome v2, encrypted off, advertising interval                                                                                                                                                                                          |
-| TP357              | stock            |             | ☐      | Record raw payload sample ID                                                                                                                                                                                                                   |
-
-## Support rule
-
-A device can be marketed as supported only when:
-
-```text
-[ ] real hardware test passed
-[ ] firmware version recorded
-[ ] compatibility doc updated
-[ ] parser fixtures committed
-[ ] troubleshooting entry added
-[ ] safe relay/stale/power-cycle tests passed
-```
+When firmware, device model or BLE behavior changes materially, add a new dated row rather than rewriting old evidence.

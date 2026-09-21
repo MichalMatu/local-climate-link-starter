@@ -10,7 +10,7 @@ Before changing code:
 1. read this file;
 2. read the nearest directory-level `AGENTS.md` for the files you will touch;
 3. read `docs/HANDOFF_NEXT_CHAT.md`;
-4. read `docs/architecture/overview.md` and `docs/architecture/refactor-boundaries.md`;
+4. read `docs/ARCHITECTURE.md` and `docs/ROADMAP.md`;
 5. fetch fresh `main` and `agent-control:.agent/status/daemon.json`;
 6. verify that no duplicate Local Agent task is running.
 
@@ -214,11 +214,11 @@ must not be committed unless intentionally promoted to a long-lived fixture.
 Documentation is part of the implementation.
 
 Update the canonical docs in the same change when product behavior, ownership or
-architecture changes. Use an ADR for a major technology, dependency, runtime, safety,
-privacy or business-model decision.
+architecture changes. Record durable architecture decisions in `docs/ARCHITECTURE.md`
+and planned product stages in `docs/ROADMAP.md`.
 
-Do not rewrite historical plans to pretend they were current. Mark them historical and
-keep current truth in the canonical docs.
+Keep the active documentation set intentionally small. Historical plans and superseded
+decisions belong in Git history rather than parallel current documents.
 
 ## Definition of done
 

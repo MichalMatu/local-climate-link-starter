@@ -69,10 +69,10 @@ https://michalmatu.github.io/local-climate-link-starter/
 Technical notes, commands, tests, and repository structure are kept outside the
 main README:
 
-- [docs/development/repository-guide.md](docs/development/repository-guide.md)
-- [docs/SANDBOX_EXECUTION_FLOW.md](docs/SANDBOX_EXECUTION_FLOW.md)
-- [docs/testing/hardware-matrix.md](docs/testing/hardware-matrix.md)
-- [docs/product/next-functional-steps.md](docs/product/next-functional-steps.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
+- [Hardware test matrix](docs/testing/hardware-matrix.md)
 
 ## License
 
