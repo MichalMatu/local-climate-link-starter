@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { generateShellyBleDiscoveryScript } from '@lcl/script-generator';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { BleDiscoverySnapshot } from './schemas.js';
 import {
@@ -39,6 +39,21 @@ export const useShellyBleDiscoveryFlow = () => {
     useState<BleDiscoverySnapshot | null>(null);
   const bleDiscoverySessionRef = useRef<BleDiscoverySession | null>(null);
   const cleanupAfterStartRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const clearLocalDiscoveryState = () => {
+    bleDiscoverySessionRef.current = null;
+    if (!mountedRef.current) return;
+    setBleDiscoverySession(null);
+    setBleDiscoverySnapshot(null);
+  };
 
   const startBleDiscoveryMutation = useMutation({
     mutationFn: async (device: ShellyDraftDevice): Promise<StartBleDiscoveryResult> => {
@@ -92,28 +107,27 @@ export const useShellyBleDiscoveryFlow = () => {
     onSuccess: ({ session, snapshot }) => {
       if (cleanupAfterStartRef.current) {
         cleanupAfterStartRef.current = false;
-        bleDiscoverySessionRef.current = null;
-        setBleDiscoverySession(null);
-        setBleDiscoverySnapshot(null);
+        clearLocalDiscoveryState();
         void stopBleDiscoverySession(session).catch(() => undefined);
         return;
       }
       bleDiscoverySessionRef.current = session;
+      if (!mountedRef.current) return;
       setBleDiscoverySession(session);
       setBleDiscoverySnapshot(snapshot);
     },
     onError: () => {
       cleanupAfterStartRef.current = false;
-      bleDiscoverySessionRef.current = null;
-      setBleDiscoverySession(null);
-      setBleDiscoverySnapshot(null);
+      clearLocalDiscoveryState();
     }
   });
 
   const refreshBleDiscoveryMutation = useMutation({
     mutationFn: async (session: BleDiscoverySession): Promise<BleDiscoverySnapshot> =>
       readShellyBleDiscoverySnapshot(session.baseUrl, session.discoveryScriptId),
-    onSuccess: (snapshot) => setBleDiscoverySnapshot(snapshot)
+    onSuccess: (snapshot) => {
+      if (mountedRef.current) setBleDiscoverySnapshot(snapshot);
+    }
   });
 
   const restartBleDiscoveryMutation = useMutation({
@@ -121,14 +135,16 @@ export const useShellyBleDiscoveryFlow = () => {
       await restartShellyBleDiscoveryScan(session.baseUrl, session.discoveryScriptId);
       return readShellyBleDiscoverySnapshot(session.baseUrl, session.discoveryScriptId);
     },
-    onSuccess: (snapshot) => setBleDiscoverySnapshot(snapshot)
+    onSuccess: (snapshot) => {
+      if (mountedRef.current) setBleDiscoverySnapshot(snapshot);
+    }
   });
 
   const stopBleDiscoveryMutation = useMutation({
     mutationFn: stopBleDiscoverySession,
     onSuccess: () => {
       bleDiscoverySessionRef.current = null;
-      setBleDiscoverySession(null);
+      if (mountedRef.current) setBleDiscoverySession(null);
     }
   });
 
