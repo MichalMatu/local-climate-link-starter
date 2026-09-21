@@ -37,10 +37,12 @@ const editedHash = hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${editedCod
 const runtime = ({
   code = originalCode,
   persistedRuntimeConfigJson = null,
+  runtimeConfigStorageSupported = true,
   running = true
 }: {
   code?: string;
   persistedRuntimeConfigJson?: string | null;
+  runtimeConfigStorageSupported?: boolean;
   running?: boolean;
 } = {}) => ({
   script: {
@@ -50,6 +52,7 @@ const runtime = ({
     running
   },
   code,
+  runtimeConfigStorageSupported,
   persistedRuntimeConfigJson,
   status: {} as never
 });
@@ -103,6 +106,35 @@ describe('updateClimateInstalledAutomation', () => {
       expect.stringContaining(configHash(editedConfig))
     );
     expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
+  });
+
+  it('falls back to code replacement when Script.storage is unavailable', async () => {
+    const mocked = services({
+      readManagedRuntime: vi
+        .fn()
+        .mockResolvedValueOnce(runtime({ runtimeConfigStorageSupported: false }))
+        .mockResolvedValueOnce(
+          runtime({
+            code: editedCode,
+            runtimeConfigStorageSupported: false,
+            persistedRuntimeConfigJson: null
+          })
+        )
+    });
+
+    const result = await updateClimateInstalledAutomation({
+      installation,
+      config: editedConfig,
+      installations: [installation],
+      services: mocked
+    });
+
+    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
+    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
+      installation.shelly.baseUrl,
+      editedCode
+    );
+    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
   });
 
   it('upgrades a legacy managed runtime by replacing code once', async () => {
