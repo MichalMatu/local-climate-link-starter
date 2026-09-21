@@ -55,6 +55,13 @@ export const createShellyRuntimeConfig = (
 export const serializeShellyRuntimeConfig = (config: ShellyThermostatConfig): string =>
   stableStringify(createShellyRuntimeConfig(config, configHash(config)));
 
+export const shellyRuntimeConfigMatchesConfig = (
+  runtimeConfig: ShellyRuntimeConfig,
+  config: ShellyThermostatConfig
+): boolean =>
+  stableStringify(runtimeConfig) ===
+  stableStringify(createShellyRuntimeConfig(config, runtimeConfig.k));
+
 export const parseShellyRuntimeConfig = (input: unknown): ShellyRuntimeConfig | null => {
   const result = shellyRuntimeConfigSchema.safeParse(input);
   return result.success ? result.data : null;
