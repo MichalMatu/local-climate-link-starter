@@ -5,14 +5,23 @@ import type {
 } from '@lcl/automation-core';
 import type { SensorProfileId } from '@lcl/device-profiles';
 import { z } from 'zod';
+import type { ClimateSensorAggregation } from './config.js';
 import {
   decodeShellyRuntimeConfig,
   decodeShellyRuntimeConfigJson,
+  runtimeAggregationFromFlag,
   type ShellyRuntimeConfig
 } from './runtimeConfig.js';
 
 export type DecodedShellyThermostatRuntimeMode =
   'climate-engine-v1' | 'xiaomi-bthome-minimal' | 'tp357-minimal';
+
+export interface DecodedShellyThermostatSensorSettings {
+  sensorProfileId: SensorProfileId;
+  sensorDisplayName: string;
+  runtimeAddress: string;
+  compactAddress: string;
+}
 
 export interface DecodedShellyThermostatSettings {
   version: number;
@@ -20,6 +29,8 @@ export interface DecodedShellyThermostatSettings {
   sensorDisplayName: string;
   runtimeAddress: string;
   compactAddress: string;
+  sensors: readonly DecodedShellyThermostatSensorSettings[];
+  aggregation: ClimateSensorAggregation;
   relayId: number;
   mode: AutomationMode;
   control: {
@@ -72,6 +83,37 @@ const sensorProfileForRuntimeMode = (
     : 'xiaomi_lywsd03mmc_bthome_v2';
 };
 
+const sensorProfileForFlag = (profileFlag: 0 | 1): SensorProfileId =>
+  profileFlag === 1 ? 'tp357_custom_v1' : 'xiaomi_lywsd03mmc_bthome_v2';
+
+const fullAddressFromCompact = (compactAddress: string): string => {
+  const pairs = compactAddress.match(/.{1,2}/g);
+  return pairs?.join(':') ?? compactAddress;
+};
+
+const decodedSensors = (
+  runtimeMode: DecodedShellyThermostatRuntimeMode,
+  runtimeConfig: ShellyRuntimeConfig
+): readonly DecodedShellyThermostatSensorSettings[] => {
+  if (runtimeConfig.ss) {
+    return runtimeConfig.ss.map(([compactAddress, sensorDisplayName, profileFlag]) => ({
+      sensorProfileId: sensorProfileForFlag(profileFlag),
+      sensorDisplayName,
+      runtimeAddress: fullAddressFromCompact(compactAddress),
+      compactAddress
+    }));
+  }
+
+  return [
+    {
+      sensorProfileId: sensorProfileForRuntimeMode(runtimeMode, runtimeConfig),
+      sensorDisplayName: runtimeConfig.n,
+      runtimeAddress: runtimeConfig.fa,
+      compactAddress: runtimeConfig.a
+    }
+  ];
+};
+
 const controlMetricForFlag = (metricFlag: 0 | 1): RuleControlMetric =>
   metricFlag === 1 ? 'humidity' : 'temperature';
 
@@ -121,6 +163,8 @@ export const decodeShellyThermostatScript = (
 
   const metric = controlMetricForFlag(runtimeConfig.m);
   const direction = thresholdDirectionForFlag(runtimeConfig.d);
+  const sensors = decodedSensors(runtimeMode, runtimeConfig);
+  const primarySensor = sensors[0]!;
 
   return {
     generatorVersion: metadataLine(script, 'g'),
@@ -129,10 +173,14 @@ export const decodeShellyThermostatScript = (
     runtimeConfig,
     settings: {
       version: runtimeConfig.v,
-      sensorProfileId: sensorProfileForRuntimeMode(runtimeMode, runtimeConfig),
-      sensorDisplayName: runtimeConfig.n,
-      runtimeAddress: runtimeConfig.fa,
-      compactAddress: runtimeConfig.a,
+      sensorProfileId: primarySensor.sensorProfileId,
+      sensorDisplayName: primarySensor.sensorDisplayName,
+      runtimeAddress: primarySensor.runtimeAddress,
+      compactAddress: primarySensor.compactAddress,
+      sensors,
+      aggregation: runtimeConfig.ag === undefined
+        ? 'firstValid'
+        : runtimeAggregationFromFlag(runtimeConfig.ag),
       relayId: runtimeConfig.i,
       mode: modeForControl(metric, direction),
       control: {
