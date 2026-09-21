@@ -1,5 +1,10 @@
 import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { sensorProfileIdSchema, type SensorProfileId } from '@lcl/device-profiles';
+import {
+  climateSensorAggregationSchema,
+  MAX_CLIMATE_SENSORS,
+  type ClimateSensorAggregation
+} from '@lcl/script-generator';
 import { create } from 'zustand';
 import { z } from 'zod';
 import {
@@ -8,7 +13,7 @@ import {
   type ClimateInstalledAutomation
 } from '../../features/automations/index.js';
 
-export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v8';
+export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v9';
 
 const rulePresetSchema = z.enum(['heating', 'cooling', 'humidifying', 'dehumidifying']);
 
@@ -48,6 +53,8 @@ const hardwareSetupDraftSchema = z.object({
   sensorDevices: z.array(sensorDraftDeviceSchema),
   selectedShellyId: z.string().nullable(),
   selectedSensorId: z.string().nullable(),
+  additionalSensorIds: z.array(z.string()).max(MAX_CLIMATE_SENSORS - 1),
+  sensorAggregation: climateSensorAggregationSchema,
   rulePreset: rulePresetSchema,
   onThresholdInput: z.string(),
   offThresholdInput: z.string(),
@@ -73,6 +80,8 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   sensorDevices: [],
   selectedShellyId: null,
   selectedSensorId: null,
+  additionalSensorIds: [],
+  sensorAggregation: 'avg',
   rulePreset: 'heating',
   onThresholdInput: '19',
   offThresholdInput: '20',
@@ -93,6 +102,9 @@ type HardwareSetupDraftState = HardwareSetupDraft & {
   setSensorNameInput(value: string): void;
   upsertSensorDevice(device: SensorDraftDevice): void;
   selectSensorDevice(id: string): void;
+  setAdditionalSensorIds(ids: readonly string[]): void;
+  toggleAdditionalSensorDevice(id: string): void;
+  setSensorAggregation(value: ClimateSensorAggregation): void;
   setSensorDeviceName(id: string, name: string): void;
   removeSensorDevice(id: string): void;
   setRulePreset(value: RulePresetId): void;
@@ -157,6 +169,8 @@ const createStoredDraft = (
     'selectedSensorId' in patch
       ? (patch.selectedSensorId ?? null)
       : state.selectedSensorId,
+  additionalSensorIds: patch.additionalSensorIds ?? state.additionalSensorIds,
+  sensorAggregation: patch.sensorAggregation ?? state.sensorAggregation,
   rulePreset: patch.rulePreset ?? state.rulePreset,
   onThresholdInput: patch.onThresholdInput ?? state.onThresholdInput,
   offThresholdInput: patch.offThresholdInput ?? state.offThresholdInput,
@@ -192,6 +206,17 @@ const isReplacedShellyDevice = (
   current.id.trim().toLowerCase() === verified.id.trim().toLowerCase() ||
   normalizeSavedShellyEndpoint(current.baseUrl) ===
     normalizeSavedShellyEndpoint(verified.baseUrl);
+
+const validAdditionalSensorIds = (
+  state: HardwareSetupDraftState,
+  ids: readonly string[],
+  selectedSensorId = state.selectedSensorId
+): string[] => {
+  const availableIds = new Set(state.sensorDevices.map((device) => device.id));
+  return [...new Set(ids)]
+    .filter((id) => id !== selectedSensorId && availableIds.has(id))
+    .slice(0, MAX_CLIMATE_SENSORS - 1);
+};
 
 export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) => {
   const storedDraft = readStoredDraft();
@@ -281,7 +306,8 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
             device,
             ...state.sensorDevices.filter((item) => item.id !== device.id)
           ],
-          selectedSensorId: device.id
+          selectedSensorId: device.id,
+          additionalSensorIds: state.additionalSensorIds.filter((id) => id !== device.id)
         };
         return persistPatch(state, patch);
       }),
@@ -292,10 +318,28 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           return state;
         }
         const patch = {
-          selectedSensorId: id
+          selectedSensorId: id,
+          additionalSensorIds: state.additionalSensorIds.filter((sensorId) => sensorId !== id)
         };
         return persistPatch(state, patch);
       }),
+    setAdditionalSensorIds: (ids) =>
+      set((state) =>
+        persistPatch(state, {
+          additionalSensorIds: validAdditionalSensorIds(state, ids)
+        })
+      ),
+    toggleAdditionalSensorDevice: (id) =>
+      set((state) => {
+        if (id === state.selectedSensorId || !state.sensorDevices.some((item) => item.id === id)) {
+          return state;
+        }
+        const additionalSensorIds = state.additionalSensorIds.includes(id)
+          ? state.additionalSensorIds.filter((sensorId) => sensorId !== id)
+          : validAdditionalSensorIds(state, [...state.additionalSensorIds, id]);
+        return persistPatch(state, { additionalSensorIds });
+      }),
+    setSensorAggregation: (sensorAggregation) => updateDraft({ sensorAggregation }),
     setSensorDeviceName: (id, name) =>
       set((state) => {
         const sensorDevices = updateListItem(state.sensorDevices, id, { name });
@@ -312,8 +356,14 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           state.selectedSensorId === id
             ? (sensorDevices[0]?.id ?? null)
             : state.selectedSensorId;
+        const nextState = { ...state, sensorDevices, selectedSensorId };
+        const additionalSensorIds = validAdditionalSensorIds(
+          nextState,
+          state.additionalSensorIds.filter((sensorId) => sensorId !== id),
+          selectedSensorId
+        );
 
-        return persistPatch(state, { sensorDevices, selectedSensorId });
+        return persistPatch(state, { sensorDevices, selectedSensorId, additionalSensorIds });
       }),
     setRulePreset: (rulePreset) => {
       const thresholds = defaultThresholdInputsForPreset(rulePreset);
