@@ -4,6 +4,8 @@ import {
   createShellyRuntimeConfig,
   decodeShellyRuntimeConfig,
   generateShellyThermostatScript,
+  parseShellyRuntimeConfig,
+  runtimeAggregationFromFlag,
   stableStringify
 } from '../index.js';
 
@@ -89,5 +91,23 @@ describe('Shelly runtime config boundary', () => {
     expect(decodeShellyRuntimeConfig('var C={"a":{"nested":1}};var R={};')).toBeNull();
     expect(decodeShellyRuntimeConfig('var C={"a":"A";var R={};')).toBeNull();
     expect(decodeShellyRuntimeConfig('var C={"a":"A"};var R={};')).toBeNull();
+  });
+
+  it('rejects incomplete multi-sensor runtime config pairs', () => {
+    const base = createDefaultShellyThermostatConfig();
+    const runtime = createShellyRuntimeConfig(base, configHash(base));
+    const sensors = [
+      ['AABBCCDDEEFF', 'One', 0],
+      ['112233445566', 'Two', 1]
+    ] as const;
+
+    expect(parseShellyRuntimeConfig({ ...runtime, ss: sensors })).toBeNull();
+    expect(parseShellyRuntimeConfig({ ...runtime, ag: 0 })).toBeNull();
+  });
+
+  it('maps every runtime aggregation flag back to the public aggregation mode', () => {
+    expect(
+      [0, 1, 2, 3].map((flag) => runtimeAggregationFromFlag(flag as 0 | 1 | 2 | 3))
+    ).toEqual(['avg', 'min', 'max', 'firstValid']);
   });
 });
