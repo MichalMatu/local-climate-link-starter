@@ -163,7 +163,7 @@ describe('generateShellyThermostatScript', () => {
 
     const decoded = decodeShellyThermostatScript(generateShellyThermostatScript(config));
 
-    expect(decoded?.runtimeMode).toBe('xiaomi-bthome-minimal');
+    expect(decoded?.runtimeMode).toBe('climate-engine-v1');
     expect(decoded?.settings).toMatchObject({
       sensorProfileId: 'xiaomi_lywsd03mmc_bthome_v2',
       runtimeAddress: 'A4:C1:38:4F:24:CD',
@@ -266,7 +266,7 @@ describe('generateShellyThermostatScript', () => {
       createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2')
     );
 
-    expect(script).toContain('m: xiaomi-bthome-minimal');
+    expect(script).toContain('m: climate-engine-v1');
     expect(script).toContain('function ad(d)');
     expect(script).toContain('function r2(d,o,s)');
     expect(script).toContain('Shelly.call("Switch.Set"');
@@ -287,7 +287,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('readUint16LE');
     expect(script).not.toContain('function dataLength');
-    expect(byteLength(script)).toBeLessThanOrEqual(4500);
+    expect(byteLength(script)).toBeLessThanOrEqual(6500);
     expect(() => new Function(script)).not.toThrow();
   });
 
@@ -750,7 +750,7 @@ describe('generateShellyThermostatScript', () => {
       createDefaultShellyThermostatConfig('tp357_custom_v1')
     );
 
-    expect(script).toContain('m: tp357-minimal');
+    expect(script).toContain('m: climate-engine-v1');
     expect(script).toContain('function mf(d)');
     expect(script).toContain('"tm"');
     expect(script).toContain('Shelly.call("Switch.Set"');
@@ -763,7 +763,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('BTHome.parseData');
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('xiaomi_lywsd03mmc_bthome_v2');
-    expect(byteLength(script)).toBeLessThanOrEqual(4000);
+    expect(byteLength(script)).toBeLessThanOrEqual(6500);
     expect(() => new Function(script)).not.toThrow();
   });
 
@@ -811,7 +811,7 @@ describe('generateShellyThermostatScript', () => {
     });
 
     expect(disabled).toContain('"vp":0');
-    expect(disabled).not.toContain('function sv(t)');
+    expect(disabled).toContain('function sv(t)');
     expect(enabled).toContain('"vp":1.25');
     expect(enabled).toContain('function sv(t)');
     expect(enabled).toContain('Math.exp');

@@ -8,9 +8,7 @@ import { z } from 'zod';
 import { decodeShellyRuntimeConfig, type ShellyRuntimeConfig } from './runtimeConfig.js';
 
 export type DecodedShellyThermostatRuntimeMode =
-  | 'climate-engine-v1'
-  | 'xiaomi-bthome-minimal'
-  | 'tp357-minimal';
+  'climate-engine-v1' | 'xiaomi-bthome-minimal' | 'tp357-minimal';
 
 export interface DecodedShellyThermostatSettings {
   version: number;

@@ -14,9 +14,7 @@ const stableEngineBody = (script: string): string =>
 
 describe('stable climate engine runtime', () => {
   it('keeps one engine body across sensor profiles and VPD settings', () => {
-    const xiaomi = createDefaultShellyThermostatConfig(
-      'xiaomi_lywsd03mmc_bthome_v2'
-    );
+    const xiaomi = createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2');
     const tp357 = createDefaultShellyThermostatConfig('tp357_custom_v1');
     const xiaomiVpd = {
       ...xiaomi,
@@ -40,13 +38,12 @@ describe('stable climate engine runtime', () => {
   });
 
   it('still decodes installed 0.2.x runtimes without the profile flag', () => {
-    const config = createDefaultShellyThermostatConfig(
-      'xiaomi_lywsd03mmc_bthome_v2'
-    );
-    const { p: _profileFlag, ...legacyRuntimeConfig } = createShellyRuntimeConfig(
+    const config = createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2');
+    const { p: profileFlag, ...legacyRuntimeConfig } = createShellyRuntimeConfig(
       config,
       configHash(config)
     );
+    expect(profileFlag).toBe(0);
     const legacyScript = `// LCL
 // g: 0.2.0
 // m: xiaomi-bthome-minimal

@@ -1,5 +1,4 @@
 import { GENERATOR_VERSION, normalizeConfig } from './config.js';
-import type { ShellyThermostatConfig } from './config.js';
 import { configHash, stableStringify } from './hash.js';
 import { createShellyRuntimeConfig } from './runtimeConfig.js';
 import { compactGeneratedShellyScript } from './scriptText.js';
@@ -8,14 +7,16 @@ export type ShellyScriptGeneratorMode = 'climate-engine-v1' | 'discovery-debug';
 
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
 
-const renderThresholdHelper = (): string => `function cl(v,a,b){return Math.min(Math.max(v,a),b);}
+const renderThresholdHelper =
+  (): string => `function cl(v,a,b){return Math.min(Math.max(v,a),b);}
 function sv(t){return 0.6108*Math.exp((17.27*t)/(t+237.3));}
 function vd(t,h){return t===null||h===null?null:sv(t)*(1-h/100);}
 function vt(h){if(h===null||h>=100)return null;var f=1-h/100;if(f<=0)return null;var s=C.vp/f;if(s<=0)return null;var l=Math.log(s/0.6108);return l>=17.27?null:(237.3*l)/(17.27-l);}
 function vh(t){if(t===null)return null;var s=sv(t);return s<=0?null:100*(1-C.vp/s);}
 function th(t,h){if(!C.vp)return{o:C.on,f:C.off};var lo=Math.min(C.on,C.off),hi=Math.max(C.on,C.off),g=C.m?vh(t):vt(h);if(g===null)return{o:C.on,f:C.off};g=cl(g,lo,hi);var z=C.m?2:0.25;return C.d?{o:cl(g+z,lo,hi),f:cl(g-z,lo,hi)}:{o:cl(g-z,lo,hi),f:cl(g+z,lo,hi)};}`;
 
-const renderRuntimeParser = (): string => `function lb(d){if(!d)return 0;if(typeof d==="string")return d.length;if(d.length!==undefined)return d.length;return 0;}
+const renderRuntimeParser =
+  (): string => `function lb(d){if(!d)return 0;if(typeof d==="string")return d.length;if(d.length!==undefined)return d.length;return 0;}
 function rb(d,o){if(o<0||o>=lb(d))return null;var v=typeof d==="string"?d.charCodeAt(o):d[o];if(typeof v==="string")v=v.charCodeAt(0);return v===undefined||v===null?null:v&255;}
 function sl(d,a,b){return typeof d==="string"?d.slice(a,b):d.slice?d.slice(a,b):null;}
 function ad(d){var l=lb(d),o=0;while(o<l){var n=rb(d,o);if(!n)return null;var s=o+1,e=s+n;if(e>l)return null;if(rb(d,s)===22&&rb(d,s+1)===210&&rb(d,s+2)===252)return sl(d,s+3,e);o=e;}return null;}

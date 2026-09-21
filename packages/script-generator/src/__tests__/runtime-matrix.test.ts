@@ -149,24 +149,30 @@ describe('Shelly runtime generation matrix', () => {
     );
   });
 
-  it.each(matrixCases)('keeps both supported parsers in the stable engine for $label', (matrixCase) => {
-    const script = generateShellyThermostatScript(configForCase(matrixCase));
+  it.each(matrixCases)(
+    'keeps both supported parsers in the stable engine for $label',
+    (matrixCase) => {
+      const script = generateShellyThermostatScript(configForCase(matrixCase));
 
-    expect(script).toContain('function ad(d)');
-    expect(script).toContain('function r2(d,o,s)');
-    expect(script).toContain('function mf(d)');
-    expect(script).toContain('function parse(x){return C.p===1?pt(x):pb(x);}');
-    expect(script).not.toContain('BTHome.parseData');
-    expect(script).not.toContain('parseBthomeV2Payload');
-  });
+      expect(script).toContain('function ad(d)');
+      expect(script).toContain('function r2(d,o,s)');
+      expect(script).toContain('function mf(d)');
+      expect(script).toContain('function parse(x){return C.p===1?pt(x):pb(x);}');
+      expect(script).not.toContain('BTHome.parseData');
+      expect(script).not.toContain('parseBthomeV2Payload');
+    }
+  );
 
-  it.each(matrixCases)('selects VPD behavior through config only for $label', (matrixCase) => {
-    const script = generateShellyThermostatScript(configForCase(matrixCase));
+  it.each(matrixCases)(
+    'selects VPD behavior through config only for $label',
+    (matrixCase) => {
+      const script = generateShellyThermostatScript(configForCase(matrixCase));
 
-    expect(script).toContain('function sv(t)');
-    expect(script).toContain('Math.exp');
-    expect(script).toContain(matrixCase.vpdAssistEnabled ? '"vp":1.25' : '"vp":0');
-  });
+      expect(script).toContain('function sv(t)');
+      expect(script).toContain('Math.exp');
+      expect(script).toContain(matrixCase.vpdAssistEnabled ? '"vp":1.25' : '"vp":0');
+    }
+  );
 
   it('rejects invalid above-directed thresholds with a specific message', () => {
     const config = createDefaultShellyThermostatConfig(
