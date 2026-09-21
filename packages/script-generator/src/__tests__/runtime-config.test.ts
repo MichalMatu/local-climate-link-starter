@@ -1,4 +1,5 @@
 import {
+  climateSensorAggregationForConfig,
   configHash,
   createDefaultShellyThermostatConfig,
   createShellyRuntimeConfig,
@@ -109,5 +110,26 @@ describe('Shelly runtime config boundary', () => {
     expect(
       [0, 1, 2, 3].map((flag) => runtimeAggregationFromFlag(flag as 0 | 1 | 2 | 3))
     ).toEqual(['avg', 'min', 'max', 'firstValid']);
+  });
+
+  it('uses firstValid for single-sensor config and preserves explicit multi-sensor aggregation', () => {
+    const single = createDefaultShellyThermostatConfig();
+    const multi = {
+      ...single,
+      sensorSet: {
+        aggregation: 'max' as const,
+        additionalSensors: [
+          {
+            ...single.sensor,
+            sensorId: 'secondary',
+            runtimeAddress: '11:22:33:44:55:66',
+            displayName: 'Secondary'
+          }
+        ]
+      }
+    };
+
+    expect(climateSensorAggregationForConfig(single)).toBe('firstValid');
+    expect(climateSensorAggregationForConfig(multi)).toBe('max');
   });
 });
