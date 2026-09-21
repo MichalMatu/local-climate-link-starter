@@ -30,6 +30,10 @@ const ledsConfigSchema = z.object({
   colors: ledColorsSchema.optional(),
   night_mode: nightModeSchema.optional()
 });
+const buttonInputModeSchema = z.enum(['momentary', 'detached']);
+const controlsConfigSchema = z.object({
+  'switch:0': z.object({ in_mode: buttonInputModeSchema }).optional()
+});
 
 const nonEmptyObject = <T extends z.ZodRawShape>(
   schema: z.ZodObject<T>,
@@ -77,7 +81,8 @@ const ledsPatchSchema = nonEmptyObject(
   'PLUGS_UI LED patch requires at least one field.'
 );
 const plugsUiConfigSchema = z.object({
-  leds: ledsConfigSchema
+  leds: ledsConfigSchema,
+  controls: controlsConfigSchema.optional()
 });
 const listMethodsResponseSchema = z.object({
   methods: z.array(z.string())
@@ -91,6 +96,8 @@ export type ShellyPlugsUiLedColor = z.infer<typeof ledColorSchema>;
 export type ShellyPlugsUiNightMode = z.infer<typeof nightModeSchema>;
 export type ShellyPlugsUiLedsConfig = z.infer<typeof ledsConfigSchema>;
 export type ShellyPlugsUiLedsPatch = z.input<typeof ledsPatchSchema>;
+export type ShellyPlugsUiButtonInputMode = z.infer<typeof buttonInputModeSchema>;
+export type ShellyPlugsUiControlsConfig = z.infer<typeof controlsConfigSchema>;
 export type ShellyPlugsUiConfig = z.infer<typeof plugsUiConfigSchema>;
 export type ShellyPlugsUiSetResult = z.infer<typeof setConfigResponseSchema>;
 export type ShellyPlugsUiLedCapabilities = {
@@ -98,12 +105,16 @@ export type ShellyPlugsUiLedCapabilities = {
   powerBrightness: boolean;
   nightMode: boolean;
 };
+export type ShellyPlugsUiControlCapabilities = {
+  buttonInputMode: boolean;
+};
 export type ShellyPlugsUiReadResult =
   | { supported: false }
   | {
       supported: true;
       config: ShellyPlugsUiConfig;
       capabilities: ShellyPlugsUiLedCapabilities;
+      controlCapabilities: ShellyPlugsUiControlCapabilities;
     };
 
 const validationError = (message: string) => ({
@@ -118,6 +129,24 @@ const ledCapabilities = (config: ShellyPlugsUiConfig): ShellyPlugsUiLedCapabilit
   powerBrightness: config.leds.colors?.power?.brightness !== undefined,
   nightMode: config.leds.night_mode !== undefined
 });
+
+const controlCapabilities = (
+  config: ShellyPlugsUiConfig
+): ShellyPlugsUiControlCapabilities => ({
+  buttonInputMode: config.controls?.['switch:0']?.in_mode !== undefined
+});
+
+const parseSetConfigResponse = (
+  response: Result<unknown>
+): Result<ShellyPlugsUiSetResult> => {
+  if (!response.ok) {
+    return response;
+  }
+  const parsedResponse = setConfigResponseSchema.safeParse(response.value);
+  return parsedResponse.success
+    ? { ok: true, value: parsedResponse.data }
+    : { ok: false, error: validationError(parsedResponse.error.message) };
+};
 
 export const createRelayStateLedPatch = (): ShellyPlugsUiLedsPatch => ({
   mode: 'switch',
@@ -169,7 +198,8 @@ export class RpcShellyPlugsUiClient {
           value: {
             supported: true,
             config: parsedConfig.data,
-            capabilities: ledCapabilities(parsedConfig.data)
+            capabilities: ledCapabilities(parsedConfig.data),
+            controlCapabilities: controlCapabilities(parsedConfig.data)
           }
         }
       : { ok: false, error: validationError(parsedConfig.error.message) };
@@ -181,21 +211,39 @@ export class RpcShellyPlugsUiClient {
       return { ok: false, error: validationError(parsedPatch.error.message) };
     }
 
-    const response = await this.transport.call<unknown>({
-      method: RPC_METHODS.PlugsUiSetConfig,
-      params: {
-        config: {
-          leds: parsedPatch.data
+    return parseSetConfigResponse(
+      await this.transport.call<unknown>({
+        method: RPC_METHODS.PlugsUiSetConfig,
+        params: {
+          config: {
+            leds: parsedPatch.data
+          }
         }
-      }
-    });
-    if (!response.ok) {
-      return response;
+      })
+    );
+  }
+
+  async setButtonInputMode(
+    mode: ShellyPlugsUiButtonInputMode
+  ): Promise<Result<ShellyPlugsUiSetResult>> {
+    const parsedMode = buttonInputModeSchema.safeParse(mode);
+    if (!parsedMode.success) {
+      return { ok: false, error: validationError(parsedMode.error.message) };
     }
 
-    const parsedResponse = setConfigResponseSchema.safeParse(response.value);
-    return parsedResponse.success
-      ? { ok: true, value: parsedResponse.data }
-      : { ok: false, error: validationError(parsedResponse.error.message) };
+    return parseSetConfigResponse(
+      await this.transport.call<unknown>({
+        method: RPC_METHODS.PlugsUiSetConfig,
+        params: {
+          config: {
+            controls: {
+              'switch:0': {
+                in_mode: parsedMode.data
+              }
+            }
+          }
+        }
+      })
+    );
   }
 }
