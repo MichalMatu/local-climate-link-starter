@@ -1,4 +1,4 @@
-# Next chat handoff — Slice 3B implementation complete, integration pending
+# Next chat handoff — Slice 3B integrated, CI green, Slice 3C next
 
 Updated: 2026-09-21
 
@@ -6,15 +6,20 @@ This is the canonical continuation state for `MichalMatu/local-climate-link-star
 
 ## Immediate state
 
-Slice 3B implements the Plug S Gen3 physical-button input mode as a separate Plug settings family. Product code, focused tests, responsive E2E and real-hardware smoke are complete on `work/plug-button-input-mode`. Do not start Slice 3C until 3B is fast-forwarded to `main` and main CI is green.
-
-Current work branch before this documentation commit:
+Slice 3B — Plug S Gen3 physical-button input mode — is complete and integrated on `main`.
 
 ```text
-branch: work/plug-button-input-mode
-product/test head: 64afc789ec679d7de2ab17b6fab5a588235bf238
-base main: afe12b1ceafa5c5d117898379ec4068feff93058
+main product/docs head before this docs-only finalization: 0155d0508a05e4fea46bca89a83501a28ab8cc18
+accepted final check: 20260921-slice3b-final-check-v1 (success)
+main CI run: 35560026604 (success)
+CI job: 106211021785 (success, including Responsive smoke)
+Sandbox Pack run: 35560026593 (success)
+Sandbox Pack job: 106211021856 (success)
+completed work branch: work/plug-button-input-mode
+branch cleanup: deferred; available GitHub connector has no branch-delete action and raw delete-push was not used
 ```
+
+Do not resume Slice 3B product work unless new evidence shows a regression. The next product goal is Slice 3C: audit the real Plug S Gen3 configuration/method capability matrix plus current official Shelly documentation, then select one small user-visible settings family.
 
 ## Completed Slice 3B contract
 
@@ -46,18 +51,16 @@ Important invariants:
 - every Plug settings read/write verifies live `Shelly.GetDeviceInfo.id` against the saved stable `deviceId` before using `PLUGS_UI`;
 - `baseUrl` is reachability only;
 - `RpcShellyPlugsUiClient.setButtonInputMode()` writes only `controls.switch:0.in_mode`;
-- LED mutations remain LED-only and now reuse the same verified-target helper;
+- LED mutations remain LED-only and reuse the same verified-target helper;
 - screens/components do not call raw RPC/fetch;
 - no production dependency, lockfile or architecture-baseline change;
 - BLE transport remains deferred to Slice 4A+.
 
-The button-mode card is exposed from the saved physical Plug settings surface. The postimplementation audit deliberately did not duplicate it into installed-automation detail screens merely for symmetry with LED settings; Slice 3B is a physical Plug setting and the existing Plug settings surface is the canonical owner.
+The button-mode card is exposed from the saved physical Plug settings surface. The postimplementation audit deliberately did not duplicate it into installed-automation detail screens merely for symmetry with LED settings.
 
 ## Verification evidence
 
-Focused package/component validation before the final selector fix passed through the repository pre-push hook, including formatting, lint, UX/repository gates, workspace typechecks/tests, coverage and builds.
-
-Responsive button-mode E2E after the selector fix:
+Responsive button-mode E2E:
 
 ```text
 task: 20260921-slice3b-e2e-v2
@@ -81,25 +84,30 @@ relay before/during/after: OFF
 LED config: unchanged throughout
 ```
 
-The smoke used `FetchShellyRpcTransport`, `RpcShellyClient` and `RpcShellyPlugsUiClient` from the repository rather than raw `curl`. It verified stable identity before mutation and restored the original mode in `finally`.
+The smoke used `FetchShellyRpcTransport`, `RpcShellyClient` and `RpcShellyPlugsUiClient` from the repository, verified stable identity before mutation, and restored the original mode in `finally`.
 
-A pre-push hook ran a full `pnpm check` at intermediate head `880f960df0e70557202d6289d6efcf7054be6644`. Because later E2E/docs-only commits followed it, that run is supporting evidence only. The accepted final check is Local Agent task `20260921-slice3b-final-check-v1`; integration is permitted only when that task succeeds on the exact tree committed by the task. Do not run another full check unless the tree changes.
+Accepted final validation:
 
-## Exact remaining work for 3B
+```text
+task: 20260921-slice3b-final-check-v1
+final checked commit: 0155d0508a05e4fea46bca89a83501a28ab8cc18
+pnpm check: success
+main CI: 35560026604 / 106211021785 — success
+Responsive smoke: success
+Sandbox Pack: 35560026593 / 106211021856 — success
+```
 
-1. Require `20260921-slice3b-final-check-v1` to succeed and use the exact SHA committed by that task.
-2. Review `main...work/plug-button-input-mode`; confirm no unintended dependency/lockfile/baseline changes.
-3. Re-fetch `main` and require it to remain an ancestor of the work branch.
-4. Fast-forward `main` to the reviewed work head.
-5. Verify GitHub CI, including responsive smoke, is green on main.
-6. Delete `work/plug-button-input-mode` if the available tooling safely supports branch deletion; otherwise record cleanup debt and do not bypass safety controls.
-7. Only after green main begin Slice 3C.
+This handoff update is docs-only and intentionally does not re-run `pnpm check`; the checked product tree is unchanged.
 
-## Next slice after integration — 3C
+## Exact next work — Slice 3C
 
-Slice 3C is the next cohesive Plug settings family, but do not choose it by guesswork. First audit the real Plug S Gen3 supported configuration/method matrix and current official Shelly docs, then select one small user-visible family with clear typed ownership and reversible hardware validation. Keep one family per slice and do not create a generic JSON/settings surface.
-
-Slice 4A remains the first BLE feasibility/protocol spike; do not pull BLE transport work forward into 3C.
+1. Fetch fresh `main` and verify the Local Agent daemon is idle and bound to this repository.
+2. Read root/nearest `AGENTS.md`, this handoff, the active implementation plan and architecture boundaries.
+3. Perform a preimplementation capability/ownership audit before changing code.
+4. Read the real Plug S Gen3 method/config surface at `http://192.168.0.10/` and current official Shelly docs.
+5. Choose exactly one small user-visible settings family with clear typed ownership and reversible hardware validation; do not choose by guesswork.
+6. Keep the same architecture pattern: `@lcl/shelly-client` protocol owner, `features/plugs` product/UI owner, stable `deviceId` verification and narrow writes.
+7. Do not create a generic settings/JSON editor and do not pull BLE transport work forward; Slice 4A remains the first BLE feasibility/protocol spike.
 
 ## Local Chat Bridge identity
 
