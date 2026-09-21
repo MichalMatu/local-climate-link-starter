@@ -1,11 +1,19 @@
 import { GENERATOR_VERSION, normalizeConfig } from './config.js';
 import { configHash, stableStringify } from './hash.js';
-import { createShellyRuntimeConfig } from './runtimeConfig.js';
+import {
+  createShellyRuntimeConfig,
+  SHELLY_RUNTIME_CONFIG_STORAGE_KEY
+} from './runtimeConfig.js';
 import { compactGeneratedShellyScript } from './scriptText.js';
 
 export type ShellyScriptGeneratorMode = 'climate-engine-v1' | 'discovery-debug';
 
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
+
+const renderPersistentConfigLoader = (): string => `var E=0;
+function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&typeof c.a==="string"&&typeof c.fa==="string"&&typeof c.n==="string"&&typeof c.k==="string"&&typeof c.i==="number"&&c.i>=0&&typeof c.r==="number"&&c.r>=-100&&c.r<=-20&&typeof c.on==="number"&&typeof c.off==="number"&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&typeof c.h==="number"&&c.h>=1&&c.h<=10&&typeof c.c==="number"&&c.c>0&&typeof c.s==="number"&&c.s>0&&typeof c.x==="number"&&c.x>0&&typeof c.vp==="number"&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off);}
+function lc(d){if(typeof Script==="undefined"||!Script.storage||!Script.storage.getItem)return d;try{var x=Script.storage.getItem(${JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)});if(x===null||x==="")return d;var c=JSON.parse(x);if(vc(c))return c;}catch(e){}E=1;return d;}
+C=lc(C);`;
 
 const renderThresholdHelper =
   (): string => `function cl(v,a,b){return Math.min(Math.max(v,a),b);}
@@ -44,6 +52,7 @@ export const generateShellyThermostatScript = (input: unknown): string => {
   const hash = configHash(config);
   const cfgJson = stableStringify(createShellyRuntimeConfig(config, hash));
   const body = `var C=${cfgJson};
+${renderPersistentConfigLoader()}
 ${renderRuntimeState()}
 function nw(){return Shelly.getUptimeMs();}
 function na(a){if(a===undefined||a===null)return"";var s=String(a).toUpperCase(),o="";for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c!==":"&&c!=="-")o+=c;}return o;}
@@ -57,12 +66,10 @@ ${renderRuntimeParser()}
 function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStatus("switch:0");return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds]});}
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ev(e,x){if(e!==BLE.Scanner.SCAN_RESULT||!x)return;if(na(x.addr)!==C.a)return;R.l=nw();if(x.rssi!==undefined&&x.rssi<C.r){R.r=x.rssi;R.ds="rl";return;}parse(x);}
-sw(false,"b",true);
 var bt=BLE.Scanner.stop||BLE.Scanner.Stop;
-BLE.Scanner.subscribe(function(e,x){ev(e,x);});
 function bs(){if(bt)bt.call(BLE.Scanner);R.sa=nw();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sw(false,"bf",true);}
 function bw(){if(R.sa&&nw()-(R.l||R.sa)>9e4)bs();}
-Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw();});`;
+if(E){R.ds="cf";sw(false,"cf",true);}else{sw(false,"b",true);BLE.Scanner.subscribe(function(e,x){ev(e,x);});Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw();});}`;
   const compactBody = compactGeneratedShellyScript(body);
 
   return `// LCL
