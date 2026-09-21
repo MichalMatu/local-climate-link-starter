@@ -9,3 +9,4 @@ export * from './scripts/read.js';
 export * from './scripts/fake.js';
 export * from './schedules.js';
 export * from './plugsUi.js';
+export * from './cloud.js';
