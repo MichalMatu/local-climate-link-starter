@@ -1,4 +1,4 @@
-# Next chat handoff — Slice 3B integrated, CI green, Slice 3C next
+# Next chat handoff — Slice 3C complete, integration pending
 
 Updated: 2026-09-21
 
@@ -6,108 +6,100 @@ This is the canonical continuation state for `MichalMatu/local-climate-link-star
 
 ## Immediate state
 
-Slice 3B — Plug S Gen3 physical-button input mode — is complete and integrated on `main`.
+Slice 3C — Shelly Cloud enable/disable — is implemented and fully validated on `work/plug-cloud-settings`.
 
 ```text
-main product/docs head before this docs-only finalization: 0155d0508a05e4fea46bca89a83501a28ab8cc18
-accepted final check: 20260921-slice3b-final-check-v1 (success)
-main CI run: 35560026604 (success)
-CI job: 106211021785 (success, including Responsive smoke)
-Sandbox Pack run: 35560026593 (success)
-Sandbox Pack job: 106211021856 (success)
-completed work branch: work/plug-button-input-mode
-branch cleanup: deferred; available GitHub connector has no branch-delete action and raw delete-push was not used
+base main: c19014c0c14ce8e136c3bb149860a324320388bb
+work branch: work/plug-cloud-settings
+accepted product head: 47e047cc8b748725b952f14f04ad46c7f8f11023
+focused validation: 20260921-slice3c-focused-v2 — success
+hardware smoke: 20260921-slice3c-hardware-smoke-v1 — success
+accepted final full check: 20260921-slice3c-final-v2 — success
+integration: pending
 ```
 
-Do not resume Slice 3B product work unless new evidence shows a regression. The next product goal is Slice 3C: audit the real Plug S Gen3 configuration/method capability matrix plus current official Shelly documentation, then select one small user-visible settings family.
+Do not start Slice 4A until this exact Slice 3C tree plus docs-only finalization are fast-forwarded to `main` and GitHub CI / Sandbox Pack are green.
 
-## Completed Slice 3B contract
+## Completed Slice 3C contract
 
 Target capability:
 
 ```text
-PLUGS_UI.controls["switch:0"].in_mode
-momentary | detached
+Cloud.GetConfig
+Cloud.GetStatus
+Cloud.SetConfig { config: { enable: boolean } }
 ```
 
-Semantics confirmed against current Shelly documentation and real Plug S Gen3 firmware 1.7.5:
+Ownership and invariants:
 
-- `momentary` — the physical Plug button controls the relay;
-- `detached` — the physical Plug button is decoupled from relay control.
-
-Implemented ownership:
-
-```text
-apps/mobile/src/features/plugs
-  -> focused button-mode data/flow/card
-  -> shared verified Plug settings target helper
-  -> @lcl/shelly-client typed PLUGS_UI API
-  -> ShellyRpcTransport
-```
-
-Important invariants:
-
-- button mode remains separate from LED settings; no generic settings manager was introduced;
-- every Plug settings read/write verifies live `Shelly.GetDeviceInfo.id` against the saved stable `deviceId` before using `PLUGS_UI`;
-- `baseUrl` is reachability only;
-- `RpcShellyPlugsUiClient.setButtonInputMode()` writes only `controls.switch:0.in_mode`;
-- LED mutations remain LED-only and reuse the same verified-target helper;
-- screens/components do not call raw RPC/fetch;
-- no production dependency, lockfile or architecture-baseline change;
-- BLE transport remains deferred to Slice 4A+.
-
-The button-mode card is exposed from the saved physical Plug settings surface. The postimplementation audit deliberately did not duplicate it into installed-automation detail screens merely for symmetry with LED settings.
+- `@lcl/shelly-client` owns typed Cloud config/status parsing, method capability detection and the narrow enable-only mutation.
+- `apps/mobile/src/features/plugs` owns the separate Cloud data/flow/card path with TanStack Query.
+- Every Cloud read/write verifies live `Shelly.GetDeviceInfo.id` against the saved stable `deviceId` before creating the Cloud client.
+- `baseUrl` remains reachability only.
+- `Cloud.SetConfig` writes only `config.enable`; it does not emit server, relay, LED, button, automation, Wi-Fi or BLE config.
+- The shared verified Plug-settings helper owns transport + identity verification only; it does not absorb product semantics.
+- Cloud, button and LED settings remain separate feature families; no generic settings manager or raw JSON editor was introduced.
+- User copy explicitly states that Local Climate Link does not require Shelly Cloud.
+- No production dependency, lockfile, architecture-baseline, automation-runtime or BLE-transport change was introduced.
 
 ## Verification evidence
 
-Responsive button-mode E2E:
+Focused validation on `47e047cc8b748725b952f14f04ad46c7f8f11023`:
 
 ```text
-task: 20260921-slice3b-e2e-v2
-head: 64afc789ec679d7de2ab17b6fab5a588235bf238
-result: 4/4 passed
+Cloud package tests: 4/4 passed
+Cloud card tests: 2/2 passed
+packages/shelly-client typecheck: passed
+apps/mobile typecheck: passed
+quality:repo: passed
+responsive Playwright: 4/4 passed
 viewports: 360x800, 390x844, 768x1024
-mutation assertion: controls-only PLUGS_UI.SetConfig; no leds payload
+mutation assertion: Cloud.SetConfig writes only { config: { enable } }
 ```
 
 Real hardware smoke:
 
 ```text
-task: 20260921-slice3b-hardware-smoke-v1
+task: 20260921-slice3c-hardware-smoke-v1
 URL: http://192.168.0.10/
 deviceId: shellyplugsg3-e4b063d7f530
 model: S3PL-00112EU
 firmware: 1.7.5
-sequence: momentary -> detached -> momentary
-final mode: momentary
-relay before/during/after: OFF
-LED config: unchanged throughout
+initial/final Cloud enable: false
+initial/final Cloud connected: false
+mutation: idempotent setEnabled(false) only
+Cloud server: unchanged
+relay: OFF before/after
+PLUGS_UI config: unchanged
 ```
 
-The smoke used `FetchShellyRpcTransport`, `RpcShellyClient` and `RpcShellyPlugsUiClient` from the repository, verified stable identity before mutation, and restored the original mode in `finally`.
+The hardware smoke deliberately did **not** enable Shelly Cloud because that would create an external cloud connection. The `enable=true` path is covered deterministically by the typed client, component test and responsive Playwright test.
 
 Accepted final validation:
 
 ```text
-task: 20260921-slice3b-final-check-v1
-final checked commit: 0155d0508a05e4fea46bca89a83501a28ab8cc18
+task: 20260921-slice3c-final-v2
+checked product head: 47e047cc8b748725b952f14f04ad46c7f8f11023
 pnpm check: success
-main CI: 35560026604 / 106211021785 — success
-Responsive smoke: success
-Sandbox Pack: 35560026593 / 106211021856 — success
+elapsed: ~95 s
+working tree after check: clean
 ```
 
-This handoff update is docs-only and intentionally does not re-run `pnpm check`; the checked product tree is unchanged.
+Documentation finalization after that check is docs-only and intentionally does not trigger a second local full `pnpm check`.
 
-## Exact next work — Slice 3C
+## Exact remaining work — Slice 3C
 
-1. Fetch fresh `main` and verify the Local Agent daemon is idle and bound to this repository.
-2. Read root/nearest `AGENTS.md`, this handoff, the active implementation plan and architecture boundaries.
-3. Perform a preimplementation capability/ownership audit before changing code.
-4. Read the real Plug S Gen3 method/config surface at `http://192.168.0.10/` and current official Shelly docs.
-5. Choose exactly one small user-visible settings family with clear typed ownership and reversible hardware validation; do not choose by guesswork.
-6. Keep the same architecture pattern: `@lcl/shelly-client` protocol owner, `features/plugs` product/UI owner, stable `deviceId` verification and narrow writes.
-7. Do not create a generic settings/JSON editor and do not pull BLE transport work forward; Slice 4A remains the first BLE feasibility/protocol spike.
+1. Review the complete diff from `c19014c0c14ce8e136c3bb149860a324320388bb` to the final docs head; require clean fast-forward ancestry and only expected code/test/docs files.
+2. Fast-forward `main` to the final docs head without force.
+3. Verify GitHub CI, including Responsive smoke, and Sandbox Pack for the exact main SHA.
+4. Delete `work/plug-cloud-settings` only if available tooling supports safe branch deletion; otherwise record cleanup debt and do not bypass safety controls.
+5. Only after green main begin Slice 4A.
+
+## Next slice — 4A BLE feasibility and protocol spike
+
+Use the real Plug S Gen3 to establish BLE discovery/connection, GATT services and characteristics, authentication/pairing requirements, request/response framing and fragmentation, payload/operation limits, timeout/retry/disconnect behavior, Wi-Fi provisioning viability and which existing Local Climate Link RPC/config operations are practical over BLE.
+
+Record a capability matrix before implementing a BLE transport. Do not assume HTTP/BLE parity and do not refactor product flows speculatively.
 
 ## Local Chat Bridge identity
 
@@ -157,6 +149,7 @@ docs/implementation/automation-recovery-editing-shelly-transport-plan.md
 docs/architecture/overview.md
 docs/architecture/refactor-boundaries.md
 docs/architecture/feature-boundaries.md
+docs/testing/hardware-matrix.md
 scripts/quality/architecture-baseline.mjs
 ```
 

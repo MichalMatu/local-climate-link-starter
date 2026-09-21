@@ -321,9 +321,35 @@ Verification and integration:
 - Sandbox Pack run `35560026593`, job `106211021856` passed;
 - completed branch `work/plug-button-input-mode` remains as cleanup debt because the available connector has no branch-delete action; raw delete-push was deliberately not used.
 
-## Slice 3C — next Shelly settings family
+## Slice 3C — Shelly Cloud enable/disable
 
-Before implementation, audit the real Plug S Gen3 method/config capability matrix plus current official Shelly docs and choose one small user-visible settings family. Keep the same pattern: typed `@lcl/shelly-client` protocol owner, feature-owned orchestration/UI, stable identity verification, narrow writes, focused tests and reversible hardware smoke. Do not create a generic settings God object or raw JSON editor.
+Status: **done on work branch; integration pending**.
+
+Accepted product head:
+
+```text
+47e047cc8b748725b952f14f04ad46c7f8f11023
+```
+
+Result:
+
+- the real Plug S Gen3 capability audit exposed `Cloud.GetConfig`, `Cloud.GetStatus` and `Cloud.SetConfig`;
+- current official Shelly documentation confirms `enable` is the writable Cloud flag for this surface and `Cloud.SetConfig` accepts a partial config;
+- `@lcl/shelly-client` owns typed Cloud config/status parsing, support detection and the enable-only mutation;
+- `features/plugs` owns the separate Cloud settings data/flow/card path;
+- stable physical identity is verified before every Cloud read/write by the shared Plug-settings transport helper;
+- the UI explicitly states that Local Climate Link does not require Shelly Cloud;
+- Cloud, button and LED families remain separate and no generic settings manager was created;
+- no production dependency, lockfile, architecture-baseline, automation-runtime or BLE-transport change was introduced.
+
+Verification before integration:
+
+- focused Cloud package tests passed 4/4 and Cloud card tests passed 2/2;
+- package/mobile typechecks and `pnpm quality:repo` passed;
+- responsive Cloud Playwright passed 4/4 at 360x800, 390x844 and 768x1024, including exact `Cloud.SetConfig { config: { enable: true } }` evidence;
+- real Plug S Gen3 firmware 1.7.5 hardware smoke used the typed repository client, verified stable identity, confirmed Cloud began disabled/disconnected, issued only idempotent `setEnabled(false)`, and proved Cloud remained disabled/disconnected, server unchanged, relay OFF and `PLUGS_UI` unchanged;
+- real hardware intentionally did not enable Cloud because that would establish an external cloud connection; `enable=true` is covered by deterministic tests;
+- accepted final Local Agent task `20260921-slice3c-final-v2` passed full `pnpm check` on exact product head `47e047cc8b748725b952f14f04ad46c7f8f11023` with a clean working tree afterward.
 
 ## Slice 4A — BLE feasibility and protocol spike
 
@@ -385,8 +411,8 @@ Do not perform a schema rewrite solely to match this diagram.
 2B  Edit Time automation                  DONE  e1a4c63e3
 3A  Full LED settings                     DONE  b0319dddd
 3B  Physical button input mode            DONE  0155d0508
-3C  Next Plug settings family             NEXT
-4A  BLE feasibility spike                 pending
+3C  Shelly Cloud enable/disable           DONE  47e047cc8
+4A  BLE feasibility spike                 NEXT
 4B  BLE transport                         pending
 4C+ BLE-backed capabilities               pending
 ```

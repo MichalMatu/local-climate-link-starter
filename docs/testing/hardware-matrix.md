@@ -237,6 +237,28 @@ typed client contract and regression coverage.
 No relay, script, schedule, Wi-Fi or BLE configuration was intentionally mutated by this
 Slice 3A smoke.
 
+## Slice 3C Shelly Cloud settings smoke — 2026-09-21
+
+Hardware:
+
+```text
+URL: http://192.168.0.10/
+deviceId: shellyplugsg3-e4b063d7f530
+model: S3PL-00112EU
+gen: 3
+firmware: 1.7.5
+fw_id: 20260311-095902/1.7.5-g9979d16
+```
+
+| Test                     | Result | Evidence                                                                                                                        |
+| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Typed Cloud read         | ✅     | `RpcShellyCloudClient` read real `enable=false`, `connected=false` and current server after stable identity verification.       |
+| Privacy-preserving write | ✅     | Only idempotent `Cloud.SetConfig { config: { enable: false } }` was issued; Cloud was never enabled during hardware acceptance. |
+| Cloud readback           | ✅     | Cloud remained disabled and disconnected; server value was unchanged.                                                           |
+| Relay/settings isolation | ✅     | Relay remained OFF and the complete parsed `PLUGS_UI` config stayed unchanged.                                                  |
+
+The `enable=true` path is intentionally validated by deterministic typed-client/UI/E2E tests rather than by connecting the development Plug to Shelly Cloud.
+
 ## Physical phone + Shelly freeze E2E — 2026-09-10
 
 Hardware used: Samsung Galaxy S22+ `SM-S906B` on Android 16 / API 36 and a
