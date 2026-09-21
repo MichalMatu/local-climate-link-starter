@@ -1,4 +1,8 @@
 import {
+  SHELLY_RUNTIME_CONFIG_STORAGE_KEY,
+  supportsShellyRuntimeConfigPersistence
+} from '@lcl/script-generator';
+import {
   LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RpcShellyClient,
   readShellyScriptCode,
@@ -25,6 +29,7 @@ export type ShellyControlStatus = {
 export type ShellyAutomationScriptState = {
   script: ShellyScriptListEntry | null;
   code: string | null;
+  persistedRuntimeConfigJson: string | null;
   status: ShellyControlStatus;
 };
 
@@ -107,10 +112,21 @@ export const readShellyAutomationScriptState = async (
     readScriptList(transport)
   ]);
   const automationScript = findAutomationScript(scripts);
+  const code = automationScript ? await readScriptCode(transport, automationScript.id) : null;
+  const persistedRuntimeConfigJson =
+    automationScript && code && supportsShellyRuntimeConfigPersistence(code)
+      ? unwrapShellyResult(
+          await client.readScriptStorageItem(
+            automationScript.id,
+            SHELLY_RUNTIME_CONFIG_STORAGE_KEY
+          )
+        )
+      : null;
 
   return {
     script: automationScript,
-    code: automationScript ? await readScriptCode(transport, automationScript.id) : null,
+    code,
+    persistedRuntimeConfigJson,
     status: toControlStatus(
       unwrapShellyResult(deviceInfo),
       unwrapShellyResult(status),
