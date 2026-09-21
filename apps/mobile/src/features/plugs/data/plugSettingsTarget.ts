@@ -22,7 +22,9 @@ export const unwrapPlugSettingsResult = <T>(result: Result<T>): T => {
 
 export const createVerifiedPlugUiClient = async (target: PlugSettingsTarget) => {
   const transport = createShellyTransport(target.baseUrl);
-  const info = unwrapPlugSettingsResult(await new RpcShellyClient(transport).getDeviceInfo());
+  const info = unwrapPlugSettingsResult(
+    await new RpcShellyClient(transport).getDeviceInfo()
+  );
   const remoteDeviceId = info.id?.trim();
   if (!remoteDeviceId) {
     throw new Error('Shelly did not expose a stable device id.');

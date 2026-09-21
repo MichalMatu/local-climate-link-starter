@@ -187,7 +187,9 @@ const openPlugSettings = async (page: Page) => {
 };
 
 for (const viewport of viewports) {
-  test(`physical button mode fits Plug settings on ${viewport.name}`, async ({ page }) => {
+  test(`physical button mode fits Plug settings on ${viewport.name}`, async ({
+    page
+  }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedSavedPlug(page);
     await mockShelly(page);
@@ -211,7 +213,9 @@ test('physical button mode writes only PLUGS_UI controls', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Tryb przycisku' }).click();
   await page.getByRole('option', { name: 'Odłączony od przekaźnika' }).click();
-  await expect(page.getByText('Fizyczny przycisk nie zmienia stanu przekaźnika.')).toBeVisible();
+  await expect(
+    page.getByText('Fizyczny przycisk nie zmienia stanu przekaźnika.')
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Zapisz tryb przycisku' }).click();
 
   await expect(page.getByText('Tryb przycisku zapisany.')).toBeVisible();

@@ -1,7 +1,4 @@
-import type {
-  ShellyPlugsUiLedsPatch,
-  ShellyPlugsUiReadResult
-} from '@lcl/shelly-client';
+import type { ShellyPlugsUiLedsPatch, ShellyPlugsUiReadResult } from '@lcl/shelly-client';
 import {
   createVerifiedPlugUiClient,
   type PlugSettingsTarget,

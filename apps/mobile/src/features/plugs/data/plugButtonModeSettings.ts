@@ -10,8 +10,7 @@ import {
 
 export type PlugButtonModeSettingsTarget = PlugSettingsTarget;
 export type PlugButtonModeSettingsReadResult =
-  | { supported: false }
-  | { supported: true; mode: ShellyPlugsUiButtonInputMode };
+  { supported: false } | { supported: true; mode: ShellyPlugsUiButtonInputMode };
 
 const buttonModeSettings = (
   settings: ShellyPlugsUiReadResult
