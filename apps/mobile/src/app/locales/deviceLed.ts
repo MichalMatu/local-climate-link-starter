@@ -10,7 +10,19 @@ type DeviceLedCopy = {
   off: string;
   onState: string;
   offState: string;
+  customColor: string;
+  color: string;
+  brightness: string;
   powerBrightness: string;
+  nightMode: string;
+  nightModeEnabled: string;
+  nightBrightness: string;
+  nightStart: string;
+  nightEnd: string;
+  save: string;
+  saving: string;
+  noChanges: string;
+  saved: string;
   relayPreset: string;
   relayPresetHint: string;
   turnOff: string;
@@ -32,7 +44,19 @@ const en: DeviceLedCopy = {
   off: 'Off',
   onState: 'ON',
   offState: 'OFF',
+  customColor: 'Use custom color',
+  color: 'Color',
+  brightness: 'Brightness',
   powerBrightness: 'Power mode brightness',
+  nightMode: 'Night mode',
+  nightModeEnabled: 'Enable night mode',
+  nightBrightness: 'Night brightness',
+  nightStart: 'Starts at',
+  nightEnd: 'Ends at',
+  save: 'Save LED settings',
+  saving: 'Saving…',
+  noChanges: 'No LED changes to save.',
+  saved: 'LED settings saved.',
   relayPreset: 'Show ON/OFF',
   relayPresetHint: 'Preset: ON green, OFF red, 100% brightness.',
   turnOff: 'Turn LED off',
@@ -48,6 +72,7 @@ const en: DeviceLedCopy = {
 export const deviceLedCopy: Record<Locale, DeviceLedCopy> = {
   en,
   pl: {
+    ...en,
     eyebrow: 'Ustawienia urządzenia',
     title: 'LED gniazdka',
     description: 'To ustawienie należy do Shelly i nie zmienia logiki automatyki.',
@@ -57,7 +82,19 @@ export const deviceLedCopy: Record<Locale, DeviceLedCopy> = {
     off: 'Wyłączona',
     onState: 'ON',
     offState: 'OFF',
+    customColor: 'Użyj własnego koloru',
+    color: 'Kolor',
+    brightness: 'Jasność',
     powerBrightness: 'Jasność trybu mocy',
+    nightMode: 'Tryb nocny',
+    nightModeEnabled: 'Włącz tryb nocny',
+    nightBrightness: 'Jasność nocna',
+    nightStart: 'Początek',
+    nightEnd: 'Koniec',
+    save: 'Zapisz ustawienia LED',
+    saving: 'Zapisuję…',
+    noChanges: 'Brak zmian LED do zapisania.',
+    saved: 'Ustawienia LED zapisane.',
     relayPreset: 'Sygnalizuj ON/OFF',
     relayPresetHint: 'Preset: ON zielony, OFF czerwony, jasność 100%.',
     turnOff: 'Wyłącz LED',

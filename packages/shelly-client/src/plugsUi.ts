@@ -3,6 +3,10 @@ import { RPC_METHODS, type Result, type ShellyRpcTransport } from './model.js';
 
 const percentSchema = z.number().min(0).max(100);
 const rgbSchema = z.tuple([percentSchema, percentSchema, percentSchema]).nullable();
+const clockTimeSchema = z
+  .string()
+  .regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, 'Expected HH:MM time.');
+
 const ledColorSchema = z.object({
   rgb: rgbSchema,
   brightness: percentSchema
@@ -15,19 +19,63 @@ const ledColorsSchema = z.object({
   'switch:0': switchColorsSchema.optional(),
   power: z.object({ brightness: percentSchema }).optional()
 });
+const nightModeSchema = z.object({
+  enable: z.boolean(),
+  brightness: percentSchema,
+  active_between: z.union([z.tuple([]), z.tuple([clockTimeSchema, clockTimeSchema])])
+});
 const ledModeSchema = z.enum(['power', 'switch', 'off']);
 const ledsConfigSchema = z.object({
   mode: ledModeSchema,
-  colors: ledColorsSchema.optional()
+  colors: ledColorsSchema.optional(),
+  night_mode: nightModeSchema.optional()
 });
-const ledsPatchSchema = z
-  .object({
+
+const nonEmptyObject = <T extends z.ZodRawShape>(
+  schema: z.ZodObject<T>,
+  message: string
+) => schema.refine((value) => Object.keys(value).length > 0, { message });
+
+const ledColorPatchSchema = nonEmptyObject(
+  z.object({
+    rgb: rgbSchema.optional(),
+    brightness: percentSchema.optional()
+  }),
+  'LED color patch requires at least one field.'
+);
+const switchColorsPatchSchema = nonEmptyObject(
+  z.object({
+    on: ledColorPatchSchema.optional(),
+    off: ledColorPatchSchema.optional()
+  }),
+  'Switch LED colors patch requires at least one field.'
+);
+const ledColorsPatchSchema = nonEmptyObject(
+  z.object({
+    'switch:0': switchColorsPatchSchema.optional(),
+    power: nonEmptyObject(
+      z.object({ brightness: percentSchema.optional() }),
+      'Power LED patch requires brightness.'
+    ).optional()
+  }),
+  'LED colors patch requires at least one field.'
+);
+const nightModePatchSchema = nonEmptyObject(
+  z.object({
+    enable: z.boolean().optional(),
+    brightness: percentSchema.optional(),
+    active_between: z.tuple([clockTimeSchema, clockTimeSchema]).optional()
+  }),
+  'Night mode patch requires at least one field.'
+);
+const ledsPatchSchema = nonEmptyObject(
+  z.object({
     mode: ledModeSchema.optional(),
-    colors: ledColorsSchema.optional()
-  })
-  .refine((value) => Object.keys(value).length > 0, {
-    message: 'PLUGS_UI LED patch requires at least one field.'
-  });
+    colors: ledColorsPatchSchema.optional(),
+    night_mode: nightModePatchSchema.optional()
+  }),
+  'PLUGS_UI LED patch requires at least one field.'
+);
 const plugsUiConfigSchema = z.object({
   leds: ledsConfigSchema
 });
@@ -40,18 +88,35 @@ const setConfigResponseSchema = z.object({
 
 export type ShellyPlugsUiLedMode = z.infer<typeof ledModeSchema>;
 export type ShellyPlugsUiLedColor = z.infer<typeof ledColorSchema>;
+export type ShellyPlugsUiNightMode = z.infer<typeof nightModeSchema>;
 export type ShellyPlugsUiLedsConfig = z.infer<typeof ledsConfigSchema>;
 export type ShellyPlugsUiLedsPatch = z.input<typeof ledsPatchSchema>;
 export type ShellyPlugsUiConfig = z.infer<typeof plugsUiConfigSchema>;
 export type ShellyPlugsUiSetResult = z.infer<typeof setConfigResponseSchema>;
+export type ShellyPlugsUiLedCapabilities = {
+  switchColors: boolean;
+  powerBrightness: boolean;
+  nightMode: boolean;
+};
 export type ShellyPlugsUiReadResult =
-  { supported: false } | { supported: true; config: ShellyPlugsUiConfig };
+  | { supported: false }
+  | {
+      supported: true;
+      config: ShellyPlugsUiConfig;
+      capabilities: ShellyPlugsUiLedCapabilities;
+    };
 
 const validationError = (message: string) => ({
   kind: 'validation-failed' as const,
   userMessageKey: 'errors.validationFailed',
   technicalMessage: message,
   retryable: false
+});
+
+const ledCapabilities = (config: ShellyPlugsUiConfig): ShellyPlugsUiLedCapabilities => ({
+  switchColors: config.leds.colors?.['switch:0'] !== undefined,
+  powerBrightness: config.leds.colors?.power?.brightness !== undefined,
+  nightMode: config.leds.night_mode !== undefined
 });
 
 export const createRelayStateLedPatch = (): ShellyPlugsUiLedsPatch => ({
@@ -99,7 +164,14 @@ export class RpcShellyPlugsUiClient {
 
     const parsedConfig = plugsUiConfigSchema.safeParse(configResponse.value);
     return parsedConfig.success
-      ? { ok: true, value: { supported: true, config: parsedConfig.data } }
+      ? {
+          ok: true,
+          value: {
+            supported: true,
+            config: parsedConfig.data,
+            capabilities: ledCapabilities(parsedConfig.data)
+          }
+        }
       : { ok: false, error: validationError(parsedConfig.error.message) };
   }
 

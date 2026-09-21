@@ -71,6 +71,42 @@ const timeInstallation = {
   updatedAtMs: 1782820000000
 };
 
+const savedPlugDraft = {
+  shellyNameInput: 'Shelly Plug S Gen3',
+  shellyUrlInput: '',
+  sensorProfileInput: 'xiaomi_lywsd03mmc_bthome_v2',
+  sensorMacInput: '',
+  sensorNameInput: '',
+  shellyDevices: [
+    {
+      id: 'shellyplugsg3-led-e2e',
+      name: 'Salon',
+      baseUrl: 'http://192.168.0.20/',
+      scriptIdInput: '1',
+      model: 'S3PL-00112EU',
+      gen: 3
+    }
+  ],
+  sensorDevices: [],
+  selectedShellyId: 'shellyplugsg3-led-e2e',
+  selectedSensorId: null,
+  rulePreset: 'heating',
+  onThresholdInput: '19',
+  offThresholdInput: '20',
+  vpdAssistEnabled: false,
+  vpdTargetInput: '1.2',
+  rssiMinInput: '-85',
+  staleTimeoutMinInput: '2',
+  minChangeMinInput: '2',
+  maxOnHoursInput: '4'
+};
+
+const seedSavedPlug = async (page: Page) => {
+  await page.addInitScript((draft) => {
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(draft));
+  }, savedPlugDraft);
+};
+
 const seedInstallation = async (page: Page, kind: InstallationKind) => {
   await page.addInitScript(
     (installation) => {
@@ -116,7 +152,22 @@ const mockShelly = async (
   kind: InstallationKind,
   options: { ledSupported?: boolean } = {}
 ) => {
-  let ledMode: 'power' | 'switch' | 'off' = 'power';
+  let leds = {
+    mode: 'power' as 'power' | 'switch' | 'off',
+    colors: {
+      'switch:0': {
+        on: { rgb: [0, 100, 0] as [number, number, number], brightness: 100 },
+        off: { rgb: [100, 0, 0] as [number, number, number], brightness: 100 }
+      },
+      power: { brightness: 80 }
+    },
+    night_mode: {
+      enable: false,
+      brightness: 10,
+      active_between: [] as [] | [string, string]
+    }
+  };
+  const ledSetRequests: unknown[] = [];
   const ledSupported = options.ledSupported ?? true;
 
   const handleRpc = async (route: Route) => {
@@ -135,7 +186,16 @@ const mockShelly = async (
       id?: number | string;
       method?: string;
       params?: {
-        config?: { leds?: { mode?: 'power' | 'switch' | 'off' } };
+        config?: {
+          leds?: {
+            mode?: 'power' | 'switch' | 'off';
+            night_mode?: {
+              enable?: boolean;
+              brightness?: number;
+              active_between?: [string, string];
+            };
+          };
+        };
       };
     };
 
@@ -215,23 +275,23 @@ const mockShelly = async (
         break;
       case 'PLUGS_UI.GetConfig':
         result = {
-          leds: {
-            mode: ledMode,
-            colors: {
-              'switch:0': {
-                on: { rgb: [0, 100, 0], brightness: 100 },
-                off: { rgb: [100, 0, 0], brightness: 100 }
-              },
-              power: { brightness: 80 }
-            }
-          },
+          leds,
           controls: { 'switch:0': { in_mode: 'momentary' } }
         };
         break;
-      case 'PLUGS_UI.SetConfig':
-        ledMode = body.params?.config?.leds?.mode ?? ledMode;
+      case 'PLUGS_UI.SetConfig': {
+        const patch = body.params?.config?.leds;
+        ledSetRequests.push(patch ?? {});
+        if (patch?.mode) leds = { ...leds, mode: patch.mode };
+        if (patch?.night_mode) {
+          leds = {
+            ...leds,
+            night_mode: { ...leds.night_mode, ...patch.night_mode }
+          };
+        }
         result = { restart_required: false };
         break;
+      }
       default:
         result = {};
     }
@@ -245,6 +305,7 @@ const mockShelly = async (
 
   await page.route('**/__lcl_shelly_proxy?**', handleRpc);
   await page.route('http://192.168.0.20/rpc', handleRpc);
+  return { ledSetRequests };
 };
 
 const expectNoHorizontalOverflow = async (page: Page) => {
@@ -306,7 +367,8 @@ for (const viewport of viewports) {
     await openDetail(page);
 
     await expect(page.getByText('Zużycie energii')).toBeVisible();
-    await expect(page.getByText('80%')).toBeVisible();
+    await expect(page.getByLabel('Jasność trybu mocy')).toHaveValue('80');
+    await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: `test-results/visual-audit/plugs-ui-led-${viewport.name}.png`,
@@ -327,14 +389,64 @@ test('PLUGS_UI LED relay-state and off presets work end to end', async ({ page }
     .getByRole('heading', { name: 'LED gniazdka' })
     .locator('xpath=ancestor::article[1]');
   await card.getByRole('button', { name: 'Sygnalizuj ON/OFF' }).click();
-  await expect(card.getByText('Stan przekaźnika')).toBeVisible();
-  await expect(card.getByText('RGB 0/100/0 · 100%')).toBeVisible();
-  await expect(card.getByText('RGB 100/0/0 · 100%')).toBeVisible();
+  await expect(card.getByRole('button', { name: 'Tryb LED' })).toContainText(
+    'Stan przekaźnika'
+  );
+  await expect(card.getByLabel('ON Kolor')).toHaveValue('#00ff00');
+  await expect(card.getByLabel('ON Jasność')).toHaveValue('100');
+  await expect(card.getByLabel('OFF Kolor')).toHaveValue('#ff0000');
+  await expect(card.getByLabel('OFF Jasność')).toHaveValue('100');
   await expect(page.getByText('LED pokazuje teraz stan przekaźnika.')).toBeVisible();
 
   await card.getByRole('button', { name: 'Wyłącz LED' }).click();
   await expect(card.getByText('Wyłączona')).toBeVisible();
   await expect(page.getByText('LED został wyłączony.')).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  expect(problems).toEqual([]);
+});
+
+test('PLUGS_UI night mode editor handles the real empty disabled window', async ({
+  page
+}) => {
+  const problems = consoleProblems(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedInstallation(page, 'climate');
+  const mock = await mockShelly(page, 'climate');
+  await openDetail(page);
+
+  await expect(page.getByLabel('Początek')).toHaveValue('22:00');
+  await expect(page.getByLabel('Koniec')).toHaveValue('06:00');
+  await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
+  await page.getByLabel('Włącz tryb nocny').check();
+  await page.getByLabel('Jasność nocna').fill('7');
+  await page.getByLabel('Początek').fill('23:30');
+  await page.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
+
+  await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
+  expect(mock.ledSetRequests.at(-1)).toEqual({
+    night_mode: {
+      enable: true,
+      brightness: 7,
+      active_between: ['23:30', '06:00']
+    }
+  });
+  await expectNoHorizontalOverflow(page);
+  expect(problems).toEqual([]);
+});
+
+test('plain saved Plug exposes the same LED settings without an installed automation', async ({
+  page
+}) => {
+  const problems = consoleProblems(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedSavedPlug(page);
+  await mockShelly(page, 'time');
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Ustawienia gniazdka: Salon' }).click();
+  await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+  await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });

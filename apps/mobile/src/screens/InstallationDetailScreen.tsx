@@ -1,5 +1,5 @@
 import { ClimateAutomationManagementActions } from '../features/automations/index.js';
-import { isSameShellyDevice } from '../features/plugs/index.js';
+import { PlugLedSettingsCard, isSameShellyDevice } from '../features/plugs/index.js';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { IconCode } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -30,7 +30,6 @@ import {
 import { installedAutomationScriptSourceQueryKey } from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
-import { ShellyLedSettingsCard } from './ShellyLedSettingsCard.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 import {
   installedAutomationControlQueryKey,
@@ -416,7 +415,7 @@ const InstalledAutomationDetail = ({
           onDelete={() => setDeleteOpen(true)}
         />
 
-        <ShellyLedSettingsCard installation={installation} onFeedback={pushToast} />
+        <PlugLedSettingsCard target={installation.shelly} />
       </section>
 
       <Modal

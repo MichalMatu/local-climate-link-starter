@@ -16,15 +16,32 @@ class RecordingTransport implements ShellyRpcTransport {
   async call<TResponse>(request: ShellyRpcRequest): Promise<Result<TResponse>> {
     this.requests.push(request);
     const response = this.responses.shift();
-    if (!response) {
-      throw new Error('Missing fake response.');
-    }
+    if (!response) throw new Error('Missing fake response.');
     return response as Result<TResponse>;
   }
 }
 
+const fullConfig = {
+  leds: {
+    mode: 'switch',
+    colors: {
+      'switch:0': {
+        on: { rgb: [0, 100, 0], brightness: 100 },
+        off: { rgb: [100, 0, 0], brightness: 100 }
+      },
+      power: { brightness: 80 }
+    },
+    night_mode: {
+      enable: true,
+      brightness: 10,
+      active_between: ['22:00', '06:00']
+    }
+  },
+  controls: { 'switch:0': { in_mode: 'momentary' } }
+};
+
 describe('RpcShellyPlugsUiClient', () => {
-  it('detects support and validates current LED configuration', async () => {
+  it('detects support, validates the full LED configuration and exposes capabilities', async () => {
     const transport = new RecordingTransport([
       {
         ok: true,
@@ -32,22 +49,7 @@ describe('RpcShellyPlugsUiClient', () => {
           methods: ['Shelly.GetStatus', 'PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig']
         }
       },
-      {
-        ok: true,
-        value: {
-          leds: {
-            mode: 'switch',
-            colors: {
-              'switch:0': {
-                on: { rgb: [0, 100, 0], brightness: 100 },
-                off: { rgb: [100, 0, 0], brightness: 100 }
-              },
-              power: { brightness: 80 }
-            }
-          },
-          controls: { 'switch:0': { in_mode: 'momentary' } }
-        }
-      }
+      { ok: true, value: fullConfig }
     ]);
     const client = new RpcShellyPlugsUiClient(transport);
 
@@ -55,17 +57,11 @@ describe('RpcShellyPlugsUiClient', () => {
       ok: true,
       value: {
         supported: true,
-        config: {
-          leds: {
-            mode: 'switch',
-            colors: {
-              'switch:0': {
-                on: { rgb: [0, 100, 0], brightness: 100 },
-                off: { rgb: [100, 0, 0], brightness: 100 }
-              },
-              power: { brightness: 80 }
-            }
-          }
+        config: { leds: fullConfig.leds },
+        capabilities: {
+          switchColors: true,
+          powerBrightness: true,
+          nightMode: true
         }
       }
     });
@@ -75,12 +71,64 @@ describe('RpcShellyPlugsUiClient', () => {
     ]);
   });
 
-  it('returns a clean unsupported state without calling PLUGS_UI', async () => {
+  it('accepts the real disabled night-mode shape with an empty active window', async () => {
     const transport = new RecordingTransport([
       {
         ok: true,
-        value: { methods: ['Shelly.GetStatus', 'Switch.Set'] }
+        value: { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] }
+      },
+      {
+        ok: true,
+        value: {
+          leds: {
+            mode: 'switch',
+            night_mode: { enable: false, brightness: 100, active_between: [] }
+          }
+        }
       }
+    ]);
+
+    await expect(new RpcShellyPlugsUiClient(transport).read()).resolves.toEqual({
+      ok: true,
+      value: {
+        supported: true,
+        config: {
+          leds: {
+            mode: 'switch',
+            night_mode: { enable: false, brightness: 100, active_between: [] }
+          }
+        },
+        capabilities: { switchColors: false, powerBrightness: false, nightMode: true }
+      }
+    });
+  });
+
+  it('derives capabilities from fields actually returned by the device', async () => {
+    const transport = new RecordingTransport([
+      {
+        ok: true,
+        value: { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] }
+      },
+      { ok: true, value: { leds: { mode: 'off' } } }
+    ]);
+
+    await expect(new RpcShellyPlugsUiClient(transport).read()).resolves.toEqual({
+      ok: true,
+      value: {
+        supported: true,
+        config: { leds: { mode: 'off' } },
+        capabilities: {
+          switchColors: false,
+          powerBrightness: false,
+          nightMode: false
+        }
+      }
+    });
+  });
+
+  it('returns a clean unsupported state without calling PLUGS_UI', async () => {
+    const transport = new RecordingTransport([
+      { ok: true, value: { methods: ['Shelly.GetStatus', 'Switch.Set'] } }
     ]);
     const client = new RpcShellyPlugsUiClient(transport);
 
@@ -91,21 +139,18 @@ describe('RpcShellyPlugsUiClient', () => {
     expect(transport.requests).toEqual([{ method: 'Shelly.ListMethods' }]);
   });
 
-  it('writes only the LED subtree for relay-state and off presets', async () => {
+  it('writes only changed LED leaves and never writes controls', async () => {
     const transport = new RecordingTransport([
-      { ok: true, value: { restart_required: false } },
       { ok: true, value: { restart_required: false } }
     ]);
     const client = new RpcShellyPlugsUiClient(transport);
 
-    await expect(client.setLeds(createRelayStateLedPatch())).resolves.toEqual({
-      ok: true,
-      value: { restart_required: false }
-    });
-    await expect(client.setLeds(createLedOffPatch())).resolves.toEqual({
-      ok: true,
-      value: { restart_required: false }
-    });
+    await expect(
+      client.setLeds({
+        colors: { 'switch:0': { on: { brightness: 35 } } },
+        night_mode: { brightness: 7, active_between: ['23:30', '05:45'] }
+      })
+    ).resolves.toEqual({ ok: true, value: { restart_required: false } });
 
     expect(transport.requests).toEqual([
       {
@@ -113,22 +158,43 @@ describe('RpcShellyPlugsUiClient', () => {
         params: {
           config: {
             leds: {
-              mode: 'switch',
-              colors: {
-                'switch:0': {
-                  on: { rgb: [0, 100, 0], brightness: 100 },
-                  off: { rgb: [100, 0, 0], brightness: 100 }
-                }
-              }
+              colors: { 'switch:0': { on: { brightness: 35 } } },
+              night_mode: { brightness: 7, active_between: ['23:30', '05:45'] }
             }
           }
         }
-      },
-      {
-        method: 'PLUGS_UI.SetConfig',
-        params: { config: { leds: { mode: 'off' } } }
       }
     ]);
     expect(JSON.stringify(transport.requests)).not.toContain('"controls"');
+  });
+
+  it('keeps relay-state and off presets as narrow LED-only patches', async () => {
+    const transport = new RecordingTransport([
+      { ok: true, value: { restart_required: false } },
+      { ok: true, value: { restart_required: false } }
+    ]);
+    const client = new RpcShellyPlugsUiClient(transport);
+
+    await client.setLeds(createRelayStateLedPatch());
+    await client.setLeds(createLedOffPatch());
+
+    expect(transport.requests[0]).toMatchObject({
+      method: 'PLUGS_UI.SetConfig',
+      params: { config: { leds: { mode: 'switch' } } }
+    });
+    expect(transport.requests[1]).toEqual({
+      method: 'PLUGS_UI.SetConfig',
+      params: { config: { leds: { mode: 'off' } } }
+    });
+  });
+
+  it('rejects invalid night-mode times before transport', async () => {
+    const transport = new RecordingTransport([]);
+    const result = await new RpcShellyPlugsUiClient(transport).setLeds({
+      night_mode: { active_between: ['25:00', '06:00'] }
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { kind: 'validation-failed' } });
+    expect(transport.requests).toEqual([]);
   });
 });
