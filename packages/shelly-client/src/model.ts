@@ -105,6 +105,8 @@ export interface ShellyClient {
   stopScript(scriptId: number): Promise<Result<null>>;
   startScript(scriptId: number): Promise<Result<null>>;
   deleteScript(scriptId: number): Promise<Result<null>>;
+  evaluateScript(scriptId: number, code: string): Promise<Result<string | null>>;
+  readScriptStorageItem(scriptId: number, key: string): Promise<Result<string | null>>;
   setRelayOn(options?: { relayId?: number }): Promise<Result<null>>;
   setRelayOff(options?: { relayId?: number }): Promise<Result<null>>;
   safeRelayTest(options?: { onDurationMs?: number }): Promise<Result<RelayTestResult>>;
