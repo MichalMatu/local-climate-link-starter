@@ -47,6 +47,21 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const selectSensorDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.selectSensorDevice
   );
+  const additionalSensorIds = useHardwareSetupDraftStore(
+    (state) => state.additionalSensorIds
+  );
+  const setAdditionalSensorIdsDraft = useHardwareSetupDraftStore(
+    (state) => state.setAdditionalSensorIds
+  );
+  const toggleAdditionalSensorDeviceDraft = useHardwareSetupDraftStore(
+    (state) => state.toggleAdditionalSensorDevice
+  );
+  const sensorAggregation = useHardwareSetupDraftStore(
+    (state) => state.sensorAggregation
+  );
+  const setSensorAggregationDraft = useHardwareSetupDraftStore(
+    (state) => state.setSensorAggregation
+  );
   const rulePreset = useHardwareSetupDraftStore((state) => state.rulePreset);
   const setRulePreset = useHardwareSetupDraftStore((state) => state.setRulePreset);
   const onThresholdInput = useHardwareSetupDraftStore((state) => state.onThresholdInput);
@@ -140,6 +155,13 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     () => sensorDevices.find((device) => device.id === selectedSensorId) ?? null,
     [selectedSensorId, sensorDevices]
   );
+  const additionalSensors = useMemo(
+    () =>
+      additionalSensorIds
+        .map((id) => sensorDevices.find((device) => device.id === id) ?? null)
+        .filter((device): device is (typeof sensorDevices)[number] => device !== null),
+    [additionalSensorIds, sensorDevices]
+  );
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
@@ -153,6 +175,8 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
       () =>
         deriveClimateRuleState({
           selectedSensor,
+          additionalSensors,
+          sensorAggregation,
           rulePreset,
           onThresholdInput,
           offThresholdInput,
@@ -164,6 +188,7 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
           maxOnHoursInput
         }),
       [
+        additionalSensors,
         maxOnHoursInput,
         minChangeMinInput,
         offThresholdInput,
@@ -171,6 +196,7 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
         rssiMinInput,
         rulePreset,
         selectedSensor,
+        sensorAggregation,
         staleTimeoutMinInput,
         vpdAssistEnabled,
         vpdTargetInput
@@ -196,12 +222,22 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
       onSuccess: ({ device, state, decoded }) => {
         const settings = decoded.settings;
         setShellyScriptIdDraft(device.id, String(state.script.id));
-        upsertSensorDevice({
-          id: settings.runtimeAddress,
-          name: settings.sensorDisplayName,
-          runtimeAddress: settings.runtimeAddress,
-          profileId: settings.sensorProfileId
+        settings.sensors.forEach((sensor) => {
+          upsertSensorDevice({
+            id: sensor.runtimeAddress,
+            name: sensor.sensorDisplayName,
+            runtimeAddress: sensor.runtimeAddress,
+            profileId: sensor.sensorProfileId
+          });
         });
+        const primarySensor = settings.sensors[0];
+        if (primarySensor) {
+          selectSensorDeviceDraft(primarySensor.runtimeAddress);
+          setAdditionalSensorIdsDraft(
+            settings.sensors.slice(1).map((sensor) => sensor.runtimeAddress)
+          );
+        }
+        setSensorAggregationDraft(settings.aggregation);
         setRulePreset(settings.mode);
         setOnThresholdInput(numberInput(settings.control.onThreshold));
         setOffThresholdInput(numberInput(settings.control.offThreshold));
@@ -229,6 +265,16 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
 
   const selectSensorDevice = (id: string) => {
     selectSensorDeviceDraft(id);
+    resetInstallState();
+  };
+
+  const toggleAdditionalSensorDevice = (id: string) => {
+    toggleAdditionalSensorDeviceDraft(id);
+    resetInstallState();
+  };
+
+  const updateSensorAggregation = (value: typeof sensorAggregation) => {
+    setSensorAggregationDraft(value);
     resetInstallState();
   };
 
@@ -260,7 +306,12 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     ...sensorSetupFlow,
     selectedSensorId,
     selectedSensor,
+    additionalSensorIds,
+    additionalSensors,
     selectSensorDevice,
+    toggleAdditionalSensorDevice,
+    sensorAggregation,
+    setSensorAggregation: updateSensorAggregation,
     removeSensorDevice,
     rulePreset,
     setRulePreset: (value: RulePresetId) => setRulePreset(value),
