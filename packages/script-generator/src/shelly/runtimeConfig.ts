@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { ShellyThermostatConfig } from './config.js';
 import { configHash, stableStringify } from './hash.js';
 
-export const SHELLY_RUNTIME_CONFIG_STORAGE_KEY = 'lcl_cfg_v1';
+export const SHELLY_RUNTIME_CONFIG_STORAGE_KEY = 'c';
 
 export const shellyRuntimeConfigSchema = z.object({
   a: z.string().min(1),
@@ -69,18 +69,47 @@ export const decodeShellyRuntimeConfigJson = (value: string): ShellyRuntimeConfi
 };
 
 const runtimeConfigJsonFromScript = (script: string): unknown | null => {
-  const start = script.indexOf('var C=');
-  if (start < 0) return null;
+  const marker = 'var C=';
+  const markerStart = script.indexOf(marker);
+  if (markerStart < 0) return null;
 
-  const configStart = start + 'var C='.length;
-  const end = script.indexOf(';var R=', configStart);
-  if (end < 0) return null;
+  const configStart = markerStart + marker.length;
+  if (script[configStart] !== '{') return null;
 
-  try {
-    return JSON.parse(script.slice(configStart, end)) as unknown;
-  } catch {
-    return null;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = configStart; index < script.length; index += 1) {
+    const character = script[index]!;
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === '\\') {
+        escaped = true;
+      } else if (character === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+      continue;
+    }
+    if (character === '{') depth += 1;
+    if (character === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        try {
+          return JSON.parse(script.slice(configStart, index + 1)) as unknown;
+        } catch {
+          return null;
+        }
+      }
+    }
   }
+
+  return null;
 };
 
 export const decodeShellyRuntimeConfig = (script: string): ShellyRuntimeConfig | null =>
