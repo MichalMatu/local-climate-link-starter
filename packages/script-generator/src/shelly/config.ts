@@ -98,10 +98,7 @@ export const shellyThermostatConfigSchema = z
       if (seenAddresses.has(normalizedAddress)) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
-          path:
-            index === 0
-              ? ['sensor', 'runtimeAddress']
-              : ['sensorSet', 'additionalSensors', index - 1, 'runtimeAddress'],
+          path: ['sensorSet', 'additionalSensors', index - 1, 'runtimeAddress'],
           message: 'Climate sensors must use unique runtime addresses.'
         });
       }
