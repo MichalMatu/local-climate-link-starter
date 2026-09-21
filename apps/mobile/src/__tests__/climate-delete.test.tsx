@@ -77,7 +77,9 @@ type ScriptEntry = {
   running: boolean;
 };
 
-const installShellyDeleteMock = (options: { failDelete?: boolean } = {}) => {
+const installShellyDeleteMock = (
+  options: { failDelete?: boolean; deviceId?: string } = {}
+) => {
   let relayOn = true;
   let scripts: ScriptEntry[] = [
     { id: 1, name: LOCAL_CLIMATE_LINK_SCRIPT_NAME, enable: true, running: true },
@@ -111,7 +113,11 @@ const installShellyDeleteMock = (options: { failDelete?: boolean } = {}) => {
       let result: unknown = {};
       switch (body.method) {
         case 'Shelly.GetDeviceInfo':
-          result = { id: 'shellyplugsg3-delete', model: 'S3PL-00112EU', gen: 3 };
+          result = {
+            id: options.deviceId ?? 'shellyplugsg3-delete',
+            model: 'S3PL-00112EU',
+            gen: 3
+          };
           break;
         case 'Shelly.GetStatus':
           result = {
@@ -203,6 +209,22 @@ describe('climate automation delete', () => {
     const deletes = shelly.rpcCalls.filter((call) => call.method === 'Script.Delete');
     expect(deletes).toHaveLength(1);
     expect(deletes[0]?.params?.id).toBe(saved.script.id);
+  });
+
+  it('refuses deletion when the saved endpoint belongs to another Shelly', async () => {
+    const saved = installation();
+    const shelly = installShellyDeleteMock({ deviceId: 'shellyplugsg3-other' });
+
+    await expect(deleteInstalledAutomation(saved)).rejects.toThrow(
+      'Shelly identity does not match the installed automation.'
+    );
+    expect(shelly.relayOn).toBe(true);
+    expect(shelly.scripts.some((script) => script.id === saved.script.id)).toBe(true);
+    expect(
+      shelly.rpcCalls.filter((call) =>
+        ['Switch.Set', 'Script.Stop', 'Script.Delete'].includes(call.method)
+      )
+    ).toEqual([]);
   });
 
   it('removes the local entry only after Shelly confirms deletion', async () => {

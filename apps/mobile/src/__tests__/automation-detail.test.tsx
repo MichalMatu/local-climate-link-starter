@@ -275,6 +275,13 @@ const installTimeShellyFetchMock = () => {
 
     let result: unknown = {};
     switch (body.method) {
+      case 'Shelly.GetDeviceInfo':
+        result = {
+          id: 'shellyplugsg3-time-detail',
+          model: 'S3PL-00112EU',
+          gen: 3
+        };
+        break;
       case 'Shelly.GetStatus':
         result = {
           matter: { enabled: false },

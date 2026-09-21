@@ -9,6 +9,10 @@ import {
   type TimeAutomationClients
 } from './timeAutomationClients.js';
 import {
+  requireStoredTimeAutomationDeviceIdentity,
+  type OwnedTimeAutomationRuntimeInstallation
+} from './timeAutomationIdentity.js';
+import {
   readTimeAutomationRuntime,
   type TimeAutomationRuntimeInstallation,
   type TimeAutomationRuntimeSnapshot
@@ -154,9 +158,10 @@ const updatePairEnabled = async (
 };
 
 export const pauseTimeAutomation = async (
-  installation: TimeAutomationRuntimeInstallation,
+  installation: OwnedTimeAutomationRuntimeInstallation,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<TimeAutomationRuntimeSnapshot> => {
+  await requireStoredTimeAutomationDeviceIdentity(installation, clients);
   await setRelayStateAndConfirm(clients, installation.config.relayId, false);
   await updatePairEnabled(installation, clients, false);
   await setRelayStateAndConfirm(clients, installation.config.relayId, false);
@@ -171,9 +176,10 @@ export const pauseTimeAutomation = async (
 };
 
 export const resumeTimeAutomation = async (
-  installation: TimeAutomationRuntimeInstallation,
+  installation: OwnedTimeAutomationRuntimeInstallation,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<TimeAutomationRuntimeSnapshot> => {
+  await requireStoredTimeAutomationDeviceIdentity(installation, clients);
   const status = await setRelayStateAndConfirm(
     clients,
     installation.config.relayId,
@@ -198,10 +204,11 @@ export const updateDailyTimeAutomation = async ({
   config,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 }: {
-  installation: TimeAutomationRuntimeInstallation;
+  installation: OwnedTimeAutomationRuntimeInstallation;
   config: DailyTimeAutomationConfig;
   clients?: TimeAutomationClients;
 }): Promise<TimeAutomationRuntimeSnapshot> => {
+  await requireStoredTimeAutomationDeviceIdentity(installation, clients);
   const status = unwrapShellyResult(await clients.device.getStatus());
   const localTime = requireSyncedClock(status);
   const scheduleList = unwrapShellyResult(await clients.schedules.list());
@@ -305,9 +312,10 @@ export const updateDailyTimeAutomation = async ({
 };
 
 export const deleteTimeAutomation = async (
-  installation: TimeAutomationRuntimeInstallation,
+  installation: OwnedTimeAutomationRuntimeInstallation,
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
+  await requireStoredTimeAutomationDeviceIdentity(installation, clients);
   await setRelayStateAndConfirm(clients, installation.config.relayId, false);
   const list = unwrapShellyResult(await clients.schedules.list());
   const ids = new Set(list.jobs.map((job) => job.id));

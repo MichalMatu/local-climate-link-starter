@@ -9,6 +9,7 @@ import { createInstalledAutomation } from './model.js';
 const mocks = vi.hoisted(() => ({
   setRelayOn: vi.fn(),
   setRelayOff: vi.fn(),
+  getDeviceInfo: vi.fn(),
   getStatus: vi.fn(),
   readStatus: vi.fn(),
   setRuntimeMode: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock('@lcl/shelly-client', async (importOriginal) => {
     RpcShellyClient: vi.fn(() => ({
       setRelayOn: mocks.setRelayOn,
       setRelayOff: mocks.setRelayOff,
+      getDeviceInfo: mocks.getDeviceInfo,
       getStatus: mocks.getStatus
     }))
   };
@@ -79,6 +81,10 @@ describe('installed automation runtime control', () => {
     vi.clearAllMocks();
     mocks.setRelayOn.mockResolvedValue({ ok: true, value: null });
     mocks.setRelayOff.mockResolvedValue({ ok: true, value: null });
+    mocks.getDeviceInfo.mockResolvedValue({
+      ok: true,
+      value: { id: 'shelly-a', model: 'S3PL-00112EU', gen: 3 }
+    });
     mocks.getStatus.mockResolvedValue({ ok: true, value: { relayOn: false } });
   });
 
@@ -128,6 +134,19 @@ describe('installed automation runtime control', () => {
 
     expect(mocks.setRelayOn).toHaveBeenCalledWith({ relayId: 0 });
     expect(result.status.relayOn).toBe(true);
+  });
+
+  it('refuses direct relay control when the endpoint belongs to another Shelly', async () => {
+    mocks.getDeviceInfo.mockResolvedValue({
+      ok: true,
+      value: { id: 'shelly-b', model: 'S3PL-00112EU', gen: 3 }
+    });
+    mocks.readStatus.mockResolvedValue(status('manual'));
+
+    await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
+      'Shelly identity does not match the installed automation.'
+    );
+    expect(mocks.setRelayOn).not.toHaveBeenCalled();
   });
 
   it('rejects direct relay control when the process is actually stopped', async () => {

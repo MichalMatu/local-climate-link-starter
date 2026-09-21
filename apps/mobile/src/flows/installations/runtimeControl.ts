@@ -1,6 +1,10 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
-import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, RpcShellyClient } from '@lcl/shelly-client';
+import {
+  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+  normalizeShellyDeviceId,
+  RpcShellyClient
+} from '@lcl/shelly-client';
 import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
@@ -21,6 +25,21 @@ export type InstalledAutomationScriptMatch = 'matched' | 'missing' | 'mismatch';
 export type InstalledAutomationActionResult = {
   installation: ClimateInstalledAutomation;
   status: InstalledAutomationControlStatus;
+};
+
+const assertInstalledAutomationDeviceIdentity = async (
+  installation: ClimateInstalledAutomation
+): Promise<void> => {
+  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
+  const info = unwrapShellyResult(await client.getDeviceInfo());
+  const remoteDeviceId = info.id?.trim();
+  if (
+    !remoteDeviceId ||
+    normalizeShellyDeviceId(remoteDeviceId) !==
+      normalizeShellyDeviceId(installation.shelly.deviceId)
+  ) {
+    throw new Error('Shelly identity does not match the installed automation.');
+  }
 };
 
 export const installedAutomationScriptMatch = (
@@ -120,6 +139,7 @@ export const setInstalledAutomationRelayState = async (
   installation: ClimateInstalledAutomation,
   on: boolean
 ): Promise<InstalledAutomationActionResult> => {
+  await assertInstalledAutomationDeviceIdentity(installation);
   const initialStatus = await requireMatchedInstalledAutomation(installation);
   if (initialStatus.automationMode !== 'manual' || !initialStatus.runtimeModeSupported) {
     throw new Error('Manual relay control requires a live MANUAL automation runtime.');
@@ -141,6 +161,7 @@ export const setInstalledAutomationRelayState = async (
 export const deleteInstalledAutomation = async (
   installation: ClimateInstalledAutomation
 ): Promise<void> => {
+  await assertInstalledAutomationDeviceIdentity(installation);
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
   const relayId = installation.config.output.relayId;
   const setup = await readShellySetupStatus(installation.shelly.baseUrl);

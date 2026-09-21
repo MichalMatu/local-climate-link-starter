@@ -25,6 +25,7 @@ const ok = <T>(value: T): Result<T> => ({ ok: true, value });
 
 class FakeTimeAutomationClients {
   relayOn = false;
+  deviceId = 'shelly-time';
   localTime = '12:00';
   timeSynced = true;
   jobs: ShellyScheduleJob[] = [];
@@ -36,6 +37,10 @@ class FakeTimeAutomationClients {
   calls: string[] = [];
 
   readonly device: TimeAutomationClients['device'] = {
+    getDeviceInfo: async () => {
+      this.calls.push('device:info');
+      return ok({ id: this.deviceId, model: 'S3PL-00112EU', gen: 3 });
+    },
     getStatus: async () => ok(this.status()),
     setRelayOn: async () => {
       this.calls.push('relay:on');
@@ -139,8 +144,10 @@ const installationFor = (
   _fake: FakeTimeAutomationClients,
   onJobId: number,
   offJobId: number
-): TimeAutomationRuntimeInstallation => ({
-  shelly: { baseUrl: 'http://192.168.0.20/' },
+): TimeAutomationRuntimeInstallation & {
+  shelly: { baseUrl: string; deviceId: string };
+} => ({
+  shelly: { baseUrl: 'http://192.168.0.20/', deviceId: 'shelly-time' },
   schedule: { onJobId, offJobId },
   config: { relayId: 0, onTime: '08:00', offTime: '20:00' }
 });
@@ -205,6 +212,31 @@ describe('native Shelly time automation runtime', () => {
       })
     ).rejects.toThrow('already controls this relay');
     expect(fake.createCount).toBe(0);
+  });
+
+  it('refuses existing Time mutations when the endpoint belongs to another Shelly', async () => {
+    const fake = new FakeTimeAutomationClients();
+    fake.deviceId = 'shelly-other';
+    const installation = installationFor(fake, 1, 2);
+    const mutations = [
+      () => pauseTimeAutomation(installation, fake.bundle()),
+      () => resumeTimeAutomation(installation, fake.bundle()),
+      () =>
+        updateDailyTimeAutomation({
+          installation,
+          config: { relayId: 0, onTime: '09:00', offTime: '21:00' },
+          clients: fake.bundle()
+        }),
+      () => deleteTimeAutomation(installation, fake.bundle())
+    ];
+
+    for (const mutate of mutations) {
+      fake.calls = [];
+      await expect(mutate()).rejects.toThrow(
+        'Shelly identity does not match the installed automation.'
+      );
+      expect(fake.calls).toEqual(['device:info']);
+    }
   });
 
   it('pauses, resumes and restores the correct live relay state', async () => {

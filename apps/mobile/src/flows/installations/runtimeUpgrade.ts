@@ -1,7 +1,11 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { generateShellyThermostatScript } from '@lcl/script-generator';
-import { createInstallPlan, RpcShellyClient } from '@lcl/shelly-client';
+import {
+  createInstallPlan,
+  normalizeShellyDeviceId,
+  RpcShellyClient
+} from '@lcl/shelly-client';
 import { readShellyControlStatus } from '../../features/automations/index.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
@@ -16,6 +20,21 @@ export type InstalledAutomationRuntimePreparation = {
   upgraded: boolean;
 };
 
+const assertStoredDeviceIdentity = async (
+  installation: ClimateInstalledAutomation
+): Promise<void> => {
+  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
+  const info = unwrapShellyResult(await client.getDeviceInfo());
+  const remoteDeviceId = info.id?.trim();
+  if (
+    !remoteDeviceId ||
+    normalizeShellyDeviceId(remoteDeviceId) !==
+      normalizeShellyDeviceId(installation.shelly.deviceId)
+  ) {
+    throw new Error('Shelly identity does not match the installed automation.');
+  }
+};
+
 const assertStoredScriptOwnership = async (
   installation: ClimateInstalledAutomation
 ): Promise<void> => {
@@ -28,6 +47,7 @@ const assertStoredScriptOwnership = async (
 const reinstallCurrentRuntime = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationRuntimePreparation> => {
+  await assertStoredDeviceIdentity(installation);
   await assertStoredScriptOwnership(installation);
   const relayId = installation.config.output.relayId;
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
@@ -63,6 +83,7 @@ const reinstallCurrentRuntime = async (
 export const ensureInstalledAutomationRuntimeCurrent = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationRuntimePreparation> => {
+  await assertStoredDeviceIdentity(installation);
   const status = await readInstalledAutomationControlStatus(installation);
   if (
     status.automationScriptId !== installation.script.id ||
