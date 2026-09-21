@@ -1,5 +1,9 @@
 import {
+  configHash,
+  decodeShellyThermostatScript,
+  generateShellyRuntimeConfigUpdateEval,
   generateShellyThermostatScript,
+  supportsShellyRuntimeConfigPersistence,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
 import {
@@ -18,7 +22,10 @@ import {
   type ClimateInstalledAutomation,
   type InstalledAutomation
 } from '../data/installedAutomation.js';
-import { readShellyAutomationScriptState } from '../data/shellyManagedAutomation.js';
+import {
+  readShellyAutomationScriptState,
+  type ShellyAutomationScriptState
+} from '../data/shellyManagedAutomation.js';
 import { findScheduleRelayConflict } from '../data/timeAutomationSchedule.js';
 
 export type ClimateAutomationEditServices = {
@@ -27,6 +34,7 @@ export type ClimateAutomationEditServices = {
   hasNativeScheduleConflict(baseUrl: string, relayId: number): Promise<boolean>;
   forceRelayOff(baseUrl: string, relayId: number): Promise<void>;
   replaceManagedScript(baseUrl: string, code: string): Promise<ShellyInstallResult>;
+  updateRuntimeConfig(baseUrl: string, scriptId: number, code: string): Promise<string | null>;
   nowMs(): number;
 };
 
@@ -57,16 +65,30 @@ const defaultServices: ClimateAutomationEditServices = {
         createInstallPlan(code)
       )
     ),
+  updateRuntimeConfig: async (baseUrl, scriptId, code) =>
+    unwrapShellyResult(
+      await new RpcShellyClient(createShellyTransport(baseUrl)).evaluateScript(scriptId, code)
+    ),
   nowMs: Date.now
 };
 
 const runtimeHash = (code: string): string =>
   hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${code}`);
 
+const effectiveRuntimeConfigHash = (
+  runtime: ShellyAutomationScriptState
+): string | null => {
+  if (runtime.code === null) return null;
+  return (
+    decodeShellyThermostatScript(runtime.code, runtime.persistedRuntimeConfigJson)
+      ?.runtimeConfig.k ?? null
+  );
+};
+
 const assertManagedRuntimeMatches = async (
   installation: ClimateInstalledAutomation,
   services: ClimateAutomationEditServices
-): Promise<void> => {
+): Promise<ShellyAutomationScriptState> => {
   const runtime = await services.readManagedRuntime(installation.shelly.baseUrl);
   if (
     runtime.script?.id !== installation.script.id ||
@@ -75,6 +97,98 @@ const assertManagedRuntimeMatches = async (
   ) {
     throw new Error('Stored automation script does not match Shelly.');
   }
+  if (
+    supportsShellyRuntimeConfigPersistence(runtime.code) &&
+    effectiveRuntimeConfigHash(runtime) !== configHash(installation.config)
+  ) {
+    throw new Error('Stored automation config does not match Shelly.');
+  }
+  return runtime;
+};
+
+const verifyPersistentRuntime = async ({
+  installation,
+  expectedConfig,
+  services
+}: {
+  installation: ClimateInstalledAutomation;
+  expectedConfig: ShellyThermostatConfig;
+  services: ClimateAutomationEditServices;
+}): Promise<void> => {
+  const runtime = await services.readManagedRuntime(installation.shelly.baseUrl);
+  if (
+    runtime.script?.id !== installation.script.id ||
+    runtime.script.running !== true ||
+    runtime.code === null ||
+    runtimeHash(runtime.code) !== installation.script.hash ||
+    effectiveRuntimeConfigHash(runtime) !== configHash(expectedConfig)
+  ) {
+    throw new Error('Shelly did not confirm the edited automation runtime.');
+  }
+};
+
+const updatePersistentRuntime = async ({
+  installation,
+  config,
+  services
+}: {
+  installation: ClimateInstalledAutomation;
+  config: ShellyThermostatConfig;
+  services: ClimateAutomationEditServices;
+}): Promise<void> => {
+  const confirmedHash = await services.updateRuntimeConfig(
+    installation.shelly.baseUrl,
+    installation.script.id,
+    generateShellyRuntimeConfigUpdateEval(config)
+  );
+  if (confirmedHash !== configHash(config)) {
+    throw new Error('Shelly did not confirm the runtime config update.');
+  }
+};
+
+const rollbackPersistentRuntime = async (
+  installation: ClimateInstalledAutomation,
+  services: ClimateAutomationEditServices
+): Promise<void> => {
+  await updatePersistentRuntime({ installation, config: installation.config, services });
+  await services.forceRelayOff(
+    installation.shelly.baseUrl,
+    installation.config.output.relayId
+  );
+  await verifyPersistentRuntime({
+    installation,
+    expectedConfig: installation.config,
+    services
+  });
+};
+
+const persistentEdit = async ({
+  installation,
+  config,
+  services
+}: {
+  installation: ClimateInstalledAutomation;
+  config: ShellyThermostatConfig;
+  services: ClimateAutomationEditServices;
+}): Promise<ShellyInstallResult> => {
+  try {
+    await updatePersistentRuntime({ installation, config, services });
+    await services.forceRelayOff(installation.shelly.baseUrl, config.output.relayId);
+    await verifyPersistentRuntime({ installation, expectedConfig: config, services });
+  } catch (error) {
+    try {
+      await rollbackPersistentRuntime(installation, services);
+    } catch {
+      throw new Error('Climate config update failed and rollback was not confirmed.');
+    }
+    throw error;
+  }
+
+  return {
+    scriptId: installation.script.id,
+    scriptHash: installation.script.hash,
+    running: true
+  };
 };
 
 export const updateClimateInstalledAutomation = async ({
@@ -120,24 +234,34 @@ export const updateClimateInstalledAutomation = async ({
     throw new Error('A native Shelly schedule already owns this relay.');
   }
 
-  await assertManagedRuntimeMatches(installation, services);
+  const currentRuntime = await assertManagedRuntimeMatches(installation, services);
   await services.forceRelayOff(installation.shelly.baseUrl, config.output.relayId);
 
-  const code = generateShellyThermostatScript(config);
-  const install = await services.replaceManagedScript(installation.shelly.baseUrl, code);
-  if (install.scriptId !== installation.script.id) {
-    throw new Error('Editing changed the managed Shelly script id.');
-  }
-
-  await services.forceRelayOff(installation.shelly.baseUrl, config.output.relayId);
-  const verified = await services.readManagedRuntime(installation.shelly.baseUrl);
+  let install: ShellyInstallResult;
   if (
-    verified.script?.id !== install.scriptId ||
-    verified.script.running !== true ||
-    verified.code === null ||
-    runtimeHash(verified.code) !== install.scriptHash
+    currentRuntime.code !== null &&
+    currentRuntime.script?.running === true &&
+    supportsShellyRuntimeConfigPersistence(currentRuntime.code)
   ) {
-    throw new Error('Shelly did not confirm the edited automation runtime.');
+    install = await persistentEdit({ installation, config, services });
+  } else {
+    const code = generateShellyThermostatScript(config);
+    install = await services.replaceManagedScript(installation.shelly.baseUrl, code);
+    if (install.scriptId !== installation.script.id) {
+      throw new Error('Editing changed the managed Shelly script id.');
+    }
+
+    await services.forceRelayOff(installation.shelly.baseUrl, config.output.relayId);
+    const verified = await services.readManagedRuntime(installation.shelly.baseUrl);
+    if (
+      verified.script?.id !== install.scriptId ||
+      verified.script.running !== true ||
+      verified.code === null ||
+      runtimeHash(verified.code) !== install.scriptHash ||
+      effectiveRuntimeConfigHash(verified) !== configHash(config)
+    ) {
+      throw new Error('Shelly did not confirm the edited automation runtime.');
+    }
   }
 
   return {
