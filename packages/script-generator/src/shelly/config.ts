@@ -2,7 +2,8 @@ import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { outputProfileIdSchema, sensorProfileIdSchema } from '@lcl/device-profiles';
 import { z } from 'zod';
 
-export const GENERATOR_VERSION = '0.3.0';
+export const GENERATOR_VERSION = '0.4.0';
+export const MAX_CLIMATE_SENSORS = 8;
 
 const shellyRuntimeAddressSchema = z
   .string()
@@ -13,16 +14,37 @@ const shellyRuntimeAddressSchema = z
 const ruleControlMetricSchema = z.enum(['temperature', 'humidity']);
 const thresholdDirectionSchema = z.enum(['below', 'above']);
 
+export const climateSensorSchema = z.object({
+  profileId: sensorProfileIdSchema,
+  sensorId: z.string().min(1),
+  runtimeAddress: shellyRuntimeAddressSchema,
+  displayName: z.string().min(1),
+  parserValidated: z.boolean().default(false)
+});
+
+export const climateSensorAggregationSchema = z.enum([
+  'avg',
+  'min',
+  'max',
+  'firstValid'
+]);
+
+export type ClimateSensor = z.infer<typeof climateSensorSchema>;
+export type ClimateSensorAggregation = z.infer<typeof climateSensorAggregationSchema>;
+
 export const shellyThermostatConfigSchema = z
   .object({
     version: z.literal(1),
-    sensor: z.object({
-      profileId: sensorProfileIdSchema,
-      sensorId: z.string().min(1),
-      runtimeAddress: shellyRuntimeAddressSchema,
-      displayName: z.string().min(1),
-      parserValidated: z.boolean().default(false)
-    }),
+    sensor: climateSensorSchema,
+    sensorSet: z
+      .object({
+        aggregation: climateSensorAggregationSchema,
+        additionalSensors: z
+          .array(climateSensorSchema)
+          .min(1)
+          .max(MAX_CLIMATE_SENSORS - 1)
+      })
+      .optional(),
     output: z.object({
       profileId: outputProfileIdSchema,
       relayId: z.number().int().min(0).default(0)
@@ -68,9 +90,37 @@ export const shellyThermostatConfigSchema = z
             : 'onThreshold must be higher than offThreshold.'
       });
     }
+
+    const sensors = [config.sensor, ...(config.sensorSet?.additionalSensors ?? [])];
+    const seenAddresses = new Set<string>();
+    sensors.forEach((sensor, index) => {
+      const normalizedAddress = sensor.runtimeAddress.toUpperCase();
+      if (seenAddresses.has(normalizedAddress)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path:
+            index === 0
+              ? ['sensor', 'runtimeAddress']
+              : ['sensorSet', 'additionalSensors', index - 1, 'runtimeAddress'],
+          message: 'Climate sensors must use unique runtime addresses.'
+        });
+      }
+      seenAddresses.add(normalizedAddress);
+    });
   });
 
 export type ShellyThermostatConfig = z.infer<typeof shellyThermostatConfigSchema>;
+
+export const climateSensorsForConfig = (
+  config: ShellyThermostatConfig
+): readonly ClimateSensor[] => [
+  config.sensor,
+  ...(config.sensorSet?.additionalSensors ?? [])
+];
+
+export const climateSensorAggregationForConfig = (
+  config: ShellyThermostatConfig
+): ClimateSensorAggregation => config.sensorSet?.aggregation ?? 'firstValid';
 
 export const createDefaultShellyThermostatConfig = (
   sensorProfileId: ShellyThermostatConfig['sensor']['profileId'] = 'xiaomi_lywsd03mmc_bthome_v2',
