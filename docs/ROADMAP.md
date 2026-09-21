@@ -13,17 +13,17 @@ Current stabilization has locked the product model and repaired the Plug lifecyc
 - installed automation can open physical Plug settings;
 - fresh-store recovery and Forget -> re-add verified on real Samsung S22+ + Shelly Plug S Gen3 with no unintended script/schedule/relay mutation.
 
-Closeout is documentation consolidation, merge to `main`, stale-branch cleanup and a read-only audit of fresh `main`. Do not reopen a broad refactor phase after this point.
+This baseline is frozen. Do not reopen a broad refactor phase.
 
-## 1. Automation Engine + config/data separation
+## 1. Automation Engine + config/data separation — DONE
 
-The typed compact runtime-config boundary is in place, and `climate-engine-v1` now uses one stable runtime body across supported sensor profiles and VPD on/off. Installed 0.2.x profile-specific runtimes remain decodable for conservative recovery.
+The typed compact runtime-config boundary is in place and `climate-engine-v1` uses one stable runtime body across supported sensor profiles and VPD on/off. Installed 0.2.x profile-specific runtimes remain decodable for conservative recovery.
 
-Next, move the compact config to a capability-gated persistent channel and define validation, config/engine versioning, upgrade behavior and rollback. Continue measuring real Shelly script/RAM limits before making the persistent path the production default.
+Persistent runtime config is now implemented through a capability-gated `Script.storage` channel. On supported firmware, ordinary Climate edits update config through `Script.Eval` without replacing engine code. The path validates config hash/version, survives runtime restart, participates in remote recovery and restores the previous persisted config on failed update. Firmware without the capability falls back to the compatible `Script.PutCode` path.
 
-This stage precedes further automation-generator expansion.
+Real Shelly Plug S Gen3 firmware 1.7.5 smoke confirmed unchanged script bytes during config-only update and successful persisted-config reload after runtime restart. Continue measuring script/RAM footprint as new operators are added, but this stage no longer blocks product feature work.
 
-## 2. Multiple thermometers
+## 2. Multiple thermometers — NEXT
 
 Allow an automation to reference multiple thermometers with explicit aggregation such as `avg`, `min`, `max` and `firstValid`. Preserve stale-data and safe-OFF semantics when part or all of the sensor set disappears.
 
