@@ -146,20 +146,31 @@ const recoveredClimateConfig = (
   decoded: DecodedShellyThermostatScript
 ): ShellyThermostatConfig => {
   const settings = decoded.settings;
+  const recoveredSensors = settings.sensors.map((sensor) => ({
+    profileId: sensor.sensorProfileId,
+    sensorId: sensor.runtimeAddress,
+    runtimeAddress: sensor.runtimeAddress,
+    displayName: sensor.sensorDisplayName,
+    parserValidated: true
+  }));
+  const primarySensor = recoveredSensors[0]!;
+  const additionalSensors = recoveredSensors.slice(1);
   const defaults = createDefaultShellyThermostatConfig(
-    settings.sensorProfileId,
+    primarySensor.profileId,
     settings.mode
   );
 
   return {
     ...defaults,
-    sensor: {
-      ...defaults.sensor,
-      sensorId: settings.runtimeAddress,
-      runtimeAddress: settings.runtimeAddress,
-      displayName: settings.sensorDisplayName,
-      parserValidated: true
-    },
+    sensor: primarySensor,
+    ...(additionalSensors.length > 0
+      ? {
+          sensorSet: {
+            aggregation: settings.aggregation,
+            additionalSensors
+          }
+        }
+      : {}),
     output: {
       ...defaults.output,
       relayId: settings.relayId
