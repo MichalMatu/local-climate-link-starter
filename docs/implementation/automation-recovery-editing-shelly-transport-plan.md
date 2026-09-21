@@ -291,13 +291,13 @@ Verification before integration:
 
 ## Slice 3B — physical button input mode
 
-Status: **done on work branch; integration pending**.
+Status: **done and integrated**.
 
-Completed product/test head:
+Integrated head:
 
 ```text
-64afc789ec679d7de2ab17b6fab5a588235bf238
-Fix Plug button E2E selector
+0155d0508a05e4fea46bca89a83501a28ab8cc18
+Record accepted Slice 3B final check
 ```
 
 Result:
@@ -309,13 +309,17 @@ Result:
 - the saved physical Plug settings surface exposes the control without moving RPC logic into screens;
 - no new production dependency, lockfile change, architecture-baseline increase or speculative BLE behavior was introduced.
 
-Verification before integration:
+Verification and integration:
 
 - focused package/component validation and repository gates passed during iteration;
 - responsive Playwright task `20260921-slice3b-e2e-v2` passed 4/4 tests at 360x800, 390x844 and 768x1024, including controls-only mutation evidence;
 - hardware task `20260921-slice3b-hardware-smoke-v1` used the typed repository client against real Plug S Gen3 `shellyplugsg3-e4b063d7f530` / firmware 1.7.5 and verified `momentary -> detached -> momentary`;
 - LED config stayed byte-equivalent through the hardware mutation and relay output stayed OFF;
-- an intermediate pre-push hook ran full `pnpm check` at `880f960df...`; later E2E/docs-only commits followed it, so the accepted final check is Local Agent task `20260921-slice3b-final-check-v1`, which must succeed on the exact tree it commits before integration.
+- accepted final Local Agent task `20260921-slice3b-final-check-v1` passed full `pnpm check` on exact integrated tree `0155d0508a05e4fea46bca89a83501a28ab8cc18`;
+- `main` was a clean fast-forward to that exact head;
+- GitHub CI run `35560026604`, job `106211021785` passed, including Responsive smoke;
+- Sandbox Pack run `35560026593`, job `106211021856` passed;
+- completed branch `work/plug-button-input-mode` remains as cleanup debt because the available connector has no branch-delete action; raw delete-push was deliberately not used.
 
 ## Slice 3C — next Shelly settings family
 
@@ -380,7 +384,7 @@ Do not perform a schema rewrite solely to match this diagram.
 2A  Edit climate automation               DONE  05f7eb4b8
 2B  Edit Time automation                  DONE  e1a4c63e3
 3A  Full LED settings                     DONE  b0319dddd
-3B  Physical button input mode            DONE  64afc789e
+3B  Physical button input mode            DONE  0155d0508
 3C  Next Plug settings family             NEXT
 4A  BLE feasibility spike                 pending
 4B  BLE transport                         pending
