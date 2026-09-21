@@ -27,6 +27,14 @@ Real Shelly Plug S Gen3 firmware 1.7.5 smoke confirmed unchanged script bytes du
 
 Allow an automation to reference multiple thermometers with explicit aggregation such as `avg`, `min`, `max` and `firstValid`. Preserve stale-data and safe-OFF semantics when part or all of the sensor set disappears.
 
+### Follow-up TODO — sensor provenance and Plug-side BLE visibility
+
+- On the Plug card, distinguish readings discovered live by the Plug BLE scanner from thermometers merely saved in the mobile app.
+- Do not keep showing stale sensor data just because a previously linked thermometer was removed from the app; the card should reflect what the Plug actually sees now.
+- Make the source of each reading explicit (`phone BLE`, `Plug BLE`, or recovered automation/runtime).
+- When recovering an existing automation from Shelly, consider importing its referenced thermometers into the app thermometer list without creating duplicates.
+- Define deterministic deduplication/identity rules so the same physical thermometer discovered by phone, Plug and recovered runtime stays one logical device.
+
 ## 3. Soil moisture
 
 Add soil-moisture inputs through the same typed sensor/config model instead of a separate runtime architecture.
