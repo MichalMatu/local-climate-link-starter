@@ -5,6 +5,7 @@ import type {
 } from '@lcl/automation-core';
 import type { SensorProfileId } from '@lcl/device-profiles';
 import { z } from 'zod';
+import { decodeShellyRuntimeConfig, type ShellyRuntimeConfig } from './runtimeConfig.js';
 
 export type DecodedShellyThermostatRuntimeMode =
   'xiaomi-bthome-minimal' | 'tp357-minimal';
@@ -40,54 +41,15 @@ export interface DecodedShellyThermostatScript {
   generatorVersion: string | null;
   runtimeMode: DecodedShellyThermostatRuntimeMode;
   configHash: string | null;
-  runtimeConfig: DecodedShellyRuntimeConfig;
+  runtimeConfig: ShellyRuntimeConfig;
   settings: DecodedShellyThermostatSettings;
 }
 
 const runtimeModeSchema = z.enum(['xiaomi-bthome-minimal', 'tp357-minimal']);
 
-const runtimeConfigSchema = z.object({
-  a: z.string().min(1),
-  fa: z.string().min(1),
-  n: z.string().min(1),
-  k: z.string().min(1),
-  i: z.number().int().min(0),
-  r: z.number().int().min(-100).max(-20),
-  on: z.number(),
-  off: z.number(),
-  d: z.union([z.literal(0), z.literal(1)]),
-  m: z.union([z.literal(0), z.literal(1)]),
-  h: z.number().int().min(1).max(10),
-  c: z.number().int().positive(),
-  s: z.number().int().positive(),
-  x: z.number().int().positive(),
-  v: z.number().int().positive(),
-  vp: z.number().min(0).max(5)
-});
-
-export type DecodedShellyRuntimeConfig = z.infer<typeof runtimeConfigSchema>;
-
 const metadataLine = (script: string, label: string): string | null => {
   const match = new RegExp(`^// ${label}: (.+)$`, 'm').exec(script);
   return match ? match[1]!.trim() : null;
-};
-
-const parseRuntimeConfig = (script: string): unknown | null => {
-  const start = script.indexOf('var C=');
-  if (start < 0) {
-    return null;
-  }
-  const configStart = start + 'var C='.length;
-  const end = script.indexOf(';var R=', configStart);
-  if (end < 0) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(script.slice(configStart, end)) as unknown;
-  } catch {
-    return null;
-  }
 };
 
 const sensorProfileForRuntimeMode = (
@@ -119,13 +81,12 @@ export const decodeShellyThermostatScript = (
     return null;
   }
 
-  const runtimeConfigResult = runtimeConfigSchema.safeParse(parseRuntimeConfig(script));
-  if (!runtimeConfigResult.success) {
+  const runtimeConfig = decodeShellyRuntimeConfig(script);
+  if (!runtimeConfig) {
     return null;
   }
 
   const runtimeMode = runtimeModeResult.data;
-  const runtimeConfig = runtimeConfigResult.data;
   const metric = controlMetricForFlag(runtimeConfig.m);
   const direction = thresholdDirectionForFlag(runtimeConfig.d);
 

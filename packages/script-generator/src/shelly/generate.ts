@@ -1,6 +1,7 @@
 import { GENERATOR_VERSION, normalizeConfig } from './config.js';
 import type { ShellyThermostatConfig } from './config.js';
 import { configHash, stableStringify } from './hash.js';
+import { createShellyRuntimeConfig } from './runtimeConfig.js';
 import { compactGeneratedShellyScript } from './scriptText.js';
 
 export type ShellyScriptGeneratorMode =
@@ -8,34 +9,12 @@ export type ShellyScriptGeneratorMode =
 
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
 
-const compactAddress = (address: string): string =>
-  address.replace(/[:-]/g, '').toUpperCase();
-
 const runtimeModeForConfig = (
   config: ShellyThermostatConfig
 ): Exclude<ShellyScriptGeneratorMode, 'discovery-debug'> =>
   config.sensor.profileId === 'tp357_custom_v1'
     ? 'tp357-minimal'
     : 'xiaomi-bthome-minimal';
-
-const createRuntimeConfig = (config: ShellyThermostatConfig, hash: string) => ({
-  a: compactAddress(config.sensor.runtimeAddress),
-  fa: config.sensor.runtimeAddress,
-  n: config.sensor.displayName,
-  k: hash,
-  i: config.output.relayId,
-  r: config.rule.rssiMin,
-  on: config.rule.control.onThreshold,
-  off: config.rule.control.offThreshold,
-  d: config.rule.control.direction === 'above' ? 1 : 0,
-  m: config.rule.control.metric === 'humidity' ? 1 : 0,
-  h: config.rule.consecutiveHits,
-  c: config.rule.minChangeMs,
-  s: config.rule.staleTimeoutSec * 1000,
-  x: config.rule.maxOnMs,
-  v: config.version,
-  vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0
-});
 
 const renderThresholdHelper = (config: ShellyThermostatConfig): string => {
   if (!config.rule.vpdAssist.enabled) {
@@ -97,7 +76,7 @@ export const generateShellyThermostatScript = (input: unknown): string => {
   const config = normalizeConfig(input);
   const mode = runtimeModeForConfig(config);
   const hash = configHash(config);
-  const cfgJson = stableStringify(createRuntimeConfig(config, hash));
+  const cfgJson = stableStringify(createShellyRuntimeConfig(config, hash));
   const body = `var C=${cfgJson};
 ${renderRuntimeState(config)}
 function nw(){return Shelly.getUptimeMs();}
