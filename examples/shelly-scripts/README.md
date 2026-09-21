@@ -17,8 +17,8 @@ Rules:
 JSON config is source of truth.
 script-generator creates deterministic Shelly Script.
 examples may contain generated snapshots for review only.
-runtime examples are minimal per-sensor variants, not universal parser bundles.
-Xiaomi runtime uses a compact local BTHome v2 parser because tested Shelly Plug S Gen3 firmware did not expose global BTHome.
-TP357 generated output uses the MatrixHub manufacturer-data parser model.
+installed climate automation uses one stable climate-engine-v1 body with parser/rule selection in compact config.
+Xiaomi support uses a compact local BTHome v2 parser because tested Shelly Plug S Gen3 firmware did not expose global BTHome.
+TP357 support uses the MatrixHub manufacturer-data parser model inside the same stable engine body.
 BLE discovery is temporary setup code and should be stopped/deleted after scan.
 ```
