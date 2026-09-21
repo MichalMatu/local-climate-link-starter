@@ -17,7 +17,8 @@ export const shellyRuntimeConfigSchema = z.object({
   s: z.number().int().positive(),
   x: z.number().int().positive(),
   v: z.number().int().positive(),
-  vp: z.number().min(0).max(5)
+  vp: z.number().min(0).max(5),
+  p: z.union([z.literal(0), z.literal(1)]).optional()
 });
 
 export type ShellyRuntimeConfig = z.infer<typeof shellyRuntimeConfigSchema>;
@@ -44,7 +45,8 @@ export const createShellyRuntimeConfig = (
   s: config.rule.staleTimeoutSec * 1000,
   x: config.rule.maxOnMs,
   v: config.version,
-  vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0
+  vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0,
+  p: config.sensor.profileId === 'tp357_custom_v1' ? 1 : 0
 });
 
 const runtimeConfigJsonFromScript = (script: string): unknown | null => {
