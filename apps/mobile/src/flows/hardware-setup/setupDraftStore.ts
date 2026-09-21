@@ -182,6 +182,17 @@ const updateListItem = <TItem extends { id: string }>(
   patch: Partial<TItem>
 ): TItem[] => items.map((item) => (item.id === id ? { ...item, ...patch } : item));
 
+const normalizeSavedShellyEndpoint = (baseUrl: string): string =>
+  baseUrl.trim().replace(/\/+$/, '').toLowerCase();
+
+const isReplacedShellyDevice = (
+  current: ShellyDraftDevice,
+  verified: ShellyDraftDevice
+): boolean =>
+  current.id.trim().toLowerCase() === verified.id.trim().toLowerCase() ||
+  normalizeSavedShellyEndpoint(current.baseUrl) ===
+    normalizeSavedShellyEndpoint(verified.baseUrl);
+
 export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) => {
   const storedDraft = readStoredDraft();
   const initialDraft = {
@@ -207,7 +218,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           shellyUrlInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyUrlInput,
           shellyDevices: [
             device,
-            ...state.shellyDevices.filter((item) => item.id !== device.id)
+            ...state.shellyDevices.filter((item) => !isReplacedShellyDevice(item, device))
           ],
           selectedShellyId: device.id
         };
