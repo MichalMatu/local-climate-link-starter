@@ -67,7 +67,7 @@ describe('multi-sensor climate recovery', () => {
         code,
         persistedRuntimeConfigJson: serializeShellyRuntimeConfig(persisted)
       })),
-      readTimeScheduleState: vi.fn(async () => 'running')
+      readTimeScheduleState: vi.fn(async () => 'running' as const)
     };
 
     const result = await reconcileInstalledAutomationsForShelly(target, services);
