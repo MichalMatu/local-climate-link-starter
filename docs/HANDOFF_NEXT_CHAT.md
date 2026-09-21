@@ -1,4 +1,4 @@
-# Next chat handoff — Slice 3C complete, integration pending
+# Next chat handoff — Slice 3C integrated, CI green, Slice 4A next
 
 Updated: 2026-09-21
 
@@ -6,19 +6,23 @@ This is the canonical continuation state for `MichalMatu/local-climate-link-star
 
 ## Immediate state
 
-Slice 3C — Shelly Cloud enable/disable — is implemented and fully validated on `work/plug-cloud-settings`.
+Slice 3C — Shelly Cloud enable/disable — is complete and integrated on `main`.
 
 ```text
-base main: c19014c0c14ce8e136c3bb149860a324320388bb
-work branch: work/plug-cloud-settings
+integrated main head: b2ec80d70afc3360cf7bbc33bb8907f6f20d5890
 accepted product head: 47e047cc8b748725b952f14f04ad46c7f8f11023
 focused validation: 20260921-slice3c-focused-v2 — success
 hardware smoke: 20260921-slice3c-hardware-smoke-v1 — success
 accepted final full check: 20260921-slice3c-final-v2 — success
-integration: pending
+main CI run: 35591819583 — success
+CI job: 106307684252 — success, including Responsive smoke
+Sandbox Pack run: 35591819763 — success
+Sandbox Pack job: 106307685428 — success
+completed work branch: work/plug-cloud-settings
+branch cleanup: deferred; available GitHub connector has no delete-ref action and raw delete-push was not used
 ```
 
-Do not start Slice 4A until this exact Slice 3C tree plus docs-only finalization are fast-forwarded to `main` and GitHub CI / Sandbox Pack are green.
+Do not resume Slice 3C product work unless new evidence shows a regression. The active next goal is Slice 4A: a bounded real-hardware BLE feasibility and protocol spike. Do not implement a production BLE transport until that spike establishes the actual protocol and capability matrix.
 
 ## Completed Slice 3C contract
 
@@ -75,7 +79,7 @@ PLUGS_UI config: unchanged
 
 The hardware smoke deliberately did **not** enable Shelly Cloud because that would create an external cloud connection. The `enable=true` path is covered deterministically by the typed client, component test and responsive Playwright test.
 
-Accepted final validation:
+Accepted final validation and integration:
 
 ```text
 task: 20260921-slice3c-final-v2
@@ -83,23 +87,25 @@ checked product head: 47e047cc8b748725b952f14f04ad46c7f8f11023
 pnpm check: success
 elapsed: ~95 s
 working tree after check: clean
+final docs/integration head: b2ec80d70afc3360cf7bbc33bb8907f6f20d5890
+main CI: 35591819583 / 106307684252 — success
+Responsive smoke: success
+Sandbox Pack: 35591819763 / 106307685428 — success
 ```
 
-Documentation finalization after that check is docs-only and intentionally does not trigger a second local full `pnpm check`.
+The final integration documentation commit after the accepted product check is docs-only and intentionally did not trigger a second local full `pnpm check`.
 
-## Exact remaining work — Slice 3C
+## Exact next work — Slice 4A BLE feasibility and protocol spike
 
-1. Review the complete diff from `c19014c0c14ce8e136c3bb149860a324320388bb` to the final docs head; require clean fast-forward ancestry and only expected code/test/docs files.
-2. Fast-forward `main` to the final docs head without force.
-3. Verify GitHub CI, including Responsive smoke, and Sandbox Pack for the exact main SHA.
-4. Delete `work/plug-cloud-settings` only if available tooling supports safe branch deletion; otherwise record cleanup debt and do not bypass safety controls.
-5. Only after green main begin Slice 4A.
-
-## Next slice — 4A BLE feasibility and protocol spike
-
-Use the real Plug S Gen3 to establish BLE discovery/connection, GATT services and characteristics, authentication/pairing requirements, request/response framing and fragmentation, payload/operation limits, timeout/retry/disconnect behavior, Wi-Fi provisioning viability and which existing Local Climate Link RPC/config operations are practical over BLE.
-
-Record a capability matrix before implementing a BLE transport. Do not assume HTTP/BLE parity and do not refactor product flows speculatively.
+1. Fetch fresh `main` and verify the Local Agent daemon is idle and still bound to this repository.
+2. Read root/nearest `AGENTS.md`, this handoff, the active implementation plan, architecture boundaries and existing BLE-related code/tests before changing anything.
+3. Perform a preimplementation ownership/transport audit first; Slice 4A is evidence gathering, not permission for speculative product refactors.
+4. Use the real Plug S Gen3 to establish BLE discovery/connection behavior, GATT services and characteristics, authentication/pairing requirements, request/response framing and fragmentation, payload/operation limits, timeout/retry/disconnect behavior and Wi-Fi provisioning viability.
+5. Probe which existing Local Climate Link operations are realistically available over BLE, beginning with low-risk reads. Record exact method/config support rather than assuming parity with HTTP.
+6. Produce a capability matrix and explicit transport constraints before creating a production `ShellyRpcTransport` implementation for BLE.
+7. Keep stable physical `deviceId` as identity; BLE address/session details are reachability/session data only.
+8. Do not pull Slice 4B implementation forward until 4A evidence is complete and reviewed.
+9. `work/plug-cloud-settings` remains cleanup debt because current safe tooling cannot delete the branch; do not bypass that limitation with raw delete-push.
 
 ## Local Chat Bridge identity
 
