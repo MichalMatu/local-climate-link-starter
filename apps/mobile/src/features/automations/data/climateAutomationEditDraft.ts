@@ -30,12 +30,17 @@ export const createClimateAutomationEditDraftPatch = (
     model: installation.shelly.model,
     gen: installation.shelly.gen
   };
-  const sensorDevice = {
-    id: config.sensor.sensorId,
-    name: config.sensor.displayName,
-    runtimeAddress: config.sensor.runtimeAddress,
-    profileId: config.sensor.profileId
-  };
+  const configuredSensors = [
+    config.sensor,
+    ...(config.sensorSet?.additionalSensors ?? [])
+  ];
+  const sensorDevices = configuredSensors.map((sensor) => ({
+    id: sensor.sensorId,
+    name: sensor.displayName,
+    runtimeAddress: sensor.runtimeAddress,
+    profileId: sensor.profileId
+  }));
+  const configuredSensorIds = new Set(sensorDevices.map((sensor) => sensor.id));
 
   return {
     shellyDevices: [
@@ -43,11 +48,13 @@ export const createClimateAutomationEditDraftPatch = (
       ...state.shellyDevices.filter((item) => item.id !== shellyDevice.id)
     ],
     sensorDevices: [
-      sensorDevice,
-      ...state.sensorDevices.filter((item) => item.id !== sensorDevice.id)
+      ...sensorDevices,
+      ...state.sensorDevices.filter((item) => !configuredSensorIds.has(item.id))
     ],
     selectedShellyId: shellyDevice.id,
-    selectedSensorId: sensorDevice.id,
+    selectedSensorId: sensorDevices[0]!.id,
+    additionalSensorIds: sensorDevices.slice(1).map((sensor) => sensor.id),
+    sensorAggregation: config.sensorSet?.aggregation ?? 'avg',
     rulePreset: config.rule.mode,
     onThresholdInput: String(config.rule.control.onThreshold),
     offThresholdInput: String(config.rule.control.offThreshold),
