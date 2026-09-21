@@ -2,6 +2,7 @@ import {
   configHash,
   createDefaultShellyThermostatConfig,
   generateShellyThermostatScript,
+  normalizeConfig,
   serializeShellyRuntimeConfig
 } from '@lcl/script-generator';
 import { hashScriptCode, LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
@@ -33,6 +34,22 @@ const editedConfig = {
 };
 const editedCode = generateShellyThermostatScript(editedConfig);
 const editedHash = hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${editedCode}`);
+const multiConfig = normalizeConfig({
+  ...editedConfig,
+  sensorSet: {
+    aggregation: 'avg',
+    additionalSensors: [
+      {
+        ...editedConfig.sensor,
+        sensorId: 'sensor-b',
+        runtimeAddress: '11:22:33:44:55:66',
+        displayName: 'Sensor B'
+      }
+    ]
+  }
+});
+const multiCode = generateShellyThermostatScript(multiConfig);
+const multiHash = hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${multiCode}`);
 
 const runtime = ({
   code = originalCode,
@@ -105,6 +122,131 @@ describe('updateClimateInstalledAutomation', () => {
       installation.script.id,
       expect.stringContaining(configHash(editedConfig))
     );
+    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
+  });
+
+  it('upgrades a persistence-capable single-sensor body before the first multi-sensor edit', async () => {
+    const legacyCode = originalCode.replace(
+      'function av(v,t,n)',
+      'function legacyAv(v,t,n)'
+    );
+    const legacyInstallation = {
+      ...installation,
+      script: {
+        ...installation.script,
+        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
+      }
+    };
+    const mocked = services({
+      readManagedRuntime: vi
+        .fn()
+        .mockResolvedValueOnce(runtime({ code: legacyCode }))
+        .mockResolvedValueOnce(runtime({ code: multiCode })),
+      replaceManagedScript: vi.fn(async () => ({
+        scriptId: 7,
+        scriptHash: multiHash,
+        running: true
+      }))
+    });
+
+    const result = await updateClimateInstalledAutomation({
+      installation: legacyInstallation,
+      config: multiConfig,
+      installations: [legacyInstallation],
+      services: mocked
+    });
+
+    expect(result.installation.script).toEqual({ id: 7, hash: multiHash });
+    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
+      installation.shelly.baseUrl,
+      multiCode
+    );
+    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
+    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
+  });
+
+  it('changes only persisted config for aggregation edits on a multi-sensor-capable body', async () => {
+    const minConfig = normalizeConfig({
+      ...multiConfig,
+      sensorSet: {
+        ...multiConfig.sensorSet!,
+        aggregation: 'min'
+      }
+    });
+    const multiInstallation = {
+      ...installation,
+      config: multiConfig,
+      script: { id: 7, hash: multiHash }
+    };
+    const mocked = services({
+      readManagedRuntime: vi
+        .fn()
+        .mockResolvedValueOnce(runtime({ code: multiCode }))
+        .mockResolvedValueOnce(
+          runtime({
+            code: multiCode,
+            persistedRuntimeConfigJson: serializeShellyRuntimeConfig(minConfig)
+          })
+        ),
+      updateRuntimeConfig: vi.fn(async () => configHash(minConfig))
+    });
+
+    const result = await updateClimateInstalledAutomation({
+      installation: multiInstallation,
+      config: minConfig,
+      installations: [multiInstallation],
+      services: mocked
+    });
+
+    expect(result.installation.script).toEqual({ id: 7, hash: multiHash });
+    expect(mocked.updateRuntimeConfig).toHaveBeenCalledTimes(1);
+    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
+    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
+  });
+
+  it('matches a recovered installation by runtime semantics instead of local sensor id', async () => {
+    const recoveredInstallation = {
+      ...installation,
+      config: {
+        ...installation.config,
+        sensor: {
+          ...installation.config.sensor,
+          sensorId: installation.config.sensor.runtimeAddress
+        }
+      }
+    };
+    const recoveredEditedConfig = {
+      ...editedConfig,
+      sensor: recoveredInstallation.config.sensor
+    };
+    const mocked = services({
+      readManagedRuntime: vi
+        .fn()
+        .mockResolvedValueOnce(runtime())
+        .mockResolvedValueOnce(
+          runtime({
+            persistedRuntimeConfigJson: serializeShellyRuntimeConfig(
+              recoveredEditedConfig
+            )
+          })
+        ),
+      updateRuntimeConfig: vi.fn(async () => configHash(recoveredEditedConfig))
+    });
+
+    await expect(
+      updateClimateInstalledAutomation({
+        installation: recoveredInstallation,
+        config: recoveredEditedConfig,
+        installations: [recoveredInstallation],
+        services: mocked
+      })
+    ).resolves.toMatchObject({
+      installation: {
+        config: { sensor: { sensorId: installation.config.sensor.runtimeAddress } }
+      }
+    });
+
+    expect(mocked.updateRuntimeConfig).toHaveBeenCalledTimes(1);
     expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
   });
 
@@ -238,6 +380,7 @@ describe('updateClimateInstalledAutomation', () => {
     ).rejects.toThrow('identity');
     expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
     expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
+    expect(mocked.forceRelayOff).not.toHaveBeenCalled();
   });
 
   it('refuses to overwrite a remote script that no longer matches durable ownership', async () => {
