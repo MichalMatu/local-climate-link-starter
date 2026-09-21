@@ -17,7 +17,9 @@ Closeout is documentation consolidation, merge to `main`, stale-branch cleanup a
 
 ## 1. Automation Engine + config/data separation
 
-Create one stable Local Climate Engine runtime and move automation-specific values into typed runtime configuration/data. Define versioning, validation, upgrade behavior, persistence and rollback. Continue measuring real Shelly script/RAM limits.
+The typed compact runtime-config boundary is in place, and `climate-engine-v1` now uses one stable runtime body across supported sensor profiles and VPD on/off. Installed 0.2.x profile-specific runtimes remain decodable for conservative recovery.
+
+Next, move the compact config to a capability-gated persistent channel and define validation, config/engine versioning, upgrade behavior and rollback. Continue measuring real Shelly script/RAM limits before making the persistent path the production default.
 
 This stage precedes further automation-generator expansion.
 
