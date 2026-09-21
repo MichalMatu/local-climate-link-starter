@@ -1,12 +1,112 @@
-# Next chat handoff — Slice 3A complete, Slice 3B+ next
+# Next chat handoff — Slice 3A integrated, CI repair active, 3B blocked
 
 Updated: 2026-09-21
 
 This is the canonical continuation state for `MichalMatu/local-climate-link-starter`.
 
-## Start here
+## Immediate state — read before doing anything
 
-Before any write, read in this order:
+`Slice 3A` is implemented, hardware-verified, documented and integrated on `main`, but the first clean Linux CI run after integration exposed an unrelated pre-existing/latent BLE-discovery teardown race. Do **not** start Slice 3B until this CI repair is complete and `main` is green again.
+
+```text
+main: f4c615c0dd8f9c7f9cca064b301119f829ece851
+main message: Finalize Slice 3A handoff
+Slice 3A product commit: b0319dddd668c6474b7544c38018518027e3b5f1
+active repair branch: work/fix-ble-discovery-unmount-race
+active repair head before this handoff-doc commit: 57f0b97788373790eea0f22c8f8b3f7a0a914141
+repair commit message: Guard BLE discovery state after unmount
+failed main CI run: 35547898834
+failed CI job: 106177049556
+```
+
+The Linux failure is **not an LED-settings failure**. All 223 mobile tests individually reported passed, but Vitest failed the run because of one post-teardown unhandled rejection:
+
+```text
+ReferenceError: window is not defined
+useShellyBleDiscoveryFlow.ts:108
+startBleDiscoveryMutation.onError -> setBleDiscoverySession(null)
+originating test file: src/__tests__/navigation-settings-regression.test.tsx
+```
+
+Clean Linux timing allowed a pending BLE-discovery start mutation to reject after the component/test environment had already unmounted. The production hook then attempted React state updates after teardown.
+
+A first lifecycle fix is already committed on `work/fix-ble-discovery-unmount-race`: `useShellyBleDiscoveryFlow` now tracks `mountedRef`; remote/ref cleanup may finish after unmount, but React state updates are guarded once unmounted. This change is **not yet validated** and must not be merged blindly.
+
+## Exact next work
+
+Continue the active CI repair only.
+
+1. Fetch `main` and `work/fix-ble-discovery-unmount-race` and verify ancestry from `f4c615c0d...`.
+2. Read:
+   - `AGENTS.md`
+   - `apps/mobile/AGENTS.md`
+   - nearest nested AGENTS for touched files
+   - this handoff
+   - `apps/mobile/src/flows/hardware-setup/useShellyBleDiscoveryFlow.ts`
+   - `apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx`
+   - `apps/mobile/src/__tests__/navigation-settings-regression.test.tsx`
+3. Review the mounted-ref patch instead of assuming it is correct.
+4. Add a narrow lifecycle regression test for: pending BLE discovery start settles/rejects after unmount -> no post-unmount React state update/unhandled rejection; remote cleanup guarantees remain intact.
+5. Run focused tests first, including `navigation-settings-regression.test.tsx` and relevant hardware-setup/BLE discovery coverage.
+6. Run `pnpm quality:repo` if boundaries are touched.
+7. Run exactly one accepted final full `pnpm check` for the repair diff.
+8. Push/review the repair diff, fast-forward `main`, then verify clean GitHub CI on `main` through responsive smoke.
+9. Update this handoff with the repair commit/CI evidence and delete the repair branch.
+10. Only after green `main`, begin Slice 3B.
+
+Do not hide the race by adding sleeps, weakening Vitest error handling, suppressing unhandled rejections, or changing CI. Fix lifecycle ownership.
+
+## Night / Local Chat Bridge continuation
+
+Canonical Chat Bridge identity for this project:
+
+```text
+repository id: local-climate-link-starter
+repository: MichalMatu/local-climate-link-starter
+agent_binding: e75c77cb-7589-4452-94b2-decc97ff85a1
+execution_enabled: true
+control branch: agent-control
+managed workspace: /Users/michal/agent-workspace/repos/local-climate-link-starter/work
+```
+
+A new ChatGPT conversation must stay hard-bound to this exact repository. The Bridge wake envelope is authoritative:
+
+```text
+[LA_AGENT=e75c77cb-7589-4452-94b2-decc97ff85a1]
+[LA_REPO=local-climate-link-starter]
+[LA_REPOSITORY=MichalMatu/local-climate-link-starter]
+[LA_CHAT=<new conversation id>]
+```
+
+If the new chat is not yet configured in Chat Bridge, the **user** must add it with the operator command:
+
+```text
+[LAB:OP:ADD=local-climate-link-starter]
+```
+
+The assistant must never emit/use `LAB:OP:*` as an assistant control and must never rebind itself to another repository.
+
+Autonomous night-loop policy:
+
+- preserve the active goal: repair green CI after Slice 3A, then continue the documented plan;
+- on every wake inspect the exact bound-repo daemon/run/result evidence before queueing anything;
+- never queue a second task for the same active goal while one is running;
+- after queueing a fresh Local Agent task, use `[LAB:NEXT=2m]` for the first liveness check when useful;
+- once a build/test task is visibly healthy, use evidence-based `[LAB:NEXT=5m]` to `[LAB:NEXT=10m]` rather than 30-second polling;
+- if an exact terminal failure supports a specific fix, create a new immutable task id; never mutate/replay the old payload;
+- if progress needs user action, unavailable hardware, credentials, approval, or another repository, use `[LAB:PAUSE]` rather than guessing;
+- use `[LAB:STOP]` only when the requested active goal is supported by exact execution/CI evidence;
+- do not start 3B while `main` CI is red.
+
+For this repository every Local Agent task must contain exactly:
+
+```json
+"agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1"
+```
+
+## Start-here reading order
+
+Before any new write:
 
 ```text
 AGENTS.md
@@ -18,19 +118,10 @@ docs/architecture/refactor-boundaries.md
 docs/architecture/feature-boundaries.md
 fresh main
 agent-control:.agent/status/daemon.json
+exact active run/result evidence
 ```
 
-Repository/runtime identity:
-
-```text
-repository: MichalMatu/local-climate-link-starter
-default/product branch: main
-control branch: agent-control
-Local Agent binding: e75c77cb-7589-4452-94b2-decc97ff85a1
-managed workspace: /Users/michal/agent-workspace/repos/local-climate-link-starter/work
-```
-
-Always fetch fresh `main`. Do not resume a historical work branch unless this handoff explicitly says to do so.
+Never resume a historical work branch unless this handoff explicitly names it. Right now the only branch to resume is `work/fix-ble-discovery-unmount-race`.
 
 ## Product invariants
 
@@ -67,7 +158,7 @@ fresh main + idle daemon
 -> commit/push
 -> review pushed diff
 -> fast-forward main
--> verify main
+-> verify main including CI
 -> cleanup completed work branch
 ```
 
@@ -75,12 +166,12 @@ Do not raise architecture baselines to make a slice fit. New cohesive product mo
 
 ## Last completed product slice — Slice 3A
 
-Slice 3A is complete and integrated-ready.
+Slice 3A is complete and integrated on `main`.
 
 ```text
 product commit: b0319dddd668c6474b7544c38018518027e3b5f1
 message: Complete Plug S LED settings
-validated work branch: work/slice3a-complete-led-settings
+final docs/integration main: f4c615c0dd8f9c7f9cca064b301119f829ece851
 accepted final full check: 20260921-slice3a-final-check-v2
 real hardware smoke: 20260921-slice3a-hardware-smoke-v1
 live typed-client read: 20260921-slice3a-live-client-read-v1
@@ -89,19 +180,18 @@ focused responsive LED E2E: 20260921-slice3a-real-night-window-e2e-v2
 
 Implemented contract:
 
-- `@lcl/shelly-client` owns the typed `PLUGS_UI` LED protocol for the supported Plug S Gen3 surface: `power | switch | off`, relay ON/OFF RGB + brightness, power brightness and night mode;
-- `features/plugs` owns LED settings orchestration and presentation for a physical Plug, so the same settings work with or without an installed climate/Time automation;
-- every LED settings read or write verifies the live physical `Shelly.GetDeviceInfo.id` against the saved stable `deviceId` before touching `PLUGS_UI`; `baseUrl` remains reachability only;
-- writes are deep partial LED-only patches and never write the unrelated `controls` subtree;
-- options are capability-driven from fields actually exposed by the device rather than scattered model-name checks;
-- the legacy installation-owned `flows/installations/deviceLed.ts` and `screens/ShellyLedSettingsCard.tsx` paths were removed;
-- the shared mobile `SelectField` is used for LED mode rather than a native select;
-- current HTTP remains an adapter under the same Shelly client boundary; no speculative BLE behavior was added.
+- `@lcl/shelly-client` owns typed `PLUGS_UI` LED protocol for Plug S Gen3: `power | switch | off`, relay ON/OFF RGB + brightness, power brightness and night mode;
+- `features/plugs` owns LED settings orchestration/presentation for a physical Plug, with or without installed climate/Time automation;
+- every LED read/write verifies live `Shelly.GetDeviceInfo.id` against stable saved `deviceId`; `baseUrl` is reachability only;
+- writes are deep partial LED-only patches and never write unrelated `controls`;
+- unsupported options are capability-driven;
+- legacy installation-owned LED flow/component paths were removed;
+- current HTTP remains an adapter under the Shelly client boundary; no speculative BLE transport was added.
 
-Real Plug S Gen3 finding carried forward:
+Real Plug S Gen3 used for Slice 3A:
 
 ```text
-URL during Slice 3A smoke: http://192.168.0.10/
+URL: http://192.168.0.10/
 deviceId: shellyplugsg3-e4b063d7f530
 model: S3PL-00112EU
 gen: 3
@@ -109,41 +199,50 @@ firmware: 1.7.5
 fw_id: 20260311-095902/1.7.5-g9979d16
 ```
 
-Firmware `1.7.5` returns `leds.night_mode.active_between: []` while night mode is disabled. The typed client accepts that real shape. The editor presents bounded defaults `22:00–06:00`, changing only brightness keeps the outgoing patch brightness-only, and enabling night mode from an empty window writes an explicit valid time pair.
+Firmware `1.7.5` returns `leds.night_mode.active_between: []` while night mode is disabled. The typed client accepts that real shape. Reversible hardware smoke changed only night brightness `100 -> 7`, confirmed readback, then restored the original full `PLUGS_UI` config; relay was OFF before/after and `Local Climate Link Thermostat` script id `1` remained enabled/running.
 
-Verification:
+Accepted local validation before integration:
 
-- accepted final full `pnpm check` passed on the exact product tree in `20260921-slice3a-final-check-v2`, including format, lint, UX/repository/feature gates, all workspace typechecks/tests, core coverage and production builds;
-- focused current client/form/component coverage passed (`7/7` `shelly-client` tests and `7/7` Plug LED feature tests before the final suite);
-- `apps/mobile/e2e/led-settings.spec.ts` passed `9/9`, covering 360×800, 390×844, 412×915 and tablet layouts, presets, real empty night window handling, unsupported capability state, Time detail reuse and LED settings on a saved Plug with no installed automation;
-- postimplementation full-diff audit found no dependency, lockfile or architecture-baseline changes and confirmed the squashed branch is one product commit ahead of the prior `main`;
-- live typed-client read against the real Plug parsed the actual empty night window and derived exactly `{ night_mode: { brightness: 7 } }` for a brightness-only edit;
-- reversible physical smoke changed only night brightness `100 -> 7`, confirmed readback, then restored the full original `PLUGS_UI` config exactly; relay was OFF before and after, and `Local Climate Link Thermostat` script id `1` remained enabled and running.
+- final full `pnpm check` passed in `20260921-slice3a-final-check-v2`;
+- focused LED Playwright suite passed `9/9` across mobile/tablet layouts and real empty night-window behavior;
+- no dependency, lockfile or architecture-baseline changes.
 
-## Immediate next slice — Slice 3B+
+The later Linux CI failure described at the top is the only blocker before continuing the product plan.
 
-**Add one additional Shelly device-settings family at a time from real supported capabilities.**
+## Next product slice after CI repair — Slice 3B
 
-Start with a fresh capability/ownership audit. Keep the pattern established in 3A:
+Selected candidate from the completed audit: **physical button input mode** in `PLUGS_UI.controls["switch:0"].in_mode`.
+
+Target real capability on Plug S Gen3:
 
 ```text
-features/plugs focused settings UI/flow
-        -> @lcl/shelly-client typed config API
+momentary | detached
+```
+
+Current physical Plug reported `momentary` during the 3A hardware read. `momentary` lets the physical button operate the relay; `detached` decouples the button from relay control.
+
+When 3B starts, keep it a separate settings family from LED:
+
+```text
+features/plugs focused button-mode settings UI/flow
+        -> @lcl/shelly-client typed PLUGS_UI controls API
         -> ShellyRpcTransport
 ```
 
-Do not create a generic settings manager or raw JSON editor. Do not mix multiple unrelated settings families into one slice. Confirm the selected family against current official Shelly documentation and real Plug S Gen3 hardware, preserve unknown/unrelated config with narrow writes, and keep stable `deviceId` verification before mutation. BLE remains deferred to Slice 4A+.
+Do not expand the LED editor into a generic settings manager. Reuse stable `deviceId` verification. Write only the narrow `controls.switch:0.in_mode` patch and preserve unrelated LED/controls config. Confirm behavior against current official Shelly docs and real `192.168.0.10` hardware before marking 3B done.
+
+BLE transport remains deferred to Slice 4A+.
 
 ## What follows
 
 ```text
-3B+ additional Shelly settings families
+CI repair after 3A                 ACTIVE
+3B  physical button input mode     BLOCKED until main CI green
+3C+ additional settings families
 4A  real-hardware BLE feasibility/protocol spike
 4B  BLE ShellyRpcTransport
 4C+ incremental BLE-backed capabilities
 ```
-
-Detailed acceptance criteria live in `docs/implementation/automation-recovery-editing-shelly-transport-plan.md`.
 
 ## Canonical docs
 
