@@ -1,7 +1,10 @@
 import { DiagnosticRow, FeedbackPanel, StatusBadge } from '@lcl/ui';
 import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
-import { PlugLedSettingsCard } from '../../../features/plugs/index.js';
+import {
+  PlugButtonModeSettingsCard,
+  PlugLedSettingsCard
+} from '../../../features/plugs/index.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
 import { mutationError } from '../helpers.js';
 import type { ShellySetupFlow } from '../pageContracts.js';
@@ -32,6 +35,7 @@ export const ShellySettingsContent = ({
   const controlState = flow.shellyControlStates[device.id];
   const status = controlState?.status;
   const compatibilityBadge = shellyCompatibilityBadge(flow.setupStatus, t);
+  const settingsTarget = { deviceId: device.id, baseUrl: device.baseUrl };
 
   return (
     <div className="settings-modal-layout">
@@ -120,7 +124,8 @@ export const ShellySettingsContent = ({
         />
       </div>
 
-      <PlugLedSettingsCard target={{ deviceId: device.id, baseUrl: device.baseUrl }} />
+      <PlugButtonModeSettingsCard target={settingsTarget} />
+      <PlugLedSettingsCard target={settingsTarget} />
 
       <div className="action-row">
         {enableBleDiscovery && (
