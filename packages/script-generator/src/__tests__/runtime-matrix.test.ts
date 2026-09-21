@@ -23,7 +23,7 @@ const modes = [
 ] as const satisfies readonly RuleMode[];
 const vpdOptions = [false, true] as const;
 
-const runtimeBudgetBytes = 6_000;
+const runtimeBudgetBytes = 6_500;
 
 const byteLength = (value: string): number => new TextEncoder().encode(value).length;
 
@@ -64,14 +64,14 @@ const configForCase = ({
   };
 };
 
-const expectedRuntimeModeForSensor = (sensorProfileId: SensorProfileId): string =>
-  sensorProfileId === 'tp357_custom_v1' ? 'tp357-minimal' : 'xiaomi-bthome-minimal';
-
 const expectedMetricFlagForMode = (mode: RuleMode): string =>
   mode === 'humidifying' || mode === 'dehumidifying' ? '"m":1' : '"m":0';
 
 const expectedDirectionFlagForMode = (mode: RuleMode): string =>
   mode === 'cooling' || mode === 'dehumidifying' ? '"d":1' : '"d":0';
+
+const expectedProfileFlagForSensor = (sensorProfileId: SensorProfileId): string =>
+  sensorProfileId === 'tp357_custom_v1' ? '"p":1' : '"p":0';
 
 describe('Shelly runtime generation matrix', () => {
   it('covers every supported sensor, mode, and VPD combination', () => {
@@ -95,15 +95,14 @@ describe('Shelly runtime generation matrix', () => {
     expect(matrixCases).toHaveLength(sensors.length * modes.length * vpdOptions.length);
   });
 
-  it.each(matrixCases)('generates a valid minimal runtime for $label', (matrixCase) => {
+  it.each(matrixCases)('generates a valid stable runtime for $label', (matrixCase) => {
     const config = configForCase(matrixCase);
     const script = generateShellyThermostatScript(config);
 
-    expect(script).toContain(
-      `m: ${expectedRuntimeModeForSensor(matrixCase.sensorProfileId)}`
-    );
+    expect(script).toContain('m: climate-engine-v1');
     expect(script).toContain(expectedMetricFlagForMode(matrixCase.mode));
     expect(script).toContain(expectedDirectionFlagForMode(matrixCase.mode));
+    expect(script).toContain(expectedProfileFlagForSensor(matrixCase.sensorProfileId));
     expect(script).toContain('Shelly.call("Switch.Set"');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).toContain('sw(false,"b",true)');
@@ -126,6 +125,7 @@ describe('Shelly runtime generation matrix', () => {
     const decoded = decodeShellyThermostatScript(script);
 
     expect(decoded).not.toBeNull();
+    expect(decoded?.runtimeMode).toBe('climate-engine-v1');
     expect(decoded?.configHash).toBe(configHash(config));
     expect(decoded?.runtimeConfig.k).toBe(configHash(config));
     expect(decoded?.settings).toMatchObject({
@@ -149,37 +149,23 @@ describe('Shelly runtime generation matrix', () => {
     );
   });
 
-  it.each(matrixCases)('keeps parser code profile-specific for $label', (matrixCase) => {
+  it.each(matrixCases)('keeps both supported parsers in the stable engine for $label', (matrixCase) => {
     const script = generateShellyThermostatScript(configForCase(matrixCase));
 
-    if (matrixCase.sensorProfileId === 'tp357_custom_v1') {
-      expect(script).toContain('function mf(d)');
-      expect(script).toContain('"tm"');
-      expect(script).not.toContain('BTHome.parseData');
-      expect(script).not.toContain('xiaomi_lywsd03mmc_bthome_v2');
-      expect(script).not.toContain('parseBthomeV2Payload');
-    } else {
-      expect(script).toContain('function ad(d)');
-      expect(script).toContain('function r2(d,o,s)');
-      expect(script).not.toContain('BTHome.parseData');
-      expect(script).not.toContain('function mf(d)');
-      expect(script).not.toContain('"tm"');
-      expect(script).not.toContain('tp357_custom_v1');
-    }
+    expect(script).toContain('function ad(d)');
+    expect(script).toContain('function r2(d,o,s)');
+    expect(script).toContain('function mf(d)');
+    expect(script).toContain('function parse(x){return C.p===1?pt(x):pb(x);}');
+    expect(script).not.toContain('BTHome.parseData');
+    expect(script).not.toContain('parseBthomeV2Payload');
   });
 
-  it.each(matrixCases)('adds VPD code only when requested for $label', (matrixCase) => {
+  it.each(matrixCases)('selects VPD behavior through config only for $label', (matrixCase) => {
     const script = generateShellyThermostatScript(configForCase(matrixCase));
 
-    if (matrixCase.vpdAssistEnabled) {
-      expect(script).toContain('"vp":1.25');
-      expect(script).toContain('function sv(t)');
-      expect(script).toContain('Math.exp');
-    } else {
-      expect(script).toContain('"vp":0');
-      expect(script).not.toContain('function sv(t)');
-      expect(script).not.toContain('Math.exp');
-    }
+    expect(script).toContain('function sv(t)');
+    expect(script).toContain('Math.exp');
+    expect(script).toContain(matrixCase.vpdAssistEnabled ? '"vp":1.25' : '"vp":0');
   });
 
   it('rejects invalid above-directed thresholds with a specific message', () => {
