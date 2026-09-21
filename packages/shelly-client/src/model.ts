@@ -1,33 +1,24 @@
-export type Result<T, E extends ShellyClientError = ShellyClientError> =
-  { ok: true; value: T } | { ok: false; error: E };
-
-export type ShellyErrorKind =
-  | 'matter-enabled'
-  | 'script-upload-failed'
-  | 'relay-test-failed'
+export type ShellyClientErrorKind =
+  | 'invalid-host'
+  | 'request-failed'
   | 'timeout'
+  | 'invalid-response'
   | 'validation-failed'
-  | 'shelly-offline'
-  | 'unknown';
+  | 'matter-enabled'
+  | 'scripts-unavailable'
+  | 'script-upload-failed'
+  | 'script-start-failed'
+  | 'script-delete-failed'
+  | 'relay-test-failed';
 
 export interface ShellyClientError {
-  kind: ShellyErrorKind;
+  kind: ShellyClientErrorKind;
   userMessageKey: string;
-  technicalMessage?: string;
+  technicalMessage: string;
   retryable: boolean;
 }
 
-export interface ShellyRpcRequest<TParams = unknown> {
-  method: ShellyRpcMethod;
-  params?: TParams;
-}
-
-export interface ShellyRpcTransport {
-  call<TResponse>(
-    request: ShellyRpcRequest,
-    options?: { timeoutMs?: number; signal?: AbortSignal }
-  ): Promise<Result<TResponse>>;
-}
+export type Result<T> = { ok: true; value: T } | { ok: false; error: ShellyClientError };
 
 export interface ShellyDeviceInfo {
   id?: string | undefined;
@@ -38,19 +29,18 @@ export interface ShellyDeviceInfo {
 }
 
 export interface ShellyPlugTelemetry {
-  powerW?: number | undefined;
-  voltageV?: number | undefined;
-  currentA?: number | undefined;
-  energyWh?: number | undefined;
-  deviceTemperatureC?: number | undefined;
-  wifiRssiDbm?: number | undefined;
+  powerW: number | null;
+  voltageV: number | null;
+  currentA: number | null;
+  energyWh: number | null;
+  deviceTemperatureC: number | null;
+  wifiRssiDbm: number | null;
 }
 
 export interface ShellyClockStatus {
-  localTime?: string | undefined;
-  unixTimeSec?: number | undefined;
-  uptimeSec?: number | undefined;
-  lastSyncUnixTimeSec?: number | undefined;
+  localTime: string | null;
+  unixTimeSec: number | null;
+  uptimeSec: number | null;
   timeSynced: boolean;
 }
 
@@ -98,6 +88,11 @@ export interface RelayTestResult {
   offCommandSent: boolean;
 }
 
+export interface ShellyScriptStorageItem {
+  supported: boolean;
+  value: string | null;
+}
+
 export interface ShellyClient {
   getDeviceInfo(): Promise<Result<ShellyDeviceInfo>>;
   getStatus(): Promise<Result<ShellyStatus>>;
@@ -106,7 +101,10 @@ export interface ShellyClient {
   startScript(scriptId: number): Promise<Result<null>>;
   deleteScript(scriptId: number): Promise<Result<null>>;
   evaluateScript(scriptId: number, code: string): Promise<Result<string | null>>;
-  readScriptStorageItem(scriptId: number, key: string): Promise<Result<string | null>>;
+  readScriptStorageItem(
+    scriptId: number,
+    key: string
+  ): Promise<Result<ShellyScriptStorageItem>>;
   setRelayOn(options?: { relayId?: number }): Promise<Result<null>>;
   setRelayOff(options?: { relayId?: number }): Promise<Result<null>>;
   safeRelayTest(options?: { onDurationMs?: number }): Promise<Result<RelayTestResult>>;
@@ -120,28 +118,28 @@ export const RPC_METHODS = {
   ScriptList: 'Script.List',
   ScriptCreate: 'Script.Create',
   ScriptGetCode: 'Script.GetCode',
-  ScriptStop: 'Script.Stop',
-  ScriptDelete: 'Script.Delete',
-  ScriptEval: 'Script.Eval',
   ScriptPutCode: 'Script.PutCode',
   ScriptSetConfig: 'Script.SetConfig',
   ScriptStart: 'Script.Start',
+  ScriptStop: 'Script.Stop',
+  ScriptDelete: 'Script.Delete',
   ScriptGetStatus: 'Script.GetStatus',
-  SwitchGetStatus: 'Switch.GetStatus',
+  ScriptEval: 'Script.Eval',
   SwitchSet: 'Switch.Set',
+  SwitchGetStatus: 'Switch.GetStatus',
   ScheduleList: 'Schedule.List',
   ScheduleCreate: 'Schedule.Create',
   ScheduleUpdate: 'Schedule.Update',
-  ScheduleDelete: 'Schedule.Delete',
-  PlugsUiGetConfig: 'PLUGS_UI.GetConfig',
-  PlugsUiSetConfig: 'PLUGS_UI.SetConfig',
-  CloudGetConfig: 'Cloud.GetConfig',
-  CloudSetConfig: 'Cloud.SetConfig',
-  CloudGetStatus: 'Cloud.GetStatus'
+  ScheduleDelete: 'Schedule.Delete'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
 
-export const LOCAL_CLIMATE_LINK_SCRIPT_NAME = 'Local Climate Link Thermostat';
-export const LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME =
-  'Local Climate Link BLE Discovery';
+export interface ShellyRpcRequest {
+  method: ShellyRpcMethod;
+  params?: Record<string, unknown>;
+}
+
+export interface ShellyRpcTransport {
+  call<TResponse>(request: ShellyRpcRequest): Promise<Result<TResponse>>;
+}
