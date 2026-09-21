@@ -21,6 +21,13 @@ const sensor = {
   profileId: 'xiaomi_lywsd03mmc_bthome_v2' as const
 };
 
+const additionalSensor = {
+  id: 'C2:C0:00:30:64:01',
+  name: 'TP357',
+  runtimeAddress: 'C2:C0:00:30:64:01',
+  profileId: 'tp357_custom_v1' as const
+};
+
 describe('hardware setup derivation', () => {
   it('normalizes valid Shelly and sensor draft inputs', () => {
     expect(
@@ -67,7 +74,7 @@ describe('hardware setup derivation', () => {
     }
   });
 
-  it('derives climate configuration and threshold direction without React state', () => {
+  it('derives single-sensor climate configuration without sensorSet', () => {
     const heating = deriveClimateRuleState({
       selectedSensor: sensor,
       rulePreset: 'heating',
@@ -81,6 +88,7 @@ describe('hardware setup derivation', () => {
       expect(heating.configState.config.sensor.runtimeAddress).toBe(
         sensor.runtimeAddress
       );
+      expect(heating.configState.config.sensorSet).toBeUndefined();
       expect(heating.configState.config.rule.control.onThreshold).toBe(19);
       expect(heating.configState.script.length).toBeGreaterThan(0);
     }
@@ -93,6 +101,37 @@ describe('hardware setup derivation', () => {
       ...advancedDefaults
     });
     expect(cooling.isThresholdValid).toBe(true);
+  });
+
+  it('derives primary, additional sensors and aggregation for multi-sensor climate config', () => {
+    const result = deriveClimateRuleState({
+      selectedSensor: sensor,
+      additionalSensors: [additionalSensor],
+      sensorAggregation: 'max',
+      rulePreset: 'heating',
+      onThresholdInput: '19',
+      offThresholdInput: '20',
+      ...advancedDefaults
+    });
+
+    expect(result.configState.ok).toBe(true);
+    if (result.configState.ok) {
+      expect(result.configState.config.sensor).toMatchObject({
+        profileId: sensor.profileId,
+        runtimeAddress: sensor.runtimeAddress,
+        displayName: sensor.name
+      });
+      expect(result.configState.config.sensorSet).toEqual({
+        aggregation: 'max',
+        additionalSensors: [
+          expect.objectContaining({
+            profileId: additionalSensor.profileId,
+            runtimeAddress: additionalSensor.runtimeAddress,
+            displayName: additionalSensor.name
+          })
+        ]
+      });
+    }
   });
 
   it('blocks configuration when advanced settings are invalid', () => {
