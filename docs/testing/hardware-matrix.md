@@ -21,10 +21,13 @@ Only dated real-device evidence establishes hardware support. Automated tests pr
 | 2026-09-21 | Forget -> re-add lifecycle                 | PASS   | Forget removed only saved Plug state; durable automation stayed visible; scan/re-add produced exactly one Plug and recovered ownership                                                           |
 | 2026-09-21 | Remote immutability during recovery/re-add | PASS   | script 1 `Local Climate Link Thermostat` remained byte-identical, SHA-256 `6b9aa123b72e85828ae4d930d3a7f24df4ce0e2abb55230ae409bcff23538215`; `Schedule.List` remained empty; relay remained OFF |
 | 2026-09-21 | Identity mutation gates                    | PASS   | automated regressions + real lifecycle acceptance; endpoint identity is verified before runtime/destructive mutations                                                                            |
+| 2026-09-21 | Stable engine hardware smoke               | PASS   | `climate-engine-v1` ran on a temporary Shelly slot; generated script 5713 B, `mem_peak` 4452, `mem_free` 21574; production script/schedules remained unchanged and relay finished OFF              |
+| 2026-09-21 | Persistent config hardware smoke           | PASS   | config-only `Script.Eval` changed active thresholds/RSSI without changing script SHA; `Script.storage` value survived script restart and was loaded back into active config                       |
+| 2026-09-21 | Persistent recovery on S22+                | PASS   | clean Android install, LAN scan and Add recovered the existing Climate automation; dashboard showed Humidity control, live humidity/temperature/VPD and working AUTO/MANUAL controls             |
 
 Current stabilization Shelly identity: `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware `1.7.5`. IP addresses are test transport locations and are not durable identity.
 
-Observed current climate script footprint is only a few KB; recent real status measurements were roughly `mem_peak` 6.6 KB with about 22.5 KB script memory free. Keep measuring after Automation Engine/config separation changes.
+Persistent-config smoke generated a 6480 B runtime and observed roughly `mem_peak` 4.3 KB with about 21.3 KB script memory free on firmware 1.7.5. Continue measuring as new operators are added.
 
 ## Repeatable commands
 
