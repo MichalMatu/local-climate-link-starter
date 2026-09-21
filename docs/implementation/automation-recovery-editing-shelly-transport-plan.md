@@ -257,17 +257,37 @@ Known failure semantics: if a partial remote update fails, the Time runtime atte
 
 ## Slice 3A — device-settings foundation + complete LED settings
 
-First inventory the LED configuration/capabilities actually exposed by supported physical Shelly hardware. Model typed protocol behavior in `@lcl/shelly-client`; do not copy another app's screen structure blindly.
+Status: **done**.
 
-Target ownership:
+Completed product commit:
 
 ```text
-features/plugs device settings UI/flow
-        -> @lcl/shelly-client typed config API
-        -> ShellyRpcTransport
+b0319dddd668c6474b7544c38018518027e3b5f1
+Complete Plug S LED settings
 ```
 
-Feature code sees typed settings/capabilities, not raw RPC payloads. Preserve unrelated config on partial updates. Capability differences are explicit rather than scattered model-name conditionals. Physical Shelly verification is required.
+Result:
+
+- `@lcl/shelly-client` owns typed `PLUGS_UI` LED config, validation, capability derivation and deep-partial LED-only writes;
+- supported LED surface covers `power | switch | off`, relay-state ON/OFF RGB + brightness, power brightness and night mode;
+- `features/plugs` owns the device-level LED editor and TanStack Query orchestration, reused from saved Plug settings and installed climate/Time details;
+- stable physical `deviceId` is verified through `Shelly.GetDeviceInfo` before every LED settings read/write; endpoint address remains reachability only;
+- unrelated `PLUGS_UI.controls` data is never emitted by LED mutations;
+- unsupported settings are capability-driven from the live config/method surface;
+- legacy installation-owned LED flow/component ownership was removed rather than kept as a parallel path;
+- real firmware `1.7.5` behavior `night_mode.active_between: []` when disabled is accepted and normalized safely by the editor;
+- enabling night mode from an empty window writes an explicit valid window, while brightness-only edits remain brightness-only;
+- HTTP remains the current `ShellyRpcTransport` adapter and no BLE behavior was introduced.
+
+Verification before integration:
+
+- focused package/feature tests, typechecks, `quality:repo`, feature-boundary, quality self-test and `quality:ux` passed during iteration;
+- focused responsive LED Playwright suite passed `9/9`, including the real empty night-window shape and a saved Plug with no installed automation;
+- exactly one accepted final full `pnpm check` passed in Local Agent task `20260921-slice3a-final-check-v2` on the exact product tree, covering formatting, lint, UX/repository gates, all workspace typechecks/tests, core coverage and production builds;
+- full-diff audit confirmed no dependency, lockfile or architecture-baseline changes and the branch was squashed without changing the checked tree;
+- real Plug S Gen3 `S3PL-00112EU`, device `shellyplugsg3-e4b063d7f530`, firmware `1.7.5` at `http://192.168.0.10/` passed reversible LED smoke: `night_mode.brightness` changed `100 -> 7`, readback matched, then the full original `PLUGS_UI` config was restored exactly;
+- the physical smoke began and ended with relay OFF; climate script id `1` (`Local Climate Link Thermostat`) stayed enabled and running;
+- a live typed-client read then parsed the real `active_between: []` config and derived a brightness-only patch without mutating hardware.
 
 ## Slice 3B+ — additional Shelly settings families
 
@@ -331,8 +351,8 @@ Do not perform a schema rewrite solely to match this diagram.
 1B  Re-add + reconciliation               DONE  7aba04414
 2A  Edit climate automation               DONE  05f7eb4b8
 2B  Edit Time automation                  DONE  e1a4c63e3
-3A  Full LED settings                     NEXT
-3B+ Additional settings families          pending
+3A  Full LED settings                     DONE  b0319dddd
+3B+ Additional settings families          NEXT
 4A  BLE feasibility spike                 pending
 4B  BLE transport                         pending
 4C+ BLE-backed capabilities               pending

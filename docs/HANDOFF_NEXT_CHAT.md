@@ -1,4 +1,4 @@
-# Next chat handoff — Slice 2B complete, Slice 3A next
+# Next chat handoff — Slice 3A complete, Slice 3B+ next
 
 Updated: 2026-09-21
 
@@ -73,90 +73,70 @@ fresh main + idle daemon
 
 Do not raise architecture baselines to make a slice fit. New cohesive product modules belong under `apps/mobile/src/features/<feature>`; protocol/domain behavior stays in packages; screens do not own raw transport or persistence.
 
-## Last completed product slice — Slice 2B
+## Last completed product slice — Slice 3A
 
-Slice 2B is complete and integrated.
+Slice 3A is complete and integrated-ready.
 
 ```text
-product commit: e1a4c63e32000a90c22bd02b6c01ae9b37bff536
-message: Edit installed Time automation in place
-validated work branch: work/slice2b-edit-time
-Local Agent focused task: 20260921-slice2b-edit-time-v2
-Local Agent final task: 20260921-slice2b-edit-time-v3-final
+product commit: b0319dddd668c6474b7544c38018518027e3b5f1
+message: Complete Plug S LED settings
+validated work branch: work/slice3a-complete-led-settings
+accepted final full check: 20260921-slice3a-final-check-v2
+real hardware smoke: 20260921-slice3a-hardware-smoke-v1
+live typed-client read: 20260921-slice3a-live-client-read-v1
+focused responsive LED E2E: 20260921-slice3a-real-night-window-e2e-v2
 ```
 
 Implemented contract:
 
-- installed Time automation detail exposes Edit;
-- existing Time schedule setup UI is reused and prefilled from durable ON/OFF config;
-- `features/automations/flows/updateTimeInstalledAutomation.ts` verifies live physical Shelly identity and product ownership before allowing remote mutation;
-- relay ownership conflict and a managed climate script are rejected before the Time edit runtime runs;
-- `updateDailyTimeAutomation` remains the only native Shelly schedule mutation path;
-- it verifies the exact stored schedule pair, forces a safe relay state, updates the same job IDs, preserves paused versus running state, verifies the resulting runtime and performs rollback on failure;
-- durable automation id, `onJobId`, `offJobId` and `installedAtMs` remain stable;
-- edited config and `updatedAtMs` are committed locally only after verified runtime success;
-- `TimeInstallationDetail` no longer owns edit mutation/persistence; it owns management/status/pause/resume/delete presentation;
-- climate and Time share Edit routing only, not runtime implementation;
-- the Time edit route remains under the Plug dashboard context (`kind: climate` in the current internal navigation naming), because Time automation is still attached to a Plug.
+- `@lcl/shelly-client` owns the typed `PLUGS_UI` LED protocol for the supported Plug S Gen3 surface: `power | switch | off`, relay ON/OFF RGB + brightness, power brightness and night mode;
+- `features/plugs` owns LED settings orchestration and presentation for a physical Plug, so the same settings work with or without an installed climate/Time automation;
+- every LED settings read or write verifies the live physical `Shelly.GetDeviceInfo.id` against the saved stable `deviceId` before touching `PLUGS_UI`; `baseUrl` remains reachability only;
+- writes are deep partial LED-only patches and never write the unrelated `controls` subtree;
+- options are capability-driven from fields actually exposed by the device rather than scattered model-name checks;
+- the legacy installation-owned `flows/installations/deviceLed.ts` and `screens/ShellyLedSettingsCard.tsx` paths were removed;
+- the shared mobile `SelectField` is used for LED mode rather than a native select;
+- current HTTP remains an adapter under the same Shelly client boundary; no speculative BLE behavior was added.
+
+Real Plug S Gen3 finding carried forward:
+
+```text
+URL during Slice 3A smoke: http://192.168.0.10/
+deviceId: shellyplugsg3-e4b063d7f530
+model: S3PL-00112EU
+gen: 3
+firmware: 1.7.5
+fw_id: 20260311-095902/1.7.5-g9979d16
+```
+
+Firmware `1.7.5` returns `leds.night_mode.active_between: []` while night mode is disabled. The typed client accepts that real shape. The editor presents bounded defaults `22:00–06:00`, changing only brightness keeps the outgoing patch brightness-only, and enabling night mode from an empty window writes an explicit valid time pair.
 
 Verification:
 
-- focused validation: 6 files / 94 tests passed;
-- `pnpm quality:repo`, feature-boundary gate and gate self-test passed;
-- exactly one accepted final full `pnpm check` passed in `20260921-slice2b-edit-time-v3-final`;
-- final gate covered format, lint, UX/repository gates, all workspace typechecks/tests, core coverage and production builds;
-- postimplementation audit found no baseline/dependency/lockfile changes;
-- final branch was squashed to one commit and reviewed as a clean one-commit fast-forward;
-- no physical-device smoke was required because native schedule update/rollback behavior is deterministically covered at the Time runtime and Shelly schedule-client boundaries.
+- accepted final full `pnpm check` passed on the exact product tree in `20260921-slice3a-final-check-v2`, including format, lint, UX/repository/feature gates, all workspace typechecks/tests, core coverage and production builds;
+- focused current client/form/component coverage passed (`7/7` `shelly-client` tests and `7/7` Plug LED feature tests before the final suite);
+- `apps/mobile/e2e/led-settings.spec.ts` passed `9/9`, covering 360×800, 390×844, 412×915 and tablet layouts, presets, real empty night window handling, unsupported capability state, Time detail reuse and LED settings on a saved Plug with no installed automation;
+- postimplementation full-diff audit found no dependency, lockfile or architecture-baseline changes and confirmed the squashed branch is one product commit ahead of the prior `main`;
+- live typed-client read against the real Plug parsed the actual empty night window and derived exactly `{ night_mode: { brightness: 7 } }` for a brightness-only edit;
+- reversible physical smoke changed only night brightness `100 -> 7`, confirmed readback, then restored the full original `PLUGS_UI` config exactly; relay was OFF before and after, and `Local Climate Link Thermostat` script id `1` remained enabled and running.
 
-Failure semantics carried forward: if remote mutation fails, the durable record remains on the previous config. The runtime attempts to restore both old schedule definitions and safe relay state. If that remote rollback itself cannot be completed, runtime health/reconciliation must surface the mismatch instead of pretending the edit succeeded.
+## Immediate next slice — Slice 3B+
 
-## Immediate next slice — Slice 3A
+**Add one additional Shelly device-settings family at a time from real supported capabilities.**
 
-**Build the device-settings foundation and complete LED settings for the supported Shelly Plug family.**
-
-Do not start by copying or expanding the current UI blindly. First inventory actual supported hardware/protocol capabilities and the partial implementation already present.
-
-Read/audit first:
+Start with a fresh capability/ownership audit. Keep the pattern established in 3A:
 
 ```text
-packages/AGENTS.md
-apps/mobile/src/features/AGENTS.md
-packages/shelly-client/src/plugsUi.ts
-packages/shelly-client/src/model.ts
-apps/mobile/src/flows/installations/deviceLed.ts
-apps/mobile/src/screens/ShellyLedSettingsCard.tsx
-apps/mobile/src/screens/hardware-setup/pages/ShellySettingsContent.tsx
-apps/mobile/src/screens/PlugSettingsScreen.tsx
-relevant LED/settings tests
-current official Shelly RPC / Plug UI documentation for the target device family
-```
-
-Preimplementation ownership target:
-
-```text
-features/plugs settings UI/flow
-        -> @lcl/shelly-client typed LED settings/capabilities API
+features/plugs focused settings UI/flow
+        -> @lcl/shelly-client typed config API
         -> ShellyRpcTransport
 ```
 
-3A requirements:
-
-- confirm the real target device family and actual `PLUGS_UI.GetConfig` / `PLUGS_UI.SetConfig` shape from current official documentation and physical hardware;
-- inventory what the existing LCL code already supports versus what the device exposes;
-- feature code receives typed LED settings/capabilities, never raw RPC JSON;
-- protocol parsing/validation and Shelly-specific config shapes live in `@lcl/shelly-client`;
-- partial writes preserve unrelated/unknown config fields;
-- unsupported options are capability-driven, not scattered model-name checks;
-- no generic `ShellySettingsManager`, raw JSON editor or God object;
-- HTTP remains just the current transport implementation under the existing client boundary; do not add speculative BLE behavior in 3A;
-- complete the LED family before moving to another Shelly settings family;
-- physical Shelly verification is required before 3A can be marked done.
+Do not create a generic settings manager or raw JSON editor. Do not mix multiple unrelated settings families into one slice. Confirm the selected family against current official Shelly documentation and real Plug S Gen3 hardware, preserve unknown/unrelated config with narrow writes, and keep stable `deviceId` verification before mutation. BLE remains deferred to Slice 4A+.
 
 ## What follows
 
 ```text
-3A  device-settings foundation + complete LED settings
 3B+ additional Shelly settings families
 4A  real-hardware BLE feasibility/protocol spike
 4B  BLE ShellyRpcTransport

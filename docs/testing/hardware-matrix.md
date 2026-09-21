@@ -209,6 +209,34 @@ but also showed that VPD target `1.33 kPa` is too permissive for a hard
 | Full real runtime matrix       | 16/16 combinations pass           | ✅     | 2026-07-04 | 1.7.5          | Xiaomi/PVVX `A4:C1:38:4F:24:CD` and TP357 `F7:5F:8D:0F:76:20`; heating/cooling/humidifying/dehumidifying with VPD off/on; every case saw real BLE, relay ON, relay OFF; final script stopped and relay OFF.                                                                                                                                                                                                                |
 | v2.0.5 hardware smoke          | phone, smoke installs, matrix     | ✅     | 2026-07-04 | 1.7.5          | Android debug `versionName=2.0.5`, `versionCode=20005` installed on `SM-S906B`. Shelly status and `/diag` responded at `http://192.168.0.20/`. Xiaomi smoke saw `25.35°C/46.61%/100%`, RSSI about `-58 dBm`; TP357 smoke saw `23.8°C/40%/34%`, RSSI about `-77 dBm`. Full real matrix passed 16/16 combinations with Xiaomi/PVVX and TP357, VPD off/on, real BLE, relay ON, relay OFF. Final script stopped and relay OFF. |
 
+## Slice 3A Plug S LED settings smoke — 2026-09-21
+
+Hardware:
+
+```text
+URL: http://192.168.0.10/
+deviceId: shellyplugsg3-e4b063d7f530
+model: S3PL-00112EU
+app: PlugSG3
+gen: 3
+firmware: 1.7.5
+fw_id: 20260311-095902/1.7.5-g9979d16
+```
+
+The full `PLUGS_UI.GetConfig` was backed up before mutation. The real firmware returned
+`night_mode.active_between: []` with night mode disabled; this shape is now part of the
+typed client contract and regression coverage.
+
+| Test                              | Result | Evidence                                                                                                                                                                                              |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typed live LED read               | ✅     | `RpcShellyPlugsUiClient` parsed the real config including `active_between: []`; editor derivation used `22:00–06:00` defaults and produced a brightness-only patch for a brightness-only edit.        |
+| Reversible night-brightness write | ✅     | `PLUGS_UI.SetConfig` changed only `night_mode.brightness` from `100` to `7`; immediate `GetConfig` readback returned `7`.                                                                             |
+| Exact config restoration          | ✅     | The complete pre-smoke `PLUGS_UI` config was restored and the final `GetConfig` matched the backup, including `controls.switch:0.in_mode`, LED mode/colors, power brightness and disabled night mode. |
+| Automation/relay isolation        | ✅     | `Switch.GetStatus` was OFF before and after; script id `1`, `Local Climate Link Thermostat`, remained `enable=true` and `running=true`.                                                               |
+
+No relay, script, schedule, Wi-Fi or BLE configuration was intentionally mutated by this
+Slice 3A smoke.
+
 ## Physical phone + Shelly freeze E2E — 2026-09-10
 
 Hardware used: Samsung Galaxy S22+ `SM-S906B` on Android 16 / API 36 and a
@@ -369,6 +397,7 @@ The hardware helper parses compact `/diag` fields from `{ v, z, s, q, y, p, g }`
 | ------------------ | ---------------- | ----------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Shelly Plug S Gen3 | 1.2.3-matter22   | 2026-06-29  | ✅     | BLE discovery and scripts work; Matter flag present                                                                                                                                                                                            |
 | Shelly Plug S Gen3 | 1.7.5            | 2026-07-04  | ✅     | Final real BLE runtime matrix passed 16/16 with Xiaomi/PVVX + TP357, all four modes and VPD off/on; every case saw relay ON/OFF and finished safe OFF. Earlier 2026-06-30 advertisement failures remain recorded above as historical evidence. |
+| Shelly Plug S Gen3 | 1.7.5            | 2026-09-21  | ✅     | Complete `PLUGS_UI` LED settings smoke on `shellyplugsg3-e4b063d7f530`: real disabled `active_between: []`, reversible brightness write/readback, exact config restore, relay OFF and thermostat script still running.                         |
 | Xiaomi PVVX        |                  |             | ☐      | Record BTHome v2, encrypted off, advertising interval                                                                                                                                                                                          |
 | TP357              | stock            |             | ☐      | Record raw payload sample ID                                                                                                                                                                                                                   |
 
