@@ -1,8 +1,27 @@
 import { z } from 'zod';
-import type { ShellyThermostatConfig } from './config.js';
+import {
+  climateSensorAggregationForConfig,
+  climateSensorsForConfig,
+  MAX_CLIMATE_SENSORS,
+  type ClimateSensorAggregation,
+  type ShellyThermostatConfig
+} from './config.js';
 import { configHash, stableStringify } from './hash.js';
 
 export const SHELLY_RUNTIME_CONFIG_STORAGE_KEY = 'c';
+
+const runtimeSensorSchema = z.tuple([
+  z.string().min(1),
+  z.string().min(1),
+  z.union([z.literal(0), z.literal(1)])
+]);
+
+const runtimeAggregationSchema = z.union([
+  z.literal(0),
+  z.literal(1),
+  z.literal(2),
+  z.literal(3)
+]);
 
 export const shellyRuntimeConfigSchema = z.object({
   a: z.string().min(1),
@@ -21,36 +40,99 @@ export const shellyRuntimeConfigSchema = z.object({
   x: z.number().int().positive(),
   v: z.number().int().positive(),
   vp: z.number().min(0).max(5),
-  p: z.union([z.literal(0), z.literal(1)]).optional()
+  p: z.union([z.literal(0), z.literal(1)]).optional(),
+  ss: z.array(runtimeSensorSchema).min(2).max(MAX_CLIMATE_SENSORS).optional(),
+  ag: runtimeAggregationSchema.optional()
+}).superRefine((config, context) => {
+  if ((config.ss === undefined) !== (config.ag === undefined)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: config.ss === undefined ? ['ss'] : ['ag'],
+      message: 'Multi-sensor runtime config requires both ss and ag.'
+    });
+  }
 });
 
 export type ShellyRuntimeConfig = z.infer<typeof shellyRuntimeConfigSchema>;
+export type ShellyRuntimeSensor = z.infer<typeof runtimeSensorSchema>;
+export type ShellyRuntimeAggregation = z.infer<typeof runtimeAggregationSchema>;
 
 const compactAddress = (address: string): string =>
   address.replace(/[:-]/g, '').toUpperCase();
 
+const sensorProfileFlag = (
+  profileId: ShellyThermostatConfig['sensor']['profileId']
+): 0 | 1 => (profileId === 'tp357_custom_v1' ? 1 : 0);
+
+const aggregationFlag = (aggregation: ClimateSensorAggregation): ShellyRuntimeAggregation => {
+  switch (aggregation) {
+    case 'avg':
+      return 0;
+    case 'min':
+      return 1;
+    case 'max':
+      return 2;
+    case 'firstValid':
+      return 3;
+  }
+};
+
+export const runtimeAggregationFromFlag = (
+  aggregation: ShellyRuntimeAggregation
+): ClimateSensorAggregation => {
+  switch (aggregation) {
+    case 0:
+      return 'avg';
+    case 1:
+      return 'min';
+    case 2:
+      return 'max';
+    case 3:
+      return 'firstValid';
+  }
+};
+
 export const createShellyRuntimeConfig = (
   config: ShellyThermostatConfig,
   hash: string
-): ShellyRuntimeConfig => ({
-  a: compactAddress(config.sensor.runtimeAddress),
-  fa: config.sensor.runtimeAddress,
-  n: config.sensor.displayName,
-  k: hash,
-  i: config.output.relayId,
-  r: config.rule.rssiMin,
-  on: config.rule.control.onThreshold,
-  off: config.rule.control.offThreshold,
-  d: config.rule.control.direction === 'above' ? 1 : 0,
-  m: config.rule.control.metric === 'humidity' ? 1 : 0,
-  h: config.rule.consecutiveHits,
-  c: config.rule.minChangeMs,
-  s: config.rule.staleTimeoutSec * 1000,
-  x: config.rule.maxOnMs,
-  v: config.version,
-  vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0,
-  p: config.sensor.profileId === 'tp357_custom_v1' ? 1 : 0
-});
+): ShellyRuntimeConfig => {
+  const sensors = climateSensorsForConfig(config);
+  const multiSensorRuntime =
+    sensors.length > 1
+      ? {
+          ss: sensors.map(
+            (sensor) =>
+              [
+                compactAddress(sensor.runtimeAddress),
+                sensor.displayName,
+                sensorProfileFlag(sensor.profileId)
+              ] as ShellyRuntimeSensor
+          ),
+          ag: aggregationFlag(climateSensorAggregationForConfig(config))
+        }
+      : {};
+
+  return {
+    a: compactAddress(config.sensor.runtimeAddress),
+    fa: config.sensor.runtimeAddress,
+    n: config.sensor.displayName,
+    k: hash,
+    i: config.output.relayId,
+    r: config.rule.rssiMin,
+    on: config.rule.control.onThreshold,
+    off: config.rule.control.offThreshold,
+    d: config.rule.control.direction === 'above' ? 1 : 0,
+    m: config.rule.control.metric === 'humidity' ? 1 : 0,
+    h: config.rule.consecutiveHits,
+    c: config.rule.minChangeMs,
+    s: config.rule.staleTimeoutSec * 1000,
+    x: config.rule.maxOnMs,
+    v: config.version,
+    vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0,
+    p: sensorProfileFlag(config.sensor.profileId),
+    ...multiSensorRuntime
+  };
+};
 
 export const serializeShellyRuntimeConfig = (config: ShellyThermostatConfig): string =>
   stableStringify(createShellyRuntimeConfig(config, configHash(config)));
