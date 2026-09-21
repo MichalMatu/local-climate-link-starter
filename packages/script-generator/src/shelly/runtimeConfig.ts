@@ -67,7 +67,9 @@ export const parseShellyRuntimeConfig = (input: unknown): ShellyRuntimeConfig | 
   return result.success ? result.data : null;
 };
 
-export const decodeShellyRuntimeConfigJson = (value: string): ShellyRuntimeConfig | null => {
+export const decodeShellyRuntimeConfigJson = (
+  value: string
+): ShellyRuntimeConfig | null => {
   try {
     return parseShellyRuntimeConfig(JSON.parse(value) as unknown);
   } catch {

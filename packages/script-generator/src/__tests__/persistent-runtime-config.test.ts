@@ -105,7 +105,10 @@ describe('persistent Shelly runtime config', () => {
   });
 
   it('generates an in-place config update that persists the same compact config and resets runtime state', () => {
-    const config = createDefaultShellyThermostatConfig('tp357_custom_v1', 'dehumidifying');
+    const config = createDefaultShellyThermostatConfig(
+      'tp357_custom_v1',
+      'dehumidifying'
+    );
     const code = generateShellyRuntimeConfigUpdateEval(config);
     const storage = new Map<string, string>();
     const runtimeState = {
@@ -131,14 +134,7 @@ describe('persistent Shelly runtime config', () => {
       m: 1,
       sa: 13
     };
-    const evaluate = new Function(
-      'C',
-      'R',
-      'vc',
-      'Script',
-      'nw',
-      `return ${code};`
-    ) as (
+    const evaluate = new Function('C', 'R', 'vc', 'Script', 'nw', `return ${code};`) as (
       currentConfig: Record<string, unknown>,
       runtime: typeof runtimeState,
       validate: (value: unknown) => boolean,
@@ -186,14 +182,7 @@ describe('persistent Shelly runtime config', () => {
   it('refuses an invalid config or missing Script.storage before mutating state', () => {
     const config = createDefaultShellyThermostatConfig();
     const code = generateShellyRuntimeConfigUpdateEval(config);
-    const evaluate = new Function(
-      'C',
-      'R',
-      'vc',
-      'Script',
-      'nw',
-      `return ${code};`
-    ) as (
+    const evaluate = new Function('C', 'R', 'vc', 'Script', 'nw', `return ${code};`) as (
       currentConfig: Record<string, unknown>,
       runtime: Record<string, unknown>,
       validate: (value: unknown) => boolean,
@@ -202,9 +191,25 @@ describe('persistent Shelly runtime config', () => {
     ) => string;
     const runtime = { on: true, ds: 'old' };
 
-    expect(evaluate({}, runtime, () => false, {}, () => 0)).toBe('iv');
+    expect(
+      evaluate(
+        {},
+        runtime,
+        () => false,
+        {},
+        () => 0
+      )
+    ).toBe('iv');
     expect(runtime).toEqual({ on: true, ds: 'old' });
-    expect(evaluate({}, runtime, () => true, {}, () => 0)).toBe('ns');
+    expect(
+      evaluate(
+        {},
+        runtime,
+        () => true,
+        {},
+        () => 0
+      )
+    ).toBe('ns');
     expect(runtime).toEqual({ on: true, ds: 'old' });
   });
 
@@ -212,18 +217,22 @@ describe('persistent Shelly runtime config', () => {
     const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
 
     expect(supportsShellyRuntimeConfigPersistence(script)).toBe(true);
-    expect(supportsShellyRuntimeConfigPersistence(script.replace('function vc(c)', ''))).toBe(
-      false
-    );
     expect(
-      supportsShellyRuntimeConfigPersistence(script.replace('// m: climate-engine-v1', ''))
+      supportsShellyRuntimeConfigPersistence(script.replace('function vc(c)', ''))
+    ).toBe(false);
+    expect(
+      supportsShellyRuntimeConfigPersistence(
+        script.replace('// m: climate-engine-v1', '')
+      )
     ).toBe(false);
   });
 
   it('embeds the persistent loader and storage key in the stable engine', () => {
     const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
 
-    expect(script).toContain(`Script.storage.getItem("${SHELLY_RUNTIME_CONFIG_STORAGE_KEY}")`);
+    expect(script).toContain(
+      `Script.storage.getItem("${SHELLY_RUNTIME_CONFIG_STORAGE_KEY}")`
+    );
     expect(script).toContain('R.ds="cf"');
     expect(script).toContain('if(E)');
   });

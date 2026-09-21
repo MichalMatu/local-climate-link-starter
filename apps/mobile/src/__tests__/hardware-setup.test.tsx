@@ -528,6 +528,13 @@ describe('HardwareSetupScreen', () => {
             });
           case 'Script.GetCode':
             return rpcResult({ data: thermostatCode, left: 0 });
+          case 'Script.Eval': {
+            const params = body.params as { code?: string } | undefined;
+            if (params?.code?.includes('Script.storage')) {
+              return rpcResult({ result: JSON.stringify({ s: 1, v: null }) });
+            }
+            return rpcResult({});
+          }
           case 'Script.Create':
             return rpcResult({ id: 4 });
           case 'Script.PutCode': {

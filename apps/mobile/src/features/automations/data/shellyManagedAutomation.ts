@@ -113,7 +113,9 @@ export const readShellyAutomationScriptState = async (
     readScriptList(transport)
   ]);
   const automationScript = findAutomationScript(scripts);
-  const code = automationScript ? await readScriptCode(transport, automationScript.id) : null;
+  const code = automationScript
+    ? await readScriptCode(transport, automationScript.id)
+    : null;
   const storage =
     automationScript && code && supportsShellyRuntimeConfigPersistence(code)
       ? unwrapShellyResult(

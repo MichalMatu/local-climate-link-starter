@@ -34,7 +34,11 @@ export type ClimateAutomationEditServices = {
   hasNativeScheduleConflict(baseUrl: string, relayId: number): Promise<boolean>;
   forceRelayOff(baseUrl: string, relayId: number): Promise<void>;
   replaceManagedScript(baseUrl: string, code: string): Promise<ShellyInstallResult>;
-  updateRuntimeConfig(baseUrl: string, scriptId: number, code: string): Promise<string | null>;
+  updateRuntimeConfig(
+    baseUrl: string,
+    scriptId: number,
+    code: string
+  ): Promise<string | null>;
   nowMs(): number;
 };
 
@@ -67,7 +71,10 @@ const defaultServices: ClimateAutomationEditServices = {
     ),
   updateRuntimeConfig: async (baseUrl, scriptId, code) =>
     unwrapShellyResult(
-      await new RpcShellyClient(createShellyTransport(baseUrl)).evaluateScript(scriptId, code)
+      await new RpcShellyClient(createShellyTransport(baseUrl)).evaluateScript(
+        scriptId,
+        code
+      )
     ),
   nowMs: Date.now
 };

@@ -53,24 +53,38 @@ const parseScriptEvalValue = (value: unknown): Result<string | null> => {
   return { ok: true, value: result ?? null };
 };
 
-const parseScriptStorageProbe = (value: string | null): Result<ShellyScriptStorageItem> => {
+const parseScriptStorageProbe = (
+  value: string | null
+): Result<ShellyScriptStorageItem> => {
   if (value === null) {
-    return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+    return {
+      ok: false,
+      error: validationError('Invalid Script.storage probe response.')
+    };
   }
   try {
     const parsed = JSON.parse(value) as unknown;
     if (typeof parsed !== 'object' || parsed === null || !('s' in parsed)) {
-      return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+      return {
+        ok: false,
+        error: validationError('Invalid Script.storage probe response.')
+      };
     }
     const supported = (parsed as { s?: unknown }).s;
     const stored = (parsed as { v?: unknown }).v;
     if (supported === 0) return { ok: true, value: { supported: false, value: null } };
     if (supported !== 1 || (stored !== null && typeof stored !== 'string')) {
-      return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+      return {
+        ok: false,
+        error: validationError('Invalid Script.storage probe response.')
+      };
     }
     return { ok: true, value: { supported: true, value: stored ?? null } };
   } catch {
-    return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+    return {
+      ok: false,
+      error: validationError('Invalid Script.storage probe response.')
+    };
   }
 };
 
@@ -185,7 +199,10 @@ export class RpcShellyClient implements ShellyClient {
     key: string
   ): Promise<Result<ShellyScriptStorageItem>> {
     if (key.trim().length === 0) {
-      return { ok: false, error: validationError('Script.storage key must not be empty.') };
+      return {
+        ok: false,
+        error: validationError('Script.storage key must not be empty.')
+      };
     }
     const keyJson = JSON.stringify(key);
     const probe = await this.evaluateScript(

@@ -101,7 +101,11 @@ export const decodeShellyThermostatScript = (
     persistedRuntimeConfigJson && persistedRuntimeConfigJson.length > 0
       ? decodeShellyRuntimeConfigJson(persistedRuntimeConfigJson)
       : null;
-  if (persistedRuntimeConfigJson && persistedRuntimeConfigJson.length > 0 && !persistedRuntimeConfig) {
+  if (
+    persistedRuntimeConfigJson &&
+    persistedRuntimeConfigJson.length > 0 &&
+    !persistedRuntimeConfig
+  ) {
     return null;
   }
 

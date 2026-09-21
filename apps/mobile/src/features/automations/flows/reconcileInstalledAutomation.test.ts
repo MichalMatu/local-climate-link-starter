@@ -123,7 +123,10 @@ describe('reconcileInstalledAutomationsForShelly', () => {
       'xiaomi_lywsd03mmc_bthome_v2',
       'heating'
     );
-    const persistedBase = createDefaultShellyThermostatConfig('tp357_custom_v1', 'cooling');
+    const persistedBase = createDefaultShellyThermostatConfig(
+      'tp357_custom_v1',
+      'cooling'
+    );
     const persisted = {
       ...persistedBase,
       sensor: {
