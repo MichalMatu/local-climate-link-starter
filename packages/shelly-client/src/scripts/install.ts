@@ -10,6 +10,7 @@ import {
   type ShellyInstallResult,
   type ShellyRpcRequest,
   type ShellyRpcTransport,
+  type ShellyScriptStorageItem,
   type ShellyStatus
 } from '../model.js';
 import {
@@ -50,6 +51,27 @@ const parseScriptEvalValue = (value: unknown): Result<string | null> => {
     return { ok: false, error: validationError('Invalid Script.Eval result value.') };
   }
   return { ok: true, value: result ?? null };
+};
+
+const parseScriptStorageProbe = (value: string | null): Result<ShellyScriptStorageItem> => {
+  if (value === null) {
+    return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+  }
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (typeof parsed !== 'object' || parsed === null || !('s' in parsed)) {
+      return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+    }
+    const supported = (parsed as { s?: unknown }).s;
+    const stored = (parsed as { v?: unknown }).v;
+    if (supported === 0) return { ok: true, value: { supported: false, value: null } };
+    if (supported !== 1 || (stored !== null && typeof stored !== 'string')) {
+      return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+    }
+    return { ok: true, value: { supported: true, value: stored ?? null } };
+  } catch {
+    return { ok: false, error: validationError('Invalid Script.storage probe response.') };
+  }
 };
 
 const defaultSleep = (durationMs: number): Promise<void> =>
@@ -158,14 +180,19 @@ export class RpcShellyClient implements ShellyClient {
     return response.ok ? parseScriptEvalValue(response.value) : response;
   }
 
-  async readScriptStorageItem(scriptId: number, key: string): Promise<Result<string | null>> {
+  async readScriptStorageItem(
+    scriptId: number,
+    key: string
+  ): Promise<Result<ShellyScriptStorageItem>> {
     if (key.trim().length === 0) {
       return { ok: false, error: validationError('Script.storage key must not be empty.') };
     }
-    return this.evaluateScript(
+    const keyJson = JSON.stringify(key);
+    const probe = await this.evaluateScript(
       scriptId,
-      `Script.storage.getItem(${JSON.stringify(key)})`
+      `JSON.stringify(typeof Script!="undefined"&&Script.storage&&Script.storage.getItem?{s:1,v:Script.storage.getItem(${keyJson})}:{s:0})`
     );
+    return probe.ok ? parseScriptStorageProbe(probe.value) : probe;
   }
 
   private setRelayState(
