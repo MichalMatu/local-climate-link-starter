@@ -75,10 +75,11 @@ var C=${stableStringify(legacyRuntimeConfig)};var R={};`;
 
   it('rejects climate-engine-v1 runtime metadata without the profile flag', () => {
     const config = createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2');
-    const { p: _profileFlag, ...runtimeConfigWithoutProfile } = createShellyRuntimeConfig(
+    const { p: profileFlag, ...runtimeConfigWithoutProfile } = createShellyRuntimeConfig(
       config,
       configHash(config)
     );
+    expect(profileFlag).toBe(0);
     const malformedScript = `// LCL
 // g: 0.3.0
 // m: climate-engine-v1
