@@ -2,6 +2,8 @@ import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import {
   createDefaultShellyThermostatConfig,
   generateShellyThermostatScript,
+  type ClimateSensor,
+  type ClimateSensorAggregation,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
 import { t } from '../../app/i18n.js';
@@ -40,10 +42,20 @@ type AdvancedRuleInputs = {
 
 type ClimateRuleDerivationInput = AdvancedRuleInputs & {
   selectedSensor: SensorDraftDevice | null;
+  additionalSensors?: readonly SensorDraftDevice[];
+  sensorAggregation?: ClimateSensorAggregation;
   rulePreset: RulePresetId;
   onThresholdInput: string;
   offThresholdInput: string;
 };
+
+const climateSensorFromDraft = (sensor: SensorDraftDevice): ClimateSensor => ({
+  profileId: sensor.profileId,
+  sensorId: formatSensorId(sensor.profileId, sensor.runtimeAddress),
+  runtimeAddress: sensor.runtimeAddress,
+  displayName: sensor.name,
+  parserValidated: true
+});
 
 export const deriveShellyInputState = ({
   shellyNameInput,
@@ -115,6 +127,8 @@ export const deriveSensorInputState = ({
 
 export const deriveClimateRuleState = ({
   selectedSensor,
+  additionalSensors = [],
+  sensorAggregation = 'avg',
   rulePreset,
   onThresholdInput,
   offThresholdInput,
@@ -151,12 +165,15 @@ export const deriveClimateRuleState = ({
     const advancedSettings = parseRuleAdvancedSettings(advancedInputs);
     const config: ShellyThermostatConfig = {
       ...base,
-      sensor: {
-        ...base.sensor,
-        sensorId: formatSensorId(selectedSensor.profileId, selectedSensor.runtimeAddress),
-        runtimeAddress: selectedSensor.runtimeAddress,
-        displayName: selectedSensor.name
-      },
+      sensor: climateSensorFromDraft(selectedSensor),
+      ...(additionalSensors.length > 0
+        ? {
+            sensorSet: {
+              aggregation: sensorAggregation,
+              additionalSensors: additionalSensors.map(climateSensorFromDraft)
+            }
+          }
+        : {}),
       rule: {
         ...base.rule,
         control: {
