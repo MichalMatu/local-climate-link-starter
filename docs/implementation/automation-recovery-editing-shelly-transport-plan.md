@@ -289,9 +289,37 @@ Verification before integration:
 - the physical smoke began and ended with relay OFF; climate script id `1` (`Local Climate Link Thermostat`) stayed enabled and running;
 - a live typed-client read then parsed the real `active_between: []` config and derived a brightness-only patch without mutating hardware.
 
-## Slice 3B+ — additional Shelly settings families
+## Slice 3B — physical button input mode
 
-After LED, audit the supported device capability matrix and add one cohesive settings family per slice. Each family gets a typed `@lcl/shelly-client` owner, feature-owned presentation/orchestration, capability detection, focused tests and physical smoke. Do not create a generic settings God object or raw JSON editor.
+Status: **done on work branch; integration pending**.
+
+Completed product/test head:
+
+```text
+64afc789ec679d7de2ab17b6fab5a588235bf238
+Fix Plug button E2E selector
+```
+
+Result:
+
+- `@lcl/shelly-client` parses `PLUGS_UI.controls["switch:0"].in_mode`, derives button-mode capability and exposes a typed `momentary | detached` mutation;
+- the mutation writes only `controls.switch:0.in_mode` and never emits LED config;
+- `features/plugs` owns a separate button-mode data/flow/card path rather than enlarging the LED editor;
+- a shared Plug-settings target helper verifies live `Shelly.GetDeviceInfo.id` before every LED/button settings read or mutation;
+- the saved physical Plug settings surface exposes the control without moving RPC logic into screens;
+- no new production dependency, lockfile change, architecture-baseline increase or speculative BLE behavior was introduced.
+
+Verification before integration:
+
+- focused package/component validation and repository gates passed during iteration;
+- responsive Playwright task `20260921-slice3b-e2e-v2` passed 4/4 tests at 360x800, 390x844 and 768x1024, including controls-only mutation evidence;
+- hardware task `20260921-slice3b-hardware-smoke-v1` used the typed repository client against real Plug S Gen3 `shellyplugsg3-e4b063d7f530` / firmware 1.7.5 and verified `momentary -> detached -> momentary`;
+- LED config stayed byte-equivalent through the hardware mutation and relay output stayed OFF;
+- an intermediate pre-push hook ran full `pnpm check` at `880f960df...`; because the E2E-selector-only final product/test commit followed it, one accepted final `pnpm check` still must run on the exact final documentation head before integration.
+
+## Slice 3C — next Shelly settings family
+
+Before implementation, audit the real Plug S Gen3 method/config capability matrix plus current official Shelly docs and choose one small user-visible settings family. Keep the same pattern: typed `@lcl/shelly-client` protocol owner, feature-owned orchestration/UI, stable identity verification, narrow writes, focused tests and reversible hardware smoke. Do not create a generic settings God object or raw JSON editor.
 
 ## Slice 4A — BLE feasibility and protocol spike
 
@@ -352,7 +380,8 @@ Do not perform a schema rewrite solely to match this diagram.
 2A  Edit climate automation               DONE  05f7eb4b8
 2B  Edit Time automation                  DONE  e1a4c63e3
 3A  Full LED settings                     DONE  b0319dddd
-3B+ Additional settings families          NEXT
+3B  Physical button input mode            DONE  64afc789e
+3C  Next Plug settings family             NEXT
 4A  BLE feasibility spike                 pending
 4B  BLE transport                         pending
 4C+ BLE-backed capabilities               pending
