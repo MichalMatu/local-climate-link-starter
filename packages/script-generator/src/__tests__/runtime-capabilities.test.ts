@@ -14,12 +14,16 @@ describe('Shelly runtime capabilities', () => {
     expect(supportsShellyMultiSensorRuntime(script)).toBe(true);
   });
 
-  it('does not infer multi-sensor support from persistence alone', () => {
+  it.each([
+    ['sensor-set validator', 'function vs(c)', 'function legacyVs(c)'],
+    ['aggregator', 'function av(v,t,n)', 'function legacyAv(v,t,n)'],
+    ['sensor index', 'function ix(a)', 'function legacyIx(a)']
+  ])('requires the multi-sensor %s body capability', (_name, marker, replacement) => {
     const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
-    const singleSensorBody = script.replace('function av(v,t,n)', 'function legacyAv(v,t,n)');
+    const legacyBody = script.replace(marker, replacement);
 
-    expect(supportsShellyRuntimeConfigPersistence(singleSensorBody)).toBe(true);
-    expect(supportsShellyMultiSensorRuntime(singleSensorBody)).toBe(false);
+    expect(supportsShellyRuntimeConfigPersistence(legacyBody)).toBe(true);
+    expect(supportsShellyMultiSensorRuntime(legacyBody)).toBe(false);
   });
 
   it('rejects unrelated scripts', () => {
