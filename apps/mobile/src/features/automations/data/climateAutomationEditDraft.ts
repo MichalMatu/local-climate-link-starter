@@ -17,6 +17,9 @@ type ClimateAutomationEditDraftState = {
   }[];
 };
 
+const sensorIdentityKey = (runtimeAddress: string): string =>
+  runtimeAddress.trim().toUpperCase();
+
 export const createClimateAutomationEditDraftPatch = (
   state: ClimateAutomationEditDraftState,
   installation: ClimateInstalledAutomation
@@ -34,26 +37,41 @@ export const createClimateAutomationEditDraftPatch = (
     config.sensor,
     ...(config.sensorSet?.additionalSensors ?? [])
   ];
-  const sensorDevices = configuredSensors.map((sensor) => ({
-    id: sensor.sensorId,
+  const savedSensorIdentityKeys = new Set(
+    state.sensorDevices.map((sensor) => sensorIdentityKey(sensor.runtimeAddress))
+  );
+  const configuredSensorDevices = configuredSensors.map((sensor) => ({
+    id: sensor.runtimeAddress,
     name: sensor.displayName,
     runtimeAddress: sensor.runtimeAddress,
     profileId: sensor.profileId
   }));
-  const configuredSensorIds = new Set(sensorDevices.map((sensor) => sensor.id));
+  const configuredIdentityKeys = new Set(
+    configuredSensorDevices.map((sensor) => sensorIdentityKey(sensor.runtimeAddress))
+  );
+  const seenIdentityKeys = new Set(configuredIdentityKeys);
+  const savedOnlySensorDevices = state.sensorDevices.flatMap((sensor) => {
+    const identityKey = sensorIdentityKey(sensor.runtimeAddress);
+    if (seenIdentityKeys.has(identityKey)) return [];
+    seenIdentityKeys.add(identityKey);
+    return [{ ...sensor, id: sensor.runtimeAddress }];
+  });
+  const sensorDevices = [...configuredSensorDevices, ...savedOnlySensorDevices];
 
   return {
     shellyDevices: [
       shellyDevice,
       ...state.shellyDevices.filter((item) => item.id !== shellyDevice.id)
     ],
-    sensorDevices: [
-      ...sensorDevices,
-      ...state.sensorDevices.filter((item) => !configuredSensorIds.has(item.id))
-    ],
+    sensorDevices,
     selectedShellyId: shellyDevice.id,
-    selectedSensorId: sensorDevices[0]!.id,
-    additionalSensorIds: sensorDevices.slice(1).map((sensor) => sensor.id),
+    selectedSensorId: configuredSensorDevices[0]!.id,
+    additionalSensorIds: configuredSensorDevices.slice(1).map((sensor) => sensor.id),
+    inheritedSensorIds: configuredSensorDevices
+      .filter(
+        (sensor) => !savedSensorIdentityKeys.has(sensorIdentityKey(sensor.runtimeAddress))
+      )
+      .map((sensor) => sensor.id),
     sensorAggregation: config.sensorSet?.aggregation ?? 'avg',
     rulePreset: config.rule.mode,
     onThresholdInput: String(config.rule.control.onThreshold),
