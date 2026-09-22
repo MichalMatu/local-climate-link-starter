@@ -26,12 +26,12 @@ The merged baseline includes:
 - up to 8 Climate thermometers with `avg`, `min`, `max` and `firstValid` aggregation;
 - per-sensor freshness with safe-OFF when no configured sensor remains usable;
 - normalized physical BLE `runtimeAddress` as the canonical mobile thermometer identity;
-- recovery provenance that does not silently retain inherited additional sensors after an explicit membership edit;
+- persisted recovery provenance that survives Edit reopen/app restart and does not silently retain inherited additional sensors after an explicit membership edit;
 - authoritative Load from Shelly reconstruction of the complete runtime sensor set;
 - setup-draft persistence kept behind the hardware-setup data boundary;
 - responsive E2E fixtures updated to the current `lcl.hardwareSetupDraft.v9` contract.
 
-Pre-merge verification for the final PR source included focused identity/recovery coverage, 256/256 mobile tests, 100% core coverage, successful production builds and 36/36 responsive Playwright tests. Real Samsung S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance also passed. Exact dated hardware evidence, script hash and final relay state are recorded only in `docs/testing/hardware-matrix.md`.
+Pre-merge verification for the final PR source included focused identity/recovery coverage, the full mobile test suite, 100% core coverage, successful production builds and the complete responsive Playwright suite. Real Samsung S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance also passed. Exact dated hardware evidence, script hash and final relay state are recorded only in `docs/testing/hardware-matrix.md`.
 
 ## Next task: per-sensor Plug-side diagnostics and provenance
 
