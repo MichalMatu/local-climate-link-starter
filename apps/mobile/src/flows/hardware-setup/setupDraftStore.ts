@@ -3,6 +3,7 @@ import type { SensorProfileId } from '@lcl/device-profiles';
 import { create } from 'zustand';
 import {
   createClimateAutomationEditDraftPatch,
+  DEFAULT_RULE_ADVANCED_SETTINGS,
   removeSensorSelection,
   selectSensorSelection,
   setAdditionalSensorSelection,
@@ -13,23 +14,37 @@ import {
 } from '../../features/automations/index.js';
 import {
   clearStoredHardwareSetupDraft,
-  DEFAULT_HARDWARE_SETUP_DRAFT,
   persistHardwareSetupDraftPatch,
   readStoredHardwareSetupDraft,
   type HardwareSetupDraft,
   type SensorDraftDevice,
   type ShellyDraftDevice
-} from './setupDraftPersistence.js';
+} from '../../features/hardware-setup/index.js';
 
-export {
-  DEFAULT_HARDWARE_SETUP_DRAFT,
-  HARDWARE_SETUP_DRAFT_STORAGE_KEY
-} from './setupDraftPersistence.js';
+export { HARDWARE_SETUP_DRAFT_STORAGE_KEY } from '../../features/hardware-setup/index.js';
 export type {
   HardwareSetupDraft,
   SensorDraftDevice,
   ShellyDraftDevice
-} from './setupDraftPersistence.js';
+} from '../../features/hardware-setup/index.js';
+
+export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
+  shellyNameInput: 'Shelly Plug S Gen3',
+  shellyUrlInput: '',
+  sensorProfileInput: 'xiaomi_lywsd03mmc_bthome_v2',
+  sensorMacInput: '',
+  sensorNameInput: '',
+  shellyDevices: [],
+  sensorDevices: [],
+  selectedShellyId: null,
+  selectedSensorId: null,
+  additionalSensorIds: [],
+  sensorAggregation: 'avg',
+  rulePreset: 'heating',
+  onThresholdInput: '19',
+  offThresholdInput: '20',
+  ...DEFAULT_RULE_ADVANCED_SETTINGS
+};
 
 const defaultThresholdInputsForPreset = (
   preset: RulePresetId
@@ -70,7 +85,8 @@ type HardwareSetupDraftState = HardwareSetupDraft &
 const persistPatch = (
   state: HardwareSetupDraftState,
   patch: Partial<HardwareSetupDraft>
-): Partial<HardwareSetupDraftState> => persistHardwareSetupDraftPatch(state, patch);
+): Partial<HardwareSetupDraftState> =>
+  persistHardwareSetupDraftPatch(state, patch, DEFAULT_HARDWARE_SETUP_DRAFT);
 
 const persistExplicitSensorPatch = (
   state: HardwareSetupDraftState,
@@ -110,7 +126,7 @@ const isReplacedShellyDevice = (
     normalizeSavedShellyEndpoint(verified.baseUrl);
 
 export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) => {
-  const storedDraft = readStoredHardwareSetupDraft();
+  const storedDraft = readStoredHardwareSetupDraft(DEFAULT_HARDWARE_SETUP_DRAFT);
   const initialDraft = {
     ...storedDraft,
     shellyNameInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyNameInput,
