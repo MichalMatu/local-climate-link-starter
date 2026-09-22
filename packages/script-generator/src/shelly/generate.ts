@@ -9,6 +9,7 @@ import { compactGeneratedShellyScript } from './scriptText.js';
 export type ShellyScriptGeneratorMode = 'climate-engine-v1' | 'discovery-debug';
 
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
+export const SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES = 8_000;
 
 const renderPersistentConfigLoader = (): string => `var E=0;
 function vs(c){if(c.ss===undefined)return c.ag===undefined;if(!Array.isArray(c.ss)||c.ss.length<2||c.ss.length>4||typeof c.ag!="number"||c.ag<0||c.ag>3)return false;for(var i=0;i<c.ss.length;i++){var s=c.ss[i];if(!Array.isArray(s)||s.length!==3||typeof s[0]!="string"||typeof s[1]!="string"||(s[2]!==0&&s[2]!==1))return false;}return true;}
@@ -76,12 +77,19 @@ function bw(){if(R.sa&&nw()-(R.l||R.sa)>9e4)bs();}
 if(E){R.ds="cf";sw(false,"cf",true);}else{sw(false,"b",true);BLE.Scanner.subscribe(function(e,x){ev(e,x);});Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw();});}`;
   const compactBody = compactGeneratedShellyScript(body);
 
-  return `// LCL
+  const script = `// LCL
 // g: ${GENERATOR_VERSION}
 // m: ${mode}
 // h: ${hash}
 ${compactBody}
 `;
+  const scriptBytes = new TextEncoder().encode(script).length;
+  if (scriptBytes > SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES) {
+    throw new Error(
+      `Generated Shelly thermostat script is ${scriptBytes} bytes; maximum is ${SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES}.`
+    );
+  }
+  return script;
 };
 
 export { generateShellyBleDiscoveryScript } from './discovery.js';

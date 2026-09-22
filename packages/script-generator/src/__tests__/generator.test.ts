@@ -335,6 +335,30 @@ describe('generateShellyThermostatScript', () => {
     expect(() => new Function(script)).not.toThrow();
   });
 
+  it('rejects a four-sensor runtime whose names would exceed the Shelly script limit', () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'tp357_custom_v1',
+      'humidifying'
+    );
+    const sensor = (index: number) => ({
+      ...baseConfig.sensor,
+      sensorId: `sensor-${index}`,
+      runtimeAddress: `02:00:00:00:00:0${index}`,
+      displayName: `Sensor ${index} `.padEnd(32, 'X')
+    });
+
+    expect(() =>
+      generateShellyThermostatScript({
+        ...baseConfig,
+        sensor: sensor(1),
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [sensor(2), sensor(3), sensor(4)]
+        }
+      })
+    ).toThrow(/maximum is 8000/);
+  });
+
   it('returns null for unsupported or malformed thermostat scripts', () => {
     expect(decodeShellyThermostatScript('var C={};var R={};')).toBeNull();
     expect(
