@@ -44,7 +44,10 @@ export const createClimateAutomationEditDraftPatch = (
     ...(config.sensorSet?.additionalSensors ?? [])
   ];
   const savedSensorByIdentityKey = new Map(
-    state.sensorDevices.map((sensor) => [sensorIdentityKey(sensor.runtimeAddress), sensor])
+    state.sensorDevices.map((sensor) => [
+      sensorIdentityKey(sensor.runtimeAddress),
+      sensor
+    ])
   );
   const savedSensorIdentityKeys = new Set(savedSensorByIdentityKey.keys());
   const inheritedSensorIdentityKeys = new Set(

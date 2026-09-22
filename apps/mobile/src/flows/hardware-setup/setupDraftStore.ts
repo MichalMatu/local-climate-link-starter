@@ -254,7 +254,9 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
     loadClimateAutomationDraft: (installation) =>
-      set((state) => persistPatch(state, createClimateAutomationEditDraftPatch(state, installation)))
+      set((state) =>
+        persistPatch(state, createClimateAutomationEditDraftPatch(state, installation))
+      )
   };
 });
 
