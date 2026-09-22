@@ -127,11 +127,13 @@ describe('hardware setup Plug identity', () => {
       const stored = JSON.parse(String(lastWrite?.[1])) as {
         selectedSensorId: string | null;
         additionalSensorIds: string[];
+        inheritedSensorIds: string[];
         sensorAggregation: string;
       };
       expect(stored).toMatchObject({
         selectedSensorId: 'sensor-a',
         additionalSensorIds: ['sensor-b'],
+        inheritedSensorIds: [],
         sensorAggregation: 'max'
       });
     } finally {
@@ -139,6 +141,69 @@ describe('hardware setup Plug identity', () => {
         Object.defineProperty(window, 'localStorage', originalLocalStorage);
       }
     }
+  });
+
+  it('persists configured-only provenance across a simulated edit reopen', () => {
+    const primaryAddress = 'C2:C0:00:30:64:01';
+    const inheritedAddress = 'C2:C0:00:30:64:02';
+    const base = createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating');
+    const configuredSensor = (runtimeAddress: string, displayName: string) => ({
+      ...base.sensor,
+      sensorId: `sensor-${runtimeAddress.replaceAll(':', '').toLowerCase()}`,
+      runtimeAddress,
+      displayName
+    });
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shelly-abc', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Grow plug',
+      baseUrl: 'http://192.168.0.10/',
+      scriptId: 1,
+      scriptHash: 'script-hash',
+      config: normalizeConfig({
+        ...base,
+        sensor: configuredSensor(primaryAddress, 'Primary'),
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [configuredSensor(inheritedAddress, 'Configured only')]
+        }
+      }),
+      nowMs: 1000
+    });
+
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      sensorDevices: [
+        {
+          id: primaryAddress,
+          name: 'Primary',
+          runtimeAddress: primaryAddress,
+          profileId: 'tp357_custom_v1'
+        }
+      ]
+    });
+
+    useHardwareSetupDraftStore.getState().loadClimateAutomationDraft(installation);
+
+    const firstStored = JSON.parse(
+      String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
+    ) as typeof DEFAULT_HARDWARE_SETUP_DRAFT;
+    expect(firstStored.inheritedSensorIds).toEqual([inheritedAddress]);
+    expect(firstStored.sensorDevices.map((sensor) => sensor.runtimeAddress)).toEqual([
+      primaryAddress,
+      inheritedAddress
+    ]);
+
+    useHardwareSetupDraftStore.setState(firstStored);
+    useHardwareSetupDraftStore.getState().loadClimateAutomationDraft(installation);
+
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      inheritedAddress
+    ]);
+
+    const reopenedStored = JSON.parse(
+      String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
+    ) as typeof DEFAULT_HARDWARE_SETUP_DRAFT;
+    expect(reopenedStored.inheritedSensorIds).toEqual([inheritedAddress]);
   });
 
   it('keeps an authoritative full sensor set while clearing inherited membership markers', () => {
@@ -232,5 +297,6 @@ describe('hardware setup Plug identity', () => {
     expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual([
       addresses[2]
     ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
   });
 });
