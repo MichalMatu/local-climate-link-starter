@@ -6,10 +6,6 @@ import {
   serializeShellyRuntimeConfig
 } from '@lcl/script-generator';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  resetHardwareSetupDraftStore,
-  useHardwareSetupDraftStore
-} from '../../../flows/hardware-setup/setupDraftStore.js';
 import type { ClimateAutomationScriptLoadResult } from './useClimateAutomationScriptLoadFlow.js';
 
 const useClimateAutomationScriptLoadFlowMock = vi.hoisted(() => vi.fn());
@@ -27,7 +23,6 @@ type LoadCallbacks = {
 
 describe('useClimateAutomationScriptLoadDraftFlow', () => {
   beforeEach(() => {
-    resetHardwareSetupDraftStore();
     useClimateAutomationScriptLoadFlowMock.mockReset();
   });
 
@@ -74,14 +69,26 @@ describe('useClimateAutomationScriptLoadDraftFlow', () => {
     expect(decoded).not.toBeNull();
     if (!decoded) return;
 
-    useHardwareSetupDraftStore.setState({
-      inheritedSensorIds: [addresses[3]]
-    });
+    const draftActions = {
+      setShellyScriptId: vi.fn(),
+      selectSensorDevice: vi.fn(),
+      setAdditionalSensorIds: vi.fn(),
+      setSensorAggregation: vi.fn(),
+      setRulePreset: vi.fn(),
+      setOnThresholdInput: vi.fn(),
+      setOffThresholdInput: vi.fn(),
+      setVpdAssistEnabled: vi.fn(),
+      setVpdTargetInput: vi.fn(),
+      setRssiMinInput: vi.fn(),
+      setStaleTimeoutMinInput: vi.fn(),
+      setMinChangeMinInput: vi.fn(),
+      setMaxOnHoursInput: vi.fn()
+    };
+    const upsertSensorDevice = vi.fn();
 
     useClimateAutomationScriptLoadDraftFlow({
-      getDraftActions: useHardwareSetupDraftStore.getState,
-      upsertSensorDevice: (device) =>
-        useHardwareSetupDraftStore.getState().upsertSensorDevice(device),
+      getDraftActions: () => draftActions,
+      upsertSensorDevice,
       resetInstallState: vi.fn(),
       applyControlStatus: vi.fn(),
       applyControlError: vi.fn()
@@ -101,13 +108,12 @@ describe('useClimateAutomationScriptLoadDraftFlow', () => {
 
     callbacks?.onSuccess?.(result);
 
-    const draft = useHardwareSetupDraftStore.getState();
-    expect(draft.sensorDevices.map((sensor) => sensor.runtimeAddress)).toEqual(
-      [...addresses].reverse()
-    );
-    expect(draft.selectedSensorId).toBe(addresses[0]);
-    expect(draft.additionalSensorIds).toEqual(addresses.slice(1));
-    expect(draft.sensorAggregation).toBe('avg');
-    expect(draft.inheritedSensorIds).toEqual([]);
+    expect(draftActions.setShellyScriptId).toHaveBeenCalledWith('shelly-abc', '7');
+    expect(
+      upsertSensorDevice.mock.calls.map(([device]) => device.runtimeAddress)
+    ).toEqual(addresses);
+    expect(draftActions.selectSensorDevice).toHaveBeenCalledWith(addresses[0]);
+    expect(draftActions.setAdditionalSensorIds).toHaveBeenCalledWith(addresses.slice(1));
+    expect(draftActions.setSensorAggregation).toHaveBeenCalledWith('avg');
   });
 });
