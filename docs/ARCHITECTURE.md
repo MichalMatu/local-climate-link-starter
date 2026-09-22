@@ -84,7 +84,7 @@ For the current BLE thermometer profiles, normalized physical `runtimeAddress` i
 
 Recovery still reconstructs the complete runtime sensor membership. The existing recovery contract writes `sensorId = runtimeAddress`; edit uses that deterministic marker, plus configured-only membership, as transient inherited-selection provenance. Ordinary non-sensor edits preserve recovered membership unchanged. Once the user explicitly changes sensor membership, inherited additional sensors are not carried forward unless they are explicitly selected again. Load from Shelly is an explicit full-set replacement and therefore restores every runtime sensor and clears inherited-selection provenance. This changes only mobile draft/edit semantics; runtime `ss`, `ag`, freshness and safety behavior are unchanged.
 
-Regression tests cover the previously observed 7-row duplication, recovered `A4:C1:38:4F:24:CD` surviving a prior draft, full multi-sensor recovery and full-set Load from Shelly. Real-hardware re-acceptance is still required before the identity/provenance fix is considered hardware-confirmed.
+Regression tests cover the previously observed 7-row duplication, recovered `A4:C1:38:4F:24:CD` surviving a prior draft, full multi-sensor recovery and full-set Load from Shelly. Real Samsung S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance passed on 2026-09-22; exact dated evidence and final hardware state are kept in `docs/testing/hardware-matrix.md`.
 
 ## Transport direction
 
