@@ -39,6 +39,7 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   selectedShellyId: null,
   selectedSensorId: null,
   additionalSensorIds: [],
+  inheritedSensorIds: [],
   sensorAggregation: 'avg',
   rulePreset: 'heating',
   onThresholdInput: '19',
@@ -58,7 +59,6 @@ const defaultThresholdInputsForPreset = (
 
 type HardwareSetupDraftState = HardwareSetupDraft &
   SensorDraftActions<SensorDraftDevice> & {
-    inheritedSensorIds: string[];
     setShellyNameInput(value: string): void;
     setShellyUrlInput(value: string): void;
     upsertShellyDevice(device: ShellyDraftDevice): void;
@@ -102,10 +102,10 @@ const persistExplicitSensorPatch = (
             (id) => !inheritedSensorIds.has(id)
           )
         };
-  return {
-    ...persistPatch(state, explicitPatch),
+  return persistPatch(state, {
+    ...explicitPatch,
     inheritedSensorIds: []
-  };
+  });
 };
 
 const updateListItem = <TItem extends { id: string }>(
@@ -141,7 +141,6 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
 
   return {
     ...initialDraft,
-    inheritedSensorIds: [],
     setShellyNameInput: (shellyNameInput) => set({ shellyNameInput }),
     setShellyUrlInput: (shellyUrlInput) => set({ shellyUrlInput }),
     upsertShellyDevice: (device) =>
@@ -219,10 +218,12 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
         return patch ? persistExplicitSensorPatch(state, patch) : state;
       }),
     setAdditionalSensorIds: (ids) =>
-      set((state) => ({
-        ...persistPatch(state, setAdditionalSensorSelection(state, ids)),
-        inheritedSensorIds: []
-      })),
+      set((state) =>
+        persistPatch(state, {
+          ...setAdditionalSensorSelection(state, ids),
+          inheritedSensorIds: []
+        })
+      ),
     toggleAdditionalSensorDevice: (id) =>
       set((state) => {
         const patch = toggleAdditionalSensorSelection(state, id);
@@ -253,23 +254,11 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
     loadClimateAutomationDraft: (installation) =>
-      set((state) => {
-        const { inheritedSensorIds, ...patch } = createClimateAutomationEditDraftPatch(
-          state,
-          installation
-        );
-        return {
-          ...persistPatch(state, patch),
-          inheritedSensorIds
-        };
-      })
+      set((state) => persistPatch(state, createClimateAutomationEditDraftPatch(state, installation)))
   };
 });
 
 export const resetHardwareSetupDraftStore = () => {
   clearStoredHardwareSetupDraft();
-  useHardwareSetupDraftStore.setState({
-    ...DEFAULT_HARDWARE_SETUP_DRAFT,
-    inheritedSensorIds: []
-  });
+  useHardwareSetupDraftStore.setState(DEFAULT_HARDWARE_SETUP_DRAFT);
 };
