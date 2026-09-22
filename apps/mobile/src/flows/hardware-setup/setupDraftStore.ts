@@ -40,6 +40,7 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   selectedSensorId: null,
   additionalSensorIds: [],
   inheritedSensorIds: [],
+  inheritedSensorSourceId: null,
   sensorAggregation: 'avg',
   rulePreset: 'heating',
   onThresholdInput: '19',
@@ -104,7 +105,8 @@ const persistExplicitSensorPatch = (
         };
   return persistPatch(state, {
     ...explicitPatch,
-    inheritedSensorIds: []
+    inheritedSensorIds: [],
+    inheritedSensorSourceId: null
   });
 };
 
@@ -221,7 +223,8 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
       set((state) =>
         persistPatch(state, {
           ...setAdditionalSensorSelection(state, ids),
-          inheritedSensorIds: []
+          inheritedSensorIds: [],
+          inheritedSensorSourceId: null
         })
       ),
     toggleAdditionalSensorDevice: (id) =>
