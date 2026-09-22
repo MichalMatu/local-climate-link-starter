@@ -127,4 +127,105 @@ describe('createClimateAutomationEditDraftPatch', () => {
     expect(patch.selectedSensorId).toBe(addresses[0]);
     expect(patch.additionalSensorIds).toEqual(addresses.slice(1));
   });
+
+  it('preserves the current saved sensor name when the installed snapshot is older', () => {
+    const base = createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating');
+    const runtimeAddress = 'C2:C0:00:30:64:01';
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shelly-abc', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Grow plug',
+      baseUrl: 'http://192.168.0.10/',
+      scriptId: 1,
+      scriptHash: 'script-hash',
+      config: normalizeConfig({
+        ...base,
+        sensor: tp357Sensor(
+          base.sensor,
+          runtimeAddress,
+          'sensor-c2c000306401',
+          'Installed old name'
+        )
+      }),
+      nowMs: 1000
+    });
+
+    const patch = createClimateAutomationEditDraftPatch(
+      {
+        shellyDevices: [],
+        sensorDevices: [
+          {
+            id: 'saved-local-id',
+            name: 'Kitchen thermometer',
+            runtimeAddress,
+            profileId: 'tp357_custom_v1'
+          }
+        ]
+      },
+      installation
+    );
+
+    expect(patch.sensorDevices[0]).toMatchObject({
+      id: runtimeAddress,
+      name: 'Kitchen thermometer',
+      runtimeAddress
+    });
+  });
+
+  it('keeps configured-only inherited provenance after the hydrated row exists locally', () => {
+    const base = createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating');
+    const primaryAddress = 'C2:C0:00:30:64:01';
+    const inheritedAddress = 'C2:C0:00:30:64:02';
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shelly-abc', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Grow plug',
+      baseUrl: 'http://192.168.0.10/',
+      scriptId: 1,
+      scriptHash: 'script-hash',
+      config: normalizeConfig({
+        ...base,
+        sensor: tp357Sensor(
+          base.sensor,
+          primaryAddress,
+          'sensor-c2c000306401',
+          'Primary'
+        ),
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [
+            tp357Sensor(
+              base.sensor,
+              inheritedAddress,
+              'sensor-c2c000306402',
+              'Configured only'
+            )
+          ]
+        }
+      }),
+      nowMs: 1000
+    });
+
+    const patch = createClimateAutomationEditDraftPatch(
+      {
+        shellyDevices: [],
+        sensorDevices: [
+          {
+            id: primaryAddress,
+            name: 'Primary',
+            runtimeAddress: primaryAddress,
+            profileId: 'tp357_custom_v1'
+          },
+          {
+            id: inheritedAddress,
+            name: 'Configured only',
+            runtimeAddress: inheritedAddress,
+            profileId: 'tp357_custom_v1'
+          }
+        ],
+        inheritedSensorIds: [inheritedAddress]
+      },
+      installation
+    );
+
+    expect(patch.inheritedSensorIds).toEqual([inheritedAddress]);
+  });
 });
