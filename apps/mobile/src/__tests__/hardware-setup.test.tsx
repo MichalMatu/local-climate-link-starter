@@ -325,7 +325,8 @@ const openRuleDisclosure = (label: string): HTMLDetailsElement => {
 };
 
 const openRuleDeveloperTools = () => {
-  const actions = document.querySelector('.rule-developer-actions--compact');
+  const details = openRuleDisclosure('Zaawansowane');
+  const actions = details.querySelector('.rule-developer-actions--compact');
   expect(actions).not.toBeNull();
   expect(actions!.querySelectorAll('button')).toHaveLength(2);
 };
@@ -1867,9 +1868,11 @@ describe('HardwareSetupScreen', () => {
       'title',
       'Pokaż wygenerowany Shelly Script'
     );
-    expect(screen.getByRole('button', { name: 'Wczytaj z Shelly' })).toHaveAttribute(
+    expect(
+      screen.getByRole('button', { name: 'Przywróć ustawienia z gniazdka' })
+    ).toHaveAttribute(
       'title',
-      'Odczytaj skrypt Local Climate Link z Shelly i wypełnij formularz'
+      'Zastąp bieżący formularz konfiguracją działającą na tym gniazdku'
     );
     const developerActions = document.querySelector('.rule-developer-actions--compact');
     expect(developerActions).not.toBeNull();
@@ -2201,7 +2204,18 @@ describe('HardwareSetupScreen', () => {
     });
 
     openRuleDeveloperTools();
-    fireEvent.click(screen.getByRole('button', { name: 'Wczytaj z Shelly' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Przywróć ustawienia z gniazdka' })
+    );
+    const restoreDialog = screen.getByRole('dialog', {
+      name: 'Przywrócić ustawienia z gniazdka?'
+    });
+    expect(restoreDialog).toHaveTextContent(
+      'Nic nie zostanie jeszcze zapisane na urządzeniu.'
+    );
+    fireEvent.click(
+      within(restoreDialog).getByRole('button', { name: 'Przywróć ustawienia' })
+    );
 
     expect(
       await screen.findByText('Wczytano ustawienia z Shelly do formularza.')
@@ -2450,8 +2464,10 @@ describe('HardwareSetupScreen', () => {
     const follows = (first: Node, second: Node) =>
       Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
 
-    expect(follows(developerActions!, advanced)).toBe(true);
-    expect(follows(advanced, send)).toBe(true);
+    const advancedDetails = advanced.closest('details');
+    expect(advancedDetails).not.toBeNull();
+    expect(advancedDetails!.contains(developerActions)).toBe(true);
+    expect(follows(advancedDetails!, send)).toBe(true);
   });
 
   it('shows compact live values on the right side of the rule thermometer options', async () => {

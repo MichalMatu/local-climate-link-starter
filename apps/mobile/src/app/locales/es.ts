@@ -504,11 +504,19 @@ export const es = {
         'Si Matter bloquea los scripts, desactiva Matter en Shelly e inténtalo de nuevo.',
       loadingScriptFromShelly: 'Cargando desde Shelly',
       loadScriptDone: 'Ajustes de Shelly cargados en el formulario.',
-      loadScriptFromShelly: 'Cargar desde Shelly',
+      loadScriptFromShelly: 'Restaurar ajustes del enchufe',
       loadScriptFromShellyTitle:
-        'Leer el script Local Climate Link de Shelly y rellenar el formulario',
+        'Sustituir el formulario actual por la configuración activa en este enchufe',
       loadScriptMissing: 'No se encontró script Local Climate Link en este Shelly.',
       loadScriptUnknown: 'No puedo leer ajustes de este script.',
+      editContextLabel: 'Editando automatización',
+      editContextHint:
+        'Al guardar se cambiarán los ajustes que funcionan actualmente en este enchufe.',
+      saveTarget: 'Los cambios se guardarán en: {name}.',
+      restoreFromShellyTitle: '¿Restaurar los ajustes del enchufe?',
+      restoreFromShellyDescription:
+        'Los valores actuales del formulario se sustituirán por la configuración activa en este enchufe. Todavía no se escribirá nada en el dispositivo.',
+      restoreFromShellyConfirm: 'Restaurar ajustes',
       maxOnHoursLabel: 'Tiempo máximo activo h',
       minChangeLabel: 'Siguiente ON tras min',
       noShellySelected: 'Selecciona enchufe Shelly.',

@@ -251,31 +251,6 @@ export const ClimateRuleEditor = ({
         )}
       </section>
 
-      <div className="action-row rule-developer-actions rule-developer-actions--compact">
-        <button
-          className="secondary-action"
-          type="button"
-          disabled={!props.canPreviewScript}
-          title={t('hardware.rule.scriptPreviewTitle')}
-          onClick={props.openScriptPreview}
-        >
-          <CodeIcon />
-          {t('hardware.rule.scriptPreview')}
-        </button>
-        <button
-          className="secondary-action"
-          type="button"
-          aria-busy={props.loadScriptPending}
-          disabled={!props.hasSelectedShelly || props.loadScriptPending}
-          title={t('hardware.rule.loadScriptFromShellyTitle')}
-          onClick={props.loadScriptFromShelly}
-        >
-          {props.loadScriptPending
-            ? t('hardware.rule.loadingScriptFromShelly')
-            : t('hardware.rule.loadScriptFromShelly')}
-        </button>
-      </div>
-
       <details className="rule-progressive-disclosure">
         <summary>{t('hardware.rule.advanced')}</summary>
         <ClimateRuleAdvancedSettings
@@ -290,8 +265,37 @@ export const ClimateRuleEditor = ({
           setMinChangeMinInput={props.setMinChangeMinInput}
           setMaxOnHoursInput={props.setMaxOnHoursInput}
         />
+        <div className="action-row rule-developer-actions rule-developer-actions--compact">
+          <button
+            className="secondary-action"
+            type="button"
+            disabled={!props.canPreviewScript}
+            title={t('hardware.rule.scriptPreviewTitle')}
+            onClick={props.openScriptPreview}
+          >
+            <CodeIcon />
+            {t('hardware.rule.scriptPreview')}
+          </button>
+          <button
+            className="secondary-action"
+            type="button"
+            aria-busy={props.loadScriptPending}
+            disabled={!props.hasSelectedShelly || props.loadScriptPending}
+            title={t('hardware.rule.loadScriptFromShellyTitle')}
+            onClick={props.loadScriptFromShelly}
+          >
+            {props.loadScriptPending
+              ? t('hardware.rule.loadingScriptFromShelly')
+              : t('hardware.rule.loadScriptFromShelly')}
+          </button>
+        </div>
       </details>
 
+      {props.submitMode === 'edit' && props.selectedShellyName && (
+        <p className="rule-save-target">
+          {t('hardware.rule.saveTarget', { name: props.selectedShellyName })}
+        </p>
+      )}
       <div className="action-row rule-action-row">
         <button
           className="primary-action"

@@ -4,7 +4,8 @@ import type { Translate } from '../../../app/i18n.js';
 import { mutationError } from '../helpers.js';
 import type { RuleSetupFlow } from '../pageContracts.js';
 
-export type RuleDialogState = 'none' | 'script' | 'install-block' | 'relay-test';
+export type RuleDialogState =
+  'none' | 'script' | 'install-block' | 'relay-test' | 'restore';
 
 type PushToast = (tone: ToastTone, title: string, detail?: string) => void;
 

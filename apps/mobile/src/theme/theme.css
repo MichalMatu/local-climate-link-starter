@@ -3319,3 +3319,35 @@ select {
     background: var(--lcl-color-surface);
   }
 }
+
+.rule-edit-context {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  margin-bottom: var(--lcl-spacing-lg);
+  padding: var(--lcl-spacing-md);
+}
+.rule-edit-context__label {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+}
+.rule-edit-context strong {
+  font-size: var(--lcl-font-size-lg);
+}
+.rule-edit-context p,
+.rule-save-target {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  margin: 0;
+}
+.rule-progressive-disclosure .rule-developer-actions {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  margin-top: var(--lcl-spacing-md);
+  padding-top: var(--lcl-spacing-md);
+}
+.rule-save-target {
+  margin-top: var(--lcl-spacing-md);
+}

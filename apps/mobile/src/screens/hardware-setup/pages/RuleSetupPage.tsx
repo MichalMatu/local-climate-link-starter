@@ -71,10 +71,11 @@ export const RuleSetupPage = ({
     onEditSaved?.();
   }, [flow.installMutation, flow.isEditingClimateAutomation, onEditSaved, pushToast, t]);
 
-  const loadScriptFromShelly = () => {
+  const confirmLoadScriptFromShelly = () => {
     if (!flow.selectedShelly) {
       return;
     }
+    setDialog('none');
     flow.loadAutomationScript(flow.selectedShelly);
   };
 
@@ -96,6 +97,15 @@ export const RuleSetupPage = ({
 
   return (
     <section className="demo-panel" aria-label={t('hardware.nav.ruleTitle')}>
+      {flow.isEditingClimateAutomation && flow.selectedShelly && (
+        <div className="rule-edit-context">
+          <span className="rule-edit-context__label">
+            {t('hardware.rule.editContextLabel')}
+          </span>
+          <strong>{flow.selectedShelly.name}</strong>
+          <p>{t('hardware.rule.editContextHint')}</p>
+        </div>
+      )}
       <ClimateRuleEditor
         selectablePresets={selectablePresets}
         showShellySelector={showShellySelector}
@@ -137,7 +147,7 @@ export const RuleSetupPage = ({
         canPreviewScript={flow.configState.ok}
         loadScriptPending={flow.loadAutomationScriptMutation.isPending}
         openScriptPreview={() => setDialog('script')}
-        loadScriptFromShelly={loadScriptFromShelly}
+        loadScriptFromShelly={() => setDialog('restore')}
         canInstall={canInstallScript(flow)}
         installPending={flow.installMutation.isPending}
         safeRelayTestPending={flow.safeRelayTestMutation.isPending}
@@ -145,6 +155,25 @@ export const RuleSetupPage = ({
         submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
       />
 
+      <Modal
+        actions={
+          <button
+            className="primary-action"
+            type="button"
+            disabled={flow.loadAutomationScriptMutation.isPending}
+            onClick={confirmLoadScriptFromShelly}
+          >
+            {t('hardware.rule.restoreFromShellyConfirm')}
+          </button>
+        }
+        closeLabel={t('common.cancel')}
+        description={flow.selectedShelly?.name ?? ''}
+        open={dialog === 'restore' && flow.selectedShelly !== null}
+        title={t('hardware.rule.restoreFromShellyTitle')}
+        onClose={() => setDialog('none')}
+      >
+        <p>{t('hardware.rule.restoreFromShellyDescription')}</p>
+      </Modal>
       <Modal
         closeLabel={t('common.close')}
         open={dialog === 'install-block' && flow.installMutation.isError}
