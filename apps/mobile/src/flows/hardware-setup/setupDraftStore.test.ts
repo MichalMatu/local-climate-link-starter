@@ -1,4 +1,9 @@
+import {
+  createDefaultShellyThermostatConfig,
+  normalizeConfig
+} from '@lcl/script-generator';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createInstalledAutomation } from '../../features/automations/data/installedAutomation.js';
 import {
   DEFAULT_HARDWARE_SETUP_DRAFT,
   HARDWARE_SETUP_DRAFT_STORAGE_KEY,
@@ -134,5 +139,64 @@ describe('hardware setup Plug identity', () => {
         Object.defineProperty(window, 'localStorage', originalLocalStorage);
       }
     }
+  });
+
+  it('drops runtime-only inherited membership after an explicit sensor selection edit', () => {
+    const addresses = [
+      'C2:C0:00:30:64:01',
+      'C2:C0:00:30:64:02',
+      'C2:C0:00:30:64:03',
+      'A4:C1:38:4F:24:CD'
+    ] as const;
+    const base = createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating');
+    const configuredSensor = (runtimeAddress: string, displayName: string) => ({
+      ...base.sensor,
+      sensorId: `sensor-${runtimeAddress.replaceAll(':', '').toLowerCase()}`,
+      runtimeAddress,
+      displayName
+    });
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shelly-abc', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Grow plug',
+      baseUrl: 'http://192.168.0.10/',
+      scriptId: 1,
+      scriptHash: 'script-hash',
+      config: normalizeConfig({
+        ...base,
+        sensor: configuredSensor(addresses[0], 'TP357 1'),
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [
+            configuredSensor(addresses[1], 'TP357 2'),
+            configuredSensor(addresses[2], 'TP357 3'),
+            configuredSensor(addresses[3], 'Recovered legacy sensor')
+          ]
+        }
+      }),
+      nowMs: 1000
+    });
+
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      sensorDevices: addresses.slice(0, 3).map((runtimeAddress, index) => ({
+        id: runtimeAddress,
+        name: `Saved TP357 ${index + 1}`,
+        runtimeAddress,
+        profileId: 'tp357_custom_v1' as const
+      }))
+    });
+
+    useHardwareSetupDraftStore.getState().loadClimateAutomationDraft(installation);
+
+    expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual(
+      addresses.slice(1)
+    );
+
+    useHardwareSetupDraftStore.getState().selectSensorDevice(addresses[1]);
+
+    expect(useHardwareSetupDraftStore.getState().selectedSensorId).toBe(addresses[1]);
+    expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual([
+      addresses[2]
+    ]);
   });
 });
