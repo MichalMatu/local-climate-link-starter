@@ -318,7 +318,7 @@ describe('AppRoutes navigation shell', () => {
 
     const draft = useHardwareSetupDraftStore.getState();
     expect(draft.selectedShellyId).toBe(installation.shelly.deviceId);
-    expect(draft.selectedSensorId).toBe(installation.config.sensor.sensorId);
+    expect(draft.selectedSensorId).toBe(installation.config.sensor.runtimeAddress);
     expect(draft.rulePreset).toBe(installation.config.rule.mode);
     expect(draft.onThresholdInput).toBe(
       String(installation.config.rule.control.onThreshold)
