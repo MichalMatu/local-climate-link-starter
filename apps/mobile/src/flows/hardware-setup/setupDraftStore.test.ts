@@ -3,7 +3,7 @@ import {
   normalizeConfig
 } from '@lcl/script-generator';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createInstalledAutomation } from '../../features/automations/data/installedAutomation.js';
+import { createInstalledAutomation } from '../../features/automations/index.js';
 import {
   DEFAULT_HARDWARE_SETUP_DRAFT,
   HARDWARE_SETUP_DRAFT_STORAGE_KEY,
@@ -141,6 +141,35 @@ describe('hardware setup Plug identity', () => {
     }
   });
 
+  it('keeps an authoritative full sensor set while clearing inherited membership markers', () => {
+    const addresses = [
+      'C2:C0:00:30:64:01',
+      'C2:C0:00:30:64:02',
+      'A4:C1:38:4F:24:CD'
+    ] as const;
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      sensorDevices: addresses.map((runtimeAddress, index) => ({
+        id: runtimeAddress,
+        name: `Sensor ${index + 1}`,
+        runtimeAddress,
+        profileId: 'tp357_custom_v1' as const
+      })),
+      selectedSensorId: addresses[0],
+      inheritedSensorIds: [addresses[2]]
+    });
+
+    useHardwareSetupDraftStore
+      .getState()
+      .setAdditionalSensorIds([addresses[1], addresses[2]]);
+
+    expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual([
+      addresses[1],
+      addresses[2]
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
+  });
+
   it('drops recovered membership after an explicit edit even if an older draft persisted its row', () => {
     const addresses = [
       'C2:C0:00:30:64:01',
@@ -184,7 +213,8 @@ describe('hardware setup Plug identity', () => {
       ...DEFAULT_HARDWARE_SETUP_DRAFT,
       sensorDevices: addresses.map((runtimeAddress, index) => ({
         id: runtimeAddress,
-        name: index === 3 ? 'Previously persisted recovery row' : `Saved TP357 ${index + 1}`,
+        name:
+          index === 3 ? 'Previously persisted recovery row' : `Saved TP357 ${index + 1}`,
         runtimeAddress,
         profileId: 'tp357_custom_v1' as const
       }))
