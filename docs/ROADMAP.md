@@ -37,16 +37,22 @@ The mobile draft/edit boundary uses normalized physical BLE `runtimeAddress` as 
 
 Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance passed with four physical sensors, including the previously duplicated recovery case. The exact dated evidence and final safe hardware state are recorded in `docs/testing/hardware-matrix.md`.
 
-### Next Climate slice — per-sensor diagnostics and reading provenance
+### Current Climate slice — per-sensor diagnostics and reading provenance
 
-- Extend the Climate runtime diagnostics contract to expose one live record per configured sensor: normalized runtime address, temperature, humidity, battery, RSSI, last-seen/age and stale/fresh state.
-- Map those records back to mobile thermometer rows by physical `runtimeAddress`.
-- Make reading provenance explicit in the UI (`phone BLE`, `Plug BLE`, or recovered/runtime state).
-- Do not keep displaying stale Plug-side data for a thermometer that is no longer configured or no longer observed.
-- Keep the aggregate/runtime safety path independent from presentation diagnostics.
-- Preserve the existing identity, ownership and safe-OFF invariants.
+Work branch: `work/per-sensor-diagnostics`.
 
-Before implementation, audit the current `/diag` payload, decoder, runtime memory budget and mobile reading store so the extension has one clear owner on each side of the boundary.
+The preimplementation architecture audit is complete. Its canonical findings, ownership map, migration requirement and test/hardware guardrails are in `docs/HANDOFF_NEXT_CHAT.md`; do not repeat the audit as a separate phase.
+
+Implementation target:
+
+- expose one Plug-side live diagnostic record per configured thermometer without changing aggregation/safe-OFF semantics;
+- join runtime diagnostics to mobile rows only by normalized physical BLE `runtimeAddress`;
+- show Phone BLE vs Plug BLE live-source provenance while keeping recovered identity provenance separate;
+- remove stale indexed runtime readings when sensor membership/order changes;
+- preserve backward compatibility with existing aggregate-only runtimes;
+- capability-gate one-time engine upgrade of an old managed runtime on explicit Save/Edit only, never on diagnostic reads.
+
+Finish with focused regressions, the normal repository gate, script/RAM review and dated real-device acceptance before marking this slice done.
 
 ## 3. Soil moisture
 
