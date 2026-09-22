@@ -33,7 +33,7 @@ A Climate automation can reference up to 8 thermometers with explicit `avg`, `mi
 
 The compact runtime config stores the sensor set in `ss` and aggregation in `ag`. Recovery preserves the complete runtime sensor set and aggregation, while ordinary aggregation/sensor edits on the current 0.4 runtime use the persistent `Script.storage` / `Script.Eval` config channel rather than rewriting engine code.
 
-The mobile draft/edit boundary uses normalized physical BLE `runtimeAddress` as the canonical thermometer identity. Phone discovery, Plug discovery, installed config and Load from Shelly converge on the same physical row. Recovered membership is tracked as persisted draft provenance that survives Edit reopen and app restart: ordinary edits preserve it, an explicit membership change stops silently carrying inherited additional sensors, and Load from Shelly remains the authoritative full-set replacement.
+The mobile draft/edit boundary uses normalized physical BLE `runtimeAddress` as the canonical thermometer identity. Phone discovery, Plug discovery, installed config and Load from Shelly converge on the same physical row. Recovered membership is tracked as persisted draft provenance scoped to the installed automation ID so it survives Edit reopen and app restart without leaking between automations: ordinary edits preserve it, an explicit membership change stops silently carrying inherited additional sensors, and Load from Shelly remains the authoritative full-set replacement.
 
 Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance passed with four physical sensors, including the previously duplicated recovery case. The exact dated evidence and final safe hardware state are recorded in `docs/testing/hardware-matrix.md`.
 

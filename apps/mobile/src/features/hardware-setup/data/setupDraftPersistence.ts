@@ -106,8 +106,7 @@ const createStoredHardwareSetupDraft = (
       : state.selectedSensorId,
   additionalSensorIds: patch.additionalSensorIds ?? state.additionalSensorIds,
   inheritedSensorIds: patch.inheritedSensorIds ?? state.inheritedSensorIds,
-  inheritedSensorSourceId:
-    patch.inheritedSensorSourceId ?? state.inheritedSensorSourceId,
+  inheritedSensorSourceId: patch.inheritedSensorSourceId ?? state.inheritedSensorSourceId,
   sensorAggregation: patch.sensorAggregation ?? state.sensorAggregation,
   rulePreset: patch.rulePreset ?? state.rulePreset,
   onThresholdInput: patch.onThresholdInput ?? state.onThresholdInput,
