@@ -37,6 +37,7 @@ const hardwareSetupDraftSchema = z.object({
   selectedSensorId: z.string().nullable(),
   additionalSensorIds: z.array(z.string()).max(MAX_CLIMATE_SENSORS - 1),
   inheritedSensorIds: z.array(z.string()).max(MAX_CLIMATE_SENSORS).default([]),
+  inheritedSensorSourceId: z.string().nullable().default(null),
   sensorAggregation: climateSensorAggregationSchema,
   rulePreset: rulePresetSchema,
   onThresholdInput: z.string(),
@@ -105,6 +106,8 @@ const createStoredHardwareSetupDraft = (
       : state.selectedSensorId,
   additionalSensorIds: patch.additionalSensorIds ?? state.additionalSensorIds,
   inheritedSensorIds: patch.inheritedSensorIds ?? state.inheritedSensorIds,
+  inheritedSensorSourceId:
+    patch.inheritedSensorSourceId ?? state.inheritedSensorSourceId,
   sensorAggregation: patch.sensorAggregation ?? state.sensorAggregation,
   rulePreset: patch.rulePreset ?? state.rulePreset,
   onThresholdInput: patch.onThresholdInput ?? state.onThresholdInput,
