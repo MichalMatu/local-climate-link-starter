@@ -238,7 +238,19 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     removeSensorDevice: (id) =>
       set((state) => {
         const patch = removeSensorSelection(state, id);
-        return patch ? persistExplicitSensorPatch(state, patch) : state;
+        if (!patch) {
+          return state;
+        }
+        const changesSensorMembership =
+          state.selectedSensorId === id || state.additionalSensorIds.includes(id);
+        return changesSensorMembership
+          ? persistExplicitSensorPatch(state, patch)
+          : persistPatch(state, {
+              ...patch,
+              inheritedSensorIds: state.inheritedSensorIds.filter(
+                (sensorId) => sensorId !== id
+              )
+            });
       }),
     setRulePreset: (rulePreset) => {
       const thresholds = defaultThresholdInputsForPreset(rulePreset);

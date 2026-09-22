@@ -235,6 +235,52 @@ describe('hardware setup Plug identity', () => {
     expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
   });
 
+  it('keeps inherited configured members when removing an unrelated saved sensor', () => {
+    const primaryAddress = 'C2:C0:00:30:64:01';
+    const inheritedAddress = 'C2:C0:00:30:64:02';
+    const unusedAddress = 'C2:C0:00:30:64:03';
+
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      sensorDevices: [
+        {
+          id: primaryAddress,
+          name: 'Primary',
+          runtimeAddress: primaryAddress,
+          profileId: 'tp357_custom_v1'
+        },
+        {
+          id: inheritedAddress,
+          name: 'Configured only',
+          runtimeAddress: inheritedAddress,
+          profileId: 'tp357_custom_v1'
+        },
+        {
+          id: unusedAddress,
+          name: 'Unused saved sensor',
+          runtimeAddress: unusedAddress,
+          profileId: 'tp357_custom_v1'
+        }
+      ],
+      selectedSensorId: primaryAddress,
+      additionalSensorIds: [inheritedAddress],
+      inheritedSensorIds: [inheritedAddress]
+    });
+
+    useHardwareSetupDraftStore.getState().removeSensorDevice(unusedAddress);
+
+    expect(
+      useHardwareSetupDraftStore.getState().sensorDevices.map((sensor) => sensor.id)
+    ).toEqual([primaryAddress, inheritedAddress]);
+    expect(useHardwareSetupDraftStore.getState().selectedSensorId).toBe(primaryAddress);
+    expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual([
+      inheritedAddress
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      inheritedAddress
+    ]);
+  });
+
   it('drops recovered membership after an explicit edit even if an older draft persisted its row', () => {
     const addresses = [
       'C2:C0:00:30:64:01',
