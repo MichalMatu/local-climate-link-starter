@@ -102,9 +102,9 @@ describe('useClimateAutomationScriptLoadDraftFlow', () => {
     callbacks?.onSuccess?.(result);
 
     const draft = useHardwareSetupDraftStore.getState();
-    expect(draft.sensorDevices.map((sensor) => sensor.runtimeAddress)).toEqual([
-      ...addresses.toReversed()
-    ]);
+    expect(draft.sensorDevices.map((sensor) => sensor.runtimeAddress)).toEqual(
+      [...addresses].reverse()
+    );
     expect(draft.selectedSensorId).toBe(addresses[0]);
     expect(draft.additionalSensorIds).toEqual(addresses.slice(1));
     expect(draft.sensorAggregation).toBe('avg');
