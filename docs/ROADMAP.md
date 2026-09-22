@@ -23,6 +23,10 @@ Persistent runtime config is now implemented through a capability-gated `Script.
 
 Real Shelly Plug S Gen3 firmware 1.7.5 smoke confirmed unchanged script bytes during config-only update and successful persisted-config reload after runtime restart. Continue measuring script/RAM footprint as new operators are added, but this stage no longer blocks product feature work.
 
+### Follow-up option — global Shelly KVS as storage fallback
+
+Keep `Script.storage` as the default owner-local store for automation config. If future sensor sets, operators or runtime data approach practical `Script.storage` limits, evaluate the device-level Shelly `KVS` API as an overflow or alternative persistence layer. Any move to global KVS must keep Local Climate Link data explicitly namespaced/versioned and preserve clear automation ownership, migration and uninstall/cleanup semantics instead of silently spreading script-owned state across device-global storage.
+
 ## 2. Multiple thermometers — DONE
 
 Climate automation can reference up to 8 thermometers with explicit `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi BTHome and TP357 sensors may be mixed in one set. Freshness is tracked per sensor: stale/unusable members are omitted, and when no configured member remains fresh the runtime fails safe OFF. Single-sensor automations remain backward compatible.
