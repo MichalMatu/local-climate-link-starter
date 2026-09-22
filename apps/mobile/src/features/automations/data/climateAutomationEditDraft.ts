@@ -15,6 +15,7 @@ type ClimateAutomationEditDraftState = {
     runtimeAddress: string;
     profileId: ClimateInstalledAutomation['config']['sensor']['profileId'];
   }[];
+  inheritedSensorIds?: readonly string[];
 };
 
 const sensorIdentityKey = (runtimeAddress: string): string =>
@@ -42,12 +43,18 @@ export const createClimateAutomationEditDraftPatch = (
     config.sensor,
     ...(config.sensorSet?.additionalSensors ?? [])
   ];
-  const savedSensorIdentityKeys = new Set(
-    state.sensorDevices.map((sensor) => sensorIdentityKey(sensor.runtimeAddress))
+  const savedSensorByIdentityKey = new Map(
+    state.sensorDevices.map((sensor) => [sensorIdentityKey(sensor.runtimeAddress), sensor])
+  );
+  const savedSensorIdentityKeys = new Set(savedSensorByIdentityKey.keys());
+  const inheritedSensorIdentityKeys = new Set(
+    (state.inheritedSensorIds ?? []).map(sensorIdentityKey)
   );
   const configuredSensorDevices = configuredSensors.map((sensor) => ({
     id: sensor.runtimeAddress,
-    name: sensor.displayName,
+    name:
+      savedSensorByIdentityKey.get(sensorIdentityKey(sensor.runtimeAddress))?.name ??
+      sensor.displayName,
     runtimeAddress: sensor.runtimeAddress,
     profileId: sensor.profileId
   }));
@@ -73,11 +80,14 @@ export const createClimateAutomationEditDraftPatch = (
     selectedSensorId: configuredSensorDevices[0]!.id,
     additionalSensorIds: configuredSensorDevices.slice(1).map((sensor) => sensor.id),
     inheritedSensorIds: configuredSensors
-      .filter(
-        (sensor) =>
+      .filter((sensor) => {
+        const identityKey = sensorIdentityKey(sensor.runtimeAddress);
+        return (
           hasRecoveredRuntimeIdentity(sensor) ||
-          !savedSensorIdentityKeys.has(sensorIdentityKey(sensor.runtimeAddress))
-      )
+          inheritedSensorIdentityKeys.has(identityKey) ||
+          !savedSensorIdentityKeys.has(identityKey)
+        );
+      })
       .map((sensor) => sensor.runtimeAddress),
     sensorAggregation: config.sensorSet?.aggregation ?? 'avg',
     rulePreset: config.rule.mode,
