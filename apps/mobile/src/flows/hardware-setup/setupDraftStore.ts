@@ -60,6 +60,7 @@ const defaultThresholdInputsForPreset = (
 
 type HardwareSetupDraftState = HardwareSetupDraft &
   SensorDraftActions<SensorDraftDevice> & {
+    sensorMembershipEditStarted: boolean;
     setShellyNameInput(value: string): void;
     setShellyUrlInput(value: string): void;
     upsertShellyDevice(device: ShellyDraftDevice): void;
@@ -94,8 +95,9 @@ const persistExplicitSensorPatch = (
   patch: Partial<HardwareSetupDraft>
 ): Partial<HardwareSetupDraftState> => {
   const inheritedSensorIds = new Set(state.inheritedSensorIds);
+  const shouldDropInherited = !state.sensorMembershipEditStarted;
   const explicitPatch =
-    patch.additionalSensorIds === undefined
+    !shouldDropInherited || patch.additionalSensorIds === undefined
       ? patch
       : {
           ...patch,
@@ -103,11 +105,10 @@ const persistExplicitSensorPatch = (
             (id) => !inheritedSensorIds.has(id)
           )
         };
-  return persistPatch(state, {
-    ...explicitPatch,
-    inheritedSensorIds: [],
-    inheritedSensorSourceId: null
-  });
+  return {
+    ...persistPatch(state, explicitPatch),
+    sensorMembershipEditStarted: true
+  };
 };
 
 const updateListItem = <TItem extends { id: string }>(
@@ -143,6 +144,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
 
   return {
     ...initialDraft,
+    sensorMembershipEditStarted: false,
     setShellyNameInput: (shellyNameInput) => set({ shellyNameInput }),
     setShellyUrlInput: (shellyUrlInput) => set({ shellyUrlInput }),
     upsertShellyDevice: (device) =>
@@ -220,13 +222,10 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
         return patch ? persistExplicitSensorPatch(state, patch) : state;
       }),
     setAdditionalSensorIds: (ids) =>
-      set((state) =>
-        persistPatch(state, {
-          ...setAdditionalSensorSelection(state, ids),
-          inheritedSensorIds: [],
-          inheritedSensorSourceId: null
-        })
-      ),
+      set((state) => ({
+        ...persistPatch(state, setAdditionalSensorSelection(state, ids)),
+        sensorMembershipEditStarted: true
+      })),
     toggleAdditionalSensorDevice: (id) =>
       set((state) => {
         const patch = toggleAdditionalSensorSelection(state, id);
@@ -269,13 +268,20 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
     loadClimateAutomationDraft: (installation) =>
-      set((state) =>
-        persistPatch(state, createClimateAutomationEditDraftPatch(state, installation))
-      )
+      set((state) => ({
+        ...persistPatch(
+          state,
+          createClimateAutomationEditDraftPatch(state, installation)
+        ),
+        sensorMembershipEditStarted: false
+      }))
   };
 });
 
 export const resetHardwareSetupDraftStore = () => {
   clearStoredHardwareSetupDraft();
-  useHardwareSetupDraftStore.setState(DEFAULT_HARDWARE_SETUP_DRAFT);
+  useHardwareSetupDraftStore.setState({
+    ...DEFAULT_HARDWARE_SETUP_DRAFT,
+    sensorMembershipEditStarted: false
+  });
 };

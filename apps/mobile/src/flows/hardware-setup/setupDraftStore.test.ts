@@ -213,7 +213,7 @@ describe('hardware setup Plug identity', () => {
     expect(reopenedStored.inheritedSensorSourceId).toBe(installation.id);
   });
 
-  it('keeps an authoritative full sensor set while clearing inherited membership markers', () => {
+  it('keeps an authoritative full sensor set while accepting inherited members for the current edit session', () => {
     const addresses = [
       'C2:C0:00:30:64:01',
       'C2:C0:00:30:64:02',
@@ -240,8 +240,13 @@ describe('hardware setup Plug identity', () => {
       addresses[1],
       addresses[2]
     ]);
-    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
-    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBeNull();
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      addresses[2]
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      'climate:test'
+    );
+    expect(useHardwareSetupDraftStore.getState().sensorMembershipEditStarted).toBe(true);
   });
 
   it('keeps inherited configured members when removing an unrelated saved sensor', () => {
@@ -359,7 +364,45 @@ describe('hardware setup Plug identity', () => {
     expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual([
       addresses[2]
     ]);
-    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
-    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBeNull();
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      addresses[3]
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      installation.id
+    );
+    expect(useHardwareSetupDraftStore.getState().sensorMembershipEditStarted).toBe(true);
+
+    useHardwareSetupDraftStore.getState().toggleAdditionalSensorDevice(addresses[3]);
+
+    expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual([
+      addresses[2],
+      addresses[3]
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      addresses[3]
+    ]);
+
+    const storedAfterExplicitEdit = JSON.parse(
+      String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
+    ) as typeof DEFAULT_HARDWARE_SETUP_DRAFT;
+    expect(storedAfterExplicitEdit.inheritedSensorIds).toEqual([addresses[3]]);
+    expect(storedAfterExplicitEdit.inheritedSensorSourceId).toBe(installation.id);
+
+    useHardwareSetupDraftStore.setState({
+      ...storedAfterExplicitEdit,
+      sensorMembershipEditStarted: false
+    });
+    useHardwareSetupDraftStore.getState().loadClimateAutomationDraft(installation);
+
+    expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual(
+      addresses.slice(1)
+    );
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      addresses[3]
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      installation.id
+    );
+    expect(useHardwareSetupDraftStore.getState().sensorMembershipEditStarted).toBe(false);
   });
 });

@@ -26,7 +26,7 @@ The merged baseline includes:
 - up to 8 Climate thermometers with `avg`, `min`, `max` and `firstValid` aggregation;
 - per-sensor freshness with safe-OFF when no configured sensor remains usable;
 - normalized physical BLE `runtimeAddress` as the canonical mobile thermometer identity;
-- persisted recovery provenance scoped to the installed automation ID so it survives Edit reopen/app restart without leaking between automations, and does not silently retain inherited additional sensors after an explicit membership edit;
+- persisted recovery provenance scoped to the installed automation ID plus runtime-only Edit-session membership state, so Back/app restart reconstructs the durable installation while the first explicit membership change does not silently retain inherited additional sensors;
 - authoritative Load from Shelly reconstruction of the complete runtime sensor set;
 - setup-draft persistence kept behind the hardware-setup data boundary;
 - responsive E2E fixtures updated to the current `lcl.hardwareSetupDraft.v9` contract.
