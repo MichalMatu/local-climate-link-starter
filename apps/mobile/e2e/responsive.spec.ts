@@ -26,6 +26,8 @@ const draft = {
   ],
   selectedShellyId: 'http://192.168.0.20/',
   selectedSensorId: 'A4:C1:38:4F:24:CD',
+  additionalSensorIds: [],
+  sensorAggregation: 'avg',
   diagnosticShellyId: 'http://192.168.0.20/',
   rulePreset: 'heating',
   onThresholdInput: '19',
@@ -60,13 +62,13 @@ const viewports = [
 
 const seedDraft = async (page: Page) => {
   await page.addInitScript((value) => {
-    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(value));
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v9', JSON.stringify(value));
   }, draft);
 };
 
 const seedTimeDraft = async (page: Page) => {
   await page.addInitScript((value) => {
-    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(value));
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v9', JSON.stringify(value));
   }, timeDraft);
 };
 

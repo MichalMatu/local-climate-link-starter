@@ -90,6 +90,8 @@ const savedPlugDraft = {
   sensorDevices: [],
   selectedShellyId: 'shellyplugsg3-led-e2e',
   selectedSensorId: null,
+  additionalSensorIds: [],
+  sensorAggregation: 'avg',
   rulePreset: 'heating',
   onThresholdInput: '19',
   offThresholdInput: '20',
@@ -103,7 +105,7 @@ const savedPlugDraft = {
 
 const seedSavedPlug = async (page: Page) => {
   await page.addInitScript((draft) => {
-    window.localStorage.setItem('lcl.hardwareSetupDraft.v8', JSON.stringify(draft));
+    window.localStorage.setItem('lcl.hardwareSetupDraft.v9', JSON.stringify(draft));
   }, savedPlugDraft);
 };
 
