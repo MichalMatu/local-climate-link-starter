@@ -1,6 +1,7 @@
 import {
   configHash,
   decodeShellyThermostatScript,
+  GENERATOR_VERSION,
   generateShellyRuntimeConfigUpdateEval,
   generateShellyThermostatScript,
   shellyRuntimeConfigMatchesConfig,
@@ -84,6 +85,9 @@ const defaultServices: ClimateAutomationEditServices = {
 
 const runtimeHash = (code: string): string =>
   hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${code}`);
+
+const runtimeUsesCurrentGenerator = (code: string): boolean =>
+  decodeShellyThermostatScript(code)?.generatorVersion === GENERATOR_VERSION;
 
 const effectiveRuntimeConfig = (runtime: ShellyAutomationScriptState) => {
   if (runtime.code === null) return null;
@@ -261,6 +265,7 @@ export const updateClimateInstalledAutomation = async ({
   let install: ShellyInstallResult;
   if (
     currentRuntime.code !== null &&
+    runtimeUsesCurrentGenerator(currentRuntime.code) &&
     currentRuntime.script?.running === true &&
     supportsShellyRuntimeConfigPersistence(currentRuntime.code) &&
     supportsShellyPerSensorDiagnosticsRuntime(currentRuntime.code) &&

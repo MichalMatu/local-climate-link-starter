@@ -2,6 +2,7 @@ import {
   configHash,
   createDefaultShellyThermostatConfig,
   generateShellyThermostatScript,
+  GENERATOR_VERSION,
   normalizeConfig,
   serializeShellyRuntimeConfig
 } from '@lcl/script-generator';
@@ -123,6 +124,46 @@ describe('updateClimateInstalledAutomation', () => {
       expect.stringContaining(configHash(editedConfig))
     );
     expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
+  });
+
+  it('replaces an otherwise capable runtime from a previous generator revision on deliberate save', async () => {
+    const previousCode = originalCode.replace(
+      `// g: ${GENERATOR_VERSION}`,
+      '// g: 0.5.0'
+    );
+    const previousInstallation = {
+      ...installation,
+      script: {
+        ...installation.script,
+        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${previousCode}`)
+      }
+    };
+    const mocked = services({
+      readManagedRuntime: vi
+        .fn()
+        .mockResolvedValueOnce(runtime({ code: previousCode }))
+        .mockResolvedValueOnce(runtime({ code: editedCode })),
+      replaceManagedScript: vi.fn(async () => ({
+        scriptId: 7,
+        scriptHash: editedHash,
+        running: true
+      }))
+    });
+
+    const result = await updateClimateInstalledAutomation({
+      installation: previousInstallation,
+      config: editedConfig,
+      installations: [previousInstallation],
+      services: mocked
+    });
+
+    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
+    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
+      installation.shelly.baseUrl,
+      editedCode
+    );
+    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
+    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
   });
 
   it('upgrades a persistence-capable runtime that predates per-sensor diagnostics', async () => {

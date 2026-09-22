@@ -2,7 +2,7 @@ import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
 import { outputProfileIdSchema, sensorProfileIdSchema } from '@lcl/device-profiles';
 import { z } from 'zod';
 
-export const GENERATOR_VERSION = '0.5.0';
+export const GENERATOR_VERSION = '0.5.1';
 export const MAX_CLIMATE_SENSORS = 4;
 
 const shellyRuntimeAddressSchema = z
