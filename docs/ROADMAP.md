@@ -56,7 +56,24 @@ Add reusable operators for clock/time windows, interval, cooldown, minimum ON, m
 
 Build automation list/templates and more advanced rules on the stable engine/config model. Avoid adding parallel ownership models or feature-specific runtimes when a shared operator/config path is sufficient.
 
-## 6. BLE Shelly transport
+## 6. Shelly Script Library + simple configurators — PARALLEL TRACK
+
+Build a curated library of useful existing Shelly scripts that Local Climate Link can present as end-user features with a simple `choose -> configure -> install/run` flow instead of exposing raw script code.
+
+This track may be developed in parallel with the core Climate/automation roadmap on a dedicated work branch because most work should stay behind a separate script-catalog/configurator boundary. Do not fork device identity, ownership, transport, install safety or recovery rules: reuse the same Shelly client and managed-resource safeguards already used elsewhere.
+
+For each candidate script:
+
+1. review source, supported Shelly models/firmware and required components;
+2. verify its license/redistribution/attribution requirements before bundling or adapting it;
+3. define a small typed configuration schema for the values a normal user should edit;
+4. expose those values through a simple menu/form rather than raw JavaScript;
+5. install/update through the common Shelly lifecycle with backup, identity checks and explicit ownership;
+6. test on real hardware before marking that catalog entry supported.
+
+Prefer wrapping proven upstream scripts with a thin Local Climate Link configuration layer over rewriting them without a concrete reason. Keep the catalog modular so individual scripts can be added, updated or removed independently.
+
+## 7. BLE Shelly transport
 
 Run a real-hardware feasibility spike first. If Shelly BLE exposes enough RPC for the required lifecycle, implement a shared `ShellyRpcTransport` and HTTP/BLE adapters. Progressively enable:
 
@@ -71,3 +88,5 @@ BLE must not fork automation ownership, persistence or business logic.
 ## Working rule
 
 Refactor only for a concrete blocker, broken ownership or a feature that needs the boundary. Prefer small vertical slices with focused regressions, one final `pnpm check`, and real hardware acceptance when behavior touches Shelly/BLE/relay safety.
+
+Parallel branches are allowed when they have clearly separated ownership and low file overlap. Keep one branch focused on core automation/UX cleanup and a second branch focused on the Shelly Script Library. Rebase/sync both from `main` regularly, merge small completed slices quickly, and avoid concurrent edits to shared lifecycle/transport files unless one track waits for the other.
