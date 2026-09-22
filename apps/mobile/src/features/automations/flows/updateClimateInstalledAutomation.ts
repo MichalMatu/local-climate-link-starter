@@ -5,6 +5,7 @@ import {
   generateShellyThermostatScript,
   shellyRuntimeConfigMatchesConfig,
   supportsShellyMultiSensorRuntime,
+  supportsShellyPerSensorDiagnosticsRuntime,
   supportsShellyRuntimeConfigPersistence,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
@@ -262,6 +263,7 @@ export const updateClimateInstalledAutomation = async ({
     currentRuntime.code !== null &&
     currentRuntime.script?.running === true &&
     supportsShellyRuntimeConfigPersistence(currentRuntime.code) &&
+    supportsShellyPerSensorDiagnosticsRuntime(currentRuntime.code) &&
     currentRuntime.runtimeConfigStorageSupported &&
     (!requiresMultiSensorRuntime(config) ||
       supportsShellyMultiSensorRuntime(currentRuntime.code))

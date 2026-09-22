@@ -67,6 +67,31 @@ export const bleDiscoverySnapshotSchema = z
 export type BleDiscoveryCandidate = z.infer<typeof bleDiscoveryCandidateSchema>;
 export type BleDiscoverySnapshot = z.infer<typeof bleDiscoverySnapshotSchema>;
 
+const diagnosticRuntimeAddressSchema = z
+  .string()
+  .regex(/^[0-9a-f]{12}$/i)
+  .transform((value) => value.toUpperCase().match(/.{2}/g)!.join(':'));
+
+const perSensorDiagnosticSchema = z
+  .tuple([
+    diagnosticRuntimeAddressSchema,
+    z.number().nullable(),
+    z.number().nullable(),
+    z.number().nullable(),
+    z.number().nullable(),
+    z.number().nullable(),
+    z.union([z.literal(0), z.literal(1)])
+  ])
+  .transform((diagnostic) => ({
+    runtimeAddress: diagnostic[0],
+    temperatureC: diagnostic[1],
+    humidityPct: diagnostic[2],
+    batteryPct: diagnostic[3],
+    rssi: diagnostic[4],
+    lastSeenUptimeMs: diagnostic[5],
+    fresh: diagnostic[6] === 1
+  }));
+
 export const diagnosticSnapshotSchema = z
   .object({
     v: z.number(),
@@ -93,6 +118,7 @@ export const diagnosticSnapshotSchema = z
         z.number().nullable()
       ])
       .nullable(),
+    d: z.array(perSensorDiagnosticSchema).optional(),
     g: z.tuple([
       z.number().nullable(),
       z.number().nullable(),
@@ -123,6 +149,7 @@ export const diagnosticSnapshotSchema = z
       runtimeAddress: snapshot.s[0],
       displayName: snapshot.s[1]
     },
+    sensorDiagnostics: snapshot.d ?? [],
     rule: {
       control: {
         metric: snapshot.q[0] === 1 ? 'humidity' : 'temperature',

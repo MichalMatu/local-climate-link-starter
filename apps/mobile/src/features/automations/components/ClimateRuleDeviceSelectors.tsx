@@ -17,9 +17,12 @@ export type ClimateRuleSensorDevice = ClimateRuleDevice & {
 };
 
 export type ClimateRuleLiveReading = {
-  source: 'phone' | 'shelly-runtime';
+  source: 'phone' | 'shelly-runtime' | 'recovered-runtime';
   temperatureC?: number | undefined;
   humidityPct?: number | undefined;
+  batteryPct?: number | undefined;
+  rssi?: number | undefined;
+  ageMs?: number | undefined;
   stale: boolean;
   shellyName?: string | undefined;
 };
@@ -56,7 +59,8 @@ export const ClimateRuleDeviceSelectors = ({
   const { t } = useTranslation();
 
   const liveMeta = (device: ClimateRuleSensorDevice) => {
-    const reading = sensorLiveReadings[device.runtimeAddress.toUpperCase()];
+    const reading =
+      sensorLiveReadings[device.runtimeAddress.trim().replace(/[:-]/g, '').toUpperCase()];
     const sourceTitle =
       reading?.source === 'shelly-runtime'
         ? `${t('hardware.rule.selectedShelly')}: ${reading.shellyName ?? ''}`

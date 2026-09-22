@@ -43,6 +43,7 @@ export const RuleSetupPage = ({
   const sensorLiveReadings = useRuleSensorReadings({
     sensorDevices: flow.sensorDevices,
     samplesBySensorId: flow.sensorSamplesById,
+    inheritedSensorIds: flow.inheritedSensorIds,
     preferredShellyBaseUrl: flow.selectedShelly?.baseUrl
   });
 

@@ -111,7 +111,9 @@ const createExecutableRuntime = (
     'BLE',
     'Timer',
     `${script}\nreturn {diag:function(){return JSON.parse(diag());}};`
-  )(shelly, ble, timer) as { diag: () => { g: unknown[] } };
+  )(shelly, ble, timer) as {
+    diag: () => { g: unknown[]; d: unknown[][] };
+  };
 
   if (!scanCallback) {
     throw new Error('Generated runtime did not subscribe to BLE scanner.');
@@ -239,7 +241,8 @@ describe('generateShellyThermostatScript', () => {
         null,
         0,
         'boot'
-      ]
+      ],
+      d: [['A4C1384F24CD', null, null, null, null, null, 0]]
     });
   });
 
@@ -348,6 +351,15 @@ describe('generateShellyThermostatScript', () => {
     expect(runtime.diag().g[2]).toBe(58);
     expect(runtime.diag().g[3]).toBe(99);
     expect(runtime.diag().g[16]).toBe('ok');
+    expect(runtime.diag().d[0]).toEqual([
+      'A4C1384F24CD',
+      22.5,
+      58,
+      99,
+      -35,
+      expect.any(Number),
+      1
+    ]);
   });
 
   it('keeps consecutive hits when an incomplete BTHome packet arrives', () => {

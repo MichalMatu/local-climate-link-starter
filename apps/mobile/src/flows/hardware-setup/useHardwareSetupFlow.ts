@@ -42,6 +42,9 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const additionalSensorIds = useHardwareSetupDraftStore(
     (state) => state.additionalSensorIds
   );
+  const inheritedSensorIds = useHardwareSetupDraftStore(
+    (state) => state.inheritedSensorIds
+  );
   const toggleAdditionalSensorDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.toggleAdditionalSensorDevice
   );
@@ -265,6 +268,7 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     selectedSensorId,
     selectedSensor,
     additionalSensorIds,
+    inheritedSensorIds,
     additionalSensors,
     selectSensorDevice,
     toggleAdditionalSensorDevice,

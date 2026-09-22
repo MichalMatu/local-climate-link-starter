@@ -45,7 +45,7 @@ const renderMeasurementHelper = (): string => {
 
   return `function fr(x,n){return x!==null&&n-x<=Math.min(${COMPOSITE_MEASUREMENT_WINDOW_MS},C.s);}
 function av(v,t,n){var z=[],q,u,i;for(i=0;i<R.u.length;i++){u=R.u[i];if(u&&fr(u[t],n)&&u[v]!=null)z.push(u[v]);}R.fc=z.length;if(!z.length)return null;if(C.ag===3||C.ag===undefined)return z[0];q=z[0];if(C.ag===1){for(i=1;i<z.length;i++)q=Math.min(q,z[i]);return q;}if(C.ag===2){for(i=1;i<z.length;i++)q=Math.max(q,z[i]);return q;}q=0;for(i=0;i<z.length;i++)q+=z[i];return q/z.length;}
-function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(!p){R.ds="cv";return;}if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;${commonDecision}}`;
+function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(!p){R.ds="cv";return;}if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;u[6]=C.ss?C.ss[j][0]:C.a;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;${commonDecision}}`;
 };
 
 export const generateShellyThermostatScript = (input: unknown): string => {
@@ -65,7 +65,8 @@ function stale(){var n=nw();if(R.ls===null||n-R.ls>C.s){R.ds="st";R.nh=0;R.fh=0;
 ${renderThresholdHelper()}
 ${renderMeasurementHelper()}
 ${renderRuntimeParser()}
-function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStatus("switch:0");return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds],u:[R.fc,C.ss?C.ss.length:1,C.ag===undefined?3:C.ag]});}
+function pd(){var n=nw(),s=C.ss,a=[],i,u,x,l,f;for(i=0;i<(s?s.length:1);i++){x=s?s[i][0]:C.a;u=R.u[i];if(!u||u[6]!==x){a.push([x,null,null,null,null,null,0]);continue;}l=u[2];if(u[3]!==null&&(l===null||u[3]>l))l=u[3];f=C.vp?fr(u[2],n)&&fr(u[3],n):fr(C.m?u[3]:u[2],n);a.push([x,u[0],u[1],u[4],u[5],l,f?1:0]);}return a;}
+function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStatus("switch:0");return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds],d:pd(),u:[R.fc,C.ss?C.ss.length:1,C.ag===undefined?3:C.ag]});}
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ix(a){var z=na(a),s=C.ss;if(!s)return z===C.a?0:-1;for(var i=0;i<s.length;i++)if(z===s[i][0])return i;return-1;}
 function ev(e,x){if(e!==BLE.Scanner.SCAN_RESULT||!x)return;var j=ix(x.addr);if(j<0)return;R.l=nw();if(x.rssi!==undefined&&x.rssi<C.r){R.r=x.rssi;R.ds="rl";return;}var p=C.ss?C.ss[j][2]:C.p;parse(x,p,j);}

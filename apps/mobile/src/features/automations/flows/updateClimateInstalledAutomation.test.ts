@@ -125,6 +125,45 @@ describe('updateClimateInstalledAutomation', () => {
     expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
   });
 
+  it('upgrades a persistence-capable runtime that predates per-sensor diagnostics', async () => {
+    const legacyCode = originalCode
+      .replace('function pd()', 'function oldPd()')
+      .replace('d:pd()', 'd:oldPd()');
+    const legacyInstallation = {
+      ...installation,
+      script: {
+        ...installation.script,
+        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
+      }
+    };
+    const mocked = services({
+      readManagedRuntime: vi
+        .fn()
+        .mockResolvedValueOnce(runtime({ code: legacyCode }))
+        .mockResolvedValueOnce(runtime({ code: editedCode })),
+      replaceManagedScript: vi.fn(async () => ({
+        scriptId: 7,
+        scriptHash: editedHash,
+        running: true
+      }))
+    });
+
+    const result = await updateClimateInstalledAutomation({
+      installation: legacyInstallation,
+      config: editedConfig,
+      installations: [legacyInstallation],
+      services: mocked
+    });
+
+    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
+    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
+      installation.shelly.baseUrl,
+      editedCode
+    );
+    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
+    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
+  });
+
   it('upgrades a persistence-capable single-sensor body before the first multi-sensor edit', async () => {
     const legacyCode = originalCode.replace(
       'function av(v,t,n)',
