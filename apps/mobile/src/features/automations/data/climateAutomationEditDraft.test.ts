@@ -120,7 +120,9 @@ describe('createClimateAutomationEditDraftPatch', () => {
 
     expect(patch.sensorDevices).toHaveLength(4);
     expect(patch.sensorDevices.map((sensor) => sensor.runtimeAddress)).toEqual(addresses);
-    expect(new Set(patch.sensorDevices.map((sensor) => sensor.runtimeAddress)).size).toBe(4);
+    expect(new Set(patch.sensorDevices.map((sensor) => sensor.runtimeAddress)).size).toBe(
+      4
+    );
     expect(patch.sensorDevices.map((sensor) => sensor.id)).toEqual(addresses);
     expect(patch.selectedSensorId).toBe(addresses[0]);
     expect(patch.additionalSensorIds).toEqual(addresses.slice(1));
