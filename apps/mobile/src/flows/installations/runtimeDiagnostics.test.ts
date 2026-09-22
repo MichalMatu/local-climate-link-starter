@@ -8,6 +8,7 @@ const snapshot = (
     uptimeSec?: number | null;
     staleTimeoutSec?: number;
     dataState?: string;
+    includeSensorDiagnostics?: boolean;
   } = {}
 ) =>
   diagnosticSnapshotSchema.parse({
@@ -21,7 +22,9 @@ const snapshot = (
       'uptimeSec' in overrides ? (overrides.uptimeSec ?? null) : 1000
     ],
     p: [false, 0, 230, 0, 100, 30],
-    d: [['a4c1384f24cd', 21.5, 55, 88, -60, 950_000, 1]],
+    ...(overrides.includeSensorDiagnostics === false
+      ? {}
+      : { d: [['a4c1384f24cd', 21.5, 55, 88, -60, 950_000, 1]] }),
     g: [
       overrides.lastSeenUptimeMs === undefined ? 950_000 : overrides.lastSeenUptimeMs,
       21.5,
@@ -56,6 +59,10 @@ describe('installedAutomationHealth', () => {
         fresh: true
       }
     ]);
+  });
+
+  it('keeps aggregate-only legacy diagnostics backward compatible', () => {
+    expect(snapshot({ includeSensorDiagnostics: false }).sensorDiagnostics).toEqual([]);
   });
 
   it('marks a fresh runtime snapshot as healthy', () => {

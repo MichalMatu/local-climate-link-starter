@@ -110,7 +110,8 @@ describe('buildRuleSensorReadings', () => {
               temperatureC: 22.2,
               humidityPct: 57,
               batteryPct: 77,
-              rssi: -65
+              rssi: -65,
+              lastSeenUptimeMs: 980_000
             })
           ]),
           fetchedAtMs: 20_000
@@ -134,6 +135,7 @@ describe('buildRuleSensorReadings', () => {
       humidityPct: 57,
       batteryPct: 77,
       rssi: -65,
+      ageMs: 20_000,
       stale: false
     });
   });
@@ -154,7 +156,7 @@ describe('buildRuleSensorReadings', () => {
     expect(readings[ruleSensorReadingKey(additionalAddress)]).toBeUndefined();
   });
 
-  it('keeps recovered runtime provenance until a live source appears', () => {
+  it('does not invent a telemetry source for recovered identity provenance', () => {
     const readings = buildRuleSensorReadings({
       sensorDevices,
       samplesBySensorId: {},
@@ -162,8 +164,36 @@ describe('buildRuleSensorReadings', () => {
     });
 
     expect(readings[ruleSensorReadingKey(additionalAddress)]).toEqual({
-      source: 'recovered-runtime',
-      stale: true
+      identityProvenance: 'recovered-runtime'
+    });
+    expect(readings[ruleSensorReadingKey(additionalAddress)]?.source).toBeUndefined();
+  });
+
+  it('keeps recovered identity provenance separate from a Plug BLE live source', () => {
+    const readings = buildRuleSensorReadings({
+      sensorDevices,
+      samplesBySensorId: {},
+      inheritedSensorIds: [additionalAddress],
+      runtimeSnapshots: [
+        {
+          installation: installation(),
+          snapshot: snapshot([
+            plugDiagnostic(additionalAddress, {
+              temperatureC: 23.1,
+              humidityPct: 58
+            })
+          ]),
+          fetchedAtMs: 20_000
+        }
+      ]
+    });
+
+    expect(readings[ruleSensorReadingKey(additionalAddress)]).toMatchObject({
+      source: 'shelly-runtime',
+      identityProvenance: 'recovered-runtime',
+      temperatureC: 23.1,
+      humidityPct: 58,
+      stale: false
     });
   });
 

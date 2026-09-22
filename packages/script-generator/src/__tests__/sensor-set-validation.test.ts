@@ -13,7 +13,7 @@ const sensor = (index: number) => ({
 });
 
 describe('multi-sensor config limits', () => {
-  it('accepts exactly eight sensors', () => {
+  it('accepts exactly four sensors', () => {
     const base = createDefaultShellyThermostatConfig();
     const config = normalizeConfig({
       ...base,
@@ -31,7 +31,7 @@ describe('multi-sensor config limits', () => {
     );
   });
 
-  it('rejects a ninth sensor', () => {
+  it('rejects a fifth sensor', () => {
     const base = createDefaultShellyThermostatConfig();
     expect(() =>
       normalizeConfig({

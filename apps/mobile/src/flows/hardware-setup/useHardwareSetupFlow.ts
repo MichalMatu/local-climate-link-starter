@@ -45,6 +45,9 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const inheritedSensorIds = useHardwareSetupDraftStore(
     (state) => state.inheritedSensorIds
   );
+  const inheritedSensorSourceId = useHardwareSetupDraftStore(
+    (state) => state.inheritedSensorSourceId
+  );
   const toggleAdditionalSensorDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.toggleAdditionalSensorDevice
   );
@@ -154,6 +157,10 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
         .filter((device): device is (typeof sensorDevices)[number] => device !== null),
     [additionalSensorIds, sensorDevices]
   );
+  const scopedInheritedSensorIds =
+    editInstallationId && inheritedSensorSourceId === editInstallationId
+      ? inheritedSensorIds
+      : [];
   const shellyBaseUrl = useMemo(() => {
     return selectedShelly?.baseUrl ?? null;
   }, [selectedShelly]);
@@ -268,7 +275,7 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     selectedSensorId,
     selectedSensor,
     additionalSensorIds,
-    inheritedSensorIds,
+    inheritedSensorIds: scopedInheritedSensorIds,
     additionalSensors,
     selectSensorDevice,
     toggleAdditionalSensorDevice,

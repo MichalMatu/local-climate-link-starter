@@ -3,6 +3,7 @@ import {
   createDefaultShellyThermostatConfig,
   generateShellyThermostatScript,
   supportsShellyMultiSensorRuntime,
+  supportsShellyPerSensorDiagnosticsRuntime,
   supportsShellyRuntimeConfigPersistence
 } from '../index.js';
 
@@ -12,6 +13,21 @@ describe('Shelly runtime capabilities', () => {
 
     expect(supportsShellyRuntimeConfigPersistence(script)).toBe(true);
     expect(supportsShellyMultiSensorRuntime(script)).toBe(true);
+  });
+
+  it('recognizes per-sensor diagnostics only when the structural markers are present', () => {
+    const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
+
+    expect(supportsShellyPerSensorDiagnosticsRuntime(script)).toBe(true);
+    expect(
+      supportsShellyPerSensorDiagnosticsRuntime(
+        script.replace('function pd()', 'function legacyPd()')
+      )
+    ).toBe(false);
+    expect(
+      supportsShellyPerSensorDiagnosticsRuntime(script.replace('d:pd()', 'd:legacyPd()'))
+    ).toBe(false);
+    expect(supportsShellyPerSensorDiagnosticsRuntime('// LCL')).toBe(false);
   });
 
   it.each([

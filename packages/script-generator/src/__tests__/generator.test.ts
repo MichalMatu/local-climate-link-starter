@@ -246,6 +246,91 @@ describe('generateShellyThermostatScript', () => {
     });
   });
 
+  it('keeps per-sensor diagnostics independent for seen and unseen configured sensors', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const baseConfig = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      );
+      const primaryAddress = 'A4:C1:38:4F:24:CD';
+      const additionalAddress = '11:22:33:44:55:66';
+      const script = generateShellyThermostatScript({
+        ...baseConfig,
+        sensor: {
+          ...baseConfig.sensor,
+          sensorId: 'primary',
+          runtimeAddress: primaryAddress,
+          displayName: 'Primary'
+        },
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [
+            {
+              ...baseConfig.sensor,
+              sensorId: 'additional',
+              runtimeAddress: additionalAddress,
+              displayName: 'Additional'
+            }
+          ]
+        }
+      });
+      const { runtime, scan } = createExecutableRuntime(script);
+
+      expect(runtime.diag().d).toEqual([
+        ['A4C1384F24CD', null, null, null, null, null, 0],
+        ['112233445566', null, null, null, null, null, 0]
+      ]);
+
+      scan('scan-result', {
+        addr: primaryAddress,
+        advData: createBthomeAdvertisement([0x40, 0x45, 0xd7, 0x00, 0x2e, 55, 0x01, 88]),
+        rssi: -60
+      });
+      nowMs += 100_000;
+      scan('scan-result', {
+        addr: additionalAddress,
+        advData: createBthomeAdvertisement([0x40, 0x45, 0xde, 0x00, 0x2e, 57, 0x01, 77]),
+        rssi: -65
+      });
+      nowMs += 10_000;
+
+      expect(runtime.diag().d).toEqual([
+        ['A4C1384F24CD', 21.5, 55, 88, -60, 1_000_000, 0],
+        ['112233445566', 22.2, 57, 77, -65, 1_100_000, 1]
+      ]);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('keeps the maximum four-sensor climate runtime within the Shelly script limit', () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const additionalSensors = Array.from({ length: 3 }, (_, index) => {
+      const suffix = (index + 2).toString(16).padStart(2, '0').toUpperCase();
+      return {
+        ...baseConfig.sensor,
+        sensorId: `sensor-${index + 2}`,
+        runtimeAddress: `02:00:00:00:00:${suffix}`,
+        displayName: `Sensor ${index + 2}`
+      };
+    });
+    const script = generateShellyThermostatScript({
+      ...baseConfig,
+      sensorSet: {
+        aggregation: 'avg',
+        additionalSensors
+      }
+    });
+
+    expect(byteLength(script)).toBeLessThanOrEqual(8000);
+    expect(() => new Function(script)).not.toThrow();
+  });
+
   it('returns null for unsupported or malformed thermostat scripts', () => {
     expect(decodeShellyThermostatScript('var C={};var R={};')).toBeNull();
     expect(

@@ -11,7 +11,7 @@ export type ShellyScriptGeneratorMode = 'climate-engine-v1' | 'discovery-debug';
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
 
 const renderPersistentConfigLoader = (): string => `var E=0;
-function vs(c){if(c.ss===undefined)return c.ag===undefined;if(!Array.isArray(c.ss)||c.ss.length<2||c.ss.length>8||typeof c.ag!="number"||c.ag<0||c.ag>3)return false;for(var i=0;i<c.ss.length;i++){var s=c.ss[i];if(!Array.isArray(s)||s.length!==3||typeof s[0]!="string"||typeof s[1]!="string"||(s[2]!==0&&s[2]!==1))return false;}return true;}
+function vs(c){if(c.ss===undefined)return c.ag===undefined;if(!Array.isArray(c.ss)||c.ss.length<2||c.ss.length>4||typeof c.ag!="number"||c.ag<0||c.ag>3)return false;for(var i=0;i<c.ss.length;i++){var s=c.ss[i];if(!Array.isArray(s)||s.length!==3||typeof s[0]!="string"||typeof s[1]!="string"||(s[2]!==0&&s[2]!==1))return false;}return true;}
 function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&typeof c.a=="string"&&typeof c.fa=="string"&&typeof c.n=="string"&&typeof c.k=="string"&&typeof c.i=="number"&&c.i>=0&&typeof c.r=="number"&&c.r>=-100&&c.r<=-20&&typeof c.on=="number"&&typeof c.off=="number"&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&typeof c.h=="number"&&c.h>=1&&c.h<=10&&typeof c.c=="number"&&c.c>0&&typeof c.s=="number"&&c.s>0&&typeof c.x=="number"&&c.x>0&&typeof c.vp=="number"&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off)&&vs(c);}
 function lc(d){if(typeof Script=="undefined"||!Script.storage||!Script.storage.getItem)return d;try{var x=Script.storage.getItem(${JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)});if(!x)return d;var c=JSON.parse(x);if(vc(c))return c;}catch(e){}E=1;return d;}
 C=lc(C);`;

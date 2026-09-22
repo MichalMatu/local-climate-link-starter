@@ -21,7 +21,8 @@ const finiteNumber = (value: number | null | undefined): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
 export type RuleSensorLiveReading = {
-  source: 'phone' | 'shelly-runtime' | 'recovered-runtime';
+  source?: 'phone' | 'shelly-runtime' | undefined;
+  identityProvenance?: 'recovered-runtime' | undefined;
   temperatureC?: number | undefined;
   humidityPct?: number | undefined;
   batteryPct?: number | undefined;
@@ -29,7 +30,7 @@ export type RuleSensorLiveReading = {
   vpdKpa?: number | undefined;
   seenAtMs?: number | undefined;
   ageMs?: number | undefined;
-  stale: boolean;
+  stale?: boolean | undefined;
   shellyName?: string | undefined;
   shellyBaseUrl?: string | undefined;
 };
@@ -101,14 +102,12 @@ const shouldReplaceReading = ({
   candidate: RuleSensorLiveReading;
   preferredShellyBaseUrl: string;
 }): boolean => {
-  if (!current) return true;
-  if (current.source === 'recovered-runtime') {
-    return candidate.source !== 'recovered-runtime';
-  }
-  if (candidate.source === 'recovered-runtime') return false;
+  if (!current?.source) return true;
 
-  if (current.stale !== candidate.stale) {
-    return current.stale && !candidate.stale;
+  const currentStale = current.stale === true;
+  const candidateStale = candidate.stale === true;
+  if (currentStale !== candidateStale) {
+    return currentStale && !candidateStale;
   }
 
   const currentPreferred =
@@ -130,6 +129,14 @@ const shouldReplaceReading = ({
   return (candidate.seenAtMs ?? 0) > (current.seenAtMs ?? 0);
 };
 
+const preserveIdentityProvenance = (
+  current: RuleSensorLiveReading | undefined,
+  candidate: RuleSensorLiveReading
+): RuleSensorLiveReading =>
+  current?.identityProvenance
+    ? { ...candidate, identityProvenance: current.identityProvenance }
+    : candidate;
+
 export const buildRuleSensorReadings = ({
   sensorDevices,
   samplesBySensorId,
@@ -147,8 +154,7 @@ export const buildRuleSensorReadings = ({
     const sensorId = ruleSensorReadingKey(runtimeAddress);
     if (!sensorIds.has(sensorId)) return;
     readings[sensorId] = {
-      source: 'recovered-runtime',
-      stale: true
+      identityProvenance: 'recovered-runtime'
     };
   });
 
@@ -164,7 +170,7 @@ export const buildRuleSensorReadings = ({
         preferredShellyBaseUrl: normalizeBaseUrl(preferredShellyBaseUrl)
       })
     ) {
-      readings[sensorId] = reading;
+      readings[sensorId] = preserveIdentityProvenance(readings[sensorId], reading);
     }
   });
 
@@ -213,7 +219,7 @@ export const buildRuleSensorReadings = ({
           preferredShellyBaseUrl: preferredBaseUrl
         })
       ) {
-        readings[sensorId] = candidate;
+        readings[sensorId] = preserveIdentityProvenance(readings[sensorId], candidate);
       }
     });
   });
