@@ -316,11 +316,15 @@ describe('generateShellyThermostatScript', () => {
         ...baseConfig.sensor,
         sensorId: `sensor-${index + 2}`,
         runtimeAddress: `02:00:00:00:00:${suffix}`,
-        displayName: `Sensor ${index + 2}`
+        displayName: `Thermometer 0${index + 2}:AA`
       };
     });
     const script = generateShellyThermostatScript({
       ...baseConfig,
+      sensor: {
+        ...baseConfig.sensor,
+        displayName: 'Thermometer 01:AA'
+      },
       sensorSet: {
         aggregation: 'avg',
         additionalSensors
