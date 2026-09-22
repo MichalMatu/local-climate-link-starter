@@ -22,7 +22,8 @@ const sensorIdentityKey = (runtimeAddress: string): string =>
 
 const hasRecoveredRuntimeIdentity = (
   sensor: ClimateInstalledAutomation['config']['sensor']
-): boolean => sensorIdentityKey(sensor.sensorId) === sensorIdentityKey(sensor.runtimeAddress);
+): boolean =>
+  sensorIdentityKey(sensor.sensorId) === sensorIdentityKey(sensor.runtimeAddress);
 
 export const createClimateAutomationEditDraftPatch = (
   state: ClimateAutomationEditDraftState,
