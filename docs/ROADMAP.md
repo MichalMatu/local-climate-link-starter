@@ -29,30 +29,34 @@ Keep `Script.storage` as the default owner-local store for automation config. If
 
 ## 2. Multiple thermometers — DONE
 
-A Climate automation can reference up to 8 thermometers with explicit `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi BTHome and TP357 sensors may be mixed in one set. Freshness is tracked per sensor: stale/unusable members are omitted, and when no configured member remains fresh the runtime fails safe OFF. Single-sensor automations remain backward compatible.
+A Climate automation can reference up to 4 thermometers with explicit `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi BTHome and TP357 sensors may be mixed in one set. Freshness is tracked per sensor: stale/unusable members are omitted, and when no configured member remains fresh the runtime fails safe OFF. Single-sensor automations remain backward compatible.
 
-The compact runtime config stores the sensor set in `ss` and aggregation in `ag`. Recovery preserves the complete runtime sensor set and aggregation, while ordinary aggregation/sensor edits on the current 0.4 runtime use the persistent `Script.storage` / `Script.Eval` config channel rather than rewriting engine code.
+The compact runtime config stores the sensor set in `ss` and aggregation in `ag`. Recovery preserves the complete runtime sensor set and aggregation, while compatible Climate edits use the persistent `Script.storage` / `Script.Eval` config channel instead of rewriting engine code.
 
 The mobile draft/edit boundary uses normalized physical BLE `runtimeAddress` as the canonical thermometer identity. Phone discovery, Plug discovery, installed config and Load from Shelly converge on the same physical row. Recovered membership is tracked as persisted draft provenance scoped to the installed automation ID so it survives Edit reopen and app restart without leaking between automations. A runtime-only Edit-session flag makes the first explicit membership change stop silently carrying inherited additional sensors while keeping durable provenance intact through Back/restart; matching provenance is retired only after the updated installed automation is committed successfully; Load from Shelly remains the authoritative full-set replacement for the current session.
 
 Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance passed with four physical sensors, including the previously duplicated recovery case. The exact dated evidence and final safe hardware state are recorded in `docs/testing/hardware-matrix.md`.
 
-### Current Climate slice — per-sensor diagnostics and reading provenance
+### Per-sensor diagnostics and reading provenance — DONE
 
-Work branch: `work/per-sensor-diagnostics`.
+The `work/per-sensor-diagnostics` slice is complete:
 
-The preimplementation architecture audit is complete. Its canonical findings, ownership map, migration requirement and test/hardware guardrails are in `docs/HANDOFF_NEXT_CHAT.md`; do not repeat the audit as a separate phase.
+- the Shelly runtime exposes one compact Plug-side diagnostic record per configured thermometer;
+- runtime diagnostics join mobile rows only through normalized physical BLE `runtimeAddress`;
+- Phone BLE and Plug BLE remain live-reading sources while recovered/runtime identity provenance is tracked separately;
+- unseen sensors remain explicit null/fresh=0 records and removed/reordered membership clears indexed runtime state;
+- old aggregate-only diagnostics remain parseable;
+- old managed runtimes upgrade through the guarded replacement path only on explicit Save/Edit;
+- generated Climate runtime size is hard-limited to 8000 bytes;
+- the supported Climate sensor count is capped at 4.
 
-Implementation target:
+Focused regressions, the normal repository gate, script/RAM review and real S22+ + Shelly Plug S Gen3 acceptance all passed. The four-sensor runtime generated at 7929 bytes and all four physical sensors were observed independently in `/diag.d` and in the mobile Edit UI. Dated hardware evidence is in `docs/testing/hardware-matrix.md`.
 
-- expose one Plug-side live diagnostic record per configured thermometer without changing aggregation/safe-OFF semantics;
-- join runtime diagnostics to mobile rows only by normalized physical BLE `runtimeAddress`;
-- show Phone BLE vs Plug BLE live-source provenance while keeping recovered identity provenance separate;
-- remove stale indexed runtime readings when sensor membership/order changes;
-- preserve backward compatibility with existing aggregate-only runtimes;
-- capability-gate one-time engine upgrade of an old managed runtime on explicit Save/Edit only, never on diagnostic reads.
+### Next stabilization slice — UX corrections — NEXT
 
-Finish with focused regressions, the normal repository gate, script/RAM review and dated real-device acceptance before marking this slice done.
+Before adding Soil moisture or another automation capability, do a focused UX correction/stabilization pass over the existing mobile product flows.
+
+Start that work from a fresh branch after this completed diagnostics slice is merged to `main`. Scope concrete UX changes from observed/user-reported friction rather than reopening architecture or adding new product capabilities. Preserve the current ownership model and hardware/runtime behavior unless a UX defect proves a functional bug. Use the repository UX gate plus real render/device inspection for affected screens.
 
 ## 3. Soil moisture
 
