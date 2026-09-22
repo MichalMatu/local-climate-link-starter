@@ -141,7 +141,7 @@ describe('hardware setup Plug identity', () => {
     }
   });
 
-  it('drops runtime-only inherited membership after an explicit sensor selection edit', () => {
+  it('drops recovered membership after an explicit edit even if an older draft persisted its row', () => {
     const addresses = [
       'C2:C0:00:30:64:01',
       'C2:C0:00:30:64:02',
@@ -155,6 +155,10 @@ describe('hardware setup Plug identity', () => {
       runtimeAddress,
       displayName
     });
+    const recoveredSensor = {
+      ...configuredSensor(addresses[3], 'Recovered legacy sensor'),
+      sensorId: addresses[3]
+    };
     const installation = createInstalledAutomation({
       shelly: { id: 'shelly-abc', model: 'S3PL-00112EU', gen: 3 },
       shellyName: 'Grow plug',
@@ -169,7 +173,7 @@ describe('hardware setup Plug identity', () => {
           additionalSensors: [
             configuredSensor(addresses[1], 'TP357 2'),
             configuredSensor(addresses[2], 'TP357 3'),
-            configuredSensor(addresses[3], 'Recovered legacy sensor')
+            recoveredSensor
           ]
         }
       }),
@@ -178,9 +182,9 @@ describe('hardware setup Plug identity', () => {
 
     useHardwareSetupDraftStore.setState({
       ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      sensorDevices: addresses.slice(0, 3).map((runtimeAddress, index) => ({
+      sensorDevices: addresses.map((runtimeAddress, index) => ({
         id: runtimeAddress,
-        name: `Saved TP357 ${index + 1}`,
+        name: index === 3 ? 'Previously persisted recovery row' : `Saved TP357 ${index + 1}`,
         runtimeAddress,
         profileId: 'tp357_custom_v1' as const
       }))
