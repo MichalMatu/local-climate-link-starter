@@ -20,6 +20,10 @@ type ClimateAutomationEditDraftState = {
 const sensorIdentityKey = (runtimeAddress: string): string =>
   runtimeAddress.trim().toUpperCase();
 
+const hasRecoveredRuntimeIdentity = (
+  sensor: ClimateInstalledAutomation['config']['sensor']
+): boolean => sensorIdentityKey(sensor.sensorId) === sensorIdentityKey(sensor.runtimeAddress);
+
 export const createClimateAutomationEditDraftPatch = (
   state: ClimateAutomationEditDraftState,
   installation: ClimateInstalledAutomation
@@ -67,11 +71,13 @@ export const createClimateAutomationEditDraftPatch = (
     selectedShellyId: shellyDevice.id,
     selectedSensorId: configuredSensorDevices[0]!.id,
     additionalSensorIds: configuredSensorDevices.slice(1).map((sensor) => sensor.id),
-    inheritedSensorIds: configuredSensorDevices
+    inheritedSensorIds: configuredSensors
       .filter(
-        (sensor) => !savedSensorIdentityKeys.has(sensorIdentityKey(sensor.runtimeAddress))
+        (sensor) =>
+          hasRecoveredRuntimeIdentity(sensor) ||
+          !savedSensorIdentityKeys.has(sensorIdentityKey(sensor.runtimeAddress))
       )
-      .map((sensor) => sensor.id),
+      .map((sensor) => sensor.runtimeAddress),
     sensorAggregation: config.sensorSet?.aggregation ?? 'avg',
     rulePreset: config.rule.mode,
     onThresholdInput: String(config.rule.control.onThreshold),
