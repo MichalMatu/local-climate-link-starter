@@ -111,7 +111,9 @@ const createExecutableRuntime = (
     'BLE',
     'Timer',
     `${script}\nreturn {diag:function(){return JSON.parse(diag());}};`
-  )(shelly, ble, timer) as { diag: () => { g: unknown[] } };
+  )(shelly, ble, timer) as {
+    diag: () => { g: unknown[]; d: unknown[][] };
+  };
 
   if (!scanCallback) {
     throw new Error('Generated runtime did not subscribe to BLE scanner.');
@@ -239,8 +241,122 @@ describe('generateShellyThermostatScript', () => {
         null,
         0,
         'boot'
-      ]
+      ],
+      d: [['A4C1384F24CD', null, null, null, null, null, 0]]
     });
+  });
+
+  it('keeps per-sensor diagnostics independent for seen and unseen configured sensors', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const baseConfig = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      );
+      const primaryAddress = 'A4:C1:38:4F:24:CD';
+      const additionalAddress = '11:22:33:44:55:66';
+      const script = generateShellyThermostatScript({
+        ...baseConfig,
+        sensor: {
+          ...baseConfig.sensor,
+          sensorId: 'primary',
+          runtimeAddress: primaryAddress,
+          displayName: 'Primary'
+        },
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [
+            {
+              ...baseConfig.sensor,
+              sensorId: 'additional',
+              runtimeAddress: additionalAddress,
+              displayName: 'Additional'
+            }
+          ]
+        }
+      });
+      const { runtime, scan } = createExecutableRuntime(script);
+
+      expect(runtime.diag().d).toEqual([
+        ['A4C1384F24CD', null, null, null, null, null, 0],
+        ['112233445566', null, null, null, null, null, 0]
+      ]);
+
+      scan('scan-result', {
+        addr: primaryAddress,
+        advData: createBthomeAdvertisement([0x40, 0x45, 0xd7, 0x00, 0x2e, 55, 0x01, 88]),
+        rssi: -60
+      });
+      nowMs += 100_000;
+      scan('scan-result', {
+        addr: additionalAddress,
+        advData: createBthomeAdvertisement([0x40, 0x45, 0xde, 0x00, 0x2e, 57, 0x01, 77]),
+        rssi: -65
+      });
+      nowMs += 10_000;
+
+      expect(runtime.diag().d).toEqual([
+        ['A4C1384F24CD', 21.5, 55, 88, -60, 1_000_000, 0],
+        ['112233445566', 22.2, 57, 77, -65, 1_100_000, 1]
+      ]);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('keeps the maximum four-sensor climate runtime within the Shelly script limit', () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const additionalSensors = Array.from({ length: 3 }, (_, index) => {
+      const suffix = (index + 2).toString(16).padStart(2, '0').toUpperCase();
+      return {
+        ...baseConfig.sensor,
+        sensorId: `sensor-${index + 2}`,
+        runtimeAddress: `02:00:00:00:00:${suffix}`,
+        displayName: `Thermometer 0${index + 2}:AA`
+      };
+    });
+    const script = generateShellyThermostatScript({
+      ...baseConfig,
+      sensor: {
+        ...baseConfig.sensor,
+        displayName: 'Thermometer 01:AA'
+      },
+      sensorSet: {
+        aggregation: 'avg',
+        additionalSensors
+      }
+    });
+
+    expect(byteLength(script)).toBeLessThanOrEqual(8000);
+    expect(() => new Function(script)).not.toThrow();
+  });
+
+  it('rejects a four-sensor runtime whose names would exceed the Shelly script limit', () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'tp357_custom_v1',
+      'humidifying'
+    );
+    const sensor = (index: number) => ({
+      ...baseConfig.sensor,
+      sensorId: `sensor-${index}`,
+      runtimeAddress: `02:00:00:00:00:0${index}`,
+      displayName: `Sensor ${index} `.padEnd(32, 'X')
+    });
+
+    expect(() =>
+      generateShellyThermostatScript({
+        ...baseConfig,
+        sensor: sensor(1),
+        sensorSet: {
+          aggregation: 'avg',
+          additionalSensors: [sensor(2), sensor(3), sensor(4)]
+        }
+      })
+    ).toThrow(/maximum is 8000/);
   });
 
   it('returns null for unsupported or malformed thermostat scripts', () => {
@@ -348,6 +464,15 @@ describe('generateShellyThermostatScript', () => {
     expect(runtime.diag().g[2]).toBe(58);
     expect(runtime.diag().g[3]).toBe(99);
     expect(runtime.diag().g[16]).toBe('ok');
+    expect(runtime.diag().d[0]).toEqual([
+      'A4C1384F24CD',
+      22.5,
+      58,
+      99,
+      -35,
+      expect.any(Number),
+      1
+    ]);
   });
 
   it('keeps consecutive hits when an incomplete BTHome packet arrives', () => {

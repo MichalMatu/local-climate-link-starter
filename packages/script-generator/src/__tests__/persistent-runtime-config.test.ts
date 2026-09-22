@@ -132,7 +132,9 @@ describe('persistent Shelly runtime config', () => {
       eo: 11,
       ef: 12,
       m: 1,
-      sa: 13
+      sa: 13,
+      u: [[21.5, 55, 1000, 1000, 88, -60, 'A4C1384F24CD']],
+      fc: 1
     };
     const evaluate = new Function('C', 'R', 'vc', 'Script', 'nw', `return ${code};`) as (
       currentConfig: Record<string, unknown>,
@@ -175,7 +177,9 @@ describe('persistent Shelly runtime config', () => {
       eo: null,
       ef: null,
       m: 0,
-      sa: 0
+      sa: 0,
+      u: [],
+      fc: 0
     });
   });
 

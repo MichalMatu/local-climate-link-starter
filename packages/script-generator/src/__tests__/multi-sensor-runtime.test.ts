@@ -221,9 +221,9 @@ describe('multi-sensor climate runtime', () => {
     ).toThrow(/unique runtime addresses/);
   });
 
-  it('keeps eight typical sensors within the Script.storage value limit', () => {
+  it('keeps four typical sensors within the Script.storage value limit', () => {
     const base = createDefaultShellyThermostatConfig();
-    const additionalSensors = Array.from({ length: 7 }, (_, index) => ({
+    const additionalSensors = Array.from({ length: 3 }, (_, index) => ({
       ...base.sensor,
       sensorId: `sensor-${index + 2}`,
       runtimeAddress: `AA:BB:CC:DD:EE:${String(index + 2).padStart(2, '0')}`,

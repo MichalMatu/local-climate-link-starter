@@ -77,6 +77,7 @@ export type RuleSetupFlow = Pick<
   | 'canRunSafeRelayTest'
   | 'configState'
   | 'installMutation'
+  | 'inheritedSensorIds'
   | 'isAdvancedSettingsValid'
   | 'isEditingClimateAutomation'
   | 'isThresholdValid'

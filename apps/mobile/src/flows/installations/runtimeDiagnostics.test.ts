@@ -8,6 +8,7 @@ const snapshot = (
     uptimeSec?: number | null;
     staleTimeoutSec?: number;
     dataState?: string;
+    includeSensorDiagnostics?: boolean;
   } = {}
 ) =>
   diagnosticSnapshotSchema.parse({
@@ -21,6 +22,9 @@ const snapshot = (
       'uptimeSec' in overrides ? (overrides.uptimeSec ?? null) : 1000
     ],
     p: [false, 0, 230, 0, 100, 30],
+    ...(overrides.includeSensorDiagnostics === false
+      ? {}
+      : { d: [['a4c1384f24cd', 21.5, 55, 88, -60, 950_000, 1]] }),
     g: [
       overrides.lastSeenUptimeMs === undefined ? 950_000 : overrides.lastSeenUptimeMs,
       21.5,
@@ -43,6 +47,24 @@ const snapshot = (
   });
 
 describe('installedAutomationHealth', () => {
+  it('normalizes per-sensor diagnostics from the Plug runtime', () => {
+    expect(snapshot().sensorDiagnostics).toEqual([
+      {
+        runtimeAddress: 'A4:C1:38:4F:24:CD',
+        temperatureC: 21.5,
+        humidityPct: 55,
+        batteryPct: 88,
+        rssi: -60,
+        lastSeenUptimeMs: 950_000,
+        fresh: true
+      }
+    ]);
+  });
+
+  it('keeps aggregate-only legacy diagnostics backward compatible', () => {
+    expect(snapshot({ includeSensorDiagnostics: false }).sensorDiagnostics).toEqual([]);
+  });
+
   it('marks a fresh runtime snapshot as healthy', () => {
     expect(installedAutomationHealth(snapshot())).toBe('ok');
   });

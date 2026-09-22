@@ -17,10 +17,14 @@ export type ClimateRuleSensorDevice = ClimateRuleDevice & {
 };
 
 export type ClimateRuleLiveReading = {
-  source: 'phone' | 'shelly-runtime';
+  source?: 'phone' | 'shelly-runtime' | undefined;
+  identityProvenance?: 'recovered-runtime' | undefined;
   temperatureC?: number | undefined;
   humidityPct?: number | undefined;
-  stale: boolean;
+  batteryPct?: number | undefined;
+  rssi?: number | undefined;
+  ageMs?: number | undefined;
+  stale?: boolean | undefined;
   shellyName?: string | undefined;
 };
 
@@ -56,13 +60,29 @@ export const ClimateRuleDeviceSelectors = ({
   const { t } = useTranslation();
 
   const liveMeta = (device: ClimateRuleSensorDevice) => {
-    const reading = sensorLiveReadings[device.runtimeAddress.toUpperCase()];
-    const sourceTitle =
+    const reading =
+      sensorLiveReadings[device.runtimeAddress.trim().replace(/[:-]/g, '').toUpperCase()];
+    const liveSourceLabel =
       reading?.source === 'shelly-runtime'
-        ? `${t('hardware.rule.selectedShelly')}: ${reading.shellyName ?? ''}`
+        ? t('hardware.rule.liveSourcePlugBle')
         : reading?.source === 'phone'
-          ? t('hardware.sensor.scanPhoneTitle')
+          ? t('hardware.rule.liveSourcePhoneBle')
           : undefined;
+    const identityProvenanceLabel =
+      reading?.identityProvenance === 'recovered-runtime'
+        ? t('hardware.rule.identityRecoveredRuntime')
+        : undefined;
+    const provenanceLabels = [liveSourceLabel, identityProvenanceLabel].filter(
+      (value): value is string => value !== undefined
+    );
+    const sourceTitleParts = [
+      reading?.source === 'shelly-runtime' && liveSourceLabel
+        ? `${liveSourceLabel}: ${reading.shellyName ?? ''}`
+        : liveSourceLabel,
+      identityProvenanceLabel
+    ].filter((value): value is string => value !== undefined);
+    const sourceTitle =
+      sourceTitleParts.length > 0 ? sourceTitleParts.join(' · ') : undefined;
 
     return (
       <span
@@ -76,7 +96,10 @@ export const ClimateRuleDeviceSelectors = ({
         ) : reading?.source === 'phone' ? (
           <IconDeviceMobile aria-hidden="true" />
         ) : null}
-        <span>{formatSensorLiveSummary(reading)}</span>
+        <span>
+          {formatSensorLiveSummary(reading)}
+          {provenanceLabels.length > 0 ? ` · ${provenanceLabels.join(' · ')}` : ''}
+        </span>
       </span>
     );
   };
