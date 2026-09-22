@@ -80,7 +80,11 @@ Freshness is evaluated independently for every member. A stale or unusable membe
 
 Current 0.4 runtimes persist sensor-set and aggregation edits through the same validated `Script.storage` config channel as other Climate edits. Recovery reads the effective persisted config first and reconstructs the full sensor set and aggregation without requiring an engine rewrite. Installed legacy managed runtimes may require one guarded `Script.PutCode` upgrade before they gain this config shape; later edits remain config-only.
 
-Physical BLE identity is the intended deduplication boundary across phone discovery, Plug-side discovery and recovered runtime membership. The current acceptance cycle exposed a remaining UI/recovery provenance bug where one physical sensor can surface as duplicate logical rows and a recovered legacy member can be retained alongside newly selected sensors; that follow-up is tracked in the roadmap and is not part of the runtime aggregation semantics.
+For the current BLE thermometer profiles, normalized physical `runtimeAddress` is the canonical logical identity at the mobile draft/edit boundary. Phone discovery, Plug-side discovery and Load from Shelly already produce that address; edit reconstruction now uses the same identity instead of treating config `sensorId` as a second device key. Config validation continues to enforce unique runtime addresses, so provenance metadata cannot create another logical row for the same physical BLE device.
+
+Recovery still reconstructs the complete runtime sensor membership. The existing recovery contract writes `sensorId = runtimeAddress`; edit uses that deterministic marker, plus configured-only membership, as transient inherited-selection provenance. Ordinary non-sensor edits preserve recovered membership unchanged. Once the user explicitly changes sensor membership, inherited additional sensors are not carried forward unless they are explicitly selected again. Load from Shelly is an explicit full-set replacement and therefore restores every runtime sensor and clears inherited-selection provenance. This changes only mobile draft/edit semantics; runtime `ss`, `ag`, freshness and safety behavior are unchanged.
+
+Regression tests cover the previously observed 7-row duplication, recovered `A4:C1:38:4F:24:CD` surviving a prior draft, full multi-sensor recovery and full-set Load from Shelly. Real-hardware re-acceptance is still required before the identity/provenance fix is considered hardware-confirmed.
 
 ## Transport direction
 
