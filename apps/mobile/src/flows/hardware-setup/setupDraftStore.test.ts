@@ -128,12 +128,14 @@ describe('hardware setup Plug identity', () => {
         selectedSensorId: string | null;
         additionalSensorIds: string[];
         inheritedSensorIds: string[];
+        inheritedSensorSourceId: string | null;
         sensorAggregation: string;
       };
       expect(stored).toMatchObject({
         selectedSensorId: 'sensor-a',
         additionalSensorIds: ['sensor-b'],
         inheritedSensorIds: [],
+        inheritedSensorSourceId: null,
         sensorAggregation: 'max'
       });
     } finally {
@@ -188,6 +190,7 @@ describe('hardware setup Plug identity', () => {
       String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
     ) as typeof DEFAULT_HARDWARE_SETUP_DRAFT;
     expect(firstStored.inheritedSensorIds).toEqual([inheritedAddress]);
+    expect(firstStored.inheritedSensorSourceId).toBe(installation.id);
     expect(firstStored.sensorDevices.map((sensor) => sensor.runtimeAddress)).toEqual([
       primaryAddress,
       inheritedAddress
@@ -199,11 +202,15 @@ describe('hardware setup Plug identity', () => {
     expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
       inheritedAddress
     ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      installation.id
+    );
 
     const reopenedStored = JSON.parse(
       String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
     ) as typeof DEFAULT_HARDWARE_SETUP_DRAFT;
     expect(reopenedStored.inheritedSensorIds).toEqual([inheritedAddress]);
+    expect(reopenedStored.inheritedSensorSourceId).toBe(installation.id);
   });
 
   it('keeps an authoritative full sensor set while clearing inherited membership markers', () => {
@@ -221,7 +228,8 @@ describe('hardware setup Plug identity', () => {
         profileId: 'tp357_custom_v1' as const
       })),
       selectedSensorId: addresses[0],
-      inheritedSensorIds: [addresses[2]]
+      inheritedSensorIds: [addresses[2]],
+      inheritedSensorSourceId: 'climate:test'
     });
 
     useHardwareSetupDraftStore
@@ -233,6 +241,7 @@ describe('hardware setup Plug identity', () => {
       addresses[2]
     ]);
     expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBeNull();
   });
 
   it('keeps inherited configured members when removing an unrelated saved sensor', () => {
@@ -264,7 +273,8 @@ describe('hardware setup Plug identity', () => {
       ],
       selectedSensorId: primaryAddress,
       additionalSensorIds: [inheritedAddress],
-      inheritedSensorIds: [inheritedAddress]
+      inheritedSensorIds: [inheritedAddress],
+      inheritedSensorSourceId: 'climate:test'
     });
 
     useHardwareSetupDraftStore.getState().removeSensorDevice(unusedAddress);
@@ -279,6 +289,9 @@ describe('hardware setup Plug identity', () => {
     expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
       inheritedAddress
     ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      'climate:test'
+    );
   });
 
   it('drops recovered membership after an explicit edit even if an older draft persisted its row', () => {
@@ -336,6 +349,9 @@ describe('hardware setup Plug identity', () => {
     expect(useHardwareSetupDraftStore.getState().additionalSensorIds).toEqual(
       addresses.slice(1)
     );
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      installation.id
+    );
 
     useHardwareSetupDraftStore.getState().selectSensorDevice(addresses[1]);
 
@@ -344,5 +360,6 @@ describe('hardware setup Plug identity', () => {
       addresses[2]
     ]);
     expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBeNull();
   });
 });
