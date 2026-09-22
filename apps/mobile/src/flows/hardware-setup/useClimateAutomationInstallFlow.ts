@@ -82,6 +82,9 @@ export const useClimateAutomationInstallFlow = ({
   const setShellyScriptIdDraft = useHardwareSetupDraftStore(
     (state) => state.setShellyScriptId
   );
+  const commitClimateAutomationDraft = useHardwareSetupDraftStore(
+    (state) => state.commitClimateAutomationDraft
+  );
   const [lastInstallState, setLastInstallState] = useState<HardwareInstallState | null>(
     null
   );
@@ -190,6 +193,7 @@ export const useClimateAutomationInstallFlow = ({
     onSuccess: ({ install, installation, shellyDraftId, requiresSafeRelayTest }) => {
       setShellyScriptIdDraft(shellyDraftId, String(install.scriptId));
       upsertInstalledAutomation(installation);
+      commitClimateAutomationDraft(installation.id);
       setLastInstallState({
         shellyId: shellyDraftId,
         scriptId: install.scriptId,

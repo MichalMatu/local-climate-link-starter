@@ -1,11 +1,6 @@
 import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
-import { sensorProfileIdSchema, type SensorProfileId } from '@lcl/device-profiles';
-import {
-  climateSensorAggregationSchema,
-  MAX_CLIMATE_SENSORS
-} from '@lcl/script-generator';
+import type { SensorProfileId } from '@lcl/device-profiles';
 import { create } from 'zustand';
-import { z } from 'zod';
 import {
   createClimateAutomationEditDraftPatch,
   DEFAULT_RULE_ADVANCED_SETTINGS,
@@ -17,63 +12,21 @@ import {
   type ClimateInstalledAutomation,
   type SensorDraftActions
 } from '../../features/automations/index.js';
+import {
+  clearStoredHardwareSetupDraft,
+  persistHardwareSetupDraftPatch,
+  readStoredHardwareSetupDraft,
+  type HardwareSetupDraft,
+  type SensorDraftDevice,
+  type ShellyDraftDevice
+} from '../../features/hardware-setup/index.js';
 
-export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v9';
-
-const rulePresetSchema = z.enum(['heating', 'cooling', 'humidifying', 'dehumidifying']);
-
-const defaultThresholdInputsForPreset = (
-  preset: RulePresetId
-): { onThresholdInput: string; offThresholdInput: string } => {
-  const rule = defaultRuleForPreset(preset);
-  return {
-    onThresholdInput: String(rule.control.onThreshold),
-    offThresholdInput: String(rule.control.offThreshold)
-  };
-};
-
-const shellyDraftDeviceSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  baseUrl: z.string(),
-  scriptIdInput: z.string(),
-  model: z.string().optional(),
-  gen: z.number().int().nonnegative().optional()
-});
-
-const sensorDraftDeviceSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  runtimeAddress: z.string(),
-  profileId: sensorProfileIdSchema
-});
-
-const hardwareSetupDraftSchema = z.object({
-  shellyNameInput: z.string(),
-  shellyUrlInput: z.string(),
-  sensorProfileInput: sensorProfileIdSchema,
-  sensorMacInput: z.string(),
-  sensorNameInput: z.string(),
-  shellyDevices: z.array(shellyDraftDeviceSchema),
-  sensorDevices: z.array(sensorDraftDeviceSchema),
-  selectedShellyId: z.string().nullable(),
-  selectedSensorId: z.string().nullable(),
-  additionalSensorIds: z.array(z.string()).max(MAX_CLIMATE_SENSORS - 1),
-  sensorAggregation: climateSensorAggregationSchema,
-  rulePreset: rulePresetSchema,
-  onThresholdInput: z.string(),
-  offThresholdInput: z.string(),
-  vpdAssistEnabled: z.boolean(),
-  vpdTargetInput: z.string(),
-  rssiMinInput: z.string(),
-  staleTimeoutMinInput: z.string(),
-  minChangeMinInput: z.string(),
-  maxOnHoursInput: z.string()
-});
-
-export type ShellyDraftDevice = z.infer<typeof shellyDraftDeviceSchema>;
-export type SensorDraftDevice = z.infer<typeof sensorDraftDeviceSchema>;
-export type HardwareSetupDraft = z.infer<typeof hardwareSetupDraftSchema>;
+export { HARDWARE_SETUP_DRAFT_STORAGE_KEY } from '../../features/hardware-setup/index.js';
+export type {
+  HardwareSetupDraft,
+  SensorDraftDevice,
+  ShellyDraftDevice
+} from '../../features/hardware-setup/index.js';
 
 export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   shellyNameInput: 'Shelly Plug S Gen3',
@@ -86,6 +39,8 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   selectedShellyId: null,
   selectedSensorId: null,
   additionalSensorIds: [],
+  inheritedSensorIds: [],
+  inheritedSensorSourceId: null,
   sensorAggregation: 'avg',
   rulePreset: 'heating',
   onThresholdInput: '19',
@@ -93,8 +48,19 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   ...DEFAULT_RULE_ADVANCED_SETTINGS
 };
 
+const defaultThresholdInputsForPreset = (
+  preset: RulePresetId
+): { onThresholdInput: string; offThresholdInput: string } => {
+  const rule = defaultRuleForPreset(preset);
+  return {
+    onThresholdInput: String(rule.control.onThreshold),
+    offThresholdInput: String(rule.control.offThreshold)
+  };
+};
+
 type HardwareSetupDraftState = HardwareSetupDraft &
   SensorDraftActions<SensorDraftDevice> & {
+    sensorMembershipEditStarted: boolean;
     setShellyNameInput(value: string): void;
     setShellyUrlInput(value: string): void;
     upsertShellyDevice(device: ShellyDraftDevice): void;
@@ -116,77 +82,34 @@ type HardwareSetupDraftState = HardwareSetupDraft &
     setMinChangeMinInput(value: string): void;
     setMaxOnHoursInput(value: string): void;
     loadClimateAutomationDraft(installation: ClimateInstalledAutomation): void;
+    commitClimateAutomationDraft(installationId: string): void;
   };
-
-const isStorageAvailable = (): boolean =>
-  typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
-
-const readStoredDraft = (): HardwareSetupDraft => {
-  if (!isStorageAvailable()) {
-    return DEFAULT_HARDWARE_SETUP_DRAFT;
-  }
-
-  try {
-    const stored = window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY);
-    return stored
-      ? hardwareSetupDraftSchema.parse(JSON.parse(stored))
-      : DEFAULT_HARDWARE_SETUP_DRAFT;
-  } catch {
-    return DEFAULT_HARDWARE_SETUP_DRAFT;
-  }
-};
-
-const saveDraft = (draft: HardwareSetupDraft): void => {
-  if (!isStorageAvailable()) {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY, JSON.stringify(draft));
-  } catch {
-    return;
-  }
-};
-
-const createStoredDraft = (
-  state: HardwareSetupDraftState,
-  patch: Partial<HardwareSetupDraft> = {}
-): HardwareSetupDraft => ({
-  shellyNameInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyNameInput,
-  shellyUrlInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyUrlInput,
-  sensorProfileInput:
-    patch.sensorProfileInput ?? DEFAULT_HARDWARE_SETUP_DRAFT.sensorProfileInput,
-  sensorMacInput: DEFAULT_HARDWARE_SETUP_DRAFT.sensorMacInput,
-  sensorNameInput: DEFAULT_HARDWARE_SETUP_DRAFT.sensorNameInput,
-  shellyDevices: patch.shellyDevices ?? state.shellyDevices,
-  sensorDevices: patch.sensorDevices ?? state.sensorDevices,
-  selectedShellyId:
-    'selectedShellyId' in patch
-      ? (patch.selectedShellyId ?? null)
-      : state.selectedShellyId,
-  selectedSensorId:
-    'selectedSensorId' in patch
-      ? (patch.selectedSensorId ?? null)
-      : state.selectedSensorId,
-  additionalSensorIds: patch.additionalSensorIds ?? state.additionalSensorIds,
-  sensorAggregation: patch.sensorAggregation ?? state.sensorAggregation,
-  rulePreset: patch.rulePreset ?? state.rulePreset,
-  onThresholdInput: patch.onThresholdInput ?? state.onThresholdInput,
-  offThresholdInput: patch.offThresholdInput ?? state.offThresholdInput,
-  vpdAssistEnabled: patch.vpdAssistEnabled ?? state.vpdAssistEnabled,
-  vpdTargetInput: patch.vpdTargetInput ?? state.vpdTargetInput,
-  rssiMinInput: patch.rssiMinInput ?? state.rssiMinInput,
-  staleTimeoutMinInput: patch.staleTimeoutMinInput ?? state.staleTimeoutMinInput,
-  minChangeMinInput: patch.minChangeMinInput ?? state.minChangeMinInput,
-  maxOnHoursInput: patch.maxOnHoursInput ?? state.maxOnHoursInput
-});
 
 const persistPatch = (
   state: HardwareSetupDraftState,
   patch: Partial<HardwareSetupDraft>
+): Partial<HardwareSetupDraftState> =>
+  persistHardwareSetupDraftPatch(state, patch, DEFAULT_HARDWARE_SETUP_DRAFT);
+
+const persistExplicitSensorPatch = (
+  state: HardwareSetupDraftState,
+  patch: Partial<HardwareSetupDraft>
 ): Partial<HardwareSetupDraftState> => {
-  saveDraft(createStoredDraft(state, patch));
-  return patch;
+  const inheritedSensorIds = new Set(state.inheritedSensorIds);
+  const shouldDropInherited = !state.sensorMembershipEditStarted;
+  const explicitPatch =
+    !shouldDropInherited || patch.additionalSensorIds === undefined
+      ? patch
+      : {
+          ...patch,
+          additionalSensorIds: patch.additionalSensorIds.filter(
+            (id) => !inheritedSensorIds.has(id)
+          )
+        };
+  return {
+    ...persistPatch(state, explicitPatch),
+    sensorMembershipEditStarted: true
+  };
 };
 
 const updateListItem = <TItem extends { id: string }>(
@@ -207,7 +130,7 @@ const isReplacedShellyDevice = (
     normalizeSavedShellyEndpoint(verified.baseUrl);
 
 export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) => {
-  const storedDraft = readStoredDraft();
+  const storedDraft = readStoredHardwareSetupDraft(DEFAULT_HARDWARE_SETUP_DRAFT);
   const initialDraft = {
     ...storedDraft,
     shellyNameInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyNameInput,
@@ -222,6 +145,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
 
   return {
     ...initialDraft,
+    sensorMembershipEditStarted: false,
     setShellyNameInput: (shellyNameInput) => set({ shellyNameInput }),
     setShellyUrlInput: (shellyUrlInput) => set({ shellyUrlInput }),
     upsertShellyDevice: (device) =>
@@ -287,7 +211,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setSensorNameInput: (sensorNameInput) => set({ sensorNameInput }),
     upsertSensorDevice: (device) =>
       set((state) =>
-        persistPatch(state, {
+        persistExplicitSensorPatch(state, {
           sensorMacInput: DEFAULT_HARDWARE_SETUP_DRAFT.sensorMacInput,
           sensorNameInput: DEFAULT_HARDWARE_SETUP_DRAFT.sensorNameInput,
           ...upsertSensorSelection(state, device)
@@ -296,14 +220,17 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     selectSensorDevice: (id) =>
       set((state) => {
         const patch = selectSensorSelection(state, id);
-        return patch ? persistPatch(state, patch) : state;
+        return patch ? persistExplicitSensorPatch(state, patch) : state;
       }),
     setAdditionalSensorIds: (ids) =>
-      set((state) => persistPatch(state, setAdditionalSensorSelection(state, ids))),
+      set((state) => ({
+        ...persistPatch(state, setAdditionalSensorSelection(state, ids)),
+        sensorMembershipEditStarted: true
+      })),
     toggleAdditionalSensorDevice: (id) =>
       set((state) => {
         const patch = toggleAdditionalSensorSelection(state, id);
-        return patch ? persistPatch(state, patch) : state;
+        return patch ? persistExplicitSensorPatch(state, patch) : state;
       }),
     setSensorAggregation: (sensorAggregation) => updateDraft({ sensorAggregation }),
     setSensorDeviceName: (id, name) =>
@@ -314,7 +241,19 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     removeSensorDevice: (id) =>
       set((state) => {
         const patch = removeSensorSelection(state, id);
-        return patch ? persistPatch(state, patch) : state;
+        if (!patch) {
+          return state;
+        }
+        const changesSensorMembership =
+          state.selectedSensorId === id || state.additionalSensorIds.includes(id);
+        return changesSensorMembership
+          ? persistExplicitSensorPatch(state, patch)
+          : persistPatch(state, {
+              ...patch,
+              inheritedSensorIds: state.inheritedSensorIds.filter(
+                (sensorId) => sensorId !== id
+              )
+            });
       }),
     setRulePreset: (rulePreset) => {
       const thresholds = defaultThresholdInputsForPreset(rulePreset);
@@ -330,18 +269,30 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
     loadClimateAutomationDraft: (installation) =>
-      set((state) =>
-        persistPatch(state, createClimateAutomationEditDraftPatch(state, installation))
-      )
+      set((state) => ({
+        ...persistPatch(
+          state,
+          createClimateAutomationEditDraftPatch(state, installation)
+        ),
+        sensorMembershipEditStarted: false
+      })),
+    commitClimateAutomationDraft: (installationId) =>
+      set((state) => ({
+        ...(state.inheritedSensorSourceId === installationId
+          ? persistPatch(state, {
+              inheritedSensorIds: [],
+              inheritedSensorSourceId: null
+            })
+          : {}),
+        sensorMembershipEditStarted: false
+      }))
   };
 });
 
 export const resetHardwareSetupDraftStore = () => {
-  if (isStorageAvailable()) {
-    window.localStorage.removeItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY);
-  }
-
+  clearStoredHardwareSetupDraft();
   useHardwareSetupDraftStore.setState({
-    ...DEFAULT_HARDWARE_SETUP_DRAFT
+    ...DEFAULT_HARDWARE_SETUP_DRAFT,
+    sensorMembershipEditStarted: false
   });
 };

@@ -1,20 +1,80 @@
 # Next chat handoff
 
-Stabilization and the first Automation Engine/config separation stage are the current baseline. Before new implementation work, fetch fresh `main` and verify the Local Agent daemon/binding from `AGENTS.md`.
+This handoff is for the first chat **after PR #34 is merged into `main`**.
 
-Completed stabilization includes canonical Plug identity, actionable Add errors, managed remote-to-local automation recovery, Forget vs Uninstall separation, Climate/Time identity gates before runtime mutation, restored Plug settings access for installed automations, and preservation of existing Climate/Time edit + Plug settings features.
+Start from a fresh `main`. Do not continue from an old worktree or cached branch SHA. Before any implementation, verify:
 
-`climate-engine-v1` is now a stable runtime body with typed compact config. On Shelly firmware that supports `Script.storage`, ordinary Climate edits persist config through `Script.Eval` without replacing engine code; unsupported firmware keeps the compatible `Script.PutCode` fallback. Persistent updates validate hash/version, survive runtime restart, participate in remote recovery and roll back the previous stored config on failure.
+1. PR #34 is merged and the local checkout matches fresh `origin/main`;
+2. `agent-control:.agent/status/daemon.json` is healthy and idle;
+3. Local Agent binding is exactly `e75c77cb-7589-4452-94b2-decc97ff85a1`;
+4. no duplicate task is already running for the same goal.
 
-Real Shelly Plug S Gen3 firmware 1.7.5 acceptance confirmed config-only persistence with unchanged engine bytes, persisted-config reload after runtime restart, safe cleanup, unchanged production script/schedules and final relay OFF. Samsung S22+ acceptance is part of the final slice closeout before merge.
+Canonical context is intentionally small: `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, this file and `docs/testing/hardware-matrix.md`. Historical plans belong in Git history.
 
-Next product work after this slice is merged:
+## Baseline completed by PR #34
 
-1. multiple thermometers per automation;
-2. explicit aggregation operators: `avg`, `min`, `max`, `firstValid`;
-3. preserve partial/all-sensor stale-data and safe-OFF semantics;
-4. then continue with soil moisture and richer timing operators from `docs/ROADMAP.md`.
+The product model remains:
 
-Do not reopen a broad refactor phase. BLE Shelly transport remains a later hardware feasibility stage and must reuse the same automation/config ownership model.
+```text
+physical Plug -> optional installed automation
+```
 
-Canonical project context is only `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, this file and `docs/testing/hardware-matrix.md`. Historical plans remain available in Git history.
+The merged baseline includes:
+
+- stable `climate-engine-v1` plus typed persistent runtime config;
+- capability-gated `Script.storage` / `Script.Eval` config-only Climate edits with guarded fallback;
+- up to 8 Climate thermometers with `avg`, `min`, `max` and `firstValid` aggregation;
+- per-sensor freshness with safe-OFF when no configured sensor remains usable;
+- normalized physical BLE `runtimeAddress` as the canonical mobile thermometer identity;
+- persisted recovery provenance scoped to the installed automation ID plus runtime-only Edit-session membership state, so Back/app restart reconstructs the durable installation while the first explicit membership change does not silently retain inherited additional sensors, and matching provenance is retired only after a successful installed-automation update;
+- authoritative Load from Shelly reconstruction of the complete runtime sensor set;
+- setup-draft persistence kept behind the hardware-setup data boundary;
+- responsive E2E fixtures updated to the current `lcl.hardwareSetupDraft.v9` contract.
+
+Pre-merge verification for the final PR source included focused identity/recovery coverage, the full mobile test suite, 100% core coverage, successful production builds and the complete responsive Playwright suite. Real Samsung S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance also passed. Exact dated hardware evidence, script hash and final relay state are recorded only in `docs/testing/hardware-matrix.md`.
+
+## Next task: per-sensor Plug-side diagnostics and provenance
+
+Do a **preimplementation architecture audit first**, without changing behavior.
+
+Audit the complete path for the existing Climate diagnostic snapshot:
+
+```text
+Shelly climate runtime
+-> /diag payload
+-> decoder/types
+-> mobile runtime/reading store
+-> Plug / Climate UI
+```
+
+The implementation target after that audit is:
+
+- one diagnostic record per configured thermometer;
+- normalized `runtimeAddress` as the join key;
+- temperature, humidity, battery, RSSI, last-seen/age and stale/fresh state per sensor;
+- explicit UI provenance for `phone BLE`, `Plug BLE` and recovered/runtime data;
+- no stale Plug-side display after a sensor is removed from configuration or stops being observed;
+- no change to aggregation, rule evaluation or safe-OFF semantics merely to support presentation diagnostics.
+
+Before coding, identify product owner, state owner, side-effect owner, UI owner, final file layout and test owner as required by `AGENTS.md`. Pay particular attention to runtime memory/script-size cost and avoid adding another sensor identity.
+
+## After that
+
+Continue in this order unless a concrete blocker changes the priority:
+
+1. soil moisture through the same typed sensor/config model;
+2. richer timing operators with explicit safety precedence;
+3. advanced automation UX/templates;
+4. Shelly Script Library/configurator as a parallel, isolated track;
+5. Shelly BLE transport only after a real-hardware feasibility spike.
+
+## Do not reopen
+
+- no broad refactor phase;
+- no parallel automation ownership model;
+- no URL/IP-as-device identity;
+- no Home Assistant, MQTT, cloud service or 24/7 server requirement in the default product flow;
+- no destructive/runtime mutation without identity verification;
+- no weakening of boot OFF, stale-sensor OFF or explicit final relay-state rules.
+
+For any hardware-facing slice, finish with dated real-device evidence in `docs/testing/hardware-matrix.md`.
