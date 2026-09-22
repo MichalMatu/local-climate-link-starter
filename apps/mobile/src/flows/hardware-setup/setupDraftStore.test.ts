@@ -299,6 +299,41 @@ describe('hardware setup Plug identity', () => {
     );
   });
 
+  it('retires matching durable provenance only after a successful installation commit', () => {
+    const inheritedAddress = 'A4:C1:38:4F:24:CD';
+    useHardwareSetupDraftStore.setState({
+      ...DEFAULT_HARDWARE_SETUP_DRAFT,
+      inheritedSensorIds: [inheritedAddress],
+      inheritedSensorSourceId: 'climate:installed-a',
+      sensorMembershipEditStarted: true
+    });
+
+    useHardwareSetupDraftStore
+      .getState()
+      .commitClimateAutomationDraft('climate:installed-b');
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([
+      inheritedAddress
+    ]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBe(
+      'climate:installed-a'
+    );
+    expect(useHardwareSetupDraftStore.getState().sensorMembershipEditStarted).toBe(false);
+
+    useHardwareSetupDraftStore.setState({ sensorMembershipEditStarted: true });
+    useHardwareSetupDraftStore
+      .getState()
+      .commitClimateAutomationDraft('climate:installed-a');
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorIds).toEqual([]);
+    expect(useHardwareSetupDraftStore.getState().inheritedSensorSourceId).toBeNull();
+    expect(useHardwareSetupDraftStore.getState().sensorMembershipEditStarted).toBe(false);
+
+    const stored = JSON.parse(
+      String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
+    ) as typeof DEFAULT_HARDWARE_SETUP_DRAFT;
+    expect(stored.inheritedSensorIds).toEqual([]);
+    expect(stored.inheritedSensorSourceId).toBeNull();
+  });
+
   it('drops recovered membership after an explicit edit even if an older draft persisted its row', () => {
     const addresses = [
       'C2:C0:00:30:64:01',

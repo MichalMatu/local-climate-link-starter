@@ -82,6 +82,7 @@ type HardwareSetupDraftState = HardwareSetupDraft &
     setMinChangeMinInput(value: string): void;
     setMaxOnHoursInput(value: string): void;
     loadClimateAutomationDraft(installation: ClimateInstalledAutomation): void;
+    commitClimateAutomationDraft(installationId: string): void;
   };
 
 const persistPatch = (
@@ -273,6 +274,16 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           state,
           createClimateAutomationEditDraftPatch(state, installation)
         ),
+        sensorMembershipEditStarted: false
+      })),
+    commitClimateAutomationDraft: (installationId) =>
+      set((state) => ({
+        ...(state.inheritedSensorSourceId === installationId
+          ? persistPatch(state, {
+              inheritedSensorIds: [],
+              inheritedSensorSourceId: null
+            })
+          : {}),
         sensorMembershipEditStarted: false
       }))
   };
