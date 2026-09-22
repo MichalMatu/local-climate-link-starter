@@ -23,9 +23,13 @@ Persistent runtime config is now implemented through a capability-gated `Script.
 
 Real Shelly Plug S Gen3 firmware 1.7.5 smoke confirmed unchanged script bytes during config-only update and successful persisted-config reload after runtime restart. Continue measuring script/RAM footprint as new operators are added, but this stage no longer blocks product feature work.
 
-## 2. Multiple thermometers — NEXT
+## 2. Multiple thermometers — DONE
 
-Allow an automation to reference multiple thermometers with explicit aggregation such as `avg`, `min`, `max` and `firstValid`. Preserve stale-data and safe-OFF semantics when part or all of the sensor set disappears.
+Climate automation can reference up to 8 thermometers with explicit `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi BTHome and TP357 sensors may be mixed in one set. Freshness is tracked per sensor: stale/unusable members are omitted, and when no configured member remains fresh the runtime fails safe OFF. Single-sensor automations remain backward compatible.
+
+The compact runtime config stores the sensor set in `ss` and aggregation in `ag`. Recovery preserves the complete runtime sensor set and aggregation, while ordinary aggregation/sensor edits on the current 0.4 runtime use the persistent `Script.storage` / `Script.Eval` config channel rather than rewriting engine code.
+
+Real Samsung S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance covered a one-time installed-runtime upgrade from 0.2.0 to 0.4.0, all four aggregation modes, persistent config-only edits with unchanged script SHA-256 `8acb3f2e2b02936e07b960921fce25ab57004139e021ccc5e4e18f07acf2fe41`, one-sensor stale omission and recovery after BLE resumes. Final hardware state was Average, 4/4 configured sensors fresh, script running, relay OFF and no Shelly schedules.
 
 ### Follow-up TODO — sensor provenance and Plug-side BLE visibility
 
@@ -34,6 +38,7 @@ Allow an automation to reference multiple thermometers with explicit aggregation
 - Make the source of each reading explicit (`phone BLE`, `Plug BLE`, or recovered automation/runtime).
 - When recovering an existing automation from Shelly, consider importing its referenced thermometers into the app thermometer list without creating duplicates.
 - Define deterministic deduplication/identity rules so the same physical thermometer discovered by phone, Plug and recovered runtime stays one logical device.
+- Hardware acceptance exposed a concrete identity/provenance bug: the edit UI showed 7 thermometer rows (3 selected phone-source entries, 3 unselected duplicate phone-source entries and 1 Plug-source entry), while saving persisted 4 runtime sensors even though 3 TP357s were intentionally selected. The fourth member was recovered legacy sensor `A4:C1:38:4F:24:CD`. Follow-up must deduplicate by physical BLE identity across phone/Plug/recovered sources and must not silently retain stale recovered membership.
 
 ## 3. Soil moisture
 

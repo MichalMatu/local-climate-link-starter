@@ -72,6 +72,16 @@ Persistent updates carry the config hash/version, validate the stored payload, u
 
 Real Plug S Gen3 acceptance on firmware 1.7.5 confirmed that a config-only update changes effective runtime values while script bytes remain unchanged, and that the persisted config is loaded again after runtime restart.
 
+## Multiple-thermometer climate input
+
+A Climate automation may reference 1 to 8 thermometers. The compact runtime config keeps the ordered sensor set in `ss` and the aggregation operator in `ag` (`avg`, `min`, `max`, `firstValid`). The primary sensor remains the compatibility anchor for older single-sensor records, but runtime evaluation uses the complete configured set. Xiaomi BTHome and TP357 profiles may coexist in one set.
+
+Freshness is evaluated independently for every member. A stale or unusable member contributes nothing to the aggregate; if every configured member is stale/unusable, the existing safe-OFF invariant wins. Incomplete advertisements such as battery-only updates must not make an old temperature sample fresh or advance rule hit counters.
+
+Current 0.4 runtimes persist sensor-set and aggregation edits through the same validated `Script.storage` config channel as other Climate edits. Recovery reads the effective persisted config first and reconstructs the full sensor set and aggregation without requiring an engine rewrite. Installed legacy managed runtimes may require one guarded `Script.PutCode` upgrade before they gain this config shape; later edits remain config-only.
+
+Physical BLE identity is the intended deduplication boundary across phone discovery, Plug-side discovery and recovered runtime membership. The current acceptance cycle exposed a remaining UI/recovery provenance bug where one physical sensor can surface as duplicate logical rows and a recovered legacy member can be retained alongside newly selected sensors; that follow-up is tracked in the roadmap and is not part of the runtime aggregation semantics.
+
 ## Transport direction
 
 Current production management uses local HTTP RPC. BLE is deferred until real hardware proves that the required Shelly RPC lifecycle is feasible.
