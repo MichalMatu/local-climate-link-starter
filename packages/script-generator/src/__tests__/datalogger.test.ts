@@ -22,11 +22,11 @@ describe('Shelly rolling history tail generator', () => {
     );
   });
 
-  it('defaults to 5-minute polling, hourly flushes and 32 ring slots', () => {
+  it('defaults to 5-minute polling, two-hour flushes and 16 ring slots', () => {
     const script = generateShellyDataloggerScript({ sourceScriptId: 1 });
     expect(script).toContain('"p":300');
-    expect(script).toContain('"f":3600');
-    expect(script).toContain('"n":32');
+    expect(script).toContain('"f":7200');
+    expect(script).toContain('"n":16');
     expect(script).toContain('"t":3');
     expect(script).toContain('"h":10');
   });
@@ -35,15 +35,15 @@ describe('Shelly rolling history tail generator', () => {
     const script = generateShellyDataloggerScript({
       sourceScriptId: 2,
       pollIntervalSec: 600,
-      flushIntervalSec: 7200,
-      slotCount: 40,
+      flushIntervalSec: 10800,
+      slotCount: 32,
       temperatureDeltaC: 0.5,
       humidityDeltaPct: 2
     });
     expect(script).toContain('"s":2');
     expect(script).toContain('"p":600');
-    expect(script).toContain('"f":7200');
-    expect(script).toContain('"n":40');
+    expect(script).toContain('"f":10800');
+    expect(script).toContain('"n":32');
     expect(script).toContain('"t":5');
     expect(script).toContain('"h":20');
   });
@@ -55,7 +55,7 @@ describe('Shelly rolling history tail generator', () => {
     expect(() =>
       generateShellyDataloggerScript({ sourceScriptId: 1, flushIntervalSec: 3599 })
     ).toThrow(/flush interval/);
-    expect(() => generateShellyDataloggerScript({ sourceScriptId: 1, slotCount: 41 })).toThrow(
+    expect(() => generateShellyDataloggerScript({ sourceScriptId: 1, slotCount: 33 })).toThrow(
       /slot count/
     );
   });
