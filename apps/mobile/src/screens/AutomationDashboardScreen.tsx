@@ -150,6 +150,7 @@ const ClimateAutomationCard = ({
     snapshot?.diagnostics.lastEffectiveOffThreshold,
     t
   );
+  const thresholdLines = thresholdSummary.split(' · ');
 
   const primaryMetric = controlsHumidity
     ? {
@@ -228,17 +229,21 @@ const ClimateAutomationCard = ({
 
       <div className="automation-card__main" aria-label={t('dashboard.currentValues')}>
         <div className="automation-card__primary-metric">
-          <span>{primaryMetric.label}</span>
-          <strong>{primaryMetric.value}</strong>
+          <strong aria-label={`${primaryMetric.label}: ${primaryMetric.value}`}>
+            {primaryMetric.value}
+          </strong>
           <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
-            {thresholdSummary}
+            {thresholdLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
           </small>
         </div>
 
         <div className="automation-card__secondary-metrics">
           <div>
-            <span>{secondaryMetric.label}</span>
-            <strong>{secondaryMetric.value}</strong>
+            <strong aria-label={`${secondaryMetric.label}: ${secondaryMetric.value}`}>
+              {secondaryMetric.value}
+            </strong>
           </div>
           <div>
             <span>{t('dashboard.vpd')}</span>

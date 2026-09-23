@@ -73,13 +73,6 @@
   min-width: 0;
 }
 
-.plug-detail-surface section > section {
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  display: grid;
-  gap: var(--lcl-spacing-md);
-  padding-top: var(--lcl-spacing-lg);
-}
-
 .plug-detail-section__title,
 .plug-detail-subheading {
   font-size: var(--lcl-font-size-md);
@@ -121,6 +114,44 @@
 .installation-automation-live-state {
   border-bottom: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   padding-bottom: var(--lcl-spacing-md);
+}
+
+.installation-detail-summary--flush {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.plug-detail-framed-section {
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+  padding: var(--lcl-spacing-md);
+  padding-top: var(--lcl-spacing-lg);
+  position: relative;
+}
+
+.plug-detail-framed-section__title {
+  background: var(--lcl-color-background);
+  font-size: var(--lcl-font-size-md);
+  line-height: var(--lcl-line-height-tight);
+  margin: 0;
+  padding: 0 var(--lcl-spacing-xs);
+  position: absolute;
+  top: 0;
+  left: var(--lcl-spacing-md);
+  transform: translateY(-50%);
+}
+
+.plug-detail-framed-section .plug-info-grid {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+.plug-detail-framed-section .lcl-diagnostic-row:last-child {
+  border-bottom: 0;
 }
 
 .installation-detail-inline-rule {
@@ -169,6 +200,15 @@
 
 .installation-ble-card__status + .installation-sensor-list {
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+}
+
+.installation-ble-card__footer {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+}
+
+.installation-ble-card__footer .secondary-action {
+  width: 100%;
 }
 
 .installation-ble-card .installation-sensor-list {

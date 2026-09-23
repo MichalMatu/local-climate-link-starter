@@ -392,19 +392,22 @@ const ClimateInstallationDetail = ({
               error={informationQuery.isError}
               deviceRamFreeBytes={resources?.system?.ramFreeBytes}
               deviceRamTotalBytes={resources?.system?.ramSizeBytes}
+              title={t('hardware.nav.shelly')}
             />
             <ClimateScriptDiagnosticsSection
               title={t('common.diagnostics')}
               rows={scriptRows}
             />
             {savedDevice && (
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                onClick={() => setForgetOpen(true)}
-              >
-                {t('hardware.shelly.deleteTitle')}
-              </button>
+              <div className="installation-detail-delete-action">
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  onClick={() => setForgetOpen(true)}
+                >
+                  {t('hardware.shelly.deleteTitle')}
+                </button>
+              </div>
             )}
           </section>
         )}

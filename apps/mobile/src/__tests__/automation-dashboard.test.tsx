@@ -528,7 +528,11 @@ describe('AutomationDashboardScreen', () => {
     expect(climateLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('ON 19°C · OFF 20°C')).toBeVisible();
+    expect(screen.getByText('ON 19°C')).toBeVisible();
+    expect(screen.getByText('OFF 20°C')).toBeVisible();
+    expect(within(climateCard).queryByText('Temperatura')).toBeNull();
+    expect(within(climateCard).queryByText('Wilgotność')).toBeNull();
+    expect(within(climateCard).getByText('VPD')).toBeVisible();
     expect(screen.queryByText('Sterowanie temperaturą')).toBeNull();
     rerenderKind('time');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
@@ -763,7 +767,8 @@ describe('AutomationDashboardScreen', () => {
     });
 
     await waitFor(() => expect(screen.queryByText('Wymaga uwagi')).toBeNull());
-    expect(screen.getByText('ON 19.25°C · OFF 19.75°C')).toBeVisible();
+    expect(screen.getByText('ON 19.25°C')).toBeVisible();
+    expect(screen.getByText('OFF 19.75°C')).toBeVisible();
     expect(diagnosticAttempts).toBe(2);
   });
 

@@ -11,6 +11,7 @@ export type PlugInfoPanelProps = {
   error?: boolean;
   deviceRamFreeBytes?: number | null | undefined;
   deviceRamTotalBytes?: number | null | undefined;
+  title: string;
 };
 
 const formatNumber = (
@@ -42,7 +43,8 @@ export const PlugInfoPanel = ({
   loading = false,
   error = false,
   deviceRamFreeBytes,
-  deviceRamTotalBytes
+  deviceRamTotalBytes,
+  title
 }: PlugInfoPanelProps) => {
   const { locale, t } = useTranslation();
   const missing = t('common.missing');
@@ -73,70 +75,73 @@ export const PlugInfoPanel = ({
       : { label: t('hardware.status.compatible'), tone: 'ok' as const };
 
   return (
-    <div className="plug-info-grid">
-      <div className="lcl-diagnostic-row">
-        <span>{t('common.model')}</span>
-        <div className="lcl-compact-device__meta">
-          <strong>{`${deviceInfo.model}, gen ${deviceInfo.gen}`}</strong>
-          <StatusBadge tone={compatibility.tone}>{compatibility.label}</StatusBadge>
+    <section className="plug-detail-framed-section">
+      <h3 className="plug-detail-framed-section__title">{title}</h3>
+      <div className="plug-info-grid">
+        <div className="lcl-diagnostic-row">
+          <span>{t('common.model')}</span>
+          <div className="lcl-compact-device__meta">
+            <strong>{`${deviceInfo.model}, gen ${deviceInfo.gen}`}</strong>
+            <StatusBadge tone={compatibility.tone}>{compatibility.label}</StatusBadge>
+          </div>
         </div>
+        <DiagnosticRow
+          label={t('common.firmware')}
+          value={deviceInfo.firmwareId ?? missing}
+        />
+        <DiagnosticRow
+          href={target.baseUrl}
+          label={t('hardware.shelly.addressSettings')}
+          linkLabel={t('hardware.shelly.openPanelLabel', { address: target.baseUrl })}
+          value={target.baseUrl}
+        />
+        <DiagnosticRow
+          label={t('hardware.metrics.wifiRssi')}
+          value={formatNumber(telemetry.wifiRssiDbm, ' dBm', missing, 0)}
+        />
+        <DiagnosticRow
+          label={t('hardware.shelly.uptime')}
+          value={formatUptime(status.clock.uptimeSec, missing)}
+        />
+        <DiagnosticRow
+          label="NTP"
+          value={`${status.clock.localTime ?? missing} · ${
+            status.clock.timeSynced
+              ? t('hardware.status.synced')
+              : t('hardware.status.unsynced')
+          } · ${
+            status.clock.lastSyncUnixTimeSec == null
+              ? missing
+              : new Intl.DateTimeFormat(locale, {
+                  dateStyle: 'short',
+                  timeStyle: 'medium'
+                }).format(status.clock.lastSyncUnixTimeSec * 1000)
+          }`}
+          tone={status.clock.timeSynced ? 'normal' : 'warning'}
+        />
+        <DiagnosticRow
+          label={t('hardware.metrics.current')}
+          value={formatNumber(telemetry.currentA, ' A', missing, 2)}
+        />
+        <DiagnosticRow
+          label={t('hardware.metrics.plugTemperature')}
+          value={formatNumber(telemetry.deviceTemperatureC, '°C', missing, 1)}
+        />
+        <div className="lcl-diagnostic-row">
+          <span>{t('hardware.shelly.matter')}</span>
+          <StatusBadge tone={status.matterEnabled ? 'warning' : 'inactive'}>
+            {status.matterEnabled ? t('common.enabled') : t('common.disabled')}
+          </StatusBadge>
+        </div>
+        <DiagnosticRow
+          label={t('hardware.diagnostics.deviceRamFree')}
+          value={formatBytes(deviceRamFreeBytes, missing)}
+        />
+        <DiagnosticRow
+          label={t('hardware.diagnostics.deviceRamTotal')}
+          value={formatBytes(deviceRamTotalBytes, missing)}
+        />
       </div>
-      <DiagnosticRow
-        label={t('common.firmware')}
-        value={deviceInfo.firmwareId ?? missing}
-      />
-      <DiagnosticRow
-        href={target.baseUrl}
-        label={t('hardware.shelly.addressSettings')}
-        linkLabel={t('hardware.shelly.openPanelLabel', { address: target.baseUrl })}
-        value={target.baseUrl}
-      />
-      <DiagnosticRow
-        label={t('hardware.metrics.wifiRssi')}
-        value={formatNumber(telemetry.wifiRssiDbm, ' dBm', missing, 0)}
-      />
-      <DiagnosticRow
-        label={t('hardware.shelly.uptime')}
-        value={formatUptime(status.clock.uptimeSec, missing)}
-      />
-      <DiagnosticRow
-        label="NTP"
-        value={`${status.clock.localTime ?? missing} · ${
-          status.clock.timeSynced
-            ? t('hardware.status.synced')
-            : t('hardware.status.unsynced')
-        } · ${
-          status.clock.lastSyncUnixTimeSec == null
-            ? missing
-            : new Intl.DateTimeFormat(locale, {
-                dateStyle: 'short',
-                timeStyle: 'medium'
-              }).format(status.clock.lastSyncUnixTimeSec * 1000)
-        }`}
-        tone={status.clock.timeSynced ? 'normal' : 'warning'}
-      />
-      <DiagnosticRow
-        label={t('hardware.metrics.current')}
-        value={formatNumber(telemetry.currentA, ' A', missing, 2)}
-      />
-      <DiagnosticRow
-        label={t('hardware.metrics.plugTemperature')}
-        value={formatNumber(telemetry.deviceTemperatureC, '°C', missing, 1)}
-      />
-      <div className="lcl-diagnostic-row">
-        <span>{t('hardware.shelly.matter')}</span>
-        <StatusBadge tone={status.matterEnabled ? 'warning' : 'inactive'}>
-          {status.matterEnabled ? t('common.enabled') : t('common.disabled')}
-        </StatusBadge>
-      </div>
-      <DiagnosticRow
-        label={t('hardware.diagnostics.deviceRamFree')}
-        value={formatBytes(deviceRamFreeBytes, missing)}
-      />
-      <DiagnosticRow
-        label={t('hardware.diagnostics.deviceRamTotal')}
-        value={formatBytes(deviceRamTotalBytes, missing)}
-      />
-    </div>
+    </section>
   );
 };

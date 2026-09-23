@@ -50,7 +50,7 @@ export const ClimateAutomationDetailSection = ({
 
   return (
     <section className="installation-automation-live-state">
-      <dl className="automation-summary installation-detail-summary">
+      <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
         <div>
           <dt>{t('hardware.metrics.reason')}</dt>
           <dd>{reason}</dd>
@@ -145,12 +145,14 @@ export const ClimateBleDetailSection = ({
             </section>
           ))}
         </div>
+        {onScan && (
+          <div className="installation-ble-card__footer">
+            <button className="secondary-action" type="button" onClick={onScan}>
+              {t('hardware.shelly.scanBleViaShellyTitle')}
+            </button>
+          </div>
+        )}
       </div>
-      {onScan && (
-        <button className="secondary-action" type="button" onClick={onScan}>
-          {t('hardware.shelly.scanBleViaShellyTitle')}
-        </button>
-      )}
     </section>
   );
 };
@@ -169,8 +171,8 @@ export const ClimateScriptDiagnosticsSection = ({
   title,
   rows
 }: ClimateScriptDiagnosticsSectionProps) => (
-  <section className="plug-script-diagnostics">
-    <h3 className="plug-detail-subheading">{title}</h3>
+  <section className="plug-script-diagnostics plug-detail-framed-section">
+    <h3 className="plug-detail-framed-section__title">{title}</h3>
     <div className="plug-info-grid">
       {rows.map((row) => (
         <DiagnosticRow key={row.label} label={row.label} value={row.value} />

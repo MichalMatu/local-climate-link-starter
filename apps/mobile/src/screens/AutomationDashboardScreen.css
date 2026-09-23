@@ -163,7 +163,6 @@
   gap: var(--lcl-spacing-xs);
 }
 
-.automation-card__primary-metric > span,
 .automation-card__secondary-metrics span {
   color: var(--lcl-color-text-muted);
   font-size: var(--lcl-font-size-xs);
@@ -178,10 +177,11 @@
 
 .automation-card__primary-metric small {
   color: var(--lcl-color-text-muted);
+  display: grid;
   font-size: var(--lcl-font-size-xs);
   font-weight: var(--lcl-font-weight-semibold);
+  gap: var(--lcl-spacing-xs);
   line-height: var(--lcl-line-height-compact);
-  white-space: nowrap;
 }
 
 .automation-card__secondary-metrics {
