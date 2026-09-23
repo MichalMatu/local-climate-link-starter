@@ -22,11 +22,9 @@ The phone configures and diagnoses. The Shelly executes the installed automation
 
 ## Current product status
 
-The project is in MVP/beta with a stable architecture and a verified real-hardware path on Samsung S22+ + Shelly Plug S Gen3.
+The project is in MVP/beta with a stable architecture, an accepted UX baseline and a verified real-hardware path on Samsung S22+ + Shelly Plug S Gen3.
 
-The current development priority is **continued UX refinement of existing flows**. Do not start a new sensor/runtime capability until the current UX pass is accepted.
-
-After UX stabilization, the next planned product expansions are:
+The UX stabilization pass is complete. The next planned product expansions are:
 
 1. BLE soil-moisture input through the existing typed sensor/config model;
 2. a real-hardware feasibility spike for managing Shelly over BLE, reusing the same ownership and RPC transport boundaries.
