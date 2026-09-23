@@ -19,9 +19,9 @@ import {
 const sample = (index: number): LclHistorySample => ({
   clock: 'unix',
   timeSec: 1_800_000_000 + index * 900,
-  temperatureC: 23.4 + index / 10,
-  humidityPct: 55.1 - index / 10,
-  vpdKpa: 1.12 + index / 100,
+  temperatureC: (234 + index) / 10,
+  humidityPct: (551 - index) / 10,
+  vpdKpa: (112 + index) / 100,
   freshSensorCount: 1,
   relayOn: index % 2 === 1,
   reason: index % 2 === 1 ? 'ab' : 'ib'
