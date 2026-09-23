@@ -1,0 +1,10 @@
+.lcl-color-swatch {
+  background: var(--lcl-color-swatch-value);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-round);
+  display: block;
+  height: 100%;
+  min-height: inherit;
+  min-width: inherit;
+  width: 100%;
+}

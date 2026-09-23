@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
 import type { PlugButtonModeSettingsTarget } from '../data/plugButtonModeSettings.js';
+import './PlugSettingsSurface.css';
 import { usePlugButtonModeSettingsFlow } from '../flows/usePlugButtonModeSettingsFlow.js';
 
 export type PlugButtonModeSettingsCardProps = {
@@ -40,40 +41,39 @@ export const PlugButtonModeSettingsCard = ({
 
   if (query.isPending) {
     return (
-      <article className="automation-card installation-detail-device-button">
+      <section className="plug-settings-section installation-detail-device-button">
         <h2>{copy.title}</h2>
-        <p className="time-schedule-note">{copy.loading}</p>
-      </article>
+        <p className="plug-settings-feedback">{copy.loading}</p>
+      </section>
     );
   }
   if (query.isError) {
     return (
-      <article className="automation-card installation-detail-device-button">
+      <section className="plug-settings-section installation-detail-device-button">
         <h2>{copy.title}</h2>
-        <p className="installation-detail-note">{copy.unavailable}</p>
-      </article>
+        <p className="plug-settings-feedback plug-settings-feedback--warning">
+          {copy.unavailable}
+        </p>
+      </section>
     );
   }
   if (!settings?.supported || !draft) {
     return (
-      <article className="automation-card installation-detail-device-button">
+      <section className="plug-settings-section installation-detail-device-button">
         <h2>{copy.title}</h2>
-        <p className="time-schedule-note">{copy.unsupported}</p>
-      </article>
+        <p className="plug-settings-feedback">{copy.unsupported}</p>
+      </section>
     );
   }
 
   return (
-    <article className="automation-card installation-detail-device-button">
-      <div className="installation-section-heading">
-        <div>
-          <p className="automation-card__eyebrow">{copy.eyebrow}</p>
-          <h2>{copy.title}</h2>
-          <p>{copy.description}</p>
-        </div>
+    <section className="plug-settings-section installation-detail-device-button">
+      <div className="plug-settings-section__heading">
+        <h2>{copy.title}</h2>
+        <p>{copy.description}</p>
       </div>
 
-      <div className="field-stack">
+      <div className="field">
         <span>{copy.currentMode}</span>
         <SelectField<ShellyPlugsUiButtonInputMode>
           ariaLabel={copy.currentMode}
@@ -89,11 +89,11 @@ export const PlugButtonModeSettingsCard = ({
         />
       </div>
 
-      <p className="time-schedule-note">
+      <p className="plug-settings-feedback">
         {draft === 'momentary' ? copy.momentaryHint : copy.detachedHint}
       </p>
 
-      <div className="installation-detail-actions">
+      <div className="plug-settings-actions">
         <button
           className="primary-action"
           type="button"
@@ -105,10 +105,10 @@ export const PlugButtonModeSettingsCard = ({
       </div>
 
       {feedback && (
-        <p role="status" className="installation-detail-note">
+        <p role="status" className="plug-settings-feedback">
           {feedback}
         </p>
       )}
-    </article>
+    </section>
   );
 };

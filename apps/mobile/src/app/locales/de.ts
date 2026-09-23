@@ -161,6 +161,7 @@ export const de = {
     disabled: 'deaktiviert',
     enabled: 'aktiviert',
     firmware: 'Firmware',
+    info: 'Info',
     missing: 'fehlt',
     missingData: 'keine Daten',
     missingInStatus: 'fehlt im Status',

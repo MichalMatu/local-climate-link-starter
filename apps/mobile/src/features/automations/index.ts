@@ -1,4 +1,12 @@
 export {
+  ClimateAutomationDetailSection,
+  ClimateRecoverySection,
+  ClimateBleDetailSection,
+  ClimateScriptDetailSection,
+  type ClimateBleSensorView,
+  type ClimateScriptDiagnosticRow
+} from './components/ClimateInstallationDetailSections.js';
+export {
   readShellyAutomationScriptState,
   readShellyControlStatus,
   readShellyManagedAutomationScriptCode,
@@ -28,7 +36,6 @@ export {
   type RuleAdvancedSettingsInput,
   type RuleAdvancedSettingsValidation
 } from './data/climateRuleSettings.js';
-export { ClimateAutomationManagementActions } from './components/ClimateAutomationManagementActions.js';
 export {
   ClimateRuleEditor,
   type ClimateRuleEditorProps,

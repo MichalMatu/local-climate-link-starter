@@ -1,3 +1,10 @@
+export { readPlugInformation, type PlugInformation } from './data/plugInformation.js';
+export {
+  usePlugInformationFlow,
+  plugInformationQueryKey
+} from './flows/usePlugInformationFlow.js';
+export { PlugInfoPanel, type PlugInfoPanelProps } from './components/PlugInfoPanel.js';
+export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
   PlugAddPage,
@@ -23,10 +30,6 @@ export {
   type PlugLedSettingsCardProps
 } from './components/PlugLedSettingsCard.js';
 export type { PlugLedSettingsTarget } from './data/plugLedSettings.js';
-export {
-  InstalledPlugSummaryCard,
-  type InstalledPlugSummaryCardProps
-} from './components/InstalledPlugSummaryCard.js';
 export {
   usePlugManagementSurface,
   type PlugManagementDevice,

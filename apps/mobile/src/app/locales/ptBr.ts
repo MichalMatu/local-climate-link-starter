@@ -159,6 +159,7 @@ export const ptBr = {
     disabled: 'desativado',
     enabled: 'ativado',
     firmware: 'Firmware',
+    info: 'Informações',
     missing: 'ausente',
     missingData: 'sem dados',
     missingInStatus: 'ausente no status',

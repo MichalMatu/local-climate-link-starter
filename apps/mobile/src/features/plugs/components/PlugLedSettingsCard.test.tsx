@@ -123,6 +123,62 @@ describe('PlugLedSettingsCard', () => {
     ]);
   });
 
+  it('uses the in-app color editor and initializes custom ON/OFF colors visibly', async () => {
+    const leds = {
+      mode: 'switch' as const,
+      colors: {
+        'switch:0': {
+          on: { rgb: null, brightness: 100 },
+          off: { rgb: null, brightness: 100 }
+        },
+        power: { brightness: 80 }
+      },
+      night_mode: {
+        enable: false,
+        brightness: 10,
+        active_between: ['22:00', '06:00'] as [string, string]
+      }
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number;
+          method?: string;
+        };
+        let result: unknown = {};
+        if (body.method === 'Shelly.GetDeviceInfo') result = deviceInfo();
+        if (body.method === 'Shelly.ListMethods') {
+          result = { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] };
+        }
+        if (body.method === 'PLUGS_UI.GetConfig') {
+          result = { leds, controls: { 'switch:0': { in_mode: 'momentary' } } };
+        }
+        return jsonResponse({ id: body.id ?? 1, result });
+      })
+    );
+
+    const rendered = renderCard();
+    const customColorToggles = await screen.findAllByRole('checkbox', {
+      name: copy.customColor
+    });
+    expect(customColorToggles).toHaveLength(2);
+    expect(rendered.container.querySelector('input[type="color"]')).toBeNull();
+    const [onColorToggle, offColorToggle] = customColorToggles;
+    if (!onColorToggle || !offColorToggle) throw new Error('Missing LED color toggles.');
+
+    fireEvent.click(onColorToggle);
+    expect(screen.getByRole('textbox', { name: `ON ${copy.color}` })).toHaveValue(
+      '#00ff00'
+    );
+
+    fireEvent.click(offColorToggle);
+    expect(screen.getByRole('textbox', { name: `OFF ${copy.color}` })).toHaveValue(
+      '#ff0000'
+    );
+  });
+
   it('renders unsupported PLUGS_UI as a stable device capability state', async () => {
     vi.stubGlobal(
       'fetch',

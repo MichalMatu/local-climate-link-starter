@@ -82,20 +82,28 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     editInstallationId,
     onBackToIntent,
     onSetupComplete,
-    plugAddOnly
+    onBackFromStandaloneAdd,
+    plugAddOnly,
+    sensorAddOnly
   }: {
     setupIntent?: SetupIntent;
     fixedShellyId?: string;
     editInstallationId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
+    onBackFromStandaloneAdd?: () => void;
     plugAddOnly?: boolean;
+    sensorAddOnly?: boolean;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
       <p>{`mock-fixed-shelly-${fixedShellyId ?? 'none'}`}</p>
       <p>{`mock-edit-installation-${editInstallationId ?? 'none'}`}</p>
       <p>{`mock-plug-add-${plugAddOnly ? 'yes' : 'no'}`}</p>
+      <p>{`mock-sensor-add-${sensorAddOnly ? 'yes' : 'no'}`}</p>
+      <button type="button" onClick={onBackFromStandaloneAdd}>
+        mock-add-back
+      </button>
       <button type="button" onClick={onBackToIntent}>
         mock-back
       </button>
@@ -192,6 +200,11 @@ describe('AppRoutes navigation shell', () => {
     expect(await screen.findByText('mock-setup-none')).toBeVisible();
     expect(screen.getByText('mock-plug-add-yes')).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'mock-add-back' }));
+    expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
+    expect(await screen.findByText('mock-plug-add-yes')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
   });

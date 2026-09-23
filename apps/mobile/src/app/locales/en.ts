@@ -160,6 +160,7 @@ export const en = {
     disabled: 'disabled',
     enabled: 'enabled',
     firmware: 'Firmware',
+    info: 'Info',
     missing: 'missing',
     missingData: 'no data',
     missingInStatus: 'missing in status',

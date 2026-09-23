@@ -846,17 +846,30 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
   });
 
-  it('keeps standalone device-add pages free of duplicate top navigation and titles', () => {
-    const { unmount } = renderHardwareSetup({ plugAddOnly: true });
-    expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
-    expect(document.querySelector('.app-page-back-row')).toBeNull();
+  it('gives standalone device-add pages one compact return action without duplicate titles', async () => {
+    const onBack = vi.fn();
+    const { unmount } = renderHardwareSetup({
+      plugAddOnly: true,
+      onBackFromStandaloneAdd: onBack
+    });
+    expect(await screen.findByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Gniazdka' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
+    expect(onBack).toHaveBeenCalledTimes(1);
 
     unmount();
-    renderHardwareSetup({ sensorAddOnly: true, sensorAddMode: 'phone-scan' });
-    expect(screen.getByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
-    expect(document.querySelector('.app-page-back-row')).toBeNull();
+    renderHardwareSetup({
+      sensorAddOnly: true,
+      sensorAddMode: 'phone-scan',
+      onBackFromStandaloneAdd: onBack
+    });
+    expect(await screen.findByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Termometry' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
+    await act(async () => {
+      await Promise.resolve();
+    });
   });
 
   it('opens device add flows as full child pages instead of modals', async () => {
@@ -2490,12 +2503,9 @@ describe('HardwareSetupScreen', () => {
     await waitFor(() => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1));
 
     const thermometerSelect = screen.getByRole('button', { name: 'Termometr' });
-    await waitFor(() => expect(thermometerSelect).toHaveTextContent('21.3°C · 45.7%'));
-    expect(thermometerSelect).not.toHaveTextContent('kPa');
-    expect(
-      thermometerSelect.querySelector('.lcl-select-field__trigger-meta')
-    ).not.toBeNull();
-    expect(thermometerSelect.querySelector('.tabler-icon-device-mobile')).not.toBeNull();
+    await waitFor(() => expect(thermometerSelect).toHaveTextContent('Xiaomi salon'));
+    expect(thermometerSelect).not.toHaveTextContent('21.3°C · 45.7%');
+    expect(thermometerSelect.querySelector('.lcl-select-field__trigger-meta')).toBeNull();
     fireEvent.click(thermometerSelect);
 
     const option = await screen.findByRole('option', { name: 'Xiaomi salon' });

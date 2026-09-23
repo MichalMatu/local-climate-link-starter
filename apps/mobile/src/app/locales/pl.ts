@@ -159,6 +159,7 @@ export const pl = {
     disabled: 'wyłączone',
     enabled: 'włączone',
     firmware: 'Firmware',
+    info: 'Informacje',
     missing: 'brak',
     missingData: 'brak danych',
     missingInStatus: 'brak w statusie',
