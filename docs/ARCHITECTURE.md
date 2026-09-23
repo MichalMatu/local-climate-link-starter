@@ -106,6 +106,8 @@ Legacy nested Settings, Diagnostics and Script detail pages were removed after t
 
 Shared controls should use `packages/ui` + design tokens when the behavior is genuinely reusable. Product-specific layout remains in the owning mobile feature. Avoid one-off global CSS injections.
 
+Plug detail visual hierarchy is intentional: the tab surface is flat by default; a thin framed group with an inline title is used only for a closed data/control group; `Disclosure` is reserved for optional expandable content; destructive/action separators are explicit. Styling must not infer visual separators from semantic nesting such as `section > section`, because component markup must not accidentally change page hierarchy.
+
 ## Transport direction
 
 Current production management uses local HTTP RPC.

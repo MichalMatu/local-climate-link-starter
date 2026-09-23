@@ -14,7 +14,7 @@ e75c77cb-7589-4452-94b2-decc97ff85a1
 
 ## Current product state
 
-The architecture/lifecycle baseline is stable and the third UX correction checkpoint is complete.
+The architecture/lifecycle baseline is stable and the fourth UX correction checkpoint is complete.
 
 Key established behavior:
 
@@ -27,7 +27,7 @@ Key established behavior:
 - successful Climate recovery also restores missing configured thermometer identities into the saved Thermometers list by canonical BLE MAC, without duplicating existing entries or changing current rule membership;
 - local Shelly execution remains independent of phone/cloud after configuration.
 
-## UX state after the third stabilization checkpoint
+## UX state after the fourth stabilization checkpoint
 
 Plug details remain one surface with five local sections:
 
@@ -52,7 +52,10 @@ The current UX baseline now establishes:
 - Automation live-state labels are user-facing (`Automation reason`, `Automation output`, `Actual relay`) and unknown runtime abbreviations fail closed to an unknown-state label rather than leaking raw codes;
 - VPD Assist visibly shows the operating range imposed by the configured primary thresholds while preserving the existing runtime clamp;
 - Automation `Advanced` and Settings diagnostics use one shared `Disclosure` pattern;
-- Plug LED presets are balanced 4×2 on phone widths and 8×1 on wider layouts instead of allowing a 7+1 wrap.
+- Plug LED presets are balanced 4×2 on phone widths and 8×1 on wider layouts instead of allowing a 7+1 wrap;
+- Plug detail tabs now use a deliberate visual hierarchy: flat surface by default, compact framed groups only for closed data/control groups, Disclosure only for optional content, and explicit separators instead of semantic-tag-driven dividers;
+- Automation no longer opens with an accidental summary divider, BLE scan belongs to the BLE card footer, Script keeps its own code block without an injected divider, and Info uses matching inline-framed `Shelly` and `Diagnostics` groups;
+- dashboard metric labels that are already unambiguous from `%` / `°C` are visually omitted while accessible names remain, and ON/OFF thresholds stack vertically with narrow-screen geometry that stays clear of the temperature/VPD column.
 
 No automation ownership, runtime-safety or Shelly mutation semantics were intentionally changed by this UX restructuring.
 
@@ -61,6 +64,8 @@ No automation ownership, runtime-safety or Shelly mutation semantics were intent
 The third UX candidate `9315cbad7236d6322ccd414b3239e006e971553a` passed the exact final `pnpm check:full`: mobile 283/283 tests, repository/feature/UX gates, coverage and build were green, and responsive Playwright finished 36/36.
 
 That exact candidate was installed on the real Samsung SM-S906B / S22+ with Android 16 using `adb install -r`, preserving the existing app data. Real-device inspection confirmed the dashboard threshold cleanup, readable Automation live-state labels, visible VPD working range, shared inline Advanced disclosure and a balanced 4×2 LED palette. No Save action, schedule/runtime rewrite or deliberate relay mutation was performed during this presentation-only acceptance.
+
+UX round 4 candidate `75780d08b6ed579728e68ab94cc819b1ce79a5cb` passed exact `pnpm check:full`: mobile 283/283 and responsive Playwright 36/36. The same candidate was installed on Samsung SM-S906B / Android 16 with `adb install -r`, preserving app data. Real-device read-only inspection confirmed vertically stacked ON/OFF thresholds without collision with the temperature/VPD column, omitted visual Humidity/Temperature labels with VPD retained, the cleaned Automation hierarchy, BLE scan contained in the BLE card, unchanged compact Device hierarchy, code-focused Script, and matching inline-framed Shelly/Diagnostics groups in Info. No Save action, relay control, runtime rewrite or schedule mutation was performed.
 
 The earlier clean-install recovery acceptance on `main` `9bb6b2f145b90d295879a75012e15fc5258f95ae` remains valid: after a clean install and re-adding the physical Plug, the existing Climate automation was recovered and its configured thermometer was restored into Thermometers without duplication.
 

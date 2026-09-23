@@ -32,7 +32,7 @@ Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance passed with 3 TP357 + 1
 
 ## 3. UX stabilization — IN PROGRESS / NEXT SESSION
 
-Three UX correction slices are complete. The current candidate has been verified on representative responsive viewports and accepted on the real S22+ without clearing app data.
+Four UX correction slices are complete. The current candidate has been verified on representative responsive viewports and accepted on the real S22+ without clearing app data.
 
 Completed in the current UX baseline:
 
@@ -49,6 +49,9 @@ Completed in the current UX baseline:
 - Climate dashboard cards remove redundant control-mode copy and render explicit ON/OFF thresholds;
 - Automation live-state copy no longer leaks raw runtime reason abbreviations, VPD Assist exposes its threshold-derived working range, and true disclosure sections share one project-level pattern;
 - LED color presets use a balanced 4×2 phone layout and 8×1 wider layout;
+- Plug detail visual hierarchy is explicit: flat tab surfaces by default, framed groups only for closed groups, shared Disclosure for optional content and no CSS dividers inferred from nested semantic tags;
+- Automation, BLE, Script and Info no longer carry legacy stray separators/loose controls, while Device keeps the compact flat-plus-framed-subgroup pattern;
+- dashboard cards stack ON/OFF thresholds vertically, omit redundant visual Humidity/Temperature labels while retaining accessible names, and reserve enough narrow-screen space to avoid VPD collisions;
 - existing automation/runtime ownership and Shelly safety semantics were preserved.
 
 **Next session continues UX refinement.** Work from concrete screenshots/real-device friction. Do not add Soil moisture, richer rule operators or a new transport while this UX pass is still being reviewed.
