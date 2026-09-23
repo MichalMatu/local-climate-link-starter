@@ -7,6 +7,8 @@ export * from './scripts/hash.js';
 export * from './scripts/install.js';
 export * from './scripts/read.js';
 export * from './scripts/fake.js';
+export * from './scripts/dataloggerInstall.js';
 export * from './schedules.js';
 export * from './plugsUi.js';
 export * from './cloud.js';
+export * from './kvs.js';

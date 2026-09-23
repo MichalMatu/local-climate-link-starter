@@ -145,11 +145,17 @@ export const RPC_METHODS = {
   PlugsUiSetConfig: 'PLUGS_UI.SetConfig',
   CloudGetConfig: 'Cloud.GetConfig',
   CloudSetConfig: 'Cloud.SetConfig',
-  CloudGetStatus: 'Cloud.GetStatus'
+  CloudGetStatus: 'Cloud.GetStatus',
+  KvsGet: 'KVS.Get',
+  KvsSet: 'KVS.Set',
+  KvsDelete: 'KVS.Delete',
+  KvsList: 'KVS.List',
+  KvsGetMany: 'KVS.GetMany'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
 
 export const LOCAL_CLIMATE_LINK_SCRIPT_NAME = 'Local Climate Link Thermostat';
+export const LOCAL_CLIMATE_LINK_DATALOGGER_SCRIPT_NAME = 'Local Climate Link Datalogger';
 export const LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME =
   'Local Climate Link BLE Discovery';
