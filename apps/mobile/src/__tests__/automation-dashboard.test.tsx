@@ -528,8 +528,7 @@ describe('AutomationDashboardScreen', () => {
     expect(climateLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('ON 19°C')).toBeVisible();
-    expect(screen.getByText('OFF 20°C')).toBeVisible();
+    expect(screen.getByText('ON 19°C · OFF 20°C')).toBeVisible();
     expect(within(climateCard).queryByText('Temperatura')).toBeNull();
     expect(within(climateCard).queryByText('Wilgotność')).toBeNull();
     expect(within(climateCard).getByText('VPD')).toBeVisible();
@@ -599,8 +598,7 @@ describe('AutomationDashboardScreen', () => {
 
     renderDashboard();
 
-    expect(await screen.findByText('1.31 → 1.20 kPa')).toBeVisible();
-    expect(screen.queryByText('1.31 kPa')).toBeNull();
+    expect(await screen.findByText('1.31 → 1.20 → 20°C · 19–20°C')).toBeVisible();
   });
 
   it('pulses only the plug symbol when a fresh climate measurement arrives', async () => {
@@ -767,8 +765,7 @@ describe('AutomationDashboardScreen', () => {
     });
 
     await waitFor(() => expect(screen.queryByText('Wymaga uwagi')).toBeNull());
-    expect(screen.getByText('ON 19.25°C')).toBeVisible();
-    expect(screen.getByText('OFF 19.75°C')).toBeVisible();
+    expect(screen.getByText('ON 19°C · OFF 20°C')).toBeVisible();
     expect(diagnosticAttempts).toBe(2);
   });
 

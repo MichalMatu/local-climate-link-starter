@@ -280,6 +280,42 @@ describe('evaluateThresholdDecision', () => {
     expect(decision.reason).toBe('below-threshold');
   });
 
+  it('keeps humidifier off when VPD is below target and only lower humidity could raise it', () => {
+    const rule = {
+      ...DEFAULT_HUMIDIFYING_RULE,
+      control: {
+        ...DEFAULT_HUMIDIFYING_RULE.control,
+        onThreshold: 60,
+        offThreshold: 90
+      },
+      vpdAssist: {
+        enabled: true,
+        targetKpa: 1
+      },
+      consecutiveHits: 1
+    };
+    const measurement = {
+      temperatureC: 22.8,
+      humidityPct: 69,
+      seenAtMs: nowMs
+    };
+
+    const thresholds = resolveEffectiveThresholdControl(rule, measurement);
+    const decision = evaluateThresholdDecision({
+      rule,
+      state: createInitialAutomationState(),
+      measurement,
+      nowMs
+    });
+
+    expect(calculateVpdKpa(22.8, 69)).toBeCloseTo(0.86, 2);
+    expect(calculateHumidityForVpdKpa(1, 22.8)).toBeCloseTo(63.97, 2);
+    expect(thresholds.control.onThreshold).toBeCloseTo(61.97, 2);
+    expect(thresholds.control.offThreshold).toBeCloseTo(65.97, 2);
+    expect(decision.requestedRelayOn).toBe(false);
+    expect(decision.reason).toBe('above-threshold');
+  });
+
   it('uses VPD assist to derive humidifying thresholds from temperature', () => {
     const rule = {
       ...DEFAULT_HUMIDIFYING_RULE,

@@ -602,29 +602,28 @@ for (const viewport of viewports) {
     await expect(page.getByText('Salon')).toBeVisible();
     await expect(page.getByText('21.4°C')).toBeVisible();
     await expect(page.getByText('55.2%')).toBeVisible();
-    await expect(page.getByText('1.31 → 1.20 kPa')).toBeVisible();
+    await expect(page.getByText('1.31 → 1.20 → 20°C · 19–20°C')).toBeVisible();
     await expect(page.getByText('Działa')).toHaveCount(0);
-    await expect(page.getByText('ON 19°C')).toBeVisible();
-    await expect(page.getByText('OFF 20°C')).toBeVisible();
+    await expect(page.getByText('ON 19°C · OFF 20°C')).toBeVisible();
     const climateCard = page
       .getByText('Salon', { exact: true })
       .locator('xpath=ancestor::article[1]');
     await expect(climateCard.getByText('Temperatura', { exact: true })).toHaveCount(0);
     await expect(climateCard.getByText('Wilgotność', { exact: true })).toHaveCount(0);
     await expect(climateCard.getByText('VPD', { exact: true })).toBeVisible();
-    const [onThresholdBox, offThresholdBox, secondaryMetricsBox] = await Promise.all([
-      requiredBox(climateCard.getByText('ON 19°C')),
-      requiredBox(climateCard.getByText('OFF 20°C')),
-      requiredBox(climateCard.locator('.automation-card__secondary-metrics'))
+    const [thresholdBox, secondaryColumnBox, vpdValueBox, modeBox] = await Promise.all([
+      requiredBox(climateCard.getByText('ON 19°C · OFF 20°C')),
+      requiredBox(climateCard.locator('.automation-card__secondary-column')),
+      requiredBox(climateCard.locator('.automation-card__vpd strong')),
+      requiredBox(climateCard.locator('.automation-card__mode-control'))
     ]);
-    expect(Math.abs(onThresholdBox.x - offThresholdBox.x)).toBeLessThanOrEqual(2);
-    expect(offThresholdBox.y).toBeGreaterThan(onThresholdBox.y);
-    expect(onThresholdBox.x + onThresholdBox.width).toBeLessThanOrEqual(
-      secondaryMetricsBox.x + 1
+    expect(thresholdBox.x + thresholdBox.width).toBeLessThanOrEqual(
+      secondaryColumnBox.x + 1
     );
-    expect(offThresholdBox.x + offThresholdBox.width).toBeLessThanOrEqual(
-      secondaryMetricsBox.x + 1
+    expect(vpdValueBox.x + vpdValueBox.width).toBeLessThanOrEqual(
+      secondaryColumnBox.x + secondaryColumnBox.width + 1
     );
+    expect(vpdValueBox.y).toBeGreaterThanOrEqual(modeBox.y + modeBox.height - 1);
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
