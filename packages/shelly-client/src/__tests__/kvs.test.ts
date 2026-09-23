@@ -20,27 +20,27 @@ class QueueTransport implements ShellyRpcTransport {
 
 describe('ShellyKvsClient', () => {
   it('reads and validates a KVS value', async () => {
-    const transport = new QueueTransport([{ etag: 'abc', value: '[1,2,3]' }]);
+    const transport = new QueueTransport([{ etag: 'abc', value: '[1,[[234,551,0]]]' }]);
     const client = new ShellyKvsClient(transport);
-    await expect(client.get('lcl.dl1.00')).resolves.toEqual({
+    await expect(client.get('lcl.tail.00')).resolves.toEqual({
       ok: true,
-      value: { etag: 'abc', value: '[1,2,3]' }
+      value: { etag: 'abc', value: '[1,[[234,551,0]]]' }
     });
     expect(transport.requests).toEqual([
-      { method: RPC_METHODS.KvsGet, params: { key: 'lcl.dl1.00' } }
+      { method: RPC_METHODS.KvsGet, params: { key: 'lcl.tail.00' } }
     ]);
   });
 
   it('passes etags for atomic KVS updates', async () => {
     const transport = new QueueTransport([{ etag: 'next', rev: 7 }]);
     const client = new ShellyKvsClient(transport);
-    await expect(client.set('lcl.dl1.m', '[1]', 'old')).resolves.toEqual({
+    await expect(client.set('lcl.tail.m', '[1,32,1,1]', 'old')).resolves.toEqual({
       ok: true,
       value: { etag: 'next', rev: 7 }
     });
     expect(transport.requests[0]).toEqual({
       method: RPC_METHODS.KvsSet,
-      params: { key: 'lcl.dl1.m', value: '[1]', etag: 'old' }
+      params: { key: 'lcl.tail.m', value: '[1,32,1,1]', etag: 'old' }
     });
   });
 
@@ -48,38 +48,38 @@ describe('ShellyKvsClient', () => {
     const transport = new QueueTransport([
       {
         items: [
-          { key: 'lcl.dl1.00', etag: 'a', value: 'v0' },
-          { key: 'lcl.dl1.01', etag: 'b', value: 'v1' }
+          { key: 'lcl.tail.00', etag: 'a', value: 'v0' },
+          { key: 'lcl.tail.01', etag: 'b', value: 'v1' }
         ],
         offset: 0,
         total: 3
       },
-      { items: [{ key: 'lcl.dl1.02', etag: 'c', value: 'v2' }], offset: 2, total: 3 }
+      { items: [{ key: 'lcl.tail.02', etag: 'c', value: 'v2' }], offset: 2, total: 3 }
     ]);
     const client = new ShellyKvsClient(transport);
-    const result = await client.getAllMatching('lcl.dl1.*');
+    const result = await client.getAllMatching('lcl.tail.*');
     expect(result).toMatchObject({ ok: true });
     if (!result.ok) return;
     expect(result.value.map(({ key }) => key)).toEqual([
-      'lcl.dl1.00',
-      'lcl.dl1.01',
-      'lcl.dl1.02'
+      'lcl.tail.00',
+      'lcl.tail.01',
+      'lcl.tail.02'
     ]);
     expect(transport.requests).toEqual([
-      { method: RPC_METHODS.KvsGetMany, params: { match: 'lcl.dl1.*', offset: 0 } },
-      { method: RPC_METHODS.KvsGetMany, params: { match: 'lcl.dl1.*', offset: 2 } }
+      { method: RPC_METHODS.KvsGetMany, params: { match: 'lcl.tail.*', offset: 0 } },
+      { method: RPC_METHODS.KvsGetMany, params: { match: 'lcl.tail.*', offset: 2 } }
     ]);
   });
 
   it('accepts object-shaped GetMany items used by older firmware documentation', async () => {
     const transport = new QueueTransport([
-      { items: { 'lcl.dl1.00': { etag: 'a', value: 'v0' } }, offset: 0, total: 1 }
+      { items: { 'lcl.tail.00': { etag: 'a', value: 'v0' } }, offset: 0, total: 1 }
     ]);
     const client = new ShellyKvsClient(transport);
-    await expect(client.getMany('lcl.dl1.*')).resolves.toEqual({
+    await expect(client.getMany('lcl.tail.*')).resolves.toEqual({
       ok: true,
       value: {
-        items: [{ key: 'lcl.dl1.00', etag: 'a', value: 'v0' }],
+        items: [{ key: 'lcl.tail.00', etag: 'a', value: 'v0' }],
         offset: 0,
         total: 1
       }
