@@ -13,6 +13,8 @@ describe('Shelly rolling history tail generator', () => {
     expect(script).toContain('KVS.Set');
     expect(script).toContain('lcl.tail.m');
     expect(script).toContain('historyStatus');
+    expect(script).toContain('y[2]*1000-g[0]');
+    expect(script).toContain('q[4]*1000');
     expect(script).not.toContain('Switch.Set');
     expect(script).not.toContain('BLE.Scanner');
     expect(script).not.toContain('unixtime');
