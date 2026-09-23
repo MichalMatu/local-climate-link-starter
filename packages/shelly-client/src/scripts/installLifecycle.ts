@@ -164,7 +164,9 @@ export const installShellyScript = async (
     scriptId = existingScript.id;
 
     if (existingScript.running) {
-      await stopBleScannerInScript(scriptId, lifecycle.callMutation, lifecycle.sleepMs);
+      if (plan.cleanupBleScannerBeforeStop !== false) {
+        await stopBleScannerInScript(scriptId, lifecycle.callMutation, lifecycle.sleepMs);
+      }
       const stopResult = await lifecycle.callMutation({
         method: RPC_METHODS.ScriptStop,
         params: { id: scriptId }
