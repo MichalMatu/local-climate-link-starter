@@ -1,4 +1,5 @@
 import { App as CapacitorApp } from '@capacitor/app';
+import { calculateVpdKpa } from '@lcl/automation-core';
 import { isSameShellyDevice } from '../features/plugs/index.js';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -18,8 +19,8 @@ import type {
 } from '../flows/installations/model.js';
 import {
   formatInstallationMetric,
+  formatInstallationVpd,
   installationHealthLabel,
-  installationVpdSummary,
   installationThresholdSummary
 } from '../flows/installations/presentation.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
@@ -144,6 +145,9 @@ const ClimateAutomationCard = ({
     snapshot?.diagnostics.relayState;
   const controlsHumidity = installation.config.rule.control.metric === 'humidity';
   const thresholdSummary = installationThresholdSummary(installation, t);
+  const thresholdLines = controlsHumidity
+    ? [thresholdSummary]
+    : thresholdSummary.split(' · ');
 
   const primaryMetric = controlsHumidity
     ? {
@@ -163,7 +167,15 @@ const ClimateAutomationCard = ({
         label: t('dashboard.humidity'),
         value: formatInstallationMetric(snapshot?.diagnostics.lastHumidity, '%')
       };
-  const vpdSummary = installationVpdSummary(installation, snapshot?.diagnostics);
+  const currentVpdKpa =
+    snapshot?.diagnostics.lastVpd ??
+    calculateVpdKpa(
+      snapshot?.diagnostics.lastTemp ?? undefined,
+      snapshot?.diagnostics.lastHumidity ?? undefined
+    );
+  const targetVpdKpa = installation.config.rule.vpdAssist.enabled
+    ? installation.config.rule.vpdAssist.targetKpa
+    : null;
 
   let warningLabel: string | null = null;
   let warningClass = 'attention';
@@ -218,48 +230,51 @@ const ClimateAutomationCard = ({
             {primaryMetric.value}
           </strong>
           <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
-            {thresholdSummary}
+            {thresholdLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
           </small>
         </div>
 
-        <div className="automation-card__secondary-column">
-          <div className="automation-card__secondary-top">
+        <div className="automation-card__secondary-metrics">
+          <div>
             <strong aria-label={`${secondaryMetric.label}: ${secondaryMetric.value}`}>
               {secondaryMetric.value}
             </strong>
-            <div
-              className="automation-control-group automation-card__mode-control"
-              role="group"
-              aria-label={t('detail.automation')}
-            >
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={automationRunning}
-                disabled={action.isPending || !runtimeControllable}
-                onClick={() => {
-                  if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
-                }}
-              >
-                AUTO
-              </button>
-              <button
-                className="automation-control-button"
-                type="button"
-                aria-pressed={manualControl}
-                disabled={action.isPending || !runtimeControllable}
-                onClick={() => {
-                  if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
-                }}
-              >
-                MANUAL
-              </button>
-            </div>
           </div>
-          <div className="automation-card__vpd">
+          <div>
             <span>{t('dashboard.vpd')}</span>
-            <strong>{vpdSummary}</strong>
+            <strong>{formatInstallationVpd(currentVpdKpa, targetVpdKpa)}</strong>
           </div>
+        </div>
+
+        <div
+          className="automation-control-group automation-card__mode-control"
+          role="group"
+          aria-label={t('detail.automation')}
+        >
+          <button
+            className="automation-control-button"
+            type="button"
+            aria-pressed={automationRunning}
+            disabled={action.isPending || !runtimeControllable}
+            onClick={() => {
+              if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
+            }}
+          >
+            AUTO
+          </button>
+          <button
+            className="automation-control-button"
+            type="button"
+            aria-pressed={manualControl}
+            disabled={action.isPending || !runtimeControllable}
+            onClick={() => {
+              if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
+            }}
+          >
+            MANUAL
+          </button>
         </div>
       </div>
 

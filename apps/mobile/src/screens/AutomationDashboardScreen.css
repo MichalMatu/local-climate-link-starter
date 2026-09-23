@@ -147,14 +147,14 @@
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   display: grid;
   gap: var(--lcl-spacing-sm);
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1fr) auto var(--lcl-size-action-min-width);
   min-width: 0;
   padding-top: var(--lcl-spacing-sm);
 }
 
 .automation-card__primary-metric,
-.automation-card__secondary-column,
-.automation-card__vpd {
+.automation-card__secondary-metrics,
+.automation-card__secondary-metrics > div {
   display: grid;
   min-width: 0;
 }
@@ -163,38 +163,10 @@
   gap: var(--lcl-spacing-xs);
 }
 
-.automation-card__secondary-column {
-  gap: var(--lcl-spacing-xs);
-}
-
-.automation-card__secondary-top {
-  align-items: center;
-  display: grid;
-  gap: var(--lcl-spacing-sm);
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-width: 0;
-}
-
-.automation-card__secondary-top > strong {
-  font-size: var(--lcl-font-size-sm);
-  line-height: var(--lcl-line-height-tight);
-  white-space: nowrap;
-}
-
-.automation-card__vpd {
-  gap: var(--lcl-spacing-xs);
-}
-
-.automation-card__vpd span {
+.automation-card__secondary-metrics span {
   color: var(--lcl-color-text-muted);
   font-size: var(--lcl-font-size-xs);
   line-height: var(--lcl-line-height-compact);
-}
-
-.automation-card__vpd strong {
-  font-size: var(--lcl-font-size-sm);
-  line-height: var(--lcl-line-height-tight);
-  white-space: nowrap;
 }
 
 .automation-card__primary-metric strong {
@@ -212,7 +184,17 @@
   line-height: var(--lcl-line-height-compact);
 }
 
-.automation-card__primary-metric small {
+.automation-card__secondary-metrics {
+  gap: var(--lcl-spacing-sm);
+}
+
+.automation-card__secondary-metrics > div {
+  gap: var(--lcl-spacing-xs);
+}
+
+.automation-card__secondary-metrics strong {
+  font-size: var(--lcl-font-size-sm);
+  line-height: var(--lcl-line-height-tight);
   white-space: nowrap;
 }
 
@@ -350,12 +332,10 @@
 
 @media (max-width: 30rem) {
   .automation-card__main {
-    gap: var(--lcl-spacing-xs);
-    grid-template-columns: max-content minmax(0, 1fr);
-  }
-
-  .automation-card__vpd strong {
-    font-size: var(--lcl-font-size-xs);
+    gap: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
+    grid-template-columns:
+      minmax(0, 1fr) auto
+      calc(var(--lcl-size-action-min-width) - var(--lcl-spacing-xl));
   }
 }
 

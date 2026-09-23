@@ -528,7 +528,8 @@ describe('AutomationDashboardScreen', () => {
     expect(climateLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('ON 19°C · OFF 20°C')).toBeVisible();
+    expect(screen.getByText('ON 19°C')).toBeVisible();
+    expect(screen.getByText('OFF 20°C')).toBeVisible();
     expect(within(climateCard).queryByText('Temperatura')).toBeNull();
     expect(within(climateCard).queryByText('Wilgotność')).toBeNull();
     expect(within(climateCard).getByText('VPD')).toBeVisible();
@@ -589,6 +590,49 @@ describe('AutomationDashboardScreen', () => {
     expect(await screen.findByText('1.14 kPa')).toBeVisible();
   });
 
+  it('shows configured humidity limits instead of VPD-derived effective thresholds', async () => {
+    const base = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'humidifying'
+    );
+    const saved = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'GrowBox',
+      baseUrl: 'http://192.168.0.20/',
+      scriptId: 1,
+      scriptHash: 'lcl-test',
+      config: {
+        ...base,
+        rule: {
+          ...base.rule,
+          control: { ...base.rule.control, onThreshold: 60, offThreshold: 90 },
+          vpdAssist: { ...base.rule.vpdAssist, enabled: true, targetKpa: 1 }
+        },
+        sensor: {
+          ...base.sensor,
+          runtimeAddress: 'A4:C1:38:4F:24:CD',
+          displayName: 'GrowBox'
+        }
+      },
+      nowMs: 1000
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        jsonResponse(
+          diagnosticPayload({ effectiveOnThreshold: 61.97, effectiveOffThreshold: 65.97 })
+        )
+      )
+    );
+
+    renderDashboard();
+
+    const card = (await screen.findByText('GrowBox')).closest('article') as HTMLElement;
+    expect(within(card).getByText('ON 60% · OFF 90%')).toBeVisible();
+    expect(within(card).queryByText(/61\.97|65\.97/)).toBeNull();
+  });
+
   it('shows the VPD target inline only while VPD assist is enabled', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation(true));
     vi.stubGlobal(
@@ -598,7 +642,8 @@ describe('AutomationDashboardScreen', () => {
 
     renderDashboard();
 
-    expect(await screen.findByText('1.31 → 1.20 → 20°C · 19–20°C')).toBeVisible();
+    expect(await screen.findByText('1.31 → 1.20 kPa')).toBeVisible();
+    expect(screen.queryByText('1.31 kPa')).toBeNull();
   });
 
   it('pulses only the plug symbol when a fresh climate measurement arrives', async () => {
@@ -732,7 +777,7 @@ describe('AutomationDashboardScreen', () => {
     expect(await screen.findByText('Dane nieaktualne')).toBeVisible();
   });
 
-  it('uses effective runtime thresholds and recovers without a manual refresh control', async () => {
+  it('keeps configured thresholds while diagnostics recover without a manual refresh control', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(installedAutomation());
     let diagnosticAttempts = 0;
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -765,7 +810,10 @@ describe('AutomationDashboardScreen', () => {
     });
 
     await waitFor(() => expect(screen.queryByText('Wymaga uwagi')).toBeNull());
-    expect(screen.getByText('ON 19°C · OFF 20°C')).toBeVisible();
+    expect(screen.getByText('ON 19°C')).toBeVisible();
+    expect(screen.getByText('OFF 20°C')).toBeVisible();
+    expect(screen.queryByText('ON 19.25°C')).toBeNull();
+    expect(screen.queryByText('OFF 19.75°C')).toBeNull();
     expect(diagnosticAttempts).toBe(2);
   });
 
