@@ -274,10 +274,10 @@ export const de = {
       mode: 'Modus',
       plugTemperature: 'Steckd.-Temp.',
       power: 'Leistung',
-      reason: 'Grund',
+      reason: 'Automationsgrund',
       relay: 'Relais',
-      relayRule: 'Regel-Relais',
-      shellyRelay: 'Shelly-Relais',
+      relayRule: 'Automationsausgang',
+      shellyRelay: 'Relaisstatus',
       snapshotAge: 'Snapshot-Alter',
       temperature: 'Temperatur',
       temperatureShort: 'Temp.',
@@ -595,6 +595,7 @@ export const de = {
       },
       vpdRangeHint:
         'Nach dem Setzen von kPa wählt VPD den Arbeitspunkt innerhalb der ON/OFF-Schwellen. Der Bereich wird nicht erweitert; bei engem Feuchtebereich kann der Effekt klein sein.',
+      vpdWorkingRange: 'Arbeitsbereich: {min}–{max}{unit} · {metric}',
       vpdTarget: 'Ziel-VPD kPa',
       vpdTargetShort: 'Ziel-VPD',
       generatedScriptLabel: 'Generiertes Skript'

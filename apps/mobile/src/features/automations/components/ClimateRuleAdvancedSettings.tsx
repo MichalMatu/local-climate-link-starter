@@ -33,7 +33,7 @@ export const ClimateRuleAdvancedSettings = (props: ClimateRuleAdvancedSettingsPr
   };
 
   return (
-    <div className="rule-progressive-disclosure__body rule-advanced-inline">
+    <div className="rule-advanced-inline">
       <p>{t('hardware.rule.advancedDisclosureHint')}</p>
       <div className="rule-advanced-inline__grid">
         <label

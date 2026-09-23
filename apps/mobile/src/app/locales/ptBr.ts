@@ -271,10 +271,10 @@ export const ptBr = {
       mode: 'Modo',
       plugTemperature: 'Temp. tomada',
       power: 'Potência',
-      reason: 'Motivo',
+      reason: 'Motivo da automação',
       relay: 'Relé',
-      relayRule: 'Relé regra',
-      shellyRelay: 'Relé Shelly',
+      relayRule: 'Saída da automação',
+      shellyRelay: 'Estado do relé',
       snapshotAge: 'Idade do snapshot',
       temperature: 'Temperatura',
       temperatureShort: 'Temp.',
@@ -589,6 +589,7 @@ export const ptBr = {
       },
       vpdRangeHint:
         'Depois de definir kPa, o VPD escolhe o ponto de trabalho dentro dos limites ON/OFF. Ele não amplia o intervalo; com um intervalo estreito de umidade, o efeito pode ser sutil.',
+      vpdWorkingRange: 'Faixa de trabalho: {min}–{max}{unit} · {metric}',
       vpdTarget: 'VPD alvo kPa',
       vpdTargetShort: 'VPD alvo',
       generatedScriptLabel: 'Script gerado'

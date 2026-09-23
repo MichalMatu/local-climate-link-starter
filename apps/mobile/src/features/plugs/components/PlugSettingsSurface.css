@@ -89,11 +89,8 @@
 .plug-color-presets {
   display: grid;
   gap: var(--lcl-spacing-xs);
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(var(--lcl-size-control-min-height), var(--lcl-size-control-min-height))
-  );
-  justify-content: start;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
 }
 
 .plug-color-preset {
@@ -228,4 +225,10 @@
   font-size: var(--lcl-font-size-md);
   line-height: var(--lcl-line-height-tight);
   margin: 0;
+}
+
+@media (min-width: 44rem) {
+  .plug-color-presets {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
 }

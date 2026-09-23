@@ -44,8 +44,9 @@ export const formatInstallationVpd = (
 
 export const installationThresholdSummary = (
   installation: ClimateInstalledAutomation,
-  effectiveOnThreshold?: number | null,
-  effectiveOffThreshold?: number | null
+  effectiveOnThreshold: number | null | undefined,
+  effectiveOffThreshold: number | null | undefined,
+  t: Translate
 ): string => {
   const { metric, onThreshold, offThreshold } = installation.config.rule.control;
   const unit = metric === 'humidity' ? '%' : '°C';
@@ -57,5 +58,7 @@ export const installationThresholdSummary = (
     effectiveOffThreshold != null && Number.isFinite(effectiveOffThreshold)
       ? effectiveOffThreshold
       : offThreshold;
-  return `${activeOnThreshold}${unit} / ${activeOffThreshold}${unit}`;
+  const formatThreshold = (value: number) =>
+    Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
+  return `${t('common.on')} ${formatThreshold(activeOnThreshold)}${unit} · ${t('common.off')} ${formatThreshold(activeOffThreshold)}${unit}`;
 };

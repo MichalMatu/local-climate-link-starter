@@ -1,6 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
-import { IconChevronDown } from '@tabler/icons-react';
+import { Disclosure, DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import {
   getLocalePreference,
@@ -189,17 +188,15 @@ export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
           </div>
         </section>
 
-        <details className="app-settings__section app-settings__diagnostics">
-          <summary className="app-settings__diagnostics-summary">
-            <span>{t('common.diagnostics')}</span>
+        <Disclosure
+          className="app-settings__diagnostics"
+          summary={t('common.diagnostics')}
+          summaryEnd={
             <span className="app-settings__diagnostics-status">
               {t('settings.support.runtimeErrors', { count: runtimeIssues.length })}
-              <IconChevronDown
-                className="app-settings__diagnostics-chevron"
-                aria-hidden="true"
-              />
             </span>
-          </summary>
+          }
+        >
           <div className="app-settings__diagnostics-body">
             <div className="status-stack">
               {supportRows.map((row) => (
@@ -243,7 +240,7 @@ export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
               </p>
             )}
           </div>
-        </details>
+        </Disclosure>
       </div>
     </main>
   );

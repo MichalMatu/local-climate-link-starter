@@ -1,6 +1,6 @@
 import type { RulePresetId, ThresholdDirection } from '@lcl/automation-core';
 import type { ClimateSensorAggregation } from '@lcl/script-generator';
-import { InfoLabel, SelectField } from '@lcl/ui';
+import { Disclosure, InfoLabel, SelectField } from '@lcl/ui';
 import { useId } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
@@ -89,6 +89,17 @@ export const ClimateRuleEditor = ({
   const vpdTargetInputId = useId();
   const copy = RULE_PRESET_COPY[props.rulePreset];
   const direction = props.controlDirection ?? copy.direction;
+  const onThresholdValue = Number(props.onThresholdInput);
+  const offThresholdValue = Number(props.offThresholdInput);
+  const vpdWorkingRange =
+    Number.isFinite(onThresholdValue) && Number.isFinite(offThresholdValue)
+      ? t('hardware.rule.vpdWorkingRange', {
+          min: Math.min(onThresholdValue, offThresholdValue),
+          max: Math.max(onThresholdValue, offThresholdValue),
+          unit: copy.unit,
+          metric: copy.unit === '%' ? t('dashboard.humidity') : t('dashboard.temperature')
+        })
+      : null;
   const vpdAssistLabel = props.vpdAssistEnabled
     ? props.isVpdAssistValid
       ? `${Number(props.vpdTargetInput).toFixed(2)} kPa`
@@ -253,10 +264,15 @@ export const ClimateRuleEditor = ({
             )}
           </div>
         )}
+        {props.vpdAssistEnabled && vpdWorkingRange && (
+          <p className="rule-vpd-assist__working-range">{vpdWorkingRange}</p>
+        )}
       </section>
 
-      <details className="rule-progressive-disclosure">
-        <summary>{t('hardware.rule.advanced')}</summary>
+      <Disclosure
+        className="rule-advanced-disclosure"
+        summary={t('hardware.rule.advanced')}
+      >
         <ClimateRuleAdvancedSettings
           vpdAssistEnabled={props.vpdAssistEnabled}
           vpdTargetInput={props.vpdTargetInput}
@@ -295,7 +311,7 @@ export const ClimateRuleEditor = ({
             </button>
           </div>
         )}
-      </details>
+      </Disclosure>
 
       {showSaveTarget && props.submitMode === 'edit' && props.selectedShellyName && (
         <p className="rule-save-target">

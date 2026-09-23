@@ -144,13 +144,11 @@ const ClimateAutomationCard = ({
     controlStatus?.relayOn ??
     snapshot?.diagnostics.relayState;
   const controlsHumidity = installation.config.rule.control.metric === 'humidity';
-  const purposeLabel = controlsHumidity
-    ? t('intent.humidity.context')
-    : t('intent.temperature.context');
   const thresholdSummary = installationThresholdSummary(
     installation,
     snapshot?.diagnostics.lastEffectiveOnThreshold,
-    snapshot?.diagnostics.lastEffectiveOffThreshold
+    snapshot?.diagnostics.lastEffectiveOffThreshold,
+    t
   );
 
   const primaryMetric = controlsHumidity
@@ -213,7 +211,6 @@ const ClimateAutomationCard = ({
             variant="card"
             onCommit={onNameChange}
           />
-          <p>{purposeLabel}</p>
         </div>
 
         <div className="automation-card__header-actions">

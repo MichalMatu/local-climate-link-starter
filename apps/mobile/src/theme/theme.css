@@ -353,7 +353,8 @@ select {
 }
 
 .rule-vpd-assist__header p,
-.rule-progressive-disclosure__body > p {
+.rule-advanced-inline > p,
+.rule-vpd-assist__working-range {
   color: var(--lcl-color-text-muted);
   font-size: var(--lcl-font-size-sm);
   line-height: var(--lcl-line-height-normal);
@@ -699,10 +700,8 @@ select {
 }
 
 .app-settings__diagnostics-body {
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   display: grid;
   gap: var(--lcl-spacing-md);
-  padding: var(--lcl-spacing-md);
 }
 
 .app-settings__issues {
@@ -2886,6 +2885,7 @@ select {
 }
 
 .rule-advanced-inline {
+  display: grid;
   gap: var(--lcl-spacing-md);
 }
 

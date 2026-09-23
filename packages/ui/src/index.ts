@@ -13,3 +13,4 @@ export * from './primitives/DiagnosticRow.js';
 export * from './primitives/Modal.js';
 export * from './primitives/SelectField.js';
 export * from './primitives/ColorSwatch.js';
+export * from './primitives/Disclosure.js';

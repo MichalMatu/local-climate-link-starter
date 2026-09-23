@@ -272,10 +272,10 @@ export const en = {
       mode: 'Mode',
       plugTemperature: 'Plug temp.',
       power: 'Power',
-      reason: 'Reason',
+      reason: 'Automation reason',
       relay: 'Relay',
-      relayRule: 'Rule relay',
-      shellyRelay: 'Shelly relay',
+      relayRule: 'Automation output',
+      shellyRelay: 'Actual relay',
       snapshotAge: 'Snapshot age',
       temperature: 'Temperature',
       temperatureShort: 'Temp.',
@@ -588,6 +588,7 @@ export const en = {
       },
       vpdRangeHint:
         'After setting kPa, VPD chooses the working point within the ON/OFF thresholds. It does not widen the range; with a narrow humidity range the effect may be subtle.',
+      vpdWorkingRange: 'Working range: {min}–{max}{unit} · {metric}',
       vpdTarget: 'Target VPD kPa',
       vpdTargetShort: 'Target VPD',
       generatedScriptLabel: 'Generated script'

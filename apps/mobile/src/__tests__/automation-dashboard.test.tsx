@@ -528,7 +528,8 @@ describe('AutomationDashboardScreen', () => {
     expect(climateLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     expect(screen.queryByText('Działa')).toBeNull();
     expect(screen.getAllByText('ON').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('19°C / 20°C')).toBeVisible();
+    expect(screen.getByText('ON 19°C · OFF 20°C')).toBeVisible();
+    expect(screen.queryByText('Sterowanie temperaturą')).toBeNull();
     rerenderKind('time');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Termometry' })).toBeNull();

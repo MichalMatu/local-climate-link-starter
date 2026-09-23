@@ -272,10 +272,10 @@ export const pl = {
       mode: 'Tryb',
       plugTemperature: 'Temp. gniazdka',
       power: 'Moc',
-      reason: 'Powód',
+      reason: 'Powód automatyzacji',
       relay: 'Przekaźnik',
-      relayRule: 'Przekaźnik reguły',
-      shellyRelay: 'Przekaźnik Shelly',
+      relayRule: 'Wyjście automatyzacji',
+      shellyRelay: 'Stan przekaźnika',
       snapshotAge: 'Wiek snapshotu',
       temperature: 'Temperatura',
       temperatureShort: 'Temp.',
@@ -592,6 +592,7 @@ export const pl = {
       },
       vpdRangeHint:
         'Po ustawieniu kPa VPD dobiera punkt pracy w zakresie progów ON/OFF. Nie rozszerza zakresu; przy wąskim zakresie efekt może być mało widoczny.',
+      vpdWorkingRange: 'Zakres pracy: {min}–{max}{unit} · {metric}',
       vpdTarget: 'Docelowe VPD kPa',
       vpdTargetShort: 'Docelowe VPD',
       generatedScriptLabel: 'Wygenerowany skrypt'

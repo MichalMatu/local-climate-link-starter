@@ -62,7 +62,7 @@ export const formatDiagnosticUptimeAge = (
 export const formatDiagnosticReason = (reason: string, t: Translate): string =>
   diagnosticReasonKeys.has(reason)
     ? t(`hardware.diagnosticsReason.${reason}` as TranslationKey)
-    : reason;
+    : t('dashboard.health.unknown');
 
 export const formatBleDataState = (
   diagnostics: DiagnosticDetails,
