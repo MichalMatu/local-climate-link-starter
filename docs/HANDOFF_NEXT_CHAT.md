@@ -14,7 +14,7 @@ e75c77cb-7589-4452-94b2-decc97ff85a1
 
 ## Current product state
 
-The architecture/lifecycle baseline is stable and the second UX correction checkpoint is complete.
+The architecture/lifecycle baseline is stable and the third UX correction checkpoint is complete.
 
 Key established behavior:
 
@@ -27,7 +27,7 @@ Key established behavior:
 - successful Climate recovery also restores missing configured thermometer identities into the saved Thermometers list by canonical BLE MAC, without duplicating existing entries or changing current rule membership;
 - local Shelly execution remains independent of phone/cloud after configuration.
 
-## UX state after the second stabilization checkpoint
+## UX state after the third stabilization checkpoint
 
 Plug details remain one surface with five local sections:
 
@@ -48,14 +48,21 @@ The current UX baseline now establishes:
 - script/runtime resource diagnostics were moved to Info alongside device diagnostics;
 - old nested Settings/Diagnostics/Script detail pages remain removed;
 - standalone Add Plug/Thermometer pages intentionally have no page-local Back control; bottom navigation plus platform/browser Back own return navigation, and regressions are blocked by tests + UX gate.
+- dashboard Climate cards omit the redundant control-mode subtitle and show explicit `ON … · OFF …` thresholds;
+- Automation live-state labels are user-facing (`Automation reason`, `Automation output`, `Actual relay`) and unknown runtime abbreviations fail closed to an unknown-state label rather than leaking raw codes;
+- VPD Assist visibly shows the operating range imposed by the configured primary thresholds while preserving the existing runtime clamp;
+- Automation `Advanced` and Settings diagnostics use one shared `Disclosure` pattern;
+- Plug LED presets are balanced 4×2 on phone widths and 8×1 on wider layouts instead of allowing a 7+1 wrap.
 
 No automation ownership, runtime-safety or Shelly mutation semantics were intentionally changed by this UX restructuring.
 
 ## Verification / real device
 
-Current `main` `9bb6b2f145b90d295879a75012e15fc5258f95ae` includes the UX checkpoint plus passive thermometer-registry recovery from a verified managed Climate automation. The final repository gate passed `pnpm check`; the mobile suite was 279/279 green, with the recovery-focused hardware/setup suite 70/70 green.
+The third UX candidate `9315cbad7236d6322ccd414b3239e006e971553a` passed the exact final `pnpm check:full`: mobile 283/283 tests, repository/feature/UX gates, coverage and build were green, and responsive Playwright finished 36/36.
 
-That exact `main` was clean-installed on the real Samsung SM-S906B / S22+ with Android 16 using `pnpm android:phone-alpha`. Uninstall/install and cold start succeeded and the app opened with an empty Plug list. The user then re-added the physical Plug and confirmed that the existing Climate automation was recovered and its configured thermometer was automatically restored into Thermometers without duplication.
+That exact candidate was installed on the real Samsung SM-S906B / S22+ with Android 16 using `adb install -r`, preserving the existing app data. Real-device inspection confirmed the dashboard threshold cleanup, readable Automation live-state labels, visible VPD working range, shared inline Advanced disclosure and a balanced 4×2 LED palette. No Save action, schedule/runtime rewrite or deliberate relay mutation was performed during this presentation-only acceptance.
+
+The earlier clean-install recovery acceptance on `main` `9bb6b2f145b90d295879a75012e15fc5258f95ae` remains valid: after a clean install and re-adding the physical Plug, the existing Climate automation was recovered and its configured thermometer was restored into Thermometers without duplication.
 
 The user's live Climate setup may intentionally use only **1 thermometer**. Do not restore a previous 4-sensor acceptance configuration or mutate the real Shelly merely to reproduce historical test state.
 
