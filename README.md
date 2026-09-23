@@ -2,61 +2,50 @@
 
 **Thermostat without a hub.**
 
-Local Climate Link is an app for local climate automation:
+Local Climate Link is a local-first mobile app for configuring and managing Shelly Plug climate automation:
 
 ```text
 BLE thermometer -> Shelly Plug S Gen3 -> local relay ON/OFF
 ```
 
-The app does not need to run in the background. You configure the rule once, then
-the script uploaded to Shelly receives BLE beacons and controls the plug locally.
+The phone configures and diagnoses. The Shelly executes the installed automation locally, so the app does not need to remain open and the default product path does not require cloud services, Home Assistant, MQTT or a 24/7 server.
 
 ## What the app does
 
-- finds and checks Shelly Plug S Gen3,
-- supports BLE thermometers: Xiaomi LYWSD03MMC / PVVX BTHome v2 and TP357,
-- lets you set your own temperature, humidity, and VPD thresholds,
-- generates and uploads a local Shelly Script,
-- shows diagnostics: last reading, RSSI, Shelly firmware, relay state, and
-  decision reason,
-- works without cloud, Home Assistant, MQTT, or a 24/7 server.
+- discovers and manages Shelly Plug S Gen3 devices;
+- supports Xiaomi LYWSD03MMC / PVVX BTHome v2 and TP357 BLE thermometers;
+- supports up to 4 thermometers in one Climate automation with `avg`, `min`, `max` or `firstValid` aggregation;
+- configures temperature, humidity and VPD rules;
+- generates and manages a local Shelly Script runtime;
+- exposes Plug, BLE, script and automation diagnostics without duplicating ownership;
+- keeps device settings such as LED, physical button mode and Shelly Cloud separate from automation logic.
 
-## Supported MVP setup
+## Current product status
 
-```text
-Xiaomi LYWSD03MMC / PVVX / BTHome v2
-or TP357 custom BLE beacon
-        ↓
-Shelly Plug S Gen3
-        ↓
-local script and relay ON/OFF
-```
+The project is in MVP/beta with a stable architecture and a verified real-hardware path on Samsung S22+ + Shelly Plug S Gen3.
 
-## Status
+The current development priority is **continued UX refinement of existing flows**. Do not start a new sensor/runtime capability until the current UX pass is accepted.
 
-The project is in MVP/beta. The current priority is one stable path:
-Xiaomi/PVVX or TP357 + Shelly Plug S Gen3.
+After UX stabilization, the next planned product expansions are:
+
+1. BLE soil-moisture input through the existing typed sensor/config model;
+2. a real-hardware feasibility spike for managing Shelly over BLE, reusing the same ownership and RPC transport boundaries.
+
+See [Roadmap](docs/ROADMAP.md) and [Current handoff](docs/HANDOFF_NEXT_CHAT.md) for the exact next-session contract.
 
 ## Downloads
 
 The latest Android beta build is available in GitHub Releases:
 
-Release page (always points to the newest published version):
-
 ```text
 https://github.com/MichalMatu/local-climate-link-starter/releases/latest
 ```
 
-Direct assets for the current published release (v2.0.10):
+Current published release: **v2.0.10**.
 
 - [Android APK v2.0.10](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.apk)
-  for direct installation on Android.
 - [Android App Bundle v2.0.10](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.aab)
-  for Play Store/internal testing workflows.
 - [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-sha256.txt)
-  for file verification.
-
-iOS installation files are not published yet.
 
 ## Project page
 
@@ -64,20 +53,19 @@ iOS installation files are not published yet.
 https://michalmatu.github.io/local-climate-link-starter/
 ```
 
-## For developers
+## Developer documentation
 
-Technical notes, commands, tests, and repository structure are kept outside the
-main README:
+The active documentation set is intentionally small:
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
 - [Hardware test matrix](docs/testing/hardware-matrix.md)
 
+Repository operating rules live in [AGENTS.md](AGENTS.md) and the nearest directory-level `AGENTS.md` files.
+
 ## License
 
-Local Climate Link is source-available under a noncommercial license. Commercial
-use, app store distribution, product bundling, or paid services require written
-permission or a separate commercial license.
+Local Climate Link is source-available under a noncommercial license. Commercial use, app store distribution, product bundling or paid services require written permission or a separate commercial license.
 
 Copyright (c) 2026 Michal Matuszewski. See [LICENSE](LICENSE).
