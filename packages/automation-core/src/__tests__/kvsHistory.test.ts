@@ -22,7 +22,6 @@ const sample = (index: number): LclHistorySample => ({
   temperatureC: (234 + index) / 10,
   humidityPct: (551 - index) / 10,
   vpdKpa: (112 + index) / 100,
-  freshSensorCount: 1,
   relayOn: index % 2 === 1,
   reason: index % 2 === 1 ? 'ab' : 'ib'
 });
