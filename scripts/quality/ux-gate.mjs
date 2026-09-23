@@ -11,7 +11,6 @@ const cssPaths = [
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
   'packages/ui/src/primitives/ColorSwatch.css',
-  'packages/ui/src/primitives/ToggleSwitch.css',
   'packages/ui/src/styles.css'
 ];
 const landingTokenizedCssPaths = [
@@ -63,11 +62,15 @@ const checkDeviceAddPageBoundary = async () => {
   const sensorPath = 'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx';
   const shellyPath = 'apps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx';
   const routesPath = 'apps/mobile/src/routes/AppRoutes.tsx';
-  const [sensorSource, shellySource, routesSource] = await Promise.all([
-    readRepoFile(sensorPath),
-    readRepoFile(shellyPath),
-    readRepoFile(routesPath)
-  ]);
+  const hardwareScreenPath =
+    'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx';
+  const [sensorSource, shellySource, routesSource, hardwareScreenSource] =
+    await Promise.all([
+      readRepoFile(sensorPath),
+      readRepoFile(shellyPath),
+      readRepoFile(routesPath),
+      readRepoFile(hardwareScreenPath)
+    ]);
 
   if (
     sensorSource.includes('isAddSensorModalOpen') ||
@@ -89,6 +92,15 @@ const checkDeviceAddPageBoundary = async () => {
   }
   if (!routesSource.includes("type: 'device-add'")) {
     addFailure(routesPath, 'device add flows must be represented in the app page tree');
+  }
+  if (
+    hardwareScreenSource.includes('onBackFromStandaloneAdd') ||
+    routesSource.includes('onBackFromStandaloneAdd')
+  ) {
+    addFailure(
+      hardwareScreenPath,
+      'standalone Plug/Thermometer add pages must not render a page-local Back; use persistent bottom navigation or platform/browser Back'
+    );
   }
   if (sensorSource.includes('device-add-page__header')) {
     addFailure(

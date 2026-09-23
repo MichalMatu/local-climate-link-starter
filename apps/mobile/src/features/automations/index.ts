@@ -3,6 +3,7 @@ export {
   ClimateRecoverySection,
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
+  ClimateScriptDiagnosticsSection,
   type ClimateBleSensorView,
   type ClimateScriptDiagnosticRow
 } from './components/ClimateInstallationDetailSections.js';

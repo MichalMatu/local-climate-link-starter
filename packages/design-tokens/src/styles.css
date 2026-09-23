@@ -12,6 +12,12 @@
   --lcl-color-overlay: rgba(29, 29, 31, 0.44);
   --lcl-color-code-background: #1d1d1f;
   --lcl-color-code-text: #f5f5f7;
+  --lcl-color-spectrum-red: #ff0000;
+  --lcl-color-spectrum-yellow: #ffff00;
+  --lcl-color-spectrum-green: #00ff00;
+  --lcl-color-spectrum-cyan: #00ffff;
+  --lcl-color-spectrum-blue: #0000ff;
+  --lcl-color-spectrum-magenta: #ff00ff;
   --lcl-color-status-ok-bg: #e8f7ee;
   --lcl-color-status-ok-text: #146c43;
   --lcl-color-status-ok-border: #b7e4c7;

@@ -1,11 +1,12 @@
 import type { ShellyPlugsUiLedMode } from '@lcl/shelly-client';
-import { SelectField, ToggleSwitch } from '@lcl/ui';
+import { SelectField } from '@lcl/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceLedCopy } from '../../../app/locales/deviceLed.js';
 import {
   buildPlugLedSettingsPatch,
-  createPlugLedSettingsDraft
+  createPlugLedSettingsDraft,
+  type PlugLedSettingsDraft
 } from '../data/plugLedSettingsForm.js';
 import type { PlugLedSettingsTarget } from '../data/plugLedSettings.js';
 import { usePlugLedSettingsFlow } from '../flows/usePlugLedSettingsFlow.js';
@@ -23,26 +24,36 @@ const ON_DEFAULT_RGB: [number, number, number] = [0, 100, 0];
 const OFF_DEFAULT_RGB: [number, number, number] = [100, 0, 0];
 
 export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const copy = deviceLedCopy[locale];
   const { query, updateMutation } = usePlugLedSettingsFlow(target);
   const settings = query.data;
   const config = settings?.supported ? settings.config.leds : null;
   const capabilities = settings?.supported ? settings.capabilities : null;
-  const [draft, setDraft] = useState(() =>
+  const [baseline, setBaseline] = useState(config);
+  const [draft, setDraft] = useState<PlugLedSettingsDraft | null>(() =>
     config ? createPlugLedSettingsDraft(config) : null
   );
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!config) return;
-    setDraft(createPlugLedSettingsDraft(config));
-  }, [config]);
-
   const patch = useMemo(() => {
-    if (!config || !capabilities || !draft) return null;
-    return buildPlugLedSettingsPatch({ original: config, draft, capabilities });
-  }, [capabilities, config, draft]);
+    if (!baseline || !capabilities || !draft) return null;
+    return buildPlugLedSettingsPatch({ original: baseline, draft, capabilities });
+  }, [baseline, capabilities, draft]);
+  const dirty = patch !== null;
+
+  useEffect(() => {
+    if (!config || dirty) return;
+    setBaseline(config);
+    setDraft(createPlugLedSettingsDraft(config));
+  }, [config, dirty]);
+
+  const updateDraft = (
+    update: (current: PlugLedSettingsDraft) => PlugLedSettingsDraft
+  ) => {
+    setFeedback(null);
+    setDraft((current) => (current ? update(current) : current));
+  };
 
   const save = () => {
     if (!patch) {
@@ -51,7 +62,13 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
     }
     setFeedback(null);
     updateMutation.mutate(patch, {
-      onSuccess: () => setFeedback(copy.saved),
+      onSuccess: (confirmed) => {
+        if (confirmed.supported) {
+          setBaseline(confirmed.config.leds);
+          setDraft(createPlugLedSettingsDraft(confirmed.config.leds));
+        }
+        setFeedback(copy.saved);
+      },
       onError: () => setFeedback(copy.actionFailed)
     });
   };
@@ -86,12 +103,14 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
     );
   }
 
-  const setMode = (mode: ShellyPlugsUiLedMode) => {
-    setFeedback(null);
-    setDraft((current) => current && { ...current, mode });
-  };
-  const setPercent = (field: keyof typeof draft, value: string) =>
-    setDraft((current) => current && { ...current, [field]: percentValue(value) });
+  const setMode = (mode: ShellyPlugsUiLedMode) =>
+    updateDraft((current) => ({ ...current, mode }));
+  const setPercent = (field: keyof PlugLedSettingsDraft, value: string) =>
+    updateDraft((current) => ({ ...current, [field]: percentValue(value) }));
+  const setNightModeEnabled = (nightModeEnabled: boolean) =>
+    updateDraft((current) => ({ ...current, nightModeEnabled }));
+  const setNightTime = (field: 'nightStart' | 'nightEnd', value: string) =>
+    updateDraft((current) => ({ ...current, [field]: value }));
 
   return (
     <section className="plug-settings-section installation-detail-device-led">
@@ -117,15 +136,20 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
       {capabilities.powerBrightness && draft.mode === 'power' && (
         <label className="field">
           <span>{copy.powerBrightness}</span>
-          <input
-            aria-label={copy.powerBrightness}
-            inputMode="numeric"
-            type="number"
-            min="0"
-            max="100"
-            value={draft.powerBrightness}
-            onChange={(event) => setPercent('powerBrightness', event.target.value)}
-          />
+          <span className="field-unit-control">
+            <input
+              aria-label={copy.powerBrightness}
+              inputMode="numeric"
+              max="100"
+              min="0"
+              type="number"
+              value={draft.powerBrightness}
+              onChange={(event) => setPercent('powerBrightness', event.target.value)}
+            />
+            <span className="field-unit-control__unit" aria-hidden="true">
+              %
+            </span>
+          </span>
         </label>
       )}
 
@@ -142,54 +166,45 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
             return (
               <fieldset className="plug-led-state" key={state}>
                 <legend>{stateLabel}</legend>
-                <ToggleSwitch
-                  checked={rgb !== null}
-                  onChange={(checked) =>
-                    setDraft(
-                      (current) =>
-                        current && {
-                          ...current,
-                          [colorField]: checked
-                            ? isOn
-                              ? ON_DEFAULT_RGB
-                              : OFF_DEFAULT_RGB
-                            : null
-                        }
-                    )
+                <PlugLedColorEditor
+                  ariaPrefix={stateLabel}
+                  colorLabel={copy.color}
+                  defaultLabel={copy.defaultColor}
+                  customLabel={copy.customColor}
+                  customTitle={copy.customColorTitle}
+                  hueLabel={copy.hue}
+                  saturationLabel={copy.saturation}
+                  lightnessLabel={copy.lightness}
+                  applyLabel={copy.applyColor}
+                  cancelLabel={t('common.cancel')}
+                  fallbackValue={isOn ? ON_DEFAULT_RGB : OFF_DEFAULT_RGB}
+                  value={rgb}
+                  onChange={(nextRgb) =>
+                    updateDraft((current) => ({ ...current, [colorField]: nextRgb }))
                   }
-                >
-                  {copy.customColor}
-                </ToggleSwitch>
-
-                {rgb !== null && (
-                  <PlugLedColorEditor
-                    ariaPrefix={stateLabel}
-                    colorLabel={copy.color}
-                    value={rgb}
-                    onChange={(nextRgb) =>
-                      setDraft(
-                        (current) => current && { ...current, [colorField]: nextRgb }
-                      )
-                    }
-                  />
-                )}
+                />
 
                 <label className="field">
                   <span>{copy.brightness}</span>
-                  <input
-                    aria-label={`${stateLabel} ${copy.brightness}`}
-                    inputMode="numeric"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={brightness}
-                    onChange={(event) =>
-                      setPercent(
-                        isOn ? 'switchOnBrightness' : 'switchOffBrightness',
-                        event.target.value
-                      )
-                    }
-                  />
+                  <span className="field-unit-control">
+                    <input
+                      aria-label={`${stateLabel} ${copy.brightness}`}
+                      inputMode="numeric"
+                      max="100"
+                      min="0"
+                      type="number"
+                      value={brightness}
+                      onChange={(event) =>
+                        setPercent(
+                          isOn ? 'switchOnBrightness' : 'switchOffBrightness',
+                          event.target.value
+                        )
+                      }
+                    />
+                    <span className="field-unit-control__unit" aria-hidden="true">
+                      %
+                    </span>
+                  </span>
                 </label>
               </fieldset>
             );
@@ -200,25 +215,32 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
       {capabilities.nightMode && (
         <fieldset className="plug-night-mode">
           <legend>{copy.nightMode}</legend>
-          <ToggleSwitch
-            checked={draft.nightModeEnabled}
-            onChange={(checked) =>
-              setDraft((current) => current && { ...current, nightModeEnabled: checked })
-            }
-          >
-            {copy.nightModeEnabled}
-          </ToggleSwitch>
+          <label className="plug-settings-check-row">
+            <span>{copy.nightModeEnabled}</span>
+            <input
+              aria-label={copy.nightModeEnabled}
+              checked={draft.nightModeEnabled}
+              type="checkbox"
+              onChange={(event) => setNightModeEnabled(event.currentTarget.checked)}
+            />
+          </label>
           <label className="field">
             <span>{copy.nightBrightness}</span>
-            <input
-              aria-label={copy.nightBrightness}
-              inputMode="numeric"
-              type="number"
-              min="0"
-              max="100"
-              value={draft.nightBrightness}
-              onChange={(event) => setPercent('nightBrightness', event.target.value)}
-            />
+            <span className="field-unit-control">
+              <input
+                aria-label={copy.nightBrightness}
+                disabled={!draft.nightModeEnabled}
+                inputMode="numeric"
+                max="100"
+                min="0"
+                type="number"
+                value={draft.nightBrightness}
+                onChange={(event) => setPercent('nightBrightness', event.target.value)}
+              />
+              <span className="field-unit-control__unit" aria-hidden="true">
+                %
+              </span>
+            </span>
           </label>
           <div className="time-schedule-grid plug-night-mode__times">
             <label className="field">
@@ -226,12 +248,11 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
               <input
                 className="plug-time-input"
                 aria-label={copy.nightStart}
+                disabled={!draft.nightModeEnabled}
                 type="time"
                 value={draft.nightStart}
                 onChange={(event) =>
-                  setDraft(
-                    (current) => current && { ...current, nightStart: event.target.value }
-                  )
+                  setNightTime('nightStart', event.currentTarget.value)
                 }
               />
             </label>
@@ -240,13 +261,10 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
               <input
                 className="plug-time-input"
                 aria-label={copy.nightEnd}
+                disabled={!draft.nightModeEnabled}
                 type="time"
                 value={draft.nightEnd}
-                onChange={(event) =>
-                  setDraft(
-                    (current) => current && { ...current, nightEnd: event.target.value }
-                  )
-                }
+                onChange={(event) => setNightTime('nightEnd', event.currentTarget.value)}
               />
             </label>
           </div>
@@ -262,7 +280,7 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
       <button
         className="primary-action plug-settings-save"
         type="button"
-        disabled={updateMutation.isPending}
+        disabled={!patch || updateMutation.isPending}
         onClick={save}
       >
         {updateMutation.isPending ? copy.saving : copy.save}

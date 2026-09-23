@@ -9,8 +9,14 @@ type DeviceLedCopy = {
   off: string;
   onState: string;
   offState: string;
+  defaultColor: string;
   customColor: string;
+  customColorTitle: string;
   color: string;
+  hue: string;
+  saturation: string;
+  lightness: string;
+  applyColor: string;
   brightness: string;
   powerBrightness: string;
   nightMode: string;
@@ -37,8 +43,14 @@ const en: DeviceLedCopy = {
   off: 'Off',
   onState: 'ON',
   offState: 'OFF',
-  customColor: 'Use custom color',
+  defaultColor: 'Default',
+  customColor: 'Custom',
+  customColorTitle: 'Custom color',
   color: 'Color',
+  hue: 'Hue',
+  saturation: 'Saturation',
+  lightness: 'Lightness',
+  applyColor: 'Use color',
   brightness: 'Brightness',
   powerBrightness: 'Power mode brightness',
   nightMode: 'Night mode',
@@ -69,8 +81,14 @@ export const deviceLedCopy: Record<Locale, DeviceLedCopy> = {
     off: 'Wyłączona',
     onState: 'ON',
     offState: 'OFF',
-    customColor: 'Użyj własnego koloru',
+    defaultColor: 'Domyślny',
+    customColor: 'Własny',
+    customColorTitle: 'Własny kolor',
     color: 'Kolor',
+    hue: 'Odcień',
+    saturation: 'Nasycenie',
+    lightness: 'Jasność koloru',
+    applyColor: 'Użyj koloru',
     brightness: 'Jasność',
     powerBrightness: 'Jasność trybu mocy',
     nightMode: 'Tryb nocny',

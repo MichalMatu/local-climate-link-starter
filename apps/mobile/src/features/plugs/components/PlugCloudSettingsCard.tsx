@@ -1,4 +1,3 @@
-import { ToggleSwitch } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceCloudCopy } from '../../../app/locales/deviceCloud.js';
@@ -16,22 +15,31 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
   const { query, updateMutation } = usePlugCloudSettingsFlow(target);
   const settings = query.data;
   const enabled = settings?.supported ? settings.enabled : null;
+  const [baseline, setBaseline] = useState<boolean | null>(enabled);
   const [draft, setDraft] = useState<boolean | null>(enabled);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const hasChanges = draft !== null && baseline !== null && draft !== baseline;
 
   useEffect(() => {
-    if (enabled === null) return;
+    if (enabled === null || hasChanges) return;
+    setBaseline(enabled);
     setDraft(enabled);
-  }, [enabled]);
+  }, [enabled, hasChanges]);
 
   const save = () => {
-    if (draft === null || draft === enabled) {
+    if (draft === null || draft === baseline) {
       setFeedback(copy.noChanges);
       return;
     }
     setFeedback(null);
     updateMutation.mutate(draft, {
-      onSuccess: () => setFeedback(copy.saved),
+      onSuccess: (confirmed) => {
+        if (confirmed.supported) {
+          setBaseline(confirmed.enabled);
+          setDraft(confirmed.enabled);
+        }
+        setFeedback(copy.saved);
+      },
       onError: () => setFeedback(copy.actionFailed)
     });
   };
@@ -70,15 +78,18 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
         <p>{copy.description}</p>
       </div>
 
-      <ToggleSwitch
-        checked={draft}
-        onChange={(checked) => {
-          setFeedback(null);
-          setDraft(checked);
-        }}
-      >
-        {copy.enable}
-      </ToggleSwitch>
+      <label className="plug-settings-check-row">
+        <span>{copy.enable}</span>
+        <input
+          aria-label={copy.enable}
+          checked={draft}
+          type="checkbox"
+          onChange={(event) => {
+            setFeedback(null);
+            setDraft(event.currentTarget.checked);
+          }}
+        />
+      </label>
 
       <p className="plug-settings-feedback">
         {draft ? copy.enabledHint : copy.disabledHint}
@@ -91,7 +102,7 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
         <button
           className="primary-action"
           type="button"
-          disabled={updateMutation.isPending}
+          disabled={!hasChanges || updateMutation.isPending}
           onClick={save}
         >
           {updateMutation.isPending ? copy.saving : copy.save}

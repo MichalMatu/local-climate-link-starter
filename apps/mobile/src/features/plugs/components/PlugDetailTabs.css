@@ -101,6 +101,14 @@
   min-height: var(--lcl-size-control-min-height);
 }
 
+.plug-detail-loading--section {
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  justify-content: center;
+  padding: var(--lcl-spacing-lg);
+  width: 100%;
+}
+
 .plug-detail-loading__spinner {
   animation: plug-detail-spin 0.8s linear infinite;
   border: var(--lcl-border-width-md) solid var(--lcl-color-border);
@@ -108,6 +116,63 @@
   border-top-color: var(--lcl-color-accent);
   height: var(--lcl-size-control-icon-size);
   width: var(--lcl-size-control-icon-size);
+}
+
+.installation-automation-live-state {
+  border-bottom: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding-bottom: var(--lcl-spacing-md);
+}
+
+.installation-detail-inline-rule {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  min-width: 0;
+}
+
+.installation-detail-inline-rule .rule-developer-actions,
+.installation-detail-inline-rule .rule-save-target {
+  display: none;
+}
+
+.installation-detail-delete-action {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--lcl-spacing-lg);
+}
+
+.installation-detail-delete-action .secondary-action {
+  width: auto;
+}
+
+.installation-ble-card {
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  overflow: hidden;
+}
+
+.installation-ble-card__status {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: var(--lcl-size-control-min-height);
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+}
+
+.installation-ble-card__status span {
+  color: var(--lcl-color-text-muted);
+}
+
+.installation-ble-card__status strong {
+  color: var(--lcl-color-text);
+}
+
+.installation-ble-card__status + .installation-sensor-list {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+}
+
+.installation-ble-card .installation-sensor-list {
+  gap: 0;
 }
 
 .installation-sensor-list {
@@ -121,6 +186,16 @@
   display: grid;
   gap: var(--lcl-spacing-sm);
   padding: var(--lcl-spacing-md);
+}
+
+.installation-ble-card .installation-sensor-item {
+  border: 0;
+  border-radius: 0;
+  padding: var(--lcl-spacing-md);
+}
+
+.installation-ble-card .installation-sensor-item + .installation-sensor-item {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
 }
 
 .installation-sensor-item__header {

@@ -29,7 +29,6 @@ type HardwareSetupScreenProps = {
   onSetupComplete?: () => void;
   onOpenPlugAdd?: () => void;
   onOpenSensorAdd?: (mode: 'manual' | 'phone-scan') => void;
-  onBackFromStandaloneAdd?: () => void;
   fixedShellyId?: string;
   editInstallationId?: string;
   plugAddOnly?: boolean;
@@ -43,7 +42,6 @@ export const HardwareSetupScreen = ({
   onSetupComplete,
   onOpenPlugAdd,
   onOpenSensorAdd,
-  onBackFromStandaloneAdd,
   fixedShellyId,
   editInstallationId,
   plugAddOnly = false,
@@ -213,13 +211,6 @@ export const HardwareSetupScreen = ({
 
   return (
     <main className="demo-shell hardware-shell">
-      {(plugAddOnly || sensorAddOnly) && onBackFromStandaloneAdd && (
-        <AppPageBack
-          label={plugAddOnly ? t('dashboard.climateTab') : t('dashboard.timeTab')}
-          onBack={onBackFromStandaloneAdd}
-        />
-      )}
-
       {setupIntent && onBackToIntent && !plugAddOnly && !sensorAddOnly && (
         <AppPageBack
           context={t(`intent.${setupIntent}.context`)}

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
@@ -41,13 +41,14 @@ const renderCard = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
-  return render(
+  const rendered = render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <PlugButtonModeSettingsCard target={target} />
       </QueryClientProvider>
     </I18nProvider>
   );
+  return { ...rendered, queryClient };
 };
 
 describe('PlugButtonModeSettingsCard', () => {
@@ -96,12 +97,15 @@ describe('PlugButtonModeSettingsCard', () => {
 
     renderCard();
     const modeSelect = await screen.findByRole('button', { name: copy.currentMode });
+    const save = screen.getByRole('button', { name: copy.save });
     expect(modeSelect).toHaveTextContent(copy.momentary);
+    expect(save).toBeDisabled();
 
     fireEvent.click(modeSelect);
     fireEvent.click(screen.getByRole('option', { name: copy.detached }));
     expect(modeSelect).toHaveTextContent(copy.detached);
-    fireEvent.click(screen.getByRole('button', { name: copy.save }));
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
     expect(setConfigs).toEqual([
@@ -112,6 +116,41 @@ describe('PlugButtonModeSettingsCard', () => {
       }
     ]);
     expect(JSON.stringify(setConfigs)).not.toContain('"leds"');
+    expect(save).toBeDisabled();
+  });
+
+  it('does not overwrite a dirty button-mode draft when the device query refetches', async () => {
+    const mode: 'momentary' | 'detached' = 'momentary';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number | string;
+          method?: string;
+        };
+        const result =
+          body.method === 'Shelly.GetDeviceInfo'
+            ? deviceInfo()
+            : body.method === 'Shelly.ListMethods'
+              ? { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] }
+              : body.method === 'PLUGS_UI.GetConfig'
+                ? { leds, controls: { 'switch:0': { in_mode: mode } } }
+                : {};
+        return jsonResponse({ id: body.id ?? 1, result });
+      })
+    );
+
+    const { queryClient } = renderCard();
+    const modeSelect = await screen.findByRole('button', { name: copy.currentMode });
+    fireEvent.click(modeSelect);
+    fireEvent.click(screen.getByRole('option', { name: copy.detached }));
+    expect(modeSelect).toHaveTextContent(copy.detached);
+
+    await queryClient.refetchQueries({
+      queryKey: ['plug-button-mode-settings', target.deviceId, target.baseUrl],
+      exact: true
+    });
+    await waitFor(() => expect(modeSelect).toHaveTextContent(copy.detached));
   });
 
   it('renders missing control capability as unsupported without mutating anything', async () => {

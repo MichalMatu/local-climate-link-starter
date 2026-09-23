@@ -262,7 +262,6 @@ export const AppRoutes = () => {
           {...(route.device === 'plug'
             ? { plugAddOnly: true }
             : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
-          onBackFromStandaloneAdd={() => navigate(route.returnTo)}
         />
       </Suspense>
     );

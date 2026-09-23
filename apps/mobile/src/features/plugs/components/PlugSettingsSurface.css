@@ -65,38 +65,87 @@
   padding: 0 var(--lcl-spacing-xs);
 }
 
-.plug-color-editor {
-  display: grid;
+.plug-settings-check-row {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-weight: var(--lcl-font-weight-semibold);
   gap: var(--lcl-spacing-md);
+  justify-content: space-between;
+  min-height: var(--lcl-size-control-min-height);
+}
+
+.plug-settings-check-row input[type='checkbox'] {
+  accent-color: var(--lcl-color-accent);
+  flex: 0 0 auto;
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
+}
+
+.plug-color-editor {
+  min-width: 0;
 }
 
 .plug-color-presets {
   display: grid;
-  gap: var(--lcl-spacing-sm);
+  gap: var(--lcl-spacing-xs);
   grid-template-columns: repeat(
-    auto-fit,
-    minmax(var(--lcl-size-control-min-height), 1fr)
+    auto-fill,
+    minmax(var(--lcl-size-control-min-height), var(--lcl-size-control-min-height))
   );
+  justify-content: start;
 }
 
 .plug-color-preset {
+  align-items: center;
   background: var(--lcl-color-surface);
   border: var(--lcl-border-width-md) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-round);
   cursor: pointer;
-  min-height: var(--lcl-size-control-min-height);
-  min-width: var(--lcl-size-control-min-height);
-  padding: var(--lcl-spacing-xs);
+  display: flex;
+  height: var(--lcl-size-control-min-height);
+  justify-content: center;
+  padding: var(--lcl-spacing-sm);
+  width: var(--lcl-size-control-min-height);
 }
 
-.plug-color-swatch {
+.plug-color-preset > .lcl-color-swatch,
+.plug-color-preset__rainbow {
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
+}
+
+.plug-color-preset--default span {
+  align-items: center;
+  border: var(--lcl-border-width-sm) dashed var(--lcl-color-text-muted);
+  border-radius: var(--lcl-radius-round);
+  color: var(--lcl-color-text-muted);
+  display: inline-flex;
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  height: var(--lcl-size-control-icon-size);
+  justify-content: center;
+  width: var(--lcl-size-control-icon-size);
+}
+
+.plug-color-preset__rainbow {
+  background: conic-gradient(
+    var(--lcl-color-spectrum-red),
+    var(--lcl-color-spectrum-yellow),
+    var(--lcl-color-spectrum-green),
+    var(--lcl-color-spectrum-cyan),
+    var(--lcl-color-spectrum-blue),
+    var(--lcl-color-spectrum-magenta),
+    var(--lcl-color-spectrum-red)
+  );
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-round);
   display: block;
-  height: 100%;
-  width: 100%;
 }
 
 .plug-color-preset[aria-pressed='true'] {
-  box-shadow: 0 0 0 var(--lcl-border-width-md) var(--lcl-color-accent);
+  border-color: var(--lcl-color-accent);
+  box-shadow: 0 0 0 var(--lcl-border-width-sm) var(--lcl-color-accent);
 }
 
 .plug-color-preset:focus-visible {
@@ -104,18 +153,50 @@
   outline-offset: var(--lcl-border-width-sm);
 }
 
-.plug-color-hex__control {
-  align-items: center;
+.plug-color-picker {
   display: grid;
-  gap: var(--lcl-spacing-sm);
-  grid-template-columns: var(--lcl-size-control-min-height) minmax(0, 1fr);
+  gap: var(--lcl-spacing-lg);
 }
 
-.plug-color-preview {
+.plug-color-picker__preview {
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-md);
-  height: var(--lcl-size-control-min-height);
-  width: var(--lcl-size-control-min-height);
+  height: calc(var(--lcl-size-control-min-height) * 1.5);
+  overflow: hidden;
+}
+
+.plug-color-picker__preview .lcl-color-swatch {
+  border: 0;
+  border-radius: 0;
+}
+
+.plug-color-picker__field {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+}
+
+.plug-color-picker__field > span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.plug-color-picker__range {
+  accent-color: var(--lcl-color-accent);
+  width: 100%;
+}
+
+.plug-color-picker__range--hue {
+  background: linear-gradient(
+    90deg,
+    var(--lcl-color-spectrum-red),
+    var(--lcl-color-spectrum-yellow),
+    var(--lcl-color-spectrum-green),
+    var(--lcl-color-spectrum-cyan),
+    var(--lcl-color-spectrum-blue),
+    var(--lcl-color-spectrum-magenta),
+    var(--lcl-color-spectrum-red)
+  );
+  border-radius: var(--lcl-radius-round);
 }
 
 .plug-night-mode__times {

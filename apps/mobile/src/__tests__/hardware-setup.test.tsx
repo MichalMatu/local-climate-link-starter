@@ -846,30 +846,24 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
   });
 
-  it('gives standalone device-add pages one compact return action without duplicate titles', async () => {
-    const onBack = vi.fn();
-    const { unmount } = renderHardwareSetup({
-      plugAddOnly: true,
-      onBackFromStandaloneAdd: onBack
-    });
-    expect(await screen.findByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
-    expect(screen.getByRole('button', { name: '‹ Gniazdka' })).toBeVisible();
-    expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
-    expect(onBack).toHaveBeenCalledTimes(1);
+  it('never renders page-local Back on standalone Plug or Thermometer add pages', async () => {
+    const plugView = renderHardwareSetup({ plugAddOnly: true });
 
-    unmount();
+    expect(await screen.findByRole('region', { name: 'Dodaj gniazdko' })).toHaveClass(
+      'device-add-page'
+    );
+    expect(document.querySelector('.setup-context__back')).toBeNull();
+
+    plugView.unmount();
     renderHardwareSetup({
       sensorAddOnly: true,
-      sensorAddMode: 'phone-scan',
-      onBackFromStandaloneAdd: onBack
+      sensorAddMode: 'phone-scan'
     });
-    expect(await screen.findByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
-    expect(screen.getByRole('button', { name: '‹ Termometry' })).toBeVisible();
-    expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
-    await act(async () => {
-      await Promise.resolve();
-    });
+
+    expect(await screen.findByRole('region', { name: 'Dodaj termometr' })).toHaveClass(
+      'device-add-page'
+    );
+    expect(document.querySelector('.setup-context__back')).toBeNull();
   });
 
   it('opens device add flows as full child pages instead of modals', async () => {

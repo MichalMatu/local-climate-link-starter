@@ -41,6 +41,7 @@ const installation = () => {
       ...base,
       sensor: {
         ...base.sensor,
+        sensorId: 'sensor-a4c1384f24cd',
         runtimeAddress: 'A4:C1:38:4F:24:CD',
         displayName: 'Przedpokój'
       }
@@ -404,16 +405,16 @@ describe('InstallationDetailScreen', () => {
     expect(screen.getByRole('heading', { name: 'Shelly Cloud' })).toBeVisible();
   });
 
-  it('exposes Edit for an installed climate automation', async () => {
+  it('renders climate editing inline without a separate Edit action', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     installShellyFetchMock();
-    const onEdit = vi.fn();
-    renderDetail(saved.id, vi.fn(), vi.fn(), onEdit);
+    renderDetail(saved.id);
 
-    const edit = await screen.findByRole('button', { name: 'Edytuj' });
-    fireEvent.click(edit);
-    expect(onEdit).toHaveBeenCalledTimes(1);
+    const save = await screen.findByRole('button', { name: 'Zapisz zmiany' });
+    expect(save).toBeVisible();
+    expect(save).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
   });
 
   it('uses one detail surface without child-page Back chrome', async () => {
@@ -461,7 +462,9 @@ describe('InstallationDetailScreen', () => {
     expect(within(automationSurface).getByText('Powód')).toBeVisible();
     expect(within(automationSurface).getByText('Przekaźnik reguły')).toBeVisible();
     expect(within(automationSurface).getByText('Przekaźnik Shelly')).toBeVisible();
-    expect(within(automationSurface).getByText('Przedpokój')).toBeVisible();
+    expect(within(automationSurface).getAllByText('Przedpokój').length).toBeGreaterThan(
+      0
+    );
     expect(screen.queryByRole('heading', { name: 'Automatyka' })).toBeNull();
     expect(screen.queryByText('0.20 A')).toBeNull();
     expect(screen.queryByText('32.4°C')).toBeNull();
@@ -477,13 +480,13 @@ describe('InstallationDetailScreen', () => {
     expect(await screen.findByText('S3PL-00112EU, gen 3')).toBeVisible();
   });
 
-  it('moves technical diagnostics into the Script tab and keeps them refreshing', async () => {
+  it('keeps technical diagnostics in Info and leaves Script focused on source', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
     renderDetail(saved.id);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Skrypt' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Informacje' }));
     expect(await screen.findByText('CPU skryptu')).toBeVisible();
     expect(screen.getByText('Stan skryptu RPC')).toBeVisible();
     await waitFor(() => expect(rpcMethods).toContain('Script.GetStatus'));
@@ -496,6 +499,11 @@ describe('InstallationDetailScreen', () => {
         ).toBeGreaterThan(before),
       { timeout: 5_000 }
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Skrypt' }));
+    expect(await screen.findByText('// deployed exact source')).toBeVisible();
+    expect(screen.queryByText('CPU skryptu')).toBeNull();
+    expect(screen.queryByText('Stan skryptu RPC')).toBeNull();
   });
 
   it('shows the deployed script directly in the Script tab with no nested page', async () => {

@@ -14,7 +14,7 @@ e75c77cb-7589-4452-94b2-decc97ff85a1
 
 ## Current product state
 
-The architecture/lifecycle baseline is stable and the first major UX correction pass is complete.
+The architecture/lifecycle baseline is stable and the second UX correction checkpoint is complete.
 
 Key established behavior:
 
@@ -26,35 +26,35 @@ Key established behavior:
 - valid managed runtimes are not rewritten by passive recovery;
 - local Shelly execution remains independent of phone/cloud after configuration.
 
-## UX state after the first stabilization pass
+## UX state after the second stabilization checkpoint
 
-Plug details were flattened into one surface with five local sections:
+Plug details remain one surface with five local sections:
 
 ```text
 Automation | BLE | Device | Script | Info
 ```
 
-The old nested Settings, Diagnostics and Script detail pages were removed after their data was migrated to the correct owner surface.
+The current UX baseline now establishes:
 
-The first UX pass also:
+- Automation edits Climate configuration inline; there is no separate Edit page/button;
+- live reason/rule relay/actual Shelly relay state remains visible above the inline editor;
+- BLE keeps Bluetooth state and configured sensor diagnostics in one coherent section;
+- Device owns LED, physical button mode and Shelly Cloud;
+- Device toggles use compact checkbox/tick rows rather than the retired oversized `ToggleSwitch`;
+- LED colors use fixed presets plus a styled custom-color picker modal, and brightness fields expose `%` consistently;
+- Device forms protect dirty local drafts from background refetches; a successful save establishes the confirmed Shelly state as the new baseline;
+- Script is code-focused with contained loading/error feedback;
+- script/runtime resource diagnostics were moved to Info alongside device diagnostics;
+- old nested Settings/Diagnostics/Script detail pages remain removed;
+- standalone Add Plug/Thermometer pages intentionally have no page-local Back control; bottom navigation plus platform/browser Back own return navigation, and regressions are blocked by tests + UX gate.
 
-- grouped LED, physical button mode and Shelly Cloud under Device;
-- gave BLE a dedicated surface with room for future capabilities;
-- moved script-specific diagnostics into Script and device diagnostics into Info;
-- removed duplicated Plug/detail data where the dashboard already owns it;
-- rebuilt LED controls to match the product UI instead of native/system-looking controls;
-- introduced reusable tokenized `ToggleSwitch` and `ColorSwatch` primitives where justified;
-- fixed standalone Add return navigation;
-- improved script-loading feedback and narrow mobile sensor selection;
-- updated responsive/E2E contracts for the new structure.
-
-No automation ownership, runtime-safety or Shelly mutation semantics were intentionally changed by the UX restructuring.
+No automation ownership, runtime-safety or Shelly mutation semantics were intentionally changed by this UX restructuring.
 
 ## Verification / real device
 
-The completed UX candidate passed `pnpm check:full` on the MacBook, including formatting, lint, UX/repository/feature-boundary gates, TypeScript, unit/integration tests, coverage, build and responsive Playwright.
+The current functional UX checkpoint `64733c910d831373e5993a4282b63817861ac5a5` passed focused navigation regressions (69/69) and a full `pnpm check:full`, including 36/36 responsive Playwright tests.
 
-A build from UX commit `4cb7666f0a4aec809f48ff7186a2b4ecc74c5794` was installed on the real Samsung SM-S906B / S22+ with Android 16 using `adb install -r`, preserving app data. The application cold-started successfully.
+That exact code checkpoint was built and installed on the real Samsung SM-S906B / S22+ with Android 16 using the repository phone-alpha flow, preserving app data. The application cold-started successfully with no observed FATAL/ANR. Documentation-only checkpoint cleanup after that smoke does not alter application code.
 
 The user's live Climate setup may intentionally use only **1 thermometer**. Do not restore a previous 4-sensor acceptance configuration or mutate the real Shelly merely to reproduce historical test state.
 

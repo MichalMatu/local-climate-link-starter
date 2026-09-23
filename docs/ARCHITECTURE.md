@@ -92,11 +92,13 @@ Automation | BLE | Device | Script | Info
 
 They are presentation/navigation boundaries, not new ownership models:
 
-- **Automation** presents rule state, decisions, relay state and automation-edit entry points;
-- **BLE** presents BLE devices/readings/diagnostics and is the reserved surface for future BLE capabilities;
+- **Automation** presents live rule/relay state and owns inline Climate configuration editing plus automation deletion;
+- **BLE** presents BLE state, devices/readings/diagnostics and is the reserved surface for future BLE capabilities;
 - **Device** groups Shelly-owned settings such as LED, physical button mode and Shelly Cloud;
-- **Script** presents managed runtime code/status and script-specific diagnostics;
-- **Info** presents read-only device identity, firmware/network/health information and destructive device-removal entry points.
+- **Script** presents the managed runtime source/preview and code-loading feedback only;
+- **Info** presents device identity, firmware/network/health information, script/runtime resource diagnostics and destructive device-removal entry points.
+
+Device-setting forms keep a local draft. Background refetches may refresh the server/device baseline, but must not overwrite a dirty user draft. A successful save establishes the newly confirmed device state as the next baseline.
 
 Legacy nested Settings, Diagnostics and Script detail pages were removed after their data was moved to the correct surface. Do not reintroduce parallel nested pages for the same data.
 

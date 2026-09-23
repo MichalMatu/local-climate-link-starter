@@ -29,13 +29,14 @@ const renderCard = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
-  return render(
+  const rendered = render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <PlugLedSettingsCard target={target} />
       </QueryClientProvider>
     </I18nProvider>
   );
+  return { ...rendered, queryClient };
 };
 
 describe('PlugLedSettingsCard', () => {
@@ -49,7 +50,7 @@ describe('PlugLedSettingsCard', () => {
     vi.unstubAllGlobals();
   });
 
-  it('edits full Plug S LED settings with a narrow patch', async () => {
+  it('edits night mode with compact checkbox controls and a narrow patch', async () => {
     let leds = {
       mode: 'switch' as const,
       colors: {
@@ -98,11 +99,17 @@ describe('PlugLedSettingsCard', () => {
     );
 
     renderCard();
-    expect(await screen.findByLabelText(copy.nightBrightness)).toHaveValue(10);
-
-    fireEvent.change(screen.getByLabelText(copy.nightBrightness), {
-      target: { value: '7' }
+    const nightToggle = await screen.findByRole('checkbox', {
+      name: copy.nightModeEnabled
     });
+    const nightBrightness = screen.getByLabelText(copy.nightBrightness);
+    expect(nightToggle).not.toBeChecked();
+    expect(nightBrightness).toBeDisabled();
+    expect(screen.getByRole('button', { name: copy.save })).toBeDisabled();
+
+    fireEvent.click(nightToggle);
+    expect(nightBrightness).toBeEnabled();
+    fireEvent.change(nightBrightness, { target: { value: '7' } });
     fireEvent.change(screen.getByLabelText(copy.nightStart), {
       target: { value: '23:30' }
     });
@@ -114,6 +121,7 @@ describe('PlugLedSettingsCard', () => {
         config: {
           leds: {
             night_mode: {
+              enable: true,
               brightness: 7,
               active_between: ['23:30', '06:00']
             }
@@ -123,7 +131,7 @@ describe('PlugLedSettingsCard', () => {
     ]);
   });
 
-  it('uses the in-app color editor and initializes custom ON/OFF colors visibly', async () => {
+  it('uses Default, compact presets and a modal custom color picker for ON/OFF', async () => {
     const leds = {
       mode: 'switch' as const,
       colors: {
@@ -160,22 +168,84 @@ describe('PlugLedSettingsCard', () => {
     );
 
     const rendered = renderCard();
-    const customColorToggles = await screen.findAllByRole('checkbox', {
-      name: copy.customColor
+    const onDefault = await screen.findByRole('button', {
+      name: `ON ${copy.defaultColor}`
     });
-    expect(customColorToggles).toHaveLength(2);
+    const offDefault = screen.getByRole('button', {
+      name: `OFF ${copy.defaultColor}`
+    });
+    expect(onDefault).toHaveAttribute('aria-pressed', 'true');
+    expect(offDefault).toHaveAttribute('aria-pressed', 'true');
     expect(rendered.container.querySelector('input[type="color"]')).toBeNull();
-    const [onColorToggle, offColorToggle] = customColorToggles;
-    if (!onColorToggle || !offColorToggle) throw new Error('Missing LED color toggles.');
+    expect(screen.queryByRole('textbox', { name: `ON ${copy.color}` })).toBeNull();
 
-    fireEvent.click(onColorToggle);
-    expect(screen.getByRole('textbox', { name: `ON ${copy.color}` })).toHaveValue(
-      '#00ff00'
+    fireEvent.click(screen.getByRole('button', { name: 'ON #00ff00' }));
+    expect(screen.getByRole('button', { name: 'ON #00ff00' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
     );
 
-    fireEvent.click(offColorToggle);
-    expect(screen.getByRole('textbox', { name: `OFF ${copy.color}` })).toHaveValue(
-      '#ff0000'
+    fireEvent.click(screen.getByRole('button', { name: `OFF ${copy.customColor}` }));
+    expect(
+      screen.getByRole('dialog', { name: `OFF · ${copy.customColorTitle}` })
+    ).toBeVisible();
+    fireEvent.change(screen.getByLabelText(`OFF ${copy.hue}`), {
+      target: { value: '240' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: copy.applyColor }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(
+      screen.getByRole('button', { name: `OFF ${copy.customColor}` })
+    ).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps a dirty local LED draft when the device query refetches', async () => {
+    const leds = {
+      mode: 'power' as const,
+      colors: {
+        'switch:0': {
+          on: { rgb: [0, 100, 0] as [number, number, number], brightness: 100 },
+          off: { rgb: [100, 0, 0] as [number, number, number], brightness: 100 }
+        },
+        power: { brightness: 80 }
+      },
+      night_mode: {
+        enable: false,
+        brightness: 10,
+        active_between: ['22:00', '06:00'] as [string, string]
+      }
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number;
+          method?: string;
+        };
+        const result =
+          body.method === 'Shelly.GetDeviceInfo'
+            ? deviceInfo()
+            : body.method === 'Shelly.ListMethods'
+              ? { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] }
+              : body.method === 'PLUGS_UI.GetConfig'
+                ? { leds, controls: { 'switch:0': { in_mode: 'momentary' } } }
+                : {};
+        return jsonResponse({ id: body.id ?? 1, result });
+      })
+    );
+
+    const { queryClient } = renderCard();
+    const brightness = await screen.findByLabelText(copy.powerBrightness);
+    fireEvent.change(brightness, { target: { value: '55' } });
+    expect(brightness).toHaveValue(55);
+
+    await queryClient.refetchQueries({
+      queryKey: ['plug-led-settings', target.deviceId, target.baseUrl],
+      exact: true
+    });
+    await waitFor(() =>
+      expect(screen.getByLabelText(copy.powerBrightness)).toHaveValue(55)
     );
   });
 

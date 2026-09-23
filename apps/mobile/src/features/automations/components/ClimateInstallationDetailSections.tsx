@@ -1,5 +1,6 @@
 import { DiagnosticRow, FeedbackPanel, ScriptPreview } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
+
 export type ClimateRecoverySectionProps = {
   title: string;
   description: string;
@@ -35,37 +36,21 @@ export const ClimateRecoverySection = ({
 );
 
 export type ClimateAutomationDetailSectionProps = {
-  mode: string;
   reason: string;
   relayRule: string;
   shellyRelay: string;
-  sensorNames: string;
-  deleteLabel: string;
-  deletePending: boolean;
-  onDelete(): void;
-  onEdit?: () => void;
 };
 
 export const ClimateAutomationDetailSection = ({
-  mode,
   reason,
   relayRule,
-  shellyRelay,
-  sensorNames,
-  deleteLabel,
-  deletePending,
-  onDelete,
-  onEdit
+  shellyRelay
 }: ClimateAutomationDetailSectionProps) => {
   const { t } = useTranslation();
 
   return (
-    <section>
+    <section className="installation-automation-live-state">
       <dl className="automation-summary installation-detail-summary">
-        <div>
-          <dt>{t('hardware.metrics.mode')}</dt>
-          <dd>{mode}</dd>
-        </div>
         <div>
           <dt>{t('hardware.metrics.reason')}</dt>
           <dd>{reason}</dd>
@@ -78,26 +63,7 @@ export const ClimateAutomationDetailSection = ({
           <dt>{t('hardware.metrics.shellyRelay')}</dt>
           <dd>{shellyRelay}</dd>
         </div>
-        <div>
-          <dt>{t('hardware.metrics.thermometer')}</dt>
-          <dd>{sensorNames}</dd>
-        </div>
       </dl>
-      <div className="installation-detail-actions">
-        {onEdit && (
-          <button className="primary-action" type="button" onClick={onEdit}>
-            {t('detail.edit')}
-          </button>
-        )}
-        <button
-          className="secondary-action secondary-action--danger"
-          type="button"
-          disabled={deletePending}
-          onClick={onDelete}
-        >
-          {deleteLabel}
-        </button>
-      </div>
     </section>
   );
 };
@@ -130,55 +96,55 @@ export const ClimateBleDetailSection = ({
 
   return (
     <section>
-      {bluetoothState && (
-        <dl className="automation-summary installation-detail-summary">
-          <div>
-            <dt>{t('common.bluetooth')}</dt>
-            <dd>{bluetoothState}</dd>
+      <div className="installation-ble-card">
+        {bluetoothState && (
+          <div className="installation-ble-card__status">
+            <span>{t('common.bluetooth')}</span>
+            <strong>{bluetoothState}</strong>
           </div>
-        </dl>
-      )}
-      <div className="installation-sensor-list">
-        {sensors.map((sensor) => (
-          <section className="installation-sensor-item" key={sensor.id}>
-            <div className="installation-sensor-item__header">
-              <strong>{sensor.name}</strong>
-              <span>{sensor.address}</span>
-            </div>
-            <dl className="automation-summary installation-detail-summary">
-              <div>
-                <dt>{t('hardware.metrics.temperature')}</dt>
-                <dd>{sensor.temperature}</dd>
+        )}
+        <div className="installation-sensor-list">
+          {sensors.map((sensor) => (
+            <section className="installation-sensor-item" key={sensor.id}>
+              <div className="installation-sensor-item__header">
+                <strong>{sensor.name}</strong>
+                <span>{sensor.address}</span>
               </div>
-              <div>
-                <dt>{t('hardware.metrics.humidity')}</dt>
-                <dd>{sensor.humidity}</dd>
-              </div>
-              <div>
-                <dt>{t('hardware.metrics.battery')}</dt>
-                <dd>{sensor.battery}</dd>
-              </div>
-              <div>
-                <dt>RSSI</dt>
-                <dd>{sensor.rssi}</dd>
-              </div>
-              <div>
-                <dt>{t('hardware.metrics.lastMeasurement')}</dt>
-                <dd>{sensor.lastMeasurement}</dd>
-              </div>
-              {sensor.lastPacket && (
+              <dl className="automation-summary installation-detail-summary">
                 <div>
-                  <dt>{t('hardware.metrics.lastBlePacket')}</dt>
-                  <dd>{sensor.lastPacket}</dd>
+                  <dt>{t('hardware.metrics.temperature')}</dt>
+                  <dd>{sensor.temperature}</dd>
                 </div>
-              )}
-              <div>
-                <dt>{t('hardware.metrics.dataBle')}</dt>
-                <dd>{sensor.dataState}</dd>
-              </div>
-            </dl>
-          </section>
-        ))}
+                <div>
+                  <dt>{t('hardware.metrics.humidity')}</dt>
+                  <dd>{sensor.humidity}</dd>
+                </div>
+                <div>
+                  <dt>{t('hardware.metrics.battery')}</dt>
+                  <dd>{sensor.battery}</dd>
+                </div>
+                <div>
+                  <dt>RSSI</dt>
+                  <dd>{sensor.rssi}</dd>
+                </div>
+                <div>
+                  <dt>{t('hardware.metrics.lastMeasurement')}</dt>
+                  <dd>{sensor.lastMeasurement}</dd>
+                </div>
+                {sensor.lastPacket && (
+                  <div>
+                    <dt>{t('hardware.metrics.lastBlePacket')}</dt>
+                    <dd>{sensor.lastPacket}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt>{t('hardware.metrics.dataBle')}</dt>
+                  <dd>{sensor.dataState}</dd>
+                </div>
+              </dl>
+            </section>
+          ))}
+        </div>
       </div>
       {onScan && (
         <button className="secondary-action" type="button" onClick={onScan}>
@@ -194,12 +160,30 @@ export type ClimateScriptDiagnosticRow = {
   value: string;
 };
 
+export type ClimateScriptDiagnosticsSectionProps = {
+  title: string;
+  rows: readonly ClimateScriptDiagnosticRow[];
+};
+
+export const ClimateScriptDiagnosticsSection = ({
+  title,
+  rows
+}: ClimateScriptDiagnosticsSectionProps) => (
+  <section className="plug-script-diagnostics">
+    <h3 className="plug-detail-subheading">{title}</h3>
+    <div className="plug-info-grid">
+      {rows.map((row) => (
+        <DiagnosticRow key={row.label} label={row.label} value={row.value} />
+      ))}
+    </div>
+  </section>
+);
+
 export type ClimateScriptDetailSectionProps = {
   attentionMessage?: string;
   attentionTitle: string;
   copyAriaLabel: string;
   copyLabel: string;
-  diagnosticsTitle: string;
   error: boolean;
   errorTitle: string;
   loading: boolean;
@@ -207,7 +191,6 @@ export type ClimateScriptDetailSectionProps = {
   previewLabel: string;
   retryLabel: string;
   source?: string;
-  rows: readonly ClimateScriptDiagnosticRow[];
   onCopy(): void;
   onRetry(): void;
 };
@@ -217,7 +200,6 @@ export const ClimateScriptDetailSection = ({
   attentionTitle,
   copyAriaLabel,
   copyLabel,
-  diagnosticsTitle,
   error,
   errorTitle,
   loading,
@@ -225,7 +207,6 @@ export const ClimateScriptDetailSection = ({
   previewLabel,
   retryLabel,
   source,
-  rows,
   onCopy,
   onRetry
 }: ClimateScriptDetailSectionProps) => (
@@ -236,7 +217,7 @@ export const ClimateScriptDetailSection = ({
       </FeedbackPanel>
     )}
     {loading && (
-      <div className="plug-detail-loading" role="status">
+      <div className="plug-detail-loading plug-detail-loading--section" role="status">
         <span className="plug-detail-loading__spinner" aria-hidden="true" />
         <span>{loadingLabel}</span>
       </div>
@@ -258,13 +239,5 @@ export const ClimateScriptDetailSection = ({
         onCopy={onCopy}
       />
     )}
-    <section>
-      <h3 className="plug-detail-subheading">{diagnosticsTitle}</h3>
-      <div className="plug-info-grid">
-        {rows.map((row) => (
-          <DiagnosticRow key={row.label} label={row.label} value={row.value} />
-        ))}
-      </div>
-    </section>
   </section>
 );

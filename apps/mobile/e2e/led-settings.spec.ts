@@ -396,10 +396,14 @@ test('PLUGS_UI LED relay-state and off modes work end to end', async ({ page }) 
   await mode.click();
   await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
   await expect(mode).toContainText('Sygnalizuj ON/OFF');
-  await expect(section.getByRole('textbox', { name: 'ON Kolor' })).toHaveValue('#00ff00');
+  await expect(section.getByRole('button', { name: 'ON #00ff00' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
   await expect(section.getByLabel('ON Jasność')).toHaveValue('100');
-  await expect(section.getByRole('textbox', { name: 'OFF Kolor' })).toHaveValue(
-    '#ff0000'
+  await expect(section.getByRole('button', { name: 'OFF #ff0000' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
   );
   await expect(section.getByLabel('OFF Jasność')).toHaveValue('100');
   await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();

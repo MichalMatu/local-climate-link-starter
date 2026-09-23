@@ -11,7 +11,13 @@ export const tokens = {
     accentContrast: '#ffffff',
     overlay: 'rgba(29, 29, 31, 0.44)',
     codeBackground: '#1d1d1f',
-    codeText: '#f5f5f7'
+    codeText: '#f5f5f7',
+    spectrumRed: '#ff0000',
+    spectrumYellow: '#ffff00',
+    spectrumGreen: '#00ff00',
+    spectrumCyan: '#00ffff',
+    spectrumBlue: '#0000ff',
+    spectrumMagenta: '#ff00ff'
   },
   status: {
     ok: {

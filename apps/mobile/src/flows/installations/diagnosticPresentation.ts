@@ -247,3 +247,60 @@ export const formatScriptDiagnosticRows = (
   },
   { label: t('hardware.metrics.snapshotAge'), value: input.snapshotAge }
 ];
+
+type ClimateDetailDiagnosticResources = {
+  script?: {
+    running?: boolean | null;
+    cpuPercent?: number | null;
+    memUsedBytes?: number | null;
+    memPeakBytes?: number | null;
+    memFreeBytes?: number | null;
+  } | null;
+};
+
+export const formatClimateDetailDiagnostics = ({
+  sensors,
+  snapshot,
+  componentState,
+  resources,
+  dataUpdatedAt,
+  nowMs,
+  missing,
+  t
+}: {
+  sensors: readonly ClimateBleSensorIdentity[];
+  snapshot: HardwareDiagnosticSnapshot | undefined;
+  componentState: ScriptDiagnosticPresentationInput['componentState'];
+  resources: ClimateDetailDiagnosticResources | undefined;
+  dataUpdatedAt: number;
+  nowMs: number;
+  missing: string;
+  t: Translate;
+}) => {
+  const snapshotAgeMs = dataUpdatedAt ? Math.max(0, nowMs - dataUpdatedAt) : null;
+  const snapshotAge =
+    snapshotAgeMs == null
+      ? missing
+      : snapshotAgeMs < 60_000
+        ? `${Math.floor(snapshotAgeMs / 1000)} s`
+        : `${Math.floor(snapshotAgeMs / 60_000)} min`;
+
+  return {
+    bleSensors: formatClimateBleSensorPresentations(sensors, snapshot, missing, t),
+    scriptRows: formatScriptDiagnosticRows(
+      {
+        componentState,
+        rpcRunning: resources?.script?.running,
+        runtimeRunning: snapshot?.script?.running,
+        configHash: snapshot?.script?.configHash,
+        cpuPercent: resources?.script?.cpuPercent,
+        memUsedBytes: resources?.script?.memUsedBytes,
+        memPeakBytes: resources?.script?.memPeakBytes,
+        memFreeBytes: resources?.script?.memFreeBytes,
+        snapshotAge
+      },
+      missing,
+      t
+    )
+  };
+};

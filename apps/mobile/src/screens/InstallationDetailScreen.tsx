@@ -1,6 +1,6 @@
 import { climateSensorsForConfig } from '@lcl/script-generator';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
@@ -12,7 +12,8 @@ import {
   ClimateAutomationDetailSection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
-  ClimateScriptDetailSection
+  ClimateScriptDetailSection,
+  ClimateScriptDiagnosticsSection
 } from '../features/automations/index.js';
 import {
   PlugButtonModeSettingsCard,
@@ -27,21 +28,20 @@ import {
 } from '../features/plugs/index.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
 import {
-  formatClimateBleSensorPresentations,
+  formatClimateDetailDiagnostics,
   formatDiagnosticReason,
-  formatRelayState,
-  formatScriptDiagnosticRows
+  formatRelayState
 } from '../flows/installations/diagnosticPresentation.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
-import { INSTALLATION_MODE_KEYS } from '../flows/installations/presentation.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
   deleteInstalledAutomation,
   installedAutomationScriptMatch
 } from '../flows/installations/runtimeControl.js';
 import {
+  copyInstalledAutomationScriptSource,
   installedAutomationScriptSourceQueryKey,
-  loadInstalledAutomationScriptSource
+  useInstalledAutomationScriptSource
 } from '../flows/installations/scriptPreview.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import {
@@ -54,6 +54,8 @@ import {
   useInstalledAutomationResourceDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
+import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
+import { RuleSetupPage } from './hardware-setup/pages/RuleSetupPage.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 
 const TECHNICAL_DIAGNOSTICS_REFRESH_MS = 3_000;
@@ -122,7 +124,6 @@ export const InstallationDetailScreen = ({
       toasts={toasts}
       queryClient={queryClient}
       {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
-      {...(onEdit ? { onEdit } : {})}
     />
   );
 };
@@ -135,7 +136,6 @@ type ClimateInstallationDetailProps = {
   toasts: ToastMessage[];
   queryClient: ReturnType<typeof useQueryClient>;
   onOpenBleDiscovery?: (deviceId: string) => void;
-  onEdit?: () => void;
 };
 
 const ClimateInstallationDetail = ({
@@ -145,28 +145,34 @@ const ClimateInstallationDetail = ({
   dismissToast,
   toasts,
   queryClient,
-  onOpenBleDiscovery,
-  onEdit
+  onOpenBleDiscovery
 }: ClimateInstallationDetailProps) => {
   const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [preparedAutomationDraftId, setPreparedAutomationDraftId] = useState<
+    string | null
+  >(null);
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
   const automationAction = useInstalledAutomationActions(installation);
   const resourcesQuery = useInstalledAutomationResourceDiagnostics(installation, {
-    enabled: activeTab === 'script' || activeTab === 'info',
+    enabled: activeTab === 'info',
     refetchInterval: TECHNICAL_DIAGNOSTICS_REFRESH_MS
   });
   const informationQuery = usePlugInformationFlow(installation.shelly, {
-    enabled: activeTab === 'ble' || activeTab === 'script' || activeTab === 'info'
+    enabled: activeTab === 'ble' || activeTab === 'info'
   });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
+  const automationEditFlow = useHardwareSetupFlow(installation.id);
   const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
+  const loadClimateAutomationDraft = useHardwareSetupDraftStore(
+    (state) => state.loadClimateAutomationDraft
+  );
   const removeShellyDevice = useHardwareSetupDraftStore(
     (state) => state.removeShellyDevice
   );
@@ -193,17 +199,19 @@ const ClimateInstallationDetail = ({
   const recoveryCopy = recovery
     ? installationHealthCopy[locale].issues[recovery.issue]
     : null;
-  const scriptQuery = useQuery({
-    queryKey: scriptQueryKey,
-    queryFn: () => loadInstalledAutomationScriptSource(installation),
-    enabled: activeTab === 'script' && scriptMatch === 'matched',
-    retry: false,
-    refetchOnWindowFocus: false,
-    staleTime: 0
-  });
+  const scriptQuery = useInstalledAutomationScriptSource(
+    installation,
+    activeTab === 'script' && scriptMatch === 'matched'
+  );
 
   useEffect(() => {
-    if (activeTab !== 'script') return undefined;
+    if (preparedAutomationDraftId === installation.id) return;
+    loadClimateAutomationDraft(installation);
+    setPreparedAutomationDraftId(installation.id);
+  }, [installation, loadClimateAutomationDraft, preparedAutomationDraftId]);
+
+  useEffect(() => {
+    if (activeTab !== 'info') return undefined;
     setNowMs(Date.now());
     const timer = window.setInterval(() => setNowMs(Date.now()), 1_000);
     return () => window.clearInterval(timer);
@@ -235,51 +243,28 @@ const ClimateInstallationDetail = ({
   const missing = t('common.missing');
   const configuredSensors = climateSensorsForConfig(installation.config);
   const shellyRelayState = snapshot?.plug?.relayState ?? control?.relayOn;
-  const snapshotAgeMs = diagnosticsQuery.dataUpdatedAt
-    ? Math.max(0, nowMs - diagnosticsQuery.dataUpdatedAt)
-    : null;
-  const snapshotAge =
-    snapshotAgeMs == null
-      ? missing
-      : snapshotAgeMs < 60_000
-        ? `${Math.floor(snapshotAgeMs / 1000)} s`
-        : `${Math.floor(snapshotAgeMs / 60_000)} min`;
   const resources = resourcesQuery.data;
-
-  const bleSensors = formatClimateBleSensorPresentations(
-    configuredSensors,
+  const { bleSensors, scriptRows } = formatClimateDetailDiagnostics({
+    sensors: configuredSensors,
     snapshot,
+    componentState: informationQuery.data?.status.scripts,
+    resources,
+    dataUpdatedAt: diagnosticsQuery.dataUpdatedAt,
+    nowMs,
     missing,
     t
-  );
+  });
+  const automationHasChanges =
+    automationEditFlow.configState.ok &&
+    JSON.stringify(automationEditFlow.configState.config) !==
+      JSON.stringify(installation.config);
 
-  const scriptRows = formatScriptDiagnosticRows(
-    {
-      componentState: informationQuery.data?.status.scripts,
-      rpcRunning: resources?.script?.running,
-      runtimeRunning: snapshot?.script?.running,
-      configHash: snapshot?.script?.configHash,
-      cpuPercent: resources?.script?.cpuPercent,
-      memUsedBytes: resources?.script?.memUsedBytes,
-      memPeakBytes: resources?.script?.memPeakBytes,
-      memFreeBytes: resources?.script?.memFreeBytes,
-      snapshotAge
-    },
-    missing,
-    t
-  );
-
-  const copyScript = () => {
-    const source = scriptQuery.data;
-    if (!source || typeof navigator === 'undefined' || !navigator.clipboard) {
-      pushToast('warning', scriptCopy.copyFailed);
-      return;
-    }
-    void navigator.clipboard
-      .writeText(source)
-      .then(() => pushToast('ok', scriptCopy.copyDone))
-      .catch(() => pushToast('warning', scriptCopy.copyFailed));
-  };
+  const copyScript = () =>
+    copyInstalledAutomationScriptSource(
+      scriptQuery.data,
+      () => pushToast('ok', scriptCopy.copyDone),
+      () => pushToast('warning', scriptCopy.copyFailed)
+    );
 
   return (
     <main className="demo-shell installation-detail-shell">
@@ -321,20 +306,38 @@ const ClimateInstallationDetail = ({
               />
             )}
             <ClimateAutomationDetailSection
-              mode={t(INSTALLATION_MODE_KEYS[installation.config.rule.mode])}
               reason={
                 diagnostics ? formatDiagnosticReason(diagnostics.lastReason, t) : missing
               }
               relayRule={formatRelayState(diagnostics?.relayState, missing)}
               shellyRelay={formatRelayState(shellyRelayState, missing)}
-              sensorNames={configuredSensors
-                .map((sensor) => sensor.displayName)
-                .join(', ')}
-              deleteLabel={deleteCopy.action}
-              deletePending={deleteMutation.isPending}
-              onDelete={() => setDeleteOpen(true)}
-              {...(onEdit ? { onEdit } : {})}
             />
+            {preparedAutomationDraftId === installation.id ? (
+              <RuleSetupPage
+                flow={automationEditFlow}
+                showShellySelector={false}
+                inline
+                canSubmit={automationHasChanges}
+              />
+            ) : (
+              <div
+                className="plug-detail-loading plug-detail-loading--section"
+                role="status"
+              >
+                <span className="plug-detail-loading__spinner" aria-hidden="true" />
+                <span>{t('app.loadingConfigurator')}</span>
+              </div>
+            )}
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {deleteCopy.action}
+              </button>
+            </div>
           </>
         )}
 
@@ -368,7 +371,6 @@ const ClimateInstallationDetail = ({
               : {})}
             copyAriaLabel={scriptCopy.copy}
             copyLabel={scriptCopy.copy}
-            diagnosticsTitle={t('common.diagnostics')}
             error={scriptQuery.isError}
             errorTitle={scriptCopy.failed}
             loading={scriptMatch === 'matched' && scriptQuery.isPending}
@@ -376,7 +378,6 @@ const ClimateInstallationDetail = ({
             previewLabel={scriptCopy.label}
             retryLabel={scriptCopy.retry}
             {...(scriptQuery.data !== undefined ? { source: scriptQuery.data } : {})}
-            rows={scriptRows}
             onCopy={copyScript}
             onRetry={() => void scriptQuery.refetch()}
           />
@@ -391,6 +392,10 @@ const ClimateInstallationDetail = ({
               error={informationQuery.isError}
               deviceRamFreeBytes={resources?.system?.ramFreeBytes}
               deviceRamTotalBytes={resources?.system?.ramSizeBytes}
+            />
+            <ClimateScriptDiagnosticsSection
+              title={t('common.diagnostics')}
+              rows={scriptRows}
             />
             {savedDevice && (
               <button

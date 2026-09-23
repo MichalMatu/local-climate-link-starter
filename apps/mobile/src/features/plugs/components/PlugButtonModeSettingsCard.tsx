@@ -19,22 +19,31 @@ export const PlugButtonModeSettingsCard = ({
   const { query, updateMutation } = usePlugButtonModeSettingsFlow(target);
   const settings = query.data;
   const mode = settings?.supported ? settings.mode : null;
+  const [baseline, setBaseline] = useState<ShellyPlugsUiButtonInputMode | null>(mode);
   const [draft, setDraft] = useState<ShellyPlugsUiButtonInputMode | null>(mode);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const hasChanges = draft !== null && baseline !== null && draft !== baseline;
 
   useEffect(() => {
-    if (!mode) return;
+    if (!mode || hasChanges) return;
+    setBaseline(mode);
     setDraft(mode);
-  }, [mode]);
+  }, [hasChanges, mode]);
 
   const save = () => {
-    if (!draft || draft === mode) {
+    if (!draft || draft === baseline) {
       setFeedback(copy.noChanges);
       return;
     }
     setFeedback(null);
     updateMutation.mutate(draft, {
-      onSuccess: () => setFeedback(copy.saved),
+      onSuccess: (confirmed) => {
+        if (confirmed.supported) {
+          setBaseline(confirmed.mode);
+          setDraft(confirmed.mode);
+        }
+        setFeedback(copy.saved);
+      },
       onError: () => setFeedback(copy.actionFailed)
     });
   };
@@ -97,7 +106,7 @@ export const PlugButtonModeSettingsCard = ({
         <button
           className="primary-action"
           type="button"
-          disabled={updateMutation.isPending}
+          disabled={!hasChanges || updateMutation.isPending}
           onClick={save}
         >
           {updateMutation.isPending ? copy.saving : copy.save}

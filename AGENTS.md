@@ -37,6 +37,7 @@ physical Plug -> optional installed automation
 Keep these invariants unless the user explicitly changes the product model:
 
 - bottom navigation is `Plugs | Thermometers | Settings`;
+- standalone Add Plug and Add Thermometer pages do not render page-local Back/return controls; persistent bottom navigation plus platform/browser Back own return navigation;
 - a saved Plug remains useful without an automation;
 - automation setup starts from a concrete Plug;
 - Time is a Plug automation type, not a global dashboard section;

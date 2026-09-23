@@ -82,7 +82,6 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     editInstallationId,
     onBackToIntent,
     onSetupComplete,
-    onBackFromStandaloneAdd,
     plugAddOnly,
     sensorAddOnly
   }: {
@@ -91,7 +90,6 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     editInstallationId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
-    onBackFromStandaloneAdd?: () => void;
     plugAddOnly?: boolean;
     sensorAddOnly?: boolean;
   }) => (
@@ -101,9 +99,6 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
       <p>{`mock-edit-installation-${editInstallationId ?? 'none'}`}</p>
       <p>{`mock-plug-add-${plugAddOnly ? 'yes' : 'no'}`}</p>
       <p>{`mock-sensor-add-${sensorAddOnly ? 'yes' : 'no'}`}</p>
-      <button type="button" onClick={onBackFromStandaloneAdd}>
-        mock-add-back
-      </button>
       <button type="button" onClick={onBackToIntent}>
         mock-back
       </button>
@@ -194,19 +189,40 @@ describe('AppRoutes navigation shell', () => {
     expect(document.querySelector('.app-settings-trigger')).toBeNull();
   });
 
-  it('opens the dedicated Add Plug flow from the Plugs plus', async () => {
+  it('opens standalone Add Plug without page-local back and keeps bottom navigation available', async () => {
     renderRoutes();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
     expect(await screen.findByText('mock-setup-none')).toBeVisible();
     expect(screen.getByText('mock-plug-add-yes')).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-add-back' }));
+    expect(screen.queryByRole('button', { name: 'mock-add-back' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
+  });
+
+  it('uses Android system Back to leave both standalone device-add pages', async () => {
+    nativeAppMocks.getPlatform.mockReturnValue('android');
+    renderRoutes();
+    await waitFor(() =>
+      expect(nativeAppMocks.addListener).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function)
+      )
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
     expect(await screen.findByText('mock-plug-add-yes')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
+    act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
+    );
+    expect(await screen.findByText('mock-sensor-add-yes')).toBeVisible();
+    act(() => nativeAppMocks.fireBack());
+    expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
   });
 
   it('starts climate setup from a saved plug with fixed Shelly context', async () => {

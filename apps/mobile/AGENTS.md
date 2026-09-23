@@ -154,6 +154,7 @@ Rules:
   footer, not arbitrary empty space;
 - standalone actions align with the established action edge or intentionally use full
   width on mobile;
+- standalone Add Plug and Add Thermometer pages must never render `AppPageBack`, a custom Back button, or another page-local return control; users return with persistent bottom navigation or platform/browser Back;
 - use shared patterns before creating one-off card/button/status styles;
 - user-facing copy goes through i18n;
 - technical detail belongs in diagnostics;

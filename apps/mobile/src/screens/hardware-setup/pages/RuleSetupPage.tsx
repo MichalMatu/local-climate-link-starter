@@ -24,6 +24,8 @@ const copyToClipboard = async (value: string): Promise<void> => {
 type RuleSetupPageProps = HardwarePageProps<RuleSetupFlow> & {
   selectablePresets?: readonly RulePresetId[];
   showShellySelector?: boolean;
+  inline?: boolean;
+  canSubmit?: boolean;
   onEditSaved?: () => void;
 };
 
@@ -31,6 +33,8 @@ export const RuleSetupPage = ({
   flow,
   selectablePresets = ALL_RULE_PRESETS,
   showShellySelector = true,
+  inline = false,
+  canSubmit,
   onEditSaved
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
@@ -96,8 +100,11 @@ export const RuleSetupPage = ({
       : undefined;
 
   return (
-    <section className="demo-panel" aria-label={t('hardware.nav.ruleTitle')}>
-      {flow.isEditingClimateAutomation && flow.selectedShelly && (
+    <section
+      className={inline ? 'installation-detail-inline-rule' : 'demo-panel'}
+      aria-label={t('hardware.nav.ruleTitle')}
+    >
+      {!inline && flow.isEditingClimateAutomation && flow.selectedShelly && (
         <div className="rule-edit-context">
           <span className="rule-edit-context__label">
             {t('hardware.rule.editContextLabel')}
@@ -109,6 +116,8 @@ export const RuleSetupPage = ({
       <ClimateRuleEditor
         selectablePresets={selectablePresets}
         showShellySelector={showShellySelector}
+        showScriptActions={!inline}
+        showSaveTarget={!inline}
         shellyDevices={flow.shellyDevices}
         selectedShellyId={flow.selectedShellyId}
         selectedShellyName={flow.selectedShelly?.name}
@@ -148,7 +157,7 @@ export const RuleSetupPage = ({
         loadScriptPending={flow.loadAutomationScriptMutation.isPending}
         openScriptPreview={() => setDialog('script')}
         loadScriptFromShelly={() => setDialog('restore')}
-        canInstall={canInstallScript(flow)}
+        canInstall={canInstallScript(flow) && (canSubmit ?? true)}
         installPending={flow.installMutation.isPending}
         safeRelayTestPending={flow.safeRelayTestMutation.isPending}
         install={() => flow.installMutation.mutate()}

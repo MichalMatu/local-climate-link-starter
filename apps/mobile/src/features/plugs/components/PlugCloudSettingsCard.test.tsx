@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceCloudCopy } from '../../../app/locales/deviceCloud.js';
@@ -29,13 +29,14 @@ const renderCard = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
-  return render(
+  const rendered = render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <PlugCloudSettingsCard target={target} />
       </QueryClientProvider>
     </I18nProvider>
   );
+  return { ...rendered, queryClient };
 };
 
 describe('PlugCloudSettingsCard', () => {
@@ -82,16 +83,55 @@ describe('PlugCloudSettingsCard', () => {
 
     renderCard();
     const toggle = await screen.findByRole('checkbox', { name: copy.enable });
+    const save = screen.getByRole('button', { name: copy.save });
     expect(toggle).not.toBeChecked();
+    expect(save).toBeDisabled();
     expect(screen.getByText(`${copy.connection}: ${copy.disconnected}`)).toBeVisible();
 
     fireEvent.click(toggle);
     expect(toggle).toBeChecked();
-    fireEvent.click(screen.getByRole('button', { name: copy.save }));
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
     expect(setConfigs).toEqual([{ enable: true }]);
     expect(screen.getByText(`${copy.connection}: ${copy.connected}`)).toBeVisible();
+    expect(save).toBeDisabled();
+  });
+
+  it('does not overwrite a dirty Cloud draft when the device query refetches', async () => {
+    const enabled = false;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number | string;
+          method?: string;
+        };
+        const result =
+          body.method === 'Shelly.GetDeviceInfo'
+            ? deviceInfo()
+            : body.method === 'Shelly.ListMethods'
+              ? { methods: ['Cloud.GetConfig', 'Cloud.SetConfig', 'Cloud.GetStatus'] }
+              : body.method === 'Cloud.GetConfig'
+                ? { enable: enabled, server: 'shelly-195-eu.shelly.cloud:6022/jrpc' }
+                : body.method === 'Cloud.GetStatus'
+                  ? { connected: false }
+                  : {};
+        return jsonResponse({ id: body.id ?? 1, result });
+      })
+    );
+
+    const { queryClient } = renderCard();
+    const toggle = await screen.findByRole('checkbox', { name: copy.enable });
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
+
+    await queryClient.refetchQueries({
+      queryKey: ['plug-cloud-settings', target.deviceId, target.baseUrl],
+      exact: true
+    });
+    await waitFor(() => expect(toggle).toBeChecked());
   });
 
   it('renders a missing writable Cloud surface as unsupported without mutating anything', async () => {

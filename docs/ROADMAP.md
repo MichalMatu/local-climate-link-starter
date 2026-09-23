@@ -32,18 +32,20 @@ Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance passed with 3 TP357 + 1
 
 ## 3. UX stabilization — IN PROGRESS / NEXT SESSION
 
-The first major UX restructuring pass is complete and merged candidate code has been verified on representative responsive viewports and installed on the real S22+ without clearing app data.
+Two UX correction slices are complete and checkpointed on the real-device branch. The current candidate has been verified on representative responsive viewports and installed on the real S22+ without clearing app data.
 
-Completed in the first pass:
+Completed in the current UX baseline:
 
-- Plug detail was flattened into one surface with five local sections: Automation, BLE, Device, Script and Info;
-- duplicated nested Settings/Diagnostics/Script pages were removed and their data moved to the correct owner surface;
+- Plug detail is one surface with five local sections: Automation, BLE, Device, Script and Info;
+- Automation edits Climate configuration inline, without a separate Edit page/button, while retaining live runtime/relay state;
+- BLE keeps its Bluetooth status and configured sensor diagnostics in one coherent section;
 - Device groups LED, physical-button mode and Shelly Cloud settings;
-- BLE has a dedicated surface with room for future BLE capabilities;
-- LED controls were rebuilt into the product design system instead of native/system-looking controls;
-- shared tokenized UI primitives were introduced where reuse was justified;
-- standalone Add flows gained visible return navigation;
-- script loading, narrow sensor selection and responsive contracts were corrected;
+- LED/device controls use compact project-native checkbox rows, fixed color swatches, a styled custom-color modal and explicit field units;
+- dirty Device drafts are protected from background refetches and successful saves establish the confirmed device state as the new baseline;
+- Script is code-focused; script/runtime diagnostics live under Info with device diagnostics;
+- redundant nested Settings/Diagnostics/Script pages remain removed;
+- standalone Add Plug/Thermometer flows rely on persistent bottom navigation plus platform/browser Back and intentionally have no page-local Back control; this is enforced by tests and the UX gate;
+- loading, narrow sensor selection and responsive contracts were corrected;
 - existing automation/runtime ownership and Shelly safety semantics were preserved.
 
 **Next session continues UX refinement.** Work from concrete screenshots/real-device friction. Do not add Soil moisture, richer rule operators or a new transport while this UX pass is still being reviewed.
