@@ -74,6 +74,23 @@ describe('multi-sensor climate recovery', () => {
     const stored = useInstalledAutomationStore.getState().installations[0];
 
     expect(result.status).toBe('recovered');
+    expect(result.recoveredSensors).toEqual([
+      {
+        profileId: 'tp357_custom_v1',
+        runtimeAddress: 'C2:C0:00:30:64:01',
+        displayName: 'TP357 Primary'
+      },
+      {
+        profileId: 'xiaomi_lywsd03mmc_bthome_v2',
+        runtimeAddress: 'A4:C1:38:4F:24:CD',
+        displayName: 'Xiaomi Room'
+      },
+      {
+        profileId: 'tp357_custom_v1',
+        runtimeAddress: 'C2:C0:00:30:64:02',
+        displayName: 'TP357 Shelf'
+      }
+    ]);
     expect(stored).toMatchObject({
       kind: 'climate',
       config: {

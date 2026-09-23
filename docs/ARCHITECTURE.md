@@ -20,6 +20,8 @@ Before relay mutations, runtime upgrades or destructive operations, the app veri
 
 Remote-to-local recovery is conservative. A missing local automation may be reconstructed only when the remote script is positively recognized as a Local Climate Link managed runtime and its metadata/config can be decoded. A similar script name alone is not ownership evidence.
 
+When Climate recovery succeeds, the configured sensor identities are passively merged into the saved Thermometers registry by physical BLE `runtimeAddress`. Existing entries and user names win, duplicate MACs are not created, current rule membership is not changed, and recovery never synthesizes live readings.
+
 ## Runtime ownership and safety
 
 The phone owns configuration, persistence, presentation and diagnostics. Shelly owns real-time automation execution after installation.

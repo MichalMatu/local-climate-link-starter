@@ -24,6 +24,7 @@ Key established behavior:
 - Climate supports 1–4 thermometers with `avg`, `min`, `max` or `firstValid` aggregation;
 - per-sensor Plug diagnostics are available and join mobile rows by normalized BLE `runtimeAddress`;
 - valid managed runtimes are not rewritten by passive recovery;
+- successful Climate recovery also restores missing configured thermometer identities into the saved Thermometers list by canonical BLE MAC, without duplicating existing entries or changing current rule membership;
 - local Shelly execution remains independent of phone/cloud after configuration.
 
 ## UX state after the second stabilization checkpoint

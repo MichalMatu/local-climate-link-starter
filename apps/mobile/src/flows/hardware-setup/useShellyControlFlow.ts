@@ -14,9 +14,14 @@ import { readShellySetupStatus } from './shellyRequests.js';
 import {
   readShellyControlStatus,
   reconcileInstalledAutomationsForShelly,
+  type RecoveredAutomationSensor,
   type ShellyControlStatus
 } from '../../features/automations/index.js';
-import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
+import {
+  useHardwareSetupDraftStore,
+  type SensorDraftDevice,
+  type ShellyDraftDevice
+} from './setupDraftStore.js';
 
 export type ShellyControlAction = 'status' | 'on' | 'off';
 
@@ -42,7 +47,15 @@ type ShellyCheckMutationInput = {
 
 type ShellyCheckMutationResult = HardwareSetupStatus & {
   checkedDevice: ShellyDraftDevice;
+  recoveredSensors: SensorDraftDevice[];
 };
+
+const recoveredSensorDraft = (sensor: RecoveredAutomationSensor): SensorDraftDevice => ({
+  id: sensor.runtimeAddress,
+  name: sensor.displayName,
+  runtimeAddress: sensor.runtimeAddress,
+  profileId: sensor.profileId
+});
 
 const createInitialShellyControlState = (): ShellyControlViewState => ({
   status: null,
@@ -80,6 +93,9 @@ export const useShellyControlFlow = () => {
   );
   const setShellyDeviceMetadata = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceMetadata
+  );
+  const mergeRecoveredSensorDevices = useHardwareSetupDraftStore(
+    (state) => state.mergeRecoveredSensorDevices
   );
   const [setupStatus, setSetupStatus] = useState<HardwareSetupStatus | null>(null);
   const [shellyControlStates, setShellyControlStates] = useState<
@@ -160,18 +176,23 @@ export const useShellyControlFlow = () => {
         model: status.deviceInfo.model,
         gen: status.deviceInfo.gen
       };
-      await reconcileInstalledAutomationsForShelly({
+      const reconciliation = await reconcileInstalledAutomationsForShelly({
         deviceId: checkedDevice.id,
         name: checkedDevice.name,
         baseUrl: checkedDevice.baseUrl,
         model: status.deviceInfo.model,
         gen: status.deviceInfo.gen
       });
-      return { ...status, checkedDevice };
+      return {
+        ...status,
+        checkedDevice,
+        recoveredSensors: reconciliation.recoveredSensors.map(recoveredSensorDraft)
+      };
     },
     onSuccess: (status) => {
       setSetupStatus(status);
       upsertShellyDevice(status.checkedDevice);
+      mergeRecoveredSensorDevices(status.recoveredSensors);
       applyControlStatus(
         status.checkedDevice,
         shellyControlStatusFromSetupStatus(status),

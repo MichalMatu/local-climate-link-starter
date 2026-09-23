@@ -4,6 +4,7 @@ export {
   persistHardwareSetupDraftPatch,
   readStoredHardwareSetupDraft
 } from './data/setupDraftPersistence.js';
+export { mergeRecoveredSensorRegistry } from './data/recoveredSensorRegistry.js';
 export type {
   HardwareSetupDraft,
   SensorDraftDevice,

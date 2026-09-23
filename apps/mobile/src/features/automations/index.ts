@@ -92,7 +92,8 @@ export {
 export {
   reconcileInstalledAutomationsForShelly,
   type InstalledAutomationReconciliationResult,
-  type InstalledAutomationReconciliationStatus
+  type InstalledAutomationReconciliationStatus,
+  type RecoveredAutomationSensor
 } from './flows/reconcileInstalledAutomation.js';
 export {
   updateClimateInstalledAutomation,

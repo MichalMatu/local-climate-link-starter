@@ -89,7 +89,14 @@ describe('reconcileInstalledAutomationsForShelly', () => {
 
     expect(result).toEqual({
       status: 'recovered',
-      installationIds: ['climate:shelly-abc:0']
+      installationIds: ['climate:shelly-abc:0'],
+      recoveredSensors: [
+        {
+          profileId: 'xiaomi_lywsd03mmc_bthome_v2',
+          runtimeAddress: 'A4:C1:38:4F:24:CD',
+          displayName: 'Recovered sensor'
+        }
+      ]
     });
     expect(stored).toMatchObject({
       id: 'climate:shelly-abc:0',
@@ -199,7 +206,7 @@ describe('reconcileInstalledAutomationsForShelly', () => {
           }))
         })
       )
-    ).resolves.toEqual({ status: 'none', installationIds: [] });
+    ).resolves.toEqual({ status: 'none', installationIds: [], recoveredSensors: [] });
     expect(useInstalledAutomationStore.getState().installations).toEqual([]);
   });
 
@@ -208,7 +215,8 @@ describe('reconcileInstalledAutomationsForShelly', () => {
       reconcileInstalledAutomationsForShelly(target, services())
     ).resolves.toEqual({
       status: 'none',
-      installationIds: []
+      installationIds: [],
+      recoveredSensors: []
     });
   });
 
@@ -219,7 +227,11 @@ describe('reconcileInstalledAutomationsForShelly', () => {
     const result = await reconcileInstalledAutomationsForShelly(target, services());
     const stored = useInstalledAutomationStore.getState().installations[0];
 
-    expect(result).toEqual({ status: 'verified', installationIds: [installation.id] });
+    expect(result).toEqual({
+      status: 'verified',
+      installationIds: [installation.id],
+      recoveredSensors: []
+    });
     expect(stored?.shelly).toMatchObject({
       deviceId: 'SHELLY-ABC',
       name: 'Grow plug',

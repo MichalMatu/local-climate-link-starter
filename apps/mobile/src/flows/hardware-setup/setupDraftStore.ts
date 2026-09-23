@@ -14,6 +14,7 @@ import {
 } from '../../features/automations/index.js';
 import {
   clearStoredHardwareSetupDraft,
+  mergeRecoveredSensorRegistry,
   persistHardwareSetupDraftPatch,
   readStoredHardwareSetupDraft,
   type HardwareSetupDraft,
@@ -72,6 +73,7 @@ type HardwareSetupDraftState = HardwareSetupDraft &
     setSensorProfileInput(value: SensorProfileId): void;
     setSensorMacInput(value: string): void;
     setSensorNameInput(value: string): void;
+    mergeRecoveredSensorDevices(devices: readonly SensorDraftDevice[]): void;
     setRulePreset(value: RulePresetId): void;
     setOnThresholdInput(value: string): void;
     setOffThresholdInput(value: string): void;
@@ -217,6 +219,13 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           ...upsertSensorSelection(state, device)
         })
       ),
+    mergeRecoveredSensorDevices: (devices) =>
+      set((state) => {
+        const sensorDevices = mergeRecoveredSensorRegistry(state.sensorDevices, devices);
+        return sensorDevices === state.sensorDevices
+          ? state
+          : persistPatch(state, { sensorDevices });
+      }),
     selectSensorDevice: (id) =>
       set((state) => {
         const patch = selectSensorSelection(state, id);

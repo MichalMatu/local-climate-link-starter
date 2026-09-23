@@ -26,9 +26,16 @@ import { useInstalledAutomationStore } from '../state/installedAutomationStore.j
 export type InstalledAutomationReconciliationStatus =
   'none' | 'recovered' | 'verified' | 'changed' | 'unavailable' | 'conflict';
 
+export type RecoveredAutomationSensor = {
+  profileId: ShellyThermostatConfig['sensor']['profileId'];
+  runtimeAddress: string;
+  displayName: string;
+};
+
 export type InstalledAutomationReconciliationResult = {
   status: InstalledAutomationReconciliationStatus;
   installationIds: string[];
+  recoveredSensors: RecoveredAutomationSensor[];
 };
 
 type ClimateRuntimeEvidence = {
@@ -218,6 +225,28 @@ const recoverClimateInstallation = async (
   });
 };
 
+const recoveredSensorsFromInstallation = (
+  installation: ClimateInstalledAutomation
+): RecoveredAutomationSensor[] => {
+  const sensors = [
+    installation.config.sensor,
+    ...(installation.config.sensorSet?.additionalSensors ?? [])
+  ];
+  const seen = new Set<string>();
+  return sensors.flatMap((sensor) => {
+    const key = sensor.runtimeAddress.trim().toUpperCase();
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [
+      {
+        profileId: sensor.profileId,
+        runtimeAddress: sensor.runtimeAddress,
+        displayName: sensor.displayName
+      }
+    ];
+  });
+};
+
 export const reconcileInstalledAutomationsForShelly = async (
   target: {
     deviceId: string;
@@ -234,11 +263,17 @@ export const reconcileInstalledAutomationsForShelly = async (
   if (matches.length === 0) {
     try {
       const recovered = await recoverClimateInstallation(target, services);
-      if (!recovered) return { status: 'none', installationIds: [] };
+      if (!recovered) {
+        return { status: 'none', installationIds: [], recoveredSensors: [] };
+      }
       useInstalledAutomationStore.getState().upsertInstallation(recovered);
-      return { status: 'recovered', installationIds: [recovered.id] };
+      return {
+        status: 'recovered',
+        installationIds: [recovered.id],
+        recoveredSensors: recoveredSensorsFromInstallation(recovered)
+      };
     } catch {
-      return { status: 'unavailable', installationIds: [] };
+      return { status: 'unavailable', installationIds: [], recoveredSensors: [] };
     }
   }
 
@@ -257,17 +292,17 @@ export const reconcileInstalledAutomationsForShelly = async (
 
   const installationIds = reconciled.map((installation) => installation.id);
   if (hasRelayOwnershipConflict(reconciled)) {
-    return { status: 'conflict', installationIds };
+    return { status: 'conflict', installationIds, recoveredSensors: [] };
   }
 
   try {
     for (const installation of reconciled) {
       if (!(await runtimeMatches(installation, services))) {
-        return { status: 'changed', installationIds };
+        return { status: 'changed', installationIds, recoveredSensors: [] };
       }
     }
-    return { status: 'verified', installationIds };
+    return { status: 'verified', installationIds, recoveredSensors: [] };
   } catch {
-    return { status: 'unavailable', installationIds };
+    return { status: 'unavailable', installationIds, recoveredSensors: [] };
   }
 };
