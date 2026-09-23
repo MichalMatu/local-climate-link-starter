@@ -71,6 +71,7 @@ export interface ShellyInstallPlan {
   runOnBoot: boolean;
   backupExisting: boolean;
   chunkSizeBytes?: number | undefined;
+  cleanupBleScannerBeforeStop?: boolean | undefined;
 }
 
 export interface ShellyScriptBackup {
