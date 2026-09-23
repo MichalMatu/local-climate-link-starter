@@ -14,6 +14,7 @@ describe('Shelly KVS datalogger generator', () => {
     expect(first).toContain('diag()');
     expect(first).toContain('KVS.Set');
     expect(first).toContain('lcl.dl1.m');
+    expect(first).toContain('p[0]');
     expect(first).toContain('historyStatus');
     expect(first).not.toContain('Switch.Set');
     expect(first).not.toContain('BLE.Scanner');
