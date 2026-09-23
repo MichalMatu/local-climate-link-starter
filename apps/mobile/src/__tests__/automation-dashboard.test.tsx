@@ -763,7 +763,7 @@ describe('AutomationDashboardScreen', () => {
     });
 
     await waitFor(() => expect(screen.queryByText('Wymaga uwagi')).toBeNull());
-    expect(screen.getByText('19.25°C / 19.75°C')).toBeVisible();
+    expect(screen.getByText('ON 19.25°C · OFF 19.75°C')).toBeVisible();
     expect(diagnosticAttempts).toBe(2);
   });
 

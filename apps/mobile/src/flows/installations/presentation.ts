@@ -58,7 +58,6 @@ export const installationThresholdSummary = (
     effectiveOffThreshold != null && Number.isFinite(effectiveOffThreshold)
       ? effectiveOffThreshold
       : offThreshold;
-  const formatThreshold = (value: number) =>
-    Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
+  const formatThreshold = (value: number) => String(Number(value.toFixed(2)));
   return `${t('common.on')} ${formatThreshold(activeOnThreshold)}${unit} · ${t('common.off')} ${formatThreshold(activeOffThreshold)}${unit}`;
 };

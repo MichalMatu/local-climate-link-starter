@@ -51,6 +51,7 @@ describe('app settings screen', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     const diagnostics = settings.querySelector('details');
     if (!diagnostics) throw new Error('settings diagnostics missing');
+    expect(diagnostics).toHaveClass('lcl-disclosure');
     fireEvent.click(diagnostics.querySelector('summary')!);
     expect(within(settings).getByText(/client saw a blank screen/)).toBeInTheDocument();
 

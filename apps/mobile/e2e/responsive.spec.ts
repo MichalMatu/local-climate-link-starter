@@ -614,9 +614,14 @@ for (const viewport of viewports) {
     await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Salon' })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Automatyka' })).toHaveCount(0);
-    await expect(page.getByText('Powód')).toBeVisible();
-    await expect(page.getByText('Przekaźnik reguły')).toBeVisible();
+    await expect(page.getByText('Powód automatyzacji')).toBeVisible();
+    await expect(page.getByText('Wyjście automatyzacji')).toBeVisible();
+    await expect(page.getByText('Stan przekaźnika')).toBeVisible();
     await expect(page.getByText('Przedpokój')).toBeVisible();
+    await expect(page.getByText('Zakres pracy: 19–20°C · Temperatura')).toBeVisible();
+    await expect(
+      page.locator('details.rule-advanced-disclosure.lcl-disclosure')
+    ).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
       0

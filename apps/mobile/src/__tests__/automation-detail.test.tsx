@@ -459,9 +459,9 @@ describe('InstallationDetailScreen', () => {
     renderDetail(saved.id);
 
     const automationSurface = screen.getByRole('region', { name: 'Stan bieżący' });
-    expect(within(automationSurface).getByText('Powód')).toBeVisible();
-    expect(within(automationSurface).getByText('Przekaźnik reguły')).toBeVisible();
-    expect(within(automationSurface).getByText('Przekaźnik Shelly')).toBeVisible();
+    expect(within(automationSurface).getByText('Powód automatyzacji')).toBeVisible();
+    expect(within(automationSurface).getByText('Wyjście automatyzacji')).toBeVisible();
+    expect(within(automationSurface).getByText('Stan przekaźnika')).toBeVisible();
     expect(within(automationSurface).getAllByText('Przedpokój').length).toBeGreaterThan(
       0
     );

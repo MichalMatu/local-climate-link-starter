@@ -375,6 +375,21 @@ for (const viewport of viewports) {
     await expect(page.getByText('Zużycie energii')).toBeVisible();
     await expect(page.getByLabel('Jasność trybu mocy')).toHaveValue('80');
     await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
+
+    const section = page.locator('.installation-detail-device-led');
+    const mode = section.getByRole('button', { name: 'Tryb LED' });
+    await mode.click();
+    await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
+    const colorGrids = section.locator('.plug-color-presets');
+    await expect(colorGrids).toHaveCount(2);
+    const expectedColumns = viewport.width >= 704 ? 8 : 4;
+    const columnCounts = await colorGrids.evaluateAll((elements) =>
+      elements.map(
+        (element) =>
+          getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length
+      )
+    );
+    expect(columnCounts).toEqual([expectedColumns, expectedColumns]);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: `test-results/visual-audit/plugs-ui-led-${viewport.name}.png`,
