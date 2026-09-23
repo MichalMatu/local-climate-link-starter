@@ -16,7 +16,6 @@ export interface LclHistorySample {
   temperatureC: number | null;
   humidityPct: number | null;
   vpdKpa: number | null;
-  freshSensorCount: number | null;
   relayOn: boolean;
   reason: string | null;
 }
@@ -70,7 +69,6 @@ type EncodedRecord = [
   temperatureDeciC: number | null,
   humidityDeciPct: number | null,
   vpdCentiKpa: number | null,
-  freshSensorCount: number | null,
   relayOn: 0 | 1,
   reason: string | null
 ];
@@ -120,12 +118,6 @@ const validateSample = (sample: LclHistorySample): LclHistoryCodecResult<LclHist
   if (sample.vpdKpa !== null && !isFiniteInRange(sample.vpdKpa, 0, 100)) {
     return failure('invalid-value', 'History VPD is outside the supported range.');
   }
-  if (
-    sample.freshSensorCount !== null &&
-    (!Number.isInteger(sample.freshSensorCount) || sample.freshSensorCount < 0 || sample.freshSensorCount > 16)
-  ) {
-    return failure('invalid-value', 'History fresh-sensor count is outside the supported range.');
-  }
   if (sample.reason !== null && (sample.reason.length === 0 || sample.reason.length > 16)) {
     return failure('invalid-value', 'History reason must contain 1 to 16 characters.');
   }
@@ -143,7 +135,6 @@ const encodeRecord = (sample: LclHistorySample, baseTimeSec: number): EncodedRec
   scale(sample.temperatureC, 10),
   scale(sample.humidityPct, 10),
   scale(sample.vpdKpa, 100),
-  sample.freshSensorCount,
   sample.relayOn ? 1 : 0,
   sample.reason
 ];
@@ -291,25 +282,17 @@ export const decodeLclHistorySegment = (
   const samples: LclHistorySample[] = [];
   let previousTimeSec = baseTimeSec;
   for (const rawRecord of rawRecords) {
-    if (!Array.isArray(rawRecord) || rawRecord.length !== 7) {
+    if (!Array.isArray(rawRecord) || rawRecord.length !== 6) {
       return failure('invalid-value', 'History record shape is invalid.');
     }
-    const [
-      deltaSec,
-      temperatureDeciC,
-      humidityDeciPct,
-      vpdCentiKpa,
-      freshSensorCount,
-      relayOn,
-      reason
-    ] = rawRecord;
+    const [deltaSec, temperatureDeciC, humidityDeciPct, vpdCentiKpa, relayOn, reason] =
+      rawRecord;
     const scaledValues = [temperatureDeciC, humidityDeciPct, vpdCentiKpa];
     if (
       !isIntegerAtLeast(deltaSec, 0) ||
       scaledValues.some(
         (entry) => entry !== null && (typeof entry !== 'number' || !Number.isInteger(entry))
       ) ||
-      (freshSensorCount !== null && !isIntegerAtLeast(freshSensorCount, 0)) ||
       (relayOn !== 0 && relayOn !== 1) ||
       (reason !== null && typeof reason !== 'string')
     ) {
@@ -325,7 +308,6 @@ export const decodeLclHistorySegment = (
       temperatureC: unscale(temperatureDeciC as number | null, 10),
       humidityPct: unscale(humidityDeciPct as number | null, 10),
       vpdKpa: unscale(vpdCentiKpa as number | null, 100),
-      freshSensorCount: freshSensorCount as number | null,
       relayOn: relayOn === 1,
       reason: reason as string | null
     };
