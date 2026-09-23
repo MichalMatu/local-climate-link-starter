@@ -53,9 +53,9 @@ No automation ownership, runtime-safety or Shelly mutation semantics were intent
 
 ## Verification / real device
 
-The current functional UX checkpoint `64733c910d831373e5993a4282b63817861ac5a5` passed focused navigation regressions (69/69) and a full `pnpm check:full`, including 36/36 responsive Playwright tests.
+Current `main` `9bb6b2f145b90d295879a75012e15fc5258f95ae` includes the UX checkpoint plus passive thermometer-registry recovery from a verified managed Climate automation. The final repository gate passed `pnpm check`; the mobile suite was 279/279 green, with the recovery-focused hardware/setup suite 70/70 green.
 
-That exact code checkpoint was built and installed on the real Samsung SM-S906B / S22+ with Android 16 using the repository phone-alpha flow, preserving app data. The application cold-started successfully with no observed FATAL/ANR. Documentation-only checkpoint cleanup after that smoke does not alter application code.
+That exact `main` was clean-installed on the real Samsung SM-S906B / S22+ with Android 16 using `pnpm android:phone-alpha`. Uninstall/install and cold start succeeded and the app opened with an empty Plug list. The user then re-added the physical Plug and confirmed that the existing Climate automation was recovered and its configured thermometer was automatically restored into Thermometers without duplication.
 
 The user's live Climate setup may intentionally use only **1 thermometer**. Do not restore a previous 4-sensor acceptance configuration or mutate the real Shelly merely to reproduce historical test state.
 
