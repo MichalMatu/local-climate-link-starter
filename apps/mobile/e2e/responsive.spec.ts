@@ -604,7 +604,7 @@ for (const viewport of viewports) {
     await expect(page.getByText('55.2%')).toBeVisible();
     await expect(page.getByText('1.31 → 1.20 kPa')).toBeVisible();
     await expect(page.getByText('Działa')).toHaveCount(0);
-    await expect(page.getByText('19°C / 20°C')).toBeVisible();
+    await expect(page.getByText('ON 19°C · OFF 20°C')).toBeVisible();
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
