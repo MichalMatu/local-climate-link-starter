@@ -26,6 +26,7 @@ Only dated real-device evidence establishes hardware support. Automated tests pr
 | 2026-09-21 | Persistent recovery on S22+                | PASS   | clean Android install, LAN scan and Add recovered the existing Climate automation; dashboard showed Humidity control, live humidity/temperature/VPD and working AUTO/MANUAL controls                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-09-22 | Sensor identity/provenance re-acceptance   | PASS   | S22+ on branch `77b50f255d023b5f0f6fe4648e71c425b8bde989`: Edit showed exactly 4 physical sensors (3 TP357 + Xiaomi `A4:C1:38:4F:24:CD`), explicit membership editing dropped inherited recovery membership, Load from Shelly restored the complete 4-sensor set; script SHA-256 stayed `8acb3f2e2b02936e07b960921fce25ab57004139e021ccc5e4e18f07acf2fe41`, schedules stayed empty and relay finished OFF                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-09-22 | Per-sensor diagnostics / 4-sensor runtime  | PASS   | S22+ Android 16 + Plug S Gen3 firmware 1.7.5 on branch `3fb932b4ed8def2d37230788c1ebe390621c3082`: deliberate Edit/Save upgraded the managed runtime from generator 0.5.0 to 0.5.1 with exactly 4 configured sensors (3 TP357 + Xiaomi/PVVX). Generated source was 7929 B, SHA-256 `cce71f12bc3b02f43b88bfe8023b110a800f5c18ed433b383a64a8cfecf002b0`; `/diag.d` returned one record per configured address, initially preserving unseen sensors as null/fresh=0 and then all 4 as fresh after BLE advertisements; the Edit UI mapped all 4 live rows to Plug BLE and preserved Average aggregation with 65/66% humidifying thresholds. Script memory settled around `mem_peak` 10.6 KB with about 17.2 KB script memory free; `Schedule.List` remained empty. Final relay state was explicitly forced and verified OFF at 0 W / 0 A. |
+| 2026-09-23 | UX stabilization real-device install       | PASS   | Samsung SM-S906B / Android 16 installed exact UX commit `4cb7666f0a4aec809f48ff7186a2b4ecc74c5794` with `adb install -r`, preserving existing app data. Build and cold start succeeded. This was presentation acceptance only: no Save action, runtime rewrite, schedule mutation or deliberate relay mutation was performed. The live Climate setup was intentionally left at its current one-thermometer configuration. |
 
 Current stabilization Shelly identity: `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware `1.7.5`. IP addresses are test transport locations and are not durable identity.
 
@@ -38,6 +39,8 @@ Install a physical Android alpha build:
 ```bash
 pnpm android:phone-alpha
 ```
+
+Note: `android:phone-alpha` performs a clean uninstall. For presentation acceptance where app data must be preserved, build/sync the same APK and use `adb install -r` instead.
 
 Install/observe a generated Shelly climate runtime:
 
@@ -72,5 +75,7 @@ Use `SOAK_CYCLE_RELAY=1` only for supervised/endurance tests intended to exercis
 ## Acceptance rules
 
 A hardware-facing slice is complete only when the relevant combination is verified on the real device and the final relay state is known. Recovery/reconciliation tests must also verify that valid remote scripts and schedules are not silently replaced.
+
+Presentation-only acceptance may preserve app data and avoid runtime mutation; record that distinction explicitly rather than treating visual inspection as automation acceptance.
 
 When firmware, device model or BLE behavior changes materially, add a new dated row rather than rewriting old evidence.
