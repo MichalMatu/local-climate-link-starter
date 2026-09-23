@@ -11,7 +11,8 @@ describe('datalogger install plan', () => {
       code: '// logger',
       runOnBoot: true,
       backupExisting: false,
-      chunkSizeBytes: 1024
+      chunkSizeBytes: 1024,
+      cleanupBleScannerBeforeStop: false
     });
   });
 });
