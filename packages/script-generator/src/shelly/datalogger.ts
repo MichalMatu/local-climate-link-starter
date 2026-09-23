@@ -11,7 +11,7 @@ import { compactGeneratedShellyScript } from './scriptText.js';
 export const SHELLY_DATALOGGER_RUNTIME_VERSION = 'tail-v1';
 export const SHELLY_DATALOGGER_SCRIPT_MAX_BYTES = 3_000;
 export const SHELLY_DATALOGGER_DEFAULT_POLL_INTERVAL_SEC = 5 * 60;
-export const SHELLY_DATALOGGER_DEFAULT_FLUSH_INTERVAL_SEC = 60 * 60;
+export const SHELLY_DATALOGGER_DEFAULT_FLUSH_INTERVAL_SEC = 2 * 60 * 60;
 
 export interface ShellyDataloggerConfig {
   sourceScriptId: number;
