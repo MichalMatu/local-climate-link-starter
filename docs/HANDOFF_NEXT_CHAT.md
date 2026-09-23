@@ -1,22 +1,10 @@
-# Handoff — close per-sensor diagnostics, then UX stabilization
+# Handoff — continue UX refinement from clean main
 
-Status: **2026-09-22**
-
-## Current repository state
+Status: **2026-09-23**
 
 Repository: `MichalMatu/local-climate-link-starter`
 
-Completed work branch:
-
-```text
-work/per-sensor-diagnostics
-```
-
-The branch was created from `main` commit:
-
-```text
-699e6ac7845838cbce114aab513d4ff73e972a1a
-```
+Canonical restart point for the next session: **fresh `main`**. Completed work branches from the previous diagnostics and UX slices are retired after merge. `agent-control` remains only as Local Agent infrastructure.
 
 Local Agent binding:
 
@@ -24,71 +12,106 @@ Local Agent binding:
 e75c77cb-7589-4452-94b2-decc97ff85a1
 ```
 
-The per-sensor diagnostics slice is complete and should now be reviewed, merged to `main`, and retired. Do not add another feature to this branch.
+## Current product state
 
-## Completed behavior
+The architecture/lifecycle baseline is stable and the first major UX correction pass is complete.
 
-Climate supports a maximum of 4 configured thermometers. The completed slice adds distinct Plug-side diagnostics for every configured sensor without changing aggregation or relay-safety semantics.
+Key established behavior:
 
-Final behavior includes:
+- Shelly physical identity is canonical; URL/IP is transport only;
+- a saved Plug remains useful without automation;
+- Climate and Time use one clear installed-automation ownership model;
+- Climate supports 1–4 thermometers with `avg`, `min`, `max` or `firstValid` aggregation;
+- per-sensor Plug diagnostics are available and join mobile rows by normalized BLE `runtimeAddress`;
+- valid managed runtimes are not rewritten by passive recovery;
+- local Shelly execution remains independent of phone/cloud after configuration.
 
-- compact `/diag.d` record per configured thermometer;
-- per-sensor temperature, humidity, battery, RSSI, last-seen uptime and fresh/stale state;
-- explicit unseen representation with null values and `fresh=0`;
-- mobile mapping by normalized physical BLE `runtimeAddress` only;
-- Phone BLE and Plug BLE as live-reading sources;
-- recovered/runtime identity provenance kept separate from telemetry source;
-- config-only membership/reorder updates clear indexed `R.u` / `R.fc` state;
-- aggregate-only older diagnostics remain backward-compatible;
-- older managed runtimes lacking the current diagnostics/runtime revision upgrade only on explicit Save/Edit through the guarded replacement path;
-- passive app launch, Details, Edit-open and diagnostics reads do not rewrite the managed runtime;
-- generated Climate runtime is hard-limited to 8000 UTF-8 bytes.
+## UX state after the first stabilization pass
 
-No new mutable reading store, device identity, cloud dependency, MQTT dependency or parallel automation ownership model was introduced.
+Plug details were flattened into one surface with five local sections:
 
-## Verification completed
+```text
+Automation | BLE | Device | Script | Info
+```
 
-Software verification passed on the completed branch, including focused generator/mobile regressions and the repository `pnpm check` gate.
+The old nested Settings, Diagnostics and Script detail pages were removed after their data was migrated to the correct owner surface.
 
-Real-device acceptance passed on:
+The first UX pass also:
 
-- Samsung SM-S906B / S22+, Android 16;
-- Shelly Plug S Gen3 `S3PL-00112EU`, firmware 1.7.5;
-- 3 TP357 thermometers + 1 Xiaomi/PVVX BTHome thermometer.
+- grouped LED, physical button mode and Shelly Cloud under Device;
+- gave BLE a dedicated surface with room for future capabilities;
+- moved script-specific diagnostics into Script and device diagnostics into Info;
+- removed duplicated Plug/detail data where the dashboard already owns it;
+- rebuilt LED controls to match the product UI instead of native/system-looking controls;
+- introduced reusable tokenized `ToggleSwitch` and `ColorSwatch` primitives where justified;
+- fixed standalone Add return navigation;
+- improved script-loading feedback and narrow mobile sensor selection;
+- updated responsive/E2E contracts for the new structure.
 
-The accepted four-sensor runtime used generator `0.5.1`, generated at 7929 bytes, and exposed four independent `/diag.d` records. During the acceptance run unseen sensors first appeared as null/fresh=0 and then all four became fresh after BLE advertisements. The mobile Edit UI mapped all four rows to Plug BLE. Script memory remained within the measured hardware budget. `Schedule.List` remained empty. Exact dated evidence is in `docs/testing/hardware-matrix.md`.
+No automation ownership, runtime-safety or Shelly mutation semantics were intentionally changed by the UX restructuring.
 
-The user's current live Climate configuration may legitimately differ from the four-sensor acceptance setup. Do not treat a later one-sensor configuration as a regression or automatically restore the acceptance configuration.
+## Verification / real device
 
-## Final audit / merge contract
+The completed UX candidate passed `pnpm check:full` on the MacBook, including formatting, lint, UX/repository/feature-boundary gates, TypeScript, unit/integration tests, coverage, build and responsive Playwright.
 
-Before merging:
+A build from UX commit `4cb7666f0a4aec809f48ff7186a2b4ecc74c5794` was installed on the real Samsung SM-S906B / S22+ with Android 16 using `adb install -r`, preserving app data. The application cold-started successfully.
 
-1. compare the completed branch against current `main`;
-2. confirm only intended diagnostics/mobile/docs/test changes are present;
-3. run the final repository gate on the exact PR head;
-4. open the PR against `main`;
-5. review CI and merge only when green.
+The user's live Climate setup may intentionally use only **1 thermometer**. Do not restore a previous 4-sensor acceptance configuration or mutate the real Shelly merely to reproduce historical test state.
 
-Two content-neutral technical commits exist on `main` from creating and deleting the same accidental Local Agent task file. Their final tree is unchanged from the prior baseline; leave those commits as-is and do not force-rewrite `main` history.
+## NEXT SESSION — continue UX refinement
 
-## Next work — UX corrections / stabilization
+The next task is **more UX correction/stabilization of the existing product**, based on real S22+ screenshots and user feedback.
 
-After this diagnostics PR is merged, the next task is **UX corrections/stabilization**, not Soil moisture.
+Do not start Soil moisture, richer timing, a script-library expansion or Shelly-over-BLE implementation until the user explicitly says the current UX pass is accepted.
 
-Create a fresh UX work branch from the merged `main`. Scope that branch from concrete observed or user-reported UX problems in the existing product flows. Do not bundle Soil moisture, richer rule operators or another runtime architecture into the UX pass.
+Working method:
 
-For UX work:
+1. start from fresh `main`;
+2. inspect the concrete screenshot/problem first;
+3. add the issue to the UX backlog;
+4. discuss one problem at a time before broad implementation;
+5. prefer the shared design system/tokens for reusable controls;
+6. keep product-specific layout inside the owning feature;
+7. avoid large duplicate headings, nested cards/pages and one-off global CSS hacks;
+8. use available screen space efficiently on 360/390/412 px phones and tablet/desktop widths;
+9. preserve existing state/side-effect ownership and hardware safety;
+10. run focused checks while iterating and `pnpm check:full` before closing a meaningful UX slice.
 
-- preserve existing product/state/side-effect ownership boundaries;
-- keep screens/components presentation-focused;
-- do not change hardware/runtime behavior merely for visual polish;
-- when a UX issue exposes a real functional bug, fix it at the existing owner boundary and add focused regression coverage;
-- run `pnpm quality:ux`, the relevant responsive/render checks, and inspect affected flows on representative real/mobile viewports;
-- use the S22+ for physical acceptance when the changed UX depends on native navigation, BLE, device discovery or real Shelly interaction.
+Representative responsive viewports remain:
 
-The exact UX correction list should be defined from the next concrete user review rather than guessed here.
+```text
+360x800
+390x844
+412x915
+768x1024
+1440x900
+```
 
-## Later roadmap
+Use the real S22+ when the acceptance question depends on Android/native navigation, BLE discovery or real Shelly behavior. Presentation-only inspection must not press Save or otherwise mutate the live runtime unless that mutation is the explicit test objective.
 
-After the UX stabilization slice is complete, continue with the existing roadmap stages such as Soil moisture, richer timing/operators and advanced automation UX. Do not start those stages on `work/per-sensor-diagnostics`.
+## AFTER UX — planned next product work
+
+Once the user accepts the UX baseline, the next product directions are, in order of current intent:
+
+1. **BLE soil-moisture sensor support** through the existing typed sensor/config/diagnostic model;
+2. **Shelly communication/management over BLE**, beginning with a real-hardware feasibility spike and reusing the same RPC transport/ownership boundaries.
+
+These are separate Bluetooth concerns. Do not combine them into one transport or ownership model.
+
+Later roadmap items include richer timing/operators, advanced automation UX and the optional Shelly Script Library track. See `docs/ROADMAP.md`.
+
+## Restart checklist
+
+At the beginning of the next chat:
+
+```text
+read AGENTS.md
+read docs/HANDOFF_NEXT_CHAT.md
+read docs/ARCHITECTURE.md
+read docs/ROADMAP.md
+fetch fresh main
+check agent-control daemon
+confirm no stale work branch/task is being reused
+```
+
+Do not rely on old task IDs or old work-branch SHAs. `main` + the canonical docs above are the source of truth.
