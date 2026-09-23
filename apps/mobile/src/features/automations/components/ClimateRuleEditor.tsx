@@ -11,6 +11,7 @@ import {
 import {
   ALL_RULE_PRESETS,
   formatRuleSummary,
+  formatVpdWorkingRange,
   RULE_PRESET_COPY,
   stripTrailingUnit
 } from '../presentation/climateRulePresentation.js';
@@ -89,21 +90,14 @@ export const ClimateRuleEditor = ({
   const vpdTargetInputId = useId();
   const copy = RULE_PRESET_COPY[props.rulePreset];
   const direction = props.controlDirection ?? copy.direction;
-  const onThresholdValue = Number(props.onThresholdInput);
-  const offThresholdValue = Number(props.offThresholdInput);
-  const vpdWorkingRange =
-    props.isThresholdValid &&
-    props.onThresholdInput.trim() !== '' &&
-    props.offThresholdInput.trim() !== '' &&
-    Number.isFinite(onThresholdValue) &&
-    Number.isFinite(offThresholdValue)
-      ? t('hardware.rule.vpdWorkingRange', {
-          min: Math.min(onThresholdValue, offThresholdValue),
-          max: Math.max(onThresholdValue, offThresholdValue),
-          unit: copy.unit,
-          metric: copy.unit === '%' ? t('dashboard.humidity') : t('dashboard.temperature')
-        })
-      : null;
+  const vpdWorkingRange = formatVpdWorkingRange({
+    isThresholdValid: props.isThresholdValid,
+    onThresholdInput: props.onThresholdInput,
+    offThresholdInput: props.offThresholdInput,
+    unit: copy.unit,
+    metricLabel: copy.unit === '%' ? t('dashboard.humidity') : t('dashboard.temperature'),
+    t
+  });
   const vpdAssistLabel = props.vpdAssistEnabled
     ? props.isVpdAssistValid
       ? `${Number(props.vpdTargetInput).toFixed(2)} kPa`

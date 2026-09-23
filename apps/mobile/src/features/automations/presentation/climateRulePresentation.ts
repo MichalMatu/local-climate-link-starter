@@ -80,6 +80,39 @@ export const formatSensorLiveSummary = (
     1
   )}`;
 
+export const formatVpdWorkingRange = ({
+  isThresholdValid,
+  onThresholdInput,
+  offThresholdInput,
+  unit,
+  metricLabel,
+  t
+}: {
+  isThresholdValid: boolean;
+  onThresholdInput: string;
+  offThresholdInput: string;
+  unit: string;
+  metricLabel: string;
+  t: Translate;
+}): string | null => {
+  if (!isThresholdValid || !onThresholdInput.trim() || !offThresholdInput.trim()) {
+    return null;
+  }
+
+  const onThreshold = Number(onThresholdInput);
+  const offThreshold = Number(offThresholdInput);
+  if (!Number.isFinite(onThreshold) || !Number.isFinite(offThreshold)) {
+    return null;
+  }
+
+  return t('hardware.rule.vpdWorkingRange', {
+    min: Math.min(onThreshold, offThreshold),
+    max: Math.max(onThreshold, offThreshold),
+    unit,
+    metric: metricLabel
+  });
+};
+
 export const formatRuleSummary = ({
   actionLabel,
   direction,
