@@ -352,11 +352,15 @@ const consoleProblems = (page: Page) => {
   return problems;
 };
 
-const openDetail = async (page: Page) => {
+const openDetail = async (page: Page, kind: InstallationKind = 'climate') => {
   await page.goto('/');
   const details = page.getByRole('button', { name: 'Szczegóły' });
   await expect(details).toBeVisible();
   await details.click();
+  if (kind === 'climate') {
+    await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+    await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
+  }
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
 };
 
@@ -380,29 +384,34 @@ for (const viewport of viewports) {
   });
 }
 
-test('PLUGS_UI LED relay-state and off presets work end to end', async ({ page }) => {
+test('PLUGS_UI LED relay-state and off modes work end to end', async ({ page }) => {
   const problems = consoleProblems(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await seedInstallation(page, 'climate');
-  await mockShelly(page, 'climate');
+  const mock = await mockShelly(page, 'climate');
   await openDetail(page);
 
-  const card = page
-    .getByRole('heading', { name: 'LED gniazdka' })
-    .locator('xpath=ancestor::article[1]');
-  await card.getByRole('button', { name: 'Sygnalizuj ON/OFF' }).click();
-  await expect(card.getByRole('button', { name: 'Tryb LED' })).toContainText(
-    'Stan przekaźnika'
+  const section = page.locator('.installation-detail-device-led');
+  const mode = section.getByRole('button', { name: 'Tryb LED' });
+  await mode.click();
+  await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
+  await expect(mode).toContainText('Sygnalizuj ON/OFF');
+  await expect(section.getByRole('textbox', { name: 'ON Kolor' })).toHaveValue('#00ff00');
+  await expect(section.getByLabel('ON Jasność')).toHaveValue('100');
+  await expect(section.getByRole('textbox', { name: 'OFF Kolor' })).toHaveValue(
+    '#ff0000'
   );
-  await expect(card.getByLabel('ON Kolor')).toHaveValue('#00ff00');
-  await expect(card.getByLabel('ON Jasność')).toHaveValue('100');
-  await expect(card.getByLabel('OFF Kolor')).toHaveValue('#ff0000');
-  await expect(card.getByLabel('OFF Jasność')).toHaveValue('100');
-  await expect(page.getByText('LED pokazuje teraz stan przekaźnika.')).toBeVisible();
+  await expect(section.getByLabel('OFF Jasność')).toHaveValue('100');
+  await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
+  await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
+  expect(mock.ledSetRequests.at(-1)).toEqual({ mode: 'switch' });
 
-  await card.getByRole('button', { name: 'Wyłącz LED' }).click();
-  await expect(card.getByText('Wyłączona')).toBeVisible();
-  await expect(page.getByText('LED został wyłączony.')).toBeVisible();
+  await mode.click();
+  await page.getByRole('option', { name: 'Wyłączona' }).click();
+  await expect(mode).toContainText('Wyłączona');
+  await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
+  await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
+  expect(mock.ledSetRequests.at(-1)).toEqual({ mode: 'off' });
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });
@@ -475,7 +484,7 @@ test('time installation exposes the same device-level LED settings', async ({ pa
   await page.setViewportSize({ width: 390, height: 844 });
   await seedInstallation(page, 'time');
   await mockShelly(page, 'time');
-  await openDetail(page);
+  await openDetail(page, 'time');
 
   await expect(page.getByRole('heading', { name: 'Lampa' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();

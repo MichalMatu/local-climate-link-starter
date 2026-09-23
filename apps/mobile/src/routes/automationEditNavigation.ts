@@ -15,8 +15,7 @@ export type AutomationEditSetupRoute = {
 export const automationDetailRoute = (installationId: string) => ({
   type: 'installation' as const,
   installationId,
-  kind: 'climate' as const,
-  page: 'detail' as const
+  kind: 'climate' as const
 });
 
 export const prepareAutomationEditRoute = (

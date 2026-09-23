@@ -2521,13 +2521,6 @@ select {
   line-height: var(--lcl-line-height-tight);
 }
 
-.installation-detail-shell .installation-detail-purpose {
-  color: var(--lcl-color-text-muted);
-  font-size: var(--lcl-font-size-sm);
-  line-height: var(--lcl-line-height-compact);
-  margin: 0;
-}
-
 .installation-detail-shell .automation-card {
   box-shadow: none;
   gap: var(--lcl-spacing-sm);
@@ -3008,14 +3001,8 @@ select {
 
 /* Climate installation detail: identity and diagnostics-first layout. */
 .installation-detail-identity,
-.installation-detail-recovery,
-.installation-detail-management {
+.installation-detail-recovery {
   grid-column: 1 / -1;
-}
-
-.installation-detail-identity__copy {
-  display: grid;
-  gap: var(--lcl-spacing-xs);
 }
 
 .installation-detail-identity h1 {
@@ -3024,64 +3011,8 @@ select {
   margin: 0;
 }
 
-.installation-detail-management__actions {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.installation-diagnostics {
-  display: grid;
-  gap: var(--lcl-spacing-md);
-}
-
-.installation-diagnostics__section {
-  display: grid;
-  gap: var(--lcl-spacing-xs);
-}
-
-.installation-diagnostics__section + .installation-diagnostics__section {
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  padding-top: var(--lcl-spacing-md);
-}
-
-.installation-diagnostics__section h3 {
-  font-size: var(--lcl-font-size-md);
-  line-height: var(--lcl-line-height-compact);
-  margin: 0;
-}
-
-.installation-diagnostics__rows .lcl-diagnostic-row:last-child {
-  border-bottom: 0;
-}
-
 .app-page-back-row {
   margin-bottom: var(--lcl-spacing-sm);
-}
-
-.installation-diagnostics-page__card,
-.installation-script-page__card {
-  display: grid;
-  gap: var(--lcl-spacing-md);
-}
-
-.installation-diagnostics-page__card h1,
-.installation-script-page__card h1 {
-  font-size: var(--lcl-font-size-2xl);
-  margin: 0;
-}
-
-.installation-diagnostics__section h2 {
-  font-size: var(--lcl-font-size-lg);
-  margin: 0;
-}
-
-.installation-script-page__card {
-  min-height: calc(100dvh - (var(--lcl-spacing-2xl) * 7));
-}
-
-.installation-script-page__card .lcl-script-preview {
-  height: 100%;
-  min-height: var(--lcl-size-code-preview-max-height);
 }
 
 /* Full-page device add flow: page content owns the viewport; only confirmations use Modal. */
@@ -3318,4 +3249,36 @@ select {
     backdrop-filter: none;
     background: var(--lcl-color-surface);
   }
+}
+
+.rule-edit-context {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  margin-bottom: var(--lcl-spacing-lg);
+  padding: var(--lcl-spacing-md);
+}
+.rule-edit-context__label {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-semibold);
+}
+.rule-edit-context strong {
+  font-size: var(--lcl-font-size-lg);
+}
+.rule-edit-context p,
+.rule-save-target {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  margin: 0;
+}
+.rule-progressive-disclosure .rule-developer-actions {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  margin-top: var(--lcl-spacing-md);
+  padding-top: var(--lcl-spacing-md);
+}
+.rule-save-target {
+  margin-top: var(--lcl-spacing-md);
 }

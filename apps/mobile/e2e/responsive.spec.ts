@@ -161,6 +161,59 @@ const mockShellyRpc = async (page: Page) => {
           }
         };
         break;
+      case 'Shelly.ListMethods':
+        result = {
+          methods: [
+            'PLUGS_UI.GetConfig',
+            'PLUGS_UI.SetConfig',
+            'Cloud.GetConfig',
+            'Cloud.SetConfig',
+            'Cloud.GetStatus'
+          ]
+        };
+        break;
+      case 'PLUGS_UI.GetConfig':
+        result = {
+          leds: {
+            mode: 'switch',
+            colors: {
+              'switch:0': {
+                on: { rgb: [0, 100, 0], brightness: 100 },
+                off: { rgb: [100, 0, 0], brightness: 75 }
+              },
+              power: { brightness: 80 }
+            },
+            night_mode: {
+              enable: true,
+              brightness: 10,
+              active_between: ['22:00', '06:00']
+            }
+          },
+          controls: { 'switch:0': { in_mode: 'momentary' } }
+        };
+        break;
+      case 'Cloud.GetConfig':
+        result = { enable: false, server: 'shelly-195-eu.shelly.cloud:6022/jrpc' };
+        break;
+      case 'Cloud.GetStatus':
+        result = { connected: false };
+        break;
+      case 'Script.GetCode':
+        result = { data: '// Local Climate Link deployed script\nprint("ok");' };
+        break;
+      case 'Script.GetStatus':
+        result = {
+          id: 1,
+          running: scriptRunning,
+          mem_used: 2048,
+          mem_peak: 3072,
+          mem_free: 4096,
+          cpu: 1.5
+        };
+        break;
+      case 'Sys.GetStatus':
+        result = { ram_free: 64000, ram_size: 262144 };
+        break;
       case 'Script.List':
         result = {
           scripts: [
@@ -376,6 +429,14 @@ const expectNoHorizontalOverflow = async (page: Page) => {
   expect(overflow.offenders).toEqual([]);
 };
 
+const ensureRuleAdvancedOpen = async (page: Page) => {
+  const summary = page.locator('summary').filter({ hasText: 'Zaawansowane' });
+  const details = summary.locator('xpath=..');
+  if ((await details.getAttribute('open')) === null) {
+    await summary.click();
+  }
+};
+
 const expectNoLegacyInlineFeedback = async (page: Page) => {
   const offenders = await page.evaluate(() => {
     const legacyBoxes = Array.from(
@@ -408,16 +469,17 @@ const requiredBox = async (locator: Locator) => {
 };
 
 const expectClimateDetailHierarchy = async (page: Page) => {
-  const gridBox = await requiredBox(page.locator('.installation-detail-grid'));
+  const [tabsBox, surfaceBox] = await Promise.all([
+    requiredBox(page.locator('.plug-detail-tabs')),
+    requiredBox(page.locator('.plug-detail-surface'))
+  ]);
 
-  expect(gridBox.width).toBeGreaterThan(0);
+  expect(tabsBox.width).toBeGreaterThan(0);
+  expect(surfaceBox.width).toBeGreaterThan(0);
+  expect(Math.abs(tabsBox.x - surfaceBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(tabsBox.width - surfaceBox.width)).toBeLessThanOrEqual(2);
+  await expect(page.locator('.app-page-back-row')).toHaveCount(0);
   await expect(page.locator('.installation-detail-live')).toHaveCount(0);
-  await expect(page.locator('.installation-detail-header .detail-back-link')).toHaveCount(
-    0
-  );
-  await expect(
-    page.locator('.installation-detail-header .runtime-refresh-action')
-  ).toHaveCount(0);
   await expect(page.locator('.app-bottom-nav')).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Gniazdka', exact: true })
@@ -549,15 +611,46 @@ for (const viewport of viewports) {
     await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Szczegóły: Salon' }).click();
-    await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Automatyka' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'BLE i sensor' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Telemetria Shelly' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Salon' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Automatyka' })).toHaveCount(0);
+    await expect(page.getByText('Powód')).toBeVisible();
+    await expect(page.getByText('Przekaźnik reguły')).toBeVisible();
+    await expect(page.getByText('Przedpokój')).toBeVisible();
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
       0
     );
+
+    await page.getByRole('button', { name: 'Bluetooth' }).click();
+    await expect(page.getByText('91%')).toBeVisible();
+    await expect(page.getByText('-51 dBm')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
+    await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Tryb LED' })).toBeVisible();
+    await expect(page.getByText('ON', { exact: true })).toBeVisible();
+    await expect(page.getByText('OFF', { exact: true })).toBeVisible();
+    await expect(page.locator('input[type="color"]')).toHaveCount(0);
+    const onStateBox = await requiredBox(page.locator('fieldset.plug-led-state').nth(0));
+    const offStateBox = await requiredBox(page.locator('fieldset.plug-led-state').nth(1));
+    expect(offStateBox.y).toBeGreaterThan(onStateBox.y + onStateBox.height);
+    const [nightStartBox, nightEndBox] = await Promise.all([
+      requiredBox(page.getByLabel('Początek')),
+      requiredBox(page.getByLabel('Koniec'))
+    ]);
+    expect(Math.abs(nightStartBox.y - nightEndBox.y)).toBeLessThanOrEqual(2);
+    await expect(
+      page.getByRole('button', { name: 'Zapisz ustawienia LED' })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole('button', { name: 'Informacje' }).click();
+    await expect(page.getByText('S3PL-00112EU, gen 3')).toBeVisible();
+    await expect(page.getByText('0.20 A')).toBeVisible();
+    await expect(page.getByText('32.4°C')).toBeVisible();
+    await expect(page.getByText('42.3 W')).toHaveCount(0);
+    await expect(page.getByText('230 V')).toHaveCount(0);
     await expectClimateDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
@@ -787,6 +880,7 @@ for (const viewport of viewports) {
       0
     );
     await expect(page.getByLabel('VPD assist')).toBeVisible();
+    await ensureRuleAdvancedOpen(page);
     await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
@@ -817,6 +911,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
   await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
     0
   );
+  await ensureRuleAdvancedOpen(page);
   await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Tryb reguły' }).click();
@@ -881,7 +976,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
 
   await page.getByLabel('VPD assist').check();
   await page.getByLabel('Docelowe VPD kPa').fill('1.25');
-  await page.locator('summary').filter({ hasText: 'Zaawansowane' }).click();
+  await ensureRuleAdvancedOpen(page);
   await expect(page.getByRole('dialog', { name: 'Opcje zaawansowane' })).toHaveCount(0);
   await expect(page.getByLabel('Minimalny RSSI dBm')).toHaveValue('-85');
   await expect(page.getByLabel('Brak odczytu przez min')).toHaveValue('2');
@@ -949,6 +1044,7 @@ test('keeps app toasts anchored above bottom navigation at every viewport', asyn
   await page.goto('/admin#rule');
   await page.getByRole('button', { name: 'Dodaj automatykę' }).click();
   await page.getByRole('button', { name: /Sterować wilgotnością/ }).click();
+  await ensureRuleAdvancedOpen(page);
   await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
 
   for (const viewport of viewports) {

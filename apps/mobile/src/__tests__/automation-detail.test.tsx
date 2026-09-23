@@ -1,12 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within
-} from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import type { ShellyScheduleJob } from '@lcl/shelly-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -25,11 +18,6 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
-import {
-  INSTALLATION_DIAGNOSTICS_REFRESH_MS,
-  InstallationDiagnosticsScreen
-} from '../screens/InstallationDiagnosticsScreen.js';
-import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
@@ -68,6 +56,7 @@ const diagnosticPayload = () => ({
   q: [0, 0, 19, 20, 120, -85],
   y: ['14:00', 1_782_820_000, 3600],
   p: [true, 42.3, 230.1, 0.2, 1250, 32.4],
+  d: [['A4C1384F24CD', 21.4, 55.2, 91, -51, 3_550_000, 1]],
   g: [
     3_550_000,
     21.4,
@@ -349,10 +338,7 @@ const installTimeShellyFetchMock = () => {
 const renderDetail = (
   installationId: string,
   onBack = vi.fn(),
-  onNavigateDashboard = vi.fn(),
-  onOpenSettings = vi.fn(),
-  onOpenDiagnostics = vi.fn(),
-  onOpenScript = vi.fn(),
+  onOpenBleDiscovery = vi.fn(),
   onEdit = vi.fn()
 ) => {
   const queryClient = new QueryClient({
@@ -360,10 +346,7 @@ const renderDetail = (
   });
   return {
     onBack,
-    onNavigateDashboard,
-    onOpenSettings,
-    onOpenDiagnostics,
-    onOpenScript,
+    onOpenBleDiscovery,
     onEdit,
     ...renderWithAppToastHost(
       <I18nProvider>
@@ -371,10 +354,7 @@ const renderDetail = (
           <InstallationDetailScreen
             installationId={installationId}
             onBack={onBack}
-            onNavigateDashboard={onNavigateDashboard}
-            onOpenSettings={onOpenSettings}
-            onOpenDiagnostics={onOpenDiagnostics}
-            onOpenScript={onOpenScript}
+            onOpenBleDiscovery={onOpenBleDiscovery}
             onEdit={onEdit}
           />
         </QueryClientProvider>
@@ -412,15 +392,16 @@ describe('InstallationDetailScreen', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
-  it('opens physical Plug settings from an installed climate automation', async () => {
+  it('keeps physical Plug settings in the Device tab instead of a nested settings page', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     installShellyFetchMock();
-    const onOpenSettings = vi.fn();
-    renderDetail(saved.id, vi.fn(), vi.fn(), onOpenSettings);
+    renderDetail(saved.id);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Ustawienia gniazdka' }));
-    expect(onOpenSettings).toHaveBeenCalledWith(saved.shelly.deviceId);
+    fireEvent.click(screen.getByRole('button', { name: 'Ustawienia gniazdka' }));
+    expect(await screen.findByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Przycisk gniazdka' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Shelly Cloud' })).toBeVisible();
   });
 
   it('exposes Edit for an installed climate automation', async () => {
@@ -428,54 +409,31 @@ describe('InstallationDetailScreen', () => {
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     installShellyFetchMock();
     const onEdit = vi.fn();
-    renderDetail(saved.id, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), onEdit);
+    renderDetail(saved.id, vi.fn(), vi.fn(), onEdit);
 
     const edit = await screen.findByRole('button', { name: 'Edytuj' });
     fireEvent.click(edit);
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps missing diagnostics and script routes in the same child-page chrome', () => {
-    const diagnosticsBack = vi.fn();
-    const diagnostics = render(
-      <I18nProvider>
-        <InstallationDiagnosticsScreen
-          installationId="missing-installation"
-          onBack={diagnosticsBack}
-        />
-      </I18nProvider>
+  it('uses one detail surface without child-page Back chrome', async () => {
+    const saved = installation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    installShellyFetchMock();
+    renderDetail(saved.id);
+
+    expect(screen.queryByRole('button', { name: '‹ Gniazdka' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
+      'aria-current',
+      'page'
     );
-
-    expect(
-      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
-    ).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
-    expect(diagnosticsBack).toHaveBeenCalledTimes(1);
-    diagnostics.unmount();
-
-    const scriptBack = vi.fn();
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-    });
-    render(
-      <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          <InstallationScriptScreen
-            installationId="missing-installation"
-            onBack={scriptBack}
-          />
-        </QueryClientProvider>
-      </I18nProvider>
-    );
-
-    expect(
-      screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
-    ).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
-    expect(scriptBack).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Skrypt' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Informacje' })).toBeVisible();
   });
 
-  it('keeps Plug detail free of redundant Plugs back chrome and supports inline rename', async () => {
+  it('does not repeat the dashboard name, rename control, or climate-purpose heading', async () => {
     const saved = installation();
     useHardwareSetupDraftStore.getState().upsertShellyDevice({
       id: saved.shelly.deviceId,
@@ -488,100 +446,45 @@ describe('InstallationDetailScreen', () => {
 
     renderDetail(saved.id);
 
-    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
-    expect(screen.queryByRole('button', { name: '‹ Gniazdka' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Nazwa gniazdka' }));
-    const input = screen.getByRole('textbox', { name: 'Nazwa gniazdka' });
-    fireEvent.change(input, { target: { value: 'Nawilżacz growbox' } });
-    fireEvent.blur(input);
-
-    expect(screen.getByRole('heading', { name: 'Nawilżacz growbox' })).toBeVisible();
-    expect(useHardwareSetupDraftStore.getState().shellyDevices[0]?.name).toBe(
-      'Nawilżacz growbox'
-    );
-    expect(useInstalledAutomationStore.getState().installations[0]?.shelly.name).toBe(
-      'Nawilżacz growbox'
-    );
+    expect(screen.queryByRole('heading', { name: 'Salon' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Nazwa gniazdka' })).toBeNull();
+    expect(screen.queryByText('Sterowanie temperaturą')).toBeNull();
   });
 
-  it('shows unique diagnostic detail without duplicating dashboard controls or climate values', async () => {
+  it('separates automation, BLE and device telemetry without dashboard duplication', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     installShellyFetchMock();
     renderDetail(saved.id);
 
-    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
-    const identityCard = screen
-      .getByRole('heading', { name: 'Salon' })
-      .closest('article');
-    expect(identityCard).toHaveClass('installation-detail-identity');
-    expect(screen.getByText('Sterowanie temperaturą')).toBeVisible();
+    const automationSurface = screen.getByRole('region', { name: 'Stan bieżący' });
+    expect(within(automationSurface).getByText('Powód')).toBeVisible();
+    expect(within(automationSurface).getByText('Przekaźnik reguły')).toBeVisible();
+    expect(within(automationSurface).getByText('Przekaźnik Shelly')).toBeVisible();
+    expect(within(automationSurface).getByText('Przedpokój')).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Automatyka' })).toBeNull();
+    expect(screen.queryByText('0.20 A')).toBeNull();
+    expect(screen.queryByText('32.4°C')).toBeNull();
 
-    const automationCard = screen
-      .getByRole('heading', { name: 'Automatyka' })
-      .closest('article');
-    expect(automationCard).not.toBeNull();
-    expect(within(automationCard!).getByText('Powód')).toBeVisible();
-    expect(within(automationCard!).getByText('Przekaźnik reguły')).toBeVisible();
-    expect(within(automationCard!).getByText('Przekaźnik Shelly')).toBeVisible();
-    expect(within(automationCard!).queryByRole('button', { name: 'AUTO' })).toBeNull();
-    expect(within(automationCard!).queryByRole('button', { name: 'MANUAL' })).toBeNull();
-    expect(within(automationCard!).queryByRole('button', { name: 'ON' })).toBeNull();
-    expect(within(automationCard!).queryByRole('button', { name: 'OFF' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
+    expect(await screen.findByText('Przedpokój')).toBeVisible();
+    expect(await screen.findByText('91%')).toBeVisible();
+    expect(await screen.findByText('-51 dBm')).toBeVisible();
 
-    const sensorCard = screen
-      .getByRole('heading', { name: 'BLE i sensor' })
-      .closest('article');
-    expect(sensorCard).not.toBeNull();
-    expect(within(sensorCard!).getByText('Przedpokój')).toBeVisible();
-    expect(await within(sensorCard!).findByText('91%')).toBeVisible();
-    expect(await within(sensorCard!).findByText('-51 dBm')).toBeVisible();
-
-    const shellyCard = screen
-      .getByRole('heading', { name: 'Telemetria Shelly' })
-      .closest('article');
-    expect(shellyCard).not.toBeNull();
-    expect(await within(shellyCard!).findByText('0.20 A')).toBeVisible();
-    expect(await within(shellyCard!).findByText('32.4°C')).toBeVisible();
-    expect(within(shellyCard!).getByText('OK')).toBeVisible();
-
-    expect(screen.queryByText('21.4°C')).toBeNull();
-    expect(screen.queryByText('55.2%')).toBeNull();
-    expect(screen.queryByText('1.31 kPa')).toBeNull();
-    expect(screen.queryByText('19°C / 20°C')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Informacje' }));
+    expect(await screen.findByText('0.20 A')).toBeVisible();
+    expect(await screen.findByText('32.4°C')).toBeVisible();
+    expect(await screen.findByText('S3PL-00112EU, gen 3')).toBeVisible();
   });
 
-  it('opens technical diagnostics as a child page and keeps auto-refreshing there', async () => {
+  it('moves technical diagnostics into the Script tab and keeps them refreshing', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
-    const onOpenDiagnostics = vi.fn();
-    const detail = renderDetail(saved.id, vi.fn(), vi.fn(), vi.fn(), onOpenDiagnostics);
-    expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Diagnostyka' }));
-    expect(onOpenDiagnostics).toHaveBeenCalledTimes(1);
-    detail.unmount();
+    renderDetail(saved.id);
 
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-    });
-    render(
-      <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          <InstallationDiagnosticsScreen installationId={saved.id} onBack={vi.fn()} />
-        </QueryClientProvider>
-      </I18nProvider>
-    );
-
-    expect(await screen.findByRole('heading', { name: 'Diagnostyka' })).toBeVisible();
-    expect(screen.queryByRole('dialog')).toBeNull();
-    expect(
-      await screen.findByRole('heading', { name: 'Skrypt', level: 2 })
-    ).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Shelly', level: 2 })).toBeVisible();
-    expect(await screen.findByText('JS użyte teraz')).toBeVisible();
-    expect(screen.getByText('CPU skryptu')).toBeVisible();
-    expect(screen.getByText('RAM Shelly wolny')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Skrypt' }));
+    expect(await screen.findByText('CPU skryptu')).toBeVisible();
     expect(screen.getByText('Stan skryptu RPC')).toBeVisible();
     await waitFor(() => expect(rpcMethods).toContain('Script.GetStatus'));
     expect(rpcMethods).toContain('Sys.GetStatus');
@@ -591,46 +494,17 @@ describe('InstallationDetailScreen', () => {
         expect(
           rpcMethods.filter((method) => method === 'Script.GetStatus').length
         ).toBeGreaterThan(before),
-      { timeout: INSTALLATION_DIAGNOSTICS_REFRESH_MS + 2000 }
+      { timeout: 5_000 }
     );
   });
 
-  it('opens the deployed script as a child page instead of a modal', async () => {
+  it('shows the deployed script directly in the Script tab with no nested page', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const { rpcMethods } = installShellyFetchMock();
-    const onOpenScript = vi.fn();
-    const detail = renderDetail(
-      saved.id,
-      vi.fn(),
-      vi.fn(),
-      vi.fn(),
-      vi.fn(),
-      onOpenScript
-    );
+    renderDetail(saved.id);
 
-    const showScript = await screen.findByRole('button', {
-      name: 'Pokaż wdrożony skrypt'
-    });
-    await waitFor(() => expect(showScript).toBeEnabled());
-    fireEvent.click(showScript);
-    expect(onOpenScript).toHaveBeenCalledTimes(1);
-    detail.unmount();
-
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-    });
-    render(
-      <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          <InstallationScriptScreen installationId={saved.id} onBack={vi.fn()} />
-        </QueryClientProvider>
-      </I18nProvider>
-    );
-
-    expect(
-      await screen.findByRole('heading', { name: 'Skrypt wdrożony w Shelly' })
-    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Skrypt' }));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(await screen.findByText('// deployed exact source')).toBeVisible();
     expect(rpcMethods).toContain('Script.GetCode');
@@ -659,17 +533,12 @@ describe('InstallationDetailScreen', () => {
 
     renderDetail(saved.id);
 
-    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
-    if (options.scriptId === 2) {
-      expect(
-        screen.getByRole('button', { name: 'Pokaż wdrożony skrypt' })
-      ).toBeDisabled();
-    }
+    expect(await screen.findByText(heading)).toBeVisible();
     const refresh = screen.getByRole('button', { name: 'Sprawdź ponownie' });
     expect(refresh).toBeVisible();
 
     fireEvent.click(refresh);
-    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    expect(await screen.findByText(heading)).toBeVisible();
     expect(rpcMethods).not.toContain('Script.Start');
     expect(rpcMethods).not.toContain('Script.Stop');
     expect(rpcMethods).not.toContain('Switch.Set');

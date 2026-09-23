@@ -21,8 +21,6 @@ import {
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
-import { InstallationDiagnosticsScreen } from '../screens/InstallationDiagnosticsScreen.js';
-import { InstallationScriptScreen } from '../screens/InstallationScriptScreen.js';
 import { PlugBleDiscoveryScreen } from '../screens/PlugBleDiscoveryScreen.js';
 import { PlugSettingsScreen } from '../screens/PlugSettingsScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
@@ -33,7 +31,6 @@ const HardwareSetupScreen = lazy(async () => {
 });
 
 type SetupRouteIntent = SetupIntent;
-type InstallationPage = 'detail' | 'diagnostics' | 'script';
 type DashboardRoute = { type: 'dashboard'; kind?: AppNavigationKind };
 type SetupRoute = {
   type: 'setup';
@@ -50,19 +47,26 @@ type DeviceAddRoute = {
   returnTo: DeviceAddReturnRoute;
   sensorMode?: 'manual' | 'phone-scan';
 };
+type InstallationRoute = {
+  type: 'installation';
+  installationId: string;
+  kind: AppNavigationKind;
+};
+type PlugSettingsRoute = { type: 'plug-settings'; deviceId: string };
+type PlugBleReturnRoute = PlugSettingsRoute | InstallationRoute;
+type PlugBleDiscoveryRoute = {
+  type: 'plug-ble-discovery';
+  deviceId: string;
+  returnTo: PlugBleReturnRoute;
+};
 type PrimaryAppRoute =
   | DashboardRoute
   | DeviceAddRoute
-  | { type: 'plug-settings'; deviceId: string }
-  | { type: 'plug-ble-discovery'; deviceId: string }
+  | PlugSettingsRoute
+  | PlugBleDiscoveryRoute
   | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
   | SetupRoute
-  | {
-      type: 'installation';
-      installationId: string;
-      kind: AppNavigationKind;
-      page: InstallationPage;
-    };
+  | InstallationRoute;
 type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
 const RouteFallback = () => {
@@ -87,20 +91,11 @@ const activeNavigationForRoute = (route: AppRoute): AppNavigationKind | 'setting
   return route.sourceKind;
 };
 
-const installationDetailRoute = (
-  route: Extract<PrimaryAppRoute, { type: 'installation' }>
-): PrimaryAppRoute => ({ ...route, page: 'detail' });
-
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'settings') return route.returnTo;
-  if (route.type === 'installation') {
-    if (route.page !== 'detail') return installationDetailRoute(route);
-    return { type: 'dashboard', kind: route.kind };
-  }
+  if (route.type === 'installation') return { type: 'dashboard', kind: route.kind };
   if (route.type === 'device-add') return route.returnTo;
-  if (route.type === 'plug-ble-discovery') {
-    return { type: 'plug-settings', deviceId: route.deviceId };
-  }
+  if (route.type === 'plug-ble-discovery') return route.returnTo;
   if (route.type === 'plug-settings') return { type: 'dashboard', kind: 'climate' };
   if (route.type === 'setup') {
     if (route.editInstallationId) {
@@ -233,8 +228,7 @@ export const AppRoutes = () => {
           navigate({
             type: 'installation',
             installationId,
-            kind: 'climate',
-            page: 'detail'
+            kind: 'climate'
           })
         }
         onOpenPlugSettings={(deviceId) => navigate({ type: 'plug-settings', deviceId })}
@@ -246,7 +240,11 @@ export const AppRoutes = () => {
         deviceId={route.deviceId}
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenBleDiscovery={(deviceId) =>
-          navigate({ type: 'plug-ble-discovery', deviceId })
+          navigate({
+            type: 'plug-ble-discovery',
+            deviceId,
+            returnTo: { type: 'plug-settings', deviceId }
+          })
         }
       />
     );
@@ -254,7 +252,7 @@ export const AppRoutes = () => {
     content = (
       <PlugBleDiscoveryScreen
         deviceId={route.deviceId}
-        onBack={() => navigate({ type: 'plug-settings', deviceId: route.deviceId })}
+        onBack={() => navigate(route.returnTo)}
       />
     );
   } else if (route.type === 'device-add') {
@@ -264,37 +262,25 @@ export const AppRoutes = () => {
           {...(route.device === 'plug'
             ? { plugAddOnly: true }
             : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
+          onBackFromStandaloneAdd={() => navigate(route.returnTo)}
         />
       </Suspense>
     );
   } else if (route.type === 'installation') {
-    const backToDetail = () => navigate(installationDetailRoute(route));
-    if (route.page === 'diagnostics') {
-      content = (
-        <InstallationDiagnosticsScreen
-          installationId={route.installationId}
-          onBack={backToDetail}
-        />
-      );
-    } else if (route.page === 'script') {
-      content = (
-        <InstallationScriptScreen
-          installationId={route.installationId}
-          onBack={backToDetail}
-        />
-      );
-    } else {
-      content = (
-        <InstallationDetailScreen
-          installationId={route.installationId}
-          onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
-          onOpenSettings={(deviceId) => navigate({ type: 'plug-settings', deviceId })}
-          onOpenDiagnostics={() => navigate({ ...route, page: 'diagnostics' })}
-          onOpenScript={() => navigate({ ...route, page: 'script' })}
-          onEdit={() => openAutomationEdit(route.installationId)}
-        />
-      );
-    }
+    content = (
+      <InstallationDetailScreen
+        installationId={route.installationId}
+        onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
+        onOpenBleDiscovery={(deviceId) =>
+          navigate({
+            type: 'plug-ble-discovery',
+            deviceId,
+            returnTo: route
+          })
+        }
+        onEdit={() => openAutomationEdit(route.installationId)}
+      />
+    );
   } else {
     const openDeviceAdd = (
       device: 'plug' | 'sensor',

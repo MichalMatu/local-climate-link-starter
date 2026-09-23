@@ -1,106 +1,93 @@
 # Roadmap
 
-## 0. Stable baseline
+## 0. Stable baseline — DONE
 
-The current product model and Plug lifecycle are stabilized:
+The product model and Plug lifecycle are stabilized:
 
-- canonical Shelly physical identity instead of URL-as-ID;
-- actionable Add errors;
-- conservative remote-to-local managed automation recovery;
-- Forget Plug distinct from Uninstall Automation;
-- Climate and Time runtime identity verification before mutation;
-- Climate/Time edit plus Plug LED, physical-button and Shelly Cloud settings retained;
-- installed automations can reopen their physical Plug settings;
-- fresh-store recovery, Forget -> re-add and the current multi-sensor edit/recovery path are verified on real Samsung S22+ + Shelly Plug S Gen3 without unintended script, schedule or relay mutation.
+- physical Shelly identity is canonical; URL/IP is transport only;
+- a saved Plug is useful with or without automation;
+- Forget Plug is distinct from Uninstall Automation;
+- Climate and Time verify runtime/device identity before mutation;
+- the phone configures/manages/diagnoses while Shelly executes installed automation locally;
+- recovery is conservative and must not silently rewrite a valid managed runtime;
+- real Samsung S22+ + Shelly Plug S Gen3 acceptance exists for the current lifecycle, engine, recovery and multi-sensor paths.
 
-This baseline is frozen. Do not reopen a broad refactor phase. Dated hardware evidence belongs in `docs/testing/hardware-matrix.md`.
+This baseline is frozen. Refactor only for a concrete blocker, broken ownership or an agreed feature boundary.
 
-## 1. Automation Engine + config/data separation — DONE
+## 1. Automation Engine + persistent config — DONE
 
-The typed compact runtime-config boundary is in place and `climate-engine-v1` uses one stable runtime body across supported sensor profiles and VPD on/off. Installed 0.2.x profile-specific runtimes remain decodable for conservative recovery.
+`climate-engine-v1` uses one stable runtime body with typed compact config. Supported firmware uses validated `Script.storage` + `Script.Eval` for config-only edits; compatible firmware can fall back to the guarded `Script.PutCode` path.
 
-Persistent runtime config is implemented through a capability-gated `Script.storage` channel. On supported firmware, ordinary Climate edits update config through `Script.Eval` without replacing engine code. The path validates config hash/version, survives runtime restart, participates in remote recovery and restores the previous persisted config on failed update. Firmware without the capability falls back to the compatible `Script.PutCode` path.
+Real Plug S Gen3 firmware 1.7.5 acceptance confirmed unchanged script bytes during config-only updates and successful persisted-config reload after runtime restart.
 
-Real Shelly Plug S Gen3 firmware 1.7.5 acceptance confirmed unchanged script bytes during config-only update and successful persisted-config reload after runtime restart. Continue measuring script/RAM footprint as new operators are added, but this stage no longer blocks product work.
+If future config/data outgrows practical `Script.storage` limits, evaluate Shelly KVS only as a namespaced/versioned overflow or alternative store. Do not fork ownership or cleanup semantics.
 
-### Follow-up option — global Shelly KVS as storage fallback
+## 2. Multiple thermometers + per-sensor diagnostics — DONE
 
-Keep `Script.storage` as the default owner-local store for automation config. If future sensor sets, operators or runtime data approach practical `Script.storage` limits, evaluate the device-level Shelly `KVS` API as an overflow or alternative persistence layer. Any move to global KVS must keep Local Climate Link data explicitly namespaced/versioned and preserve clear automation ownership, migration and uninstall/cleanup semantics.
+A Climate automation supports **1 to 4 thermometers** with `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi/PVVX BTHome and TP357 sensors may be mixed. Freshness is evaluated per sensor and no usable member means safe OFF.
 
-## 2. Multiple thermometers — DONE
+The runtime exposes compact diagnostics per configured sensor. Phone BLE and Plug BLE are live-reading sources; recovered/runtime identity provenance is tracked separately. Mobile identity joins through normalized physical BLE `runtimeAddress`.
 
-A Climate automation can reference up to 4 thermometers with explicit `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi BTHome and TP357 sensors may be mixed in one set. Freshness is tracked per sensor: stale/unusable members are omitted, and when no configured member remains fresh the runtime fails safe OFF. Single-sensor automations remain backward compatible.
+Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance passed with 3 TP357 + 1 Xiaomi/PVVX sensor. The accepted four-sensor runtime generated at 7929 bytes and exposed four independent diagnostic records. Dated evidence is in `docs/testing/hardware-matrix.md`.
 
-The compact runtime config stores the sensor set in `ss` and aggregation in `ag`. Recovery preserves the complete runtime sensor set and aggregation, while compatible Climate edits use the persistent `Script.storage` / `Script.Eval` config channel instead of rewriting engine code.
+## 3. UX stabilization — IN PROGRESS / NEXT SESSION
 
-The mobile draft/edit boundary uses normalized physical BLE `runtimeAddress` as the canonical thermometer identity. Phone discovery, Plug discovery, installed config and Load from Shelly converge on the same physical row. Recovered membership is tracked as persisted draft provenance scoped to the installed automation ID so it survives Edit reopen and app restart without leaking between automations. A runtime-only Edit-session flag makes the first explicit membership change stop silently carrying inherited additional sensors while keeping durable provenance intact through Back/restart; matching provenance is retired only after the updated installed automation is committed successfully; Load from Shelly remains the authoritative full-set replacement for the current session.
+The first major UX restructuring pass is complete and merged candidate code has been verified on representative responsive viewports and installed on the real S22+ without clearing app data.
 
-Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 re-acceptance passed with four physical sensors, including the previously duplicated recovery case. The exact dated evidence and final safe hardware state are recorded in `docs/testing/hardware-matrix.md`.
+Completed in the first pass:
 
-### Per-sensor diagnostics and reading provenance — DONE
+- Plug detail was flattened into one surface with five local sections: Automation, BLE, Device, Script and Info;
+- duplicated nested Settings/Diagnostics/Script pages were removed and their data moved to the correct owner surface;
+- Device groups LED, physical-button mode and Shelly Cloud settings;
+- BLE has a dedicated surface with room for future BLE capabilities;
+- LED controls were rebuilt into the product design system instead of native/system-looking controls;
+- shared tokenized UI primitives were introduced where reuse was justified;
+- standalone Add flows gained visible return navigation;
+- script loading, narrow sensor selection and responsive contracts were corrected;
+- existing automation/runtime ownership and Shelly safety semantics were preserved.
 
-The `work/per-sensor-diagnostics` slice is complete:
+**Next session continues UX refinement.** Work from concrete screenshots/real-device friction. Do not add Soil moisture, richer rule operators or a new transport while this UX pass is still being reviewed.
 
-- the Shelly runtime exposes one compact Plug-side diagnostic record per configured thermometer;
-- runtime diagnostics join mobile rows only through normalized physical BLE `runtimeAddress`;
-- Phone BLE and Plug BLE remain live-reading sources while recovered/runtime identity provenance is tracked separately;
-- unseen sensors remain explicit null/fresh=0 records and removed/reordered membership clears indexed runtime state;
-- old aggregate-only diagnostics remain parseable;
-- old managed runtimes upgrade through the guarded replacement path only on explicit Save/Edit;
-- generated Climate runtime size is hard-limited to 8000 bytes;
-- the supported Climate sensor count is capped at 4.
+Acceptance rule for this stage: keep iterating until the existing product flows feel coherent on the real S22+ and responsive E2E remains green. Prefer small vertical corrections over broad architecture changes.
 
-Focused regressions, the normal repository gate, script/RAM review and real S22+ + Shelly Plug S Gen3 acceptance all passed. The four-sensor runtime generated at 7929 bytes and all four physical sensors were observed independently in `/diag.d` and in the mobile Edit UI. Dated hardware evidence is in `docs/testing/hardware-matrix.md`.
+## 4. BLE soil-moisture input — AFTER UX
 
-### Next stabilization slice — UX corrections — NEXT
+Add soil-moisture sensors through the existing typed sensor/config model. Do not create a parallel automation engine or device identity model.
 
-Before adding Soil moisture or another automation capability, do a focused UX correction/stabilization pass over the existing mobile product flows.
+Start with sensor discovery/identity, typed readings and diagnostics. Only then add automation behavior that has a clear product rule and safety model.
 
-Start that work from a fresh branch after this completed diagnostics slice is merged to `main`. Scope concrete UX changes from observed/user-reported friction rather than reopening architecture or adding new product capabilities. Preserve the current ownership model and hardware/runtime behavior unless a UX defect proves a functional bug. Use the repository UX gate plus real render/device inspection for affected screens.
+## 5. Shelly management over BLE — AFTER UX, HARDWARE SPIKE FIRST
 
-## 3. Soil moisture
+Run a real-hardware feasibility spike before product implementation. Determine which Shelly RPC lifecycle operations are genuinely available/reliable over BLE.
 
-Add soil-moisture inputs through the same typed sensor/config model instead of creating a separate runtime architecture.
-
-## 4. Richer rule timing
-
-Add reusable operators for clock/time windows, interval, cooldown, minimum ON, minimum OFF and condition combinations. Keep safety precedence explicit.
-
-## 5. Advanced automation UX
-
-Build automation list/templates and more advanced rules on the stable engine/config model. Avoid adding parallel ownership models or feature-specific runtimes when a shared operator/config path is sufficient.
-
-## 6. Shelly Script Library + simple configurators — PARALLEL TRACK
-
-Build a curated library of useful existing Shelly scripts that Local Climate Link can present as end-user features with a simple `choose -> configure -> install/run` flow instead of exposing raw script code.
-
-This track may use a dedicated work branch because most work should stay behind a separate script-catalog/configurator boundary. Do not fork device identity, ownership, transport, install safety or recovery rules: reuse the same Shelly client and managed-resource safeguards already used elsewhere.
-
-For each candidate script:
-
-1. review source, supported Shelly models/firmware and required components;
-2. verify license/redistribution/attribution requirements before bundling or adapting it;
-3. define a small typed configuration schema for the values a normal user should edit;
-4. expose those values through a simple menu/form rather than raw JavaScript;
-5. install/update through the common Shelly lifecycle with backup, identity checks and explicit ownership;
-6. test on real hardware before marking that catalog entry supported.
-
-Prefer wrapping proven upstream scripts with a thin Local Climate Link configuration layer over rewriting them without a concrete reason. Keep the catalog modular so individual scripts can be added, updated or removed independently.
-
-## 7. BLE Shelly transport
-
-Run a real-hardware feasibility spike first. If Shelly BLE exposes enough RPC for the required lifecycle, implement a shared `ShellyRpcTransport` and HTTP/BLE adapters. Progressively enable:
+If feasible, implement a shared `ShellyRpcTransport` boundary with HTTP and BLE adapters. Progressively enable:
 
 1. discovery and identity;
 2. provisioning/configuration;
-3. engine install/upgrade when required;
-4. config-only updates;
-5. status and diagnostics.
+3. status and diagnostics;
+4. config-only automation updates;
+5. engine install/upgrade only when the transport proves safe enough.
 
 BLE must not fork automation ownership, persistence or business logic.
 
+The BLE sensor track and Shelly-over-BLE transport track are separate concerns even though both use Bluetooth.
+
+## 6. Richer rule timing — LATER
+
+Add reusable operators for clock/time windows, interval, cooldown, minimum ON, minimum OFF and condition combinations. Keep safety precedence explicit.
+
+## 7. Advanced automation UX — LATER
+
+Build templates/list management and more advanced rules on the stable engine/config model. Avoid feature-specific runtime forks where shared operators/config are sufficient.
+
+## 8. Shelly Script Library + simple configurators — PARALLEL OPTIONAL TRACK
+
+A curated script catalog may expose useful Shelly scripts through a simple `choose -> configure -> install/run` flow. Reuse the same identity, ownership, transport, install-safety and recovery rules.
+
+For each script: verify source/license, supported models/firmware, define a small typed config, keep raw JavaScript out of the normal user flow, and require real-hardware acceptance before marking it supported.
+
 ## Working rule
 
-Refactor only for a concrete blocker, broken ownership or a feature that needs the boundary. Prefer small vertical slices with focused regressions, one final `pnpm check`, and real hardware acceptance when behavior touches Shelly/BLE/relay safety.
+Prefer small vertical slices, focused regressions and one final full repository gate. Use `pnpm check:full` whenever responsive E2E is part of the acceptance surface. Hardware-facing behavior requires real-device acceptance and an explicit final relay state.
 
-Parallel branches are fine when ownership is clearly separated and file overlap is low. Sync them from `main`, merge completed slices promptly, and avoid concurrent edits to shared lifecycle/transport files.
+Keep active work on one clearly named branch, merge completed slices promptly, and delete retired work branches after the merged `main` is re-verified.

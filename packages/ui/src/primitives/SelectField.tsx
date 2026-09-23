@@ -13,6 +13,7 @@ export type SelectFieldOption<T extends string = string> = {
   value: T;
   label: string;
   meta?: ReactNode;
+  triggerMeta?: ReactNode | null;
   disabled?: boolean;
 };
 
@@ -83,6 +84,10 @@ export const SelectField = <T extends string>({
     selectedIndex >= 0 ? selectedIndex : firstEnabledIndex(options)
   );
   const selectedOption = selectedIndex >= 0 ? options[selectedIndex] : undefined;
+  const selectedTriggerMeta =
+    selectedOption?.triggerMeta === undefined
+      ? selectedOption?.meta
+      : selectedOption.triggerMeta;
 
   useEffect(() => {
     if (!open) {
@@ -249,8 +254,8 @@ export const SelectField = <T extends string>({
           >
             {selectedOption?.label ?? placeholder ?? ''}
           </span>
-          {selectedOption?.meta ? (
-            <span className="lcl-select-field__trigger-meta">{selectedOption.meta}</span>
+          {selectedTriggerMeta ? (
+            <span className="lcl-select-field__trigger-meta">{selectedTriggerMeta}</span>
           ) : null}
         </span>
         <span className="lcl-select-field__chevron" aria-hidden="true">

@@ -8,6 +8,10 @@ const cssPaths = [
   'apps/mobile/src/app/appShell.css',
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
+  'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
+  'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
+  'packages/ui/src/primitives/ColorSwatch.css',
+  'packages/ui/src/primitives/ToggleSwitch.css',
   'packages/ui/src/styles.css'
 ];
 const landingTokenizedCssPaths = [

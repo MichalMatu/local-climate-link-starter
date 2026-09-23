@@ -136,7 +136,8 @@ export const ClimateRuleDeviceSelectors = ({
           options={sensorDevices.map((device) => ({
             value: device.id,
             label: device.name,
-            meta: liveMeta(device)
+            meta: liveMeta(device),
+            triggerMeta: null
           }))}
           onChange={selectSensorDevice}
         />

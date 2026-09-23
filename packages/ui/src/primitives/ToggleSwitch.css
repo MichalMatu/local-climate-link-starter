@@ -1,0 +1,71 @@
+.lcl-toggle-switch {
+  align-items: center;
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  display: inline-grid;
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-semibold);
+  gap: var(--lcl-spacing-sm);
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: var(--lcl-size-control-min-height);
+  width: fit-content;
+}
+
+.lcl-toggle-switch__input {
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+}
+
+.lcl-toggle-switch__track {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-round);
+  display: inline-flex;
+  height: var(--lcl-size-control-min-height);
+  padding: var(--lcl-spacing-xs);
+  transition:
+    background var(--lcl-motion-fast),
+    border-color var(--lcl-motion-fast);
+  width: calc(var(--lcl-size-control-min-height) * 1.65);
+}
+
+.lcl-toggle-switch__thumb {
+  background: var(--lcl-color-text-muted);
+  border-radius: var(--lcl-radius-round);
+  height: 100%;
+  transform: translateX(0);
+  transition:
+    background var(--lcl-motion-fast),
+    transform var(--lcl-motion-fast);
+  width: calc(
+    var(--lcl-size-control-min-height) - var(--lcl-spacing-xs) * 2 -
+      var(--lcl-border-width-sm) * 2
+  );
+}
+
+.lcl-toggle-switch__input:checked + .lcl-toggle-switch__track {
+  background: var(--lcl-color-accent);
+  border-color: var(--lcl-color-accent);
+}
+
+.lcl-toggle-switch__input:checked + .lcl-toggle-switch__track .lcl-toggle-switch__thumb {
+  background: var(--lcl-color-accent-contrast);
+  transform: translateX(calc(var(--lcl-size-control-min-height) * 0.65));
+}
+
+.lcl-toggle-switch__input:focus-visible + .lcl-toggle-switch__track {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: var(--lcl-border-width-sm);
+}
+
+.lcl-toggle-switch--disabled {
+  cursor: not-allowed;
+  opacity: var(--lcl-opacity-disabled);
+}
+
+.lcl-toggle-switch__label {
+  min-width: 0;
+}

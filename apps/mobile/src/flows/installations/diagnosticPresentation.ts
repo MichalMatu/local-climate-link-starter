@@ -94,3 +94,156 @@ export const formatRelayState = (
   value: boolean | null | undefined,
   missing: string
 ): string => (value == null ? missing : value ? 'ON' : 'OFF');
+
+export type ClimateBleSensorPresentation = {
+  id: string;
+  name: string;
+  address: string;
+  temperature: string;
+  humidity: string;
+  battery: string;
+  rssi: string;
+  lastMeasurement: string;
+  lastPacket?: string;
+  dataState: string;
+};
+
+type ClimateBleSensorIdentity = {
+  displayName: string;
+  runtimeAddress: string;
+};
+
+export const formatClimateBleSensorPresentations = (
+  sensors: readonly ClimateBleSensorIdentity[],
+  snapshot: HardwareDiagnosticSnapshot | undefined,
+  missing: string,
+  t: Translate
+): ClimateBleSensorPresentation[] =>
+  sensors.map((sensor, index) => {
+    const diagnostics = snapshot?.diagnostics;
+    const perSensor = snapshot?.sensorDiagnostics.find(
+      (item) => item.runtimeAddress.toUpperCase() === sensor.runtimeAddress.toUpperCase()
+    );
+    const primary = index === 0;
+    return {
+      id: sensor.runtimeAddress,
+      name: sensor.displayName,
+      address: sensor.runtimeAddress,
+      temperature: formatDiagnosticNumber(perSensor?.temperatureC, '°C', missing, 1),
+      humidity: formatDiagnosticNumber(perSensor?.humidityPct, '%', missing, 1),
+      battery: formatDiagnosticNumber(
+        perSensor?.batteryPct ?? (primary ? diagnostics?.lastBattery : null),
+        '%',
+        missing,
+        0
+      ),
+      rssi: formatDiagnosticNumber(
+        perSensor?.rssi ?? (primary ? diagnostics?.lastRssi : null),
+        ' dBm',
+        missing,
+        0
+      ),
+      lastMeasurement: formatDiagnosticUptimeAge(
+        perSensor?.lastSeenUptimeMs ?? (primary ? diagnostics?.lastSeenUptimeMs : null),
+        snapshot?.time.uptimeSec,
+        missing,
+        t
+      ),
+      ...(primary
+        ? {
+            lastPacket: formatDiagnosticUptimeAge(
+              diagnostics?.lastPacketSeenUptimeMs,
+              snapshot?.time.uptimeSec,
+              missing,
+              t
+            )
+          }
+        : {}),
+      dataState: perSensor
+        ? perSensor.fresh
+          ? t('hardware.status.running')
+          : t('dashboard.health.stale')
+        : primary && diagnostics
+          ? formatBleDataState(diagnostics, t)
+          : missing
+    };
+  });
+
+export type ScriptDiagnosticPresentationInput = {
+  componentState: 'enabled' | 'disabled' | 'missing' | null | undefined;
+  rpcRunning: boolean | null | undefined;
+  runtimeRunning: boolean | null | undefined;
+  configHash: string | null | undefined;
+  cpuPercent: number | null | undefined;
+  memUsedBytes: number | null | undefined;
+  memPeakBytes: number | null | undefined;
+  memFreeBytes: number | null | undefined;
+  snapshotAge: string;
+};
+
+export type ScriptDiagnosticPresentationRow = {
+  label: string;
+  value: string;
+};
+
+const formatDiagnosticBytes = (
+  value: number | null | undefined,
+  missing: string
+): string => {
+  if (value == null) return missing;
+  return value < 1024 ? `${Math.round(value)} B` : `${(value / 1024).toFixed(1)} KiB`;
+};
+
+export const formatScriptDiagnosticRows = (
+  input: ScriptDiagnosticPresentationInput,
+  missing: string,
+  t: Translate
+): ScriptDiagnosticPresentationRow[] => [
+  {
+    label: t('hardware.rule.script'),
+    value:
+      input.componentState === 'enabled'
+        ? t('common.enabled')
+        : input.componentState === 'disabled'
+          ? t('common.disabled')
+          : input.componentState === 'missing'
+            ? t('common.missingInStatus')
+            : missing
+  },
+  {
+    label: t('hardware.diagnostics.scriptRpcState'),
+    value:
+      input.rpcRunning === true
+        ? 'RUNNING'
+        : input.rpcRunning === false
+          ? 'STOPPED'
+          : missing
+  },
+  {
+    label: t('hardware.status.running'),
+    value:
+      input.runtimeRunning === true
+        ? t('hardware.status.running')
+        : input.runtimeRunning === false
+          ? t('hardware.status.stopped')
+          : missing
+  },
+  { label: t('hardware.metrics.configHash'), value: input.configHash ?? missing },
+  {
+    label: t('hardware.diagnostics.scriptCpu'),
+    value: formatDiagnosticNumber(input.cpuPercent, '%', missing, 1)
+  },
+  {
+    label: t('hardware.diagnostics.scriptMemUsed'),
+    value: formatDiagnosticBytes(input.memUsedBytes, missing)
+  },
+  {
+    label: t('hardware.diagnostics.scriptMemPeak'),
+    value: formatDiagnosticBytes(input.memPeakBytes, missing)
+  },
+  {
+    label: t('hardware.diagnostics.scriptMemFree'),
+    value: formatDiagnosticBytes(input.memFreeBytes, missing)
+  },
+  { label: t('hardware.metrics.snapshotAge'), value: input.snapshotAge }
+];

@@ -29,8 +29,6 @@ export const legacyProductionPaths = Object.freeze({
   'apps/mobile/src/screens': [
     'AutomationDashboardScreen.tsx',
     'InstallationDetailScreen.tsx',
-    'InstallationDiagnosticsScreen.tsx',
-    'InstallationScriptScreen.tsx',
     'PlugBleDiscoveryScreen.tsx',
     'PlugSettingsScreen.tsx',
     'SetupIntentScreen.tsx',

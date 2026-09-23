@@ -325,7 +325,8 @@ const openRuleDisclosure = (label: string): HTMLDetailsElement => {
 };
 
 const openRuleDeveloperTools = () => {
-  const actions = document.querySelector('.rule-developer-actions--compact');
+  const details = openRuleDisclosure('Zaawansowane');
+  const actions = details.querySelector('.rule-developer-actions--compact');
   expect(actions).not.toBeNull();
   expect(actions!.querySelectorAll('button')).toHaveLength(2);
 };
@@ -845,17 +846,30 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
   });
 
-  it('keeps standalone device-add pages free of duplicate top navigation and titles', () => {
-    const { unmount } = renderHardwareSetup({ plugAddOnly: true });
-    expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
-    expect(document.querySelector('.app-page-back-row')).toBeNull();
+  it('gives standalone device-add pages one compact return action without duplicate titles', async () => {
+    const onBack = vi.fn();
+    const { unmount } = renderHardwareSetup({
+      plugAddOnly: true,
+      onBackFromStandaloneAdd: onBack
+    });
+    expect(await screen.findByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Gniazdka' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
+    expect(onBack).toHaveBeenCalledTimes(1);
 
     unmount();
-    renderHardwareSetup({ sensorAddOnly: true, sensorAddMode: 'phone-scan' });
-    expect(screen.getByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
-    expect(document.querySelector('.app-page-back-row')).toBeNull();
+    renderHardwareSetup({
+      sensorAddOnly: true,
+      sensorAddMode: 'phone-scan',
+      onBackFromStandaloneAdd: onBack
+    });
+    expect(await screen.findByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
+    expect(screen.getByRole('button', { name: '‹ Termometry' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
+    await act(async () => {
+      await Promise.resolve();
+    });
   });
 
   it('opens device add flows as full child pages instead of modals', async () => {
@@ -1867,9 +1881,11 @@ describe('HardwareSetupScreen', () => {
       'title',
       'Pokaż wygenerowany Shelly Script'
     );
-    expect(screen.getByRole('button', { name: 'Wczytaj z Shelly' })).toHaveAttribute(
+    expect(
+      screen.getByRole('button', { name: 'Przywróć ustawienia z gniazdka' })
+    ).toHaveAttribute(
       'title',
-      'Odczytaj skrypt Local Climate Link z Shelly i wypełnij formularz'
+      'Zastąp bieżący formularz konfiguracją działającą na tym gniazdku'
     );
     const developerActions = document.querySelector('.rule-developer-actions--compact');
     expect(developerActions).not.toBeNull();
@@ -2201,7 +2217,18 @@ describe('HardwareSetupScreen', () => {
     });
 
     openRuleDeveloperTools();
-    fireEvent.click(screen.getByRole('button', { name: 'Wczytaj z Shelly' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Przywróć ustawienia z gniazdka' })
+    );
+    const restoreDialog = screen.getByRole('dialog', {
+      name: 'Przywrócić ustawienia z gniazdka?'
+    });
+    expect(restoreDialog).toHaveTextContent(
+      'Nic nie zostanie jeszcze zapisane na urządzeniu.'
+    );
+    fireEvent.click(
+      within(restoreDialog).getByRole('button', { name: 'Przywróć ustawienia' })
+    );
 
     expect(
       await screen.findByText('Wczytano ustawienia z Shelly do formularza.')
@@ -2450,8 +2477,10 @@ describe('HardwareSetupScreen', () => {
     const follows = (first: Node, second: Node) =>
       Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
 
-    expect(follows(developerActions!, advanced)).toBe(true);
-    expect(follows(advanced, send)).toBe(true);
+    const advancedDetails = advanced.closest('details');
+    expect(advancedDetails).not.toBeNull();
+    expect(advancedDetails!.contains(developerActions)).toBe(true);
+    expect(follows(advancedDetails!, send)).toBe(true);
   });
 
   it('shows compact live values on the right side of the rule thermometer options', async () => {
@@ -2474,12 +2503,9 @@ describe('HardwareSetupScreen', () => {
     await waitFor(() => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1));
 
     const thermometerSelect = screen.getByRole('button', { name: 'Termometr' });
-    await waitFor(() => expect(thermometerSelect).toHaveTextContent('21.3°C · 45.7%'));
-    expect(thermometerSelect).not.toHaveTextContent('kPa');
-    expect(
-      thermometerSelect.querySelector('.lcl-select-field__trigger-meta')
-    ).not.toBeNull();
-    expect(thermometerSelect.querySelector('.tabler-icon-device-mobile')).not.toBeNull();
+    await waitFor(() => expect(thermometerSelect).toHaveTextContent('Xiaomi salon'));
+    expect(thermometerSelect).not.toHaveTextContent('21.3°C · 45.7%');
+    expect(thermometerSelect.querySelector('.lcl-select-field__trigger-meta')).toBeNull();
     fireEvent.click(thermometerSelect);
 
     const option = await screen.findByRole('option', { name: 'Xiaomi salon' });

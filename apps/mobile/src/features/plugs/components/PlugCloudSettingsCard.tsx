@@ -1,7 +1,9 @@
+import { ToggleSwitch } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceCloudCopy } from '../../../app/locales/deviceCloud.js';
 import type { PlugCloudSettingsTarget } from '../data/plugCloudSettings.js';
+import './PlugSettingsSurface.css';
 import { usePlugCloudSettingsFlow } from '../flows/usePlugCloudSettingsFlow.js';
 
 export type PlugCloudSettingsCardProps = {
@@ -36,58 +38,56 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
 
   if (query.isPending) {
     return (
-      <article className="automation-card installation-detail-device-cloud">
+      <section className="plug-settings-section installation-detail-device-cloud">
         <h2>{copy.title}</h2>
-        <p className="time-schedule-note">{copy.loading}</p>
-      </article>
+        <p className="plug-settings-feedback">{copy.loading}</p>
+      </section>
     );
   }
   if (query.isError) {
     return (
-      <article className="automation-card installation-detail-device-cloud">
+      <section className="plug-settings-section installation-detail-device-cloud">
         <h2>{copy.title}</h2>
-        <p className="installation-detail-note">{copy.unavailable}</p>
-      </article>
+        <p className="plug-settings-feedback plug-settings-feedback--warning">
+          {copy.unavailable}
+        </p>
+      </section>
     );
   }
   if (!settings?.supported || draft === null) {
     return (
-      <article className="automation-card installation-detail-device-cloud">
+      <section className="plug-settings-section installation-detail-device-cloud">
         <h2>{copy.title}</h2>
-        <p className="time-schedule-note">{copy.unsupported}</p>
-      </article>
+        <p className="plug-settings-feedback">{copy.unsupported}</p>
+      </section>
     );
   }
 
   return (
-    <article className="automation-card installation-detail-device-cloud">
-      <div className="installation-section-heading">
-        <div>
-          <p className="automation-card__eyebrow">{copy.eyebrow}</p>
-          <h2>{copy.title}</h2>
-          <p>{copy.description}</p>
-        </div>
+    <section className="plug-settings-section installation-detail-device-cloud">
+      <div className="plug-settings-section__heading">
+        <h2>{copy.title}</h2>
+        <p>{copy.description}</p>
       </div>
 
-      <label className="toggle-row">
-        <input
-          aria-label={copy.enable}
-          type="checkbox"
-          checked={draft}
-          onChange={(event) => {
-            setFeedback(null);
-            setDraft(event.currentTarget.checked);
-          }}
-        />
-        <span>{copy.enable}</span>
-      </label>
+      <ToggleSwitch
+        checked={draft}
+        onChange={(checked) => {
+          setFeedback(null);
+          setDraft(checked);
+        }}
+      >
+        {copy.enable}
+      </ToggleSwitch>
 
-      <p className="time-schedule-note">{draft ? copy.enabledHint : copy.disabledHint}</p>
-      <p className="installation-detail-note">
+      <p className="plug-settings-feedback">
+        {draft ? copy.enabledHint : copy.disabledHint}
+      </p>
+      <p className="plug-settings-feedback">
         {copy.connection}: {settings.connected ? copy.connected : copy.disconnected}
       </p>
 
-      <div className="installation-detail-actions">
+      <div className="plug-settings-actions">
         <button
           className="primary-action"
           type="button"
@@ -99,10 +99,10 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
       </div>
 
       {feedback && (
-        <p role="status" className="installation-detail-note">
+        <p role="status" className="plug-settings-feedback">
           {feedback}
         </p>
       )}
-    </article>
+    </section>
   );
 };

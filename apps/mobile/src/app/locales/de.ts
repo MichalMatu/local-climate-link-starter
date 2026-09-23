@@ -161,6 +161,7 @@ export const de = {
     disabled: 'deaktiviert',
     enabled: 'aktiviert',
     firmware: 'Firmware',
+    info: 'Info',
     missing: 'fehlt',
     missingData: 'keine Daten',
     missingInStatus: 'fehlt im Status',
@@ -506,12 +507,20 @@ export const de = {
         'Wenn Matter Skripte blockiert, Matter in Shelly ausschalten und erneut versuchen.',
       loadingScriptFromShelly: 'Lade aus Shelly',
       loadScriptDone: 'Shelly-Einstellungen wurden in das Formular geladen.',
-      loadScriptFromShelly: 'Aus Shelly laden',
+      loadScriptFromShelly: 'Einstellungen von Steckdose wiederherstellen',
       loadScriptFromShellyTitle:
-        'Local Climate Link Skript aus Shelly lesen und das Formular füllen',
+        'Aktuelles Formular durch die auf dieser Steckdose laufende Konfiguration ersetzen',
       loadScriptMissing:
         'Auf diesem Shelly wurde kein Local Climate Link Skript gefunden.',
       loadScriptUnknown: 'Ich kann die Einstellungen aus diesem Skript nicht lesen.',
+      editContextLabel: 'Automation bearbeiten',
+      editContextHint:
+        'Beim Speichern werden die aktuell auf dieser Steckdose laufenden Einstellungen geändert.',
+      saveTarget: 'Änderungen werden gespeichert auf: {name}.',
+      restoreFromShellyTitle: 'Einstellungen von der Steckdose wiederherstellen?',
+      restoreFromShellyDescription:
+        'Die aktuellen Formularwerte werden durch die auf dieser Steckdose laufende Konfiguration ersetzt. Auf das Gerät wird noch nichts geschrieben.',
+      restoreFromShellyConfirm: 'Einstellungen wiederherstellen',
       maxOnHoursLabel: 'Maximale Laufzeit h',
       minChangeLabel: 'Nächstes ON nach min',
       noShellySelected: 'Shelly-Steckdose auswählen.',
