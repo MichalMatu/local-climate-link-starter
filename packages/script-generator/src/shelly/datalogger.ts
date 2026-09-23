@@ -80,7 +80,7 @@ var B=[],L=null,H=0,V=0,W=0,Q=0,F=0,A=0,P=null,E="";
 function up(){return Math.floor(Shelly.getUptimeMs()/1000);}
 function ky(i){return C.x+(i<10?"0":"")+i;}
 function sc(v,m){return typeof v==="number"&&isFinite(v)?Math.round(v*m):null;}
-function sm(d){if(!d||!Array.isArray(d.g)||d.g.length<6)return null;var g=d.g,p=d.p,o=Array.isArray(p)&&typeof p[0]==="boolean"?p[0]:g[5];if(typeof o!=="boolean")return null;return[sc(g[1],10),sc(g[2],10),o?1:0];}
+function sm(d){if(!d||!Array.isArray(d.g)||!Array.isArray(d.y)||!Array.isArray(d.q)||d.g.length<6)return null;var g=d.g,y=d.y,q=d.q,p=d.p,o=Array.isArray(p)&&typeof p[0]==="boolean"?p[0]:g[5],f=typeof g[0]==="number"&&typeof y[2]==="number"&&typeof q[4]==="number"&&y[2]*1000-g[0]<=q[4]*1000;if(typeof o!=="boolean")return null;return[f?sc(g[1],10):null,f?sc(g[2],10):null,o?1:0];}
 function df(a,b,n){if(a===null||b===null)return a!==b;return Math.abs(a-b)>=n;}
 function ch(s){return!L||L[2]!==s[2]||df(L[0],s[0],C.t)||df(L[1],s[1],C.h)||up()-A>=C.f;}
 function nx(){if(P&&!W){var s=P;P=null;ad(s);}}
