@@ -1,8 +1,8 @@
 export const LCL_HISTORY_FORMAT_VERSION = 1 as const;
 export const LCL_HISTORY_KVS_PREFIX = 'lcl.tail.';
 export const LCL_HISTORY_KVS_META_KEY = 'lcl.tail.m';
-export const LCL_HISTORY_DEFAULT_SLOT_COUNT = 32;
-export const LCL_HISTORY_MAX_SLOT_COUNT = 40;
+export const LCL_HISTORY_DEFAULT_SLOT_COUNT = 16;
+export const LCL_HISTORY_MAX_SLOT_COUNT = 32;
 export const LCL_HISTORY_MAX_VALUE_CHARS = 253;
 
 export interface LclHistorySample {
