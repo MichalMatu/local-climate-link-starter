@@ -604,7 +604,27 @@ for (const viewport of viewports) {
     await expect(page.getByText('55.2%')).toBeVisible();
     await expect(page.getByText('1.31 → 1.20 kPa')).toBeVisible();
     await expect(page.getByText('Działa')).toHaveCount(0);
-    await expect(page.getByText('ON 19°C · OFF 20°C')).toBeVisible();
+    await expect(page.getByText('ON 19°C')).toBeVisible();
+    await expect(page.getByText('OFF 20°C')).toBeVisible();
+    const climateCard = page
+      .getByText('Salon', { exact: true })
+      .locator('xpath=ancestor::article[1]');
+    await expect(climateCard.getByText('Temperatura', { exact: true })).toHaveCount(0);
+    await expect(climateCard.getByText('Wilgotność', { exact: true })).toHaveCount(0);
+    await expect(climateCard.getByText('VPD', { exact: true })).toBeVisible();
+    const [onThresholdBox, offThresholdBox, secondaryMetricsBox] = await Promise.all([
+      requiredBox(climateCard.getByText('ON 19°C')),
+      requiredBox(climateCard.getByText('OFF 20°C')),
+      requiredBox(climateCard.locator('.automation-card__secondary-metrics'))
+    ]);
+    expect(Math.abs(onThresholdBox.x - offThresholdBox.x)).toBeLessThanOrEqual(2);
+    expect(offThresholdBox.y).toBeGreaterThan(onThresholdBox.y);
+    expect(onThresholdBox.x + onThresholdBox.width).toBeLessThanOrEqual(
+      secondaryMetricsBox.x + 1
+    );
+    expect(offThresholdBox.x + offThresholdBox.width).toBeLessThanOrEqual(
+      secondaryMetricsBox.x + 1
+    );
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Odśwież' })).toHaveCount(0);
@@ -619,6 +639,10 @@ for (const viewport of viewports) {
     await expect(page.getByText('Stan przekaźnika')).toBeVisible();
     await expect(page.getByText('Przedpokój')).toBeVisible();
     await expect(page.getByText('Zakres pracy: 19–20°C · Temperatura')).toBeVisible();
+    const liveSummaryBorderTop = await page
+      .locator('.installation-automation-live-state .installation-detail-summary')
+      .evaluate((element) => window.getComputedStyle(element).borderTopWidth);
+    expect(liveSummaryBorderTop).toBe('0px');
     await expect(
       page.locator('details.rule-advanced-disclosure.lcl-disclosure')
     ).toHaveCount(1);
@@ -630,6 +654,14 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Bluetooth' }).click();
     await expect(page.getByText('91%')).toBeVisible();
     await expect(page.getByText('-51 dBm')).toBeVisible();
+    const [bleCardBox, bleScanBox] = await Promise.all([
+      requiredBox(page.locator('.installation-ble-card')),
+      requiredBox(page.locator('.installation-ble-card__footer .secondary-action'))
+    ]);
+    expect(bleScanBox.y).toBeGreaterThanOrEqual(bleCardBox.y);
+    expect(bleScanBox.y + bleScanBox.height).toBeLessThanOrEqual(
+      bleCardBox.y + bleCardBox.height + 1
+    );
 
     await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
     await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
@@ -656,6 +688,22 @@ for (const viewport of viewports) {
     await expect(page.getByText('32.4°C')).toBeVisible();
     await expect(page.getByText('42.3 W')).toHaveCount(0);
     await expect(page.getByText('230 V')).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { name: 'Shelly', exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Diagnostyka', exact: true })
+    ).toBeVisible();
+    const framedGroups = page.locator('.plug-detail-framed-section');
+    await expect(framedGroups).toHaveCount(2);
+    for (let index = 0; index < 2; index += 1) {
+      const [groupBox, titleBox] = await Promise.all([
+        requiredBox(framedGroups.nth(index)),
+        requiredBox(framedGroups.nth(index).locator('.plug-detail-framed-section__title'))
+      ]);
+      expect(titleBox.y).toBeLessThanOrEqual(groupBox.y + 1);
+      expect(titleBox.y + titleBox.height).toBeGreaterThan(groupBox.y);
+    }
     await expectClimateDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);

@@ -51,18 +51,24 @@ export const PlugInfoPanel = ({
 
   if (loading) {
     return (
-      <div className="plug-detail-loading" role="status">
-        <span className="plug-detail-loading__spinner" aria-hidden="true" />
-        <span>{t('common.refreshing')}</span>
-      </div>
+      <section className="plug-detail-framed-section">
+        <h3 className="plug-detail-framed-section__title">{title}</h3>
+        <div className="plug-detail-loading" role="status">
+          <span className="plug-detail-loading__spinner" aria-hidden="true" />
+          <span>{t('common.refreshing')}</span>
+        </div>
+      </section>
     );
   }
 
   if (error || !information) {
     return (
-      <p className="plug-settings-feedback plug-settings-feedback--warning">
-        {t('dashboard.readFailed')}
-      </p>
+      <section className="plug-detail-framed-section">
+        <h3 className="plug-detail-framed-section__title">{title}</h3>
+        <p className="plug-settings-feedback plug-settings-feedback--warning">
+          {t('dashboard.readFailed')}
+        </p>
+      </section>
     );
   }
 

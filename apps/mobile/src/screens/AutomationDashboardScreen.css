@@ -333,7 +333,9 @@
 @media (max-width: 30rem) {
   .automation-card__main {
     gap: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
-    grid-template-columns: minmax(0, 1fr) auto var(--lcl-size-action-min-width);
+    grid-template-columns:
+      minmax(0, 1fr) auto
+      calc(var(--lcl-size-action-min-width) - var(--lcl-spacing-xl));
   }
 }
 
