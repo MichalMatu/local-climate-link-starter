@@ -2830,7 +2830,7 @@ describe('HardwareSetupScreen', () => {
     }
   });
 
-  it('runs a Shelly-side BLE scanner from a saved plug and adds a found thermometer', async () => {
+  it('recognizes a thermometer restored from automation during Shelly-side BLE scan', async () => {
     renderHardwareSetup();
 
     await addShellyThroughUi();
@@ -2876,16 +2876,13 @@ describe('HardwareSetupScreen', () => {
     expect(within(dialog).getByText('31.2°C')).toBeInTheDocument();
     expect(within(dialog).getByText('-37 dBm')).toBeInTheDocument();
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Zapisz termometr' }));
-
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Już zapisany' })).toBeDisabled();
-    expect(await screen.findByText('Zapisano termometr.')).toBeInTheDocument();
+    expect(screen.queryByText('Zapisano termometr.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(screen.getByText('31.2°C')).toBeInTheDocument();
     expect(
-      within(getSavedSensorCard('Termometr 24:CD')).getByText('A4:C1:38:4F:24:CD')
+      within(getSavedSensorCard('Xiaomi salon')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();
 
     await waitFor(() => {
@@ -3108,7 +3105,6 @@ describe('HardwareSetupScreen', () => {
     const firstAddress = await findBleScanCandidate(dialog);
     const firstItem = firstAddress.closest('article');
     expect(firstItem).not.toBeNull();
-    fireEvent.click(within(firstItem!).getByRole('button', { name: 'Zapisz termometr' }));
     expect(
       within(firstItem!).getByRole('button', { name: 'Już zapisany' })
     ).toBeDisabled();
