@@ -74,7 +74,6 @@ export const InstallationDetailScreen = ({
   onEdit
 }: InstallationDetailScreenProps) => {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const installation = useInstalledAutomationStore((state) =>
     state.installations.find((candidate) => candidate.id === installationId)
   );
@@ -122,7 +121,6 @@ export const InstallationDetailScreen = ({
       pushToast={pushToast}
       dismissToast={dismissToast}
       toasts={toasts}
-      queryClient={queryClient}
       {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
     />
   );
@@ -134,7 +132,6 @@ type ClimateInstallationDetailProps = {
   pushToast(tone: ToastTone, title: string): void;
   dismissToast(id: string): void;
   toasts: ToastMessage[];
-  queryClient: ReturnType<typeof useQueryClient>;
   onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
@@ -144,10 +141,10 @@ const ClimateInstallationDetail = ({
   pushToast,
   dismissToast,
   toasts,
-  queryClient,
   onOpenBleDiscovery
 }: ClimateInstallationDetailProps) => {
   const { locale, t } = useTranslation();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
@@ -392,7 +389,6 @@ const ClimateInstallationDetail = ({
               error={informationQuery.isError}
               deviceRamFreeBytes={resources?.system?.ramFreeBytes}
               deviceRamTotalBytes={resources?.system?.ramSizeBytes}
-              title={t('hardware.nav.shelly')}
             />
             <ClimateScriptDiagnosticsSection
               title={t('common.diagnostics')}

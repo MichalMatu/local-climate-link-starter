@@ -11,7 +11,6 @@ export type PlugInfoPanelProps = {
   error?: boolean;
   deviceRamFreeBytes?: number | null | undefined;
   deviceRamTotalBytes?: number | null | undefined;
-  title: string;
 };
 
 const formatNumber = (
@@ -43,8 +42,7 @@ export const PlugInfoPanel = ({
   loading = false,
   error = false,
   deviceRamFreeBytes,
-  deviceRamTotalBytes,
-  title
+  deviceRamTotalBytes
 }: PlugInfoPanelProps) => {
   const { locale, t } = useTranslation();
   const missing = t('common.missing');
@@ -52,7 +50,7 @@ export const PlugInfoPanel = ({
   if (loading) {
     return (
       <section className="plug-detail-framed-section">
-        <h3 className="plug-detail-framed-section__title">{title}</h3>
+        <h3 className="plug-detail-framed-section__title">{t('hardware.nav.shelly')}</h3>
         <div className="plug-detail-loading" role="status">
           <span className="plug-detail-loading__spinner" aria-hidden="true" />
           <span>{t('common.refreshing')}</span>
@@ -64,7 +62,7 @@ export const PlugInfoPanel = ({
   if (error || !information) {
     return (
       <section className="plug-detail-framed-section">
-        <h3 className="plug-detail-framed-section__title">{title}</h3>
+        <h3 className="plug-detail-framed-section__title">{t('hardware.nav.shelly')}</h3>
         <p className="plug-settings-feedback plug-settings-feedback--warning">
           {t('dashboard.readFailed')}
         </p>
@@ -82,7 +80,7 @@ export const PlugInfoPanel = ({
 
   return (
     <section className="plug-detail-framed-section">
-      <h3 className="plug-detail-framed-section__title">{title}</h3>
+      <h3 className="plug-detail-framed-section__title">{t('hardware.nav.shelly')}</h3>
       <div className="plug-info-grid">
         <div className="lcl-diagnostic-row">
           <span>{t('common.model')}</span>
