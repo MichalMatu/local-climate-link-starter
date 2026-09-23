@@ -8,6 +8,10 @@ Repository final check after the latest simplification: **not run**
 
 This document is the restart point when work on history is resumed.
 
+At parking time `main` had already advanced beyond this branch. The branch is intentionally
+left un-rebased so unrelated work can continue. A fresh compare/rebase/port is mandatory
+when this feature resumes.
+
 ## 1. Final product decision
 
 The original datalogger design was intentionally simplified.
@@ -92,6 +96,17 @@ This is important: Climate may keep its last numeric values in RAM after a senso
 stale. The tail checks existing freshness information from `diag()` and writes a gap instead
 of pretending that old values are fresh.
 
+Pathological/non-finite/out-of-range values are also normalized to `null` instead of being
+persisted. Current accepted storage ranges are:
+
+```text
+temperature -100..200 C
+humidity       0..100 % RH
+```
+
+The relay bit is retained even when a measurement becomes null. One bad measurement must
+not poison a whole 253-character segment and make the phone reject otherwise useful points.
+
 ## 4. What is deliberately NOT persisted
 
 There is no persisted:
@@ -156,6 +171,11 @@ trace, while ordinary BLE/sensor noise does not consume the tail.
 
 These thresholds are storage noise thresholds only. They are **not Climate control
 hysteresis** and must never influence relay behavior.
+
+The 5-minute polling interval is another intentional simplification: a very short excursion
+or relay pulse that starts and ends entirely between polls can be absent from `tail-v1`.
+If exact transition capture later becomes important, solve that as a new requirement rather
+than turning the tail into another automation/event engine.
 
 ## 7. KVS format
 
@@ -238,9 +258,9 @@ future UI. It must not pretend to have an authoritative timeline.
 Default runtime settings:
 
 ```text
-poll             5 min
-flush            2 h
-slots            16
+poll              5 min
+flush             2 h
+slots             16
 temperature delta 0.3 C
 humidity delta    1.0 % RH
 ```
@@ -423,12 +443,12 @@ Current fields used:
 
 ```text
 g[0] last measurement uptime
- g[1] aggregate temperature
- g[2] aggregate humidity
- g[5] runtime relay fallback
- y[2] device uptime
- q[4] stale timeout
- p[0] actual relay output
+g[1] aggregate temperature
+g[2] aggregate humidity
+g[5] runtime relay fallback
+y[2] device uptime
+q[4] stale timeout
+p[0] actual relay output
 ```
 
 ### BLOCKER before merge: cross-runtime contract test
@@ -441,6 +461,10 @@ then break a test instead of silently changing History meaning.
 
 Before using this parked branch after other work, rebase/port it onto fresh `main` and
 revalidate every index above.
+
+At parking time fresh `main` had advanced four commits beyond this branch's merge base. The
+then-current `main` Climate generator was inspected and the `diag()` field layout above was
+still unchanged. This is only a parking-time observation, not a future compatibility claim.
 
 ## 17. Climate script ID coupling
 
@@ -514,10 +538,14 @@ The phone can derive:
 - VPD from temperature + humidity;
 - below / within / above configured range;
 - visual threshold bands;
-- relay transition markers;
-- simple excursion detection;
+- relay transition markers visible in retained points;
+- simple excursion detection over retained points;
 - display smoothing/hysteresis;
 - min/max/average over the retained points.
+
+Because sampling is change-filtered and only every five minutes, derived excursion/relay
+analysis is approximate. It must not claim to reconstruct transitions that happened entirely
+between retained observations.
 
 This is why raw temperature/humidity/relay is the preferred persisted primitive.
 
@@ -560,7 +588,7 @@ No new package is justified.
 - raw minimal record format;
 - no wall-clock dependency;
 - noise/change filtering;
-- explicit stale gaps;
+- explicit stale/invalid gaps;
 - small default KVS footprint;
 - lossy behavior isolated from automation safety;
 - no UI work mixed into the backend draft.
@@ -575,7 +603,7 @@ No new package is justified.
 5. measure memory with current real Climate configuration + History simultaneously;
 6. verify History replacement does not interrupt Climate BLE scanning;
 7. verify KVS writes/readback and ring wrap on hardware;
-8. verify stale -> `[null,null,relay]` on hardware;
+8. verify stale and invalid readings become `[null,null,relay]` on hardware;
 9. verify KVS failure cannot change Climate relay behavior;
 10. decide whether pending RAM should be flushed before intentional History stop/reinstall.
 
@@ -583,6 +611,7 @@ No new package is justified.
 
 - no exact timestamps;
 - no duration calculation;
+- 5-minute polling can miss very short excursions or relay cycles;
 - up to approximately one flush window of newest points may be lost on abrupt power loss;
 - one slot/meta split-write can make the newest ring order temporarily imperfect;
 - old points are not tied to historical Climate threshold revisions;
@@ -598,7 +627,9 @@ What was done:
 - architecture re-audit;
 - simplification of the codec/runtime/tests to `tail-v1`;
 - official Shelly KVS/example review earlier in this work;
-- static inspection against current Climate `diag()` layout.
+- static inspection against the branch Climate `diag()` layout;
+- static re-check against the then-current fresh `main` Climate generator after `main`
+  advanced four commits; the used `diag()` indexes were still unchanged.
 
 What was NOT done after the final simplification:
 
@@ -632,7 +663,7 @@ When returning to this feature later, do this in order:
 12. measure mem_used/mem_free for both scripts
 13. observe BLE/Climate behavior unchanged
 14. create several tail points and read KVS back
-15. test stale gap
+15. test stale/invalid gap
 16. test ring wrap using temporarily small slot count
 17. reboot and confirm acceptable lossy recovery
 18. leave relay in an explicit known safe state
@@ -651,7 +682,7 @@ The simplest initial view should show:
 - ordinal temperature trend;
 - ordinal humidity trend;
 - relay ON/OFF indication;
-- gaps for stale/unavailable sensor data;
+- gaps for stale/unavailable/invalid sensor data;
 - optional VPD calculated on the phone;
 - current-config range overlay calculated on the phone.
 
