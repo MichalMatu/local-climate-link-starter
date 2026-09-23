@@ -1,30 +1,18 @@
 export const LCL_HISTORY_FORMAT_VERSION = 1 as const;
-export const LCL_HISTORY_KVS_PREFIX = 'lcl.dl1.';
-export const LCL_HISTORY_KVS_META_KEY = 'lcl.dl1.m';
+export const LCL_HISTORY_KVS_PREFIX = 'lcl.tail.';
+export const LCL_HISTORY_KVS_META_KEY = 'lcl.tail.m';
 export const LCL_HISTORY_DEFAULT_SLOT_COUNT = 32;
 export const LCL_HISTORY_MAX_SLOT_COUNT = 40;
 export const LCL_HISTORY_MAX_VALUE_CHARS = 253;
-export const LCL_HISTORY_DEFAULT_SAMPLE_INTERVAL_SEC = 15 * 60;
-export const LCL_HISTORY_DEFAULT_FLUSH_INTERVAL_SEC = 2 * 60 * 60;
-export const LCL_HISTORY_MIN_FLUSH_INTERVAL_SEC = 60 * 60;
-
-export type LclHistoryClock = 'unix' | 'uptime';
 
 export interface LclHistorySample {
-  clock: LclHistoryClock;
-  timeSec: number;
   temperatureC: number | null;
   humidityPct: number | null;
-  vpdKpa: number | null;
   relayOn: boolean;
-  reason: string | null;
 }
 
 export interface LclHistorySegment {
   version: typeof LCL_HISTORY_FORMAT_VERSION;
-  sequence: number;
-  clock: LclHistoryClock;
-  baseTimeSec: number;
   samples: readonly LclHistorySample[];
 }
 
@@ -32,16 +20,10 @@ export interface LclHistoryMeta {
   version: typeof LCL_HISTORY_FORMAT_VERSION;
   slots: number;
   nextSlot: number;
-  nextSequence: number;
-  sampleIntervalSec: number;
-  flushIntervalSec: number;
+  validSlots: number;
 }
 
-export type LclHistoryCodecErrorCode =
-  | 'invalid-value'
-  | 'clock-mismatch'
-  | 'time-regression'
-  | 'value-too-long';
+export type LclHistoryCodecErrorCode = 'invalid-value' | 'value-too-long';
 
 export interface LclHistoryCodecError {
   code: LclHistoryCodecErrorCode;
@@ -65,19 +47,13 @@ export interface LclHistoryDecodedStore {
 }
 
 type EncodedRecord = [
-  deltaSec: number,
   temperatureDeciC: number | null,
   humidityDeciPct: number | null,
-  vpdCentiKpa: number | null,
-  relayOn: 0 | 1,
-  reason: string | null
+  relayOn: 0 | 1
 ];
 
 type EncodedSegment = [
   version: typeof LCL_HISTORY_FORMAT_VERSION,
-  sequence: number,
-  clock: 0 | 1,
-  baseTimeSec: number,
   records: EncodedRecord[]
 ];
 
@@ -85,9 +61,7 @@ type EncodedMeta = [
   version: typeof LCL_HISTORY_FORMAT_VERSION,
   slots: number,
   nextSlot: number,
-  nextSequence: number,
-  sampleIntervalSec: number,
-  flushIntervalSec: number
+  validSlots: number
 ];
 
 const success = <T>(value: T): LclHistoryCodecResult<T> => ({ ok: true, value });
@@ -103,23 +77,11 @@ const isFiniteInRange = (value: number, minimum: number, maximum: number): boole
   Number.isFinite(value) && value >= minimum && value <= maximum;
 
 const validateSample = (sample: LclHistorySample): LclHistoryCodecResult<LclHistorySample> => {
-  if (!isIntegerAtLeast(sample.timeSec, 0)) {
-    return failure('invalid-value', 'History sample time must be a non-negative integer.');
-  }
-  if (sample.clock !== 'unix' && sample.clock !== 'uptime') {
-    return failure('invalid-value', 'History sample clock is invalid.');
-  }
   if (sample.temperatureC !== null && !isFiniteInRange(sample.temperatureC, -100, 200)) {
     return failure('invalid-value', 'History temperature is outside the supported range.');
   }
   if (sample.humidityPct !== null && !isFiniteInRange(sample.humidityPct, 0, 100)) {
     return failure('invalid-value', 'History humidity is outside the supported range.');
-  }
-  if (sample.vpdKpa !== null && !isFiniteInRange(sample.vpdKpa, 0, 100)) {
-    return failure('invalid-value', 'History VPD is outside the supported range.');
-  }
-  if (sample.reason !== null && (sample.reason.length === 0 || sample.reason.length > 16)) {
-    return failure('invalid-value', 'History reason must contain 1 to 16 characters.');
   }
   return success(sample);
 };
@@ -130,17 +92,11 @@ const scale = (value: number | null, multiplier: number): number | null =>
 const unscale = (value: number | null, multiplier: number): number | null =>
   value === null ? null : value / multiplier;
 
-const encodeRecord = (sample: LclHistorySample, baseTimeSec: number): EncodedRecord => [
-  sample.timeSec - baseTimeSec,
+const encodeRecord = (sample: LclHistorySample): EncodedRecord => [
   scale(sample.temperatureC, 10),
   scale(sample.humidityPct, 10),
-  scale(sample.vpdKpa, 100),
-  sample.relayOn ? 1 : 0,
-  sample.reason
+  sample.relayOn ? 1 : 0
 ];
-
-const clockToFlag = (clock: LclHistoryClock): 0 | 1 => (clock === 'unix' ? 0 : 1);
-const flagToClock = (flag: 0 | 1): LclHistoryClock => (flag === 0 ? 'unix' : 'uptime');
 
 export const lclHistorySegmentKey = (slot: number): string => {
   if (!Number.isInteger(slot) || slot < 0 || slot >= LCL_HISTORY_MAX_SLOT_COUNT) {
@@ -164,9 +120,8 @@ export const encodeLclHistoryMeta = (meta: LclHistoryMeta): LclHistoryCodecResul
     meta.slots > LCL_HISTORY_MAX_SLOT_COUNT ||
     !isIntegerAtLeast(meta.nextSlot, 0) ||
     meta.nextSlot >= meta.slots ||
-    !isIntegerAtLeast(meta.nextSequence, 0) ||
-    !isIntegerAtLeast(meta.sampleIntervalSec, 1) ||
-    !isIntegerAtLeast(meta.flushIntervalSec, LCL_HISTORY_MIN_FLUSH_INTERVAL_SEC)
+    !isIntegerAtLeast(meta.validSlots, 0) ||
+    meta.validSlots > meta.slots
   ) {
     return failure('invalid-value', 'History metadata is invalid.');
   }
@@ -175,9 +130,7 @@ export const encodeLclHistoryMeta = (meta: LclHistoryMeta): LclHistoryCodecResul
     LCL_HISTORY_FORMAT_VERSION,
     meta.slots,
     meta.nextSlot,
-    meta.nextSequence,
-    meta.sampleIntervalSec,
-    meta.flushIntervalSec
+    meta.validSlots
   ];
   const text = JSON.stringify(encoded);
   return text.length <= LCL_HISTORY_MAX_VALUE_CHARS
@@ -195,17 +148,15 @@ export const decodeLclHistoryMeta = (value: unknown): LclHistoryCodecResult<LclH
   } catch {
     return failure('invalid-value', 'History metadata is not valid JSON.');
   }
-  if (!Array.isArray(parsed) || parsed.length !== 6) {
+  if (!Array.isArray(parsed) || parsed.length !== 4) {
     return failure('invalid-value', 'History metadata shape is invalid.');
   }
-  const [version, slots, nextSlot, nextSequence, sampleIntervalSec, flushIntervalSec] = parsed;
+  const [version, slots, nextSlot, validSlots] = parsed;
   const meta: LclHistoryMeta = {
     version: version as typeof LCL_HISTORY_FORMAT_VERSION,
     slots: slots as number,
     nextSlot: nextSlot as number,
-    nextSequence: nextSequence as number,
-    sampleIntervalSec: sampleIntervalSec as number,
-    flushIntervalSec: flushIntervalSec as number
+    validSlots: validSlots as number
   };
   const encoded = encodeLclHistoryMeta(meta);
   return encoded.ok ? success(meta) : encoded;
@@ -214,38 +165,18 @@ export const decodeLclHistoryMeta = (value: unknown): LclHistoryCodecResult<LclH
 export const encodeLclHistorySegment = (
   segment: LclHistorySegment
 ): LclHistoryCodecResult<string> => {
-  if (
-    segment.version !== LCL_HISTORY_FORMAT_VERSION ||
-    !isIntegerAtLeast(segment.sequence, 0) ||
-    !isIntegerAtLeast(segment.baseTimeSec, 0) ||
-    segment.samples.length === 0
-  ) {
-    return failure('invalid-value', 'History segment header is invalid.');
+  if (segment.version !== LCL_HISTORY_FORMAT_VERSION || segment.samples.length === 0) {
+    return failure('invalid-value', 'History segment is invalid.');
   }
 
   const records: EncodedRecord[] = [];
-  let previousTimeSec = segment.baseTimeSec;
   for (const sample of segment.samples) {
     const validated = validateSample(sample);
     if (!validated.ok) return validated;
-    if (sample.clock !== segment.clock) {
-      return failure('clock-mismatch', 'History segment cannot mix clock sources.');
-    }
-    if (sample.timeSec < segment.baseTimeSec || sample.timeSec < previousTimeSec) {
-      return failure('time-regression', 'History samples must be ordered by time.');
-    }
-    records.push(encodeRecord(sample, segment.baseTimeSec));
-    previousTimeSec = sample.timeSec;
+    records.push(encodeRecord(sample));
   }
 
-  const encoded: EncodedSegment = [
-    LCL_HISTORY_FORMAT_VERSION,
-    segment.sequence,
-    clockToFlag(segment.clock),
-    segment.baseTimeSec,
-    records
-  ];
-  const text = JSON.stringify(encoded);
+  const text = JSON.stringify([LCL_HISTORY_FORMAT_VERSION, records] satisfies EncodedSegment);
   return text.length <= LCL_HISTORY_MAX_VALUE_CHARS
     ? success(text)
     : failure('value-too-long', 'History segment exceeds the Shelly KVS value limit.');
@@ -263,78 +194,47 @@ export const decodeLclHistorySegment = (
   } catch {
     return failure('invalid-value', 'History segment is not valid JSON.');
   }
-  if (!Array.isArray(parsed) || parsed.length !== 5) {
+  if (!Array.isArray(parsed) || parsed.length !== 2) {
     return failure('invalid-value', 'History segment shape is invalid.');
   }
-  const [version, sequence, clockFlag, baseTimeSec, rawRecords] = parsed;
-  if (
-    version !== LCL_HISTORY_FORMAT_VERSION ||
-    !isIntegerAtLeast(sequence, 0) ||
-    (clockFlag !== 0 && clockFlag !== 1) ||
-    !isIntegerAtLeast(baseTimeSec, 0) ||
-    !Array.isArray(rawRecords) ||
-    rawRecords.length === 0
-  ) {
+  const [version, rawRecords] = parsed;
+  if (version !== LCL_HISTORY_FORMAT_VERSION || !Array.isArray(rawRecords) || rawRecords.length === 0) {
     return failure('invalid-value', 'History segment header is invalid.');
   }
 
-  const clock = flagToClock(clockFlag);
   const samples: LclHistorySample[] = [];
-  let previousTimeSec = baseTimeSec;
   for (const rawRecord of rawRecords) {
-    if (!Array.isArray(rawRecord) || rawRecord.length !== 6) {
+    if (!Array.isArray(rawRecord) || rawRecord.length !== 3) {
       return failure('invalid-value', 'History record shape is invalid.');
     }
-    const [deltaSec, temperatureDeciC, humidityDeciPct, vpdCentiKpa, relayOn, reason] =
-      rawRecord;
-    const scaledValues = [temperatureDeciC, humidityDeciPct, vpdCentiKpa];
+    const [temperatureDeciC, humidityDeciPct, relayOn] = rawRecord;
+    const scaledValues = [temperatureDeciC, humidityDeciPct];
     if (
-      !isIntegerAtLeast(deltaSec, 0) ||
       scaledValues.some(
         (entry) => entry !== null && (typeof entry !== 'number' || !Number.isInteger(entry))
       ) ||
-      (relayOn !== 0 && relayOn !== 1) ||
-      (reason !== null && typeof reason !== 'string')
+      (relayOn !== 0 && relayOn !== 1)
     ) {
       return failure('invalid-value', 'History record value is invalid.');
     }
-    const timeSec = baseTimeSec + deltaSec;
-    if (timeSec < previousTimeSec) {
-      return failure('time-regression', 'History records are not ordered by time.');
-    }
     const sample: LclHistorySample = {
-      clock,
-      timeSec,
       temperatureC: unscale(temperatureDeciC as number | null, 10),
       humidityPct: unscale(humidityDeciPct as number | null, 10),
-      vpdKpa: unscale(vpdCentiKpa as number | null, 100),
-      relayOn: relayOn === 1,
-      reason: reason as string | null
+      relayOn: relayOn === 1
     };
     const validated = validateSample(sample);
     if (!validated.ok) return validated;
     samples.push(sample);
-    previousTimeSec = timeSec;
   }
 
-  return success({
-    version: LCL_HISTORY_FORMAT_VERSION,
-    sequence,
-    clock,
-    baseTimeSec,
-    samples
-  });
+  return success({ version: LCL_HISTORY_FORMAT_VERSION, samples });
 };
 
 export const createLclHistorySegment = (
-  sequence: number,
   sample: LclHistorySample
 ): LclHistoryCodecResult<LclHistorySegment> => {
   const segment: LclHistorySegment = {
     version: LCL_HISTORY_FORMAT_VERSION,
-    sequence,
-    clock: sample.clock,
-    baseTimeSec: sample.timeSec,
     samples: [sample]
   };
   const encoded = encodeLclHistorySegment(segment);
@@ -345,9 +245,6 @@ export const appendLclHistorySample = (
   segment: LclHistorySegment,
   sample: LclHistorySample
 ): LclHistoryCodecResult<LclHistorySegment> => {
-  if (sample.clock !== segment.clock) {
-    return failure('clock-mismatch', 'History segment cannot mix clock sources.');
-  }
   const candidate: LclHistorySegment = {
     ...segment,
     samples: [...segment.samples, sample]
@@ -356,11 +253,39 @@ export const appendLclHistorySample = (
   return encoded.ok ? success(candidate) : encoded;
 };
 
+export interface LclHistoryChangeThresholds {
+  temperatureDeltaC: number;
+  humidityDeltaPct: number;
+}
+
+export const lclHistorySampleChangedEnough = (
+  previous: LclHistorySample | null,
+  next: LclHistorySample,
+  thresholds: LclHistoryChangeThresholds = {
+    temperatureDeltaC: 0.3,
+    humidityDeltaPct: 1
+  }
+): boolean => {
+  if (previous === null || previous.relayOn !== next.relayOn) return true;
+  if (
+    previous.temperatureC === null ||
+    next.temperatureC === null ||
+    previous.humidityPct === null ||
+    next.humidityPct === null
+  ) {
+    return previous.temperatureC !== next.temperatureC || previous.humidityPct !== next.humidityPct;
+  }
+  return (
+    Math.abs(previous.temperatureC - next.temperatureC) >= thresholds.temperatureDeltaC ||
+    Math.abs(previous.humidityPct - next.humidityPct) >= thresholds.humidityDeltaPct
+  );
+};
+
 export const decodeLclHistoryKvsItems = (
   items: readonly LclHistoryKvsItem[]
 ): LclHistoryDecodedStore => {
   let meta: LclHistoryMeta | null = null;
-  const segments: Array<{ slot: number; segment: LclHistorySegment }> = [];
+  const bySlot = new Map<number, LclHistorySegment>();
   const invalidKeys: string[] = [];
 
   for (const item of items) {
@@ -373,11 +298,25 @@ export const decodeLclHistoryKvsItems = (
     const slot = parseLclHistorySegmentSlot(item.key);
     if (slot === null) continue;
     const decoded = decodeLclHistorySegment(item.value);
-    if (decoded.ok) segments.push({ slot, segment: decoded.value });
+    if (decoded.ok) bySlot.set(slot, decoded.value);
     else invalidKeys.push(item.key);
   }
 
-  segments.sort((left, right) => left.segment.sequence - right.segment.sequence);
+  const segments: Array<{ slot: number; segment: LclHistorySegment }> = [];
+  if (meta) {
+    const count = Math.min(meta.validSlots, meta.slots);
+    const first = (meta.nextSlot - count + meta.slots) % meta.slots;
+    for (let index = 0; index < count; index += 1) {
+      const slot = (first + index) % meta.slots;
+      const segment = bySlot.get(slot);
+      if (segment) segments.push({ slot, segment });
+    }
+  } else {
+    for (const [slot, segment] of [...bySlot.entries()].sort((a, b) => a[0] - b[0])) {
+      segments.push({ slot, segment });
+    }
+  }
+
   return {
     meta,
     segments,
