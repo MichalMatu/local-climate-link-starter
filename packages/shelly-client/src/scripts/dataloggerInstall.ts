@@ -9,5 +9,6 @@ export const createDataloggerInstallPlan = (code: string): ShellyInstallPlan => 
   code,
   runOnBoot: true,
   backupExisting: false,
-  chunkSizeBytes: DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
+  chunkSizeBytes: DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES,
+  cleanupBleScannerBeforeStop: false
 });
