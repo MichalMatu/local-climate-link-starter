@@ -4,45 +4,51 @@ import {
   generateShellyDataloggerScript
 } from '../shelly/datalogger.js';
 
-describe('Shelly KVS datalogger generator', () => {
-  it('generates a deterministic isolated history runtime', () => {
-    const first = generateShellyDataloggerScript({ sourceScriptId: 3 });
-    const second = generateShellyDataloggerScript({ sourceScriptId: 3 });
-    expect(first).toBe(second);
-    expect(first).toContain('// m: datalogger-v1');
-    expect(first).toContain('Script.Eval');
-    expect(first).toContain('diag()');
-    expect(first).toContain('KVS.Set');
-    expect(first).toContain('lcl.dl1.m');
-    expect(first).toContain('p[0]');
-    expect(first).toContain('historyStatus');
-    expect(first).not.toContain('Switch.Set');
-    expect(first).not.toContain('BLE.Scanner');
-    expect(new TextEncoder().encode(first).length).toBeLessThanOrEqual(
+describe('Shelly rolling history tail generator', () => {
+  it('generates a tiny passive runtime that only reads existing diagnostics', () => {
+    const script = generateShellyDataloggerScript({ sourceScriptId: 3 });
+    expect(script).toContain('// m: tail-v1');
+    expect(script).toContain('Script.Eval');
+    expect(script).toContain('diag()');
+    expect(script).toContain('KVS.Set');
+    expect(script).toContain('lcl.tail.m');
+    expect(script).toContain('historyStatus');
+    expect(script).not.toContain('Switch.Set');
+    expect(script).not.toContain('BLE.Scanner');
+    expect(script).not.toContain('unixtime');
+    expect(script).not.toContain('Date.now');
+    expect(new TextEncoder().encode(script).length).toBeLessThanOrEqual(
       SHELLY_DATALOGGER_SCRIPT_MAX_BYTES
     );
   });
 
-  it('defaults to 15-minute samples, 2-hour flushes and 32 ring slots', () => {
+  it('defaults to 5-minute polling, hourly flushes and 32 ring slots', () => {
     const script = generateShellyDataloggerScript({ sourceScriptId: 1 });
-    expect(script).toContain('"i":900');
-    expect(script).toContain('"f":7200');
+    expect(script).toContain('"p":300');
+    expect(script).toContain('"f":3600');
     expect(script).toContain('"n":32');
+    expect(script).toContain('"t":3');
+    expect(script).toContain('"h":10');
   });
 
-  it('accepts bounded custom retention parameters', () => {
+  it('accepts bounded noise thresholds and retention parameters', () => {
     const script = generateShellyDataloggerScript({
       sourceScriptId: 2,
-      sampleIntervalSec: 1800,
+      pollIntervalSec: 600,
       flushIntervalSec: 7200,
-      slotCount: 40
+      slotCount: 40,
+      temperatureDeltaC: 0.5,
+      humidityDeltaPct: 2
     });
     expect(script).toContain('"s":2');
-    expect(script).toContain('"i":1800');
+    expect(script).toContain('"p":600');
+    expect(script).toContain('"f":7200');
     expect(script).toContain('"n":40');
+    expect(script).toContain('"t":5');
+    expect(script).toContain('"h":20');
   });
 
-  it('rejects unsafe write cadence or invalid script/slot ids', () => {
+  it('rejects invalid cadence, script ids and slot counts', () => {
     expect(() => generateShellyDataloggerScript({ sourceScriptId: -1 })).toThrow(
       /sourceScriptId/
     );
