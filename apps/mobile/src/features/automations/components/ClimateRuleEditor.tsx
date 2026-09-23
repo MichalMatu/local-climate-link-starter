@@ -92,7 +92,11 @@ export const ClimateRuleEditor = ({
   const onThresholdValue = Number(props.onThresholdInput);
   const offThresholdValue = Number(props.offThresholdInput);
   const vpdWorkingRange =
-    Number.isFinite(onThresholdValue) && Number.isFinite(offThresholdValue)
+    props.isThresholdValid &&
+    props.onThresholdInput.trim() !== '' &&
+    props.offThresholdInput.trim() !== '' &&
+    Number.isFinite(onThresholdValue) &&
+    Number.isFinite(offThresholdValue)
       ? t('hardware.rule.vpdWorkingRange', {
           min: Math.min(onThresholdValue, offThresholdValue),
           max: Math.max(onThresholdValue, offThresholdValue),
