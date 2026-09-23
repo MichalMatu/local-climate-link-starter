@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  LCL_HISTORY_DEFAULT_FLUSH_INTERVAL_SEC,
-  LCL_HISTORY_DEFAULT_SAMPLE_INTERVAL_SEC,
-  LCL_HISTORY_DEFAULT_SLOT_COUNT,
   LCL_HISTORY_FORMAT_VERSION,
   LCL_HISTORY_KVS_META_KEY,
   appendLclHistorySample,
@@ -12,130 +9,116 @@ import {
   decodeLclHistorySegment,
   encodeLclHistoryMeta,
   encodeLclHistorySegment,
+  lclHistorySampleChangedEnough,
   lclHistorySegmentKey,
   type LclHistorySample
 } from '../history/kvsHistory.js';
 
-const sample = (index: number): LclHistorySample => ({
-  clock: 'unix',
-  timeSec: 1_800_000_000 + index * 900,
-  temperatureC: (234 + index) / 10,
-  humidityPct: (551 - index) / 10,
-  vpdKpa: (112 + index) / 100,
-  relayOn: index % 2 === 1,
-  reason: index % 2 === 1 ? 'ab' : 'ib'
+const sample = (temperatureC: number, humidityPct: number, relayOn = false): LclHistorySample => ({
+  temperatureC,
+  humidityPct,
+  relayOn
 });
 
-describe('Shelly KVS history codec', () => {
-  it('round-trips compact metadata', () => {
+describe('Shelly KVS rolling history tail', () => {
+  it('round-trips minimal metadata', () => {
     const encoded = encodeLclHistoryMeta({
       version: LCL_HISTORY_FORMAT_VERSION,
-      slots: LCL_HISTORY_DEFAULT_SLOT_COUNT,
+      slots: 32,
       nextSlot: 7,
-      nextSequence: 39,
-      sampleIntervalSec: LCL_HISTORY_DEFAULT_SAMPLE_INTERVAL_SEC,
-      flushIntervalSec: LCL_HISTORY_DEFAULT_FLUSH_INTERVAL_SEC
+      validSlots: 12
     });
-    expect(encoded.ok).toBe(true);
+    expect(encoded).toEqual({ ok: true, value: '[1,32,7,12]' });
     if (!encoded.ok) return;
-    expect(encoded.value.length).toBeLessThan(253);
     expect(decodeLclHistoryMeta(encoded.value)).toEqual({
       ok: true,
-      value: {
-        version: 1,
-        slots: 32,
-        nextSlot: 7,
-        nextSequence: 39,
-        sampleIntervalSec: 900,
-        flushIntervalSec: 7200
-      }
+      value: { version: 1, slots: 32, nextSlot: 7, validSlots: 12 }
     });
   });
 
-  it('packs eight representative 15-minute samples into one KVS value', () => {
-    let segmentResult = createLclHistorySegment(12, sample(0));
-    expect(segmentResult.ok).toBe(true);
-    if (!segmentResult.ok) return;
-    for (let index = 1; index < 8; index += 1) {
-      segmentResult = appendLclHistorySample(segmentResult.value, sample(index));
-      expect(segmentResult.ok).toBe(true);
-      if (!segmentResult.ok) return;
+  it('stores only temperature, humidity and relay state', () => {
+    const segment = createLclHistorySegment(sample(23.4, 55.1));
+    expect(segment.ok).toBe(true);
+    if (!segment.ok) return;
+    const encoded = encodeLclHistorySegment(segment.value);
+    expect(encoded).toEqual({ ok: true, value: '[1,[[234,551,0]]]' });
+    if (!encoded.ok) return;
+    expect(decodeLclHistorySegment(encoded.value)).toEqual({ ok: true, value: segment.value });
+  });
+
+  it('packs many compact samples before reaching the 253-character KVS limit', () => {
+    let segment = createLclHistorySegment(sample(23.4, 55.1));
+    expect(segment.ok).toBe(true);
+    if (!segment.ok) return;
+
+    let accepted = 1;
+    for (let index = 1; index < 50; index += 1) {
+      const next = appendLclHistorySample(
+        segment.value,
+        sample((234 + index) / 10, (551 - (index % 20)) / 10, index % 2 === 1)
+      );
+      if (!next.ok) {
+        expect(next.error.code).toBe('value-too-long');
+        break;
+      }
+      segment = next;
+      accepted += 1;
     }
-    const encoded = encodeLclHistorySegment(segmentResult.value);
+
+    expect(accepted).toBeGreaterThanOrEqual(16);
+    const encoded = encodeLclHistorySegment(segment.value);
     expect(encoded.ok).toBe(true);
     if (!encoded.ok) return;
     expect(encoded.value.length).toBeLessThanOrEqual(253);
-    expect(decodeLclHistorySegment(encoded.value)).toEqual({
-      ok: true,
-      value: segmentResult.value
-    });
   });
 
-  it('refuses an append that would exceed the KVS value limit', () => {
-    const verboseSample = (index: number): LclHistorySample => ({
-      ...sample(index),
-      reason: 'abcdefghijklmnop'
-    });
-    let segmentResult = createLclHistorySegment(1, verboseSample(0));
-    expect(segmentResult.ok).toBe(true);
-    if (!segmentResult.ok) return;
-    let rejected = false;
-    for (let index = 1; index < 20; index += 1) {
-      const next = appendLclHistorySample(segmentResult.value, verboseSample(index));
-      if (!next.ok) {
-        expect(next.error.code).toBe('value-too-long');
-        rejected = true;
-        break;
-      }
-      segmentResult = next;
-    }
-    expect(rejected).toBe(true);
-  });
-
-  it('reconstructs ordered history from ring slots and reports corrupted entries', () => {
-    const first = createLclHistorySegment(10, sample(0));
-    const second = createLclHistorySegment(11, sample(1));
-    expect(first.ok && second.ok).toBe(true);
-    if (!first.ok || !second.ok) return;
-    const firstEncoded = encodeLclHistorySegment(first.value);
-    const secondEncoded = encodeLclHistorySegment(second.value);
-    const metaEncoded = encodeLclHistoryMeta({
-      version: 1,
-      slots: 32,
-      nextSlot: 2,
-      nextSequence: 12,
-      sampleIntervalSec: 900,
-      flushIntervalSec: 7200
-    });
-    expect(firstEncoded.ok && secondEncoded.ok && metaEncoded.ok).toBe(true);
-    if (!firstEncoded.ok || !secondEncoded.ok || !metaEncoded.ok) return;
+  it('orders wrapped slots using only nextSlot and validSlots', () => {
+    const encodedSegment = (temperatureC: number) => {
+      const created = createLclHistorySegment(sample(temperatureC, 50));
+      if (!created.ok) throw new Error('fixture');
+      const encoded = encodeLclHistorySegment(created.value);
+      if (!encoded.ok) throw new Error('fixture');
+      return encoded.value;
+    };
+    const meta = encodeLclHistoryMeta({ version: 1, slots: 4, nextSlot: 1, validSlots: 4 });
+    expect(meta.ok).toBe(true);
+    if (!meta.ok) return;
 
     const decoded = decodeLclHistoryKvsItems([
-      { key: lclHistorySegmentKey(1), value: secondEncoded.value },
-      { key: LCL_HISTORY_KVS_META_KEY, value: metaEncoded.value },
-      { key: lclHistorySegmentKey(0), value: firstEncoded.value },
-      { key: lclHistorySegmentKey(2), value: '{bad-json' },
-      { key: 'unrelated', value: 'ignored' }
+      { key: LCL_HISTORY_KVS_META_KEY, value: meta.value },
+      { key: lclHistorySegmentKey(0), value: encodedSegment(24) },
+      { key: lclHistorySegmentKey(1), value: encodedSegment(21) },
+      { key: lclHistorySegmentKey(2), value: encodedSegment(22) },
+      { key: lclHistorySegmentKey(3), value: encodedSegment(23) }
     ]);
 
-    expect(decoded.segments.map(({ segment }) => segment.sequence)).toEqual([10, 11]);
-    expect(decoded.samples.map(({ timeSec }) => timeSec)).toEqual([
-      sample(0).timeSec,
-      sample(1).timeSec
-    ]);
-    expect(decoded.invalidKeys).toEqual([lclHistorySegmentKey(2)]);
-    expect(decoded.meta?.nextSequence).toBe(12);
+    expect(decoded.segments.map(({ slot }) => slot)).toEqual([1, 2, 3, 0]);
+    expect(decoded.samples.map(({ temperatureC }) => temperatureC)).toEqual([21, 22, 23, 24]);
   });
 
-  it('rejects clock changes and time regressions inside a segment', () => {
-    const initial = createLclHistorySegment(0, sample(0));
-    expect(initial.ok).toBe(true);
-    if (!initial.ok) return;
-    expect(
-      appendLclHistorySample(initial.value, { ...sample(1), clock: 'uptime', timeSec: 10 })
-    ).toMatchObject({ ok: false, error: { code: 'clock-mismatch' } });
-    expect(
-      appendLclHistorySample(initial.value, { ...sample(1), timeSec: sample(0).timeSec - 1 })
-    ).toMatchObject({ ok: false, error: { code: 'time-regression' } });
+  it('records meaningful changes but ignores sensor noise', () => {
+    const previous = sample(23, 55, false);
+    expect(lclHistorySampleChangedEnough(previous, sample(23.2, 55.9, false))).toBe(false);
+    expect(lclHistorySampleChangedEnough(previous, sample(23.3, 55, false))).toBe(true);
+    expect(lclHistorySampleChangedEnough(previous, sample(23, 56, false))).toBe(true);
+    expect(lclHistorySampleChangedEnough(previous, sample(23, 55, true))).toBe(true);
+    expect(lclHistorySampleChangedEnough(null, previous)).toBe(true);
+  });
+
+  it('reports corrupt tail entries without failing the remaining tail', () => {
+    const good = createLclHistorySegment(sample(23, 50));
+    expect(good.ok).toBe(true);
+    if (!good.ok) return;
+    const goodEncoded = encodeLclHistorySegment(good.value);
+    expect(goodEncoded.ok).toBe(true);
+    if (!goodEncoded.ok) return;
+
+    const decoded = decodeLclHistoryKvsItems([
+      { key: lclHistorySegmentKey(0), value: goodEncoded.value },
+      { key: lclHistorySegmentKey(1), value: '{bad-json' }
+    ]);
+
+    expect(decoded.samples).toEqual([sample(23, 50)]);
+    expect(decoded.invalidKeys).toEqual([lclHistorySegmentKey(1)]);
   });
 });
