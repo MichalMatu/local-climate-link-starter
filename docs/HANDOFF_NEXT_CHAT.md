@@ -71,14 +71,48 @@ Automation detail may still show the VPD Assist working range because that is co
 
 The live Climate setup may intentionally use only **1 thermometer**. Do not restore a historical 4-sensor test configuration merely to reproduce old acceptance state.
 
+## Open hardware defect — TP357 battery decoding
+
+Fix this before starting the next product expansion.
+
+Observed on 2026-09-24:
+
+- five used **silver** TP357 units with fresh AAA batteries all show approximately `2%` battery in Shelly Link;
+- one existing **white** TP357 appears to show a plausible battery percentage;
+- it is not established which enclosure color/revision is chronologically newer. Color is only an observation and must never be used to select a parser variant.
+
+What is already established from the code:
+
+- `packages/ble-core/src/parsers/tp357.ts` currently exposes manufacturer payload byte 4 directly as `batteryPct`;
+- `packages/script-generator/src/shelly/discoveryParsing.ts` does the same in generated Shelly runtime parsing, so both phone and installed-runtime paths need the same correction.
+
+External reference behavior:
+
+`Bluetooth-Devices/thermopro-ble` treats TP357S/TP397/TP393 battery as the lower two bits of byte 4 and maps `0 -> 1%`, `1 -> 50%`, `2 -> 100%`. The source explicitly says the bit interpretation was verified with a TP357S on a laboratory power supply. This makes the five observed raw `2` readings very likely to mean a full-battery state rather than literal `2%`.
+
+Reference source:
+
+`https://github.com/Bluetooth-Devices/thermopro-ble/blob/main/src/thermopro_ble/parser.py`
+
+Do **not** patch this as a blind `2 -> 100` conversion. The existing white unit appears to behave differently, so the first implementation step is a real-BLE capture of full manufacturer data from at least one silver unit and the white unit. Compare advertised name, payload length and full bytes and determine whether there are genuinely multiple encodings/revisions.
+
+Required fix shape after capture:
+
+1. one semantic TP357 battery-decoding rule for both phone and generated Shelly runtime, with validated variant detection only if the real packets prove it is necessary;
+2. fixtures from the observed white and silver packets plus regression tests for both parsing paths;
+3. no case-color detection;
+4. no regression to temperature, humidity or sensor identity;
+5. real-hardware acceptance proving the fresh-battery silver unit no longer renders `2%`, the white unit remains correct, and phone/Shelly diagnostics agree.
+
 ## Next product work
 
-UX stabilization is **DONE**. The next planned product direction is:
+Priority order is now:
 
-1. **BLE soil-moisture sensor support** through the existing typed sensor/config/diagnostic model;
-2. then **Shelly management over BLE**, starting with a real-hardware feasibility spike and reusing the same RPC ownership boundaries.
+1. **fix TP357 battery decoding compatibility** using the capture/acceptance criteria above;
+2. **BLE soil-moisture sensor support** through the existing typed sensor/config/diagnostic model;
+3. then **Shelly management over BLE**, starting with a real-hardware feasibility spike and reusing the same RPC ownership boundaries.
 
-These are separate Bluetooth concerns. Do not combine sensor transport with Shelly management ownership.
+The soil-sensor track and Shelly-over-BLE transport track are separate Bluetooth concerns. Do not combine sensor transport with Shelly management ownership.
 
 Later roadmap items remain richer timing/operators, advanced automation UX and the optional Shelly Script Library track. See `docs/ROADMAP.md`.
 
