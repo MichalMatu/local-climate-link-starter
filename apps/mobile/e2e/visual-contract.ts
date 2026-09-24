@@ -1,5 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
+export const canonicalVisualViewport = { width: 412, height: 915 } as const;
+
 export const visualScreenNames = [
   '01-plugs-dashboard',
   '02-climate-automation',

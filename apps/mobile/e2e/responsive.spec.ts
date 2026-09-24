@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
-import { expectVisualScreen } from './visual-contract.js';
+import { canonicalVisualViewport, expectVisualScreen } from './visual-contract.js';
 
 const e2eOrigin = `http://127.0.0.1:${process.env.LCL_E2E_PORT ?? '5173'}`;
 
@@ -56,7 +56,7 @@ const timeDraft = {
 const viewports = [
   { name: 'phone-small', width: 360, height: 800 },
   { name: 'phone', width: 390, height: 844 },
-  { name: 'phone-large', width: 412, height: 915 },
+  { name: 'phone-large', ...canonicalVisualViewport },
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'desktop', width: 1440, height: 900 }
 ] as const;
