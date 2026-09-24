@@ -18,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "precommit": "lint-staged && pnpm quality:ux",
-    "prepush": "pnpm check",
+    "prepush": "pnpm check && pnpm e2e:visual",
     "prepare": "husky",
     "quality:ux": "node scripts/quality/ux-gate.mjs",
     "quality:selftest": "node scripts/quality/gate-selftest.mjs",
@@ -39,8 +39,8 @@
     "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build",
     "check:full": "pnpm check && pnpm e2e:responsive",
     "quality:repo": "node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest",
-    "e2e:visual": "playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts",
-    "e2e:visual:update": "playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --update-snapshots"
+    "e2e:visual": "playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|plain saved Plug exposes the same LED settings without an installed automation\"",
+    "e2e:visual:update": "playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|plain saved Plug exposes the same LED settings without an installed automation\" --update-snapshots"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [

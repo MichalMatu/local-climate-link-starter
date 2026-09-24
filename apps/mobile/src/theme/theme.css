@@ -931,31 +931,19 @@ select {
 }
 
 .setup-top-nav {
-  background: var(--lcl-color-surface);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  border-radius: var(--lcl-radius-lg);
   box-shadow: var(--lcl-shadow-md);
   display: grid;
-  gap: var(--lcl-spacing-xs);
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
   overflow: hidden;
-  padding: var(--lcl-spacing-sm);
   position: sticky;
   top: var(--lcl-spacing-lg);
   z-index: var(--lcl-z-index-header);
 }
 
 .setup-top-nav__item {
-  background: transparent;
-  border: var(--lcl-border-width-sm) solid transparent;
-  border-radius: var(--lcl-radius-md);
-  color: var(--lcl-color-text-muted);
-  cursor: pointer;
   font-size: var(--lcl-font-size-sm);
   font-weight: var(--lcl-font-weight-bold);
-  min-height: var(--lcl-size-control-min-height);
-  min-width: 0;
   padding: 0 var(--lcl-spacing-sm);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1789,14 +1777,8 @@ select {
     justify-self: start;
   }
 
-  .setup-top-nav {
-    gap: 0;
-    padding: var(--lcl-spacing-xs);
-  }
-
   .setup-top-nav__item {
     font-size: var(--lcl-font-size-xs);
-    min-height: var(--lcl-size-control-min-height);
     padding: 0;
   }
 
