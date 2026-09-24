@@ -4,7 +4,7 @@ This contract exists to stop small layout differences from reappearing after ref
 
 ## Canonical audit
 
-The 2026-09-24 Local Agent audit rendered 17 application states in Chromium. The primary phone viewport is 412×915; the existing plain-Plug fixture remains 390×844.
+The 2026-09-24 Local Agent audit rendered 17 application states in Chromium. All canonical visual baselines use the shared 412×915 phone viewport.
 
 Measured drift before this contract included:
 

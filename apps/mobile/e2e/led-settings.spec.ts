@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
-import { expectVisualScreen } from './visual-contract.js';
+import { canonicalVisualViewport, expectVisualScreen } from './visual-contract.js';
 
 type InstallationKind = 'climate' | 'time';
 
@@ -469,7 +469,7 @@ test('plain saved Plug exposes the same LED settings without an installed automa
   page
 }) => {
   const problems = consoleProblems(page);
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize(canonicalVisualViewport);
   await seedSavedPlug(page);
   await mockShelly(page, 'time');
   await page.goto('/');
