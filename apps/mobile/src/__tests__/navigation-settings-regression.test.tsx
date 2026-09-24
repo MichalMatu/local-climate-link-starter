@@ -149,7 +149,7 @@ describe('navigation and settings regression coverage', () => {
 
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
-    expect(screen.getByRole('button', { name: '‹ Gniazdka' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wstecz: Gniazdka' })).toBeVisible();
     const scanBle = screen.getByRole('button', {
       name: 'Skanuj termometry BLE przez to gniazdko'
     });
@@ -167,17 +167,17 @@ describe('navigation and settings regression coverage', () => {
     expect(
       await screen.findByRole('heading', { name: 'Skanuj termometry BLE' })
     ).toBeVisible();
-    expect(screen.getByRole('button', { name: '‹ Nawilżacz' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wstecz: Nawilżacz' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '‹ Nawilżacz' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Nawilżacz' }));
     expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
     expect(screen.queryByRole('dialog')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: '‹ Gniazdka' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Gniazdka' }));
     expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
   });
 });

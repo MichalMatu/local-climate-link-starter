@@ -26,6 +26,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
 7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
 8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract.
+9. Navigation chevrons are icon components, never font glyphs such as `‹` or `›`, so their geometry is stable across browser and Android font fallback.
 
 ## Surface taxonomy
 

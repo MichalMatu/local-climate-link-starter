@@ -176,9 +176,9 @@ select {
 
 .intent-choice .intent-choice__action {
   color: var(--lcl-color-accent);
-  font-size: var(--lcl-font-size-2xl);
-  font-weight: var(--lcl-font-weight-bold);
-  line-height: 1;
+  flex: 0 0 auto;
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
 }
 
 .setup-context {
@@ -197,8 +197,15 @@ select {
   display: inline-flex;
   flex: 0 0 auto;
   font-weight: var(--lcl-font-weight-bold);
+  gap: var(--lcl-spacing-xs);
   min-height: var(--lcl-size-control-min-height);
   padding: var(--lcl-spacing-sm) 0;
+}
+
+.app-page-back-row__icon {
+  flex: 0 0 auto;
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
 }
 
 .setup-context strong {

@@ -144,6 +144,7 @@ export const es = {
       'El script guardado para esta automatización no coincide con el estado de Shelly. Revisa el dispositivo antes de controlarlo.'
   },
   common: {
+    back: 'Atrás',
     add: 'Añadir',
     address: 'Dirección',
     apply: 'Aplicar',

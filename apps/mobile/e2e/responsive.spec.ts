@@ -835,7 +835,9 @@ for (const viewport of viewports) {
       await expectVisualScreen(page, '11-time-detail');
     }
     await expect(
-      page.getByRole('button', { name: 'Gniazdka', exact: true })
+      page
+        .locator('.app-bottom-nav')
+        .getByRole('button', { name: 'Gniazdka', exact: true })
     ).toHaveAttribute('aria-current', 'page');
     await expect(
       page.getByRole('button', { name: 'Ustawienia', exact: true })

@@ -698,6 +698,12 @@ const checkMobileProductionMarkupHygiene = async () => {
         'production mobile layout/style must use tokenized CSS classes, not inline style objects'
       );
     }
+    if (source.includes('‹') || source.includes('›')) {
+      addFailure(
+        path,
+        'production navigation chevrons must use icon components, not font glyphs'
+      );
+    }
     if (source.includes('IconInfoCircle')) {
       addFailure(
         path,

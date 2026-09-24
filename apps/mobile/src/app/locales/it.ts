@@ -146,6 +146,7 @@ export const it = {
       'Lo script salvato per questa automazione non corrisponde allo stato Shelly. Controlla il dispositivo prima di comandarlo.'
   },
   common: {
+    back: 'Indietro',
     add: 'Aggiungi',
     address: 'Indirizzo',
     apply: 'Applica',
