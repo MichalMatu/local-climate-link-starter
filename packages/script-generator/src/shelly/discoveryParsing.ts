@@ -165,6 +165,9 @@ function parseTp357Payload(data, offset, length) {
   if (humidity > 100 || temperature < -50 || temperature > 100) {
     return { ok: false, reason: "tp357-range-invalid" };
   }
+  var batteryState = battery & 3;
+  battery =
+    batteryState === 0 ? 1 : batteryState === 1 ? 50 : batteryState === 2 ? 100 : null;
   return { ok: true, temperature: temperature, humidity: humidity, battery: battery };
 }
 
