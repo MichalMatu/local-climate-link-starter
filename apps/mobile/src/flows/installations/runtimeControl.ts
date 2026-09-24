@@ -1,10 +1,6 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
-import {
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  normalizeShellyDeviceId,
-  RpcShellyClient
-} from '@lcl/shelly-client';
+import { normalizeShellyDeviceId, RpcShellyClient } from '@lcl/shelly-client';
 import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
@@ -52,12 +48,12 @@ export const installedAutomationScriptMatch = (
   return status.automationScriptId === installation.script.id ? 'matched' : 'mismatch';
 };
 
-const requireMatchedInstalledAutomation = async (
+const verifyRuntimeState = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationControlStatus> => {
   const status = await readInstalledAutomationControlStatus(installation);
-  if (installedAutomationScriptMatch(installation, status) !== 'matched') {
-    throw new Error('Stored automation script does not match Shelly.');
+  if (status.automationScriptId !== installation.script.id) {
+    throw new Error('Shelly runtime changed during the operation.');
   }
   return status;
 };
@@ -66,7 +62,7 @@ const verifyModeWithRelayOff = async (
   installation: ClimateInstalledAutomation,
   expectedMode: 'auto' | 'manual'
 ): Promise<InstalledAutomationControlStatus> => {
-  const status = await requireMatchedInstalledAutomation(installation);
+  const status = await verifyRuntimeState(installation);
   if (status.automationMode !== expectedMode || !status.runtimeModeSupported) {
     throw new Error(`Shelly did not confirm ${expectedMode.toUpperCase()} runtime mode.`);
   }
@@ -139,23 +135,23 @@ export const setInstalledAutomationRelayState = async (
   installation: ClimateInstalledAutomation,
   on: boolean
 ): Promise<InstalledAutomationActionResult> => {
-  await assertInstalledAutomationDeviceIdentity(installation);
-  const initialStatus = await requireMatchedInstalledAutomation(installation);
-  if (initialStatus.automationMode !== 'manual' || !initialStatus.runtimeModeSupported) {
+  const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
+  const nextInstallation = prepared.installation;
+  if (prepared.status.automationMode !== 'manual' || !prepared.status.runtimeModeSupported) {
     throw new Error('Manual relay control requires a live MANUAL automation runtime.');
   }
 
-  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
-  const relayId = installation.config.output.relayId;
+  const client = new RpcShellyClient(createShellyTransport(nextInstallation.shelly.baseUrl));
+  const relayId = nextInstallation.config.output.relayId;
   unwrapShellyResult(
     on ? await client.setRelayOn({ relayId }) : await client.setRelayOff({ relayId })
   );
 
-  const verified = await requireMatchedInstalledAutomation(installation);
+  const verified = await verifyRuntimeState(nextInstallation);
   if (verified.automationMode !== 'manual' || verified.relayOn !== on) {
     throw new Error(`Shelly did not confirm relay ${on ? 'ON' : 'OFF'} in MANUAL mode.`);
   }
-  return { installation, status: verified };
+  return { installation: nextInstallation, status: verified };
 };
 
 export const deleteInstalledAutomation = async (
@@ -164,43 +160,23 @@ export const deleteInstalledAutomation = async (
   await assertInstalledAutomationDeviceIdentity(installation);
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
   const relayId = installation.config.output.relayId;
+
+  await forceRelayOffAndConfirm(client, relayId);
   const setup = await readShellySetupStatus(installation.shelly.baseUrl);
-  const targetScript = setup.scripts.find(
-    (script) => script.id === installation.script.id
-  );
-  const conflictingManagedScript = setup.scripts.find(
-    (script) =>
-      script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME &&
-      script.id !== installation.script.id
-  );
 
-  if (targetScript && targetScript.name !== LOCAL_CLIMATE_LINK_SCRIPT_NAME) {
-    throw new Error('Stored script id belongs to a different Shelly script.');
-  }
-  if (conflictingManagedScript) {
-    throw new Error('Shelly contains another Shelly Link automation script.');
-  }
-
-  await forceRelayOffAndConfirm(client, relayId);
-  if (!targetScript) {
-    return;
-  }
-
-  if (targetScript.running) {
-    const stopResult = await client.stopScript(targetScript.id);
+  for (const script of setup.scripts) {
+    if (!script.running) continue;
+    unwrapShellyResult(await client.stopScript(script.id));
     await forceRelayOffAndConfirm(client, relayId);
-    unwrapShellyResult(stopResult);
   }
 
-  const deleteResult = await client.deleteScript(targetScript.id);
-  await forceRelayOffAndConfirm(client, relayId);
-  unwrapShellyResult(deleteResult);
+  for (const script of setup.scripts) {
+    unwrapShellyResult(await client.deleteScript(script.id));
+    await forceRelayOffAndConfirm(client, relayId);
+  }
 
   const verified = await readShellySetupStatus(installation.shelly.baseUrl);
-  if (
-    verified.status.relayOn ||
-    verified.scripts.some((script) => script.id === installation.script.id)
-  ) {
+  if (verified.status.relayOn || verified.scripts.length !== 0) {
     throw new Error('Shelly did not confirm a safely deleted automation.');
   }
 };
