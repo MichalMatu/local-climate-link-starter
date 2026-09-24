@@ -727,6 +727,26 @@ const cssDeclarationBlock = (source, selector) => {
   return bodyEnd === -1 ? null : source.slice(bodyStart, bodyEnd);
 };
 
+const checkPageTitleTypographyContract = async () => {
+  const tokenPath = 'packages/design-tokens/tokens/tokens.json';
+  const tokenSource = await readRepoFile(tokenPath);
+  if (!tokenSource.includes('"3xl": "2rem"')) {
+    addFailure(tokenPath, 'page-title typography requires the dedicated 3xl token');
+  }
+
+  const blockedExpression =
+    'font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));';
+  for (const path of [
+    'apps/mobile/src/theme/theme.css',
+    'apps/mobile/src/screens/AutomationDashboardScreen.css'
+  ]) {
+    const source = await readRepoFile(path);
+    if (source.includes(blockedExpression)) {
+      addFailure(path, 'page-title font size must not depend on spacing tokens');
+    }
+  }
+};
+
 const checkPageHeaderContract = async () => {
   const pageHeaders = [
     ['apps/mobile/src/screens/SetupIntentScreen.tsx', 'intent-header app-page-header'],
@@ -942,6 +962,7 @@ await checkResponsiveCss();
 await checkModalSizingPatterns();
 await checkThemeTokenPatterns();
 await checkMobileProductionMarkupHygiene();
+await checkPageTitleTypographyContract();
 await checkPageHeaderContract();
 await checkDisclosureContract();
 await checkSegmentedControlContract();

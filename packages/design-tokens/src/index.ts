@@ -70,6 +70,7 @@ export const tokens = {
     lg: '0.95rem',
     xl: '1rem',
     '2xl': '1.25rem',
+    '3xl': '2rem',
     code: '0.78rem'
   },
   fontWeight: {
