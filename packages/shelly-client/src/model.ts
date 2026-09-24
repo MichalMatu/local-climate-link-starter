@@ -70,6 +70,7 @@ export interface ShellyInstallPlan {
   code: string;
   runOnBoot: boolean;
   backupExisting: boolean;
+  replaceAllScripts?: boolean | undefined;
   chunkSizeBytes?: number | undefined;
 }
 
@@ -150,5 +151,5 @@ export const RPC_METHODS = {
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
 
-export const LOCAL_CLIMATE_LINK_SCRIPT_NAME = 'Shelly Link Thermostat';
-export const LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME = 'Shelly Link BLE Discovery';
+export const SHELLY_LINK_SCRIPT_NAME = 'Shelly Link Thermostat';
+export const SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME = 'Shelly Link BLE Discovery';
