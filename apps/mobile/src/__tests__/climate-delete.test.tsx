@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { LOCAL_CLIMATE_LINK_SCRIPT_NAME, type ShellyRpcMethod } from '@lcl/shelly-client';
+import { SHELLY_LINK_SCRIPT_NAME, type ShellyRpcMethod } from '@lcl/shelly-client';
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
@@ -29,7 +29,7 @@ const installation = () => {
     shellyName: 'Salon',
     baseUrl: 'http://192.168.0.20/',
     scriptId: 1,
-    scriptHash: 'lcl-delete',
+    scriptHash: 'stale-development-hash',
     config: {
       ...base,
       sensor: {
@@ -82,8 +82,8 @@ const installShellyDeleteMock = (
 ) => {
   let relayOn = true;
   let scripts: ScriptEntry[] = [
-    { id: 1, name: LOCAL_CLIMATE_LINK_SCRIPT_NAME, enable: true, running: true },
-    { id: 77, name: 'User utility script', enable: true, running: true }
+    { id: 1, name: SHELLY_LINK_SCRIPT_NAME, enable: true, running: true },
+    { id: 77, name: 'Arbitrary development script', enable: true, running: true }
   ];
   const rpcCalls: Array<{ method: ShellyRpcMethod; params?: Record<string, unknown> }> =
     [];
@@ -197,21 +197,35 @@ describe('climate automation delete', () => {
     vi.unstubAllGlobals();
   });
 
-  it('deletes only the exact managed script and leaves the relay OFF', async () => {
+  it('stops and deletes every Shelly script and leaves the relay OFF', async () => {
     const saved = installation();
     const shelly = installShellyDeleteMock();
 
     await deleteInstalledAutomation(saved);
 
     expect(shelly.relayOn).toBe(false);
-    expect(shelly.scripts.some((script) => script.id === saved.script.id)).toBe(false);
-    expect(shelly.scripts.some((script) => script.id === 77)).toBe(true);
-    const deletes = shelly.rpcCalls.filter((call) => call.method === 'Script.Delete');
-    expect(deletes).toHaveLength(1);
-    expect(deletes[0]?.params?.id).toBe(saved.script.id);
+    expect(shelly.scripts).toEqual([]);
+    expect(
+      shelly.rpcCalls
+        .filter((call) => call.method === 'Script.Delete')
+        .map((call) => call.params?.id)
+    ).toEqual([1, 77]);
   });
 
-  it('refuses deletion when the saved endpoint belongs to another Shelly', async () => {
+  it('does not use the stored script id or hash to decide what may be deleted', async () => {
+    const saved = {
+      ...installation(),
+      script: { id: 999, hash: 'stale-and-wrong' }
+    };
+    const shelly = installShellyDeleteMock();
+
+    await deleteInstalledAutomation(saved);
+
+    expect(shelly.scripts).toEqual([]);
+    expect(shelly.relayOn).toBe(false);
+  });
+
+  it('refuses deletion before any mutation when the endpoint belongs to another Shelly', async () => {
     const saved = installation();
     const shelly = installShellyDeleteMock({ deviceId: 'shellyplugsg3-other' });
 
@@ -219,7 +233,7 @@ describe('climate automation delete', () => {
       'Shelly identity does not match the installed automation.'
     );
     expect(shelly.relayOn).toBe(true);
-    expect(shelly.scripts.some((script) => script.id === saved.script.id)).toBe(true);
+    expect(shelly.scripts).toHaveLength(2);
     expect(
       shelly.rpcCalls.filter((call) =>
         ['Switch.Set', 'Script.Stop', 'Script.Delete'].includes(call.method)
@@ -227,7 +241,7 @@ describe('climate automation delete', () => {
     ).toEqual([]);
   });
 
-  it('removes the local entry only after Shelly confirms deletion', async () => {
+  it('removes the local entry only after Shelly confirms every script was deleted', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const shelly = installShellyDeleteMock();
@@ -244,10 +258,10 @@ describe('climate automation delete', () => {
         .installations.some((item) => item.id === saved.id)
     ).toBe(false);
     expect(shelly.relayOn).toBe(false);
-    expect(shelly.scripts.some((script) => script.id === 77)).toBe(true);
+    expect(shelly.scripts).toEqual([]);
   });
 
-  it('keeps the local entry when Shelly deletion fails', async () => {
+  it('keeps the local entry when Shelly script deletion fails', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const shelly = installShellyDeleteMock({ failDelete: true });
