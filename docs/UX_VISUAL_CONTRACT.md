@@ -26,6 +26,20 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
 7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
 
+## Surface taxonomy
+
+Surface differences are intentional only when they map to one of these roles:
+
+- `demo-panel` — page-level working panel; large radius, elevated glass surface, fluid panel padding.
+- `automation-card` — dashboard/detail object card; large radius, object-level density controlled by context.
+- `app-settings__section` — settings group; large radius, flat surface, medium spacing/padding.
+- `saved-list__item` — compact saved-device row/card; medium radius and medium density.
+- `plug-detail-framed-section` — diagnostic fieldset with a title crossing the border; medium radius and asymmetric top padding are intentional.
+- `installation-ble-card` — bordered list container; medium radius with clipped child rows.
+- `lcl-card` — reusable package-level card primitive; do not assume it is interchangeable with every product surface.
+
+Do not normalize these roles by copying padding/radius values between selectors. If two screens represent the same role, they must reuse the same role/class or a shared primitive. A new surface role requires an explicit visual-contract update and reviewed screenshot delta.
+
 ## Canonical states
 
 `apps/mobile/e2e/visual-contract.ts` is the source of truth for the 17 names. New top-level screens or materially different full-screen states must be added there and receive a baseline in the same change.
