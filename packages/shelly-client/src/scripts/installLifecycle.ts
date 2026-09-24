@@ -11,7 +11,11 @@ import {
   type ShellyStatus
 } from '../model.js';
 import { validationError } from '../rpc/errors.js';
-import { scriptCreateResponseSchema, scriptStatusSchema } from '../rpc/validators.js';
+import {
+  scriptCreateResponseSchema,
+  scriptStatusSchema,
+  switchStatusSchema
+} from '../rpc/validators.js';
 import { hashScriptCode } from './hash.js';
 import { readShellyScriptCode, readShellyScriptList } from './read.js';
 
@@ -102,6 +106,45 @@ const stopBleScannerInScript = async (
   await sleepMs(BLE_SCANNER_CLEANUP_DELAY_MS);
 };
 
+const confirmRelayOffBeforeDestructiveReplacement = async (
+  lifecycle: InstallLifecycle,
+  relayId: number
+): Promise<Result<null>> => {
+  if (!Number.isInteger(relayId) || relayId < 0) {
+    return {
+      ok: false,
+      error: validationError(`Invalid Shelly relay id: ${relayId}.`)
+    };
+  }
+
+  const offResult = await lifecycle.callMutation({
+    method: RPC_METHODS.SwitchSet,
+    params: { id: relayId, on: false }
+  });
+  if (!offResult.ok) return offResult;
+
+  const statusResult = await lifecycle.transport.call<unknown>({
+    method: RPC_METHODS.SwitchGetStatus,
+    params: { id: relayId }
+  });
+  if (!statusResult.ok) return statusResult;
+
+  const parsed = switchStatusSchema.safeParse(statusResult.value);
+  if (!parsed.success) {
+    return { ok: false, error: validationError(parsed.error.message) };
+  }
+  if (parsed.data.output) {
+    return {
+      ok: false,
+      error: scriptUploadError(
+        'Shelly relay did not confirm OFF before destructive script replacement.'
+      )
+    };
+  }
+
+  return { ok: true, value: null };
+};
+
 const removeScripts = async (
   lifecycle: InstallLifecycle,
   scripts: Array<{ id: number; running: boolean }>
@@ -177,7 +220,13 @@ export const installShellyScript = async (
   }
 
   const chunkSizeBytes = plan.chunkSizeBytes ?? DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES;
-  if (plan.replaceAllScripts) {
+  if (plan.replaceAllScripts && list.value.length > 0) {
+    const relayOff = await confirmRelayOffBeforeDestructiveReplacement(
+      lifecycle,
+      plan.relayId ?? 0
+    );
+    if (!relayOff.ok) return relayOff;
+
     const removed = await removeScripts(lifecycle, list.value);
     if (!removed.ok) return removed;
   }
