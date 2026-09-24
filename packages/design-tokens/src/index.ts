@@ -117,7 +117,8 @@ export const tokens = {
   breakpoint: {
     marketing: '62rem',
     compact: '44rem',
-    narrow: '30rem'
+    narrow: '30rem',
+    phoneCompact: '25rem'
   },
   shadow: {
     sm: '0 1px 2px rgba(29, 29, 31, 0.08)',
