@@ -60,8 +60,10 @@
 
 .plug-led-state legend,
 .plug-night-mode legend {
+  background: var(--lcl-color-background);
   font-size: var(--lcl-font-size-md);
   font-weight: var(--lcl-font-weight-bold);
+  line-height: var(--lcl-line-height-tight);
   padding: 0 var(--lcl-spacing-xs);
 }
 
