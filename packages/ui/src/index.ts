@@ -1,4 +1,5 @@
 import './styles.css';
+import './primitives/SegmentedControl.css';
 
 export * from './feedback/StatusBadge.js';
 export * from './feedback/InfoPopover.js';

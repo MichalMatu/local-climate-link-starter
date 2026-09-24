@@ -1,0 +1,31 @@
+.lcl-segmented-control {
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-lg);
+  gap: var(--lcl-spacing-xs);
+  padding: var(--lcl-spacing-xs);
+}
+
+.lcl-segmented-control__item {
+  align-items: center;
+  background: transparent;
+  border: var(--lcl-border-width-sm) solid transparent;
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  min-height: var(--lcl-size-control-min-height);
+  min-width: 0;
+}
+
+.lcl-segmented-control__item:hover,
+.lcl-segmented-control__item:focus-visible {
+  background: var(--lcl-color-surface-muted);
+  color: var(--lcl-color-text);
+}
+
+.lcl-segmented-control__item:focus-visible {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: var(--lcl-border-width-sm);
+}
