@@ -19,7 +19,9 @@ export const visualScreenNames = [
   '14-settings',
   '15-add-plug',
   '16-climate-setup',
-  '17-plain-plug-settings'
+  '17-plain-plug-settings',
+  '18-settings-diagnostics-open',
+  '19-climate-advanced-open'
 ] as const;
 
 export type VisualScreenName = (typeof visualScreenNames)[number];

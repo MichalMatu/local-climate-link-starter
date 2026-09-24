@@ -973,6 +973,13 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '14-settings');
     }
+    await settingsDiagnostics.locator('summary').click();
+    await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '18-settings-diagnostics-open');
+    }
+    await settingsDiagnostics.locator('summary').click();
+    await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeHidden();
     await page.getByRole('button', { name: 'Gniazdka', exact: true }).click();
 
     await page.getByRole('button', { name: 'Dodaj gniazdko', exact: true }).click();
@@ -1008,6 +1015,9 @@ for (const viewport of viewports) {
     }
     await ensureRuleAdvancedOpen(page);
     await expect(advancedDisclosure.locator('.lcl-disclosure__body')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '19-climate-advanced-open');
+    }
     await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
