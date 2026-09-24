@@ -6,6 +6,8 @@ This contract exists to stop small layout differences from reappearing after ref
 
 The 2026-09-24 Local Agent audit rendered 19 application states in Chromium. All canonical visual baselines use the shared 412×915 phone viewport.
 
+Canonical renderer: **macOS (`darwin`)**. Direct `pnpm e2e:visual` and `pnpm e2e:visual:update` runs fail closed on other platforms. `prepush` is platform-aware: macOS runs the canonical visual contract, while Linux/CI/Raspberry Pi runs `pnpm e2e:responsive`; on non-macOS those responsive tests keep behavioral/layout coverage but skip Darwin screenshot assertions, so font rasterization differences cannot masquerade as product regressions.
+
 Measured drift before this contract included:
 
 - page-level H1 geometry split between 26px/31.2px and 32px with two different line-heights;

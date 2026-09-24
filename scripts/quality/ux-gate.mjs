@@ -790,6 +790,74 @@ const checkPageHeaderContract = async () => {
   }
 };
 
+const checkCanonicalVisualPlatformContract = async () => {
+  const visualPath = 'apps/mobile/e2e/visual-contract.ts';
+  const packagePath = 'package.json';
+  const guardPath = 'scripts/quality/require-canonical-visual-platform.mjs';
+  const prepushRunnerPath = 'scripts/quality/run-prepush-e2e.mjs';
+  const [visualSource, packageSource, guardSource, prepushRunnerSource] =
+    await Promise.all([
+      readRepoFile(visualPath),
+      readRepoFile(packagePath),
+      readRepoFile(guardPath),
+      readRepoFile(prepushRunnerPath)
+    ]);
+  const packageJson = JSON.parse(packageSource);
+
+  if (
+    !visualSource.includes("export const canonicalVisualPlatform = 'darwin' as const;")
+  ) {
+    addFailure(
+      visualPath,
+      'canonical UX screenshots must declare macOS as their renderer'
+    );
+  }
+  if (
+    !visualSource.includes("process.env.LCL_VISUAL_CONTRACT === '1'") ||
+    !visualSource.includes('process.platform !== canonicalVisualPlatform')
+  ) {
+    addFailure(
+      visualPath,
+      'cross-platform responsive smoke must skip macOS screenshot assertions while required visual runs fail closed'
+    );
+  }
+  for (const scriptName of ['e2e:visual', 'e2e:visual:update']) {
+    const command = packageJson.scripts?.[scriptName] ?? '';
+    if (
+      !command.startsWith(
+        'node scripts/quality/require-canonical-visual-platform.mjs && LCL_VISUAL_CONTRACT=1 '
+      )
+    ) {
+      addFailure(
+        packagePath,
+        `${scriptName} must fail closed outside the canonical macOS renderer`
+      );
+    }
+  }
+  if (
+    packageJson.scripts?.prepush !==
+    'pnpm check && node scripts/quality/run-prepush-e2e.mjs'
+  ) {
+    addFailure(packagePath, 'prepush must use the platform-aware E2E runner');
+  }
+  if (
+    !guardSource.includes("const canonicalPlatform = 'darwin';") ||
+    !guardSource.includes('process.platform !== canonicalPlatform')
+  ) {
+    addFailure(guardPath, 'canonical visual platform guard is incomplete');
+  }
+  if (
+    !prepushRunnerSource.includes(
+      "process.platform === 'darwin' ? 'e2e:visual' : 'e2e:responsive'"
+    )
+  ) {
+    addFailure(
+      prepushRunnerPath,
+      'prepush must run canonical visuals on macOS and responsive smoke on other platforms'
+    );
+  }
+};
+
 const checkDisclosureContract = async () => {
   const path = 'packages/ui/src/primitives/Disclosure.css';
   const source = await readRepoFile(path);
@@ -964,6 +1032,7 @@ await checkThemeTokenPatterns();
 await checkMobileProductionMarkupHygiene();
 await checkPageTitleTypographyContract();
 await checkPageHeaderContract();
+await checkCanonicalVisualPlatformContract();
 await checkDisclosureContract();
 await checkSegmentedControlContract();
 await checkPackageRuntimeCopy();
