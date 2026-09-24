@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   createInstallPlan,
   hashScriptCode,
+  normalizeShellyDeviceId,
   RpcShellyClient,
   RpcShellyScheduleClient,
   type RelayTestResult,
@@ -19,6 +20,7 @@ import {
   useInstalledAutomationStore,
   type ClimateInstalledAutomation
 } from '../../features/automations/index.js';
+import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
@@ -51,6 +53,17 @@ export const isHardwareInstallStateCurrent = (
   scriptHash !== null &&
   state.shellyId === shellyId &&
   state.scriptHash === scriptHash;
+
+export const assertSelectedShellyIdentity = (
+  selectedDeviceId: string,
+  remoteDeviceId: string
+): void => {
+  if (
+    normalizeShellyDeviceId(selectedDeviceId) !== normalizeShellyDeviceId(remoteDeviceId)
+  ) {
+    throw new Error('Shelly identity changed before automation install.');
+  }
+};
 
 export const useClimateAutomationInstallFlow = ({
   selectedShelly,
@@ -146,7 +159,7 @@ export const useClimateAutomationInstallFlow = ({
           requiresSafeRelayTest: false
         };
       }
-      await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
+
       const transport = createShellyTransport(shelly.baseUrl);
       const client = new RpcShellyClient(transport);
       const scheduleClient = new RpcShellyScheduleClient(transport);
@@ -155,6 +168,8 @@ export const useClimateAutomationInstallFlow = ({
       if (!deviceId) {
         throw new Error(t('hardware.flow.shellyIdentityMissing'));
       }
+      assertSelectedShellyIdentity(shelly.id, deviceId);
+
       if (
         findRelayOwnerConflict({
           installations: installedAutomations,
@@ -169,6 +184,9 @@ export const useClimateAutomationInstallFlow = ({
       if (findScheduleRelayConflict(schedules.jobs, config.output.relayId)) {
         throw new Error(t('hardware.flow.relayOwnedByNativeSchedule'));
       }
+
+      await forceRelayOffAndConfirm(client, config.output.relayId);
+      await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
       const install = unwrapShellyResult(
         await client.installScript(createInstallPlan(configState.script))
       );
