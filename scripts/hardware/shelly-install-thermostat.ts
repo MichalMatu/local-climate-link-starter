@@ -6,6 +6,7 @@ import {
 import {
   createInstallPlan,
   FetchShellyRpcTransport,
+  normalizeShellyDeviceId,
   RPC_METHODS,
   RpcShellyClient
 } from '@lcl/shelly-client';
@@ -18,7 +19,7 @@ const SENSOR_PROFILES = new Set<SensorProfileId>([
 ]);
 
 const USAGE =
-  'Usage: SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> pnpm hardware:shelly:install';
+  'Usage: SHELLY_URL=http://<shelly-ip> SHELLY_DEVICE_ID=<device-id> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> pnpm hardware:shelly:install';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -239,6 +240,7 @@ const main = async (): Promise<void> => {
 
   try {
     const shellyUrl = new URL(readRequiredEnv('SHELLY_URL'));
+    const expectedDeviceId = normalizeShellyDeviceId(readRequiredEnv('SHELLY_DEVICE_ID'));
     const config = createHardwareConfig();
     const observeMs = readIntegerEnv('OBSERVE_MS', 15000, 0, 300000);
     const code = generateShellyThermostatScript(config);
@@ -251,19 +253,39 @@ const main = async (): Promise<void> => {
 
     report.config = {
       shellyUrl: shellyUrl.toString(),
+      expectedDeviceId,
       sensor: config.sensor,
       rule: config.rule,
       scriptBytes: new TextEncoder().encode(code).length
     };
-    report.deviceInfo = serializeResult(
-      await transport.call({ method: RPC_METHODS.ShellyGetDeviceInfo })
-    );
-    report.statusBefore = serializeResult(
-      await transport.call({ method: RPC_METHODS.ShellyGetStatus })
-    );
+    const deviceInfo = await client.getDeviceInfo();
+    report.deviceInfo = serializeResult(deviceInfo);
+    if (!deviceInfo.ok) {
+      throw new Error('Could not verify Shelly identity before destructive install.');
+    }
+    const remoteDeviceId = deviceInfo.value.id?.trim();
+    if (
+      !remoteDeviceId ||
+      normalizeShellyDeviceId(remoteDeviceId) !== expectedDeviceId
+    ) {
+      throw new Error('Shelly identity does not match SHELLY_DEVICE_ID.');
+    }
+
+    report.statusBefore = serializeResult(await client.getStatus());
     report.relayBefore = serializeResult(
       await transport.call({ method: RPC_METHODS.SwitchGetStatus, params: { id: 0 } })
     );
+
+    const off = await client.setRelayOff({ relayId: config.output.relayId });
+    report.preInstallOff = serializeResult(off);
+    if (!off.ok) {
+      throw new Error('Could not force relay OFF before destructive install.');
+    }
+    const offStatus = await client.getStatus();
+    report.preInstallStatus = serializeResult(offStatus);
+    if (!offStatus.ok || offStatus.value.relayOn) {
+      throw new Error('Shelly did not confirm relay OFF before destructive install.');
+    }
 
     const install = await client.installScript(createInstallPlan(code));
     report.install = serializeResult(install);
