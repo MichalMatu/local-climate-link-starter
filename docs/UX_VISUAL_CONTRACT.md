@@ -4,7 +4,7 @@ This contract exists to stop small layout differences from reappearing after ref
 
 ## Canonical audit
 
-The 2026-09-24 Local Agent audit rendered 17 application states in Chromium. All canonical visual baselines use the shared 412×915 phone viewport.
+The 2026-09-24 Local Agent audit rendered 19 application states in Chromium. All canonical visual baselines use the shared 412×915 phone viewport.
 
 Measured drift before this contract included:
 
@@ -26,6 +26,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
 7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
 8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract.
+   Both collapsed and expanded product states are visually baseline-protected.
 9. Navigation chevrons are icon components, never font glyphs such as `‹` or `›`, so their geometry is stable across browser and Android font fallback.
 
 ## Surface taxonomy
@@ -44,11 +45,11 @@ Do not normalize these roles by copying padding/radius values between selectors.
 
 ## Canonical states
 
-`apps/mobile/e2e/visual-contract.ts` is the source of truth for the 17 names. New top-level screens or materially different full-screen states must be added there and receive a baseline in the same change.
+`apps/mobile/e2e/visual-contract.ts` is the source of truth for the 19 names. New top-level screens or materially different full-screen states must be added there and receive a baseline in the same change.
 
 ## Local Agent workflow
 
-Run visual checks locally. GitHub Actions availability is not assumed. `prepush` runs the four deterministic scenarios that cover all 17 canonical baselines.
+Run visual checks locally. GitHub Actions availability is not assumed. `prepush` runs the four deterministic scenarios that cover all 19 canonical baselines.
 
 ```sh
 pnpm quality:ux
