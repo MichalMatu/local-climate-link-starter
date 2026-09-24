@@ -30,7 +30,11 @@ export type ClimateAutomationEditServices = {
   readDeviceId(baseUrl: string): Promise<string>;
   hasNativeScheduleConflict(baseUrl: string, relayId: number): Promise<boolean>;
   forceRelayOff(baseUrl: string, relayId: number): Promise<void>;
-  replaceManagedScript(baseUrl: string, code: string): Promise<ShellyInstallResult>;
+  replaceManagedScript(
+    baseUrl: string,
+    code: string,
+    relayId: number
+  ): Promise<ShellyInstallResult>;
   nowMs(): number;
 };
 
@@ -55,10 +59,10 @@ const defaultServices: ClimateAutomationEditServices = {
     const status = unwrapShellyResult(await client.getStatus());
     if (status.relayOn) throw new Error('Shelly relay did not confirm OFF.');
   },
-  replaceManagedScript: async (baseUrl, code) =>
+  replaceManagedScript: async (baseUrl, code, relayId) =>
     unwrapShellyResult(
       await new RpcShellyClient(createShellyTransport(baseUrl)).installScript(
-        createInstallPlan(code)
+        createInstallPlan(code, relayId)
       )
     ),
   nowMs: Date.now
@@ -123,7 +127,11 @@ export const updateClimateInstalledAutomation = async ({
 
   await services.forceRelayOff(installation.shelly.baseUrl, config.output.relayId);
   const code = generateShellyThermostatScript(config);
-  const install = await services.replaceManagedScript(installation.shelly.baseUrl, code);
+  const install = await services.replaceManagedScript(
+    installation.shelly.baseUrl,
+    code,
+    config.output.relayId
+  );
   await services.forceRelayOff(installation.shelly.baseUrl, config.output.relayId);
 
   const verified = await services.readManagedRuntime(installation.shelly.baseUrl);

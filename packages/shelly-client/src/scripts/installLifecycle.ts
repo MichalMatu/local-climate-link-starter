@@ -147,18 +147,24 @@ const confirmRelayOffBeforeDestructiveReplacement = async (
 
 const removeScripts = async (
   lifecycle: InstallLifecycle,
-  scripts: Array<{ id: number; running: boolean }>
+  scripts: Array<{ id: number; running: boolean }>,
+  relayId: number
 ): Promise<Result<null>> => {
   for (const script of scripts) {
-    if (script.running) {
-      await stopBleScannerInScript(script.id, lifecycle.callMutation, lifecycle.sleepMs);
-      const stopResult = await lifecycle.callMutation({
-        method: RPC_METHODS.ScriptStop,
-        params: { id: script.id }
-      });
-      if (!stopResult.ok) return stopResult;
-    }
+    if (!script.running) continue;
 
+    await stopBleScannerInScript(script.id, lifecycle.callMutation, lifecycle.sleepMs);
+    const stopResult = await lifecycle.callMutation({
+      method: RPC_METHODS.ScriptStop,
+      params: { id: script.id }
+    });
+    if (!stopResult.ok) return stopResult;
+  }
+
+  const relayOff = await confirmRelayOffBeforeDestructiveReplacement(lifecycle, relayId);
+  if (!relayOff.ok) return relayOff;
+
+  for (const script of scripts) {
     const deleteResult = await lifecycle.callMutation({
       method: RPC_METHODS.ScriptDelete,
       params: { id: script.id }
@@ -227,7 +233,7 @@ export const installShellyScript = async (
     );
     if (!relayOff.ok) return relayOff;
 
-    const removed = await removeScripts(lifecycle, list.value);
+    const removed = await removeScripts(lifecycle, list.value, plan.relayId ?? 0);
     if (!removed.ok) return removed;
   }
 

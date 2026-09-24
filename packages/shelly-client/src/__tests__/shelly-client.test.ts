@@ -467,15 +467,19 @@ describe('RpcShellyClient', () => {
         (request.params as { id?: number; on?: boolean } | undefined)?.id === 0 &&
         (request.params as { id?: number; on?: boolean } | undefined)?.on === false
     );
-    const offStatusIndex = transport.requests.findIndex(
+    const firstOffStatusIndex = transport.requests.findIndex(
       (request) => request.method === RPC_METHODS.SwitchGetStatus
     );
+    const lastOffStatusIndex = transport.requests
+      .map((request) => request.method)
+      .lastIndexOf(RPC_METHODS.SwitchGetStatus);
     const firstDeleteIndex = transport.requests.findIndex(
       (request) => request.method === RPC_METHODS.ScriptDelete
     );
     expect(offIndex).toBeGreaterThan(-1);
-    expect(offStatusIndex).toBeGreaterThan(offIndex);
-    expect(firstDeleteIndex).toBeGreaterThan(offStatusIndex);
+    expect(firstOffStatusIndex).toBeGreaterThan(offIndex);
+    expect(lastOffStatusIndex).toBeGreaterThan(firstOffStatusIndex);
+    expect(firstDeleteIndex).toBeGreaterThan(lastOffStatusIndex);
     expect(transport.relayOn).toBe(false);
     expect(result.value.backup).toBeUndefined();
     expect(

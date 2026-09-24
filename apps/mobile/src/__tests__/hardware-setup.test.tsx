@@ -420,8 +420,9 @@ describe('HardwareSetupScreen', () => {
     document.documentElement.removeAttribute('data-lcl-theme');
     window.history.replaceState(null, '', '/');
     let relayOn = false;
+    let thermostatScriptId = 1;
+    let thermostatExists = true;
     let thermostatRunning = true;
-    let thermostatDeleted = false;
     let thermostatCode = createStoredThermostatScript();
     vi.stubGlobal(
       'fetch',
@@ -446,7 +447,7 @@ describe('HardwareSetupScreen', () => {
             ]
           });
         }
-        if (url.pathname === '/script/1/diag') {
+        if (url.pathname === `/script/${thermostatScriptId}/diag`) {
           return jsonResponse({
             v: 1,
             z: 'lcl-12345678',
@@ -516,16 +517,16 @@ describe('HardwareSetupScreen', () => {
             return rpcResult({ jobs: [], rev: 0 });
           case 'Script.List':
             return rpcResult({
-              scripts: thermostatDeleted
-                ? []
-                : [
+              scripts: thermostatExists
+                ? [
                     {
-                      id: 1,
+                      id: thermostatScriptId,
                       name: 'Shelly Link Thermostat',
                       enable: true,
                       running: thermostatRunning
                     }
                   ]
+                : []
             });
           case 'Script.GetCode':
             return rpcResult({ data: thermostatCode, left: 0 });
@@ -536,12 +537,25 @@ describe('HardwareSetupScreen', () => {
             }
             return rpcResult({});
           }
-          case 'Script.Create':
+          case 'Script.Create': {
+            const params = body.params as { name?: string } | undefined;
+            if (params?.name === 'Shelly Link Thermostat') {
+              thermostatScriptId = 4;
+              thermostatExists = true;
+              thermostatRunning = false;
+              thermostatCode = '';
+            }
             return rpcResult({ id: 4 });
+          }
           case 'Script.PutCode': {
-            const params = body.params as { append?: boolean; code?: string } | undefined;
-            thermostatDeleted = false;
-            if (params?.code !== undefined) {
+            const params = body.params as
+              | {
+                  id?: number;
+                  append?: boolean;
+                  code?: string;
+                }
+              | undefined;
+            if (params?.id === thermostatScriptId && params.code !== undefined) {
               thermostatCode =
                 params.append === true ? `${thermostatCode}${params.code}` : params.code;
             }
@@ -551,22 +565,22 @@ describe('HardwareSetupScreen', () => {
             return rpcResult({});
           case 'Script.Start': {
             const params = body.params as { id?: number } | undefined;
-            if (params?.id === 1) {
+            if (params?.id === thermostatScriptId && thermostatExists) {
               thermostatRunning = true;
             }
             return rpcResult({});
           }
           case 'Script.Stop': {
             const params = body.params as { id?: number } | undefined;
-            if (params?.id === 1) {
+            if (params?.id === thermostatScriptId && thermostatExists) {
               thermostatRunning = false;
             }
             return rpcResult({});
           }
           case 'Script.Delete': {
             const params = body.params as { id?: number } | undefined;
-            if (params?.id === 1) {
-              thermostatDeleted = true;
+            if (params?.id === thermostatScriptId && thermostatExists) {
+              thermostatExists = false;
               thermostatRunning = false;
             }
             return rpcResult({});
@@ -2093,11 +2107,18 @@ describe('HardwareSetupScreen', () => {
 
   it('removes a stale BLE discovery script before saving the rule', async () => {
     const defaultFetch = vi.mocked(fetch);
+    let discoveryPresent = true;
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const body = requestBody(init);
-        if (requestUrl(input).pathname === '/rpc' && body.method === 'Script.List') {
+        const isRpc = requestUrl(input).pathname === '/rpc';
+        const scriptId = (body.params as { id?: number } | undefined)?.id;
+        if (isRpc && body.method === 'Script.Delete' && scriptId === 8) {
+          discoveryPresent = false;
+          return rpcResult({});
+        }
+        if (isRpc && body.method === 'Script.List' && discoveryPresent) {
           return rpcResult({
             scripts: [
               {

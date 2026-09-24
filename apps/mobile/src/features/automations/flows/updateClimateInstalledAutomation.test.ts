@@ -79,7 +79,8 @@ describe('updateClimateInstalledAutomation', () => {
     expect(mocked.replaceManagedScript).toHaveBeenCalledTimes(1);
     expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
       installation.shelly.baseUrl,
-      editedCode
+      editedCode,
+      editedConfig.output.relayId
     );
     expect(result.installation).toMatchObject({
       id: installation.id,

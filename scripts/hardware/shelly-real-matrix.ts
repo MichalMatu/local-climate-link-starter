@@ -468,7 +468,7 @@ const installRuntime = async (
 ): Promise<{ scriptId: number; scriptBytes: number }> => {
   const code = generateShellyThermostatScript(config);
   const install = await client.installScript({
-    ...createInstallPlan(code),
+    ...createInstallPlan(code, config.output.relayId),
     chunkSizeBytes: 1024
   });
   if (!install.ok) {
