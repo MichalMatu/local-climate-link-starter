@@ -975,7 +975,7 @@ describe('generateShellyThermostatScript', () => {
 describe('generateShellyBleDiscoveryScript', () => {
   it('generates a deterministic temporary Shelly-side BLE discovery script', () => {
     expect(generateShellyBleDiscoveryScript()).toBe(generateShellyBleDiscoveryScript());
-    expect(generateShellyBleDiscoveryScript()).toContain('// s: lcl-daa588c5');
+    expect(generateShellyBleDiscoveryScript()).toContain('// s: lcl-e77f1ebc');
   });
 
   it('scans compatible sensors without controlling the relay', () => {

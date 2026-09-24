@@ -162,7 +162,13 @@ export const parseTp357ManufacturerData = (
   const humidityPct = payload[3] ?? 0;
   const batteryState = (payload[4] ?? 0) & 0x03;
   const batteryPct =
-    batteryState === 0 ? 1 : batteryState === 1 ? 50 : batteryState === 2 ? 100 : undefined;
+    batteryState === 0
+      ? 1
+      : batteryState === 1
+        ? 50
+        : batteryState === 2
+          ? 100
+          : undefined;
 
   if (humidityPct > 100 || temperatureC < -50 || temperatureC > 100) {
     return {

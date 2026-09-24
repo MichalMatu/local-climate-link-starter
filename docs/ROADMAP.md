@@ -57,29 +57,19 @@ Accepted baseline:
 
 Final dashboard correction `349446f86f6d63c37ececa439ec12ef826b06d2f` passed full `pnpm check:full` and was installed on Samsung SM-S906B / Android 16 with app data preserved. The final real-device state was accepted by the user.
 
-## 4. TP357 battery decoding compatibility — NEXT BUGFIX
+## 4. TP357 battery decoding compatibility — DONE
 
-A real-device defect was identified on 2026-09-24 and should be fixed before starting the next product expansion.
+The battery-reporting defect was reproduced and resolved from real BLE evidence on 2026-09-24.
 
-Observed hardware:
+macOS CoreBluetooth capture found five affected `TP357` units with six-byte manufacturer payloads such as `C2 DC 00 32 02 2C`; all five carry raw battery byte `0x02`. The existing sixth unit advertises as `TP357S` with seven-byte payload `C2 DF 00 4A 22 0B 01` and raw battery byte `0x22`. In both cases the low two bits are state `2`, so both represent the same 100% battery state. The previously plausible `34%` reading from `0x22` was also a decoding bug, not a separate direct-percentage format.
 
-- five used silver TP357 units fitted with fresh AAA batteries all render approximately `2%` battery in Shelly Link;
-- one existing white TP357 appears to report a plausible percentage;
-- the production/revision order of the white vs silver enclosures is not established. Enclosure color must **not** be used as a protocol discriminator.
+The implementation now treats byte 4 as a bitfield and maps its low-two-bit state as `0 -> 1%`, `1 -> 50%`, `2 -> 100%`; state `3` is treated as unknown without discarding valid temperature/humidity. The same semantics are applied in:
 
-Current implementation exposes byte 4 of the TP357 manufacturer payload directly as `batteryPct` in both the phone parser (`packages/ble-core/src/parsers/tp357.ts`) and the generated Shelly runtime parser (`packages/script-generator/src/shelly/discoveryParsing.ts`).
+- the phone parser in `packages/ble-core/src/parsers/tp357.ts`;
+- the installed Climate runtime parser rendered by `packages/script-generator/src/shelly/generate.ts`;
+- the separate discovery parser in `packages/script-generator/src/shelly/discoveryParsing.ts`.
 
-Reference behavior in `Bluetooth-Devices/thermopro-ble` handles TP357S/TP397/TP393 battery as the **lower two bits of byte 4** and maps state `0 -> 1%`, `1 -> 50%`, `2 -> 100%`. Its source notes that this was verified on TP357S with a laboratory power supply. This strongly suggests that the observed raw value `2` on the five silver units means a full-battery state rather than literal `2%`.
-
-Do not implement a blind `2 -> 100` special case yet. First capture and compare raw manufacturer data from at least one affected silver TP357 and the existing white TP357, including advertised name, payload length and the full manufacturer bytes. Establish whether the white unit genuinely uses a direct percentage encoding or whether another packet/revision difference explains the plausible reading.
-
-Implementation requirements after the capture:
-
-1. define one semantic TP357 battery-decoding rule shared by phone-side parsing and generated Shelly runtime behavior, or explicit validated variant detection if real packets prove multiple encodings;
-2. never detect a protocol variant by case color;
-3. add fixtures for the observed white and silver packets and regression tests for both phone and Shelly-runtime parsers;
-4. preserve temperature/humidity decoding and existing sensor identity behavior;
-5. real-hardware acceptance must confirm that a fresh-battery affected unit no longer appears as `2%`, the existing white unit is not regressed, and phone/Shelly diagnostics agree on the battery value.
+Regression coverage uses the captured six-byte TP357 and seven-byte TP357S frames and verifies both phone-side and generated Shelly-runtime decoding. Enclosure color is not used as a protocol discriminator.
 
 Reference: `https://github.com/Bluetooth-Devices/thermopro-ble/blob/main/src/thermopro_ble/parser.py`.
 
