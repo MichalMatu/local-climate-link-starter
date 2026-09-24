@@ -1,7 +1,7 @@
 import {
-  LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RPC_METHODS,
+  SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME,
+  SHELLY_LINK_SCRIPT_NAME,
   type Result,
   type RelayTestResult,
   type ShellyClient,
@@ -243,17 +243,19 @@ export class RpcShellyClient implements ShellyClient {
 }
 
 export const createInstallPlan = (code: string): ShellyInstallPlan => ({
-  scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+  scriptName: SHELLY_LINK_SCRIPT_NAME,
   code,
   runOnBoot: true,
-  backupExisting: true,
+  backupExisting: false,
+  replaceAllScripts: true,
   chunkSizeBytes: DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
 });
 
 export const createBleDiscoveryInstallPlan = (code: string): ShellyInstallPlan => ({
-  scriptName: LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
+  scriptName: SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   code,
   runOnBoot: false,
   backupExisting: false,
+  replaceAllScripts: false,
   chunkSizeBytes: DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
 });
