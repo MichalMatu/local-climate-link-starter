@@ -86,7 +86,7 @@ const backupExistingScript = async (
   return {
     ...backupBase,
     code,
-    codeHash: hashScriptCode(`${script.name}:${code}`)
+    codeHash: hashScriptCode(code)
   };
 };
 
@@ -100,6 +100,30 @@ const stopBleScannerInScript = async (
     params: { id: scriptId, code: STOP_BLE_SCANNER_EVAL_CODE }
   });
   await sleepMs(BLE_SCANNER_CLEANUP_DELAY_MS);
+};
+
+const removeScripts = async (
+  lifecycle: InstallLifecycle,
+  scripts: Array<{ id: number; running: boolean }>
+): Promise<Result<null>> => {
+  for (const script of scripts) {
+    if (script.running) {
+      await stopBleScannerInScript(script.id, lifecycle.callMutation, lifecycle.sleepMs);
+      const stopResult = await lifecycle.callMutation({
+        method: RPC_METHODS.ScriptStop,
+        params: { id: script.id }
+      });
+      if (!stopResult.ok) return stopResult;
+    }
+
+    const deleteResult = await lifecycle.callMutation({
+      method: RPC_METHODS.ScriptDelete,
+      params: { id: script.id }
+    });
+    if (!deleteResult.ok) return deleteResult;
+  }
+
+  return { ok: true, value: null };
 };
 
 export const installShellyScript = async (
@@ -153,7 +177,14 @@ export const installShellyScript = async (
   }
 
   const chunkSizeBytes = plan.chunkSizeBytes ?? DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES;
-  const existingScript = list.value.find((script) => script.name === plan.scriptName);
+  if (plan.replaceAllScripts) {
+    const removed = await removeScripts(lifecycle, list.value);
+    if (!removed.ok) return removed;
+  }
+
+  const existingScript = plan.replaceAllScripts
+    ? undefined
+    : list.value.find((script) => script.name === plan.scriptName);
   let backup: ShellyScriptBackup | undefined;
   let scriptId: number;
 
@@ -231,6 +262,19 @@ export const installShellyScript = async (
     };
   }
 
+  if (plan.replaceAllScripts) {
+    const verifiedList = await readShellyScriptList(lifecycle.transport);
+    if (!verifiedList.ok) return verifiedList;
+    if (verifiedList.value.length !== 1 || verifiedList.value[0]?.id !== scriptId) {
+      return {
+        ok: false,
+        error: scriptUploadError(
+          'Shelly did not confirm exclusive ownership of the script runtime.'
+        )
+      };
+    }
+  }
+
   return {
     ok: true,
     value: {
@@ -238,7 +282,7 @@ export const installShellyScript = async (
       running: parsedStatus.data.running ?? true,
       memUsed: parsedStatus.data.mem_used,
       memFree: parsedStatus.data.mem_free,
-      scriptHash: hashScriptCode(`${plan.scriptName}:${plan.code}`),
+      scriptHash: hashScriptCode(plan.code),
       backup
     }
   };
