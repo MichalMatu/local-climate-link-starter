@@ -12,13 +12,17 @@ A saved Plug is useful without automation. Automation setup starts from a concre
 
 `InstalledAutomation` is the durable record of installed automation ownership. Forgetting a Plug removes only the saved physical-device entry from the app; it does not uninstall the automation or mutate Shelly. Uninstalling an automation is a separate destructive operation.
 
+The project is pre-release. Development-only persisted state, script names and internal APIs do not receive backward-compatibility adapters. A rename or model change is applied cohesively to current code/tests/docs; obsolete compatibility paths are deleted.
+
 ## Identity and recovery
 
 Shelly physical identity is `Shelly.GetDeviceInfo.id`, normalized consistently. URL/IP is transport location, not durable identity.
 
-Before relay mutations, runtime upgrades or destructive operations, the app verifies that the endpoint still belongs to the stored Shelly device. A mismatch stops before mutation.
+Before relay mutations, runtime replacement or destructive operations, the app verifies that the endpoint still belongs to the stored Shelly device. A mismatch stops before mutation.
 
-Remote-to-local recovery is conservative. A missing local automation may be reconstructed only when the remote script is positively recognized as a Shelly Link managed runtime and its metadata/config can be decoded. A similar script name alone is not ownership evidence.
+On a Shelly Link-managed Plug, the application owns the full Shelly Scripts namespace. Script name, old script hash and previously stored script id are not authorization evidence and do not block install/edit/recover/delete. Explicit automation mutation first confirms physical device identity and safe OFF, then converges the device to the current application state.
+
+Remote-to-local recovery may reconstruct a missing Climate installation when the single enabled runtime can be decoded as the current generated Climate runtime and its metadata/config is valid. Script display name is not ownership evidence. Passive reconciliation may report changed/unavailable state but does not rewrite the device; explicit recover/edit is the convergence boundary.
 
 When Climate recovery succeeds, the configured sensor identities are passively merged into the saved Thermometers registry by physical BLE `runtimeAddress`. Existing entries and user names win, duplicate MACs are not created, current rule membership is not changed, and recovery never synthesizes live readings.
 
@@ -30,9 +34,13 @@ Climate runtime invariants:
 
 - boot starts safe OFF;
 - stale/unusable sensor data fails OFF;
-- destructive/runtime mutation paths verify device and managed-resource identity first;
-- valid remote runtime is not silently rewritten by passive recovery;
+- destructive/runtime mutation paths verify physical device identity first;
+- install/edit/recover force the relay OFF, stop/delete every existing Shelly script, install exactly one current Climate runtime, verify it, then persist its new script id/hash;
+- uninstall forces the relay OFF, stops/deletes every Shelly script and confirms an empty script list before removing the local automation record;
+- script hashes describe generated code only; display-name changes must not change runtime identity;
 - hardware tests finish with an explicit known relay state.
+
+Temporary BLE discovery is the one non-exclusive script flow. It is short-lived, uses run-on-boot disabled, pauses the enabled automation while scanning, deletes its discovery script when finished and restores the automation when requested. It must not redefine the automation lifecycle ownership model.
 
 The current Climate runtime is `climate-engine-v1` with managed metadata, config hash and diagnostics. Native Time automation uses Shelly schedules rather than the Climate script.
 
@@ -59,7 +67,7 @@ The architecture separates stable engine code from automation-specific data:
 mobile automation configuration
   -> typed domain model
     -> Shelly RPC transport
-      -> stable Local Climate Engine
+      -> stable Climate engine
         -> persistent runtime config/data
           -> sensors + clock
             -> rules/operators
@@ -68,9 +76,9 @@ mobile automation configuration
 
 The generator emits one `climate-engine-v1` body across supported Xiaomi/PVVX BTHome and TP357 profiles and VPD on/off. Sensor profiles, thresholds and automation-specific values live in typed compact config.
 
-On Shelly firmware supporting `Script.storage`, ordinary Climate edits update validated persistent config through `Script.Eval` without replacing engine code. Firmware without that capability keeps the guarded compatible `Script.PutCode` path.
+`Script.storage` remains a runtime persistence mechanism where firmware supports it, but the mobile edit lifecycle intentionally does not preserve development-era engine instances through config-only mutation. During pre-release development every explicit Climate edit replaces the script runtime using the current generator and stores the returned script id plus a code-only hash. This keeps device state deterministic and prevents stale script identity/name/history from becoming a compatibility surface.
 
-Persistent updates carry config hash/version, validate stored payload, update in-memory config, survive script restart and retain rollback behavior. Recovery prefers persisted config when present while retaining embedded config as compatibility fallback.
+Recovery reads persisted config when present while retaining embedded config as the generator/runtime decoding fallback for the current development build. No compatibility promise is made to never-released historical script formats.
 
 ## Multiple-thermometer Climate input
 
