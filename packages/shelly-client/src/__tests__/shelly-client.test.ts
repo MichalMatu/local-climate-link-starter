@@ -329,14 +329,18 @@ describe('RpcShellyClient', () => {
 
   it('sends the expected RPC request shape during script install', async () => {
     const transport = new RecordingTransport();
+    transport.relayOn = true;
     const client = new RpcShellyClient(transport);
     const result = await client.installScript(createInstallPlan('print("safe off");'));
 
     expect(result.ok).toBe(true);
+    expect(transport.relayOn).toBe(false);
     expect(transport.requests.map((request) => request.method)).toEqual([
       RPC_METHODS.ShellyGetDeviceInfo,
       RPC_METHODS.ShellyGetStatus,
       RPC_METHODS.ScriptList,
+      RPC_METHODS.SwitchSet,
+      RPC_METHODS.SwitchGetStatus,
       RPC_METHODS.ScriptCreate,
       RPC_METHODS.ScriptPutCode,
       RPC_METHODS.ScriptSetConfig,
@@ -362,11 +366,12 @@ describe('RpcShellyClient', () => {
     const result = await client.installScript(createInstallPlan('print("safe off");'));
 
     expect(result.ok).toBe(true);
-    expect(sleepMs).toHaveBeenCalledTimes(4);
+    expect(sleepMs).toHaveBeenCalledTimes(5);
     expect(sleepMs).toHaveBeenNthCalledWith(1, 100);
     expect(sleepMs).toHaveBeenNthCalledWith(2, 100);
     expect(sleepMs).toHaveBeenNthCalledWith(3, 100);
     expect(sleepMs).toHaveBeenNthCalledWith(4, 100);
+    expect(sleepMs).toHaveBeenNthCalledWith(5, 100);
   });
 
   it('throttles successful relay mutations', async () => {
@@ -411,6 +416,19 @@ describe('RpcShellyClient', () => {
     expect(sleepMs).toHaveBeenCalledTimes(2);
     expect(sleepMs).toHaveBeenNthCalledWith(1, 30);
     expect(sleepMs).toHaveBeenNthCalledWith(2, 30);
+  });
+
+  it('refuses a fresh exclusive install when relay OFF cannot be established', async () => {
+    const transport = new RecordingTransport({ failOffCommand: true });
+    transport.relayOn = true;
+    const client = new RpcShellyClient(transport);
+
+    const result = await client.installScript(createInstallPlan('print("new");'));
+
+    expect(result.ok).toBe(false);
+    expect(
+      transport.requests.some((request) => request.method === RPC_METHODS.ScriptCreate)
+    ).toBe(false);
   });
 
   it('installs the BLE discovery script without enabling run on boot', async () => {
@@ -1072,6 +1090,8 @@ describe('FetchShellyRpcTransport', () => {
                 ]
               : []
         },
+        [RPC_METHODS.SwitchSet]: {},
+        [RPC_METHODS.SwitchGetStatus]: { id: 0, output: false },
         [RPC_METHODS.ScriptCreate]: { id: 4 },
         [RPC_METHODS.ScriptPutCode]: {},
         [RPC_METHODS.ScriptSetConfig]: {},
@@ -1103,6 +1123,8 @@ describe('FetchShellyRpcTransport', () => {
       RPC_METHODS.ShellyGetDeviceInfo,
       RPC_METHODS.ShellyGetStatus,
       RPC_METHODS.ScriptList,
+      RPC_METHODS.SwitchSet,
+      RPC_METHODS.SwitchGetStatus,
       RPC_METHODS.ScriptCreate,
       RPC_METHODS.ScriptPutCode,
       RPC_METHODS.ScriptSetConfig,
@@ -1110,7 +1132,9 @@ describe('FetchShellyRpcTransport', () => {
       RPC_METHODS.ScriptGetStatus,
       RPC_METHODS.ScriptList
     ]);
-    expect(requestBodies.map((body) => body.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(requestBodies.map((body) => body.id)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+    ]);
   });
 });
 

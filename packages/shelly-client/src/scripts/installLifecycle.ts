@@ -226,15 +226,17 @@ export const installShellyScript = async (
   }
 
   const chunkSizeBytes = plan.chunkSizeBytes ?? DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES;
-  if (plan.replaceAllScripts && list.value.length > 0) {
+  if (plan.replaceAllScripts) {
     const relayOff = await confirmRelayOffBeforeDestructiveReplacement(
       lifecycle,
       plan.relayId ?? 0
     );
     if (!relayOff.ok) return relayOff;
 
-    const removed = await removeScripts(lifecycle, list.value, plan.relayId ?? 0);
-    if (!removed.ok) return removed;
+    if (list.value.length > 0) {
+      const removed = await removeScripts(lifecycle, list.value, plan.relayId ?? 0);
+      if (!removed.ok) return removed;
+    }
   }
 
   const existingScript = plan.replaceAllScripts
