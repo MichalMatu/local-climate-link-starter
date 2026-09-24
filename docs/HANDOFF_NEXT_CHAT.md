@@ -18,6 +18,7 @@ e75c77cb-7589-4452-94b2-decc97ff85a1
 - A saved Plug remains useful without automation.
 - Climate and Time use one installed-automation ownership model.
 - Climate supports 1–4 thermometers with `avg`, `min`, `max` or `firstValid` aggregation.
+- Climate install/edit/repair uses exclusive Shelly Script ownership: verify physical Plug identity, confirm or force relay OFF, delete every existing Shelly Script, then create/start a fresh managed runtime; script IDs are intentionally not stable across replacement.
 - Per-sensor Plug diagnostics join mobile rows by normalized BLE `runtimeAddress`.
 - Passive recovery does not rewrite a valid managed runtime.
 - Successful Climate recovery restores missing configured thermometer identities into Thermometers by canonical BLE MAC without duplicates or membership changes.
