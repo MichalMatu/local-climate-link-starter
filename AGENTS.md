@@ -45,7 +45,8 @@ Keep these invariants unless the user explicitly changes the product model:
 - one Plug relay has one managed automation owner at a time;
 - the phone configures, manages and diagnoses;
 - the Shelly executes installed automation locally without requiring the phone or cloud;
-- delete/uninstall paths preserve identity verification and safe-OFF behavior.
+- delete/uninstall paths preserve physical-device identity verification and safe-OFF behavior;
+- during pre-release development Shelly Link has exclusive ownership of the Shelly Scripts namespace on a managed Plug: automation install/edit/recover may stop and replace all scripts, and uninstall may stop and delete all scripts after physical-device identity and safe-OFF are confirmed.
 
 Do not make Home Assistant, MQTT, cloud services or a background phone loop required by
 the default product flow.
@@ -117,10 +118,14 @@ Package rules are in `packages/AGENTS.md`; `packages/ui` has an additional contr
 
 ## Development mode
 
-The project is in active development. Unless the user explicitly asks otherwise:
+The project is in active pre-release development. Unless the user explicitly asks otherwise:
 
 - do not add migrations, legacy adapters, dual schemas or compatibility aliases for
   development-only state;
+- never keep compatibility solely for builds, persisted state, script names or APIs that
+  were never publicly released;
+- after a rename, remove the obsolete product name from active code, tests and canonical
+  documentation instead of retaining aliases;
 - replace an internal API/schema/route in one cohesive change and update all callers;
 - prefer deleting obsolete code over maintaining parallel old/new paths;
 - never weaken architecture or UX gates to keep stale structure alive.
@@ -143,13 +148,16 @@ Heating/runtime safety is not negotiable:
 
 - boot safe state is OFF;
 - stale sensor fails OFF;
-- runtime identity must be verified before destructive mutation;
+- physical Shelly identity must be verified before destructive mutation;
 - relay-control changes need focused safety tests.
 
 For the local development Shelly test plug, the user has standing authorization to toggle
 the relay ON and OFF through Shelly Link scripts or `Switch.Set` without asking
-again. When hardware testing is relevant, use real transitions, leave the final relay
-state explicit and known, and do not delete unrelated user scripts.
+again. When hardware testing is relevant, use real transitions and leave the final relay
+state explicit and known. On a Shelly Link-managed Plug, application script lifecycle is
+exclusive: install/edit/recover may clear all existing scripts and install the current
+runtime; uninstall may clear all scripts. Temporary BLE discovery remains a separately
+orchestrated short-lived script and must restore the automation state when its flow ends.
 
 ## Dependencies and licensing
 
