@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import {
   createInstallPlan,
   hashScriptCode,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RpcShellyClient,
   RpcShellyScheduleClient,
   type RelayTestResult,
@@ -92,10 +91,7 @@ export const useClimateAutomationInstallFlow = ({
     useState<HardwareInstallState | null>(null);
 
   const currentScriptHash = useMemo(
-    () =>
-      configState.ok
-        ? hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${configState.script}`)
-        : null,
+    () => (configState.ok ? hashScriptCode(configState.script) : null),
     [configState]
   );
   const selectedShellyId = selectedShelly?.id ?? null;
