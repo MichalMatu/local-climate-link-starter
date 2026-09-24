@@ -187,21 +187,23 @@ describe('DemoBleScanner', () => {
 });
 
 describe('TP357 parser', () => {
-  const matrixHubManufacturerData = new Uint8Array([0xc2, 0xc0, 0x00, 0x30, 0x64, 0x01]);
+  const capturedTp357ManufacturerData = new Uint8Array([
+    0xc2, 0xdc, 0x00, 0x32, 0x02, 0x2c
+  ]);
 
-  it('parses MatrixHub TP357 manufacturer data', () => {
-    const result = parseTp357ManufacturerData(matrixHubManufacturerData);
+  it('parses captured TP357 manufacturer data', () => {
+    const result = parseTp357ManufacturerData(capturedTp357ManufacturerData);
 
     expect(result.ok).toBe(true);
     if (!result.ok) {
       return;
     }
-    expect(result.value.temperatureC).toBe(19.2);
-    expect(result.value.humidityPct).toBe(48);
+    expect(result.value.temperatureC).toBe(22);
+    expect(result.value.humidityPct).toBe(50);
     expect(result.value.batteryPct).toBe(100);
   });
 
-  it('parses a TP357 raw advertisement fixture', () => {
+  it('parses a captured TP357 raw advertisement fixture', () => {
     const result = parseTp357Advertisement({
       id: 'tp357',
       name: 'TP357',
@@ -211,7 +213,7 @@ describe('TP357 parser', () => {
       manufacturerData: {},
       rawAdvertisement: new Uint8Array([
         0x02, 0x01, 0x06, 0x06, 0x09, 0x54, 0x50, 0x33, 0x35, 0x37, 0x07, 0xff, 0xc2,
-        0xc0, 0x00, 0x30, 0x64, 0x01
+        0xdc, 0x00, 0x32, 0x02, 0x2c
       ]),
       seenAtMs: 1000,
       platform: 'web'
@@ -222,13 +224,13 @@ describe('TP357 parser', () => {
       return;
     }
     expect(result.value.profileId).toBe('tp357_custom_v1');
-    expect(result.value.measurement.temperatureC).toBe(19.2);
-    expect(result.value.measurement.humidityPct).toBe(48);
+    expect(result.value.measurement.temperatureC).toBe(22);
+    expect(result.value.measurement.humidityPct).toBe(50);
     expect(result.value.measurement.batteryPct).toBe(100);
     expect(result.value.measurement.source).toBe('phone-scan');
   });
 
-  it('rebuilds MatrixHub TP357 payload when manufacturer id is separated', () => {
+  it('rebuilds a captured TP357 payload when manufacturer id is separated', () => {
     const result = parseTp357Advertisement({
       id: 'tp357',
       name: 'TP357S',
@@ -236,7 +238,7 @@ describe('TP357 parser', () => {
       serviceUuids: [],
       serviceData: {},
       manufacturerData: {
-        c0c2: new Uint8Array([0x00, 0x30, 0x64, 0x01])
+        dcc2: new Uint8Array([0x00, 0x32, 0x02, 0x2c])
       },
       seenAtMs: 2000,
       platform: 'android'
@@ -246,13 +248,59 @@ describe('TP357 parser', () => {
     if (!result.ok) {
       return;
     }
-    expect(result.value.measurement.temperatureC).toBe(19.2);
-    expect(result.value.measurement.humidityPct).toBe(48);
+    expect(result.value.measurement.temperatureC).toBe(22);
+    expect(result.value.measurement.humidityPct).toBe(50);
+    expect(result.value.measurement.batteryPct).toBe(100);
     expect(result.value.measurement.rssi).toBe(-66);
   });
 
+  it.each([
+    [0x00, 1],
+    [0x01, 50],
+    [0x02, 100],
+    [0x22, 100]
+  ])('decodes TP357 battery state from raw byte %s', (batteryRaw, expectedBatteryPct) => {
+    const result = parseTp357ManufacturerData(
+      new Uint8Array([0xc2, 0xdc, 0x00, 0x32, batteryRaw, 0x2c])
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+    expect(result.value.batteryPct).toBe(expectedBatteryPct);
+  });
+
+  it('parses the captured seven-byte TP357S packet', () => {
+    const result = parseTp357ManufacturerData(
+      new Uint8Array([0xc2, 0xdf, 0x00, 0x4a, 0x22, 0x0b, 0x01])
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+    expect(result.value.temperatureC).toBe(22.3);
+    expect(result.value.humidityPct).toBe(74);
+    expect(result.value.batteryPct).toBe(100);
+  });
+
+  it('keeps temperature and humidity when battery state is unknown', () => {
+    const result = parseTp357ManufacturerData(
+      new Uint8Array([0xc2, 0xdc, 0x00, 0x32, 0x03, 0x2c])
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+    expect(result.value.temperatureC).toBe(22);
+    expect(result.value.humidityPct).toBe(50);
+    expect(result.value.batteryPct).toBeUndefined();
+  });
+
   it('rejects malformed TP357 payloads', () => {
-    const result = parseTp357ManufacturerData(new Uint8Array([0xc2, 0xc0, 0x00]));
+    const result = parseTp357ManufacturerData(new Uint8Array([0xc2, 0xdc, 0x00]));
 
     expect(result.ok).toBe(false);
     if (result.ok) {
@@ -268,7 +316,7 @@ describe('TP357 parser', () => {
       rssi: -60,
       serviceUuids: [],
       serviceData: {},
-      manufacturerData: { c0c2: new Uint8Array([0x00, 0x30, 0x64, 0x01]) },
+      manufacturerData: { dcc2: new Uint8Array([0x00, 0x32, 0x02, 0x2c]) },
       seenAtMs: 1000,
       platform: 'web'
     });
