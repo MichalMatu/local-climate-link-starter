@@ -71,6 +71,7 @@ export interface ShellyInstallPlan {
   runOnBoot: boolean;
   backupExisting: boolean;
   replaceAllScripts?: boolean | undefined;
+  relayId?: number | undefined;
   chunkSizeBytes?: number | undefined;
 }
 
