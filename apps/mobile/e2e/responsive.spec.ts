@@ -965,6 +965,9 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Termometry', exact: true }).click();
     await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
+    const settingsDiagnostics = page.locator('.app-settings__diagnostics');
+    expect(await settingsDiagnostics.getAttribute('open')).toBeNull();
+    await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeHidden();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '14-settings');
     }
@@ -995,10 +998,14 @@ for (const viewport of viewports) {
       0
     );
     await expect(page.getByLabel('VPD assist')).toBeVisible();
+    const advancedDisclosure = page.locator('.rule-advanced-disclosure');
+    expect(await advancedDisclosure.getAttribute('open')).toBeNull();
+    await expect(advancedDisclosure.locator('.lcl-disclosure__body')).toBeHidden();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '16-climate-setup');
     }
     await ensureRuleAdvancedOpen(page);
+    await expect(advancedDisclosure.locator('.lcl-disclosure__body')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);

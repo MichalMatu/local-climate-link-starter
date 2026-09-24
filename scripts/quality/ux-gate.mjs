@@ -764,6 +764,23 @@ const checkPageHeaderContract = async () => {
   }
 };
 
+const checkDisclosureContract = async () => {
+  const path = 'packages/ui/src/primitives/Disclosure.css';
+  const source = await readRepoFile(path);
+  const closedBody = cssDeclarationBlock(source, '.lcl-disclosure__body');
+  const openBody = cssDeclarationBlock(
+    source,
+    '.lcl-disclosure[open] > .lcl-disclosure__body'
+  );
+
+  if (closedBody === null || !closedBody.includes('display: none;')) {
+    addFailure(path, 'closed Disclosure body must be explicitly hidden');
+  }
+  if (openBody === null || !openBody.includes('display: grid;')) {
+    addFailure(path, 'open Disclosure body must explicitly restore its grid layout');
+  }
+};
+
 const checkSegmentedControlContract = async () => {
   const usageContracts = [
     [
@@ -920,6 +937,7 @@ await checkModalSizingPatterns();
 await checkThemeTokenPatterns();
 await checkMobileProductionMarkupHygiene();
 await checkPageHeaderContract();
+await checkDisclosureContract();
 await checkSegmentedControlContract();
 await checkPackageRuntimeCopy();
 
