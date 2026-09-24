@@ -14,7 +14,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Usuwam automatykę…',
     title: 'Usunąć automatykę klimatu?',
     detail:
-      'Skrypt tej automatyki zostanie usunięty z Shelly dopiero po potwierdzeniu stanu OFF. Wpis w aplikacji zniknie dopiero po poprawnym zakończeniu operacji.',
+      'Po potwierdzeniu stanu OFF Shelly Link usunie wszystkie skrypty Shelly z tego gniazdka. Wpis automatyki zniknie z aplikacji dopiero po potwierdzeniu pustej listy skryptów.',
     failed: 'Nie udało się bezpiecznie usunąć automatyki. Wpis pozostał w aplikacji.'
   },
   en: {
@@ -22,7 +22,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Deleting automation…',
     title: 'Delete climate automation?',
     detail:
-      'This automation script will be removed from Shelly only after OFF is confirmed. The app entry is removed only after Shelly confirms the cleanup.',
+      'After OFF is confirmed, Shelly Link will remove all Shelly scripts from this Plug. The automation entry is removed only after Shelly confirms the script list is empty.',
     failed: 'The automation could not be deleted safely. The app entry was kept.'
   },
   de: {
@@ -30,7 +30,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Automation wird gelöscht…',
     title: 'Klima-Automation löschen?',
     detail:
-      'Das Skript dieser Automation wird erst von Shelly entfernt, nachdem OFF bestätigt wurde. Der Eintrag in der App wird erst nach erfolgreicher Bereinigung gelöscht.',
+      'Nachdem OFF bestätigt wurde, entfernt Shelly Link alle Shelly-Skripte von diesem Plug. Der Automationseintrag wird erst gelöscht, wenn Shelly eine leere Skriptliste bestätigt.',
     failed:
       'Die Automation konnte nicht sicher gelöscht werden. Der App-Eintrag bleibt erhalten.'
   },
@@ -39,7 +39,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Eliminando automatización…',
     title: '¿Eliminar la automatización climática?',
     detail:
-      'El script de esta automatización solo se eliminará de Shelly después de confirmar OFF. La entrada de la app se elimina únicamente cuando Shelly confirma la limpieza.',
+      'Después de confirmar OFF, Shelly Link eliminará todos los scripts de Shelly de este enchufe. La entrada de automatización solo se elimina cuando Shelly confirma que la lista de scripts está vacía.',
     failed:
       'No se pudo eliminar la automatización de forma segura. La entrada se mantuvo en la app.'
   },
@@ -48,7 +48,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Suppression de l’automatisation…',
     title: 'Supprimer l’automatisation climatique ?',
     detail:
-      'Le script de cette automatisation ne sera supprimé de Shelly qu’après confirmation de l’état OFF. L’entrée de l’app ne disparaît qu’après confirmation du nettoyage.',
+      'Après confirmation de l’état OFF, Shelly Link supprimera tous les scripts Shelly de cette prise. L’entrée d’automatisation n’est supprimée qu’après confirmation d’une liste de scripts vide.',
     failed:
       'L’automatisation n’a pas pu être supprimée en toute sécurité. L’entrée a été conservée dans l’app.'
   },
@@ -57,7 +57,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Eliminazione automazione…',
     title: 'Eliminare l’automazione climatica?',
     detail:
-      'Lo script di questa automazione verrà rimosso da Shelly solo dopo la conferma dello stato OFF. La voce nell’app viene rimossa solo dopo la conferma della pulizia.',
+      'Dopo la conferma dello stato OFF, Shelly Link rimuoverà tutti gli script Shelly da questa presa. La voce dell’automazione viene rimossa solo dopo che Shelly conferma che l’elenco degli script è vuoto.',
     failed:
       'Non è stato possibile eliminare l’automazione in sicurezza. La voce è rimasta nell’app.'
   },
@@ -66,7 +66,7 @@ export const installationDeleteCopy: Record<Locale, InstallationDeleteCopy> = {
     busy: 'Excluindo automação…',
     title: 'Excluir a automação de clima?',
     detail:
-      'O script desta automação só será removido do Shelly depois que o estado OFF for confirmado. A entrada do app só é removida após a confirmação da limpeza.',
+      'Depois que o estado OFF for confirmado, o Shelly Link removerá todos os scripts Shelly desta tomada. A entrada da automação só é removida depois que o Shelly confirma que a lista de scripts está vazia.',
     failed:
       'Não foi possível excluir a automação com segurança. A entrada foi mantida no app.'
   }
