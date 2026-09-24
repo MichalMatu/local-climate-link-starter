@@ -144,6 +144,7 @@ export const ptBr = {
       'O script salvo para esta automação não corresponde ao estado do Shelly. Verifique o dispositivo antes de controlá-lo.'
   },
   common: {
+    back: 'Voltar',
     add: 'Adicionar',
     address: 'Endereço',
     apply: 'Aplicar',

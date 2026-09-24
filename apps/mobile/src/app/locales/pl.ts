@@ -144,6 +144,7 @@ export const pl = {
       'Skrypt zapisany dla tej automatyki nie odpowiada stanowi Shelly. Sprawdź urządzenie przed sterowaniem.'
   },
   common: {
+    back: 'Wstecz',
     add: 'Dodaj',
     address: 'Adres',
     apply: 'Zastosuj',

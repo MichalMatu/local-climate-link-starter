@@ -1,3 +1,4 @@
+import { IconChevronRight } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { AppPageBack } from '../components/AppPageBack.js';
@@ -62,9 +63,7 @@ export const SetupIntentScreen = ({
               <strong>{t(choice.titleKey)}</strong>
               <span>{t(choice.descriptionKey)}</span>
             </span>
-            <span className="intent-choice__action" aria-hidden="true">
-              ›
-            </span>
+            <IconChevronRight className="intent-choice__action" aria-hidden="true" />
           </button>
         ))}
       </section>

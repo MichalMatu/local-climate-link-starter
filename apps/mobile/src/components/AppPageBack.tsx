@@ -1,3 +1,5 @@
+import { IconChevronLeft } from '@tabler/icons-react';
+import { useTranslation } from '../app/i18n.js';
 import type { ReactNode } from 'react';
 
 type AppPageBackProps = {
@@ -6,11 +8,20 @@ type AppPageBackProps = {
   onBack(): void;
 };
 
-export const AppPageBack = ({ context, label, onBack }: AppPageBackProps) => (
-  <div className="setup-context app-page-back-row">
-    <button className="setup-context__back" type="button" onClick={onBack}>
-      ‹ {label}
-    </button>
-    {context !== undefined && <strong>{context}</strong>}
-  </div>
-);
+export const AppPageBack = ({ context, label, onBack }: AppPageBackProps) => {
+  const { t } = useTranslation();
+  return (
+    <div className="setup-context app-page-back-row">
+      <button
+        className="setup-context__back"
+        type="button"
+        aria-label={`${t('common.back')}: ${label}`}
+        onClick={onBack}
+      >
+        <IconChevronLeft className="app-page-back-row__icon" aria-hidden="true" />
+        <span>{label}</span>
+      </button>
+      {context !== undefined && <strong>{context}</strong>}
+    </div>
+  );
+};

@@ -145,6 +145,7 @@ export const en = {
       'The script saved for this automation does not match the Shelly state. Check the device before controlling it.'
   },
   common: {
+    back: 'Back',
     add: 'Add',
     address: 'Address',
     apply: 'Apply',

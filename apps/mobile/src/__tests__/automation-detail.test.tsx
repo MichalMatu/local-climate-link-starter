@@ -387,7 +387,7 @@ describe('InstallationDetailScreen', () => {
       screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
     ).toBeVisible();
     expect(screen.queryByText('Shelly Link')).toBeNull();
-    const back = screen.getByRole('button', { name: '‹ Gniazdka' });
+    const back = screen.getByRole('button', { name: 'Wstecz: Gniazdka' });
     expect(back).toBeVisible();
     fireEvent.click(back);
     expect(onBack).toHaveBeenCalledTimes(1);
@@ -423,7 +423,7 @@ describe('InstallationDetailScreen', () => {
     installShellyFetchMock();
     renderDetail(saved.id);
 
-    expect(screen.queryByRole('button', { name: '‹ Gniazdka' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'aria-current',
       'page'

@@ -146,6 +146,7 @@ export const de = {
       'Das für diese Automation gespeicherte Skript stimmt nicht mit dem Shelly-Status überein. Prüfe das Gerät vor der Steuerung.'
   },
   common: {
+    back: 'Zurück',
     add: 'Hinzufügen',
     address: 'Adresse',
     apply: 'Anwenden',

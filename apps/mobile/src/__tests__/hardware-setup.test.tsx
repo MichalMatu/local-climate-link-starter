@@ -783,7 +783,7 @@ describe('HardwareSetupScreen', () => {
     const onBackToIntent = vi.fn();
     renderHardwareSetup({ setupIntent: 'temperature', onBackToIntent });
 
-    const back = screen.getByRole('button', { name: '‹ Zmień cel' });
+    const back = screen.getByRole('button', { name: 'Wstecz: Zmień cel' });
     expect(back.closest('.app-page-back-row')).not.toBeNull();
     fireEvent.click(back);
     expect(onBackToIntent).toHaveBeenCalledTimes(1);
@@ -801,7 +801,7 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.queryByRole('dialog', { name: 'Salon' })).toBeNull();
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
-    expect(screen.getByRole('button', { name: '‹ Shelly' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wstecz: Shelly' })).toBeVisible();
     expect(screen.queryByRole('navigation', { name: 'Menu konfiguracji' })).toBeNull();
 
     fireEvent.click(
@@ -811,10 +811,10 @@ describe('HardwareSetupScreen', () => {
     expect(
       await screen.findByRole('heading', { name: 'Skanuj termometry BLE' })
     ).toBeVisible();
-    expect(screen.getByRole('button', { name: '‹ Salon' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wstecz: Salon' })).toBeVisible();
     expect(screen.queryByRole('navigation', { name: 'Menu konfiguracji' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: '‹ Salon' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Salon' }));
     await waitFor(
       () => {
         const rpcBodies = vi
@@ -841,7 +841,7 @@ describe('HardwareSetupScreen', () => {
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     expect(screen.queryByRole('dialog')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
     expect(screen.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
   });
@@ -1015,7 +1015,7 @@ describe('HardwareSetupScreen', () => {
       within(detailRows as HTMLElement).queryByText('Przekaźnik')
     ).not.toBeInTheDocument();
     expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
     expect(document.querySelector('.plug-settings-page')).toBeNull();
 
     const firstCallUrl = rawRequestUrl(vi.mocked(fetch).mock.calls[0]?.[0] as URL);
@@ -1227,7 +1227,7 @@ describe('HardwareSetupScreen', () => {
       within(detailRows as HTMLElement).queryByText('Przekaźnik')
     ).not.toBeInTheDocument();
     expect(within(detailRows as HTMLElement).queryByText('Tryb')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
 
     const rpcMethods = vi
       .mocked(fetch)
@@ -2879,7 +2879,7 @@ describe('HardwareSetupScreen', () => {
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Już zapisany' })).toBeDisabled();
     expect(screen.queryByText('Zapisano termometr.')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
     expect(
       within(getSavedSensorCard('Xiaomi salon')).getByText('A4:C1:38:4F:24:CD')
@@ -2982,7 +2982,7 @@ describe('HardwareSetupScreen', () => {
     const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
 
     await waitFor(() => {
@@ -3217,7 +3217,7 @@ describe('HardwareSetupScreen', () => {
     const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: '‹ Shelly' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
 
     const bleStopError = await screen.findByText('Nie udało się zamknąć skanera BLE.');
     expect(bleStopError.closest('[role="status"]')).not.toBeNull();
