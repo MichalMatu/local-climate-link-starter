@@ -1,11 +1,7 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
-import {
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  normalizeShellyDeviceId,
-  RpcShellyClient
-} from '@lcl/shelly-client';
+import { normalizeShellyDeviceId, RpcShellyClient } from '@lcl/shelly-client';
 import { useCallback, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { HardwareSetupStatus } from './schemas.js';
@@ -65,12 +61,15 @@ const createInitialShellyControlState = (): ShellyControlViewState => ({
   updatedAtMs: null
 });
 
+const setupAutomationScript = (status: HardwareSetupStatus) => {
+  const enabledScripts = status.scripts.filter((script) => script.enable);
+  return enabledScripts.length === 1 ? enabledScripts[0]! : null;
+};
+
 export const shellyControlStatusFromSetupStatus = (
   status: HardwareSetupStatus
 ): ShellyControlStatus => {
-  const automationScript =
-    status.scripts.find((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME) ??
-    null;
+  const automationScript = setupAutomationScript(status);
   return {
     relayOn: status.status.relayOn,
     automationMode: automationScript
@@ -165,9 +164,7 @@ export const useShellyControlFlow = () => {
       if (!stableDeviceId) {
         throw new Error(t('hardware.flow.shellyIdentityMissing'));
       }
-      const existingScript = status.scripts.find(
-        (script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME
-      );
+      const existingScript = setupAutomationScript(status);
       const checkedDevice: ShellyDraftDevice = {
         id: normalizeShellyDeviceId(stableDeviceId),
         name,
