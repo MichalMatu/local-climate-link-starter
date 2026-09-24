@@ -87,6 +87,7 @@
   --lcl-breakpoint-marketing: 62rem;
   --lcl-breakpoint-compact: 44rem;
   --lcl-breakpoint-narrow: 30rem;
+  --lcl-breakpoint-phone-compact: 25rem;
   --lcl-shadow-sm: 0 1px 2px rgba(29, 29, 31, 0.08);
   --lcl-shadow-md: 0 12px 32px rgba(29, 29, 31, 0.12);
   --lcl-shadow-lg: 0 20px 56px rgba(29, 29, 31, 0.18);
