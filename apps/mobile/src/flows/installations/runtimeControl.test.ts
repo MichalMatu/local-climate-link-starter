@@ -66,10 +66,14 @@ const installation = createInstalledAutomation({
   nowMs: 1000
 });
 
-const status = (mode: 'auto' | 'manual' | 'stopped' | 'missing', relayOn = false) => ({
+const status = (
+  mode: 'auto' | 'manual' | 'stopped' | 'missing',
+  relayOn = false,
+  scriptId: number | null = mode === 'missing' ? null : 7
+) => ({
   relayOn,
   automationMode: mode,
-  automationScriptId: mode === 'missing' ? null : 7,
+  automationScriptId: scriptId,
   firmwareId: '1.0.0',
   telemetry: {},
   clock: { timeSynced: false },
@@ -88,14 +92,17 @@ describe('installed automation runtime control', () => {
     mocks.getStatus.mockResolvedValue({ ok: true, value: { relayOn: false } });
   });
 
-  it('matches ownership only by the stored script id', () => {
+  it('uses stored script id matching only as a diagnostic state', () => {
     expect(installedAutomationScriptMatch(installation, status('auto'))).toBe('matched');
     expect(installedAutomationScriptMatch(installation, status('missing'))).toBe(
       'missing'
     );
+    expect(installedAutomationScriptMatch(installation, status('auto', false, 99))).toBe(
+      'mismatch'
+    );
   });
 
-  it('enters MANUAL through the live runtime without Script.Stop', async () => {
+  it('enters MANUAL through the converged live runtime', async () => {
     mocks.ensureCurrent.mockResolvedValue({
       installation,
       status: status('auto'),
@@ -110,7 +117,7 @@ describe('installed automation runtime control', () => {
     expect(result.status.relayOn).toBe(false);
   });
 
-  it('returns to AUTO through the live runtime without Script.Start', async () => {
+  it('returns to AUTO through the converged live runtime', async () => {
     mocks.ensureCurrent.mockResolvedValue({
       installation,
       status: status('manual'),
@@ -125,23 +132,29 @@ describe('installed automation runtime control', () => {
     expect(result.status.relayOn).toBe(false);
   });
 
-  it('keeps direct relay control gated by a live MANUAL runtime', async () => {
-    mocks.readStatus
-      .mockResolvedValueOnce(status('manual', false))
-      .mockResolvedValueOnce(status('manual', true));
+  it('uses the replacement installation returned by convergence for manual relay control', async () => {
+    const replacedInstallation = {
+      ...installation,
+      script: { id: 11, hash: 'new-code-hash' }
+    };
+    mocks.ensureCurrent.mockResolvedValue({
+      installation: replacedInstallation,
+      status: status('manual', false, 11),
+      upgraded: true
+    });
+    mocks.readStatus.mockResolvedValue(status('manual', true, 11));
 
     const result = await setInstalledAutomationRelayState(installation, true);
 
     expect(mocks.setRelayOn).toHaveBeenCalledWith({ relayId: 0 });
+    expect(result.installation.script.id).toBe(11);
     expect(result.status.relayOn).toBe(true);
   });
 
-  it('refuses direct relay control when the endpoint belongs to another Shelly', async () => {
-    mocks.getDeviceInfo.mockResolvedValue({
-      ok: true,
-      value: { id: 'shelly-b', model: 'S3PL-00112EU', gen: 3 }
-    });
-    mocks.readStatus.mockResolvedValue(status('manual'));
+  it('does not mutate the relay when runtime convergence rejects physical identity', async () => {
+    mocks.ensureCurrent.mockRejectedValue(
+      new Error('Shelly identity does not match the installed automation.')
+    );
 
     await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
       'Shelly identity does not match the installed automation.'
@@ -149,8 +162,12 @@ describe('installed automation runtime control', () => {
     expect(mocks.setRelayOn).not.toHaveBeenCalled();
   });
 
-  it('rejects direct relay control when the process is actually stopped', async () => {
-    mocks.readStatus.mockResolvedValue(status('stopped'));
+  it('rejects direct relay control unless the converged runtime is MANUAL', async () => {
+    mocks.ensureCurrent.mockResolvedValue({
+      installation,
+      status: status('auto'),
+      upgraded: false
+    });
 
     await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
       'live MANUAL automation runtime'
