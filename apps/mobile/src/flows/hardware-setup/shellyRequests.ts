@@ -1,6 +1,5 @@
 import {
-  LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+  SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   type FetchShellyRpcTransport,
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
@@ -95,13 +94,13 @@ const readScriptList = async (
 ): Promise<HardwareSetupStatus['scripts']> =>
   unwrapShellyResult(await readShellyScriptListResult(transport));
 
-const findAutomationScript = (scripts: ScriptListEntry[]): ScriptListEntry | null =>
-  scripts.find((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME) ?? null;
+const findAutomationScript = (scripts: ScriptListEntry[]): ScriptListEntry | null => {
+  const enabledScripts = scripts.filter((script) => script.enable);
+  return enabledScripts.length === 1 ? enabledScripts[0]! : null;
+};
 
 const findBleDiscoveryScripts = (scripts: ScriptListEntry[]): ScriptListEntry[] =>
-  scripts.filter(
-    (script) => script.name === LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME
-  );
+  scripts.filter((script) => script.name === SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME);
 
 const deleteBleDiscoveryScripts = async (
   client: RpcShellyClient,
