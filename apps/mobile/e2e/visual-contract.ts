@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
 export const canonicalVisualViewport = { width: 412, height: 915 } as const;
+export const canonicalVisualPlatform = 'darwin' as const;
 
 export const visualScreenNames = [
   '01-plugs-dashboard',
@@ -27,6 +28,15 @@ export const visualScreenNames = [
 export type VisualScreenName = (typeof visualScreenNames)[number];
 
 export const expectVisualScreen = async (page: Page, name: VisualScreenName) => {
+  if (process.platform !== canonicalVisualPlatform) {
+    if (process.env.LCL_VISUAL_CONTRACT === '1') {
+      throw new Error(
+        `Canonical UX visual regression requires ${canonicalVisualPlatform}; current platform is ${process.platform}`
+      );
+    }
+    return;
+  }
+
   await page.mouse.move(1, 1);
   await expect(page).toHaveScreenshot(`${name}.png`, {
     animations: 'disabled',
