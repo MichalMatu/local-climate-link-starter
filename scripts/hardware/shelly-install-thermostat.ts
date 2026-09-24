@@ -264,10 +264,7 @@ const main = async (): Promise<void> => {
       throw new Error('Could not verify Shelly identity before destructive install.');
     }
     const remoteDeviceId = deviceInfo.value.id?.trim();
-    if (
-      !remoteDeviceId ||
-      normalizeShellyDeviceId(remoteDeviceId) !== expectedDeviceId
-    ) {
+    if (!remoteDeviceId || normalizeShellyDeviceId(remoteDeviceId) !== expectedDeviceId) {
       throw new Error('Shelly identity does not match SHELLY_DEVICE_ID.');
     }
 
@@ -287,7 +284,9 @@ const main = async (): Promise<void> => {
       throw new Error('Shelly did not confirm relay OFF before destructive install.');
     }
 
-    const install = await client.installScript(createInstallPlan(code));
+    const install = await client.installScript(
+      createInstallPlan(code, config.output.relayId)
+    );
     report.install = serializeResult(install);
     if (!install.ok) {
       process.exitCode = 1;
