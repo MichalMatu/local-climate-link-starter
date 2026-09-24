@@ -1,11 +1,12 @@
 import {
-  LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+  SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME,
+  SHELLY_LINK_SCRIPT_NAME,
   FakeShellyClient,
   FetchShellyRpcTransport,
   RPC_METHODS,
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
+  hashScriptCode,
   createInstallPlan,
   isLocalShellyHost,
   readShellyScriptCode,
@@ -85,8 +86,11 @@ const sliceByUtf8ByteOffset = (
 class RecordingTransport implements ShellyRpcTransport {
   readonly requests: ShellyRpcRequest[] = [];
   relayOn = false;
+  private scripts: RecordedScript[];
 
-  constructor(private readonly options: RecordingTransportOptions = {}) {}
+  constructor(private readonly options: RecordingTransportOptions = {}) {
+    this.scripts = (options.scripts ?? []).map((script) => ({ ...script }));
+  }
 
   async call<TResponse>(
     request: ShellyRpcRequest
@@ -140,7 +144,7 @@ class RecordingTransport implements ShellyRpcTransport {
       return {
         ok: true,
         value: {
-          scripts: (this.options.scripts ?? []).map((script) => ({
+          scripts: this.scripts.map((script) => ({
             id: script.id,
             name: script.name,
             enable: script.enable,
@@ -150,11 +154,20 @@ class RecordingTransport implements ShellyRpcTransport {
       };
     }
     if (request.method === RPC_METHODS.ScriptCreate) {
-      return { ok: true, value: { id: 4 } as TResponse };
+      const params = request.params as { name: string };
+      const id = 4;
+      this.scripts.push({
+        id,
+        name: params.name,
+        enable: false,
+        running: false,
+        code: ''
+      });
+      return { ok: true, value: { id } as TResponse };
     }
     if (request.method === RPC_METHODS.ScriptGetCode) {
       const params = request.params as { id: number; offset?: number; len?: number };
-      const script = this.options.scripts?.find((entry) => entry.id === params.id);
+      const script = this.scripts.find((entry) => entry.id === params.id);
       const offset = params.offset ?? 0;
       const len = params.len ?? 1024;
       const { data, left } =
@@ -162,6 +175,41 @@ class RecordingTransport implements ShellyRpcTransport {
           ? { data: '', left: 0 }
           : sliceByUtf8ByteOffset(script.code, offset, len);
       return { ok: true, value: { data, left } as TResponse };
+    }
+    if (request.method === RPC_METHODS.ScriptStop) {
+      const params = request.params as { id: number };
+      this.scripts = this.scripts.map((script) =>
+        script.id === params.id ? { ...script, running: false } : script
+      );
+      return { ok: true, value: null as TResponse };
+    }
+    if (request.method === RPC_METHODS.ScriptDelete) {
+      const params = request.params as { id: number };
+      this.scripts = this.scripts.filter((script) => script.id !== params.id);
+      return { ok: true, value: null as TResponse };
+    }
+    if (request.method === RPC_METHODS.ScriptPutCode) {
+      const params = request.params as { id: number; code: string; append?: boolean };
+      this.scripts = this.scripts.map((script) =>
+        script.id === params.id
+          ? { ...script, code: params.append ? script.code + params.code : params.code }
+          : script
+      );
+      return { ok: true, value: null as TResponse };
+    }
+    if (request.method === RPC_METHODS.ScriptSetConfig) {
+      const params = request.params as { id: number; config: { enable: boolean } };
+      this.scripts = this.scripts.map((script) =>
+        script.id === params.id ? { ...script, enable: params.config.enable } : script
+      );
+      return { ok: true, value: null as TResponse };
+    }
+    if (request.method === RPC_METHODS.ScriptStart) {
+      const params = request.params as { id: number };
+      this.scripts = this.scripts.map((script) =>
+        script.id === params.id ? { ...script, running: true } : script
+      );
+      return { ok: true, value: null as TResponse };
     }
     if (request.method === RPC_METHODS.ScriptGetStatus) {
       return {
@@ -293,7 +341,8 @@ describe('RpcShellyClient', () => {
       RPC_METHODS.ScriptPutCode,
       RPC_METHODS.ScriptSetConfig,
       RPC_METHODS.ScriptStart,
-      RPC_METHODS.ScriptGetStatus
+      RPC_METHODS.ScriptGetStatus,
+      RPC_METHODS.ScriptList
     ]);
     const putCode = transport.requests.find(
       (request) => request.method === RPC_METHODS.ScriptPutCode
@@ -378,7 +427,7 @@ describe('RpcShellyClient', () => {
     expect(result.value.scriptHash).toBeDefined();
     expect(transport.requests).toContainEqual({
       method: RPC_METHODS.ScriptCreate,
-      params: { name: LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME }
+      params: { name: SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME }
     });
     expect(
       transport.requests.find((request) => request.method === RPC_METHODS.ScriptSetConfig)
@@ -386,15 +435,22 @@ describe('RpcShellyClient', () => {
     ).toEqual({ id: 4, config: { enable: false } });
   });
 
-  it('reuses an existing script, backs up code, and stops it before upload', async () => {
+  it('deletes every existing script before creating the exclusive automation runtime', async () => {
     const transport = new RecordingTransport({
       scripts: [
         {
           id: 7,
-          name: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+          name: 'Arbitrary running script',
           enable: true,
           running: true,
           code: 'print("old");'
+        },
+        {
+          id: 8,
+          name: 'Arbitrary stopped script',
+          enable: true,
+          running: false,
+          code: 'print("stopped");'
         }
       ]
     });
@@ -402,68 +458,30 @@ describe('RpcShellyClient', () => {
     const result = await client.installScript(createInstallPlan('print("new");'));
 
     expect(result.ok).toBe(true);
-    if (!result.ok) {
-      return;
-    }
-    expect(result.value.scriptId).toBe(7);
-    expect(result.value.backup?.code).toBe('print("old");');
-    expect(transport.requests.map((request) => request.method)).toEqual([
-      RPC_METHODS.ShellyGetDeviceInfo,
-      RPC_METHODS.ShellyGetStatus,
-      RPC_METHODS.ScriptList,
-      RPC_METHODS.ScriptGetCode,
-      RPC_METHODS.ScriptEval,
-      RPC_METHODS.ScriptStop,
-      RPC_METHODS.ScriptPutCode,
-      RPC_METHODS.ScriptSetConfig,
-      RPC_METHODS.ScriptStart,
-      RPC_METHODS.ScriptGetStatus
-    ]);
-    const cleanupEval = transport.requests.find(
-      (request) => request.method === RPC_METHODS.ScriptEval
-    );
-    expect(cleanupEval?.params).toEqual({
-      id: 7,
-      code: expect.stringContaining('BLE.Scanner.stop||BLE.Scanner.Stop')
-    });
-    expect(
-      transport.requests.some((request) => request.method === RPC_METHODS.ScriptCreate)
-    ).toBe(false);
-  });
-
-  it('uses byte offsets when backing up existing non-ASCII script code', async () => {
-    const existingCode = 'print("zażółć");';
-    const transport = new RecordingTransport({
-      scripts: [
-        {
-          id: 7,
-          name: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-          enable: true,
-          running: false,
-          code: existingCode
-        }
-      ]
-    });
-    const client = new RpcShellyClient(transport);
-    const result = await client.installScript({
-      ...createInstallPlan('print("new");'),
-      chunkSizeBytes: 8
-    });
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) {
-      return;
-    }
-    expect(result.value.backup?.code).toBe(existingCode);
+    if (!result.ok) return;
+    expect(result.value.scriptId).toBe(4);
+    expect(result.value.backup).toBeUndefined();
     expect(
       transport.requests
-        .filter((request) => request.method === RPC_METHODS.ScriptGetCode)
+        .filter((request) => request.method === RPC_METHODS.ScriptDelete)
         .map((request) => request.params)
-    ).toEqual([
-      { id: 7, offset: 0, len: 8 },
-      { id: 7, offset: 8, len: 8 },
-      { id: 7, offset: 15, len: 8 }
-    ]);
+    ).toEqual([{ id: 7 }, { id: 8 }]);
+    expect(transport.requests).toContainEqual({
+      method: RPC_METHODS.ScriptCreate,
+      params: { name: SHELLY_LINK_SCRIPT_NAME }
+    });
+    expect(transport.requests.at(-1)?.method).toBe(RPC_METHODS.ScriptList);
+  });
+
+  it('hashes the installed automation from code only', async () => {
+    const code = 'print("new");';
+    const transport = new RecordingTransport();
+    const client = new RpcShellyClient(transport);
+    const result = await client.installScript(createInstallPlan(code));
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.scriptHash).toBe(hashScriptCode(code));
   });
 
   it('uploads script code in 1024-byte chunks by default', async () => {
@@ -976,6 +994,9 @@ describe('FetchShellyRpcTransport', () => {
         params?: unknown;
       };
       requestBodies.push(body);
+      const scriptListCallCount = requestBodies.filter(
+        (request) => request.method === RPC_METHODS.ScriptList
+      ).length;
 
       const paramsByMethod: Record<string, unknown> = {
         [RPC_METHODS.ShellyGetDeviceInfo]: {
@@ -990,7 +1011,19 @@ describe('FetchShellyRpcTransport', () => {
           script: true,
           ble: true
         },
-        [RPC_METHODS.ScriptList]: { scripts: [] },
+        [RPC_METHODS.ScriptList]: {
+          scripts:
+            scriptListCallCount > 1
+              ? [
+                  {
+                    id: 4,
+                    name: SHELLY_LINK_SCRIPT_NAME,
+                    enable: true,
+                    running: true
+                  }
+                ]
+              : []
+        },
         [RPC_METHODS.ScriptCreate]: { id: 4 },
         [RPC_METHODS.ScriptPutCode]: {},
         [RPC_METHODS.ScriptSetConfig]: {},
@@ -1026,9 +1059,10 @@ describe('FetchShellyRpcTransport', () => {
       RPC_METHODS.ScriptPutCode,
       RPC_METHODS.ScriptSetConfig,
       RPC_METHODS.ScriptStart,
-      RPC_METHODS.ScriptGetStatus
+      RPC_METHODS.ScriptGetStatus,
+      RPC_METHODS.ScriptList
     ]);
-    expect(requestBodies.map((body) => body.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(requestBodies.map((body) => body.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 });
 

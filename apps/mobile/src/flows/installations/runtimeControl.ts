@@ -137,11 +137,16 @@ export const setInstalledAutomationRelayState = async (
 ): Promise<InstalledAutomationActionResult> => {
   const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
   const nextInstallation = prepared.installation;
-  if (prepared.status.automationMode !== 'manual' || !prepared.status.runtimeModeSupported) {
+  if (
+    prepared.status.automationMode !== 'manual' ||
+    !prepared.status.runtimeModeSupported
+  ) {
     throw new Error('Manual relay control requires a live MANUAL automation runtime.');
   }
 
-  const client = new RpcShellyClient(createShellyTransport(nextInstallation.shelly.baseUrl));
+  const client = new RpcShellyClient(
+    createShellyTransport(nextInstallation.shelly.baseUrl)
+  );
   const relayId = nextInstallation.config.output.relayId;
   unwrapShellyResult(
     on ? await client.setRelayOn({ relayId }) : await client.setRelayOff({ relayId })

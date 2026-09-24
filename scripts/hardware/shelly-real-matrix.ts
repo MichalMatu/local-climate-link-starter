@@ -10,8 +10,8 @@ import {
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
 import {
+  createInstallPlan,
   FetchShellyRpcTransport,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RPC_METHODS,
   RpcShellyClient,
   type Result,
@@ -468,10 +468,7 @@ const installRuntime = async (
 ): Promise<{ scriptId: number; scriptBytes: number }> => {
   const code = generateShellyThermostatScript(config);
   const install = await client.installScript({
-    scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-    code,
-    runOnBoot: true,
-    backupExisting: false,
+    ...createInstallPlan(code),
     chunkSizeBytes: 1024
   });
   if (!install.ok) {

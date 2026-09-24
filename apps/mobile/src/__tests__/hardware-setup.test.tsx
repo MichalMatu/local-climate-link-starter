@@ -7,7 +7,7 @@ import {
   createDefaultShellyThermostatConfig,
   generateShellyThermostatScript
 } from '@lcl/script-generator';
-import { hashScriptCode, LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
+import { hashScriptCode } from '@lcl/shelly-client';
 
 const phoneBleScannerMock = vi.hoisted(() => ({
   failureMessage: null as string | null,
@@ -1350,9 +1350,7 @@ describe('HardwareSetupScreen', () => {
       shellyName: 'Old name',
       baseUrl: 'http://192.168.0.19/',
       scriptId: 1,
-      scriptHash: hashScriptCode(
-        `${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${createStoredThermostatScript()}`
-      ),
+      scriptHash: hashScriptCode(createStoredThermostatScript()),
       config: createDefaultShellyThermostatConfig(
         'xiaomi_lywsd03mmc_bthome_v2',
         'heating'

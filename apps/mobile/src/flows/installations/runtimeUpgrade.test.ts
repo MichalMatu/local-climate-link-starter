@@ -118,7 +118,10 @@ describe('installed automation runtime replacement', () => {
     const result = await ensureInstalledAutomationRuntimeCurrent(installation);
 
     expect(mocks.installScript).toHaveBeenCalledWith(
-      expect.objectContaining({ replaceAllScripts: true, scriptName: 'Shelly Link Thermostat' })
+      expect.objectContaining({
+        replaceAllScripts: true,
+        scriptName: 'Shelly Link Thermostat'
+      })
     );
     expect(result.upgraded).toBe(true);
     expect(result.installation.script).toEqual({ id: 11, hash: 'fresh-code-hash' });
