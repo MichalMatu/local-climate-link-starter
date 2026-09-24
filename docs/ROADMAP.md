@@ -16,11 +16,11 @@ This baseline is frozen. Refactor only for a concrete blocker, broken ownership 
 
 ## 1. Automation Engine + persistent config — DONE
 
-`climate-engine-v1` uses one stable runtime body with typed compact config. Supported firmware uses validated `Script.storage` + `Script.Eval` for config-only edits; compatible firmware can fall back to the guarded `Script.PutCode` path.
+`climate-engine-v1` remains the stable runtime/config contract. Climate install, edit and repair use one exclusive Shelly Script lifecycle: verify the physical Plug identity, confirm or force the relay OFF, delete every existing Shelly Script, then create and start a fresh managed runtime. Script IDs are intentionally not preserved across replacement.
 
-Real Plug S Gen3 firmware 1.7.5 acceptance confirmed unchanged script bytes during config-only updates and successful persisted-config reload after runtime restart.
+Recovery remains conservative: only recognized managed runtime markers plus decodable managed metadata/config establish ownership, and passive recovery must not rewrite an already valid managed runtime.
 
-If future config/data outgrows practical `Script.storage` limits, evaluate Shelly KVS only as a namespaced/versioned overflow or alternative store. Do not fork ownership or cleanup semantics.
+If future config/data outgrows the current managed runtime/config model, evaluate Shelly KVS only as a namespaced/versioned storage option. Do not fork ownership, replacement or cleanup semantics.
 
 ## 2. Multiple thermometers + per-sensor diagnostics — DONE
 
@@ -88,8 +88,8 @@ If feasible, implement a shared `ShellyRpcTransport` boundary with HTTP and BLE 
 1. discovery and identity;
 2. provisioning/configuration;
 3. status and diagnostics;
-4. config-only automation updates;
-5. engine install/upgrade only when the transport proves safe enough.
+4. verified relay-safe automation replacement operations;
+5. full exclusive managed-runtime install/edit/repair only when the transport proves safe enough.
 
 BLE must not fork automation ownership, persistence or business logic.
 
