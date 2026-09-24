@@ -29,26 +29,8 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Format
-        run: pnpm format:check
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: UX quality gate
-        run: pnpm quality:ux
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Test
-        run: pnpm test
-
-      - name: Core coverage
-        run: pnpm test:coverage:core
-
-      - name: Build
-        run: pnpm build
+      - name: Canonical repository gate
+        run: pnpm check
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
