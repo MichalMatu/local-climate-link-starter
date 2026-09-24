@@ -242,12 +242,13 @@ export class RpcShellyClient implements ShellyClient {
   }
 }
 
-export const createInstallPlan = (code: string): ShellyInstallPlan => ({
+export const createInstallPlan = (code: string, relayId = 0): ShellyInstallPlan => ({
   scriptName: SHELLY_LINK_SCRIPT_NAME,
   code,
   runOnBoot: true,
   backupExisting: false,
   replaceAllScripts: true,
+  relayId,
   chunkSizeBytes: DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
 });
 
