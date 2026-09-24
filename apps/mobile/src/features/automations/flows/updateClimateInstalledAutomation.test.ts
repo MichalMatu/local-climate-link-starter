@@ -1,12 +1,8 @@
 import {
-  configHash,
   createDefaultShellyThermostatConfig,
-  generateShellyThermostatScript,
-  GENERATOR_VERSION,
-  normalizeConfig,
-  serializeShellyRuntimeConfig
+  generateShellyThermostatScript
 } from '@lcl/script-generator';
-import { hashScriptCode, LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
+import { hashScriptCode } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
 import { createInstalledAutomation } from '../data/installedAutomation.js';
 import {
@@ -15,13 +11,12 @@ import {
 } from './updateClimateInstalledAutomation.js';
 
 const originalConfig = createDefaultShellyThermostatConfig();
-const originalCode = generateShellyThermostatScript(originalConfig);
 const installation = createInstalledAutomation({
   shelly: { id: 'shelly-abc', model: 'S3PL-00112EU', gen: 3 },
   shellyName: 'Grow plug',
   baseUrl: 'http://192.168.0.20/',
   scriptId: 7,
-  scriptHash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${originalCode}`),
+  scriptHash: 'stale-development-hash',
   config: originalConfig,
   nowMs: 1000
 });
@@ -30,76 +25,49 @@ const editedConfig = {
   ...originalConfig,
   rule: {
     ...originalConfig.rule,
-    control: { ...originalConfig.rule.control, onThreshold: 18, offThreshold: 20 }
+    control: {
+      ...originalConfig.rule.control,
+      onThreshold: 18,
+      offThreshold: 20
+    }
   }
 };
 const editedCode = generateShellyThermostatScript(editedConfig);
-const editedHash = hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${editedCode}`);
-const multiConfig = normalizeConfig({
-  ...editedConfig,
-  sensorSet: {
-    aggregation: 'avg',
-    additionalSensors: [
-      {
-        ...editedConfig.sensor,
-        sensorId: 'sensor-b',
-        runtimeAddress: '11:22:33:44:55:66',
-        displayName: 'Sensor B'
-      }
-    ]
-  }
-});
-const multiCode = generateShellyThermostatScript(multiConfig);
-const multiHash = hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${multiCode}`);
+const editedHash = hashScriptCode(editedCode);
 
-const runtime = ({
-  code = originalCode,
-  persistedRuntimeConfigJson = null,
-  runtimeConfigStorageSupported = true,
-  running = true
-}: {
-  code?: string;
-  persistedRuntimeConfigJson?: string | null;
-  runtimeConfigStorageSupported?: boolean;
-  running?: boolean;
-} = {}) => ({
+const verifiedRuntime = (scriptId = 11) => ({
   script: {
-    id: 7,
-    name: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
+    id: scriptId,
+    name: 'anything',
     enable: true,
-    running
+    running: true
   },
-  code,
-  runtimeConfigStorageSupported,
-  persistedRuntimeConfigJson,
+  code: editedCode,
+  runtimeConfigStorageSupported: false,
+  persistedRuntimeConfigJson: null,
   status: {} as never
 });
 
 const services = (
   overrides: Partial<ClimateAutomationEditServices> = {}
 ): ClimateAutomationEditServices => ({
-  readManagedRuntime: vi
-    .fn()
-    .mockResolvedValueOnce(runtime())
-    .mockResolvedValueOnce(
-      runtime({ persistedRuntimeConfigJson: serializeShellyRuntimeConfig(editedConfig) })
-    ),
+  readManagedRuntime: vi.fn(async () => verifiedRuntime()),
   readDeviceId: vi.fn(async () => 'SHELLY-ABC'),
   hasNativeScheduleConflict: vi.fn(async () => false),
   forceRelayOff: vi.fn(async () => undefined),
   replaceManagedScript: vi.fn(async () => ({
-    scriptId: 7,
+    scriptId: 11,
     scriptHash: editedHash,
     running: true
   })),
-  updateRuntimeConfig: vi.fn(async () => configHash(editedConfig)),
   nowMs: vi.fn(() => 2000),
   ...overrides
 });
 
 describe('updateClimateInstalledAutomation', () => {
-  it('updates a persistence-capable runtime without replacing script code', async () => {
+  it('always replaces the Shelly runtime and accepts a new script id', async () => {
     const mocked = services();
+
     const result = await updateClimateInstalledAutomation({
       installation,
       config: editedConfig,
@@ -107,308 +75,48 @@ describe('updateClimateInstalledAutomation', () => {
       services: mocked
     });
 
-    expect(result.installation.id).toBe(installation.id);
-    expect(result.installation.installedAtMs).toBe(1000);
-    expect(result.installation.updatedAtMs).toBe(2000);
-    expect(result.installation.config.rule.control).toEqual({
-      ...installation.config.rule.control,
-      onThreshold: 18,
-      offThreshold: 20
-    });
-    expect(result.installation.script).toEqual(installation.script);
     expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
-    expect(mocked.updateRuntimeConfig).toHaveBeenCalledTimes(1);
-    expect(mocked.updateRuntimeConfig).toHaveBeenCalledWith(
-      installation.shelly.baseUrl,
-      installation.script.id,
-      expect.stringContaining(configHash(editedConfig))
-    );
-    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
-  });
-
-  it('replaces an otherwise capable runtime from a previous generator revision on deliberate save', async () => {
-    const previousCode = originalCode.replace(
-      `// g: ${GENERATOR_VERSION}`,
-      '// g: 0.5.0'
-    );
-    const previousInstallation = {
-      ...installation,
-      script: {
-        ...installation.script,
-        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${previousCode}`)
-      }
-    };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ code: previousCode }))
-        .mockResolvedValueOnce(runtime({ code: editedCode })),
-      replaceManagedScript: vi.fn(async () => ({
-        scriptId: 7,
-        scriptHash: editedHash,
-        running: true
-      }))
-    });
-
-    const result = await updateClimateInstalledAutomation({
-      installation: previousInstallation,
-      config: editedConfig,
-      installations: [previousInstallation],
-      services: mocked
-    });
-
-    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
+    expect(mocked.replaceManagedScript).toHaveBeenCalledTimes(1);
     expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
       installation.shelly.baseUrl,
       editedCode
     );
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
-    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
-  });
-
-  it('upgrades a persistence-capable runtime that predates per-sensor diagnostics', async () => {
-    const legacyCode = originalCode
-      .replace('function pd()', 'function oldPd()')
-      .replace('d:pd()', 'd:oldPd()');
-    const legacyInstallation = {
-      ...installation,
-      script: {
-        ...installation.script,
-        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
-      }
-    };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ code: legacyCode }))
-        .mockResolvedValueOnce(runtime({ code: editedCode })),
-      replaceManagedScript: vi.fn(async () => ({
-        scriptId: 7,
-        scriptHash: editedHash,
-        running: true
-      }))
-    });
-
-    const result = await updateClimateInstalledAutomation({
-      installation: legacyInstallation,
+    expect(result.installation).toMatchObject({
+      id: installation.id,
+      installedAtMs: 1000,
+      updatedAtMs: 2000,
       config: editedConfig,
-      installations: [legacyInstallation],
-      services: mocked
+      script: { id: 11, hash: editedHash }
     });
-
-    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
-    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
-      installation.shelly.baseUrl,
-      editedCode
-    );
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
-    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
   });
 
-  it('upgrades a persistence-capable single-sensor body before the first multi-sensor edit', async () => {
-    const legacyCode = originalCode.replace(
-      'function av(v,t,n)',
-      'function legacyAv(v,t,n)'
-    );
-    const legacyInstallation = {
+  it('does not use the stored development script id or hash as edit authorization', async () => {
+    const staleInstallation = {
       ...installation,
-      script: {
-        ...installation.script,
-        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
-      }
+      script: { id: 999, hash: 'completely-stale' }
     };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ code: legacyCode }))
-        .mockResolvedValueOnce(runtime({ code: multiCode })),
-      replaceManagedScript: vi.fn(async () => ({
-        scriptId: 7,
-        scriptHash: multiHash,
-        running: true
-      }))
-    });
-
-    const result = await updateClimateInstalledAutomation({
-      installation: legacyInstallation,
-      config: multiConfig,
-      installations: [legacyInstallation],
-      services: mocked
-    });
-
-    expect(result.installation.script).toEqual({ id: 7, hash: multiHash });
-    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
-      installation.shelly.baseUrl,
-      multiCode
-    );
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
-    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
-  });
-
-  it('changes only persisted config for aggregation edits on a multi-sensor-capable body', async () => {
-    const minConfig = normalizeConfig({
-      ...multiConfig,
-      sensorSet: {
-        ...multiConfig.sensorSet!,
-        aggregation: 'min'
-      }
-    });
-    const multiInstallation = {
-      ...installation,
-      config: multiConfig,
-      script: { id: 7, hash: multiHash }
-    };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ code: multiCode }))
-        .mockResolvedValueOnce(
-          runtime({
-            code: multiCode,
-            persistedRuntimeConfigJson: serializeShellyRuntimeConfig(minConfig)
-          })
-        ),
-      updateRuntimeConfig: vi.fn(async () => configHash(minConfig))
-    });
-
-    const result = await updateClimateInstalledAutomation({
-      installation: multiInstallation,
-      config: minConfig,
-      installations: [multiInstallation],
-      services: mocked
-    });
-
-    expect(result.installation.script).toEqual({ id: 7, hash: multiHash });
-    expect(mocked.updateRuntimeConfig).toHaveBeenCalledTimes(1);
-    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
-    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
-  });
-
-  it('matches a recovered installation by runtime semantics instead of local sensor id', async () => {
-    const recoveredInstallation = {
-      ...installation,
-      config: {
-        ...installation.config,
-        sensor: {
-          ...installation.config.sensor,
-          sensorId: installation.config.sensor.runtimeAddress
-        }
-      }
-    };
-    const recoveredEditedConfig = {
-      ...editedConfig,
-      sensor: recoveredInstallation.config.sensor
-    };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime())
-        .mockResolvedValueOnce(
-          runtime({
-            persistedRuntimeConfigJson:
-              serializeShellyRuntimeConfig(recoveredEditedConfig)
-          })
-        ),
-      updateRuntimeConfig: vi.fn(async () => configHash(recoveredEditedConfig))
-    });
+    const mocked = services();
 
     await expect(
       updateClimateInstalledAutomation({
-        installation: recoveredInstallation,
-        config: recoveredEditedConfig,
-        installations: [recoveredInstallation],
+        installation: staleInstallation,
+        config: editedConfig,
+        installations: [staleInstallation],
         services: mocked
       })
     ).resolves.toMatchObject({
-      installation: {
-        config: { sensor: { sensorId: installation.config.sensor.runtimeAddress } }
-      }
+      installation: { script: { id: 11, hash: editedHash } }
     });
 
-    expect(mocked.updateRuntimeConfig).toHaveBeenCalledTimes(1);
-    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
+    expect(mocked.replaceManagedScript).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to code replacement when Script.storage is unavailable', async () => {
+  it('does not use the remote script display name as edit authorization', async () => {
     const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ runtimeConfigStorageSupported: false }))
-        .mockResolvedValueOnce(
-          runtime({
-            code: editedCode,
-            runtimeConfigStorageSupported: false,
-            persistedRuntimeConfigJson: null
-          })
-        )
-    });
-
-    const result = await updateClimateInstalledAutomation({
-      installation,
-      config: editedConfig,
-      installations: [installation],
-      services: mocked
-    });
-
-    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
-    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
-      installation.shelly.baseUrl,
-      editedCode
-    );
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
-  });
-
-  it('upgrades a legacy managed runtime by replacing code once', async () => {
-    const legacyCode = originalCode.replace('function vc(c)', 'function oldVc(c)');
-    const legacyInstallation = {
-      ...installation,
-      script: {
-        ...installation.script,
-        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
-      }
-    };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ code: legacyCode }))
-        .mockResolvedValueOnce(
-          runtime({
-            code: editedCode,
-            persistedRuntimeConfigJson: null
-          })
-        )
-    });
-
-    const result = await updateClimateInstalledAutomation({
-      installation: legacyInstallation,
-      config: editedConfig,
-      installations: [legacyInstallation],
-      services: mocked
-    });
-
-    expect(result.installation.script).toEqual({ id: 7, hash: editedHash });
-    expect(mocked.replaceManagedScript).toHaveBeenCalledWith(
-      installation.shelly.baseUrl,
-      editedCode
-    );
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
-  });
-
-  it('rolls back persisted config when post-update verification fails', async () => {
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime())
-        .mockResolvedValueOnce(runtime())
-        .mockResolvedValueOnce(
-          runtime({
-            persistedRuntimeConfigJson: serializeShellyRuntimeConfig(originalConfig)
-          })
-        ),
-      updateRuntimeConfig: vi
-        .fn()
-        .mockResolvedValueOnce(configHash(editedConfig))
-        .mockResolvedValueOnce(configHash(originalConfig))
+      readManagedRuntime: vi.fn(async () => ({
+        ...verifiedRuntime(),
+        script: { ...verifiedRuntime().script, name: 'arbitrary pre-edit name' }
+      }))
     });
 
     await expect(
@@ -418,37 +126,12 @@ describe('updateClimateInstalledAutomation', () => {
         installations: [installation],
         services: mocked
       })
-    ).rejects.toThrow('did not confirm');
-
-    expect(mocked.updateRuntimeConfig).toHaveBeenCalledTimes(2);
-    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
-    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(3);
+    ).resolves.toBeDefined();
   });
 
-  it('reports a rollback failure explicitly', async () => {
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime())
-        .mockResolvedValueOnce(runtime()),
-      updateRuntimeConfig: vi
-        .fn()
-        .mockResolvedValueOnce(configHash(editedConfig))
-        .mockRejectedValueOnce(new Error('rollback failed'))
-    });
-
-    await expect(
-      updateClimateInstalledAutomation({
-        installation,
-        config: editedConfig,
-        installations: [installation],
-        services: mocked
-      })
-    ).rejects.toThrow('rollback was not confirmed');
-  });
-
-  it('refuses to mutate a different physical Shelly', async () => {
+  it('refuses to mutate a different physical Shelly before relay or script mutation', async () => {
     const mocked = services({ readDeviceId: vi.fn(async () => 'other-device') });
+
     await expect(
       updateClimateInstalledAutomation({
         installation,
@@ -457,15 +140,14 @@ describe('updateClimateInstalledAutomation', () => {
         services: mocked
       })
     ).rejects.toThrow('identity');
-    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
+
     expect(mocked.forceRelayOff).not.toHaveBeenCalled();
+    expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
   });
 
-  it('refuses to overwrite a remote script that no longer matches durable ownership', async () => {
-    const mocked = services({
-      readManagedRuntime: vi.fn(async () => runtime({ code: 'changed elsewhere' }))
-    });
+  it('refuses to replace scripts when a native Shelly schedule owns the relay', async () => {
+    const mocked = services({ hasNativeScheduleConflict: vi.fn(async () => true) });
+
     await expect(
       updateClimateInstalledAutomation({
         installation,
@@ -473,60 +155,30 @@ describe('updateClimateInstalledAutomation', () => {
         installations: [installation],
         services: mocked
       })
-    ).rejects.toThrow('does not match');
+    ).rejects.toThrow('native Shelly schedule');
+
+    expect(mocked.forceRelayOff).not.toHaveBeenCalled();
     expect(mocked.replaceManagedScript).not.toHaveBeenCalled();
-    expect(mocked.updateRuntimeConfig).not.toHaveBeenCalled();
   });
 
-  it('does not accept a legacy replacement that changes the managed script id', async () => {
-    const legacyCode = originalCode.replace('function vc(c)', 'function oldVc(c)');
-    const legacyInstallation = {
-      ...installation,
-      script: {
-        ...installation.script,
-        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
-      }
-    };
+  it('requires the freshly installed runtime to match the requested config and code hash', async () => {
     const mocked = services({
-      readManagedRuntime: vi.fn(async () => runtime({ code: legacyCode })),
-      replaceManagedScript: vi.fn(async () => ({
-        scriptId: 8,
-        scriptHash: editedHash,
-        running: true
+      readManagedRuntime: vi.fn(async () => ({
+        ...verifiedRuntime(),
+        code: generateShellyThermostatScript(originalConfig)
       }))
     });
-    await expect(
-      updateClimateInstalledAutomation({
-        installation: legacyInstallation,
-        config: editedConfig,
-        installations: [legacyInstallation],
-        services: mocked
-      })
-    ).rejects.toThrow('script id');
-  });
 
-  it('does not persist success when legacy replacement verification fails', async () => {
-    const legacyCode = originalCode.replace('function vc(c)', 'function oldVc(c)');
-    const legacyInstallation = {
-      ...installation,
-      script: {
-        ...installation.script,
-        hash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${legacyCode}`)
-      }
-    };
-    const mocked = services({
-      readManagedRuntime: vi
-        .fn()
-        .mockResolvedValueOnce(runtime({ code: legacyCode }))
-        .mockResolvedValueOnce(runtime({ code: editedCode, running: false }))
-    });
     await expect(
       updateClimateInstalledAutomation({
-        installation: legacyInstallation,
+        installation,
         config: editedConfig,
-        installations: [legacyInstallation],
+        installations: [installation],
         services: mocked
       })
-    ).rejects.toThrow('did not confirm');
+    ).rejects.toThrow('did not confirm the replaced automation runtime');
+
+    expect(mocked.replaceManagedScript).toHaveBeenCalledTimes(1);
+    expect(mocked.forceRelayOff).toHaveBeenCalledTimes(2);
   });
 });
