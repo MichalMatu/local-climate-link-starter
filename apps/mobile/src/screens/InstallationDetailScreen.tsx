@@ -244,7 +244,6 @@ const ClimateInstallationDetail = ({
   const { bleSensors, scriptRows } = formatClimateDetailDiagnostics({
     sensors: configuredSensors,
     snapshot,
-    componentState: informationQuery.data?.status.scripts,
     resources,
     dataUpdatedAt: diagnosticsQuery.dataUpdatedAt,
     nowMs,

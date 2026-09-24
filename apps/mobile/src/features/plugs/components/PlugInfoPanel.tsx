@@ -72,12 +72,6 @@ export const PlugInfoPanel = ({
 
   const { deviceInfo, status } = information;
   const telemetry = status.telemetry;
-  const compatibility = status.matterEnabled
-    ? { label: t('hardware.status.blocked'), tone: 'danger' as const }
-    : status.scripts !== 'enabled' || status.bluetooth !== 'enabled'
-      ? { label: t('hardware.status.check'), tone: 'warning' as const }
-      : { label: t('hardware.status.compatible'), tone: 'ok' as const };
-
   return (
     <section className="plug-detail-framed-section">
       <h3 className="plug-detail-framed-section__title">{t('hardware.nav.shelly')}</h3>
@@ -86,7 +80,6 @@ export const PlugInfoPanel = ({
           <span>{t('common.model')}</span>
           <div className="lcl-compact-device__meta">
             <strong>{`${deviceInfo.model}, gen ${deviceInfo.gen}`}</strong>
-            <StatusBadge tone={compatibility.tone}>{compatibility.label}</StatusBadge>
           </div>
         </div>
         <DiagnosticRow

@@ -169,10 +169,7 @@ export const readShellySetupStatus = async (
 
   return {
     deviceInfo: parsedDeviceInfo,
-    status:
-      statusWithDeviceInfo.scripts === 'missing'
-        ? { ...statusWithDeviceInfo, scripts: 'enabled' }
-        : statusWithDeviceInfo,
+    status: statusWithDeviceInfo,
     scripts
   };
 };

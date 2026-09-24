@@ -106,7 +106,6 @@ export const parseShellyStatusResponse = (value: unknown): Result<ShellyStatus> 
     ok: true,
     value: {
       matterEnabled: matterEnabled(status.matter),
-      scripts: componentState(status.script),
       bluetooth: componentState(status.ble),
       relayOn: switchStatus.success ? switchStatus.data.output : false,
       telemetry: toShellyPlugTelemetry(switchStatus, wifiStatus),

@@ -51,7 +51,6 @@ export class FakeShellyClient implements ShellyClient {
       ok: true,
       value: {
         matterEnabled: this.options.matterEnabled ?? false,
-        scripts: this.options.matterEnabled ? 'disabled' : 'enabled',
         bluetooth: 'enabled',
         relayOn: this.relayOn,
         telemetry: {

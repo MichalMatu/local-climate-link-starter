@@ -208,12 +208,6 @@ export const installShellyScript = async (
     };
   }
 
-  if (status.value.scripts === 'disabled') {
-    return {
-      ok: false,
-      error: scriptUploadError('Shelly Scripts are disabled on this device.')
-    };
-  }
   if (status.value.bluetooth !== 'enabled') {
     return {
       ok: false,

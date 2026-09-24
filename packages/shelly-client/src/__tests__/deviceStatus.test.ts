@@ -5,11 +5,11 @@ import {
 } from '../rpc/deviceStatus.js';
 
 describe('Shelly device/status response parsing', () => {
-  it('normalizes components, plug telemetry and clock data', () => {
+  it('normalizes device status without inventing a global script component', () => {
     expect(
       parseShellyStatusResponse({
         matter: { enable: true },
-        script: { enable: true },
+        'script:7': { id: 7, running: true },
         ble: false,
         'switch:0': {
           output: true,
@@ -31,7 +31,6 @@ describe('Shelly device/status response parsing', () => {
       ok: true,
       value: {
         matterEnabled: true,
-        scripts: 'enabled',
         bluetooth: 'disabled',
         relayOn: true,
         telemetry: {
@@ -58,7 +57,6 @@ describe('Shelly device/status response parsing', () => {
       ok: true,
       value: {
         matterEnabled: false,
-        scripts: 'missing',
         bluetooth: 'missing',
         relayOn: false,
         telemetry: {},

@@ -38,22 +38,6 @@ export const formatComponentState = (
   }
 };
 
-export const shellyCompatibilityBadge = (
-  status: ShellySetupFlow['setupStatus'],
-  t: Translate
-) => {
-  if (!status) {
-    return { label: t('common.unknown'), tone: 'inactive' as const };
-  }
-  if (status.status.matterEnabled) {
-    return { label: t('hardware.status.blocked'), tone: 'danger' as const };
-  }
-  if (status.status.scripts !== 'enabled' || status.status.bluetooth !== 'enabled') {
-    return { label: t('hardware.status.check'), tone: 'warning' as const };
-  }
-  return { label: t('hardware.status.compatible'), tone: 'ok' as const };
-};
-
 export const formatPlugPower = (value: number | undefined, t: Translate): string =>
   value === undefined
     ? t('common.missing')

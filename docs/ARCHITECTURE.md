@@ -44,6 +44,8 @@ Temporary BLE discovery is the one non-exclusive script flow. It is short-lived,
 
 The current Climate runtime is `climate-engine-v1` with managed metadata, config hash and diagnostics. Native Time automation uses Shelly schedules rather than the Climate script.
 
+Shelly script status is intentionally read from script-specific RPCs. `Shelly.GetStatus` exposes created script slots under dynamic keys such as `script:1`; it is not a global Scripts capability flag and must not be interpreted through a synthetic `status.script` field. Use successful `Script.List` to establish script-management availability/listing and `Script.GetStatus` for the state of a concrete runtime.
+
 ## Dependency direction
 
 ```text

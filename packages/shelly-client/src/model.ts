@@ -58,7 +58,6 @@ export type ShellyComponentState = 'enabled' | 'disabled' | 'missing';
 
 export interface ShellyStatus {
   matterEnabled: boolean;
-  scripts: ShellyComponentState;
   bluetooth: ShellyComponentState;
   relayOn: boolean;
   telemetry: ShellyPlugTelemetry;

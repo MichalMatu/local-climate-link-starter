@@ -1,4 +1,4 @@
-import { DiagnosticRow, FeedbackPanel, StatusBadge } from '@lcl/ui';
+import { DiagnosticRow, FeedbackPanel } from '@lcl/ui';
 import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
 import {
@@ -13,8 +13,7 @@ import {
   formatClockSyncState,
   formatClockTimestamp,
   formatClockUptime,
-  formatComponentState,
-  shellyCompatibilityBadge
+  formatComponentState
 } from './ShellySetupPresentation.js';
 
 type ShellySettingsContentProps = {
@@ -35,7 +34,6 @@ export const ShellySettingsContent = ({
   const { locale, t } = useTranslation();
   const controlState = flow.shellyControlStates[device.id];
   const status = controlState?.status;
-  const compatibilityBadge = shellyCompatibilityBadge(flow.setupStatus, t);
   const settingsTarget = { deviceId: device.id, baseUrl: device.baseUrl };
 
   return (
@@ -57,9 +55,6 @@ export const ShellySettingsContent = ({
                 ? `${flow.setupStatus?.deviceInfo.model ?? device.model}, gen ${flow.setupStatus?.deviceInfo.gen ?? device.gen ?? '?'}`
                 : t('common.missingData')}
             </strong>
-            <StatusBadge tone={compatibilityBadge.tone}>
-              {compatibilityBadge.label}
-            </StatusBadge>
           </div>
         </div>
         <DiagnosticRow
@@ -98,12 +93,8 @@ export const ShellySettingsContent = ({
           tone={status?.clock.timeSynced ? 'normal' : 'warning'}
         />
         <DiagnosticRow
-          label="Scripts"
-          value={
-            flow.setupStatus
-              ? formatComponentState(flow.setupStatus.status.scripts, t)
-              : t('common.missingData')
-          }
+          label={t('hardware.shelly.scripts')}
+          value={flow.setupStatus ? t('common.enabled') : t('common.missingData')}
         />
         <DiagnosticRow
           label="Bluetooth"

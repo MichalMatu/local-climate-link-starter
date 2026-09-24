@@ -583,14 +583,14 @@ describe('RpcShellyClient', () => {
     ]);
   });
 
-  it('allows install when GetStatus omits Scripts but Script.List works', async () => {
+  it('uses Script.List rather than a synthetic GetStatus Scripts component', async () => {
     const transport = new RecordingTransport({ scriptComponent: null });
     const client = new RpcShellyClient(transport);
 
     const status = await client.getStatus();
     const install = await client.installScript(createInstallPlan('print("demo");'));
 
-    expect(status.ok && status.value.scripts).toBe('missing');
+    expect(status.ok && 'scripts' in status.value).toBe(false);
     expect(install.ok).toBe(true);
   });
 

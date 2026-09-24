@@ -88,7 +88,7 @@ const mockShelly = async (page: Page) => {
       case 'Shelly.GetStatus':
         result = {
           matter: { enabled: false },
-          script: { enable: true },
+          'script:1': { id: 1, running: true },
           ble: { enable: true },
           'switch:0': {
             id: 0,

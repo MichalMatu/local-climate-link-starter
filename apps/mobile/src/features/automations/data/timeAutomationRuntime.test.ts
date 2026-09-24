@@ -121,7 +121,6 @@ class FakeTimeAutomationClients {
   private status(): ShellyStatus {
     return {
       matterEnabled: false,
-      scripts: 'enabled',
       bluetooth: 'enabled',
       relayOn: this.relayOn,
       telemetry: {},

@@ -170,9 +170,7 @@ export const formatClimateBleSensorPresentations = (
   });
 
 export type ScriptDiagnosticPresentationInput = {
-  componentState: 'enabled' | 'disabled' | 'missing' | null | undefined;
   rpcRunning: boolean | null | undefined;
-  runtimeRunning: boolean | null | undefined;
   configHash: string | null | undefined;
   cpuPercent: number | null | undefined;
   memUsedBytes: number | null | undefined;
@@ -200,32 +198,12 @@ export const formatScriptDiagnosticRows = (
   t: Translate
 ): ScriptDiagnosticPresentationRow[] => [
   {
-    label: t('hardware.rule.script'),
-    value:
-      input.componentState === 'enabled'
-        ? t('common.enabled')
-        : input.componentState === 'disabled'
-          ? t('common.disabled')
-          : input.componentState === 'missing'
-            ? t('common.missingInStatus')
-            : missing
-  },
-  {
     label: t('hardware.diagnostics.scriptRpcState'),
     value:
       input.rpcRunning === true
         ? 'RUNNING'
         : input.rpcRunning === false
           ? 'STOPPED'
-          : missing
-  },
-  {
-    label: t('hardware.status.running'),
-    value:
-      input.runtimeRunning === true
-        ? t('hardware.status.running')
-        : input.runtimeRunning === false
-          ? t('hardware.status.stopped')
           : missing
   },
   { label: t('hardware.metrics.configHash'), value: input.configHash ?? missing },
@@ -261,7 +239,6 @@ type ClimateDetailDiagnosticResources = {
 export const formatClimateDetailDiagnostics = ({
   sensors,
   snapshot,
-  componentState,
   resources,
   dataUpdatedAt,
   nowMs,
@@ -270,7 +247,6 @@ export const formatClimateDetailDiagnostics = ({
 }: {
   sensors: readonly ClimateBleSensorIdentity[];
   snapshot: HardwareDiagnosticSnapshot | undefined;
-  componentState: ScriptDiagnosticPresentationInput['componentState'];
   resources: ClimateDetailDiagnosticResources | undefined;
   dataUpdatedAt: number;
   nowMs: number;
@@ -289,9 +265,7 @@ export const formatClimateDetailDiagnostics = ({
     bleSensors: formatClimateBleSensorPresentations(sensors, snapshot, missing, t),
     scriptRows: formatScriptDiagnosticRows(
       {
-        componentState,
         rpcRunning: resources?.script?.running,
-        runtimeRunning: snapshot?.script?.running,
         configHash: snapshot?.script?.configHash,
         cpuPercent: resources?.script?.cpuPercent,
         memUsedBytes: resources?.script?.memUsedBytes,
