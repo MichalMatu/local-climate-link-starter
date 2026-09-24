@@ -84,12 +84,12 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
   return (
     <div className="device-add-page__body">
       <div
-        className="shelly-add-tabs"
+        className="shelly-add-tabs lcl-segmented-control"
         role="tablist"
         aria-label={t('hardware.shelly.add')}
       >
         <button
-          className="shelly-add-tabs__tab"
+          className="shelly-add-tabs__tab lcl-segmented-control__item"
           type="button"
           role="tab"
           aria-selected={activeSection === 'scan'}
@@ -98,7 +98,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
           {t('hardware.shelly.scanNetwork')}
         </button>
         <button
-          className="shelly-add-tabs__tab"
+          className="shelly-add-tabs__tab lcl-segmented-control__item"
           type="button"
           role="tab"
           aria-selected={activeSection === 'manual'}

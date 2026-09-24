@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
+import { expectVisualScreen } from './visual-contract.js';
 
 const e2eOrigin = `http://127.0.0.1:${process.env.LCL_E2E_PORT ?? '5173'}`;
 
@@ -603,6 +604,9 @@ for (const viewport of viewports) {
     await expect(page.getByText('21.4°C')).toBeVisible();
     await expect(page.getByText('55.2%')).toBeVisible();
     await expect(page.getByText('1.31 → 1.20 kPa')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '01-plugs-dashboard');
+    }
     await expect(page.getByText('Działa')).toHaveCount(0);
     await expect(page.getByText('ON 19°C')).toBeVisible();
     await expect(page.getByText('OFF 20°C')).toBeVisible();
@@ -635,6 +639,9 @@ for (const viewport of viewports) {
     await expect(page.getByRole('heading', { name: 'Salon' })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Automatyka' })).toHaveCount(0);
     await expect(page.getByText('Powód automatyzacji')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '02-climate-automation');
+    }
     await expect(page.getByText('Wyjście automatyzacji')).toBeVisible();
     await expect(page.getByText('Stan przekaźnika')).toBeVisible();
     await expect(page.getByText('Przedpokój')).toBeVisible();
@@ -654,6 +661,9 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Bluetooth' }).click();
     await expect(page.getByText('91%')).toBeVisible();
     await expect(page.getByText('-51 dBm')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '03-climate-ble');
+    }
     const [bleCardBox, bleScanBox] = await Promise.all([
       requiredBox(page.locator('.installation-ble-card')),
       requiredBox(page.locator('.installation-ble-card__footer .secondary-action'))
@@ -665,6 +675,9 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
     await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '05-climate-device');
+    }
     await expect(page.getByRole('button', { name: 'Tryb LED' })).toBeVisible();
     await expect(page.getByText('ON', { exact: true })).toBeVisible();
     await expect(page.getByText('OFF', { exact: true })).toBeVisible();
@@ -682,8 +695,15 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
+    if (viewport.name === 'phone-large') {
+      await page.locator('.plug-detail-tabs__item').nth(3).click();
+      await expectVisualScreen(page, '06-climate-script');
+    }
     await page.getByRole('button', { name: 'Informacje' }).click();
     await expect(page.getByText('S3PL-00112EU, gen 3')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '07-climate-info');
+    }
     await expect(page.getByText('0.20 A')).toBeVisible();
     await expect(page.getByText('32.4°C')).toBeVisible();
     await expect(page.getByText('42.3 W')).toHaveCount(0);
@@ -707,6 +727,16 @@ for (const viewport of viewports) {
     await expectClimateDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
+    if (viewport.name === 'phone-large') {
+      await page.getByRole('button', { name: 'Bluetooth' }).click();
+      await page
+        .getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
+        .click();
+      await expect(
+        page.getByRole('heading', { name: 'Skanuj termometry BLE' })
+      ).toBeVisible();
+      await expectVisualScreen(page, '04-plug-ble-discovery');
+    }
     expect(consoleProblems).toEqual([]);
   });
 }
@@ -766,6 +796,9 @@ for (const viewport of viewports) {
       .locator('xpath=ancestor::article[1]');
     await plugCard.getByRole('button', { name: 'Dodaj automatykę' }).click();
     await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '08-automation-intent');
+    }
     await page.getByRole('button', { name: /Sterować według czasu/ }).click();
 
     await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
@@ -774,6 +807,9 @@ for (const viewport of viewports) {
     await expect(
       page.getByRole('heading', { name: 'Ustaw godziny ON i OFF' })
     ).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '09-time-setup');
+    }
     await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
@@ -781,6 +817,9 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     await expect(page.getByText('Harmonogram dzienny')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '10-time-dashboard');
+    }
     await expect(page.getByText('08:00')).toBeVisible();
     await expect(page.getByText('20:00')).toBeVisible();
     await expect(page.getByText('Działa')).toBeVisible();
@@ -792,6 +831,9 @@ for (const viewport of viewports) {
     await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '11-time-detail');
+    }
     await expect(
       page.getByRole('button', { name: 'Gniazdka', exact: true })
     ).toHaveAttribute('aria-current', 'page');
@@ -911,8 +953,28 @@ for (const viewport of viewports) {
     ).toHaveAttribute('aria-current', 'page');
     await expectNoHorizontalOverflow(page);
 
+    await page.getByRole('button', { name: 'Termometry', exact: true }).click();
+    await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '12-thermometers-dashboard');
+    }
+    await page.getByRole('button', { name: 'Skanuj termometry BLE telefonem' }).click();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '13-add-thermometer');
+    }
+    await page.getByRole('button', { name: 'Termometry', exact: true }).click();
+    await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '14-settings');
+    }
+    await page.getByRole('button', { name: 'Gniazdka', exact: true }).click();
+
     await page.getByRole('button', { name: 'Dodaj gniazdko', exact: true }).click();
     await expect(page.getByRole('tablist', { name: 'Dodaj gniazdko' })).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '15-add-plug');
+    }
     await expect(page.getByRole('tab', { name: 'Skanuj sieć' })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Dodaj ręcznie' })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
@@ -933,6 +995,9 @@ for (const viewport of viewports) {
       0
     );
     await expect(page.getByLabel('VPD assist')).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '16-climate-setup');
+    }
     await ensureRuleAdvancedOpen(page);
     await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
