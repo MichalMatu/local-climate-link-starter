@@ -4,7 +4,6 @@ import {
   normalizeConfig,
   serializeShellyRuntimeConfig
 } from '@lcl/script-generator';
-import { LOCAL_CLIMATE_LINK_SCRIPT_NAME } from '@lcl/shelly-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   resetInstalledAutomationStore,
@@ -62,7 +61,6 @@ describe('multi-sensor climate recovery', () => {
     const services: InstalledAutomationReconciliationServices = {
       readClimateRuntime: vi.fn(async () => ({
         scriptId: 1,
-        scriptName: LOCAL_CLIMATE_LINK_SCRIPT_NAME,
         running: true,
         code,
         persistedRuntimeConfigJson: serializeShellyRuntimeConfig(persisted)
