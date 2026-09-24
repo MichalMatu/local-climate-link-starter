@@ -220,14 +220,17 @@ export const HardwareSetupScreen = ({
       )}
 
       {!plugAddOnly && !sensorAddOnly && availableTabs.length > 1 && (
-        <nav className="setup-top-nav" aria-label={t('hardware.nav.label')}>
+        <nav
+          className="setup-top-nav lcl-segmented-control"
+          aria-label={t('hardware.nav.label')}
+        >
           {availableTabs.map((tab) => (
             <button
               key={tab.id}
               className={
                 activeTab === tab.id
-                  ? 'setup-top-nav__item setup-top-nav__item--active'
-                  : 'setup-top-nav__item'
+                  ? 'setup-top-nav__item lcl-segmented-control__item setup-top-nav__item--active'
+                  : 'setup-top-nav__item lcl-segmented-control__item'
               }
               type="button"
               aria-current={activeTab === tab.id ? 'page' : undefined}

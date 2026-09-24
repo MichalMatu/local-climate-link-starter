@@ -18,7 +18,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 ## Rules
 
 1. `@lcl/design-tokens` owns raw values.
-2. `@lcl/ui` owns reusable interaction geometry. `lcl-segmented-control` is the first migrated pattern.
+2. `@lcl/ui` owns reusable interaction geometry. `lcl-segmented-control` now owns add-device tabs, Plug detail tabs, and the hardware setup top navigation.
 3. Mobile screen CSS may choose layout/composition and a semantic state treatment, but must not re-declare the shared geometry for migrated primitives.
 4. Every canonical screen state is guarded by `expectVisualScreen()` and a committed Playwright screenshot baseline.
 5. Baselines are refreshed intentionally with `pnpm e2e:visual:update`, reviewed as images, then verified with `pnpm e2e:visual`.
@@ -31,7 +31,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 
 ## Local Agent workflow
 
-Run visual checks locally. GitHub Actions availability is not assumed.
+Run visual checks locally. GitHub Actions availability is not assumed. `prepush` runs the four deterministic scenarios that cover all 17 canonical baselines.
 
 ```sh
 pnpm quality:ux

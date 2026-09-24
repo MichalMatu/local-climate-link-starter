@@ -11,6 +11,7 @@ const cssPaths = [
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
   'packages/ui/src/primitives/ColorSwatch.css',
+  'packages/ui/src/primitives/SegmentedControl.css',
   'packages/ui/src/styles.css'
 ];
 const landingTokenizedCssPaths = [
@@ -712,6 +713,138 @@ const checkMobileProductionMarkupHygiene = async () => {
   }
 };
 
+const cssDeclarationBlock = (source, selector) => {
+  const selectorStart = source.indexOf(`${selector} {`);
+  if (selectorStart === -1) return null;
+  const bodyStart = source.indexOf('{', selectorStart) + 1;
+  const bodyEnd = source.indexOf('}', bodyStart);
+  return bodyEnd === -1 ? null : source.slice(bodyStart, bodyEnd);
+};
+
+const checkSegmentedControlContract = async () => {
+  const usageContracts = [
+    [
+      'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+      'shelly-add-tabs lcl-segmented-control'
+    ],
+    [
+      'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
+      'shelly-add-tabs lcl-segmented-control'
+    ],
+    [
+      'apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx',
+      'plug-detail-tabs lcl-segmented-control'
+    ],
+    [
+      'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
+      'setup-top-nav lcl-segmented-control'
+    ]
+  ];
+
+  for (const [path, rootClass] of usageContracts) {
+    const source = await readRepoFile(path);
+    if (!source.includes(rootClass) || !source.includes('lcl-segmented-control__item')) {
+      addFailure(
+        path,
+        'migrated segmented navigation must use shared lcl-segmented-control geometry'
+      );
+    }
+  }
+
+  const uiIndexPath = 'packages/ui/src/index.ts';
+  const primitivePath = 'packages/ui/src/primitives/SegmentedControl.css';
+  const [uiIndex, primitiveCss] = await Promise.all([
+    readRepoFile(uiIndexPath),
+    readRepoFile(primitivePath)
+  ]);
+  if (!uiIndex.includes("import './primitives/SegmentedControl.css';")) {
+    addFailure(uiIndexPath, 'SegmentedControl.css must be loaded by @lcl/ui');
+  }
+  if (
+    !primitiveCss.includes('.lcl-segmented-control {') ||
+    !primitiveCss.includes('.lcl-segmented-control__item {')
+  ) {
+    addFailure(
+      primitivePath,
+      'shared segmented-control root and item geometry is required'
+    );
+  }
+
+  const cssContracts = [
+    [
+      'apps/mobile/src/theme/theme.css',
+      '.shelly-add-tabs',
+      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
+    ],
+    [
+      'apps/mobile/src/theme/theme.css',
+      '.setup-top-nav',
+      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
+    ],
+    [
+      'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
+      '.plug-detail-tabs',
+      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
+    ],
+    [
+      'apps/mobile/src/theme/theme.css',
+      '.shelly-add-tabs__tab',
+      [
+        'background:',
+        'border:',
+        'border-radius:',
+        'color:',
+        'cursor:',
+        'min-height:',
+        'min-width:'
+      ]
+    ],
+    [
+      'apps/mobile/src/theme/theme.css',
+      '.setup-top-nav__item',
+      [
+        'background:',
+        'border:',
+        'border-radius:',
+        'color:',
+        'cursor:',
+        'min-height:',
+        'min-width:'
+      ]
+    ],
+    [
+      'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
+      '.plug-detail-tabs__item',
+      [
+        'background:',
+        'border:',
+        'border-radius:',
+        'color:',
+        'cursor:',
+        'min-height:',
+        'min-width:'
+      ]
+    ]
+  ];
+
+  for (const [path, selector, blockedProperties] of cssContracts) {
+    const source = await readRepoFile(path);
+    const block = cssDeclarationBlock(source, selector);
+    if (block === null) {
+      addFailure(path, `cannot find migrated segmented selector ${selector}`);
+      continue;
+    }
+    for (const property of blockedProperties) {
+      if (block.includes(property)) {
+        addFailure(
+          path,
+          `${selector} re-declares shared segmented geometry (${property.slice(0, -1)})`
+        );
+      }
+    }
+  }
+};
+
 const checkPackageRuntimeCopy = async () => {
   const blockedCopyPattern =
     /(['"`])(?:(?!\1).)*(?:[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|Kopiuj|Temperatura|Wilgotność|Bateria|brak|zgodne|blokada|Skan BLE|zabrakło pamięci)(?:(?!\1).)*\1/;
@@ -743,6 +876,7 @@ await checkResponsiveCss();
 await checkModalSizingPatterns();
 await checkThemeTokenPatterns();
 await checkMobileProductionMarkupHygiene();
+await checkSegmentedControlContract();
 await checkPackageRuntimeCopy();
 
 if (failures.length > 0) {
