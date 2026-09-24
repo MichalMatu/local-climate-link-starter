@@ -38,7 +38,9 @@
 }
 .lcl-disclosure__body {
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  display: grid;
   gap: var(--lcl-spacing-md);
   padding: var(--lcl-spacing-md) 0;
+}
+.lcl-disclosure[open] > .lcl-disclosure__body {
+  display: grid;
 }
