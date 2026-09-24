@@ -339,6 +339,16 @@
   }
 }
 
+@media (max-width: 25rem) {
+  .automation-card__main {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .automation-card__mode-control {
+    grid-column: 1 / -1;
+  }
+}
+
 .dashboard-shell .plug-card__automation-action {
   width: 100%;
 }
