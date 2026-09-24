@@ -188,7 +188,9 @@ export const useClimateAutomationInstallFlow = ({
       await forceRelayOffAndConfirm(client, config.output.relayId);
       await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
       const install = unwrapShellyResult(
-        await client.installScript(createInstallPlan(configState.script))
+        await client.installScript(
+          createInstallPlan(configState.script, config.output.relayId)
+        )
       );
       return {
         install,

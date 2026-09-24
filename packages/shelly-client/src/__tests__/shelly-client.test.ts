@@ -455,11 +455,28 @@ describe('RpcShellyClient', () => {
       ]
     });
     const client = new RpcShellyClient(transport);
+    transport.relayOn = true;
     const result = await client.installScript(createInstallPlan('print("new");'));
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.scriptId).toBe(4);
+    const offIndex = transport.requests.findIndex(
+      (request) =>
+        request.method === RPC_METHODS.SwitchSet &&
+        (request.params as { id?: number; on?: boolean } | undefined)?.id === 0 &&
+        (request.params as { id?: number; on?: boolean } | undefined)?.on === false
+    );
+    const offStatusIndex = transport.requests.findIndex(
+      (request) => request.method === RPC_METHODS.SwitchGetStatus
+    );
+    const firstDeleteIndex = transport.requests.findIndex(
+      (request) => request.method === RPC_METHODS.ScriptDelete
+    );
+    expect(offIndex).toBeGreaterThan(-1);
+    expect(offStatusIndex).toBeGreaterThan(offIndex);
+    expect(firstDeleteIndex).toBeGreaterThan(offStatusIndex);
+    expect(transport.relayOn).toBe(false);
     expect(result.value.backup).toBeUndefined();
     expect(
       transport.requests
@@ -471,6 +488,33 @@ describe('RpcShellyClient', () => {
       params: { name: SHELLY_LINK_SCRIPT_NAME }
     });
     expect(transport.requests.at(-1)?.method).toBe(RPC_METHODS.ScriptList);
+  });
+
+  it('does not delete scripts when relay OFF fails before exclusive replacement', async () => {
+    const transport = new RecordingTransport({
+      scripts: [
+        {
+          id: 7,
+          name: 'Arbitrary script',
+          enable: true,
+          running: true,
+          code: 'print("old");'
+        }
+      ],
+      failOffCommand: true
+    });
+    transport.relayOn = true;
+    const client = new RpcShellyClient(transport);
+
+    const result = await client.installScript(createInstallPlan('print("new");'));
+
+    expect(result.ok).toBe(false);
+    expect(
+      transport.requests.some((request) => request.method === RPC_METHODS.ScriptDelete)
+    ).toBe(false);
+    expect(
+      transport.requests.some((request) => request.method === RPC_METHODS.ScriptCreate)
+    ).toBe(false);
   });
 
   it('hashes the installed automation from code only', async () => {

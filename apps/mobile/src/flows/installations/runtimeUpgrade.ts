@@ -44,7 +44,7 @@ const reinstallCurrentRuntime = async (
   await forceRelayOffAndConfirm(client, relayId);
   const code = generateShellyThermostatScript(installation.config);
   const installed = unwrapShellyResult(
-    await client.installScript(createInstallPlan(code))
+    await client.installScript(createInstallPlan(code, relayId))
   );
   await forceRelayOffAndConfirm(client, relayId);
 
