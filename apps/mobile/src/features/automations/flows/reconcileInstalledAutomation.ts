@@ -6,11 +6,7 @@ import {
   type DecodedShellyThermostatScript,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
-import {
-  hashScriptCode,
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
-  normalizeShellyDeviceId
-} from '@lcl/shelly-client';
+import { hashScriptCode, normalizeShellyDeviceId } from '@lcl/shelly-client';
 import {
   createInstalledAutomation,
   installedAutomationRelayId,
@@ -40,7 +36,6 @@ export type InstalledAutomationReconciliationResult = {
 
 type ClimateRuntimeEvidence = {
   scriptId: number | null;
-  scriptName: string | null;
   running: boolean;
   code: string | null;
   persistedRuntimeConfigJson: string | null;
@@ -58,7 +53,6 @@ const defaultServices: InstalledAutomationReconciliationServices = {
     const state = await readShellyAutomationScriptState(baseUrl);
     return {
       scriptId: state.script?.id ?? null,
-      scriptName: state.script?.name ?? null,
       running: state.script?.running === true,
       code: state.code,
       persistedRuntimeConfigJson: state.persistedRuntimeConfigJson
@@ -91,11 +85,9 @@ const climateRuntimeMatches = async (
   const evidence = await services.readClimateRuntime(installation.shelly.baseUrl);
   if (
     evidence.scriptId !== installation.script.id ||
-    evidence.scriptName !== LOCAL_CLIMATE_LINK_SCRIPT_NAME ||
     !evidence.running ||
     evidence.code === null ||
-    hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${evidence.code}`) !==
-      installation.script.hash
+    hashScriptCode(evidence.code) !== installation.script.hash
   ) {
     return false;
   }
@@ -124,7 +116,6 @@ const decodeRecoverableClimateRuntime = (
 ): DecodedShellyThermostatScript | null => {
   if (
     evidence.scriptId === null ||
-    evidence.scriptName !== LOCAL_CLIMATE_LINK_SCRIPT_NAME ||
     evidence.code === null ||
     !evidence.code.startsWith('// LCL')
   ) {
@@ -220,7 +211,7 @@ const recoverClimateInstallation = async (
     shellyName: target.name,
     baseUrl: target.baseUrl,
     scriptId: evidence.scriptId,
-    scriptHash: hashScriptCode(`${LOCAL_CLIMATE_LINK_SCRIPT_NAME}:${evidence.code}`),
+    scriptHash: hashScriptCode(evidence.code),
     config: recoveredClimateConfig(decoded)
   });
 };
