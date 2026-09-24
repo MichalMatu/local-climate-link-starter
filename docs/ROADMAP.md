@@ -28,11 +28,11 @@ A Climate automation supports **1 to 4 thermometers** with `avg`, `min`, `max` o
 
 The runtime exposes compact diagnostics per configured sensor. Phone BLE and Plug BLE are live-reading sources; recovered/runtime identity provenance is tracked separately. Mobile identity joins through normalized physical BLE `runtimeAddress`.
 
-Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance passed with 3 TP357 + 1 Xiaomi/PVVX sensor. The accepted four-sensor runtime generated at 7929 bytes and exposed four independent diagnostic records. Dated evidence is in `docs/testing/hardware-matrix.md`.
+Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance passed with 3 TP357 + 1 Xiaomi/PVVX sensor. Dated evidence is in `docs/testing/hardware-matrix.md`.
 
-## 3. UX stabilization — DONE
+## 3. UX stabilization + screenshot closeout — DONE
 
-The UX pass is accepted on the real S22+ and closed. Reopen it only for a concrete new defect or explicitly requested product change.
+The broad UX pass and the final real-phone screenshot closeout are accepted on the S22+. Reopen UX only for a concrete new defect or explicitly requested product change.
 
 Accepted baseline:
 
@@ -44,70 +44,69 @@ Accepted baseline:
 - Script is code-focused; script/runtime diagnostics live under Info;
 - nested duplicate Settings/Diagnostics/Script pages remain removed;
 - Add Plug/Thermometer flows intentionally rely on persistent bottom navigation plus platform/browser Back;
-- Automation live-state copy does not leak raw runtime reason abbreviations;
-- VPD Assist configuration exposes its threshold-derived working range without changing the existing runtime clamp;
+- VPD Assist configuration exposes its threshold-derived working range without changing the runtime clamp;
 - true disclosure sections share one project-level pattern;
 - LED presets use balanced 4×2 phone and 8×1 wider layouts;
-- Plug detail hierarchy is explicit: flat tab surface by default, framed groups only for closed groups, Disclosure only for optional content and no separators inferred from semantic nesting;
-- Automation, BLE, Script and Info no longer carry legacy stray separators/loose controls, while Device keeps the compact flat-plus-framed-subgroup pattern;
-- dashboard metric labels that are obvious from `%` / `°C` are visually omitted while accessible names remain;
-- dashboard ON/OFF thresholds stay on one compact line, use the user's configured rule limits rather than VPD-derived effective runtime thresholds, and humidity thresholds display as whole percentages;
-- dashboard VPD keeps the simple accepted `current → target kPa` presentation when Assist is enabled; do not add target humidity, dynamic VPD bands or extra explanatory copy to the card without explicit product intent;
-- existing automation/runtime ownership and Shelly safety semantics were preserved.
+- framed-section inline titles use one consistent border-crossing/background-mask treatment;
+- dashboard ON/OFF thresholds stay on one compact line and use the user's configured rule limits;
+- dashboard VPD keeps the simple accepted `current → target kPa` presentation when Assist is enabled;
+- the Model row contains only model identity/generation, not the redundant `CHECK` / `COMPATIBLE` badge;
+- script diagnostics use `Script.List` for script-management availability and `Script.GetStatus` for a concrete runtime; `Shelly.GetStatus` is not treated as exposing a synthetic global `status.script`;
+- existing automation/runtime ownership and Shelly safety semantics remain unchanged.
 
-Final dashboard correction `349446f86f6d63c37ececa439ec12ef826b06d2f` passed full `pnpm check:full` and was installed on Samsung SM-S906B / Android 16 with app data preserved. The final real-device state was accepted by the user.
+Final screenshot-closeout commit `4383182be09a8e8c6ffecd1c1effed0fd837216e` passed the full pre-push gate (`pnpm check` plus canonical visual E2E), was installed on Samsung SM-S906B / Android 16 with `adb install -r` preserving app data, and the user accepted the resulting Device/Info presentation.
 
 ## 4. TP357 battery decoding compatibility — DONE
 
-The battery-reporting defect was reproduced and resolved from real BLE evidence on 2026-09-24.
+The battery-reporting defect was reproduced and resolved from real BLE evidence.
 
-macOS CoreBluetooth capture found five affected `TP357` units with six-byte manufacturer payloads such as `C2 DC 00 32 02 2C`; all five carry raw battery byte `0x02`. The existing sixth unit advertises as `TP357S` with seven-byte payload `C2 DF 00 4A 22 0B 01` and raw battery byte `0x22`. In both cases the low two bits are state `2`, so both represent the same 100% battery state. The previously plausible `34%` reading from `0x22` was also a decoding bug, not a separate direct-percentage format.
+The implementation treats byte 4 as a bitfield and maps its low-two-bit state as `0 -> 1%`, `1 -> 50%`, `2 -> 100%`; state `3` is unknown without discarding valid temperature/humidity. The same semantics are applied in:
 
-The implementation now treats byte 4 as a bitfield and maps its low-two-bit state as `0 -> 1%`, `1 -> 50%`, `2 -> 100%`; state `3` is treated as unknown without discarding valid temperature/humidity. The same semantics are applied in:
+- `packages/ble-core/src/parsers/tp357.ts`;
+- `packages/script-generator/src/shelly/generate.ts`;
+- `packages/script-generator/src/shelly/discoveryParsing.ts`.
 
-- the phone parser in `packages/ble-core/src/parsers/tp357.ts`;
-- the installed Climate runtime parser rendered by `packages/script-generator/src/shelly/generate.ts`;
-- the separate discovery parser in `packages/script-generator/src/shelly/discoveryParsing.ts`.
+Regression coverage uses captured six-byte TP357 and seven-byte TP357S frames. Enclosure color is not used as a protocol discriminator.
 
-Regression coverage uses the captured six-byte TP357 and seven-byte TP357S frames and verifies both phone-side and generated Shelly-runtime decoding. Enclosure color is not used as a protocol discriminator.
+## 5. Shelly management over BLE — NEXT, HARDWARE SPIKE FIRST
 
-Reference: `https://github.com/Bluetooth-Devices/thermopro-ble/blob/main/src/thermopro_ble/parser.py`.
+Run a narrow real-hardware RPC-over-BLE spike before broad product implementation. Reuse the existing `ShellyRpcTransport` ownership boundary so HTTP and BLE remain transport adapters over the same product logic.
 
-## 5. BLE soil-moisture input — AFTER TP357 FIX
+First acceptance slice:
 
-Add soil-moisture sensors through the existing typed sensor/config model. Do not create a parallel automation engine or device identity model.
+1. connect/bond to the known development Shelly Plug S Gen3 as required by the device;
+2. verify physical identity with `Shelly.GetDeviceInfo`;
+3. verify the read-only status path needed by management;
+4. execute `OFF -> ON -> OFF` through the BLE transport and explicitly confirm final relay OFF;
+5. document framing, payload-size, retry, timeout and connection-lifecycle constraints observed on real hardware.
 
-Start with sensor discovery/identity, typed readings and diagnostics. Only then add automation behavior that has a clear product rule and safety model.
+Do not port the exclusive Climate script lifecycle until identity/status/relay control is proven reliable. BLE must not fork automation ownership, persistence, safety or business logic, and the existing HTTP transport must remain fully functional.
 
-## 6. Shelly management over BLE — AFTER SOIL-MOISTURE, HARDWARE SPIKE FIRST
+## 6. Shelly Script Library + simple configurators — AFTER BLE FOUNDATION
 
-Run a real-hardware feasibility spike before product implementation. Determine which Shelly RPC lifecycle operations are genuinely available/reliable over BLE.
+A curated script catalog may expose useful official/approved Shelly scripts through a simple `choose -> configure -> install/run` flow. Reuse the same identity, ownership, transport, install-safety and recovery rules.
 
-If feasible, implement a shared `ShellyRpcTransport` boundary with HTTP and BLE adapters. Progressively enable:
+For each script: verify source/license, supported models/firmware, define a small typed config, keep raw JavaScript out of the normal user flow, and require real-hardware acceptance before marking it supported.
 
-1. discovery and identity;
-2. provisioning/configuration;
-3. status and diagnostics;
-4. verified relay-safe automation replacement operations;
-5. full exclusive managed-runtime install/edit/repair only when the transport proves safe enough.
+Do not add arbitrary unmanaged scripts alongside a Shelly Link-managed automation without first redesigning the current exclusive Shelly Scripts ownership model.
 
-BLE must not fork automation ownership, persistence or business logic.
+## 7. History / datalogger redesign and port — PARKED
 
-The BLE sensor track and Shelly-over-BLE transport track are separate concerns even though both use Bluetooth.
+Preserve `work/kvs-datalogger` as source material, but do not rebase-and-merge it mechanically. Its parked design uses a second long-lived Shelly script and predates the current exclusive Shelly Scripts ownership model.
 
-## 7. Richer rule timing — LATER
+When this track resumes, first choose a lifecycle compatible with current ownership, then port only still-valid KVS/codec/client/generator pieces. Re-establish software coverage, KVS capacity behavior, runtime ownership guarantees and real Plug S Gen3 memory/hardware acceptance before merge. Climate safety must remain independent of History failure.
+
+## 8. Richer rule timing — LATER
 
 Add reusable operators for clock/time windows, interval, cooldown, minimum ON, minimum OFF and condition combinations. Keep safety precedence explicit.
 
-## 8. Advanced automation UX — LATER
+## 9. Advanced automation UX — LATER
 
 Build templates/list management and more advanced rules on the stable engine/config model. Avoid feature-specific runtime forks where shared operators/config are sufficient.
 
-## 9. Shelly Script Library + simple configurators — PARALLEL OPTIONAL TRACK
+## 10. BLE soil-moisture input — DEFERRED
 
-A curated script catalog may expose useful Shelly scripts through a simple `choose -> configure -> install/run` flow. Reuse the same identity, ownership, transport, install-safety and recovery rules.
-
-For each script: verify source/license, supported models/firmware, define a small typed config, keep raw JavaScript out of the normal user flow, and require real-hardware acceptance before marking it supported.
+Soil-moisture support is intentionally off the active near-term path. If resumed later, add sensors through the existing typed sensor/config/diagnostic model; do not create a parallel automation engine or identity model. Start with discovery/identity, typed readings and diagnostics before adding any automation rule with a clear safety model.
 
 ## Working rule
 
