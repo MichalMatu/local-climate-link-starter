@@ -25,6 +25,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 5. Baselines are refreshed intentionally with `pnpm e2e:visual:update`, reviewed as images, then verified with `pnpm e2e:visual`.
 6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
 7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
+8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract.
 
 ## Surface taxonomy
 
