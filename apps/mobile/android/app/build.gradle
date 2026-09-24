@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 
-def alphaSigningPropertiesFile = new File(System.getProperty("user.home"), ".local-climate-link/android/alpha-signing.properties")
+def alphaSigningPropertiesFile = new File(System.getProperty("user.home"), ".shelly-link/android/alpha-signing.properties")
 def alphaSigningProperties = new Properties()
 if (alphaSigningPropertiesFile.exists()) {
     alphaSigningPropertiesFile.withInputStream { alphaSigningProperties.load(it) }
@@ -18,7 +18,7 @@ def releaseKeyPassword = System.getenv("LCL_ANDROID_KEY_PASSWORD")
 def hasReleaseSigning = releaseKeystoreFile && releaseKeystorePassword && releaseKeyAlias && releaseKeyPassword
 
 android {
-    namespace "link.localclimate.app"
+    namespace "app.shellylink.mobile"
     compileSdk rootProject.ext.compileSdkVersion
     signingConfigs {
         if (hasAlphaSigning) {
@@ -39,7 +39,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId "link.localclimate.app"
+        applicationId "app.shellylink.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 20010

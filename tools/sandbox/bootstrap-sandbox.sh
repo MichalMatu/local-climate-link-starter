@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT=${1:-/mnt/data/local-climate-link-sandbox}
+ROOT=${1:-/mnt/data/shelly-link-sandbox}
 OFFLINE_DIR=${2:-${LCL_OFFLINE_DIR:-}}
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)

@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'link.localclimate.app',
+  appId: 'app.shellylink.mobile',
   appName: 'Shelly Link',
   webDir: 'dist',
   android: {

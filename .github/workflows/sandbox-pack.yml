@@ -144,7 +144,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SANDBOX_ROOT="$RUNNER_TEMP/local-climate-link-sandbox"
+          SANDBOX_ROOT="$RUNNER_TEMP/shelly-link-sandbox"
           SOURCE_ROOT="$GITHUB_WORKSPACE/.sandbox-pack/source-root"
           OFFLINE_ROOT="$GITHUB_WORKSPACE/.sandbox-pack/offline"
           bash "$SOURCE_ROOT/tools/sandbox/bootstrap-sandbox.sh" "$SANDBOX_ROOT" "$OFFLINE_ROOT"

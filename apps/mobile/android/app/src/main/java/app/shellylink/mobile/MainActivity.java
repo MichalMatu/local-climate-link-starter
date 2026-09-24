@@ -1,4 +1,4 @@
-package link.localclimate.app;
+package app.shellylink.mobile;
 
 import android.os.Build;
 import android.os.Bundle;

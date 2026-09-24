@@ -25,12 +25,16 @@ const textExtensions = new Set([
   '.yaml',
   '.html',
   '.xml',
-  '.gradle'
+  '.gradle',
+  '.java',
+  '.sh'
 ]);
 
 const obsoleteProductName = ['Local', 'Climate', 'Link'].join(' ');
 const obsoleteIdentifier = ['LOCAL', 'CLIMATE', 'LINK'].join('_');
 const obsoleteHelperPrefix = ['isLocal', 'Climate', 'Link'].join('');
+const obsoleteSlug = ['local', 'climate', 'link'].join('-');
+const obsoleteCompact = ['local', 'climate'].join('');
 
 const files = [];
 const walk = async (directory) => {
@@ -49,11 +53,15 @@ await walk(repoRoot);
 
 const failures = [];
 for (const path of files) {
+  const repoRelativePath = relative(repoRoot, path);
+  if (repoRelativePath.startsWith('apps/mobile/android/app/src/main/assets/')) continue;
   const source = await readFile(path, 'utf8');
   const checks = [
     [obsoleteProductName, 'obsolete product name'],
     [obsoleteIdentifier, 'obsolete pre-rebrand identifier'],
-    [obsoleteHelperPrefix, 'obsolete pre-rebrand helper identifier']
+    [obsoleteHelperPrefix, 'obsolete pre-rebrand helper identifier'],
+    [obsoleteSlug, 'obsolete pre-rebrand product slug'],
+    [obsoleteCompact, 'obsolete pre-rebrand compact identifier']
   ];
   for (const [needle, label] of checks) {
     if (source.toLowerCase().includes(needle.toLowerCase())) {

@@ -39,12 +39,6 @@ The latest Android beta build is available in GitHub Releases:
 https://github.com/MichalMatu/shelly-link/releases/latest
 ```
 
-Current published release: **v2.0.10**. This release predates the Shelly Link rebrand, so its immutable asset filenames keep the historical `local-climate-link` prefix. New releases use the `shelly-link` prefix.
-
-- [Android APK v2.0.10](https://github.com/MichalMatu/shelly-link/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.apk)
-- [Android App Bundle v2.0.10](https://github.com/MichalMatu/shelly-link/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.aab)
-- [SHA-256 checksums](https://github.com/MichalMatu/shelly-link/releases/download/v2.0.10/local-climate-link-v2.0.10-sha256.txt)
-
 ## Project page
 
 ```text

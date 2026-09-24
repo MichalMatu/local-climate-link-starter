@@ -112,7 +112,7 @@ const verifyAndroidMetadata = () => {
   const metadata = JSON.parse(readFileSync(apkMetadataPath, 'utf8'));
   const element = metadata.elements?.[0];
 
-  if (metadata.applicationId !== 'link.localclimate.app') {
+  if (metadata.applicationId !== 'app.shellylink.mobile') {
     throw new Error(`Unexpected Android applicationId: ${metadata.applicationId}`);
   }
 
@@ -148,7 +148,7 @@ if (aapt) {
   });
 
   const packageLine = badging.split('\n')[0] ?? '';
-  if (!packageLine.includes("name='link.localclimate.app'")) {
+  if (!packageLine.includes("name='app.shellylink.mobile'")) {
     throw new Error(`Unexpected Android package line: ${packageLine}`);
   }
 

@@ -6,7 +6,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 
 if [[ -z "${LCL_SANDBOX_ROOT:-}" ]]; then
-  DEFAULT_ENV=/mnt/data/local-climate-link-sandbox/env.sh
+  DEFAULT_ENV=/mnt/data/shelly-link-sandbox/env.sh
   if [[ -f "$DEFAULT_ENV" ]]; then
     # shellcheck disable=SC1091
     source "$DEFAULT_ENV"

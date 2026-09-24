@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
-PACKAGE="link.localclimate.app"
+PACKAGE="app.shellylink.mobile"
 SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
 ADB="$SDK/platform-tools/adb"
-PROPERTIES="$HOME/.local-climate-link/android/alpha-signing.properties"
+PROPERTIES="$HOME/.shelly-link/android/alpha-signing.properties"
 APK="apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk"
 
 bash scripts/android/ensure-alpha-signing.sh

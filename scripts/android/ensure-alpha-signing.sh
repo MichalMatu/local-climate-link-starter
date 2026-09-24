@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SIGNING_DIR="$HOME/.local-climate-link/android"
+SIGNING_DIR="$HOME/.shelly-link/android"
 KEYSTORE="$SIGNING_DIR/alpha.keystore"
 PROPERTIES="$SIGNING_DIR/alpha-signing.properties"
-ALIAS="localclimatealpha"
+ALIAS="shellylinkalpha"
 
 mkdir -p "$SIGNING_DIR"
 chmod 700 "$SIGNING_DIR"
