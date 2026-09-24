@@ -11,9 +11,9 @@ if (typeof version !== 'string' || version.length === 0) {
 }
 
 const releaseDir = join('artifacts', 'releases', `v${version}`);
-const apkPath = join(releaseDir, `local-climate-link-v${version}-android-release.apk`);
-const aabPath = join(releaseDir, `local-climate-link-v${version}-android-release.aab`);
-const checksumPath = join(releaseDir, `local-climate-link-v${version}-sha256.txt`);
+const apkPath = join(releaseDir, `shelly-link-v${version}-android-release.apk`);
+const aabPath = join(releaseDir, `shelly-link-v${version}-android-release.aab`);
+const checksumPath = join(releaseDir, `shelly-link-v${version}-sha256.txt`);
 const apkMetadataPath = join(
   'apps',
   'mobile',

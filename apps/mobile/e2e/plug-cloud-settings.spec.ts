@@ -171,7 +171,7 @@ for (const viewport of viewports) {
     ).not.toBeChecked();
     await expect(
       page.getByText(
-        'Shelly Cloud jest wyłączona. Local Climate Link nadal działa w sieci lokalnej.'
+        'Shelly Cloud jest wyłączona. Shelly Link nadal działa w sieci lokalnej.'
       )
     ).toBeVisible();
     await expect(page.getByText('Połączenie z chmurą: Brak połączenia')).toBeVisible();

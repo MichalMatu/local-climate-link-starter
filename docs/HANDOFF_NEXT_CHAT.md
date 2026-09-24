@@ -2,7 +2,7 @@
 
 Status: **2026-09-24**
 
-Repository: `MichalMatu/local-climate-link-starter`
+Repository: `MichalMatu/shelly-link`
 
 Canonical restart point: **fresh `main`**. The UX stabilization pass is accepted and closed. Do not reopen layout work without a concrete new problem.
 

@@ -35,7 +35,7 @@ SOAK_STOP_SCRIPT_ON_FINISH ?= 1
 .PHONY: help install start stop restart status logs open dev test test-watch lint typecheck build check format format-check tokens diagnose shelly-status shelly-diag shelly-install shelly-off shelly-soak-start shelly-soak-overnight shelly-soak-run shelly-soak-stop shelly-soak-status shelly-soak-logs esp32-ble-status clean
 
 help: ## Show available make targets.
-	@awk 'BEGIN {FS = ":.*## "; printf "\nLocal Climate Link shortcuts\n\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2} END {printf "\nEnv examples:\n  SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install\n  SHELLY_URL=http://<shelly-ip> make shelly-diag\n  SHELLY_URL=http://<shelly-ip> SOAK_CYCLE_RELAY=1 make shelly-soak-start\n  SHELLY_URL=http://<shelly-ip> make shelly-soak-overnight\n  make shelly-soak-stop\n  ESP32_URL=http://<esp32-ip> make esp32-ble-status\n\n"}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*## "; printf "\nShelly Link shortcuts\n\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2} END {printf "\nEnv examples:\n  SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install\n  SHELLY_URL=http://<shelly-ip> make shelly-diag\n  SHELLY_URL=http://<shelly-ip> SOAK_CYCLE_RELAY=1 make shelly-soak-start\n  SHELLY_URL=http://<shelly-ip> make shelly-soak-overnight\n  make shelly-soak-stop\n  ESP32_URL=http://<esp32-ip> make esp32-ble-status\n\n"}' $(MAKEFILE_LIST)
 
 install: ## Install dependencies with the lockfile.
 	CI=1 pnpm install --frozen-lockfile

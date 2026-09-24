@@ -178,7 +178,7 @@ export const deleteInstalledAutomation = async (
     throw new Error('Stored script id belongs to a different Shelly script.');
   }
   if (conflictingManagedScript) {
-    throw new Error('Shelly contains another Local Climate Link automation script.');
+    throw new Error('Shelly contains another Shelly Link automation script.');
   }
 
   await forceRelayOffAndConfirm(client, relayId);

@@ -36,7 +36,7 @@ const readReleaseApkPath = () => {
 const artifacts = [
   {
     source: readReleaseApkPath(),
-    target: `local-climate-link-v${version}-android-release.apk`
+    target: `shelly-link-v${version}-android-release.apk`
   },
   {
     source: join(
@@ -50,7 +50,7 @@ const artifacts = [
       'release',
       'app-release.aab'
     ),
-    target: `local-climate-link-v${version}-android-release.aab`
+    target: `shelly-link-v${version}-android-release.aab`
   }
 ];
 
@@ -65,7 +65,7 @@ const checksumLines = artifacts.map(({ source, target }) => {
 });
 
 writeFileSync(
-  join(releaseDir, `local-climate-link-v${version}-sha256.txt`),
+  join(releaseDir, `shelly-link-v${version}-sha256.txt`),
   `${checksumLines.join('\n')}\n`
 );
 

@@ -1,4 +1,4 @@
-// Local Climate Link generated Shelly Script
+// Shelly Link generated Shelly Script
 // generator version: 0.1.0
 // runtime mode: xiaomi-bthome-minimal
 // config hash: lcl-0298bea4

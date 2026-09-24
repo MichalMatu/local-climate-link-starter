@@ -150,7 +150,7 @@ export const installDevConsole = (): (() => void) => {
   };
 
   window.lclDev = api;
-  window.console.info('Local Climate Link dev console ready. Run lclDev.help().');
+  window.console.info('Shelly Link dev console ready. Run lclDev.help().');
 
   return () => {
     if (window.lclDev === api) {

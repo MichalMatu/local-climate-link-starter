@@ -521,7 +521,7 @@ describe('HardwareSetupScreen', () => {
                 : [
                     {
                       id: 1,
-                      name: 'Local Climate Link Thermostat',
+                      name: 'Shelly Link Thermostat',
                       enable: true,
                       running: thermostatRunning
                     }
@@ -906,19 +906,19 @@ describe('HardwareSetupScreen', () => {
             scripts: [
               {
                 id: 8,
-                name: 'Local Climate Link BLE Discovery',
+                name: 'Shelly Link BLE Discovery',
                 enable: false,
                 running: true
               },
               {
                 id: 9,
-                name: 'Local Climate Link BLE Discovery',
+                name: 'Shelly Link BLE Discovery',
                 enable: false,
                 running: false
               },
               {
                 id: 1,
-                name: 'Local Climate Link Thermostat',
+                name: 'Shelly Link Thermostat',
                 enable: true,
                 running: true
               }
@@ -1567,7 +1567,7 @@ describe('HardwareSetupScreen', () => {
               scripts: [
                 {
                   id: 1,
-                  name: 'Local Climate Link Thermostat',
+                  name: 'Shelly Link Thermostat',
                   enable: true,
                   running: true
                 }
@@ -2104,13 +2104,13 @@ describe('HardwareSetupScreen', () => {
             scripts: [
               {
                 id: 1,
-                name: 'Local Climate Link Thermostat',
+                name: 'Shelly Link Thermostat',
                 enable: true,
                 running: true
               },
               {
                 id: 8,
-                name: 'Local Climate Link BLE Discovery',
+                name: 'Shelly Link BLE Discovery',
                 enable: false,
                 running: true
               }
@@ -2924,7 +2924,7 @@ describe('HardwareSetupScreen', () => {
             scripts: [
               {
                 id: 1,
-                name: 'Local Climate Link Thermostat',
+                name: 'Shelly Link Thermostat',
                 enable: true,
                 running: true
               },
@@ -2932,7 +2932,7 @@ describe('HardwareSetupScreen', () => {
                 ? [
                     {
                       id: 8,
-                      name: 'Local Climate Link BLE Discovery',
+                      name: 'Shelly Link BLE Discovery',
                       enable: false,
                       running: true
                     }

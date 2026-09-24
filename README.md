@@ -1,8 +1,8 @@
-# Local Climate Link
+# Shelly Link
 
 **Thermostat without a hub.**
 
-Local Climate Link is a local-first mobile app for configuring and managing Shelly Plug climate automation:
+Shelly Link is a local-first mobile app for configuring and managing Shelly Plug climate automation:
 
 ```text
 BLE thermometer -> Shelly Plug S Gen3 -> local relay ON/OFF
@@ -36,19 +36,19 @@ See [Roadmap](docs/ROADMAP.md) and [Current handoff](docs/HANDOFF_NEXT_CHAT.md) 
 The latest Android beta build is available in GitHub Releases:
 
 ```text
-https://github.com/MichalMatu/local-climate-link-starter/releases/latest
+https://github.com/MichalMatu/shelly-link/releases/latest
 ```
 
 Current published release: **v2.0.10**.
 
-- [Android APK v2.0.10](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.apk)
-- [Android App Bundle v2.0.10](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-android-release.aab)
-- [SHA-256 checksums](https://github.com/MichalMatu/local-climate-link-starter/releases/download/v2.0.10/local-climate-link-v2.0.10-sha256.txt)
+- [Android APK v2.0.10](https://github.com/MichalMatu/shelly-link/releases/download/v2.0.10/shelly-link-v2.0.10-android-release.apk)
+- [Android App Bundle v2.0.10](https://github.com/MichalMatu/shelly-link/releases/download/v2.0.10/shelly-link-v2.0.10-android-release.aab)
+- [SHA-256 checksums](https://github.com/MichalMatu/shelly-link/releases/download/v2.0.10/shelly-link-v2.0.10-sha256.txt)
 
 ## Project page
 
 ```text
-https://michalmatu.github.io/local-climate-link-starter/
+https://michalmatu.github.io/shelly-link/
 ```
 
 ## Developer documentation
@@ -64,6 +64,6 @@ Repository operating rules live in [AGENTS.md](AGENTS.md) and the nearest direct
 
 ## License
 
-Local Climate Link is source-available under a noncommercial license. Commercial use, app store distribution, product bundling or paid services require written permission or a separate commercial license.
+Shelly Link is source-available under a noncommercial license. Commercial use, app store distribution, product bundling or paid services require written permission or a separate commercial license.
 
 Copyright (c) 2026 Michal Matuszewski. See [LICENSE](LICENSE).

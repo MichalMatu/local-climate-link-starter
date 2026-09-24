@@ -103,9 +103,9 @@ const hardwareItems = [
 
 const pl: LandingMessages = {
   meta: {
-    title: 'Local Climate Link — termostat bez huba',
+    title: 'Shelly Link — termostat bez huba',
     description:
-      'Local Climate Link konfiguruje lokalny termostat BLE + Shelly bez huba, chmury, MQTT i pracy telefonu w tle.'
+      'Shelly Link konfiguruje lokalny termostat BLE + Shelly bez huba, chmury, MQTT i pracy telefonu w tle.'
   },
   nav: {
     howItWorks: 'Jak działa',
@@ -114,7 +114,7 @@ const pl: LandingMessages = {
     sectionsAria: 'Sekcje strony'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Pobierz betę Android',
     compatibilityCta: 'Zobacz kompatybilność'
   },
@@ -173,7 +173,7 @@ const pl: LandingMessages = {
     ]
   },
   preview: {
-    aria: 'Podgląd aplikacji Local Climate Link',
+    aria: 'Podgląd aplikacji Shelly Link',
     tabs: {
       shelly: 'Shelly',
       sensors: 'Termometry',
@@ -209,7 +209,7 @@ const pl: LandingMessages = {
       {
         question: 'Czy potrzebuję chmury albo Home Assistant?',
         answer:
-          'Nie w domyślnym scenariuszu. Local Climate Link celowo omija huby, MQTT i serwer 24/7.'
+          'Nie w domyślnym scenariuszu. Shelly Link celowo omija huby, MQTT i serwer 24/7.'
       },
       {
         question: 'Czy to jest gotowe dla każdego sprzętu BLE?',
@@ -219,7 +219,7 @@ const pl: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — lokalny klimat bez huba.',
+    tagline: 'Shelly Link — lokalny klimat bez huba.',
     privacy: 'Prywatność'
   }
 };
@@ -227,9 +227,9 @@ const pl: LandingMessages = {
 const en: LandingMessages = {
   ...pl,
   meta: {
-    title: 'Local Climate Link — thermostat without a hub',
+    title: 'Shelly Link — thermostat without a hub',
     description:
-      'Local Climate Link configures a local BLE + Shelly thermostat without a hub, cloud, MQTT, or a phone running in the background.'
+      'Shelly Link configures a local BLE + Shelly thermostat without a hub, cloud, MQTT, or a phone running in the background.'
   },
   nav: {
     howItWorks: 'How it works',
@@ -238,7 +238,7 @@ const en: LandingMessages = {
     sectionsAria: 'Page sections'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Get Android beta',
     compatibilityCta: 'See compatibility'
   },
@@ -280,7 +280,7 @@ const en: LandingMessages = {
     ]
   },
   preview: {
-    aria: 'Local Climate Link app preview',
+    aria: 'Shelly Link app preview',
     tabs: {
       shelly: 'Shelly',
       sensors: 'Sensors',
@@ -316,7 +316,7 @@ const en: LandingMessages = {
       {
         question: 'Do I need cloud or Home Assistant?',
         answer:
-          'No by default. Local Climate Link intentionally avoids hubs, MQTT, and a 24/7 server.'
+          'No by default. Shelly Link intentionally avoids hubs, MQTT, and a 24/7 server.'
       },
       {
         question: 'Is every BLE device supported?',
@@ -326,7 +326,7 @@ const en: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — local climate without a hub.',
+    tagline: 'Shelly Link — local climate without a hub.',
     privacy: 'Privacy'
   }
 };
@@ -334,9 +334,9 @@ const en: LandingMessages = {
 const de: LandingMessages = {
   ...en,
   meta: {
-    title: 'Local Climate Link — Thermostat ohne Hub',
+    title: 'Shelly Link — Thermostat ohne Hub',
     description:
-      'Local Climate Link konfiguriert einen lokalen BLE + Shelly Thermostat ohne Hub, Cloud, MQTT oder dauerhaft laufendes Smartphone.'
+      'Shelly Link konfiguriert einen lokalen BLE + Shelly Thermostat ohne Hub, Cloud, MQTT oder dauerhaft laufendes Smartphone.'
   },
   nav: {
     howItWorks: 'So funktioniert es',
@@ -345,7 +345,7 @@ const de: LandingMessages = {
     sectionsAria: 'Seitenbereiche'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Android-Beta laden',
     compatibilityCta: 'Kompatibilität ansehen'
   },
@@ -406,7 +406,7 @@ const de: LandingMessages = {
     ]
   },
   preview: {
-    aria: 'App-Vorschau von Local Climate Link',
+    aria: 'App-Vorschau von Shelly Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensoren', rule: 'Regel', diag: 'Diag' },
     addThermometer: 'Thermometer hinzufügen',
     sensorName: 'Wohnzimmer'
@@ -437,7 +437,7 @@ const de: LandingMessages = {
       {
         question: 'Brauche ich Cloud oder Home Assistant?',
         answer:
-          'Standardmäßig nein. Local Climate Link vermeidet bewusst Hubs, MQTT und einen Server rund um die Uhr.'
+          'Standardmäßig nein. Shelly Link vermeidet bewusst Hubs, MQTT und einen Server rund um die Uhr.'
       },
       {
         question: 'Wird jedes BLE-Gerät unterstützt?',
@@ -447,7 +447,7 @@ const de: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — lokales Klima ohne Hub.',
+    tagline: 'Shelly Link — lokales Klima ohne Hub.',
     privacy: 'Datenschutz'
   }
 };
@@ -455,9 +455,9 @@ const de: LandingMessages = {
 const es: LandingMessages = {
   ...en,
   meta: {
-    title: 'Local Climate Link — termostato sin hub',
+    title: 'Shelly Link — termostato sin hub',
     description:
-      'Local Climate Link configura un termostato local BLE + Shelly sin hub, nube, MQTT ni teléfono en segundo plano.'
+      'Shelly Link configura un termostato local BLE + Shelly sin hub, nube, MQTT ni teléfono en segundo plano.'
   },
   nav: {
     howItWorks: 'Cómo funciona',
@@ -466,7 +466,7 @@ const es: LandingMessages = {
     sectionsAria: 'Secciones de la página'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Descargar beta Android',
     compatibilityCta: 'Ver compatibilidad'
   },
@@ -527,7 +527,7 @@ const es: LandingMessages = {
   },
   preview: {
     ...en.preview,
-    aria: 'Vista previa de la app Local Climate Link',
+    aria: 'Vista previa de la app Shelly Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensores', rule: 'Regla', diag: 'Diag' },
     addThermometer: 'Añadir termómetro',
     sensorName: 'Salón'
@@ -557,7 +557,7 @@ const es: LandingMessages = {
       },
       {
         question: '¿Necesito nube o Home Assistant?',
-        answer: 'No por defecto. Local Climate Link evita hubs, MQTT y servidores 24/7.'
+        answer: 'No por defecto. Shelly Link evita hubs, MQTT y servidores 24/7.'
       },
       {
         question: '¿Funciona con cualquier dispositivo BLE?',
@@ -567,7 +567,7 @@ const es: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — clima local sin hub.',
+    tagline: 'Shelly Link — clima local sin hub.',
     privacy: 'Privacidad'
   }
 };
@@ -575,9 +575,9 @@ const es: LandingMessages = {
 const fr: LandingMessages = {
   ...en,
   meta: {
-    title: 'Local Climate Link — thermostat sans hub',
+    title: 'Shelly Link — thermostat sans hub',
     description:
-      'Local Climate Link configure un thermostat local BLE + Shelly sans hub, cloud, MQTT ni téléphone en arrière-plan.'
+      'Shelly Link configure un thermostat local BLE + Shelly sans hub, cloud, MQTT ni téléphone en arrière-plan.'
   },
   nav: {
     howItWorks: 'Fonctionnement',
@@ -586,7 +586,7 @@ const fr: LandingMessages = {
     sectionsAria: 'Sections de la page'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Télécharger la bêta Android',
     compatibilityCta: 'Voir la compatibilité'
   },
@@ -647,7 +647,7 @@ const fr: LandingMessages = {
   },
   preview: {
     ...en.preview,
-    aria: 'Aperçu de l’app Local Climate Link',
+    aria: 'Aperçu de l’app Shelly Link',
     tabs: { shelly: 'Shelly', sensors: 'Capteurs', rule: 'Règle', diag: 'Diag' },
     addThermometer: 'Ajouter un thermomètre',
     sensorName: 'Salon'
@@ -677,8 +677,7 @@ const fr: LandingMessages = {
       },
       {
         question: 'Faut-il le cloud ou Home Assistant ?',
-        answer:
-          'Non par défaut. Local Climate Link évite les hubs, MQTT et serveurs 24/7.'
+        answer: 'Non par défaut. Shelly Link évite les hubs, MQTT et serveurs 24/7.'
       },
       {
         question: 'Tous les appareils BLE sont-ils compatibles ?',
@@ -688,7 +687,7 @@ const fr: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — climat local sans hub.',
+    tagline: 'Shelly Link — climat local sans hub.',
     privacy: 'Confidentialité'
   }
 };
@@ -696,9 +695,9 @@ const fr: LandingMessages = {
 const it: LandingMessages = {
   ...en,
   meta: {
-    title: 'Local Climate Link — termostato senza hub',
+    title: 'Shelly Link — termostato senza hub',
     description:
-      'Local Climate Link configura un termostato locale BLE + Shelly senza hub, cloud, MQTT o telefono in background.'
+      'Shelly Link configura un termostato locale BLE + Shelly senza hub, cloud, MQTT o telefono in background.'
   },
   nav: {
     howItWorks: 'Come funziona',
@@ -707,7 +706,7 @@ const it: LandingMessages = {
     sectionsAria: 'Sezioni della pagina'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Scarica beta Android',
     compatibilityCta: 'Vedi compatibilità'
   },
@@ -767,7 +766,7 @@ const it: LandingMessages = {
   },
   preview: {
     ...en.preview,
-    aria: 'Anteprima dell’app Local Climate Link',
+    aria: 'Anteprima dell’app Shelly Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensori', rule: 'Regola', diag: 'Diag' },
     addThermometer: 'Aggiungi termometro',
     sensorName: 'Soggiorno'
@@ -797,7 +796,7 @@ const it: LandingMessages = {
       },
       {
         question: 'Serve cloud o Home Assistant?',
-        answer: 'No di default. Local Climate Link evita hub, MQTT e server 24/7.'
+        answer: 'No di default. Shelly Link evita hub, MQTT e server 24/7.'
       },
       {
         question: 'Supporta qualsiasi dispositivo BLE?',
@@ -807,7 +806,7 @@ const it: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — clima locale senza hub.',
+    tagline: 'Shelly Link — clima locale senza hub.',
     privacy: 'Privacy'
   }
 };
@@ -815,9 +814,9 @@ const it: LandingMessages = {
 const ptBr: LandingMessages = {
   ...en,
   meta: {
-    title: 'Local Climate Link — termostato sem hub',
+    title: 'Shelly Link — termostato sem hub',
     description:
-      'Local Climate Link configura um termostato local BLE + Shelly sem hub, nuvem, MQTT ou telefone em segundo plano.'
+      'Shelly Link configura um termostato local BLE + Shelly sem hub, nuvem, MQTT ou telefone em segundo plano.'
   },
   nav: {
     howItWorks: 'Como funciona',
@@ -826,7 +825,7 @@ const ptBr: LandingMessages = {
     sectionsAria: 'Seções da página'
   },
   common: {
-    brand: 'Local Climate Link',
+    brand: 'Shelly Link',
     betaCta: 'Baixar beta Android',
     compatibilityCta: 'Ver compatibilidade'
   },
@@ -886,7 +885,7 @@ const ptBr: LandingMessages = {
   },
   preview: {
     ...en.preview,
-    aria: 'Prévia do app Local Climate Link',
+    aria: 'Prévia do app Shelly Link',
     tabs: { shelly: 'Shelly', sensors: 'Sensores', rule: 'Regra', diag: 'Diag' },
     addThermometer: 'Adicionar termômetro',
     sensorName: 'Sala'
@@ -916,7 +915,7 @@ const ptBr: LandingMessages = {
       },
       {
         question: 'Preciso de nuvem ou Home Assistant?',
-        answer: 'Não por padrão. Local Climate Link evita hubs, MQTT e servidor 24/7.'
+        answer: 'Não por padrão. Shelly Link evita hubs, MQTT e servidor 24/7.'
       },
       {
         question: 'Qualquer dispositivo BLE é compatível?',
@@ -926,7 +925,7 @@ const ptBr: LandingMessages = {
     ]
   },
   footer: {
-    tagline: 'Local Climate Link — clima local sem hub.',
+    tagline: 'Shelly Link — clima local sem hub.',
     privacy: 'Privacidade'
   }
 };

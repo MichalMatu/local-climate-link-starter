@@ -60,5 +60,5 @@ __MACOSX/
 
 # generated but not committed unless explicitly configured
 *.tsbuildinfo
-.openvisio/cache/local-climate-link-starter/data.mdb
-.openvisio/cache/local-climate-link-starter/lock.mdb
+.openvisio/cache/shelly-link/data.mdb
+.openvisio/cache/shelly-link/lock.mdb

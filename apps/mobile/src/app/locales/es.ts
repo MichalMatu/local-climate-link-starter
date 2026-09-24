@@ -2,7 +2,7 @@ import type { PlMessages } from './pl.js';
 
 export const es = {
   app: {
-    name: 'Local Climate Link',
+    name: 'Shelly Link',
     promise: 'Termostato sin hub.',
     promiseDetail:
       'Termómetro BLE + enchufe Shelly. Configuras una vez en la app y luego funciona localmente.',
@@ -65,7 +65,7 @@ export const es = {
       relayOwnedByClimate:
         'Esta salida ya está controlada por una automatización climática. Elimínala antes de crear un horario.',
       climateScriptPresent:
-        'Se detectó un script de control de Local Climate Link en este Shelly. Elimina o mueve esa automatización antes de añadir un horario.',
+        'Se detectó un script de control de Shelly Link en este Shelly. Elimina o mueve esa automatización antes de añadir un horario.',
       clockUnsynced:
         'El reloj de Shelly no está sincronizado. Sincroniza la hora del dispositivo y vuelve a intentarlo.',
       scheduleSlots: 'Shelly no tiene dos espacios libres para horarios.',
@@ -495,10 +495,10 @@ export const es = {
       deleteScriptDone: 'Script Shelly eliminado.',
       deleteScriptFailedTitle: 'No se pudo eliminar el script.',
       deleteScriptFromShelly: 'Eliminar de Shelly',
-      deleteScriptTitle: 'Eliminar script Local Climate Link de Shelly',
+      deleteScriptTitle: 'Eliminar script Shelly Link de Shelly',
       deleteScriptConfirmTitle: 'Confirmar eliminación del script de Shelly',
       deleteScriptConfirmDetail:
-        'El relé se forzará a OFF antes de eliminar el script Local Climate Link de este Shelly.',
+        'El relé se forzará a OFF antes de eliminar el script Shelly Link de este Shelly.',
       deleting: 'Eliminando',
       installBlockedTitle: 'No se puede enviar la regla',
       installMatterHelp:
@@ -508,7 +508,7 @@ export const es = {
       loadScriptFromShelly: 'Restaurar ajustes del enchufe',
       loadScriptFromShellyTitle:
         'Sustituir el formulario actual por la configuración activa en este enchufe',
-      loadScriptMissing: 'No se encontró script Local Climate Link en este Shelly.',
+      loadScriptMissing: 'No se encontró script Shelly Link en este Shelly.',
       loadScriptUnknown: 'No puedo leer ajustes de este script.',
       editContextLabel: 'Editando automatización',
       editContextHint:
@@ -629,7 +629,7 @@ export const es = {
       actionRefresh: 'Actualizar diagnóstico',
       actionRefreshTitle: 'Obtener estado actual del script y relé de Shelly',
       ageAgo: 'hace {duration}',
-      empty: 'Comprueba si el enchufe seleccionado tiene un script Local Climate Link.',
+      empty: 'Comprueba si el enchufe seleccionado tiene un script Shelly Link.',
       fetching: 'Obteniendo',
       groupDecision: 'Input -> Processing -> Output',
       groupDecisionHint:
@@ -652,12 +652,12 @@ export const es = {
       processing: 'Processing',
       readFailed: 'No se pudo leer el diagnóstico del script Shelly.',
       refreshRequirement:
-        'Actualizar requiere el script Local Climate Link instalado y ejecutándose en AUTO.',
+        'Actualizar requiere el script Shelly Link instalado y ejecutándose en AUTO.',
       scriptMissingConfirm: 'sin confirmación',
       scriptNotRunning:
-        'El script Local Climate Link no se está ejecutando en Shelly. Estado: {status}.',
+        'El script Shelly Link no se está ejecutando en Shelly. Estado: {status}.',
       scriptOutOfMemory:
-        'El script Local Climate Link no se ejecuta: Shelly informa out_of_memory. Desactiva Matter en Shelly, reinicia el enchufe y envía la regla de nuevo.',
+        'El script Shelly Link no se ejecuta: Shelly informa out_of_memory. Desactiva Matter en Shelly, reinicia el enchufe y envía la regla de nuevo.',
       title: 'Diagnóstico',
       uptimeAt: 'uptime {duration}'
     },

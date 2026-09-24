@@ -1,6 +1,6 @@
 export const pl = {
   app: {
-    name: 'Local Climate Link',
+    name: 'Shelly Link',
     promise: 'Termostat bez huba.',
     promiseDetail:
       'Termometr BLE + gniazdko Shelly. Konfigurujesz raz w aplikacji, działa lokalnie.',
@@ -63,7 +63,7 @@ export const pl = {
       relayOwnedByClimate:
         'To wyjście jest już sterowane automatyką klimatu. Usuń ją przed utworzeniem harmonogramu czasowego.',
       climateScriptPresent:
-        'Na Shelly wykryto skrypt Local Climate Link sterujący tym urządzeniem. Usuń lub przenieś tę automatykę przed dodaniem harmonogramu.',
+        'Na Shelly wykryto skrypt Shelly Link sterujący tym urządzeniem. Usuń lub przenieś tę automatykę przed dodaniem harmonogramu.',
       clockUnsynced:
         'Zegar Shelly nie jest zsynchronizowany. Połącz urządzenie z siecią/czasem i spróbuj ponownie.',
       scheduleSlots: 'Shelly nie ma dwóch wolnych miejsc na harmonogram.',
@@ -496,10 +496,10 @@ export const pl = {
       deleteScriptDone: 'Usunięto skrypt Shelly.',
       deleteScriptFailedTitle: 'Nie udało się usunąć skryptu.',
       deleteScriptFromShelly: 'Usuń z Shelly',
-      deleteScriptTitle: 'Usuń skrypt Local Climate Link z Shelly',
+      deleteScriptTitle: 'Usuń skrypt Shelly Link z Shelly',
       deleteScriptConfirmTitle: 'Potwierdź usunięcie skryptu z Shelly',
       deleteScriptConfirmDetail:
-        'Przekaźnik zostanie wymuszony na OFF przed usunięciem skryptu Local Climate Link z tego Shelly.',
+        'Przekaźnik zostanie wymuszony na OFF przed usunięciem skryptu Shelly Link z tego Shelly.',
       deleting: 'Usuwam',
       installBlockedTitle: 'Nie mogę wysłać reguły',
       installMatterHelp:
@@ -509,7 +509,7 @@ export const pl = {
       loadScriptFromShelly: 'Przywróć ustawienia z gniazdka',
       loadScriptFromShellyTitle:
         'Zastąp bieżący formularz konfiguracją działającą na tym gniazdku',
-      loadScriptMissing: 'Nie znaleziono skryptu Local Climate Link na tym Shelly.',
+      loadScriptMissing: 'Nie znaleziono skryptu Shelly Link na tym Shelly.',
       loadScriptUnknown: 'Nie umiem odczytać ustawień z tego skryptu.',
       editContextLabel: 'Edytujesz automatykę',
       editContextHint: 'Zapis zmieni ustawienia działające na tym gniazdku.',
@@ -629,7 +629,7 @@ export const pl = {
       actionRefresh: 'Odśwież diagnostykę',
       actionRefreshTitle: 'Pobierz aktualny stan skryptu i przekaźnika z Shelly',
       ageAgo: '{duration} temu',
-      empty: 'Sprawdź, czy na wybranym gniazdku jest skrypt Local Climate Link.',
+      empty: 'Sprawdź, czy na wybranym gniazdku jest skrypt Shelly Link.',
       fetching: 'Pobieram',
       groupDecision: 'Input -> Processing -> Output',
       groupDecisionHint:
@@ -652,12 +652,11 @@ export const pl = {
       processing: 'Processing',
       readFailed: 'Nie udało się odczytać diagnostyki ze skryptu Shelly.',
       refreshRequirement:
-        'Odświeżanie wymaga wgranego skryptu Local Climate Link uruchomionego w AUTO.',
+        'Odświeżanie wymaga wgranego skryptu Shelly Link uruchomionego w AUTO.',
       scriptMissingConfirm: 'brak potwierdzenia',
-      scriptNotRunning:
-        'Skrypt Local Climate Link nie działa w Shelly. Status: {status}.',
+      scriptNotRunning: 'Skrypt Shelly Link nie działa w Shelly. Status: {status}.',
       scriptOutOfMemory:
-        'Skrypt Local Climate Link nie działa: Shelly zgłasza out_of_memory. Wyłącz Matter w Shelly, zrestartuj gniazdko i wyślij regułę ponownie.',
+        'Skrypt Shelly Link nie działa: Shelly zgłasza out_of_memory. Wyłącz Matter w Shelly, zrestartuj gniazdko i wyślij regułę ponownie.',
       title: 'Diagnostyka',
       uptimeAt: 'uptime {duration}'
     },

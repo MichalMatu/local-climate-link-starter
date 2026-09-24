@@ -11,7 +11,7 @@ chmod 700 "$SIGNING_DIR"
 
 if [[ -e "$KEYSTORE" || -e "$PROPERTIES" ]]; then
   if [[ ! -f "$KEYSTORE" || ! -f "$PROPERTIES" ]]; then
-    echo "Partial Local Climate Link alpha signing state. Remove both files in $SIGNING_DIR and retry." >&2
+    echo "Partial Shelly Link alpha signing state. Remove both files in $SIGNING_DIR and retry." >&2
     exit 1
   fi
 else
@@ -25,7 +25,7 @@ else
     -keyalg RSA \
     -keysize 4096 \
     -validity 3650 \
-    -dname "CN=Local Climate Link Alpha, OU=Local Climate Link, O=Local Climate Link, L=Warsaw, ST=Mazowieckie, C=PL" \
+    -dname "CN=Shelly Link Alpha, OU=Shelly Link, O=Shelly Link, L=Warsaw, ST=Mazowieckie, C=PL" \
     >/dev/null 2>&1
 
   umask 077
@@ -52,7 +52,7 @@ KEY_PASSWORD="$(read_property keyPassword)"
 [[ -n "$STORE_FILE" && -n "$STORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]
 [[ -f "$STORE_FILE" ]]
 
-printf '%s\n' 'Local Climate Link alpha signer:'
+printf '%s\n' 'Shelly Link alpha signer:'
 keytool -list -v \
   -keystore "$STORE_FILE" \
   -storepass "$STORE_PASSWORD" \

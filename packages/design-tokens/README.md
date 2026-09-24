@@ -1,6 +1,6 @@
 # @lcl/design-tokens
 
-Purpose: source design tokens for Local Climate Link UI packages and the mobile app.
+Purpose: source design tokens for Shelly Link UI packages and the mobile app.
 
 Public API:
 

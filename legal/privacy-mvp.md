@@ -1,6 +1,6 @@
 # Privacy MVP
 
-Local Climate Link is local-first.
+Shelly Link is local-first.
 
 ## Default data flow
 
@@ -48,7 +48,7 @@ Any analytics, crash reporting, cloud backup, remote support, or marketplace pro
 Public URL for Google Play:
 
 ```text
-https://michalmatu.github.io/local-climate-link-starter/privacy.html
+https://michalmatu.github.io/shelly-link/privacy.html
 ```
 
 Contact:

@@ -210,7 +210,7 @@ describe('reconcileInstalledAutomationsForShelly', () => {
     expect(useInstalledAutomationStore.getState().installations).toEqual([]);
   });
 
-  it('returns none when Local Climate Link has no durable ownership record', async () => {
+  it('returns none when Shelly Link has no durable ownership record', async () => {
     await expect(
       reconcileInstalledAutomationsForShelly(target, services())
     ).resolves.toEqual({

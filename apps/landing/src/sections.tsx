@@ -5,8 +5,7 @@ type LandingCopy = (typeof landingMessages)[LandingLocale];
 // Points to the current latest published release on GitHub.
 // Using /releases/latest ensures the link on the landing page always
 // leads to the newest version without manual updates on every release.
-const androidReleaseUrl =
-  'https://github.com/MichalMatu/local-climate-link-starter/releases/latest';
+const androidReleaseUrl = 'https://github.com/MichalMatu/shelly-link/releases/latest';
 const contactEmail = 'meehow939@gmail.com';
 const privacyUrl = `${import.meta.env.BASE_URL}privacy.html`;
 const brandIconUrl = `${import.meta.env.BASE_URL}assets/brand-icon.png`;

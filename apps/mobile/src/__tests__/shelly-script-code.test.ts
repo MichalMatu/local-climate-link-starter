@@ -7,7 +7,7 @@ const jsonResponse = (payload: unknown) =>
     headers: { 'content-type': 'application/json' }
   });
 
-const installFetchMock = (scriptName = 'Local Climate Link Thermostat') => {
+const installFetchMock = (scriptName = 'Shelly Link Thermostat') => {
   const getCodeIds: number[] = [];
   const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
     const body = JSON.parse(String(init?.body ?? '{}')) as {

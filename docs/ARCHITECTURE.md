@@ -1,6 +1,6 @@
 # Architecture
 
-Local Climate Link is a local configurator and management app. The phone discovers, configures and diagnoses devices; a Shelly Plug executes installed automation locally without requiring the phone, cloud, Home Assistant, MQTT or a 24/7 server.
+Shelly Link is a local configurator and management app. The phone discovers, configures and diagnoses devices; a Shelly Plug executes installed automation locally without requiring the phone, cloud, Home Assistant, MQTT or a 24/7 server.
 
 ## Product model
 
@@ -8,7 +8,7 @@ Local Climate Link is a local configurator and management app. The phone discove
 physical Plug -> optional installed automation
 ```
 
-A saved Plug is useful without automation. Automation setup starts from a concrete Plug. One Plug relay has at most one Local Climate Link managed automation owner at a time. Time automation is a Plug automation type, not a separate global device model.
+A saved Plug is useful without automation. Automation setup starts from a concrete Plug. One Plug relay has at most one Shelly Link managed automation owner at a time. Time automation is a Plug automation type, not a separate global device model.
 
 `InstalledAutomation` is the durable record of installed automation ownership. Forgetting a Plug removes only the saved physical-device entry from the app; it does not uninstall the automation or mutate Shelly. Uninstalling an automation is a separate destructive operation.
 
@@ -18,7 +18,7 @@ Shelly physical identity is `Shelly.GetDeviceInfo.id`, normalized consistently. 
 
 Before relay mutations, runtime upgrades or destructive operations, the app verifies that the endpoint still belongs to the stored Shelly device. A mismatch stops before mutation.
 
-Remote-to-local recovery is conservative. A missing local automation may be reconstructed only when the remote script is positively recognized as a Local Climate Link managed runtime and its metadata/config can be decoded. A similar script name alone is not ownership evidence.
+Remote-to-local recovery is conservative. A missing local automation may be reconstructed only when the remote script is positively recognized as a Shelly Link managed runtime and its metadata/config can be decoded. A similar script name alone is not ownership evidence.
 
 When Climate recovery succeeds, the configured sensor identities are passively merged into the saved Thermometers registry by physical BLE `runtimeAddress`. Existing entries and user names win, duplicate MACs are not created, current rule membership is not changed, and recovery never synthesizes live readings.
 

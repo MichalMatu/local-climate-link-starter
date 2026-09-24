@@ -58,7 +58,7 @@ const controlRpcResult = (method: string | undefined): unknown => {
         scripts: [
           {
             id: 1,
-            name: 'Local Climate Link Thermostat',
+            name: 'Shelly Link Thermostat',
             enable: true,
             running: true
           }

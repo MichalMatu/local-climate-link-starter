@@ -2,7 +2,7 @@ import type { PlMessages } from './pl.js';
 
 export const fr = {
   app: {
-    name: 'Local Climate Link',
+    name: 'Shelly Link',
     promise: 'Thermostat sans hub.',
     promiseDetail:
       'Thermomètre BLE + prise Shelly. Configuration une seule fois dans l’app, puis fonctionnement local.',
@@ -66,7 +66,7 @@ export const fr = {
       relayOwnedByClimate:
         'Cette sortie est déjà contrôlée par une automatisation climatique. Supprimez-la avant de créer un programme horaire.',
       climateScriptPresent:
-        'Un script de contrôle Local Climate Link a été détecté sur ce Shelly. Supprimez ou déplacez cette automatisation avant d’ajouter un programme.',
+        'Un script de contrôle Shelly Link a été détecté sur ce Shelly. Supprimez ou déplacez cette automatisation avant d’ajouter un programme.',
       clockUnsynced:
         'L’horloge du Shelly n’est pas synchronisée. Synchronisez l’heure de l’appareil puis réessayez.',
       scheduleSlots: 'Shelly ne dispose pas de deux emplacements de programme libres.',
@@ -502,10 +502,10 @@ export const fr = {
       deleteScriptDone: 'Script Shelly supprimé.',
       deleteScriptFailedTitle: 'Impossible de supprimer le script.',
       deleteScriptFromShelly: 'Supprimer de Shelly',
-      deleteScriptTitle: 'Supprimer le script Local Climate Link de Shelly',
+      deleteScriptTitle: 'Supprimer le script Shelly Link de Shelly',
       deleteScriptConfirmTitle: 'Confirmer la suppression du script de Shelly',
       deleteScriptConfirmDetail:
-        'Le relais sera forcé sur OFF avant la suppression du script Local Climate Link de ce Shelly.',
+        'Le relais sera forcé sur OFF avant la suppression du script Shelly Link de ce Shelly.',
       deleting: 'Suppression',
       installBlockedTitle: 'Impossible d’envoyer la règle',
       installMatterHelp:
@@ -515,7 +515,7 @@ export const fr = {
       loadScriptFromShelly: 'Restaurer les réglages de la prise',
       loadScriptFromShellyTitle:
         'Remplacer le formulaire actuel par la configuration active sur cette prise',
-      loadScriptMissing: 'Aucun script Local Climate Link trouvé sur ce Shelly.',
+      loadScriptMissing: 'Aucun script Shelly Link trouvé sur ce Shelly.',
       loadScriptUnknown: 'Je ne peux pas lire les réglages de ce script.',
       editContextLabel: 'Modification de l’automatisation',
       editContextHint:
@@ -636,7 +636,7 @@ export const fr = {
       actionRefresh: 'Actualiser le diagnostic',
       actionRefreshTitle: 'Lire l’état actuel du script et du relais depuis Shelly',
       ageAgo: 'il y a {duration}',
-      empty: 'Vérifie si la prise sélectionnée possède un script Local Climate Link.',
+      empty: 'Vérifie si la prise sélectionnée possède un script Shelly Link.',
       fetching: 'Lecture',
       groupDecision: 'Input -> Processing -> Output',
       groupDecisionHint:
@@ -659,12 +659,12 @@ export const fr = {
       processing: 'Processing',
       readFailed: 'Impossible de lire le diagnostic du script Shelly.',
       refreshRequirement:
-        'L’actualisation nécessite le script Local Climate Link installé et lancé en AUTO.',
+        'L’actualisation nécessite le script Shelly Link installé et lancé en AUTO.',
       scriptMissingConfirm: 'aucune confirmation',
       scriptNotRunning:
-        'Le script Local Climate Link ne fonctionne pas dans Shelly. Statut : {status}.',
+        'Le script Shelly Link ne fonctionne pas dans Shelly. Statut : {status}.',
       scriptOutOfMemory:
-        'Le script Local Climate Link ne fonctionne pas : Shelly signale out_of_memory. Désactive Matter dans Shelly, redémarre la prise et renvoie la règle.',
+        'Le script Shelly Link ne fonctionne pas : Shelly signale out_of_memory. Désactive Matter dans Shelly, redémarre la prise et renvoie la règle.',
       title: 'Diagnostic',
       uptimeAt: 'uptime {duration}'
     },

@@ -24,7 +24,7 @@ Reference links are allowed in documentation. Runtime dependency or copied code 
 ## Parser reference warning
 
 Theengs Decoder is a useful compatibility database, but it is GPL-3.0. The
-Local Climate Link source-available noncommercial license is not GPL-compatible,
+Shelly Link source-available noncommercial license is not GPL-compatible,
 so do not copy or vendor Theengs GPL code into runtime code. Treat Theengs as a
 reference and validation source only unless the project is relicensed or the GPL
 obligations are handled through a separate written decision.

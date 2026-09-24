@@ -1,4 +1,4 @@
-# Local Climate Link landing
+# Shelly Link landing
 
 Static marketing and beta landing page for GitHub Pages.
 

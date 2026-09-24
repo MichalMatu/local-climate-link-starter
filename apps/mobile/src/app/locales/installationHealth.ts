@@ -36,7 +36,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: 'Problem właściciela wyjścia',
         description:
-          'Zapisana instalacja nie odpowiada skryptowi Local Climate Link na tym Shelly. Aplikacja nie przejmie wyjścia automatycznie.',
+          'Zapisana instalacja nie odpowiada skryptowi Shelly Link na tym Shelly. Aplikacja nie przejmie wyjścia automatycznie.',
         action: 'Sprawdź ponownie'
       }
     }
@@ -64,7 +64,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: 'Output ownership problem',
         description:
-          'The saved installation no longer matches the Local Climate Link script on this Shelly. The app will not take over the output automatically.',
+          'The saved installation no longer matches the Shelly Link script on this Shelly. The app will not take over the output automatically.',
         action: 'Check again'
       }
     }
@@ -92,7 +92,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: 'Problem mit der Ausgangssteuerung',
         description:
-          'Die gespeicherte Anlage stimmt nicht mehr mit dem Local-Climate-Link-Skript auf diesem Shelly überein. Die App übernimmt den Ausgang nicht automatisch.',
+          'Die gespeicherte Anlage stimmt nicht mehr mit dem Shelly-Link-Skript auf diesem Shelly überein. Die App übernimmt den Ausgang nicht automatisch.',
         action: 'Erneut prüfen'
       }
     }
@@ -120,7 +120,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: 'Problema de control de la salida',
         description:
-          'La instalación guardada ya no coincide con el script de Local Climate Link en este Shelly. La aplicación no tomará el control de la salida automáticamente.',
+          'La instalación guardada ya no coincide con el script de Shelly Link en este Shelly. La aplicación no tomará el control de la salida automáticamente.',
         action: 'Comprobar de nuevo'
       }
     }
@@ -148,7 +148,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: 'Problème de contrôle de la sortie',
         description:
-          "L'installation enregistrée ne correspond plus au script Local Climate Link de ce Shelly. L'application ne prendra pas automatiquement le contrôle de la sortie.",
+          "L'installation enregistrée ne correspond plus au script Shelly Link de ce Shelly. L'application ne prendra pas automatiquement le contrôle de la sortie.",
         action: 'Vérifier à nouveau'
       }
     }
@@ -176,7 +176,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: "Problema di controllo dell'uscita",
         description:
-          "L'installazione salvata non corrisponde più allo script Local Climate Link su questo Shelly. L'app non prenderà automaticamente il controllo dell'uscita.",
+          "L'installazione salvata non corrisponde più allo script Shelly Link su questo Shelly. L'app non prenderà automaticamente il controllo dell'uscita.",
         action: 'Controlla di nuovo'
       }
     }
@@ -205,7 +205,7 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
       'ownership-problem': {
         title: 'Problema de controle da saída',
         description:
-          'A instalação salva não corresponde mais ao script Local Climate Link neste Shelly. O app não assumirá o controle da saída automaticamente.',
+          'A instalação salva não corresponde mais ao script Shelly Link neste Shelly. O app não assumirá o controle da saída automaticamente.',
         action: 'Verificar novamente'
       }
     }

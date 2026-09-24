@@ -74,6 +74,6 @@ export HUSKY=0
 export PATH="$OFFLINE_DIR/pnpm-runtime/node_modules/.bin:\$PATH"
 ENV
 
-printf 'Local Climate Link sandbox prepared at %s\n' "$ROOT"
+printf 'Shelly Link sandbox prepared at %s\n' "$ROOT"
 printf 'Dependency key: %s\n' "$pack_key"
 printf 'Next: source %s/env.sh && tools/sandbox/sandbox-doctor.sh\n' "$ROOT"

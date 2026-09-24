@@ -38,7 +38,7 @@ const formatRuntimeIssues = (issues: readonly RuntimeIssue[]): string[] => [
 
 export const createSupportReport = (input: SupportReportInput): string =>
   [
-    `Local Climate Link ${mobilePackage.version}`,
+    `Shelly Link ${mobilePackage.version}`,
     `Platform: ${input.platform}`,
     `Locale: ${input.activeLocale}`,
     `Locale preference: ${input.localePreference}`,

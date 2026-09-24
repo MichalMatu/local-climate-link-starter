@@ -241,7 +241,7 @@ const mockShelly = async (
                 scripts: [
                   {
                     id: 1,
-                    name: 'Local Climate Link Thermostat',
+                    name: 'Shelly Link Thermostat',
                     enable: true,
                     running: true
                   }

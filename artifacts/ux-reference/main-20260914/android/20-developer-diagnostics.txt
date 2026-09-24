@@ -13,7 +13,7 @@ Select Shelly plug.
 Shelly Plug S Gen3
 Refresh diagnostics
 
-Refresh requires the Local Climate Link script installed and running in AUTO.
+Refresh requires the Shelly Link script installed and running in AUTO.
 
 Climate
 Time

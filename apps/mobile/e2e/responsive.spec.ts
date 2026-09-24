@@ -199,7 +199,7 @@ const mockShellyRpc = async (page: Page) => {
         result = { connected: false };
         break;
       case 'Script.GetCode':
-        result = { data: '// Local Climate Link deployed script\nprint("ok");' };
+        result = { data: '// Shelly Link deployed script\nprint("ok");' };
         break;
       case 'Script.GetStatus':
         result = {
@@ -219,7 +219,7 @@ const mockShellyRpc = async (page: Page) => {
           scripts: [
             {
               id: 1,
-              name: 'Local Climate Link Thermostat',
+              name: 'Shelly Link Thermostat',
               enable: true,
               running: scriptRunning
             }
@@ -904,7 +904,7 @@ for (const viewport of viewports) {
     await mockShellyRpc(page);
     await page.goto('/');
 
-    await expect(page).toHaveTitle('Local Climate Link');
+    await expect(page).toHaveTitle('Shelly Link');
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Gniazdka', exact: true })

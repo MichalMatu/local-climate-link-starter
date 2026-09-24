@@ -24,12 +24,12 @@ const en: DeviceCloudCopy = {
   eyebrow: 'Device settings',
   title: 'Shelly Cloud',
   description:
-    'Choose whether this Plug can connect to Shelly Cloud. Local Climate Link does not require it.',
+    'Choose whether this Plug can connect to Shelly Cloud. Shelly Link does not require it.',
   enable: 'Enable Shelly Cloud',
   enabledHint:
     'The Plug may connect to Shelly Cloud while local control remains available.',
   disabledHint:
-    'Shelly Cloud is off. Local Climate Link continues to work over the local network.',
+    'Shelly Cloud is off. Shelly Link continues to work over the local network.',
   connection: 'Cloud connection',
   connected: 'Connected',
   disconnected: 'Not connected',
@@ -49,12 +49,12 @@ export const deviceCloudCopy: Record<Locale, DeviceCloudCopy> = {
     ...en,
     eyebrow: 'Ustawienia urządzenia',
     description:
-      'Wybierz, czy gniazdko może łączyć się z chmurą Shelly. Local Climate Link jej nie wymaga.',
+      'Wybierz, czy gniazdko może łączyć się z chmurą Shelly. Shelly Link jej nie wymaga.',
     enable: 'Włącz Shelly Cloud',
     enabledHint:
       'Gniazdko może łączyć się z chmurą Shelly; sterowanie lokalne nadal działa.',
     disabledHint:
-      'Shelly Cloud jest wyłączona. Local Climate Link nadal działa w sieci lokalnej.',
+      'Shelly Cloud jest wyłączona. Shelly Link nadal działa w sieci lokalnej.',
     connection: 'Połączenie z chmurą',
     connected: 'Połączono',
     disconnected: 'Brak połączenia',

@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'link.localclimate.app',
-  appName: 'Local Climate Link',
+  appName: 'Shelly Link',
   webDir: 'dist',
   android: {
     adjustMarginsForEdgeToEdge: 'auto'

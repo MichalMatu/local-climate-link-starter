@@ -1,4 +1,4 @@
-# AGENTS.md — Local Climate Link
+# AGENTS.md — Shelly Link
 
 This is the repository-wide operating contract for coding agents. Keep it short.
 More specific `AGENTS.md` files apply inside their directories and add to this file.
@@ -25,7 +25,7 @@ canonical docs win.
 
 ## Product invariants
 
-Local Climate Link is a local configurator and management app for Shelly Plugs, BLE
+Shelly Link is a local configurator and management app for Shelly Plugs, BLE
 thermometers and Plug-owned automations.
 
 The primary mental model is:
@@ -147,7 +147,7 @@ Heating/runtime safety is not negotiable:
 - relay-control changes need focused safety tests.
 
 For the local development Shelly test plug, the user has standing authorization to toggle
-the relay ON and OFF through Local Climate Link scripts or `Switch.Set` without asking
+the relay ON and OFF through Shelly Link scripts or `Switch.Set` without asking
 again. When hardware testing is relevant, use real transitions, leave the final relay
 state explicit and known, and do not delete unrelated user scripts.
 

@@ -161,7 +161,7 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
               : [
                   {
                     id: scriptId,
-                    name: 'Local Climate Link Thermostat',
+                    name: 'Shelly Link Thermostat',
                     enable: true,
                     running: scriptRunning
                   }
@@ -386,7 +386,7 @@ describe('InstallationDetailScreen', () => {
     expect(
       screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
     ).toBeVisible();
-    expect(screen.queryByText('Local Climate Link')).toBeNull();
+    expect(screen.queryByText('Shelly Link')).toBeNull();
     const back = screen.getByRole('button', { name: '‹ Gniazdka' });
     expect(back).toBeVisible();
     fireEvent.click(back);

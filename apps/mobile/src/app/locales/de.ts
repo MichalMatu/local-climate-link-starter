@@ -2,7 +2,7 @@ import type { PlMessages } from './pl.js';
 
 export const de = {
   app: {
-    name: 'Local Climate Link',
+    name: 'Shelly Link',
     promise: 'Thermostat ohne Hub.',
     promiseDetail:
       'BLE-Thermometer + Shelly-Steckdose. Einmal in der App einrichten, danach lokal betreiben.',
@@ -65,7 +65,7 @@ export const de = {
       relayOwnedByClimate:
         'Dieser Ausgang wird bereits von einer Klimaautomatik gesteuert. Entferne sie, bevor du einen Zeitplan anlegst.',
       climateScriptPresent:
-        'Auf diesem Shelly wurde ein Local-Climate-Link-Steuerskript erkannt. Entferne oder verschiebe diese Automatik, bevor du einen Zeitplan hinzufügst.',
+        'Auf diesem Shelly wurde ein Shelly-Link-Steuerskript erkannt. Entferne oder verschiebe diese Automatik, bevor du einen Zeitplan hinzufügst.',
       clockUnsynced:
         'Die Shelly-Uhr ist nicht synchronisiert. Synchronisiere die Gerätezeit und versuche es erneut.',
       scheduleSlots: 'Shelly hat keine zwei freien Zeitplanplätze.',
@@ -497,10 +497,10 @@ export const de = {
       deleteScriptDone: 'Shelly-Skript entfernt.',
       deleteScriptFailedTitle: 'Skript konnte nicht entfernt werden.',
       deleteScriptFromShelly: 'Aus Shelly entfernen',
-      deleteScriptTitle: 'Local Climate Link Skript aus Shelly entfernen',
+      deleteScriptTitle: 'Shelly Link Skript aus Shelly entfernen',
       deleteScriptConfirmTitle: 'Löschen des Skripts aus Shelly bestätigen',
       deleteScriptConfirmDetail:
-        'Das Relais wird auf OFF gesetzt, bevor das Local Climate Link Skript aus diesem Shelly entfernt wird.',
+        'Das Relais wird auf OFF gesetzt, bevor das Shelly Link Skript aus diesem Shelly entfernt wird.',
       deleting: 'Entferne',
       installBlockedTitle: 'Regel kann nicht gesendet werden',
       installMatterHelp:
@@ -510,8 +510,7 @@ export const de = {
       loadScriptFromShelly: 'Einstellungen von Steckdose wiederherstellen',
       loadScriptFromShellyTitle:
         'Aktuelles Formular durch die auf dieser Steckdose laufende Konfiguration ersetzen',
-      loadScriptMissing:
-        'Auf diesem Shelly wurde kein Local Climate Link Skript gefunden.',
+      loadScriptMissing: 'Auf diesem Shelly wurde kein Shelly Link Skript gefunden.',
       loadScriptUnknown: 'Ich kann die Einstellungen aus diesem Skript nicht lesen.',
       editContextLabel: 'Automation bearbeiten',
       editContextHint:
@@ -633,7 +632,7 @@ export const de = {
       actionRefresh: 'Diagnose aktualisieren',
       actionRefreshTitle: 'Aktuellen Skript- und Relaisstatus von Shelly abrufen',
       ageAgo: 'vor {duration}',
-      empty: 'Prüfen, ob die ausgewählte Steckdose ein Local Climate Link Skript hat.',
+      empty: 'Prüfen, ob die ausgewählte Steckdose ein Shelly Link Skript hat.',
       fetching: 'Lade',
       groupDecision: 'Input -> Processing -> Output',
       groupDecisionHint:
@@ -656,12 +655,11 @@ export const de = {
       processing: 'Processing',
       readFailed: 'Diagnose aus Shelly-Skript konnte nicht gelesen werden.',
       refreshRequirement:
-        'Aktualisieren erfordert ein installiertes Local Climate Link Skript im AUTO-Modus.',
+        'Aktualisieren erfordert ein installiertes Shelly Link Skript im AUTO-Modus.',
       scriptMissingConfirm: 'keine Bestätigung',
-      scriptNotRunning:
-        'Local Climate Link Skript läuft nicht in Shelly. Status: {status}.',
+      scriptNotRunning: 'Shelly Link Skript läuft nicht in Shelly. Status: {status}.',
       scriptOutOfMemory:
-        'Local Climate Link Skript läuft nicht: Shelly meldet out_of_memory. Matter in Shelly ausschalten, Steckdose neu starten und Regel erneut senden.',
+        'Shelly Link Skript läuft nicht: Shelly meldet out_of_memory. Matter in Shelly ausschalten, Steckdose neu starten und Regel erneut senden.',
       title: 'Diagnose',
       uptimeAt: 'Uptime {duration}'
     },

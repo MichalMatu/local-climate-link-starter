@@ -150,6 +150,5 @@ export const RPC_METHODS = {
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
 
-export const LOCAL_CLIMATE_LINK_SCRIPT_NAME = 'Local Climate Link Thermostat';
-export const LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME =
-  'Local Climate Link BLE Discovery';
+export const LOCAL_CLIMATE_LINK_SCRIPT_NAME = 'Shelly Link Thermostat';
+export const LOCAL_CLIMATE_LINK_BLE_DISCOVERY_SCRIPT_NAME = 'Shelly Link BLE Discovery';

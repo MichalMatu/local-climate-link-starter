@@ -39,7 +39,7 @@ describe('LandingPage', () => {
   it('shows the Polish product promise and primary beta action', () => {
     render(<LandingPage initialLocale="pl" />);
 
-    expect(screen.getByRole('link', { name: 'Local Climate Link' })).toContainElement(
+    expect(screen.getByRole('link', { name: 'Shelly Link' })).toContainElement(
       screen.getByRole('presentation')
     );
     expect(
@@ -63,7 +63,7 @@ describe('LandingPage', () => {
     });
     expect(screen.getByRole('link', { name: 'Download APK' })).toHaveAttribute(
       'href',
-      'https://github.com/MichalMatu/local-climate-link-starter/releases/latest'
+      'https://github.com/MichalMatu/shelly-link/releases/latest'
     );
     expect(screen.getByRole('link', { name: 'meehow939@gmail.com' })).toHaveAttribute(
       'href',

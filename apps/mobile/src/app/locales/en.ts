@@ -2,7 +2,7 @@ import type { PlMessages } from './pl.js';
 
 export const en = {
   app: {
-    name: 'Local Climate Link',
+    name: 'Shelly Link',
     promise: 'Thermostat without a hub.',
     promiseDetail:
       'BLE thermometer + Shelly plug. Configure once in the app, then it runs locally.',
@@ -65,7 +65,7 @@ export const en = {
       relayOwnedByClimate:
         'This output is already owned by climate automation. Remove it before creating a time schedule.',
       climateScriptPresent:
-        'A Local Climate Link control script is present on this Shelly. Remove or move that automation before adding a schedule.',
+        'A Shelly Link control script is present on this Shelly. Remove or move that automation before adding a schedule.',
       clockUnsynced:
         'The Shelly clock is not synchronized. Synchronize device time and try again.',
       scheduleSlots: 'Shelly does not have two free schedule slots.',
@@ -492,10 +492,10 @@ export const en = {
       deleteScriptDone: 'Shelly script removed.',
       deleteScriptFailedTitle: 'Could not remove script.',
       deleteScriptFromShelly: 'Remove from Shelly',
-      deleteScriptTitle: 'Remove Local Climate Link script from Shelly',
+      deleteScriptTitle: 'Remove Shelly Link script from Shelly',
       deleteScriptConfirmTitle: 'Confirm removing the script from Shelly',
       deleteScriptConfirmDetail:
-        'The relay will be forced OFF before the Local Climate Link script is removed from this Shelly.',
+        'The relay will be forced OFF before the Shelly Link script is removed from this Shelly.',
       deleting: 'Removing',
       installBlockedTitle: 'Cannot send rule',
       installMatterHelp:
@@ -505,7 +505,7 @@ export const en = {
       loadScriptFromShelly: 'Restore settings from plug',
       loadScriptFromShellyTitle:
         'Replace the current form with the configuration running on this plug',
-      loadScriptMissing: 'No Local Climate Link script was found on this Shelly.',
+      loadScriptMissing: 'No Shelly Link script was found on this Shelly.',
       loadScriptUnknown: 'I cannot read settings from this script.',
       editContextLabel: 'Editing automation',
       editContextHint: 'Saving will change the settings currently running on this plug.',
@@ -625,7 +625,7 @@ export const en = {
       actionRefresh: 'Refresh diagnostics',
       actionRefreshTitle: 'Fetch current script and relay state from Shelly',
       ageAgo: '{duration} ago',
-      empty: 'Check whether the selected plug has a Local Climate Link script.',
+      empty: 'Check whether the selected plug has a Shelly Link script.',
       fetching: 'Fetching',
       groupDecision: 'Input -> Processing -> Output',
       groupDecisionHint:
@@ -648,12 +648,11 @@ export const en = {
       processing: 'Processing',
       readFailed: 'Could not read diagnostics from Shelly script.',
       refreshRequirement:
-        'Refresh requires the Local Climate Link script installed and running in AUTO.',
+        'Refresh requires the Shelly Link script installed and running in AUTO.',
       scriptMissingConfirm: 'no confirmation',
-      scriptNotRunning:
-        'Local Climate Link script is not running in Shelly. Status: {status}.',
+      scriptNotRunning: 'Shelly Link script is not running in Shelly. Status: {status}.',
       scriptOutOfMemory:
-        'Local Climate Link script is not running: Shelly reports out_of_memory. Turn Matter off in Shelly, restart the plug and send the rule again.',
+        'Shelly Link script is not running: Shelly reports out_of_memory. Turn Matter off in Shelly, restart the plug and send the rule again.',
       title: 'Diagnostics',
       uptimeAt: 'uptime {duration}'
     },
