@@ -93,7 +93,7 @@ export class FakeShellyClient implements ShellyClient {
         running: true,
         memUsed: 18_000,
         memFree: 92_000,
-        scriptHash: hashScriptCode(`${plan.scriptName}:${plan.code}`)
+        scriptHash: hashScriptCode(plan.code)
       }
     };
   }
