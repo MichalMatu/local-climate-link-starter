@@ -268,12 +268,12 @@ export const SensorSetupPage = ({
         aria-label={t('hardware.sensor.add')}
       >
         <div
-          className="shelly-add-tabs"
+          className="shelly-add-tabs lcl-segmented-control"
           role="tablist"
           aria-label={t('hardware.sensor.add')}
         >
           <button
-            className="shelly-add-tabs__tab"
+            className="shelly-add-tabs__tab lcl-segmented-control__item"
             type="button"
             role="tab"
             aria-selected={addMode === 'phone-scan'}
@@ -283,7 +283,7 @@ export const SensorSetupPage = ({
             {t('hardware.sensor.scanBle')}
           </button>
           <button
-            className="shelly-add-tabs__tab"
+            className="shelly-add-tabs__tab lcl-segmented-control__item"
             type="button"
             role="tab"
             aria-selected={addMode === 'manual'}

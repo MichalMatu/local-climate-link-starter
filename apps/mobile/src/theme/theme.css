@@ -1489,36 +1489,21 @@ select {
 }
 
 .shelly-add-tabs {
-  background: var(--lcl-color-surface-muted);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  border-radius: var(--lcl-radius-md);
   display: flex;
-  gap: var(--lcl-spacing-xs);
-  padding: var(--lcl-spacing-xs);
 }
 
 .shelly-add-tabs__tab {
-  background: transparent;
-  border: 0;
-  border-radius: var(--lcl-radius-sm);
-  color: var(--lcl-color-text-muted);
-  cursor: pointer;
   flex: 1 1 0;
   font: inherit;
   font-size: var(--lcl-font-size-md);
   font-weight: var(--lcl-font-weight-semibold);
-  min-height: var(--lcl-size-compact-control-min-height);
   padding: 0 var(--lcl-spacing-md);
 }
 
 .shelly-add-tabs__tab[aria-selected='true'] {
   background: var(--lcl-color-accent);
+  border-color: var(--lcl-color-accent);
   color: var(--lcl-color-accent-contrast);
-}
-
-.shelly-add-tabs__tab:focus-visible {
-  outline: var(--lcl-border-width-md) solid var(--lcl-color-accent);
-  outline-offset: var(--lcl-border-width-sm);
 }
 
 .shelly-network-scan__body {

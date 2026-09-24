@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { expectVisualScreen } from './visual-contract.js';
 
 type InstallationKind = 'climate' | 'time';
 
@@ -477,6 +478,7 @@ test('plain saved Plug exposes the same LED settings without an installed automa
   await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
   await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
+  await expectVisualScreen(page, '17-plain-plug-settings');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });

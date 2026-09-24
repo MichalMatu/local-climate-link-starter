@@ -35,7 +35,10 @@ export const PlugDetailTabs = ({ activeTab, onChange }: PlugDetailTabsProps) => 
   const { t } = useTranslation();
 
   return (
-    <nav className="plug-detail-tabs" aria-label={t('hardware.shelly.actionsLabel')}>
+    <nav
+      className="plug-detail-tabs lcl-segmented-control"
+      aria-label={t('hardware.shelly.actionsLabel')}
+    >
       {tabs.map((tab) => {
         const label = t(tab.labelKey);
         const Icon = tab.icon;
@@ -44,7 +47,7 @@ export const PlugDetailTabs = ({ activeTab, onChange }: PlugDetailTabsProps) => 
             key={tab.id}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             aria-label={label}
-            className="plug-detail-tabs__item"
+            className="plug-detail-tabs__item lcl-segmented-control__item"
             title={label}
             type="button"
             onClick={() => onChange(tab.id)}
