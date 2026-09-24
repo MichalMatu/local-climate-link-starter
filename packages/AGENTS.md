@@ -97,7 +97,8 @@ boot/start -> OFF
 stale sensor -> OFF
 max-on guard where configured
 minimum relay-change guard
-verified managed identity before destructive mutation
+verified physical Shelly identity before destructive mutation
+exclusive script replacement for Shelly Link automation lifecycle during pre-release development
 ```
 
 `automation-core` is the source of truth for automation decisions. Do not duplicate
@@ -107,7 +108,10 @@ threshold logic in UI code or client wrappers.
 must not accept arbitrary executable user input or fetch remote runtime code.
 
 `shelly-client` owns Shelly communication. Callers should not rebuild RPC URLs or request
-shapes independently.
+shapes independently. The current pre-release automation install contract owns the full
+Shelly Scripts namespace on a managed Plug: `createInstallPlan` replaces all existing
+scripts before installing the current runtime. BLE discovery remains non-exclusive and
+temporary.
 
 ## BLE/profile rules
 
