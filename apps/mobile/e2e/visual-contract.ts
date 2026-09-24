@@ -23,6 +23,7 @@ export const visualScreenNames = [
 export type VisualScreenName = (typeof visualScreenNames)[number];
 
 export const expectVisualScreen = async (page: Page, name: VisualScreenName) => {
+  await page.mouse.move(1, 1);
   await expect(page).toHaveScreenshot(`${name}.png`, {
     animations: 'disabled',
     caret: 'hide',
