@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { isHardwareInstallStateCurrent } from './useClimateAutomationInstallFlow.js';
+import {
+  assertSelectedShellyIdentity,
+  isHardwareInstallStateCurrent
+} from './useClimateAutomationInstallFlow.js';
 
 const installed = {
   shellyId: 'http://192.168.0.20/',
@@ -30,5 +33,17 @@ describe('climate automation install state', () => {
     expect(isHardwareInstallStateCurrent(installed, installed.shellyId, null)).toBe(
       false
     );
+  });
+
+  it('accepts normalized identity for the selected physical Shelly', () => {
+    expect(() =>
+      assertSelectedShellyIdentity('SHELLYPLUGSG3-A1B2C3', 'shellyplugsg3-a1b2c3')
+    ).not.toThrow();
+  });
+
+  it('rejects a different physical Shelly before exclusive install', () => {
+    expect(() =>
+      assertSelectedShellyIdentity('shellyplugsg3-a1b2c3', 'shellyplugsg3-deadbe')
+    ).toThrow('Shelly identity changed before automation install.');
   });
 });
