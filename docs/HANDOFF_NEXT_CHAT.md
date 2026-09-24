@@ -1,10 +1,10 @@
-# Handoff — UX accepted, continue from clean main
+# Handoff — UX accepted, targeted closeout before next feature
 
 Status: **2026-09-24**
 
 Repository: `MichalMatu/shelly-link`
 
-Canonical restart point: **fresh `main`**. The UX stabilization pass is accepted and closed. Do not reopen layout work without a concrete new problem.
+Canonical restart point: **fresh `main`**. The broad UX stabilization pass is accepted and merged. Do not reopen a broad redesign. One **targeted UX closeout** is intentionally allowed next because the user has identified concrete visual inconsistencies on the real phone that the current automated visual contract did not catch.
 
 Local Agent binding:
 
@@ -44,6 +44,20 @@ Established rules:
 - `Advanced` and Settings diagnostics use the shared Disclosure pattern.
 - LED presets are 4×2 on phone widths and 8×1 on wider layouts.
 - Standalone Add Plug/Thermometer pages intentionally have no page-local Back control.
+
+### Targeted UX closeout — NEXT
+
+The user will provide real-phone screenshots showing remaining inconsistencies after the last refactor. Treat these as concrete defects, not as permission for another broad visual redesign.
+
+For each screenshot-backed defect:
+
+1. identify the visual inconsistency and the correct shared owner (`@lcl/design-tokens`, `@lcl/ui`, or product-local composition);
+2. fix the shared primitive/role when multiple screens express the same interaction or surface role instead of adding screen-specific overrides;
+3. check why the existing `quality:ux` / visual contract did not catch the defect;
+4. extend the canonical visual coverage when the missing protection is generalizable;
+5. validate on the real Samsung S22+ before declaring the UX closeout complete.
+
+The goal is to finish consistency and improve the regression net, not to change the accepted information architecture.
 
 ### Dashboard Climate card — freeze this presentation
 
@@ -86,26 +100,45 @@ Relevant owners:
 - `packages/script-generator/src/shelly/generate.ts` — installed Climate runtime TP357 parsing;
 - `packages/script-generator/src/shelly/discoveryParsing.ts` — temporary Shelly BLE discovery parsing.
 
-## Next product work
+## Development direction — DECIDED
 
-Priority order is now:
+The active product direction after the targeted UX closeout is:
 
-1. **BLE soil-moisture sensor support** through the existing typed sensor/config/diagnostic model;
-2. then **Shelly management over BLE**, starting with a real-hardware feasibility spike and reusing the same RPC ownership boundaries.
+1. **Targeted UX closeout from real S22+ screenshots.** Fix only concrete inconsistencies, improve the visual regression contract where it missed them, validate on the phone, then close UX again.
+2. **Shelly management / relay control over BLE.** Start with a narrow real-hardware RPC-over-BLE spike and reuse the existing `ShellyRpcTransport` ownership boundary. Prove identity, status and safe relay control first (`OFF -> ON -> OFF` with explicit final state), then progressively cover the script/runtime lifecycle. BLE is a transport adapter, not a second product model.
+3. **Curated Shelly Script Library with simple configurators.** Use verified official/approved scripts and expose a product flow such as `choose -> configure -> install/run`. Reuse the same physical identity, transport, safety and installed-automation ownership rules. Do not introduce arbitrary unmanaged scripts alongside a Shelly Link-managed automation without an explicit ownership redesign.
+4. **History / datalogger redesign and port.** Preserve `work/kvs-datalogger` as source material, but do not rebase-and-merge it mechanically. Its parked two-script design predates the current exclusive Shelly Scripts ownership model and now conflicts with it. When resumed, first choose a design compatible with current ownership, then port only the still-valid codec/KVS/client/generator pieces and rerun software + real-hardware acceptance.
 
-The soil-sensor track and Shelly-over-BLE transport track are separate Bluetooth concerns. Do not combine sensor transport with Shelly management ownership.
+**Soil-moisture support is deferred.** It remains a possible future sensor track but is no longer the next product milestone.
 
-Later roadmap items remain richer timing/operators, advanced automation UX and the optional Shelly Script Library track. See `docs/ROADMAP.md`.
+Richer timing/operators and advanced automation UX remain later work unless a concrete product need moves them forward.
+
+When this handoff conflicts with the older ordering in `docs/ROADMAP.md`, this section records the newer product decision. Synchronize the roadmap when the next implementation branch is opened.
+
+## Datalogger branch — PARKED SOURCE MATERIAL
+
+`work/kvs-datalogger` is intentionally retained but is **not merge-ready**.
+
+Current restart assumptions:
+
+- do not merge it into `main` as-is;
+- do not treat a rebase alone as sufficient;
+- the old History Tail architecture uses a second long-lived Shelly script and therefore must be reconciled with current exclusive script ownership;
+- preserve useful pure/history/KVS work where it still fits the current architecture;
+- re-establish ownership verification, cross-runtime diagnostics contract, KVS capacity behavior, lifecycle behavior and real Plug S Gen3 memory/hardware acceptance before any future merge;
+- Climate safety/relay behavior remains strictly independent of History failure.
+
+See the parked branch's `docs/KVS_DATALOGGER_IMPLEMENTATION.md` when this track is resumed.
 
 ## Branch state
 
-Expected long-lived/intentional branches after UX cleanup:
+Expected long-lived/intentional branches now:
 
 - `main` — canonical product source of truth;
 - `agent-control` — Local Agent infrastructure only;
-- `work/kvs-datalogger` — intentionally parked, unmerged datalogger work from a separate track; it is not part of the accepted UX baseline and must not be merged or deleted as incidental cleanup.
+- `work/kvs-datalogger` — intentionally parked source material for a future redesigned history track.
 
-All completed UX work branches should stay deleted.
+Completed UX branches, TP357 work branch and placeholder branch have been deleted. Do not recreate or reuse retired UX task IDs/branches.
 
 ## Restart checklist
 
@@ -116,9 +149,12 @@ read AGENTS.md
 read docs/HANDOFF_NEXT_CHAT.md
 read docs/ARCHITECTURE.md
 read docs/ROADMAP.md
+read docs/UX_VISUAL_CONTRACT.md when working on UX
 fetch fresh main
 check agent-control daemon
 confirm the intended work branch/track before editing
 ```
+
+For the immediate next session, the intended track is the screenshot-driven targeted UX closeout. After that is accepted and merged, move to the Shelly-over-BLE hardware spike unless the user explicitly changes priority.
 
 `main` plus the canonical docs above are the source of truth. Do not reuse old UX task IDs or retired UX branches.
