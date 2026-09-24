@@ -38,6 +38,7 @@
 }
 .lcl-disclosure__body {
   border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  display: none;
   gap: var(--lcl-spacing-md);
   padding: var(--lcl-spacing-md) 0;
 }
