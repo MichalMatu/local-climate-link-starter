@@ -43,7 +43,7 @@ describe('readShellyManagedAutomationScriptCode', () => {
     vi.unstubAllGlobals();
   });
 
-  it('reads Script.GetCode only for the exact managed id', async () => {
+  it('reads Script.GetCode only for the exact requested id', async () => {
     const { getCodeIds } = installFetchMock();
 
     await expect(
@@ -52,12 +52,21 @@ describe('readShellyManagedAutomationScriptCode', () => {
     expect(getCodeIds).toEqual([7]);
   });
 
-  it('does not read code when the stored id belongs to an unrelated script', async () => {
-    const { getCodeIds } = installFetchMock('Other Controller');
+  it('does not use the remote script display name as read authorization', async () => {
+    const { getCodeIds } = installFetchMock('Arbitrary Script Name');
 
     await expect(
       readShellyManagedAutomationScriptCode('http://192.168.0.20/', 7)
-    ).rejects.toThrow('exact managed automation script');
+    ).resolves.toBe('// deployed exact source');
+    expect(getCodeIds).toEqual([7]);
+  });
+
+  it('does not request code when the requested script id is absent', async () => {
+    const { getCodeIds } = installFetchMock();
+
+    await expect(
+      readShellyManagedAutomationScriptCode('http://192.168.0.20/', 99)
+    ).rejects.toThrow('requested automation script');
     expect(getCodeIds).toEqual([]);
   });
 });
