@@ -3,7 +3,6 @@ import {
   supportsShellyRuntimeConfigPersistence
 } from '@lcl/script-generator';
 import {
-  LOCAL_CLIMATE_LINK_SCRIPT_NAME,
   RpcShellyClient,
   readShellyScriptCode,
   readShellyScriptList,
@@ -41,8 +40,10 @@ const readScriptList = async (
 
 const findAutomationScript = (
   scripts: ShellyScriptListEntry[]
-): ShellyScriptListEntry | null =>
-  scripts.find((script) => script.name === LOCAL_CLIMATE_LINK_SCRIPT_NAME) ?? null;
+): ShellyScriptListEntry | null => {
+  const enabledScripts = scripts.filter((script) => script.enable);
+  return enabledScripts.length === 1 ? enabledScripts[0]! : null;
+};
 
 const toControlStatus = (
   deviceInfo: ShellyDeviceInfo,
@@ -95,8 +96,8 @@ export const readShellyManagedAutomationScriptCode = async (
   const scripts = await readScriptList(transport);
   const script = scripts.find((candidate) => candidate.id === scriptId);
 
-  if (!script || script.name !== LOCAL_CLIMATE_LINK_SCRIPT_NAME) {
-    throw new Error('Shelly did not return the exact managed automation script.');
+  if (!script) {
+    throw new Error('Shelly did not return the requested automation script.');
   }
 
   return readScriptCode(transport, scriptId);
