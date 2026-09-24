@@ -8,6 +8,8 @@ The 2026-09-24 Local Agent audit rendered 19 application states in Chromium. All
 
 Canonical renderer: **macOS (`darwin`)**. Direct `pnpm e2e:visual` and `pnpm e2e:visual:update` runs fail closed on other platforms. `prepush` is platform-aware: macOS runs the canonical visual contract, while Linux/CI/Raspberry Pi runs `pnpm e2e:responsive`; on non-macOS those responsive tests keep behavioral/layout coverage but skip Darwin screenshot assertions, so font rasterization differences cannot masquerade as product regressions.
 
+The 2026-09-25 screenshot-driven closeout intentionally refreshed only the baselines affected by the accepted Device/Info changes. The closeout also captured one class of defect that the earlier contract did not describe explicitly: inconsistent inline-title masking where a title crosses a framed-section border.
+
 Measured drift before this contract included:
 
 - page-level H1 geometry split between 26px/31.2px and 32px with two different line-heights;
@@ -20,17 +22,15 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 ## Rules
 
 1. `@lcl/design-tokens` owns raw values.
-2. `@lcl/ui` owns reusable interaction geometry. `lcl-segmented-control` now owns add-device tabs, Plug detail tabs, and the hardware setup top navigation.
-3. Mobile screen CSS may choose layout/composition and a semantic state treatment, but must not re-declare the shared geometry for migrated primitives.
-   Page-title typography uses `--lcl-font-size-3xl`; spacing tokens must never participate in font-size calculations.
-   Page-level H1 geometry is owned by `app-page-header`; smaller headings inside panels remain a separate hierarchy.
+2. `@lcl/ui` owns reusable interaction geometry. `lcl-segmented-control` owns add-device tabs, Plug detail tabs, and the hardware setup top navigation.
+3. Mobile screen CSS may choose layout/composition and a semantic state treatment, but must not re-declare the shared geometry for migrated primitives. Page-title typography uses `--lcl-font-size-3xl`; spacing tokens must never participate in font-size calculations. Page-level H1 geometry is owned by `app-page-header`; smaller headings inside panels remain a separate hierarchy.
 4. Every canonical screen state is guarded by `expectVisualScreen()` and a committed Playwright screenshot baseline.
 5. Baselines are refreshed intentionally with `pnpm e2e:visual:update`, reviewed as images, then verified with `pnpm e2e:visual`.
 6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
 7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
-8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract.
-   Both collapsed and expanded product states are visually baseline-protected.
+8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract. Both collapsed and expanded product states are visually baseline-protected.
 9. Navigation chevrons are icon components, never font glyphs such as `‹` or `›`, so their geometry is stable across browser and Android font fallback.
+10. Inline titles that cross a `plug-detail-framed-section` border use one consistent legend treatment: the title text is masked by the owning page/surface background and uses the shared tight line-height. Do not mix transparent-border-crossing titles with background-masked titles for the same surface role.
 
 ## Surface taxonomy
 
