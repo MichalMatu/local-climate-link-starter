@@ -6,7 +6,6 @@ import {
   normalizeShellyDeviceId,
   RpcShellyClient
 } from '@lcl/shelly-client';
-import { readShellyControlStatus } from '../../features/automations/index.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
 import {
@@ -35,20 +34,10 @@ const assertStoredDeviceIdentity = async (
   }
 };
 
-const assertStoredScriptOwnership = async (
-  installation: ClimateInstalledAutomation
-): Promise<void> => {
-  const status = await readShellyControlStatus(installation.shelly.baseUrl);
-  if (status.automationScriptId !== installation.script.id) {
-    throw new Error('Stored automation script does not match Shelly.');
-  }
-};
-
 const reinstallCurrentRuntime = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationRuntimePreparation> => {
   await assertStoredDeviceIdentity(installation);
-  await assertStoredScriptOwnership(installation);
   const relayId = installation.config.output.relayId;
   const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
 
@@ -57,9 +46,6 @@ const reinstallCurrentRuntime = async (
   const installed = unwrapShellyResult(
     await client.installScript(createInstallPlan(code))
   );
-  if (installed.scriptId !== installation.script.id) {
-    throw new Error('Runtime upgrade changed the stored Shelly script id.');
-  }
   await forceRelayOffAndConfirm(client, relayId);
 
   const upgradedInstallation: ClimateInstalledAutomation = {
@@ -74,7 +60,7 @@ const reinstallCurrentRuntime = async (
     !status.runtimeModeSupported ||
     status.relayOn
   ) {
-    throw new Error('Shelly did not confirm the upgraded automation runtime.');
+    throw new Error('Shelly did not confirm the replaced automation runtime.');
   }
 
   return { installation: upgradedInstallation, status, upgraded: true };
@@ -86,17 +72,14 @@ export const ensureInstalledAutomationRuntimeCurrent = async (
   await assertStoredDeviceIdentity(installation);
   const status = await readInstalledAutomationControlStatus(installation);
   if (
-    status.automationScriptId !== installation.script.id ||
-    status.automationMode === 'missing'
+    status.automationScriptId === installation.script.id &&
+    status.automationMode !== 'missing' &&
+    status.automationMode !== 'stopped' &&
+    status.runtimeModeSupported
   ) {
-    throw new Error('Stored automation script does not match Shelly.');
-  }
-  if (status.automationMode === 'stopped') {
-    throw new Error('Stopped automation runtime requires recovery.');
-  }
-  if (status.runtimeModeSupported) {
     return { installation, status, upgraded: false };
   }
+
   return reinstallCurrentRuntime(installation);
 };
 
