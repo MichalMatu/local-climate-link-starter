@@ -57,13 +57,39 @@ Accepted baseline:
 
 Final dashboard correction `349446f86f6d63c37ececa439ec12ef826b06d2f` passed full `pnpm check:full` and was installed on Samsung SM-S906B / Android 16 with app data preserved. The final real-device state was accepted by the user.
 
-## 4. BLE soil-moisture input — NEXT
+## 4. TP357 battery decoding compatibility — NEXT BUGFIX
+
+A real-device defect was identified on 2026-09-24 and should be fixed before starting the next product expansion.
+
+Observed hardware:
+
+- five used silver TP357 units fitted with fresh AAA batteries all render approximately `2%` battery in Shelly Link;
+- one existing white TP357 appears to report a plausible percentage;
+- the production/revision order of the white vs silver enclosures is not established. Enclosure color must **not** be used as a protocol discriminator.
+
+Current implementation exposes byte 4 of the TP357 manufacturer payload directly as `batteryPct` in both the phone parser (`packages/ble-core/src/parsers/tp357.ts`) and the generated Shelly runtime parser (`packages/script-generator/src/shelly/discoveryParsing.ts`).
+
+Reference behavior in `Bluetooth-Devices/thermopro-ble` handles TP357S/TP397/TP393 battery as the **lower two bits of byte 4** and maps state `0 -> 1%`, `1 -> 50%`, `2 -> 100%`. Its source notes that this was verified on TP357S with a laboratory power supply. This strongly suggests that the observed raw value `2` on the five silver units means a full-battery state rather than literal `2%`.
+
+Do not implement a blind `2 -> 100` special case yet. First capture and compare raw manufacturer data from at least one affected silver TP357 and the existing white TP357, including advertised name, payload length and the full manufacturer bytes. Establish whether the white unit genuinely uses a direct percentage encoding or whether another packet/revision difference explains the plausible reading.
+
+Implementation requirements after the capture:
+
+1. define one semantic TP357 battery-decoding rule shared by phone-side parsing and generated Shelly runtime behavior, or explicit validated variant detection if real packets prove multiple encodings;
+2. never detect a protocol variant by case color;
+3. add fixtures for the observed white and silver packets and regression tests for both phone and Shelly-runtime parsers;
+4. preserve temperature/humidity decoding and existing sensor identity behavior;
+5. real-hardware acceptance must confirm that a fresh-battery affected unit no longer appears as `2%`, the existing white unit is not regressed, and phone/Shelly diagnostics agree on the battery value.
+
+Reference: `https://github.com/Bluetooth-Devices/thermopro-ble/blob/main/src/thermopro_ble/parser.py`.
+
+## 5. BLE soil-moisture input — AFTER TP357 FIX
 
 Add soil-moisture sensors through the existing typed sensor/config model. Do not create a parallel automation engine or device identity model.
 
 Start with sensor discovery/identity, typed readings and diagnostics. Only then add automation behavior that has a clear product rule and safety model.
 
-## 5. Shelly management over BLE — AFTER SOIL-MOISTURE, HARDWARE SPIKE FIRST
+## 6. Shelly management over BLE — AFTER SOIL-MOISTURE, HARDWARE SPIKE FIRST
 
 Run a real-hardware feasibility spike before product implementation. Determine which Shelly RPC lifecycle operations are genuinely available/reliable over BLE.
 
@@ -79,15 +105,15 @@ BLE must not fork automation ownership, persistence or business logic.
 
 The BLE sensor track and Shelly-over-BLE transport track are separate concerns even though both use Bluetooth.
 
-## 6. Richer rule timing — LATER
+## 7. Richer rule timing — LATER
 
 Add reusable operators for clock/time windows, interval, cooldown, minimum ON, minimum OFF and condition combinations. Keep safety precedence explicit.
 
-## 7. Advanced automation UX — LATER
+## 8. Advanced automation UX — LATER
 
 Build templates/list management and more advanced rules on the stable engine/config model. Avoid feature-specific runtime forks where shared operators/config are sufficient.
 
-## 8. Shelly Script Library + simple configurators — PARALLEL OPTIONAL TRACK
+## 9. Shelly Script Library + simple configurators — PARALLEL OPTIONAL TRACK
 
 A curated script catalog may expose useful Shelly scripts through a simple `choose -> configure -> install/run` flow. Reuse the same identity, ownership, transport, install-safety and recovery rules.
 
