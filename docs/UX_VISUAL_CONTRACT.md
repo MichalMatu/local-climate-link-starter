@@ -20,6 +20,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 1. `@lcl/design-tokens` owns raw values.
 2. `@lcl/ui` owns reusable interaction geometry. `lcl-segmented-control` now owns add-device tabs, Plug detail tabs, and the hardware setup top navigation.
 3. Mobile screen CSS may choose layout/composition and a semantic state treatment, but must not re-declare the shared geometry for migrated primitives.
+   Page-title typography uses `--lcl-font-size-3xl`; spacing tokens must never participate in font-size calculations.
    Page-level H1 geometry is owned by `app-page-header`; smaller headings inside panels remain a separate hierarchy.
 4. Every canonical screen state is guarded by `expectVisualScreen()` and a committed Playwright screenshot baseline.
 5. Baselines are refreshed intentionally with `pnpm e2e:visual:update`, reviewed as images, then verified with `pnpm e2e:visual`.

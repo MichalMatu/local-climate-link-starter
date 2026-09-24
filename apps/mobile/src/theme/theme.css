@@ -84,7 +84,7 @@ select {
 }
 
 .demo-header.app-page-header h1 {
-  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));
+  font-size: var(--lcl-font-size-3xl);
   line-height: var(--lcl-line-height-tight);
 }
 
