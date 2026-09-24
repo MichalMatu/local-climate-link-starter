@@ -13,7 +13,7 @@ const AD_TYPE_MANUFACTURER_DATA = 0xff;
 type Tp357DecodedPayload = {
   temperatureC: number;
   humidityPct: number;
-  batteryPct: number;
+  batteryPct: number | undefined;
 };
 
 const error = (
@@ -160,7 +160,9 @@ export const parseTp357ManufacturerData = (
 
   const temperatureC = int16LittleEndian(payload, 1) / 10;
   const humidityPct = payload[3] ?? 0;
-  const batteryPct = payload[4] ?? 0;
+  const batteryState = (payload[4] ?? 0) & 0x03;
+  const batteryPct =
+    batteryState === 0 ? 1 : batteryState === 1 ? 50 : batteryState === 2 ? 100 : undefined;
 
   if (humidityPct > 100 || temperatureC < -50 || temperatureC > 100) {
     return {
