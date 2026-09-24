@@ -83,7 +83,7 @@ select {
   min-height: var(--lcl-size-control-min-height);
 }
 
-.app-page-header h1 {
+.demo-header.app-page-header h1 {
   font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));
   line-height: var(--lcl-line-height-tight);
 }
@@ -585,16 +585,6 @@ select {
 .app-settings-screen {
   align-content: start;
   gap: var(--lcl-spacing-md);
-}
-
-.app-settings-screen .app-settings-screen__header {
-  align-items: center;
-  min-height: var(--lcl-size-control-min-height);
-}
-
-.app-settings-screen .app-settings-screen__header h1 {
-  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));
-  line-height: var(--lcl-line-height-tight);
 }
 
 .app-settings {
@@ -2361,11 +2351,6 @@ select {
   min-width: 0;
 }
 
-.installation-detail-header h1 {
-  font-size: var(--lcl-font-size-2xl);
-  line-height: var(--lcl-line-height-tight);
-}
-
 .detail-back-link {
   background: transparent;
   border: 0;
@@ -2473,18 +2458,8 @@ select {
   gap: var(--lcl-spacing-md);
 }
 
-.installation-detail-shell .installation-detail-header {
-  align-items: center;
-  min-height: var(--lcl-size-control-min-height);
-}
-
 .installation-detail-shell .installation-detail-header > div {
   gap: var(--lcl-spacing-xs);
-}
-
-.installation-detail-shell .installation-detail-header h1 {
-  font-size: calc(var(--lcl-font-size-2xl) + var(--lcl-spacing-md));
-  line-height: var(--lcl-line-height-tight);
 }
 
 .installation-detail-shell .automation-card {

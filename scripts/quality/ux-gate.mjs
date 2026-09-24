@@ -721,6 +721,49 @@ const cssDeclarationBlock = (source, selector) => {
   return bodyEnd === -1 ? null : source.slice(bodyStart, bodyEnd);
 };
 
+const checkPageHeaderContract = async () => {
+  const pageHeaders = [
+    ['apps/mobile/src/screens/SetupIntentScreen.tsx', 'intent-header app-page-header'],
+    [
+      'apps/mobile/src/app/AppSettingsScreen.tsx',
+      'app-settings-screen__header app-page-header'
+    ],
+    [
+      'apps/mobile/src/screens/TimeInstallationDetail.tsx',
+      'installation-detail-header app-page-header'
+    ]
+  ];
+
+  for (const [path, classContract] of pageHeaders) {
+    const source = await readRepoFile(path);
+    if (!source.includes(classContract)) {
+      addFailure(path, 'page-level H1 must use the shared app-page-header geometry');
+    }
+  }
+
+  const themePath = 'apps/mobile/src/theme/theme.css';
+  const themeSource = await readRepoFile(themePath);
+  if (!themeSource.includes('.demo-header.app-page-header h1 {')) {
+    addFailure(
+      themePath,
+      'page-title geometry must be owned by .demo-header.app-page-header h1'
+    );
+  }
+  const duplicateSelectors = [
+    '.app-settings-screen .app-settings-screen__header h1',
+    '.installation-detail-header h1',
+    '.installation-detail-shell .installation-detail-header h1'
+  ];
+  for (const selector of duplicateSelectors) {
+    if (themeSource.includes(`${selector} {`)) {
+      addFailure(
+        themePath,
+        `${selector} duplicates page-title geometry; use .demo-header.app-page-header h1`
+      );
+    }
+  }
+};
+
 const checkSegmentedControlContract = async () => {
   const usageContracts = [
     [
@@ -876,6 +919,7 @@ await checkResponsiveCss();
 await checkModalSizingPatterns();
 await checkThemeTokenPatterns();
 await checkMobileProductionMarkupHygiene();
+await checkPageHeaderContract();
 await checkSegmentedControlContract();
 await checkPackageRuntimeCopy();
 

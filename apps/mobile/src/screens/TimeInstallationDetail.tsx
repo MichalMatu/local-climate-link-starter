@@ -116,7 +116,7 @@ export const TimeInstallationDetail = ({
   return (
     <main className="demo-shell installation-detail-shell">
       <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-      <header className="demo-header installation-detail-header">
+      <header className="demo-header installation-detail-header app-page-header">
         <div>
           <div className="automation-status-row">
             <span className={healthClass(runtimeState)}>{stateLabel}</span>
