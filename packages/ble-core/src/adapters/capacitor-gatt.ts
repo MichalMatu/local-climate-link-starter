@@ -96,7 +96,7 @@ export class CapacitorBleGattClient implements BleGattClient {
 
   async initialize(): Promise<void> {
     const client = await this.clientLoader();
-    await client.initialize();
+    await client.initialize({ androidNeverForLocation: true });
     if (!booleanValue(await client.isEnabled())) {
       await client.requestEnable();
     }
