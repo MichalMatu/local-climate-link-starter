@@ -1,8 +1,4 @@
-import type {
-  BleScanner,
-  NormalizedBleAdvertisement,
-  ScanOptions
-} from '@lcl/ble-core';
+import type { BleScanner, NormalizedBleAdvertisement } from '@lcl/ble-core';
 import { scanPlugBleCandidates } from './scanPlugBleCandidates.js';
 
 class FakeScanner implements BleScanner {
@@ -10,7 +6,7 @@ class FakeScanner implements BleScanner {
 
   constructor(private readonly advertisements: NormalizedBleAdvertisement[]) {}
 
-  async *startScan(_options?: ScanOptions): AsyncIterable<NormalizedBleAdvertisement> {
+  async *startScan(): AsyncIterable<NormalizedBleAdvertisement> {
     for (const advertisement of this.advertisements) {
       yield advertisement;
     }
