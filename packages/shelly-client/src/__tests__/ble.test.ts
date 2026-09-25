@@ -18,13 +18,15 @@ class FakeGatt implements ShellyBleGattPort {
   connectCalls = 0;
   disconnectCalls = 0;
   writes: Array<{ characteristicUuid: string; value: Uint8Array }> = [];
-  private active?: {
-    bytes: Uint8Array;
-    chunks: number[];
-    offset: number;
-    zeroPollsLeft: number;
-  };
-  private nextLength?: number;
+  private active:
+    | {
+        bytes: Uint8Array;
+        chunks: number[];
+        offset: number;
+        zeroPollsLeft: number;
+      }
+    | undefined;
+  private nextLength: number | undefined;
 
   constructor(private readonly responses: PlannedResponse[]) {}
 
