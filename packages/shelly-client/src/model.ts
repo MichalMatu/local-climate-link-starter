@@ -148,6 +148,7 @@ export const RPC_METHODS = {
   CloudSetConfig: 'Cloud.SetConfig',
   CloudGetStatus: 'Cloud.GetStatus',
   WifiGetConfig: 'WiFi.GetConfig',
+  WifiSetConfig: 'WiFi.SetConfig',
   WifiGetStatus: 'WiFi.GetStatus'
 } as const;
 
