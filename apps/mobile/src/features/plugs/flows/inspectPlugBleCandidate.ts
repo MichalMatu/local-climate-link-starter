@@ -1,9 +1,4 @@
-import {
-  RpcShellyClient,
-  RpcShellyWifiClient,
-  type Result,
-  type ShellyRpcTransport
-} from '@lcl/shelly-client';
+import { RpcShellyClient, type Result, type ShellyRpcTransport } from '@lcl/shelly-client';
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
 import {
   buildVerifiedPlugBleCandidate,
@@ -60,17 +55,12 @@ export const inspectPlugBleCandidate = async (
       await new RpcShellyClient(transport).getDeviceInfo(),
       'Shelly.GetDeviceInfo'
     );
-    const wifi = unwrap(
-      await new RpcShellyWifiClient(transport).read(),
-      'Shelly Wi-Fi inspection'
-    );
 
     return buildVerifiedPlugBleCandidate({
       bleDeviceId: advertisement.deviceId,
       advertisementName: advertisement.name,
       rssi: advertisement.rssi,
-      deviceInfo,
-      wifi
+      deviceInfo
     });
   } finally {
     await transport.disconnect();
