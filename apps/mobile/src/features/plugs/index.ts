@@ -26,6 +26,13 @@ export {
   type ScanPlugBleCandidatesOptions
 } from './flows/scanPlugBleCandidates.js';
 export {
+  provisionPlugBleWifi,
+  type ProvisionPlugBleWifiDependencies,
+  type ProvisionPlugBleWifiInput,
+  type ProvisionPlugBleWifiOptions,
+  type ProvisionPlugBleWifiResult
+} from './flows/provisionPlugBleWifi.js';
+export {
   PlugAddPage,
   type PlugAddPageProps,
   type PlugScanResultView
