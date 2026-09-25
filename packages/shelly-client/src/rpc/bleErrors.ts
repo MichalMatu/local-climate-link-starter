@@ -15,11 +15,25 @@ export const canceledError = (): ShellyClientError => ({
   retryable: false
 });
 
+const causeMessage = (cause: unknown): string => {
+  if (cause instanceof Error) {
+    return cause.message;
+  }
+  if (
+    typeof cause === 'object' &&
+    cause !== null &&
+    'message' in cause &&
+    typeof cause.message === 'string'
+  ) {
+    return cause.message;
+  }
+  return 'Shelly BLE communication failed.';
+};
+
 export const offlineError = (cause: unknown): ShellyClientError => ({
   kind: 'shelly-offline',
   userMessageKey: 'errors.shellyOffline',
-  technicalMessage:
-    cause instanceof Error ? cause.message : 'Shelly BLE communication failed.',
+  technicalMessage: causeMessage(cause),
   retryable: true
 });
 
