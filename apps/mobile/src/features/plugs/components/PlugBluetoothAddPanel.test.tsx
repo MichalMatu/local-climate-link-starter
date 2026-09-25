@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
@@ -7,7 +7,7 @@ import {
   type PlugBluetoothAddPanelProps
 } from './PlugBluetoothAddPanel.js';
 
-const candidate = (state: 'needs-wifi' | 'has-wifi'): VerifiedPlugBleCandidate => ({
+const verifiedCandidate: VerifiedPlugBleCandidate = {
   bleDeviceId: 'AA:BB',
   advertisementName: 'ShellyPlugSG3-AABB',
   rssi: -40,
@@ -15,59 +15,53 @@ const candidate = (state: 'needs-wifi' | 'has-wifi'): VerifiedPlugBleCandidate =
   model: 'S3PL-00112EU',
   generation: 3,
   firmwareId: '1.7.5',
-  matterEnabled: false,
-  network: {
-    state,
-    configuredSsids: state === 'has-wifi' ? ['Home'] : [],
-    connectionStatus: state === 'has-wifi' ? 'got ip' : 'disconnected',
-    connectedSsid: state === 'has-wifi' ? 'Home' : null,
-    stationIp: state === 'has-wifi' ? '192.168.1.10' : null
-  }
-});
-const props = (
-  verifiedCandidate: VerifiedPlugBleCandidate
-): PlugBluetoothAddPanelProps => ({
-  scanning: false,
-  candidates: [],
-  inspectingDeviceId: null,
-  verifiedCandidate,
-  provisioning: false,
-  provisionResult: null,
-  error: null,
-  onStart: vi.fn(),
-  onStop: vi.fn(),
-  onInspect: vi.fn(),
-  onProvision: vi.fn(async () => undefined)
-});
-const renderPanel = (value: PlugBluetoothAddPanelProps) =>
+  matterEnabled: false
+};
+
+const renderPanel = (overrides: Partial<PlugBluetoothAddPanelProps> = {}) => {
+  const props: PlugBluetoothAddPanelProps = {
+    scanning: false,
+    candidates: [],
+    inspectingDeviceId: null,
+    verifiedCandidate: null,
+    error: null,
+    onStart: vi.fn(),
+    onStop: vi.fn(),
+    onInspect: vi.fn(),
+    ...overrides
+  };
   render(
     <I18nProvider>
-      <PlugBluetoothAddPanel {...value} />
+      <PlugBluetoothAddPanel {...props} />
     </I18nProvider>
   );
+  return props;
+};
 
 describe('PlugBluetoothAddPanel', () => {
   beforeEach(() => setLocalePreference('en'));
   afterEach(() => setLocalePreference('system'));
-  it('shows ephemeral Wi-Fi credentials only when the verified Plug needs Wi-Fi', async () => {
-    const value = props(candidate('needs-wifi'));
-    renderPanel(value);
-    const ssid = screen.getByLabelText('Wi-Fi network name');
-    const password = screen.getByLabelText('Wi-Fi password');
-    const submit = screen.getByRole('button', { name: 'Connect to Wi-Fi' });
-    expect(password).toHaveAttribute('type', 'password');
-    expect(submit).toBeDisabled();
-    fireEvent.change(ssid, { target: { value: 'Home network' } });
-    fireEvent.change(password, { target: { value: 'secret-value' } });
-    fireEvent.click(submit);
-    await waitFor(() =>
-      expect(value.onProvision).toHaveBeenCalledWith('Home network', 'secret-value')
-    );
-    await waitFor(() => expect(password).toHaveValue(''));
-  });
-  it('does not show credentials when the verified Plug already has Wi-Fi', () => {
-    renderPanel(props(candidate('has-wifi')));
+
+  it('shows verified physical identity without any Wi-Fi provisioning controls', () => {
+    renderPanel({ verifiedCandidate });
+
+    expect(screen.getByText('shellyplugsg3-aabb')).toBeInTheDocument();
+    expect(screen.getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
     expect(screen.queryByLabelText('Wi-Fi network name')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Wi-Fi password')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Connect to Wi-Fi' })).not.toBeInTheDocument();
+  });
+
+  it('passes the selected advertisement to identity inspection', () => {
+    const candidate = {
+      deviceId: 'AA:BB',
+      name: 'ShellyPlugSG3-AABB',
+      rssi: -40
+    };
+    const props = renderPanel({ candidates: [candidate] });
+
+    fireEvent.click(screen.getByRole('button', { name: `Info: ${candidate.name}` }));
+
+    expect(props.onInspect).toHaveBeenCalledWith(candidate);
   });
 });
