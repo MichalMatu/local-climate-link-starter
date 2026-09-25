@@ -1,9 +1,13 @@
-import type {
-  Result,
-  ShellyClientError,
-  ShellyRpcRequest,
-  ShellyRpcTransport
-} from '../model.js';
+import type { Result, ShellyRpcRequest, ShellyRpcTransport } from '../model.js';
+import {
+  canceledError,
+  isShellyClientError,
+  offlineError,
+  protocolError,
+  responseTooLargeError,
+  rpcError,
+  timeoutError
+} from './bleErrors.js';
 import {
   SHELLY_BLE_RPC_DATA_UUID,
   SHELLY_BLE_RPC_RX_CONTROL_UUID,
@@ -12,8 +16,7 @@ import {
   assembleShellyBleRpcFrame,
   decodeShellyBleFrameLength,
   decodeShellyBleRpcResponse,
-  encodeShellyBleRpcRequestFrame,
-  type ShellyBleProtocolError
+  encodeShellyBleRpcRequestFrame
 } from './bleProtocol.js';
 
 export interface ShellyBleGattPort {
@@ -45,56 +48,6 @@ export interface BleShellyRpcTransportOptions {
 const DEFAULT_TIMEOUT_MS = 8000;
 const DEFAULT_POLL_INTERVAL_MS = 100;
 const DEFAULT_MAX_RESPONSE_BYTES = 1024 * 1024;
-
-const timeoutError = (timeoutMs: number): ShellyClientError => ({
-  kind: 'timeout',
-  userMessageKey: 'errors.timeout',
-  technicalMessage: `Shelly BLE RPC timed out after ${timeoutMs} ms.`,
-  retryable: true
-});
-
-const canceledError = (): ShellyClientError => ({
-  kind: 'timeout',
-  userMessageKey: 'errors.timeout',
-  technicalMessage: 'Shelly BLE RPC request was canceled.',
-  retryable: false
-});
-
-const offlineError = (cause: unknown): ShellyClientError => ({
-  kind: 'shelly-offline',
-  userMessageKey: 'errors.shellyOffline',
-  technicalMessage:
-    cause instanceof Error ? cause.message : 'Shelly BLE communication failed.',
-  retryable: true
-});
-
-const protocolError = (error: ShellyBleProtocolError): ShellyClientError => ({
-  kind: 'validation-failed',
-  userMessageKey: 'errors.shellyInvalidResponse',
-  technicalMessage: error.message,
-  retryable: false
-});
-
-const rpcError = (message?: string): ShellyClientError => ({
-  kind: 'unknown',
-  userMessageKey: 'errors.shellyRpc',
-  technicalMessage: message ?? 'Shelly BLE RPC returned an error.',
-  retryable: true
-});
-
-const responseTooLargeError = (length: number, maximum: number): ShellyClientError => ({
-  kind: 'validation-failed',
-  userMessageKey: 'errors.shellyInvalidResponse',
-  technicalMessage: `Shelly BLE RPC response length ${length} exceeds limit ${maximum}.`,
-  retryable: false
-});
-
-const isShellyClientError = (value: unknown): value is ShellyClientError =>
-  typeof value === 'object' &&
-  value !== null &&
-  'kind' in value &&
-  'userMessageKey' in value &&
-  'retryable' in value;
 
 export class BleShellyRpcTransport implements ShellyRpcTransport {
   private readonly defaultTimeoutMs: number;
@@ -203,7 +156,8 @@ export class BleShellyRpcTransport implements ShellyRpcTransport {
         if (chunk.byteLength === 0) {
           throw protocolError({
             kind: 'incomplete-frame',
-            message: 'Shelly BLE RPC returned an empty data chunk before the frame completed.'
+            message:
+              'Shelly BLE RPC returned an empty data chunk before the frame completed.'
           });
         }
         chunks.push(chunk);
