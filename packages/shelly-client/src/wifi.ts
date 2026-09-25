@@ -28,9 +28,21 @@ const wifiStatusSchema = z
   })
   .passthrough();
 
+const wifiStationProvisioningSchema = z.object({
+  ssid: z.string().trim().min(1),
+  password: z.string(),
+  enable: z.boolean().default(true)
+});
+
+const setConfigResponseSchema = z.object({
+  restart_required: z.boolean()
+});
+
 export type ShellyWifiStationConfig = z.infer<typeof wifiStationConfigSchema>;
 export type ShellyWifiConfig = z.infer<typeof wifiConfigSchema>;
 export type ShellyWifiStatus = z.infer<typeof wifiStatusSchema>;
+export type ShellyWifiStationProvisioning = z.input<typeof wifiStationProvisioningSchema>;
+export type ShellyWifiSetResult = z.infer<typeof setConfigResponseSchema>;
 
 export type ShellyWifiReadResult = {
   config: ShellyWifiConfig;
@@ -78,5 +90,30 @@ export class RpcShellyWifiClient {
         status: status.value
       }
     };
+  }
+
+  async setStation(
+    input: ShellyWifiStationProvisioning
+  ): Promise<Result<ShellyWifiSetResult>> {
+    const parsedInput = wifiStationProvisioningSchema.safeParse(input);
+    if (!parsedInput.success) {
+      return { ok: false, error: validationError(parsedInput.error.message) };
+    }
+
+    return parseResponse(
+      await this.transport.call<unknown>({
+        method: RPC_METHODS.WifiSetConfig,
+        params: {
+          config: {
+            sta: {
+              ssid: parsedInput.data.ssid,
+              pass: parsedInput.data.password,
+              enable: parsedInput.data.enable
+            }
+          }
+        }
+      }),
+      setConfigResponseSchema
+    );
   }
 }
