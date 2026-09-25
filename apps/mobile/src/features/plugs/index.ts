@@ -38,10 +38,10 @@ export {
   type UsePlugBleAddFlowResult
 } from './flows/usePlugBleAddFlow.js';
 export {
-  PlugAddPage,
-  type PlugAddPageProps,
-  type PlugScanResultView
-} from './components/PlugAddPage.js';
+  PlugAddPageContainer as PlugAddPage,
+  type PlugAddPageContainerProps as PlugAddPageProps
+} from './components/PlugAddPageContainer.js';
+export type { PlugScanResultView } from './components/PlugAddPage.js';
 export {
   PlugAddMethodPage,
   type PlugAddMethodPageProps
