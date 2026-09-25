@@ -8,10 +8,7 @@ export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
   buildVerifiedPlugBleCandidate,
-  classifyPlugBleNetwork,
   type PlugBleAdvertisement,
-  type PlugBleNetworkSnapshot,
-  type PlugBleNetworkState,
   type VerifiedPlugBleCandidate
 } from './data/plugBleOnboarding.js';
 export {
@@ -26,13 +23,6 @@ export {
   type ScanPlugBleCandidatesOptions
 } from './flows/scanPlugBleCandidates.js';
 export {
-  provisionPlugBleWifi,
-  type ProvisionPlugBleWifiDependencies,
-  type ProvisionPlugBleWifiInput,
-  type ProvisionPlugBleWifiOptions,
-  type ProvisionPlugBleWifiResult
-} from './flows/provisionPlugBleWifi.js';
-export {
   usePlugBleAddFlow,
   type UsePlugBleAddFlowDependencies,
   type UsePlugBleAddFlowResult
@@ -42,14 +32,16 @@ export {
   type PlugAddPageContainerProps as PlugAddPageProps
 } from './components/PlugAddPageContainer.js';
 export type { PlugScanResultView } from './components/PlugAddPage.js';
-export {
-  PlugAddMethodPage,
-  type PlugAddMethodPageProps
-} from './components/PlugAddMethodPage.js';
+export { PlugBluetoothAddPage } from './components/PlugBluetoothAddPage.js';
 export {
   PlugBluetoothAddPanel,
   type PlugBluetoothAddPanelProps
 } from './components/PlugBluetoothAddPanel.js';
+export {
+  PlugAddSpeedDial,
+  type PlugAddSpeedDialProps,
+  type PlugAddTransport
+} from './components/PlugAddSpeedDial.js';
 export {
   PlugDeleteConfirmModal,
   type PlugDeleteConfirmModalProps
