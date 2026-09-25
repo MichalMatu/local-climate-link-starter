@@ -9,10 +9,12 @@ export type PlugBluetoothAddPanelProps = {
   candidates: PlugBleAdvertisement[];
   inspectingDeviceId: string | null;
   verifiedCandidate: VerifiedPlugBleCandidate | null;
+  verifiedCandidateSaved: boolean;
   error: string | null;
   onStart(): void;
   onStop(): void;
   onInspect(candidate: PlugBleAdvertisement): void;
+  onSaveVerified(): void;
 };
 
 export const PlugBluetoothAddPanel = ({
@@ -20,10 +22,12 @@ export const PlugBluetoothAddPanel = ({
   candidates,
   inspectingDeviceId,
   verifiedCandidate,
+  verifiedCandidateSaved,
   error,
   onStart,
   onStop,
-  onInspect
+  onInspect,
+  onSaveVerified
 }: PlugBluetoothAddPanelProps) => {
   const { t } = useTranslation();
 
@@ -37,6 +41,21 @@ export const PlugBluetoothAddPanel = ({
               <strong className="device-discovery-card__identity">
                 {verifiedCandidate.advertisementName}
               </strong>
+              <button
+                className="primary-action device-discovery-card__action shelly-scan-result__add"
+                type="button"
+                disabled={verifiedCandidateSaved}
+                aria-label={
+                  verifiedCandidateSaved
+                    ? `${t('hardware.shelly.alreadyAdded')}: ${verifiedCandidate.physicalId}`
+                    : `${t('common.add')}: ${verifiedCandidate.physicalId}`
+                }
+                onClick={onSaveVerified}
+              >
+                {verifiedCandidateSaved
+                  ? t('hardware.shelly.alreadyAdded')
+                  : t('common.add')}
+              </button>
             </div>
             <div className="device-discovery-card__meta shelly-scan-result__meta">
               <span>{verifiedCandidate.physicalId}</span>
