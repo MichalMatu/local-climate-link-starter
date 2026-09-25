@@ -12,6 +12,23 @@ export {
   type VerifiedPlugBleCandidate
 } from './data/plugBleOnboarding.js';
 export {
+  SAVED_BLE_PLUG_VERSION,
+  savedBlePlugFromCandidate,
+  savedBlePlugSchema,
+  type SavedBlePlug
+} from './data/savedBlePlug.js';
+export {
+  createSavedBlePlugRepository,
+  SAVED_BLE_PLUGS_STORAGE_KEY,
+  type SavedBlePlugRepository,
+  type SavedBlePlugStorageAdapter
+} from './data/savedBlePlugRepository.js';
+export {
+  resetSavedBlePlugStore,
+  useSavedBlePlugStore,
+  type SavedBlePlugState
+} from './state/savedBlePlugStore.js';
+export {
   inspectPlugBleCandidate,
   PLUG_BLE_GATT_RADIO_SETTLE_MS,
   type InspectPlugBleCandidateOptions,
