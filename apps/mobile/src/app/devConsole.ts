@@ -32,6 +32,18 @@ export type DevConsoleState = {
   runtimeErrors: number;
 };
 
+export type DevShellyBleCandidate = {
+  deviceId: string;
+  name: string;
+  rssi: number | null;
+};
+
+export type DevShellyBleProbe = {
+  deviceId: string;
+  info: unknown;
+  status: unknown;
+};
+
 export const devCommandPaletteOpenEvent = 'lcl:dev-command-palette-open';
 export const devRuntimeIssuesChangeEvent = runtimeIssuesChangeEvent;
 
@@ -46,6 +58,8 @@ export type LclDevConsole = {
   errors: () => readonly RuntimeIssue[];
   clearErrors: () => readonly RuntimeIssue[];
   reportError: (message: string) => RuntimeIssue;
+  scanShelly: (timeoutMs?: number) => Promise<DevShellyBleCandidate[]>;
+  probeShelly: (deviceId: string) => Promise<DevShellyBleProbe>;
   supportedLocales: readonly Locale[];
   themeModes: readonly ThemeMode[];
 };
@@ -96,6 +110,71 @@ const devState = (): DevConsoleState => ({
   runtimeErrors: getRuntimeIssues().length
 });
 
+const shellyDevError = (message: string, error: unknown): Error => {
+  const detail =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object' &&
+          error !== null &&
+          'technicalMessage' in error &&
+          typeof error.technicalMessage === 'string'
+        ? error.technicalMessage
+        : String(error);
+  return new Error(`${message}: ${detail}`);
+};
+
+const scanShelly = async (timeoutMs = 6000): Promise<DevShellyBleCandidate[]> => {
+  const [{ Capacitor }, { CapacitorBleScanner }] = await Promise.all([
+    import('@capacitor/core'),
+    import('@lcl/ble-core')
+  ]);
+  const scanner = new CapacitorBleScanner({ platform: Capacitor.getPlatform() });
+  const candidates = new Map<string, DevShellyBleCandidate>();
+
+  try {
+    for await (const advertisement of scanner.startScan({ timeoutMs })) {
+      const name = advertisement.name ?? '';
+      if (!name.toLowerCase().startsWith('shelly')) {
+        continue;
+      }
+      candidates.set(advertisement.id, {
+        deviceId: advertisement.id,
+        name,
+        rssi: advertisement.rssi ?? null
+      });
+    }
+  } finally {
+    await scanner.stopScan().catch(() => undefined);
+  }
+
+  return [...candidates.values()].sort(
+    (left, right) => (right.rssi ?? -999) - (left.rssi ?? -999)
+  );
+};
+
+const probeShelly = async (deviceId: string): Promise<DevShellyBleProbe> => {
+  const [{ RpcShellyClient }, { createShellyBleTransport }] = await Promise.all([
+    import('@lcl/shelly-client'),
+    import('../platform/shellyBleTransport.js')
+  ]);
+  const transport = createShellyBleTransport(deviceId);
+  const client = new RpcShellyClient(transport);
+
+  try {
+    const info = await client.getDeviceInfo();
+    if (!info.ok) {
+      throw shellyDevError('Shelly.GetDeviceInfo failed', info.error);
+    }
+    const status = await client.getStatus();
+    if (!status.ok) {
+      throw shellyDevError('Shelly.GetStatus failed', status.error);
+    }
+    return { deviceId, info: info.value, status: status.value };
+  } finally {
+    await transport.disconnect();
+  }
+};
+
 const help = () =>
   [
     "lclDev.setLocale('pl'|'en'|'de'|'es'|'fr'|'it'|'pt-BR')",
@@ -105,6 +184,8 @@ const help = () =>
     'lclDev.errors()',
     'lclDev.clearErrors()',
     'lclDev.reportError("message")',
+    'await lclDev.scanShelly()',
+    "await lclDev.probeShelly('<deviceId>')",
     'lclDev.menu()',
     'Type /help in the app window',
     'lclDev.state()'
@@ -145,6 +226,8 @@ export const installDevConsole = (): (() => void) => {
     reportError(message) {
       return reportRuntimeIssue('manual', message);
     },
+    scanShelly,
+    probeShelly,
     supportedLocales,
     themeModes
   };
