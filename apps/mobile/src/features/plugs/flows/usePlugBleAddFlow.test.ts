@@ -131,6 +131,7 @@ describe('usePlugBleAddFlow', () => {
     let releaseScan: (() => void) | undefined;
     const scanner: BleScanner = {
       async *startScan() {
+        yield advertisement('plug', 'ShellyPlugSG3-AABBCCDDEEFF', -40);
         await new Promise<void>((resolve) => {
           releaseScan = resolve;
         });
