@@ -1,0 +1,89 @@
+.plug-add-speed-dial {
+  bottom: calc(
+    var(--app-bottom-nav-height) + var(--lcl-spacing-md) + env(safe-area-inset-bottom)
+  );
+  height: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-md));
+  position: fixed;
+  right: var(--lcl-fluid-shell-padding);
+  width: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-md));
+  z-index: var(--lcl-z-index-header);
+}
+
+.dashboard-shell .plug-add-speed-dial .dashboard-fab {
+  bottom: auto;
+  position: absolute;
+  right: auto;
+}
+
+.plug-add-speed-dial__trigger {
+  inset: 0;
+}
+
+.plug-add-speed-dial__trigger .dashboard-fab__icon {
+  transition: transform var(--lcl-motion-fast);
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__trigger .dashboard-fab__icon {
+  transform: rotate(45deg);
+}
+
+.plug-add-speed-dial__action {
+  align-items: center;
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-round);
+  box-shadow: var(--lcl-shadow-md);
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  display: inline-flex;
+  height: var(--lcl-size-control-min-height);
+  justify-content: center;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  right: calc(var(--lcl-spacing-sm) / 2);
+  top: calc(var(--lcl-spacing-sm) / 2);
+  transform: translate(0, 0) scale(0.72);
+  transition:
+    opacity var(--lcl-motion-fast),
+    transform var(--lcl-motion-fast),
+    border-color var(--lcl-motion-fast),
+    color var(--lcl-motion-fast);
+  width: var(--lcl-size-control-min-height);
+}
+
+.plug-add-speed-dial__action svg {
+  height: var(--lcl-size-control-icon-size);
+  width: var(--lcl-size-control-icon-size);
+}
+
+.plug-add-speed-dial__action:hover,
+.plug-add-speed-dial__action:focus-visible {
+  border-color: var(--lcl-color-accent);
+  color: var(--lcl-color-accent);
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__action {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__action--bluetooth {
+  transform: translate(0, calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)))) scale(1);
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__action--wifi {
+  transform: translate(
+      calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-md))),
+      calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-sm)))
+    )
+    scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plug-add-speed-dial__trigger .dashboard-fab__icon,
+  .plug-add-speed-dial__action {
+    transition: none;
+  }
+}
