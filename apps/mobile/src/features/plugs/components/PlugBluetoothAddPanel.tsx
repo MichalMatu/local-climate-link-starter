@@ -1,23 +1,18 @@
-import { useId, useState, type FormEvent } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type {
   PlugBleAdvertisement,
   VerifiedPlugBleCandidate
 } from '../data/plugBleOnboarding.js';
-import type { ProvisionPlugBleWifiResult } from '../flows/provisionPlugBleWifi.js';
 
 export type PlugBluetoothAddPanelProps = {
   scanning: boolean;
   candidates: PlugBleAdvertisement[];
   inspectingDeviceId: string | null;
   verifiedCandidate: VerifiedPlugBleCandidate | null;
-  provisioning: boolean;
-  provisionResult: ProvisionPlugBleWifiResult | null;
   error: string | null;
   onStart(): void;
   onStop(): void;
   onInspect(candidate: PlugBleAdvertisement): void;
-  onProvision(ssid: string, password: string): Promise<void>;
 };
 
 export const PlugBluetoothAddPanel = ({
@@ -25,37 +20,15 @@ export const PlugBluetoothAddPanel = ({
   candidates,
   inspectingDeviceId,
   verifiedCandidate,
-  provisioning,
-  provisionResult,
   error,
   onStart,
   onStop,
-  onInspect,
-  onProvision
+  onInspect
 }: PlugBluetoothAddPanelProps) => {
   const { t } = useTranslation();
-  const [ssid, setSsid] = useState('');
-  const [password, setPassword] = useState('');
-  const ssidId = useId();
-  const passwordId = useId();
-  const needsWifi = verifiedCandidate?.network.state === 'needs-wifi';
-
-  const submitProvisioning = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!needsWifi || provisioning || ssid.trim().length === 0) return;
-    try {
-      await onProvision(ssid, password);
-    } finally {
-      setPassword('');
-    }
-  };
 
   return (
-    <section
-      className="shelly-network-scan"
-      role="tabpanel"
-      aria-label={t('common.bluetooth')}
-    >
+    <section className="shelly-network-scan" aria-label={t('common.bluetooth')}>
       <div className="shelly-network-scan__body">
         {error && <p role="alert">{t('hardware.sensor.phoneBleGenericFailed')}</p>}
         {verifiedCandidate && (
@@ -70,56 +43,8 @@ export const PlugBluetoothAddPanel = ({
               <span>
                 {verifiedCandidate.model}, gen {verifiedCandidate.generation}
               </span>
-              <span>
-                Wi-Fi {verifiedCandidate.network.state === 'has-wifi' ? '✓' : '—'} ·{' '}
-                {verifiedCandidate.network.connectionStatus}
-              </span>
             </div>
           </article>
-        )}
-        {needsWifi && (
-          <form className="shelly-manual-add__body" onSubmit={submitProvisioning}>
-            <strong>{t('hardware.shelly.bleWifiTitle')}</strong>
-            <label className="field" htmlFor={ssidId}>
-              {t('hardware.shelly.bleWifiSsid')}
-              <input
-                id={ssidId}
-                type="text"
-                value={ssid}
-                disabled={provisioning}
-                onChange={(event) => setSsid(event.currentTarget.value)}
-              />
-            </label>
-            <label className="field" htmlFor={passwordId}>
-              {t('hardware.shelly.bleWifiPassword')}
-              <input
-                id={passwordId}
-                type="password"
-                value={password}
-                disabled={provisioning}
-                onChange={(event) => setPassword(event.currentTarget.value)}
-              />
-            </label>
-            <div className="shelly-manual-add__actions">
-              <button
-                className="primary-action"
-                type="submit"
-                aria-busy={provisioning || undefined}
-                disabled={provisioning || ssid.trim().length === 0}
-              >
-                {provisioning
-                  ? t('hardware.shelly.bleWifiConnecting')
-                  : t('hardware.shelly.bleWifiConnect')}
-              </button>
-            </div>
-          </form>
-        )}
-        {provisionResult && (
-          <p role="status">
-            {provisionResult.verification === 'confirmed'
-              ? t('hardware.shelly.bleWifiConfirmed')
-              : t('hardware.shelly.bleWifiPending')}
-          </p>
         )}
         {candidates.length > 0 && (
           <div className="saved-list" aria-label={t('hardware.shelly.foundListLabel')}>
