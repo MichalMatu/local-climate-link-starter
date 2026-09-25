@@ -4,6 +4,12 @@ import {
   type ShellyWifiReadResult
 } from '@lcl/shelly-client';
 
+export type PlugBleAdvertisement = {
+  deviceId: string;
+  name: string;
+  rssi: number | null;
+};
+
 export type PlugBleNetworkState = 'needs-wifi' | 'has-wifi';
 
 export type PlugBleNetworkSnapshot = {
