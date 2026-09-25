@@ -7,6 +7,20 @@ export { PlugInfoPanel, type PlugInfoPanelProps } from './components/PlugInfoPan
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
+  buildVerifiedPlugBleCandidate,
+  classifyPlugBleNetwork,
+  type PlugBleNetworkSnapshot,
+  type PlugBleNetworkState,
+  type VerifiedPlugBleCandidate
+} from './data/plugBleOnboarding.js';
+export {
+  inspectPlugBleCandidate,
+  PLUG_BLE_GATT_RADIO_SETTLE_MS,
+  type PlugBleAdvertisement,
+  type InspectPlugBleCandidateOptions,
+  type InspectPlugBleCandidateDependencies
+} from './flows/inspectPlugBleCandidate.js';
+export {
   PlugAddPage,
   type PlugAddPageProps,
   type PlugScanResultView
