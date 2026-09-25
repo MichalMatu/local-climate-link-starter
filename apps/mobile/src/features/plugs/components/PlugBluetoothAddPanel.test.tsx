@@ -24,10 +24,12 @@ const renderPanel = (overrides: Partial<PlugBluetoothAddPanelProps> = {}) => {
     candidates: [],
     inspectingDeviceId: null,
     verifiedCandidate: null,
+    verifiedCandidateSaved: false,
     error: null,
     onStart: vi.fn(),
     onStop: vi.fn(),
     onInspect: vi.fn(),
+    onSaveVerified: vi.fn(),
     ...overrides
   };
   render(
@@ -63,5 +65,23 @@ describe('PlugBluetoothAddPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: `Info: ${candidate.name}` }));
 
     expect(props.onInspect).toHaveBeenCalledWith(candidate);
+  });
+
+  it('saves a verified BLE-only plug and exposes the persisted state', () => {
+    const props = renderPanel({ verifiedCandidate });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: `Add: ${verifiedCandidate.physicalId}` })
+    );
+
+    expect(props.onSaveVerified).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables saving when the verified physical device is already stored', () => {
+    renderPanel({ verifiedCandidate, verifiedCandidateSaved: true });
+
+    expect(
+      screen.getByRole('button', { name: `Added: ${verifiedCandidate.physicalId}` })
+    ).toBeDisabled();
   });
 });
