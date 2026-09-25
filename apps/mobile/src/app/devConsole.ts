@@ -44,6 +44,11 @@ export type DevShellyBleProbe = {
   status: unknown;
 };
 
+export type DevShellyRelayTest = {
+  deviceId: string;
+  result: unknown;
+};
+
 export const devCommandPaletteOpenEvent = 'lcl:dev-command-palette-open';
 export const devRuntimeIssuesChangeEvent = runtimeIssuesChangeEvent;
 
@@ -60,6 +65,10 @@ export type LclDevConsole = {
   reportError: (message: string) => RuntimeIssue;
   scanShelly: (timeoutMs?: number) => Promise<DevShellyBleCandidate[]>;
   probeShelly: (deviceId: string) => Promise<DevShellyBleProbe>;
+  safeRelayTestShelly: (
+    deviceId: string,
+    onDurationMs?: number
+  ) => Promise<DevShellyRelayTest>;
   supportedLocales: readonly Locale[];
   themeModes: readonly ThemeMode[];
 };
@@ -152,13 +161,17 @@ const scanShelly = async (timeoutMs = 6000): Promise<DevShellyBleCandidate[]> =>
   );
 };
 
-const probeShelly = async (deviceId: string): Promise<DevShellyBleProbe> => {
+const createShellyDevClient = async (deviceId: string) => {
   const [{ RpcShellyClient }, { createShellyBleTransport }] = await Promise.all([
     import('@lcl/shelly-client'),
     import('../platform/shellyBleTransport.js')
   ]);
   const transport = createShellyBleTransport(deviceId);
-  const client = new RpcShellyClient(transport);
+  return { transport, client: new RpcShellyClient(transport) };
+};
+
+const probeShelly = async (deviceId: string): Promise<DevShellyBleProbe> => {
+  const { transport, client } = await createShellyDevClient(deviceId);
 
   try {
     const info = await client.getDeviceInfo();
@@ -175,6 +188,23 @@ const probeShelly = async (deviceId: string): Promise<DevShellyBleProbe> => {
   }
 };
 
+const safeRelayTestShelly = async (
+  deviceId: string,
+  onDurationMs = 500
+): Promise<DevShellyRelayTest> => {
+  const { transport, client } = await createShellyDevClient(deviceId);
+
+  try {
+    const result = await client.safeRelayTest({ onDurationMs });
+    if (!result.ok) {
+      throw shellyDevError('Shelly safe relay test failed', result.error);
+    }
+    return { deviceId, result: result.value };
+  } finally {
+    await transport.disconnect();
+  }
+};
+
 const help = () =>
   [
     "lclDev.setLocale('pl'|'en'|'de'|'es'|'fr'|'it'|'pt-BR')",
@@ -186,6 +216,7 @@ const help = () =>
     'lclDev.reportError("message")',
     'await lclDev.scanShelly()',
     "await lclDev.probeShelly('<deviceId>')",
+    "await lclDev.safeRelayTestShelly('<deviceId>')",
     'lclDev.menu()',
     'Type /help in the app window',
     'lclDev.state()'
@@ -228,6 +259,7 @@ export const installDevConsole = (): (() => void) => {
     },
     scanShelly,
     probeShelly,
+    safeRelayTestShelly,
     supportedLocales,
     themeModes
   };
