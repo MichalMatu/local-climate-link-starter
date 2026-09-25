@@ -33,6 +33,11 @@ export {
   type ProvisionPlugBleWifiResult
 } from './flows/provisionPlugBleWifi.js';
 export {
+  usePlugBleAddFlow,
+  type UsePlugBleAddFlowDependencies,
+  type UsePlugBleAddFlowResult
+} from './flows/usePlugBleAddFlow.js';
+export {
   PlugAddPage,
   type PlugAddPageProps,
   type PlugScanResultView
