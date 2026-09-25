@@ -9,6 +9,7 @@ export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
   buildVerifiedPlugBleCandidate,
   classifyPlugBleNetwork,
+  type PlugBleAdvertisement,
   type PlugBleNetworkSnapshot,
   type PlugBleNetworkState,
   type VerifiedPlugBleCandidate
@@ -16,10 +17,14 @@ export {
 export {
   inspectPlugBleCandidate,
   PLUG_BLE_GATT_RADIO_SETTLE_MS,
-  type PlugBleAdvertisement,
   type InspectPlugBleCandidateOptions,
   type InspectPlugBleCandidateDependencies
 } from './flows/inspectPlugBleCandidate.js';
+export {
+  scanPlugBleCandidates,
+  DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS,
+  type ScanPlugBleCandidatesOptions
+} from './flows/scanPlugBleCandidates.js';
 export {
   PlugAddPage,
   type PlugAddPageProps,
