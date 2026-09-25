@@ -7,6 +7,7 @@ import {
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
 import {
   buildVerifiedPlugBleCandidate,
+  type PlugBleAdvertisement,
   type VerifiedPlugBleCandidate
 } from '../data/plugBleOnboarding.js';
 
@@ -14,12 +15,6 @@ export const PLUG_BLE_GATT_RADIO_SETTLE_MS = 1200;
 
 type DisconnectableShellyTransport = ShellyRpcTransport & {
   disconnect(): Promise<void>;
-};
-
-export type PlugBleAdvertisement = {
-  deviceId: string;
-  name: string;
-  rssi: number | null;
 };
 
 export type InspectPlugBleCandidateOptions = {
