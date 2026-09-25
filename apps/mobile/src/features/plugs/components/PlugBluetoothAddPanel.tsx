@@ -1,6 +1,8 @@
 import { useTranslation } from '../../../app/i18n.js';
-import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
-import type { PlugBleAdvertisement } from '../flows/inspectPlugBleCandidate.js';
+import type {
+  PlugBleAdvertisement,
+  VerifiedPlugBleCandidate
+} from '../data/plugBleOnboarding.js';
 
 export type PlugBluetoothAddPanelProps = {
   scanning: boolean;
