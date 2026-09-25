@@ -123,4 +123,60 @@ describe('RpcShellyWifiClient', () => {
     });
     expect(transport.requests).toHaveLength(1);
   });
+
+  it('sets the primary station with exactly one mutating RPC', async () => {
+    const transport = new QueueTransport([ok({ restart_required: false })]);
+
+    const result = await new RpcShellyWifiClient(transport).setStation({
+      ssid: ' Lab Wi-Fi ',
+      password: 'test-password'
+    });
+
+    expect(result).toEqual({ ok: true, value: { restart_required: false } });
+    expect(transport.requests).toEqual([
+      {
+        method: RPC_METHODS.WifiSetConfig,
+        params: {
+          config: {
+            sta: {
+              ssid: ' Lab Wi-Fi ',
+              pass: 'test-password',
+              enable: true
+            }
+          }
+        }
+      }
+    ]);
+  });
+
+  it('rejects a blank SSID without sending credentials', async () => {
+    const transport = new QueueTransport([]);
+
+    const result = await new RpcShellyWifiClient(transport).setStation({
+      ssid: '   ',
+      password: 'test-password'
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed', retryable: false }
+    });
+    expect(transport.requests).toHaveLength(0);
+  });
+
+  it('does not retry a failed Wi-Fi mutation', async () => {
+    const transport = new QueueTransport([offline()]);
+
+    const result = await new RpcShellyWifiClient(transport).setStation({
+      ssid: 'Home',
+      password: 'test-password'
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { kind: 'shelly-offline', technicalMessage: 'offline' }
+    });
+    expect(transport.requests).toHaveLength(1);
+    expect(transport.requests[0]?.method).toBe(RPC_METHODS.WifiSetConfig);
+  });
 });
