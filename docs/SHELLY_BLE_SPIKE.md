@@ -262,7 +262,7 @@ The injected-GATT `BleShellyRpcTransport` is now implemented and verified. Focus
 
 Stage 1 focused verification is green: 16 protocol/transport tests, `@lcl/shelly-client` typecheck and focused ESLint. No production BLE dependency was added to `shelly-client`.
 
-## Stage 2 — Android/Capacitor binding
+## Stage 2 — Android/Capacitor binding — ACCEPTED
 
 Reuse the existing `CapacitorBleGattClient`; do not build a second BLE stack.
 
@@ -275,7 +275,7 @@ Validate on Samsung S22+:
 5. compare behavior with Mac reference;
 6. only after reliable read path, perform controlled relay `OFF -> ON -> OFF` on the authorized development Plug A and verify final OFF.
 
-Plug B remains read-only until its onboarding behavior has been captured and the configuration flow is deliberately designed.
+Both physical Plugs were explicitly authorized for relay testing and completed the S22 acceptance cycle with a verified final OFF state. Fresh-device Wi-Fi provisioning remains a separate later onboarding stage.
 
 ## Tooling available for the spike
 
@@ -407,3 +407,33 @@ Added `apps/mobile/src/platform/shellyBleTransport.ts`, binding the package-leve
 The full repository pre-push gate then passed end-to-end, including format, lint, UX/repository/feature-boundary gates, typechecks, all tests, core coverage, builds and responsive E2E.
 
 Next Stage 2 work is real S22+ validation through this exact Capacitor path before any user-facing BLE onboarding UI is added.
+
+### 2026-09-25 — Stage 2 S22 acceptance
+
+The Samsung S22+ (`SM-S906B`, Android 16) was connected through ADB with Bluetooth enabled. The installed app had `BLUETOOTH_SCAN` and `BLUETOOTH_CONNECT` grants. A DEV-only diagnostic hook was added to the existing `lclDev` console so the real application stack could be exercised without adding temporary product UI.
+
+The phone scan discovered both physical Plugs through the production `CapacitorBleScanner` path:
+
+```text
+E4:B0:63:E3:E2:9A  ShellyPlugSG3-E4B063E3E298
+E4:B0:63:D7:F5:32  ShellyPlugSG3-E4B063D7F530
+```
+
+The first GATT attempt exposed a real Android integration bug: the scanner initialized the Capacitor BLE plugin with `androidNeverForLocation: true`, while `CapacitorBleGattClient` initialized it without that option. On Android 16 this caused GATT connect to fail as permission denied even though scanning worked. `CapacitorBleGattClient.initialize()` now uses the same never-for-location mode, matching the Android manifest and scanner behavior. Focused privacy tests cover both scan and GATT initialization, and GATT error detail is preserved through the Shelly transport for diagnostics.
+
+After the fix, `Shelly.GetDeviceInfo` and normalized status succeeded on both Plugs through the complete shipped path:
+
+```text
+S22 -> CapacitorBleGattClient -> BleShellyRpcTransport -> RpcShellyClient -> Plug S Gen3
+```
+
+Both devices then completed the authorized safe relay acceptance through the S22 app stack:
+
+```text
+D7F530 configured:    initial OFF -> ON verified -> OFF command -> final OFF verified
+E3E298 factory-fresh: initial OFF -> ON verified -> OFF command -> final OFF verified
+```
+
+For both devices `safeRelayTest()` reported `onCommandSent=true`, `offCommandSent=true`, `finalRelayOn=false`, and a separate post-test status read confirmed `relayOn=false`. This proves that a factory-fresh Plug can be discovered, identified, read and controlled over native BLE RPC without a Shelly Link script, and that the same transport works on the configured Plug.
+
+Stage 2 is accepted. The next product-facing stage is onboarding: `Plugs -> + -> Wi-Fi | Bluetooth`, with BLE discovery/identity first and fresh-device Wi-Fi provisioning designed as a separate bounded slice.
