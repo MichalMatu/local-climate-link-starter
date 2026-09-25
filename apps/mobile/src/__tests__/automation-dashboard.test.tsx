@@ -268,7 +268,11 @@ describe('AutomationDashboardScreen', () => {
     expect(within(plugEmptyState).getByText('Brak dodanych gniazdek.')).toBeVisible();
     expect(screen.queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
-    expect(onAddPlug).toHaveBeenCalledTimes(1);
+    expect(onAddPlug).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
+    expect(onAddPlug).toHaveBeenCalledWith('bluetooth');
     expect(onAddAutomation).not.toHaveBeenCalled();
   });
 

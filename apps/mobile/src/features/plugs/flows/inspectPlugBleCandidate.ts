@@ -1,4 +1,8 @@
-import { RpcShellyClient, type Result, type ShellyRpcTransport } from '@lcl/shelly-client';
+import {
+  RpcShellyClient,
+  type Result,
+  type ShellyRpcTransport
+} from '@lcl/shelly-client';
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
 import {
   buildVerifiedPlugBleCandidate,

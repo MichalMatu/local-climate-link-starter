@@ -70,7 +70,11 @@
 }
 
 .plug-add-speed-dial--expanded .plug-add-speed-dial__action--bluetooth {
-  transform: translate(0, calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)))) scale(1);
+  transform: translate(
+      0,
+      calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)))
+    )
+    scale(1);
 }
 
 .plug-add-speed-dial--expanded .plug-add-speed-dial__action--wifi {

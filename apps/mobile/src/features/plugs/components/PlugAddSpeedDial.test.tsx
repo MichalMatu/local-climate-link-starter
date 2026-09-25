@@ -23,7 +23,10 @@ describe('PlugAddSpeedDial', () => {
       'aria-expanded',
       'false'
     );
-    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toHaveAttribute(
+      'tabindex',
+      '-1'
+    );
     expect(screen.getByRole('button', { name: 'Bluetooth' })).toHaveAttribute(
       'tabindex',
       '-1'
@@ -35,7 +38,10 @@ describe('PlugAddSpeedDial', () => {
       'aria-expanded',
       'true'
     );
-    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toHaveAttribute(
+      'tabindex',
+      '0'
+    );
     expect(screen.getByRole('button', { name: 'Bluetooth' })).toHaveAttribute(
       'tabindex',
       '0'

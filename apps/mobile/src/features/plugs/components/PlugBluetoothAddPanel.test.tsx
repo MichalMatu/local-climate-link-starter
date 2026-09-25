@@ -51,7 +51,9 @@ describe('PlugBluetoothAddPanel', () => {
     expect(screen.getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
     expect(screen.queryByLabelText('Wi-Fi network name')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Wi-Fi password')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Connect to Wi-Fi' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Connect to Wi-Fi' })
+    ).not.toBeInTheDocument();
   });
 
   it('passes the selected advertisement to identity inspection', () => {

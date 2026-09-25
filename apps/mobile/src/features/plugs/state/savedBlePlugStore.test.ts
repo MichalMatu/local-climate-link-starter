@@ -1,11 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
-import {
-  resetSavedBlePlugStore,
-  useSavedBlePlugStore
-} from './savedBlePlugStore.js';
+import { resetSavedBlePlugStore, useSavedBlePlugStore } from './savedBlePlugStore.js';
 
-const candidate = (patch: Partial<VerifiedPlugBleCandidate> = {}): VerifiedPlugBleCandidate => ({
+const candidate = (
+  patch: Partial<VerifiedPlugBleCandidate> = {}
+): VerifiedPlugBleCandidate => ({
   bleDeviceId: 'temporary-handle-a',
   advertisementName: 'ShellyPlugSG3-AABB',
   rssi: -42,
@@ -26,9 +25,11 @@ describe('saved BLE plug store', () => {
   it('upserts by physical identity rather than BLE locator', () => {
     useSavedBlePlugStore.getState().saveCandidate(candidate());
     useSavedBlePlugStore.getState().renamePlug('shellyplugsg3-aabb', 'Growbox fan');
-    useSavedBlePlugStore.getState().saveCandidate(
-      candidate({ bleDeviceId: 'temporary-handle-b', firmwareId: '1.8.0' })
-    );
+    useSavedBlePlugStore
+      .getState()
+      .saveCandidate(
+        candidate({ bleDeviceId: 'temporary-handle-b', firmwareId: '1.8.0' })
+      );
 
     expect(useSavedBlePlugStore.getState().plugs).toHaveLength(1);
     expect(useSavedBlePlugStore.getState().plugs[0]).toMatchObject({

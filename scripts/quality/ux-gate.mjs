@@ -9,6 +9,7 @@ const cssPaths = [
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
+  'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
   'packages/ui/src/primitives/ColorSwatch.css',
   'packages/ui/src/primitives/SegmentedControl.css',

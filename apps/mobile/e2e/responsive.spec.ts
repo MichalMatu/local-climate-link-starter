@@ -983,6 +983,11 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Gniazdka', exact: true }).click();
 
     await page.getByRole('button', { name: 'Dodaj gniazdko', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Wi-Fi', exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Bluetooth', exact: true })
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Wi-Fi', exact: true }).click();
     await expect(page.getByRole('tablist', { name: 'Dodaj gniazdko' })).toBeVisible();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '15-add-plug');

@@ -50,7 +50,9 @@ describe('saved BLE plug repository', () => {
   });
 
   it('rejects malformed persisted data without leaking it into state', () => {
-    const memory = createStorage(JSON.stringify({ version: 1, plugs: [{ baseUrl: 'x' }] }));
+    const memory = createStorage(
+      JSON.stringify({ version: 1, plugs: [{ baseUrl: 'x' }] })
+    );
     const repository = createSavedBlePlugRepository(memory.storage);
 
     expect(repository.load()).toEqual([]);

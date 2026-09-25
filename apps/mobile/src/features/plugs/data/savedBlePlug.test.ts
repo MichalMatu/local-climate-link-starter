@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import type { VerifiedPlugBleCandidate } from './plugBleOnboarding.js';
 import { savedBlePlugFromCandidate } from './savedBlePlug.js';
 
-const candidate = (patch: Partial<VerifiedPlugBleCandidate> = {}): VerifiedPlugBleCandidate => ({
+const candidate = (
+  patch: Partial<VerifiedPlugBleCandidate> = {}
+): VerifiedPlugBleCandidate => ({
   bleDeviceId: 'temporary-handle-a',
   advertisementName: 'ShellyPlugSG3-AABB',
   rssi: -42,
