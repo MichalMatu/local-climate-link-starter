@@ -13,6 +13,7 @@ import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { PlugBluetoothAddPage } from '../features/plugs/index.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import {
   automationDetailRoute,
@@ -46,6 +47,7 @@ type DeviceAddRoute = {
   sourceKind: AppNavigationKind;
   returnTo: DeviceAddReturnRoute;
   sensorMode?: 'manual' | 'phone-scan';
+  plugTransport?: 'wifi' | 'bluetooth';
 };
 type InstallationRoute = {
   type: 'installation';
@@ -195,10 +197,11 @@ export const AppRoutes = () => {
     content = (
       <AutomationDashboardScreen
         {...(route.kind ? { initialKind: route.kind } : {})}
-        onAddPlug={() =>
+        onAddPlug={(plugTransport) =>
           navigate({
             type: 'device-add',
             device: 'plug',
+            plugTransport,
             sourceKind: 'climate',
             returnTo: { type: 'dashboard', kind: 'climate' }
           })
@@ -256,15 +259,18 @@ export const AppRoutes = () => {
       />
     );
   } else if (route.type === 'device-add') {
-    content = (
-      <Suspense fallback={<RouteFallback />}>
-        <HardwareSetupScreen
-          {...(route.device === 'plug'
-            ? { plugAddOnly: true }
-            : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
-        />
-      </Suspense>
-    );
+    content =
+      route.device === 'plug' && route.plugTransport === 'bluetooth' ? (
+        <PlugBluetoothAddPage />
+      ) : (
+        <Suspense fallback={<RouteFallback />}>
+          <HardwareSetupScreen
+            {...(route.device === 'plug'
+              ? { plugAddOnly: true }
+              : { sensorAddOnly: true, sensorAddMode: route.sensorMode ?? 'manual' })}
+          />
+        </Suspense>
+      );
   } else if (route.type === 'installation') {
     content = (
       <InstallationDetailScreen
