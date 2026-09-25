@@ -44,7 +44,7 @@ const advertisement = {
 };
 
 describe('inspectPlugBleCandidate', () => {
-  it('waits for BLE radio settle and returns a verified needs-wifi candidate', async () => {
+  it('waits for BLE radio settle and verifies identity with GetDeviceInfo only', async () => {
     const transport = new FakeDisconnectableTransport([
       ok({
         id: 'shellyplugsg3-e4b063e3e298',
@@ -52,9 +52,7 @@ describe('inspectPlugBleCandidate', () => {
         gen: 3,
         fw_id: '1.2.3-matter22',
         matter: true
-      }),
-      ok({ sta: { ssid: null, enable: false } }),
-      ok({ status: 'disconnected', sta_ip: null, ssid: null })
+      })
     ]);
     const sleepMs = vi.fn(async () => undefined);
     const createTransport = vi.fn(() => transport);
@@ -68,37 +66,14 @@ describe('inspectPlugBleCandidate', () => {
     expect(sleepMs).toHaveBeenCalledWith(1200);
     expect(createTransport).toHaveBeenCalledWith(advertisement.deviceId);
     expect(candidate).toMatchObject({
+      bleDeviceId: advertisement.deviceId,
       physicalId: 'shellyplugsg3-e4b063e3e298',
       model: 'S3PL-00112EU',
-      generation: 3,
-      network: { state: 'needs-wifi', connectionStatus: 'disconnected' }
+      generation: 3
     });
     expect(transport.requests.map((request) => request.method)).toEqual([
-      'Shelly.GetDeviceInfo',
-      'WiFi.GetConfig',
-      'WiFi.GetStatus'
+      'Shelly.GetDeviceInfo'
     ]);
-    expect(transport.disconnectCalls).toBe(1);
-  });
-
-  it('classifies stored credentials even when the Plug is currently disconnected', async () => {
-    const transport = new FakeDisconnectableTransport([
-      ok({ id: 'plug-a', model: 'S3PL-00112EU', gen: 3 }),
-      ok({ sta: { ssid: 'Home', enable: true } }),
-      ok({ status: 'disconnected', sta_ip: null, ssid: null })
-    ]);
-
-    const candidate = await inspectPlugBleCandidate(
-      advertisement,
-      { radioSettleMs: 0 },
-      { createTransport: () => transport, sleepMs: async () => undefined }
-    );
-
-    expect(candidate.network).toMatchObject({
-      state: 'has-wifi',
-      configuredSsids: ['Home'],
-      connectionStatus: 'disconnected'
-    });
     expect(transport.disconnectCalls).toBe(1);
   });
 
@@ -115,22 +90,5 @@ describe('inspectPlugBleCandidate', () => {
 
     expect(transport.disconnectCalls).toBe(1);
     expect(transport.requests).toHaveLength(1);
-  });
-
-  it('always disconnects when Wi-Fi inspection fails', async () => {
-    const transport = new FakeDisconnectableTransport([
-      ok({ id: 'plug-a', model: 'S3PL-00112EU', gen: 3 }),
-      fail('wifi rpc unavailable')
-    ]);
-
-    await expect(
-      inspectPlugBleCandidate(
-        advertisement,
-        { radioSettleMs: 0 },
-        { createTransport: () => transport, sleepMs: async () => undefined }
-      )
-    ).rejects.toThrow('Shelly Wi-Fi inspection failed: wifi rpc unavailable');
-
-    expect(transport.disconnectCalls).toBe(1);
   });
 });
