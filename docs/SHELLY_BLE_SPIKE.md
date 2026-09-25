@@ -240,7 +240,7 @@ Stage 0 remained read-only and established:
 
 Mac diagnostic implementation used a temporary Bleak environment outside the repository. It is test tooling only and adds no application dependency.
 
-## Stage 1 — protocol/transport tests without phone hardware — IN PROGRESS
+## Stage 1 — protocol/transport tests without phone hardware — ACCEPTED
 
 The pure framing/codec slice is implemented and focused verification is green:
 
@@ -251,16 +251,16 @@ The pure framing/codec slice is implemented and focused verification is green:
 - mismatched response id detection;
 - focused codec tests, package typecheck and lint pass.
 
-Next Stage 1 slice is the smallest `BleShellyRpcTransport` around an injected GATT port. It must prove:
+The injected-GATT `BleShellyRpcTransport` is now implemented and verified. Focused transport coverage proves:
 
 - RX control zero/not-ready polling;
-- exact response-length reads;
+- exact response-length reads and multi-chunk assembly;
 - Shelly RPC error mapping;
-- timeout/abort behavior;
-- connection invalidation after mid-frame failure;
-- serialization of concurrent callers.
+- timeout and pre-abort behavior;
+- connection invalidation after protocol/timeout failure;
+- serialization of concurrent callers on the shared BLE RPC channel.
 
-No real relay mutation is needed for these tests. Do not add UI yet.
+Stage 1 focused verification is green: 16 protocol/transport tests, `@lcl/shelly-client` typecheck and focused ESLint. No production BLE dependency was added to `shelly-client`.
 
 ## Stage 2 — Android/Capacitor binding
 
@@ -386,3 +386,24 @@ This is a choice of discovery/onboarding transport, not a split device model. Bo
 ### 2026-09-25 — Stage 1 codec slice
 
 Added pure BLE RPC codec/framing support and focused tests. Verification passed: 9 codec tests, `@lcl/shelly-client` typecheck and focused ESLint. Next implementation slice is the injected-GATT `BleShellyRpcTransport`; no UI or relay mutation yet.
+
+### 2026-09-25 — Stage 1 transport and hardware relay proof
+
+Added `BleShellyRpcTransport` over an injected narrow GATT port and exported it from `@lcl/shelly-client`. The transport serializes callers, handles bounded response polling, multi-chunk frames, timeout/abort, RPC errors and invalidates suspect connections after failures. Focused verification passed 16/16 BLE protocol+transport tests, package typecheck and lint. Error mapping was extracted into a private cohesive module after the repository size gate correctly rejected an oversized transport module.
+
+With operator confirmation that both physical Plugs were electrically safe to switch, the MacBook reference host exercised both devices over native Shelly BLE RPC:
+
+```text
+E3E298 (factory-fresh): OFF -> ON verified -> OFF verified -> safety OFF verified
+D7F530 (configured):   OFF -> ON verified -> OFF verified -> safety OFF verified
+```
+
+Both relay cycles completed successfully. This proves `Switch.Set` works over BLE on the factory-fresh Plug without any Shelly Link script installed, and on the configured Plug while its existing Shelly Link Thermostat script remains installed. Both devices were left explicitly verified OFF.
+
+### 2026-09-25 — Stage 2 mobile binding slice
+
+Added `apps/mobile/src/platform/shellyBleTransport.ts`, binding the package-level `BleShellyRpcTransport` to the existing `CapacitorBleGattClient`. No second BLE stack and no new dependency were introduced. A focused mobile binding test passes, along with mobile typecheck, `shelly-client` typecheck and focused lint.
+
+The full repository pre-push gate then passed end-to-end, including format, lint, UX/repository/feature-boundary gates, typechecks, all tests, core coverage, builds and responsive E2E.
+
+Next Stage 2 work is real S22+ validation through this exact Capacitor path before any user-facing BLE onboarding UI is added.
