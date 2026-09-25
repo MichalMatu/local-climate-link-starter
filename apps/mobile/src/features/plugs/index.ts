@@ -43,6 +43,14 @@ export {
   type PlugScanResultView
 } from './components/PlugAddPage.js';
 export {
+  PlugAddMethodPage,
+  type PlugAddMethodPageProps
+} from './components/PlugAddMethodPage.js';
+export {
+  PlugBluetoothAddPanel,
+  type PlugBluetoothAddPanelProps
+} from './components/PlugBluetoothAddPanel.js';
+export {
   PlugDeleteConfirmModal,
   type PlugDeleteConfirmModalProps
 } from './components/PlugDeleteConfirmModal.js';
