@@ -1,18 +1,21 @@
 import { App as CapacitorApp } from '@capacitor/app';
-import { calculateVpdKpa } from '@lcl/automation-core';
-import { isSameShellyDevice } from '../features/plugs/index.js';
 import { Capacitor } from '@capacitor/core';
-import {
-  IconAlertTriangle,
-  IconDotsVertical,
-  IconPlug,
-  IconPlus
-} from '@tabler/icons-react';
+import { calculateVpdKpa } from '@lcl/automation-core';
+import { IconAlertTriangle, IconDotsVertical, IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { EditablePlugName } from '../components/EditablePlugName.js';
+import {
+  isSameShellyDevice,
+  PlugAddSpeedDial,
+  type PlugAddTransport
+} from '../features/plugs/index.js';
+import {
+  useHardwareSetupDraftStore,
+  type ShellyDraftDevice
+} from '../flows/hardware-setup/setupDraftStore.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -26,10 +29,6 @@ import {
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
-import {
-  useHardwareSetupDraftStore,
-  type ShellyDraftDevice
-} from '../flows/hardware-setup/setupDraftStore.js';
 import {
   useInstalledAutomationActions,
   useInstalledAutomationControl,
@@ -457,7 +456,7 @@ const PlainPlugCard = ({
 
 type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
-  onAddPlug(): void;
+  onAddPlug(transport: PlugAddTransport): void;
   onAddThermometer(): void;
   onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
@@ -528,7 +527,6 @@ export const AutomationDashboardScreen = ({
     (installation) => !matchedInstallationIds.has(installation.id)
   );
   const hasPlugEntries = plugEntries.length > 0 || unmatchedInstallations.length > 0;
-  const fabLabel = t('hardware.shelly.add');
 
   return (
     <main
@@ -577,17 +575,7 @@ export const AutomationDashboardScreen = ({
         )}
       </section>
 
-      {activeKind === 'climate' && (
-        <button
-          className="dashboard-fab"
-          type="button"
-          aria-label={fabLabel}
-          title={fabLabel}
-          onClick={onAddPlug}
-        >
-          <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
-        </button>
-      )}
+      {activeKind === 'climate' && <PlugAddSpeedDial onSelect={onAddPlug} />}
     </main>
   );
 };
