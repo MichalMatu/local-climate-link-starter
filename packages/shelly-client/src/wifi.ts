@@ -29,7 +29,9 @@ const wifiStatusSchema = z
   .passthrough();
 
 const wifiStationProvisioningSchema = z.object({
-  ssid: z.string().trim().min(1),
+  ssid: z.string().refine((value) => value.trim().length > 0, {
+    message: 'SSID must not be blank.'
+  }),
   password: z.string(),
   enable: z.boolean().default(true)
 });
