@@ -1,7 +1,7 @@
 import type { BleClientInterface } from '@capacitor-community/bluetooth-le';
-import { CapacitorBleScanner } from '../index.js';
+import { CapacitorBleGattClient, CapacitorBleScanner } from '../index.js';
 
-describe('CapacitorBleScanner Android privacy', () => {
+describe('Capacitor BLE Android privacy', () => {
   it('initializes BLE scanning as never-for-location', async () => {
     const client: BleClientInterface = {
       initialize: vi.fn().mockResolvedValue(undefined),
@@ -15,5 +15,21 @@ describe('CapacitorBleScanner Android privacy', () => {
 
     await expect(iterator.next()).resolves.toMatchObject({ done: true });
     expect(client.initialize).toHaveBeenCalledWith({ androidNeverForLocation: true });
+  });
+
+  it('initializes GATT connections as never-for-location', async () => {
+    const client: BleClientInterface = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      isEnabled: vi.fn().mockResolvedValue({ value: true }),
+      requestEnable: vi.fn().mockResolvedValue(undefined),
+      connect: vi.fn().mockResolvedValue(undefined),
+      disconnect: vi.fn().mockResolvedValue(undefined)
+    } as unknown as BleClientInterface;
+    const gatt = new CapacitorBleGattClient({ clientLoader: async () => client });
+
+    await gatt.connect('AA:BB:CC:DD:EE:FF');
+
+    expect(client.initialize).toHaveBeenCalledWith({ androidNeverForLocation: true });
+    expect(client.connect).toHaveBeenCalledTimes(1);
   });
 });
