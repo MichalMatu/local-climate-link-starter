@@ -21,6 +21,54 @@ The first slice is intentionally narrow:
 
 Climate/script install lifecycle is out of scope for the first spike.
 
+## Product direction — one Plug, two add paths
+
+The Plugs surface should keep one physical-device model while allowing two ways to add a device:
+
+```text
+Plugs
+  -> +
+      -> Wi-Fi
+      -> Bluetooth
+```
+
+The choice defines the onboarding transport, not a different kind of Plug.
+
+### Add through Wi-Fi
+
+```text
+LAN discovery / address
+-> Shelly.GetDeviceInfo
+-> verify physical identity
+-> save Plug
+```
+
+### Add through Bluetooth
+
+```text
+BLE scan
+-> candidate Shelly
+-> connect
+-> Shelly.GetDeviceInfo
+-> classify setup state
+-> fresh Plug: optionally provision home Wi-Fi through native Shelly RPC
+-> configured Plug: save/manage directly
+-> save the same physical Plug model
+```
+
+After onboarding, transport choice remains an implementation/runtime concern. The durable identity is still `Shelly.GetDeviceInfo.id`.
+
+Desired later runtime policy:
+
+```text
+preferred available transport
+  Wi-Fi when reachable
+  BLE when selected/appropriate and in range
+  optional fallback between transports where firmware/security state permits
+```
+
+Do not persist independent "Wi-Fi Plug" and "BLE Plug" entities for the same hardware. Transport-specific identifiers such as URL/IP, BLE advertisement name, Android BLE id or CoreBluetooth UUID are locations/handles, not physical identity.
+
 ## Architecture gate
 
 ```text
@@ -192,25 +240,27 @@ Stage 0 remained read-only and established:
 
 Mac diagnostic implementation used a temporary Bleak environment outside the repository. It is test tooling only and adds no application dependency.
 
-## Stage 1 — protocol/transport tests without phone hardware — NEXT
+## Stage 1 — protocol/transport tests without phone hardware — IN PROGRESS
 
-Implement pure framing/codec first and prove with fakes:
+The pure framing/codec slice is implemented and focused verification is green:
 
 - 4-byte big-endian request/response length encoding;
 - UTF-8 request generation;
-- single and multi-chunk responses;
-- RX control initially reports zero/not-ready;
-- exact response-length termination;
-- malformed JSON;
-- mismatched response id;
-- Shelly RPC error envelope;
-- timeout/abort;
-- disconnect during request;
-- two concurrent callers are serialized or one is explicitly rejected by contract.
+- single and multi-chunk response assembly;
+- malformed JSON detection;
+- mismatched response id detection;
+- focused codec tests, package typecheck and lint pass.
 
-No real relay mutation is needed for these tests.
+Next Stage 1 slice is the smallest `BleShellyRpcTransport` around an injected GATT port. It must prove:
 
-After the pure codec is green, add the smallest `BleShellyRpcTransport` around an injected GATT port and reuse the same fake transport evidence. Do not add UI yet.
+- RX control zero/not-ready polling;
+- exact response-length reads;
+- Shelly RPC error mapping;
+- timeout/abort behavior;
+- connection invalidation after mid-frame failure;
+- serialization of concurrent callers.
+
+No real relay mutation is needed for these tests. Do not add UI yet.
 
 ## Stage 2 — Android/Capacitor binding
 
@@ -321,4 +371,18 @@ Shelly.GetStatus    1244 bytes, 3 Data chunks, includes script:1
 
 All response-length reads were ready on the first RX-control poll. Multiple sequential RPCs on one BLE connection succeeded. Both Plugs were explicitly observed OFF; no relay command was sent.
 
-Stage 0 is accepted. Next work is Stage 1: pure protocol/framing implementation and focused tests only.
+Stage 0 is accepted.
+
+### 2026-09-25 — onboarding transport UX direction
+
+Product direction recorded:
+
+```text
+Plugs -> + -> Wi-Fi | Bluetooth
+```
+
+This is a choice of discovery/onboarding transport, not a split device model. Both paths converge on `Shelly.GetDeviceInfo.id` and the same saved Plug. BLE onboarding may later provision Wi-Fi credentials through native Shelly RPC, after which normal management may prefer Wi-Fi while retaining BLE as an available local transport/fallback where supported.
+
+### 2026-09-25 — Stage 1 codec slice
+
+Added pure BLE RPC codec/framing support and focused tests. Verification passed: 9 codec tests, `@lcl/shelly-client` typecheck and focused ESLint. Next implementation slice is the injected-GATT `BleShellyRpcTransport`; no UI or relay mutation yet.
