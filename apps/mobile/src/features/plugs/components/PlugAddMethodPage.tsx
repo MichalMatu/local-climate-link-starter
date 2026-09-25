@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import {
-  PlugAddPage,
-  type PlugAddPageProps
-} from './PlugAddPage.js';
+import { PlugAddPage, type PlugAddPageProps } from './PlugAddPage.js';
 import {
   PlugBluetoothAddPanel,
   type PlugBluetoothAddPanelProps

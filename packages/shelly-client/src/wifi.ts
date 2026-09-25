@@ -51,10 +51,7 @@ export type ShellyWifiReadResult = {
   status: ShellyWifiStatus;
 };
 
-const parseResponse = <T>(
-  response: Result<unknown>,
-  schema: z.ZodType<T>
-): Result<T> => {
+const parseResponse = <T>(response: Result<unknown>, schema: z.ZodType<T>): Result<T> => {
   if (!response.ok) {
     return response;
   }

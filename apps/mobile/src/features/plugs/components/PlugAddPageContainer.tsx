@@ -4,10 +4,7 @@ import { usePlugBleAddFlow } from '../flows/usePlugBleAddFlow.js';
 
 export type PlugAddPageContainerProps = PlugAddPageProps;
 
-export const PlugAddPageContainer = ({
-  manual,
-  scan
-}: PlugAddPageContainerProps) => {
+export const PlugAddPageContainer = ({ manual, scan }: PlugAddPageContainerProps) => {
   const bluetooth = usePlugBleAddFlow();
 
   return (

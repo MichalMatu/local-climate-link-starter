@@ -28,7 +28,11 @@ export const PlugBluetoothAddPanel = ({
   const { t } = useTranslation();
 
   return (
-    <section className="shelly-network-scan" role="tabpanel" aria-label={t('common.bluetooth')}>
+    <section
+      className="shelly-network-scan"
+      role="tabpanel"
+      aria-label={t('common.bluetooth')}
+    >
       <div className="shelly-network-scan__body">
         {error && <p role="alert">{t('hardware.sensor.phoneBleGenericFailed')}</p>}
 
@@ -63,7 +67,9 @@ export const PlugBluetoothAddPanel = ({
                   className="device-discovery-card shelly-scan-result"
                 >
                   <div className="device-discovery-card__primary">
-                    <strong className="device-discovery-card__identity">{candidate.name}</strong>
+                    <strong className="device-discovery-card__identity">
+                      {candidate.name}
+                    </strong>
                     <button
                       className="secondary-action device-discovery-card__action"
                       type="button"
@@ -92,7 +98,9 @@ export const PlugBluetoothAddPanel = ({
             aria-busy={scanning || undefined}
             onClick={scanning ? onStop : onStart}
           >
-            {scanning && <span className="device-scan-action__spinner" aria-hidden="true" />}
+            {scanning && (
+              <span className="device-scan-action__spinner" aria-hidden="true" />
+            )}
             <span>
               {scanning ? t('hardware.shelly.scanStop') : t('hardware.shelly.scanStart')}
             </span>

@@ -3,13 +3,15 @@ import {
   classifyPlugBleNetwork
 } from './plugBleOnboarding.js';
 
-const wifi = (patch: {
-  staSsid?: string | null;
-  sta1Ssid?: string | null;
-  status?: 'disconnected' | 'connecting' | 'connected' | 'got ip';
-  connectedSsid?: string | null;
-  stationIp?: string | null;
-} = {}) => ({
+const wifi = (
+  patch: {
+    staSsid?: string | null;
+    sta1Ssid?: string | null;
+    status?: 'disconnected' | 'connecting' | 'connected' | 'got ip';
+    connectedSsid?: string | null;
+    stationIp?: string | null;
+  } = {}
+) => ({
   config: {
     sta: { ssid: patch.staSsid ?? null, enable: Boolean(patch.staSsid) },
     sta1: { ssid: patch.sta1Ssid ?? null, enable: Boolean(patch.sta1Ssid) }
