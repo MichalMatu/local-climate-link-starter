@@ -7,11 +7,6 @@ import type {
 } from '../data/plugBleOnboarding.js';
 import { inspectPlugBleCandidate } from './inspectPlugBleCandidate.js';
 import {
-  provisionPlugBleWifi,
-  type ProvisionPlugBleWifiInput,
-  type ProvisionPlugBleWifiResult
-} from './provisionPlugBleWifi.js';
-import {
   DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS,
   scanPlugBleCandidates
 } from './scanPlugBleCandidates.js';
@@ -19,7 +14,6 @@ import {
 export type UsePlugBleAddFlowDependencies = {
   createScanner?(): BleScanner;
   inspectCandidate?(candidate: PlugBleAdvertisement): Promise<VerifiedPlugBleCandidate>;
-  provisionWifi?(input: ProvisionPlugBleWifiInput): Promise<ProvisionPlugBleWifiResult>;
 };
 
 export type UsePlugBleAddFlowResult = {
@@ -28,12 +22,9 @@ export type UsePlugBleAddFlowResult = {
   error: string | null;
   inspectingDeviceId: string | null;
   verifiedCandidate: VerifiedPlugBleCandidate | null;
-  provisioning: boolean;
-  provisionResult: ProvisionPlugBleWifiResult | null;
   startScan(): void;
   stopScan(): void;
   inspectCandidate(candidate: PlugBleAdvertisement): Promise<void>;
-  provisionWifi(ssid: string, password: string): Promise<void>;
   clearVerifiedCandidate(): void;
 };
 
@@ -61,9 +52,6 @@ export const usePlugBleAddFlow = (
   const [inspectingDeviceId, setInspectingDeviceId] = useState<string | null>(null);
   const [verifiedCandidate, setVerifiedCandidate] =
     useState<VerifiedPlugBleCandidate | null>(null);
-  const [provisioning, setProvisioning] = useState(false);
-  const [provisionResult, setProvisionResult] =
-    useState<ProvisionPlugBleWifiResult | null>(null);
   const scannerRef = useRef<BleScanner | null>(null);
   const scanGenerationRef = useRef(0);
 
@@ -74,7 +62,6 @@ export const usePlugBleAddFlow = (
     [dependencies]
   );
   const inspectCandidateImpl = dependencies.inspectCandidate ?? inspectPlugBleCandidate;
-  const provisionWifiImpl = dependencies.provisionWifi ?? provisionPlugBleWifi;
 
   const stopScanNow = useCallback(async (): Promise<void> => {
     scanGenerationRef.current += 1;
@@ -95,7 +82,6 @@ export const usePlugBleAddFlow = (
     scannerRef.current = scanner;
     setCandidates([]);
     setVerifiedCandidate(null);
-    setProvisionResult(null);
     setError(null);
     setScanning(true);
     void scanPlugBleCandidates({
@@ -126,7 +112,6 @@ export const usePlugBleAddFlow = (
       await stopScanNow();
       setError(null);
       setVerifiedCandidate(null);
-      setProvisionResult(null);
       setInspectingDeviceId(candidate.deviceId);
       try {
         setVerifiedCandidate(await inspectCandidateImpl(candidate));
@@ -139,42 +124,8 @@ export const usePlugBleAddFlow = (
     [inspectCandidateImpl, stopScanNow]
   );
 
-  const provisionWifi = useCallback(
-    async (ssid: string, password: string): Promise<void> => {
-      if (!verifiedCandidate || verifiedCandidate.network.state !== 'needs-wifi') {
-        setError('Verify a Shelly Plug that needs Wi-Fi before provisioning.');
-        return;
-      }
-      setError(null);
-      setProvisionResult(null);
-      setProvisioning(true);
-      try {
-        const next = await provisionWifiImpl({
-          candidate: verifiedCandidate,
-          ssid,
-          password
-        });
-        setProvisionResult(next);
-        if (next.network) {
-          const network = next.network;
-          setVerifiedCandidate((current) =>
-            current && current.physicalId === next.physicalId
-              ? { ...current, network }
-              : current
-          );
-        }
-      } catch (caught) {
-        setError(errorMessage(caught));
-      } finally {
-        setProvisioning(false);
-      }
-    },
-    [provisionWifiImpl, verifiedCandidate]
-  );
-
   const clearVerifiedCandidate = useCallback(() => {
     setVerifiedCandidate(null);
-    setProvisionResult(null);
   }, []);
 
   useEffect(
@@ -190,12 +141,9 @@ export const usePlugBleAddFlow = (
     error,
     inspectingDeviceId,
     verifiedCandidate,
-    provisioning,
-    provisionResult,
     startScan,
     stopScan,
     inspectCandidate,
-    provisionWifi,
     clearVerifiedCandidate
   };
 };
