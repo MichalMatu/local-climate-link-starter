@@ -437,3 +437,22 @@ E3E298 factory-fresh: initial OFF -> ON verified -> OFF command -> final OFF ver
 For both devices `safeRelayTest()` reported `onCommandSent=true`, `offCommandSent=true`, `finalRelayOn=false`, and a separate post-test status read confirmed `relayOn=false`. This proves that a factory-fresh Plug can be discovered, identified, read and controlled over native BLE RPC without a Shelly Link script, and that the same transport works on the configured Plug.
 
 Stage 2 is accepted. The next product-facing stage is onboarding: `Plugs -> + -> Wi-Fi | Bluetooth`, with BLE discovery/identity first and fresh-device Wi-Fi provisioning designed as a separate bounded slice.
+
+### 2026-09-25 — Stage 3A real S22 add-flow acceptance
+
+The current Stage 3 onboarding UI was built, installed and exercised on the Samsung S22+ through the real app WebView. The user-facing path succeeded end to end for the configured Plug:
+
+```text
+Plugs -> Add plug -> Bluetooth -> Start scan
+-> ShellyPlugSG3-E4B063D7F530
+-> Info
+-> physical id shellyplugsg3-e4b063d7f530
+-> S3PL-00112EU, gen 3
+-> Wi-Fi ✓ · got ip
+```
+
+This validates the actual shipped S22 path from presentation through `CapacitorBleScanner`, scan cleanup, GATT inspection and typed Shelly RPC classification. No Wi-Fi configuration, script mutation or relay command was sent during this acceptance.
+
+The factory-fresh `E3E298` Plug was still absent from the scan and remains pending for fresh-device UI/provisioning acceptance. Independent S22 and Mac scans previously established that it is currently not advertising BLE, rather than being filtered by the app.
+
+The next bounded slice adds the explicit Wi-Fi credential form only after a candidate is verified as `needs-wifi`. Credentials remain ephemeral UI state and the password is cleared after each terminal provisioning attempt. The existing guarded `provisionPlugBleWifi` flow remains the sole owner of the mutating `WiFi.SetConfig` call.

@@ -36,10 +36,13 @@ const createProps = (): PlugAddMethodPageProps => ({
     candidates: [],
     inspectingDeviceId: null,
     verifiedCandidate: null,
+    provisioning: false,
+    provisionResult: null,
     error: null,
     onStart: vi.fn(),
     onStop: vi.fn(),
-    onInspect: vi.fn()
+    onInspect: vi.fn(),
+    onProvision: vi.fn(async () => undefined)
   }
 });
 

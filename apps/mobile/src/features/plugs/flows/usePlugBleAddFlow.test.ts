@@ -150,4 +150,43 @@ describe('usePlugBleAddFlow', () => {
 
     await waitFor(() => expect(scanner.stopScan).toHaveBeenCalled());
   });
+
+  it('provisions a verified needs-wifi candidate once and reconciles the read-back network state', async () => {
+    const inspectCandidate = vi.fn(async () => verified('plug'));
+    const provisionWifi = vi.fn(async () => ({
+      physicalId: 'shellyplugsg3-aabbccddeeff',
+      restartRequired: false,
+      verification: 'confirmed' as const,
+      network: {
+        state: 'has-wifi' as const,
+        configuredSsids: ['Home network'],
+        connectionStatus: 'got ip' as const,
+        connectedSsid: 'Home network',
+        stationIp: '192.168.1.20'
+      }
+    }));
+    const { result } = renderHook(() =>
+      usePlugBleAddFlow({ inspectCandidate, provisionWifi })
+    );
+    await act(async () => {
+      await result.current.inspectCandidate({
+        deviceId: 'plug',
+        name: 'ShellyPlugSG3-AABBCCDDEEFF',
+        rssi: -40
+      });
+    });
+    await act(async () => {
+      await result.current.provisionWifi('Home network', 'secret-value');
+    });
+    expect(provisionWifi).toHaveBeenCalledTimes(1);
+    expect(provisionWifi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ssid: 'Home network',
+        password: 'secret-value',
+        candidate: expect.objectContaining({ physicalId: 'shellyplugsg3-aabbccddeeff' })
+      })
+    );
+    expect(result.current.provisionResult?.verification).toBe('confirmed');
+    expect(result.current.verifiedCandidate?.network.state).toBe('has-wifi');
+  });
 });
