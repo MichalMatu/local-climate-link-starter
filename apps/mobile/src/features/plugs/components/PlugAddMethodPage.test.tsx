@@ -76,7 +76,7 @@ describe('PlugAddMethodPage', () => {
       'true'
     );
     expect(screen.queryByRole('tab', { name: 'Scan network' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start scan' }));
     expect(props.bluetooth.onStart).toHaveBeenCalledTimes(1);
   });
 
