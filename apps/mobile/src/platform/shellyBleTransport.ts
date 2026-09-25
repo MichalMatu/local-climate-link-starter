@@ -1,8 +1,5 @@
 import { CapacitorBleGattClient } from '@lcl/ble-core';
-import {
-  BleShellyRpcTransport,
-  type ShellyBleGattPort
-} from '@lcl/shelly-client';
+import { BleShellyRpcTransport, type ShellyBleGattPort } from '@lcl/shelly-client';
 
 const DEFAULT_SHELLY_BLE_RPC_TIMEOUT_MS = 8000;
 

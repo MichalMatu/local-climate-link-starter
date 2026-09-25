@@ -23,9 +23,7 @@ export const offlineError = (cause: unknown): ShellyClientError => ({
   retryable: true
 });
 
-export const protocolError = (
-  error: ShellyBleProtocolError
-): ShellyClientError => ({
+export const protocolError = (error: ShellyBleProtocolError): ShellyClientError => ({
   kind: 'validation-failed',
   userMessageKey: 'errors.shellyInvalidResponse',
   technicalMessage: error.message,

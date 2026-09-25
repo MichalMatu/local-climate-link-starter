@@ -1,13 +1,9 @@
 import type { ShellyRpcRequest } from '../model.js';
 
-export const SHELLY_BLE_RPC_SERVICE_UUID =
-  '5f6d4f53-5f52-5043-5f53-56435f49445f';
-export const SHELLY_BLE_RPC_DATA_UUID =
-  '5f6d4f53-5f52-5043-5f64-6174615f5f5f';
-export const SHELLY_BLE_RPC_TX_CONTROL_UUID =
-  '5f6d4f53-5f52-5043-5f74-785f63746c5f';
-export const SHELLY_BLE_RPC_RX_CONTROL_UUID =
-  '5f6d4f53-5f52-5043-5f72-785f63746c5f';
+export const SHELLY_BLE_RPC_SERVICE_UUID = '5f6d4f53-5f52-5043-5f53-56435f49445f';
+export const SHELLY_BLE_RPC_DATA_UUID = '5f6d4f53-5f52-5043-5f64-6174615f5f5f';
+export const SHELLY_BLE_RPC_TX_CONTROL_UUID = '5f6d4f53-5f52-5043-5f74-785f63746c5f';
+export const SHELLY_BLE_RPC_RX_CONTROL_UUID = '5f6d4f53-5f52-5043-5f72-785f63746c5f';
 
 const UINT32_MAX = 0xffff_ffff;
 
@@ -25,8 +21,7 @@ export interface ShellyBleProtocolError {
 }
 
 export type ShellyBleProtocolResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: ShellyBleProtocolError };
+  { ok: true; value: T } | { ok: false; error: ShellyBleProtocolError };
 
 export interface ShellyBleRpcRequestFrame {
   lengthBytes: Uint8Array;
@@ -181,9 +176,7 @@ export const decodeShellyBleRpcResponse = (
 
   const error = isRecord(decoded.error)
     ? {
-        ...(typeof decoded.error.code === 'number'
-          ? { code: decoded.error.code }
-          : {}),
+        ...(typeof decoded.error.code === 'number' ? { code: decoded.error.code } : {}),
         ...(typeof decoded.error.message === 'string'
           ? { message: decoded.error.message }
           : {})

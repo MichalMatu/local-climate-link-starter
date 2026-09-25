@@ -221,9 +221,7 @@ describe('BleShellyRpcTransport', () => {
   });
 
   it('invalidates the connection on a mismatched response id', async () => {
-    const gatt = new FakeGatt([
-      { body: (id) => ({ id: id + 1, result: {} }) }
-    ]);
+    const gatt = new FakeGatt([{ body: (id) => ({ id: id + 1, result: {} }) }]);
     const transport = createTransport(gatt);
 
     const result = await transport.call({ method: RPC_METHODS.ShellyGetStatus });
