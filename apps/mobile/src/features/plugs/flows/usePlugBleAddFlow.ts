@@ -1,11 +1,11 @@
 import { Capacitor } from '@capacitor/core';
 import { CapacitorBleScanner, type BleScanner } from '@lcl/ble-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
-import {
-  inspectPlugBleCandidate,
-  type PlugBleAdvertisement
-} from './inspectPlugBleCandidate.js';
+import type {
+  PlugBleAdvertisement,
+  VerifiedPlugBleCandidate
+} from '../data/plugBleOnboarding.js';
+import { inspectPlugBleCandidate } from './inspectPlugBleCandidate.js';
 import {
   DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS,
   scanPlugBleCandidates
@@ -61,8 +61,7 @@ export const usePlugBleAddFlow = (
       new CapacitorBleScanner({ platform: Capacitor.getPlatform() }),
     [dependencies]
   );
-  const inspectCandidateImpl =
-    dependencies.inspectCandidate ?? inspectPlugBleCandidate;
+  const inspectCandidateImpl = dependencies.inspectCandidate ?? inspectPlugBleCandidate;
 
   const stopScanNow = useCallback(async (): Promise<void> => {
     scanGenerationRef.current += 1;
