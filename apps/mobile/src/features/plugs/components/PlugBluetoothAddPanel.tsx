@@ -52,10 +52,6 @@ export const PlugBluetoothAddPanel = ({
           </article>
         )}
 
-        {candidates.length === 0 && !scanning && !verifiedCandidate && (
-          <p>{t('hardware.shelly.scanResultEmpty')}</p>
-        )}
-
         {candidates.length > 0 && (
           <div className="saved-list" aria-label={t('hardware.shelly.foundListLabel')}>
             {candidates.map((candidate) => {
