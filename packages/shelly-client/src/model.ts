@@ -146,7 +146,9 @@ export const RPC_METHODS = {
   PlugsUiSetConfig: 'PLUGS_UI.SetConfig',
   CloudGetConfig: 'Cloud.GetConfig',
   CloudSetConfig: 'Cloud.SetConfig',
-  CloudGetStatus: 'Cloud.GetStatus'
+  CloudGetStatus: 'Cloud.GetStatus',
+  WifiGetConfig: 'WiFi.GetConfig',
+  WifiGetStatus: 'WiFi.GetStatus'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
