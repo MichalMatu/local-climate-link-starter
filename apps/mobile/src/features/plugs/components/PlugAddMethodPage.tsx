@@ -33,7 +33,7 @@ export const PlugAddMethodPage = ({
       <div
         className="shelly-add-tabs lcl-segmented-control"
         role="tablist"
-        aria-label={t('hardware.shelly.add')}
+        aria-label={`${t('common.add')}: Wi-Fi / ${t('common.bluetooth')}`}
       >
         <button
           className="shelly-add-tabs__tab lcl-segmented-control__item"
