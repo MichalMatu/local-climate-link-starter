@@ -1,11 +1,16 @@
 import {
   RpcShellyClient,
   type ShellyClient,
+  type ShellyClientError,
+  type ShellyErrorKind,
   type ShellyRpcTransport,
   type ShellyStatus
 } from '@lcl/shelly-client';
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
-import { unwrapShellyResult } from '../../../platform/shellyResult.js';
+import {
+  shellyResultErrorMessage,
+  unwrapShellyResult
+} from '../../../platform/shellyResult.js';
 import type { SavedBlePlug } from './savedBlePlug.js';
 
 export type BlePlugRuntimeStatus = Pick<ShellyStatus, 'relayOn' | 'telemetry' | 'clock'>;
@@ -23,6 +28,25 @@ export type BlePlugRuntimeDependencies = {
   createTransport(deviceId: string): DisposableShellyRpcTransport;
   createClient(transport: ShellyRpcTransport): BlePlugRuntimeClient;
 };
+
+export class BlePlugRuntimeReadError extends Error {
+  readonly kind: ShellyErrorKind;
+  readonly retryable: boolean;
+
+  constructor(error: ShellyClientError) {
+    super(shellyResultErrorMessage({ ok: false, error }));
+    this.name = 'BlePlugRuntimeReadError';
+    this.kind = error.kind;
+    this.retryable = error.retryable;
+  }
+}
+
+export const isRecoverableBlePlugRuntimeReadError = (
+  error: unknown
+): error is BlePlugRuntimeReadError =>
+  error instanceof BlePlugRuntimeReadError &&
+  error.retryable &&
+  (error.kind === 'shelly-offline' || error.kind === 'timeout');
 
 const defaultDependencies: BlePlugRuntimeDependencies = {
   createTransport: (deviceId) => createShellyBleTransport(deviceId),
@@ -74,11 +98,14 @@ export const readBlePlugRuntimeStatus = async (
   withBlePlugClient(
     plug,
     async (client) => {
-      const status = unwrapShellyResult(await client.getStatus());
+      const result = await client.getStatus();
+      if (!result.ok) {
+        throw new BlePlugRuntimeReadError(result.error);
+      }
       return {
-        relayOn: status.relayOn,
-        telemetry: status.telemetry,
-        clock: status.clock
+        relayOn: result.value.relayOn,
+        telemetry: result.value.telemetry,
+        clock: result.value.clock
       };
     },
     dependencies

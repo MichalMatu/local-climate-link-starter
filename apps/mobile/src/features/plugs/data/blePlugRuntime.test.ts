@@ -1,6 +1,8 @@
 import { FakeShellyClient, type ShellyRpcTransport } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  BlePlugRuntimeReadError,
+  isRecoverableBlePlugRuntimeReadError,
   readBlePlugRuntimeStatus,
   setBlePlugRelay,
   type BlePlugRuntimeDependencies
@@ -40,6 +42,32 @@ describe('BLE Plug runtime boundary', () => {
     expect(disconnect).toHaveBeenCalledOnce();
   });
 
+  it('preserves retryable BLE read error kind for conservative locator recovery', async () => {
+    const client = new FakeShellyClient();
+    vi.spyOn(client, 'getStatus').mockResolvedValue({
+      ok: false,
+      error: {
+        kind: 'shelly-offline',
+        userMessageKey: 'errors.shellyOffline',
+        technicalMessage: 'stale GATT locator',
+        retryable: true
+      }
+    });
+    const { dependencies } = createDependencies(client);
+
+    const error = await readBlePlugRuntimeStatus(
+      { bleDeviceId: 'BLE-STALE' },
+      dependencies
+    ).then(
+      () => null,
+      (caught: unknown) => caught
+    );
+
+    expect(error).toBeInstanceOf(BlePlugRuntimeReadError);
+    expect(error).toMatchObject({ kind: 'shelly-offline', retryable: true });
+    expect(isRecoverableBlePlugRuntimeReadError(error)).toBe(true);
+  });
+
   it('uses one-shot relay RPC calls without hiding the final state', async () => {
     const { client, disconnect, dependencies } = createDependencies();
     const plug = { bleDeviceId: 'BLE-LOCATOR-2' };
@@ -56,6 +84,28 @@ describe('BLE Plug runtime boundary', () => {
     if (!afterOff.ok) throw new Error(afterOff.error.technicalMessage);
     expect(afterOff.value.relayOn).toBe(false);
     expect(disconnect).toHaveBeenCalledTimes(2);
+  });
+
+  it('never replays a failed relay mutation automatically', async () => {
+    const client = new FakeShellyClient();
+    const setRelayOn = vi.spyOn(client, 'setRelayOn').mockResolvedValue({
+      ok: false,
+      error: {
+        kind: 'timeout',
+        userMessageKey: 'errors.timeout',
+        technicalMessage: 'relay write timed out',
+        retryable: true
+      }
+    });
+    const { createTransport, disconnect, dependencies } = createDependencies(client);
+
+    await expect(
+      setBlePlugRelay({ bleDeviceId: 'BLE-MUTATION' }, true, dependencies)
+    ).rejects.toThrow('relay write timed out');
+
+    expect(setRelayOn).toHaveBeenCalledOnce();
+    expect(createTransport).toHaveBeenCalledOnce();
+    expect(disconnect).toHaveBeenCalledOnce();
   });
 
   it('serializes overlapping operations for the same BLE locator', async () => {

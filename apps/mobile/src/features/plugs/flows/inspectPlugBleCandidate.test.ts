@@ -83,6 +83,26 @@ describe('inspectPlugBleCandidate', () => {
     expect(transport.disconnectCalls).toBe(1);
   });
 
+  it('can verify canonical identity without issuing a preview status read', async () => {
+    const transport = new FakeDisconnectableTransport([ok(deviceInfo)]);
+
+    const candidate = await inspectPlugBleCandidate(
+      advertisement,
+      { radioSettleMs: 0, includePreview: false },
+      { createTransport: () => transport, sleepMs: async () => undefined }
+    );
+
+    expect(candidate).toMatchObject({
+      bleDeviceId: advertisement.deviceId,
+      physicalId: 'shellyplugsg3-e4b063e3e298'
+    });
+    expect(candidate.preview).toBeUndefined();
+    expect(transport.requests.map((request) => request.method)).toEqual([
+      'Shelly.GetDeviceInfo'
+    ]);
+    expect(transport.disconnectCalls).toBe(1);
+  });
+
   it('keeps canonical verification usable when preview status fails', async () => {
     const transport = new FakeDisconnectableTransport([
       ok(deviceInfo),

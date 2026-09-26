@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
 import {
-  readBlePlugRuntimeStatus,
   setBlePlugRelay,
   type BlePlugRuntimeStatus
 } from '../data/blePlugRuntime.js';
+import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import { readSavedBlePlugRuntimeStatus } from './readSavedBlePlugRuntimeStatus.js';
 
 export const SAVED_BLE_PLUG_RUNTIME_REFRESH_MS = 5_000;
 
@@ -22,10 +23,14 @@ export const useSavedBlePlugRuntime = (
   options: SavedBlePlugRuntimeOptions = {}
 ) => {
   const queryClient = useQueryClient();
+  const replaceLocator = useSavedBlePlugStore((state) => state.replaceLocator);
   const queryKey = savedBlePlugRuntimeQueryKey(plug);
   const query = useQuery({
     queryKey,
-    queryFn: () => readBlePlugRuntimeStatus(plug),
+    queryFn: () =>
+      readSavedBlePlugRuntimeStatus(plug, {
+        persistLocator: replaceLocator
+      }),
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: options.refetchIntervalMs ?? SAVED_BLE_PLUG_RUNTIME_REFRESH_MS,

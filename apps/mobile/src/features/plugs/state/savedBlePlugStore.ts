@@ -9,6 +9,7 @@ import { savedBlePlugFromCandidate, type SavedBlePlug } from '../data/savedBlePl
 export type SavedBlePlugState = {
   plugs: SavedBlePlug[];
   saveCandidate(candidate: VerifiedPlugBleCandidate): void;
+  replaceLocator(physicalId: string, bleDeviceId: string): void;
   renamePlug(physicalId: string, name: string): void;
   removePlug(physicalId: string): void;
 };
@@ -30,6 +31,27 @@ export const useSavedBlePlugStore = create<SavedBlePlugState>((set) => ({
         saved,
         ...state.plugs.filter((plug) => normalizeId(plug.physicalId) !== normalizedId)
       ];
+      repository.save(plugs);
+      return { plugs };
+    }),
+  replaceLocator: (physicalId, bleDeviceId) =>
+    set((state) => {
+      const normalizedId = normalizeId(physicalId);
+      const normalizedLocator = bleDeviceId.trim();
+      if (!normalizedLocator) return state;
+
+      let changed = false;
+      const plugs = state.plugs.map((plug) => {
+        if (
+          normalizeId(plug.physicalId) !== normalizedId ||
+          plug.bleDeviceId === normalizedLocator
+        ) {
+          return plug;
+        }
+        changed = true;
+        return { ...plug, bleDeviceId: normalizedLocator };
+      });
+      if (!changed) return state;
       repository.save(plugs);
       return { plugs };
     }),

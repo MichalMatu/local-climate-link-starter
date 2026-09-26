@@ -40,6 +40,26 @@ describe('saved BLE plug store', () => {
     });
   });
 
+  it('replaces only the reconnect locator and preserves custom Plug metadata', () => {
+    useSavedBlePlugStore.getState().saveCandidate(candidate());
+    useSavedBlePlugStore.getState().renamePlug('shellyplugsg3-aabb', 'Growbox fan');
+
+    useSavedBlePlugStore
+      .getState()
+      .replaceLocator('SHELLYPLUGSG3-AABB', 'temporary-handle-recovered');
+
+    expect(useSavedBlePlugStore.getState().plugs).toEqual([
+      expect.objectContaining({
+        physicalId: 'shellyplugsg3-aabb',
+        name: 'Growbox fan',
+        bleDeviceId: 'temporary-handle-recovered',
+        advertisementName: 'ShellyPlugSG3-AABB',
+        model: 'S3PL-00112EU',
+        firmwareId: '1.7.5'
+      })
+    ]);
+  });
+
   it('removes a BLE-only plug by physical identity', () => {
     useSavedBlePlugStore.getState().saveCandidate(candidate());
 

@@ -19,6 +19,7 @@ type DisconnectableShellyTransport = ShellyRpcTransport & {
 
 export type InspectPlugBleCandidateOptions = {
   radioSettleMs?: number;
+  includePreview?: boolean;
 };
 
 export type InspectPlugBleCandidateDependencies = {
@@ -80,6 +81,10 @@ export const inspectPlugBleCandidate = async (
       rssi: advertisement.rssi,
       deviceInfo
     });
+
+    if (options.includePreview === false) {
+      return verified;
+    }
 
     return {
       ...verified,
