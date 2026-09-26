@@ -104,19 +104,29 @@ Focused recovery validation passed 4 Vitest files / 23 tests, mobile typecheck, 
 
 Real Samsung S22+ stale-locator acceptance passed on 2026-09-26 using factory-fresh Plug `shellyplugsg3-e4b063e3e298`. The saved locator was deliberately changed from `E4:B0:63:E3:E2:9A` to stale `02:00:00:00:00:01`; the read-only runtime path recovered through BLE scanning/canonical identity verification, persisted `E4:B0:63:E3:E2:9A` again, preserved `physicalId` and saved metadata, and settled to a successful `0.0 W / 245 V / 0 Wh` read with relay OFF, controls enabled and no alerts. No relay toggle or settings mutation was performed. Android Bluetooth logs showed the recovery scan followed by successful GATT reconnects to the target address suffix `E2:9A`.
 
-### Active next slice — read-only BLE Plug detail / Info target design
+### Read-only BLE Plug detail / Info — DONE
 
-The first read-only audit found that this is not a mechanical transport swap: current detail composition is installation-centric, `PlugSettingsTarget` requires an HTTP `baseUrl`, and Info presentation contains Wi-Fi-only rows. Do not force `SavedBlePlug` into that target or refactor stable Wi-Fi in place. First define a narrow verified read-only management target/transport boundary and the transport-neutral Info row set.
+A narrow verified read-only management boundary now supports both Wi-Fi and BLE without changing the existing Wi-Fi-shaped `PlugSettingsTarget` or introducing a fake HTTP target. BLE reads verify normalized `Shelly.GetDeviceInfo.id` against the saved canonical `physicalId`, and the BLE transport is disconnected in `finally`.
 
-Continue in this order:
+The accepted UI slice adds a BLE-only read-only Plug detail route from the dashboard card and keeps presentation transport-aware:
 
-1. define the narrow verified read-only management target/transport boundary without changing `PlugSettingsTarget`;
-2. define transport-neutral Info rows and BLE-only replacements for Wi-Fi address/RSSI;
-3. implement the BLE-only read-only Detail/Info surface with focused tests;
-4. implement only explicitly approved settings mutations, preserving the no-ambiguous-retry rule;
-5. pairing/bonding policy for firmware that requires it;
-6. optional dual-transport representation for one physical Plug;
-7. optional transport selection/fallback policy.
+- common Info rows remain shared;
+- Wi-Fi detail keeps `baseUrl` and Wi-Fi RSSI behavior;
+- BLE detail shows the BLE reconnect locator plus advertisement name instead of Wi-Fi-only rows;
+- BLE-only detail omits installed-runtime resource rows;
+- no LED/button/Cloud/script/config mutation surface was added;
+- no automatic retry of ambiguous mutations was introduced;
+- new capability code lives behind feature boundaries (`features/plugs` and `features/dashboard`) while app routing remains composition-only.
+
+Accepted commit `c3ffc6667f4f35b95091c740307dc9a29dc7bbcf` passed focused typecheck/Vitest/ESLint and the repository pre-push gate. The pre-push gate completed full `pnpm check`, including all workspace tests, coverage and builds, followed by the canonical 4 responsive E2E cases; push to `work/shelly-ble-transport` succeeded.
+
+Safe next work:
+
+1. audit which **read-only** Device/settings information is worth exposing over BLE, if any;
+2. implement settings mutations only when explicitly approved, preserving canonical identity verification and the no-ambiguous-retry rule;
+3. pairing/bonding policy for firmware that requires it;
+4. optional dual-transport representation for one physical Plug;
+5. optional transport selection/fallback policy.
 
 The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
 
