@@ -1,5 +1,6 @@
 import type { ShellyDeviceInfo, ShellyStatus } from '@lcl/shelly-client';
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
+import { unwrapBlePlugReadOnlyResult } from './blePlugReadOnlyError.js';
 import {
   withVerifiedPlugReadOnlyClient,
   type PlugReadOnlyManagementDependencies,
@@ -26,8 +27,14 @@ export const readPlugInformationFromTarget = async (
       ]);
 
       return {
-        deviceInfo: unwrapShellyResult(deviceInfo),
-        status: unwrapShellyResult(status)
+        deviceInfo:
+          target.transport === 'bluetooth'
+            ? unwrapBlePlugReadOnlyResult(deviceInfo)
+            : unwrapShellyResult(deviceInfo),
+        status:
+          target.transport === 'bluetooth'
+            ? unwrapBlePlugReadOnlyResult(status)
+            : unwrapShellyResult(status)
       };
     },
     dependencies

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { readBlePlugInformation } from '../data/plugInformation.js';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import { readSavedBlePlugInformation } from './readSavedBlePlugInformation.js';
 
 export const blePlugInformationQueryKey = (plug: SavedBlePlug | undefined) =>
   [
@@ -12,12 +13,14 @@ export const blePlugInformationQueryKey = (plug: SavedBlePlug | undefined) =>
 export const useBlePlugInformationFlow = (
   plug: SavedBlePlug | undefined,
   options: { enabled?: boolean } = {}
-) =>
-  useQuery({
+) => {
+  const replaceLocator = useSavedBlePlugStore((state) => state.replaceLocator);
+
+  return useQuery({
     queryKey: blePlugInformationQueryKey(plug),
     queryFn: () => {
       if (!plug) throw new Error('Saved BLE Plug is missing.');
-      return readBlePlugInformation(plug);
+      return readSavedBlePlugInformation(plug, { persistLocator: replaceLocator });
     },
     enabled: Boolean(plug) && (options.enabled ?? true),
     retry: false,
@@ -26,3 +29,4 @@ export const useBlePlugInformationFlow = (
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
   });
+};

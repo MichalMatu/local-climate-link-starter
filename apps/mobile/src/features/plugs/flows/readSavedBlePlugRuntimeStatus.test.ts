@@ -266,7 +266,7 @@ describe('readSavedBlePlugRuntimeStatus', () => {
     expect(scanCandidates).toHaveBeenCalledOnce();
     expect(inspectCandidate).toHaveBeenCalledOnce();
     expect(persistLocator).toHaveBeenCalledOnce();
-    expect(readStatus).toHaveBeenCalledTimes(3);
+    expect(readStatus).toHaveBeenCalledTimes(4);
   });
 
   it('bounds identity inspection even when many Shelly advertisements are present', async () => {

@@ -1,5 +1,6 @@
 import { FakeShellyClient, type ShellyRpcTransport } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
+import { BlePlugReadOnlyError } from './blePlugReadOnlyError.js';
 import {
   withVerifiedPlugReadOnlyClient,
   type PlugReadOnlyManagementDependencies
@@ -67,6 +68,41 @@ describe('Plug read-only management target', () => {
 
     expect(result.ok).toBe(true);
     expect(dependencies.createBleTransport).toHaveBeenCalledWith('BLE-LOCATOR');
+    expect(disconnect).toHaveBeenCalledOnce();
+  });
+
+  it('preserves recoverable BLE identity read errors for locator recovery', async () => {
+    const client = new FakeShellyClient();
+    vi.spyOn(client, 'getDeviceInfo').mockResolvedValue({
+      ok: false,
+      error: {
+        kind: 'shelly-offline',
+        userMessageKey: 'errors.shellyOffline',
+        technicalMessage: 'stale GATT locator',
+        retryable: true
+      }
+    });
+    const { dependencies, disconnect } = createDependencies(client);
+
+    const error = await withVerifiedPlugReadOnlyClient(
+      {
+        transport: 'bluetooth',
+        physicalId: 'shellyplugsg3-demo',
+        bleDeviceId: 'BLE-STALE'
+      },
+      async () => 'unreachable',
+      dependencies
+    ).then(
+      () => null,
+      (caught: unknown) => caught
+    );
+
+    expect(error).toBeInstanceOf(BlePlugReadOnlyError);
+    expect(error).toMatchObject({
+      name: 'BlePlugReadOnlyError',
+      kind: 'shelly-offline',
+      retryable: true
+    });
     expect(disconnect).toHaveBeenCalledOnce();
   });
 

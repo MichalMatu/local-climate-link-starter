@@ -5,7 +5,7 @@ import {
   type ShellyRpcTransport
 } from '@lcl/shelly-client';
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
-import { unwrapShellyResult } from '../../../platform/shellyResult.js';
+import { unwrapBlePlugReadOnlyResult } from './blePlugReadOnlyError.js';
 import {
   createVerifiedPlugSettingsTransport,
   type PlugSettingsTarget
@@ -45,7 +45,7 @@ const assertMatchingPhysicalIdentity = async (
   target: Extract<PlugReadOnlyManagementTarget, { transport: 'bluetooth' }>,
   client: ReadOnlyShellyClient
 ): Promise<void> => {
-  const info = unwrapShellyResult(await client.getDeviceInfo());
+  const info = unwrapBlePlugReadOnlyResult(await client.getDeviceInfo());
   const remoteDeviceId = info.id?.trim();
   if (!remoteDeviceId) {
     throw new Error('Shelly did not expose a stable device id.');
