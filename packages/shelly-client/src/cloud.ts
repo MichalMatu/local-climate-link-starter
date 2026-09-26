@@ -48,7 +48,9 @@ const parseSetConfigResponse = (
 export class RpcShellyCloudClient {
   constructor(private readonly transport: ShellyRpcTransport) {}
 
-  async read(): Promise<Result<ShellyCloudReadResult>> {
+  private async readWithRequirements(
+    requireWrite: boolean
+  ): Promise<Result<ShellyCloudReadResult>> {
     const methodsResponse = await this.transport.call<unknown>({
       method: RPC_METHODS.ShellyListMethods
     });
@@ -62,11 +64,11 @@ export class RpcShellyCloudClient {
     }
 
     const methods = parsedMethods.data.methods;
-    const supported =
+    const canRead =
       methods.includes(RPC_METHODS.CloudGetConfig) &&
-      methods.includes(RPC_METHODS.CloudSetConfig) &&
       methods.includes(RPC_METHODS.CloudGetStatus);
-    if (!supported) {
+    const canWrite = methods.includes(RPC_METHODS.CloudSetConfig);
+    if (!canRead || (requireWrite && !canWrite)) {
       return { ok: true, value: { supported: false } };
     }
 
@@ -100,6 +102,14 @@ export class RpcShellyCloudClient {
         status: parsedStatus.data
       }
     };
+  }
+
+  async readConfig(): Promise<Result<ShellyCloudReadResult>> {
+    return this.readWithRequirements(false);
+  }
+
+  async read(): Promise<Result<ShellyCloudReadResult>> {
+    return this.readWithRequirements(true);
   }
 
   async setEnabled(enabled: boolean): Promise<Result<ShellyCloudSetResult>> {
