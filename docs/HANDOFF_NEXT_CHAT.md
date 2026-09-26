@@ -1,6 +1,6 @@
 # Handoff — Shelly BLE-only plug path
 
-Status: **2026-09-26**
+Status: **2026-09-26 — runtime/dashboard slice accepted**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -12,27 +12,24 @@ Local Agent binding:
 e75c77cb-7589-4452-94b2-decc97ff85a1
 ```
 
-## Checkpoints
+## Accepted checkpoint
 
-Starting checkpoint for the current runtime/dashboard slice:
-
-```text
-d3f2a3b8f0d971fce30ad21ca6829f3bd3b4195b
-```
-
-Last implementation commit before docs-only cleanup:
+Implementation checkpoint before this handoff update:
 
 ```text
-e36397e48d7721b6efea349302d69069cd711f82  Test BLE-only dashboard integration
+9fa79fe87ac24584e1fefa81badffeca8002d8d0  Format extracted BLE dashboard composition
 ```
 
-Previous handoff checkpoint:
+This checkpoint includes the BLE-only saved runtime/dashboard slice plus the dashboard composition extraction required to satisfy repository line-budget checks.
+
+Relevant formatting/extraction commits in the final implementation sequence:
 
 ```text
-7214fea6f6919a223c2fa7073195c33def1b5d33  Update BLE runtime dashboard handoff
+c0c5cdaded4ed2b46c4393c6eca95cd071c08249  Format BLE runtime status type
+73f0e2fd473d44e9b570f58f57b72be4d4fb6276  Format BLE dashboard test
+6e0723a4b7425bb11b0a8a4a8f3522cb5f8735db  Extract BLE-only dashboard composition
+9fa79fe87ac24584e1fefa81badffeca8002d8d0  Format extracted BLE dashboard composition
 ```
-
-Docs-only cleanup after that checkpoint updated `docs/ARCHITECTURE.md`, `docs/ROADMAP.md` and this handoff. If HEAD is later than `e36397e`, distinguish docs-only commits from implementation before assuming code changed.
 
 ## Product direction — DECIDED
 
@@ -53,7 +50,7 @@ Transport locators are not identity:
 - Android BLE address / CoreBluetooth UUID / saved `bleDeviceId` = BLE reconnect locator;
 - advertisement name = discovery metadata only.
 
-The existing Wi-Fi implementation is stable and frozen for this BLE slice.
+The existing Wi-Fi implementation remains stable/frozen for this BLE slice.
 
 Do not:
 
@@ -62,11 +59,12 @@ Do not:
 - redesign LAN scan;
 - force BLE-only plugs into `ShellyDraftDevice`;
 - invent a fake `baseUrl`;
-- add BLE↔Wi-Fi fallback yet.
+- add automatic BLE↔Wi-Fi fallback yet;
+- add automatic retry for ambiguous mutating BLE RPC.
 
 ## BLE foundation — DONE
 
-Implemented and previously hardware-validated:
+Implemented and hardware-validated:
 
 - Shelly BLE RPC framing/service/characteristic UUIDs;
 - UTF-8 JSON + 4-byte big-endian lengths;
@@ -78,23 +76,6 @@ Implemented and previously hardware-validated:
 - `BleShellyRpcTransport` behind `ShellyRpcTransport`;
 - mobile binding through `CapacitorBleGattClient`;
 - Android initialization with `androidNeverForLocation: true`.
-
-Real hardware already proved transport-level BLE RPC on Samsung S22 and Shelly Plug S Gen3, including explicit:
-
-```text
-OFF -> ON -> OFF -> final read OFF
-```
-
-That older evidence validates the transport foundation only. It does **not** accept the new saved-runtime/dashboard slice below.
-
-Practical configured test Plug if still advertising:
-
-```text
-physicalId = shellyplugsg3-e4b063d7f530
-model = S3PL-00112EU
-Gen 3
-firmware = 1.7.5
-```
 
 ## BLE Add + persistence — DONE
 
@@ -133,7 +114,7 @@ lcl.savedBlePlugs.v1
 
 Upsert/dedup is by normalized `physicalId`; `bleDeviceId` is only the reconnect locator and may change.
 
-## BLE-only runtime/dashboard slice — IMPLEMENTED, ACCEPTANCE PENDING
+## BLE-only runtime/dashboard slice — ACCEPTED
 
 Production path:
 
@@ -151,143 +132,177 @@ Relay actions use `RpcShellyClient.setRelayOn()` / `setRelayOff()` over BLE.
 
 Each runtime operation creates a one-shot transport and best-effort disconnects in `finally`.
 
-React Query read/mutation retry is disabled for this path. Never blindly retry a timed-out/disconnected mutating relay RPC.
+React Query read/mutation retry is disabled for this path. Mutating relay RPC is one-shot and is not automatically retried after timeout/disconnect.
 
-New files:
-
-```text
-apps/mobile/src/features/plugs/data/blePlugRuntime.ts
-apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts
-apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts
-apps/mobile/src/features/plugs/components/BleOnlyPlugCard.tsx
-apps/mobile/src/features/plugs/components/BleOnlyPlugCard.test.tsx
-apps/mobile/src/__tests__/ble-only-dashboard.test.tsx
-```
-
-Updated production files:
-
-```text
-apps/mobile/src/features/plugs/index.ts
-apps/mobile/src/screens/AutomationDashboardScreen.tsx
-```
-
-Behavior:
+Dashboard behavior:
 
 - BLE-only saved plugs render independently from Wi-Fi draft persistence;
 - status shows relay, power, voltage, energy and Shelly local time;
 - ON/OFF goes through BLE RPC;
-- explicit read/mutation pending and error state is exposed;
+- read/mutation pending and error state is explicit;
 - app-resume refetch includes BLE runtime queries;
 - if the same canonical physical ID is already represented by Wi-Fi/installations, the BLE-only card is hidden;
 - that hiding is presentation dedup only, not transport fallback/merge.
 
-## Software validation — STILL PENDING
-
-Do not call this slice accepted yet.
-
-The first Local Agent focused validation task reached the worker:
+The final dashboard composition is extracted to:
 
 ```text
-shelly-ble-runtime-dashboard-validation-20260926-080
+apps/mobile/src/features/plugs/components/BleOnlyPlugDashboardCards.tsx
 ```
 
-It stopped at Prettier because two new runtime files needed formatting. Those formatting-only fixes were committed afterward.
+## Software validation — GREEN
 
-No post-fix focused test/typecheck/lint result has been obtained yet.
-
-Pending:
+Focused Local Agent task:
 
 ```text
-focused prettier     PENDING
-focused tests        PENDING
-mobile typecheck     PENDING
-focused lint         PENDING
-quality:ux           PENDING
-quality:repo         PENDING
-full pnpm check      PENDING
-S22 read-only        PENDING for this new runtime path
-S22 relay acceptance PENDING for this new runtime path
+shelly-ble-runtime-focused-validation-20260926-435
 ```
 
-## Local Agent operational note
-
-Current daemon observed after the Local Agent update:
+Passed:
 
 ```text
-daemon_version = 4.18.25
-state = idle
-current_task_id = null
-binding = e75c77cb-7589-4452-94b2-decc97ff85a1
-```
-
-During this chat, older file-based queue attempts were not consumed. After the 4.18.25 refresh the `.agent/queue` path disappeared from the tracked control tree until it was manually recreated; a small probe placed there still was not consumed and was then removed.
-
-The user reported that another chat works normally with Local Agent. Therefore do **not** assume the Local Agent installation or machine is globally broken. Treat this as a conversation/intake-path issue until fresh evidence says otherwise.
-
-At handoff there should be no active task from this chat and no stale probe to wait for.
-
-In a new chat:
-
-1. read fresh `agent-control/.agent/status/daemon.json` and binding;
-2. confirm `current_task_id = null` before queuing work;
-3. use the Local Agent protocol/bootstrap supplied to that new chat;
-4. do **not** blindly recreate the old `.agent/queue` mechanism if the new bootstrap uses a different intake path;
-5. never start a second coding agent through Local Agent.
-
-## Exact next engineering action
-
-Once Local Agent command execution works in the active chat, run focused validation against the current remote branch:
-
-```text
-prettier --check:
-  apps/mobile/src/features/plugs/data/blePlugRuntime.ts
-  apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts
-  apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts
-  apps/mobile/src/features/plugs/components/BleOnlyPlugCard.tsx
-  apps/mobile/src/features/plugs/components/BleOnlyPlugCard.test.tsx
-  apps/mobile/src/features/plugs/index.ts
-  apps/mobile/src/screens/AutomationDashboardScreen.tsx
-  apps/mobile/src/__tests__/ble-only-dashboard.test.tsx
-
-vitest:
+Prettier check on changed BLE runtime/dashboard files
+Vitest: 4 files / 24 tests
   src/features/plugs/data/blePlugRuntime.test.ts
   src/features/plugs/components/BleOnlyPlugCard.test.tsx
   src/__tests__/ble-only-dashboard.test.tsx
   src/__tests__/automation-dashboard.test.tsx
-
 pnpm --filter @lcl/mobile typecheck
-focused eslint on the same changed source/test files
+focused ESLint
 pnpm quality:ux
 pnpm quality:repo
 git diff --check
 ```
 
-Fix only concrete failures; do not broaden scope.
+`quality:repo` had initially exposed `AutomationDashboardScreen.tsx` at 604 lines versus the 600-line budget. The cohesive BLE-only dashboard composition was extracted; the final focused validation then passed.
 
-If focused validation is green, run exactly one final:
+Exactly one final full check was run after focused validation:
 
 ```text
-pnpm check
+shelly-ble-runtime-full-check-20260926-437
+pnpm check -> GREEN
 ```
 
-Then hardware acceptance in this order:
+Do **not** rerun another full `pnpm check` merely to re-prove this accepted checkpoint.
 
-1. Samsung S22 read-only status through the **new saved BLE runtime path**;
-2. verify the expected canonical physical identity/locator;
-3. only if read is reliable, authorized relay `OFF -> ON -> OFF`;
-4. final read must explicitly verify `relayOn=false`;
-5. never auto-retry an ambiguous mutating timeout/disconnect;
-6. record exact evidence here.
+## Samsung S22 hardware acceptance — GREEN
 
-## After this slice is accepted
+Acceptance used a second, factory-fresh Shelly Plug so the BLE-only card was not hidden by existing Wi-Fi presentation dedup.
 
-Continue only then with:
+Discovered advertisement:
 
-1. stale `bleDeviceId` rediscovery: scan -> `GetDeviceInfo.id` verify -> replace locator;
-2. BLE Plug detail/settings surface and safe/useful BLE settings;
+```text
+advertisementName = ShellyPlugSG3-E4B063E3E298
+bleDeviceId       = E4:B0:63:E3:E2:9A
+RSSI during scan  = -43 dBm
+```
+
+`Info` performed the real BLE `Shelly.GetDeviceInfo` verification and produced:
+
+```text
+physicalId    = shellyplugsg3-e4b063e3e298
+model         = S3PL-00112EU
+generation    = 3
+firmwareId    = 20240820-134301/1.2.3-plugsg3prod0-gec79607
+matterEnabled = true
+```
+
+After explicit Add, `lcl.savedBlePlugs.v1` contained the exact canonical physical ID and reconnect locator above.
+
+The dashboard rendered a separate card:
+
+```text
+ShellyPlugSG3-E4B063E3E298
+Bluetooth · S3PL-00112EU
+```
+
+Read-only runtime evidence from the new saved BLE path:
+
+```text
+relay = OFF
+power = 0.0 W
+voltage = 246-247 V
+energy = 0 Wh
+Shelly local time = —
+```
+
+The missing Shelly local time is expected for this factory-fresh, unconfigured plug.
+
+User manually exercised the relay and confirmed the physical ON/OFF behavior. Acceptance state sequence was:
+
+```text
+initial BLE read OFF
+-> ON works
+-> final OFF
+```
+
+Final read task:
+
+```text
+shelly-ble-s22-final-read-20260926-456
+```
+
+showed the BLE-only card with `OFF` selected.
+
+A second read after another runtime refresh interval was deliberately taken to rule out merely optimistic mutation state:
+
+```text
+shelly-ble-s22-final-stable-read-20260926-457
+```
+
+It again showed:
+
+```text
+Bluetooth · S3PL-00112EU
+0.0 W
+246 V
+0 Wh
+—
+ON  pressed=false
+OFF pressed=true
+```
+
+Therefore the final saved-runtime read is accepted as:
+
+```text
+relayOn = false
+```
+
+No automatic retry of mutating BLE RPC is present in the accepted implementation (`retry: false` in the mutation path; runtime test coverage exercises one-shot relay mutation behavior).
+
+For reference, the previously configured test plug is:
+
+```text
+physicalId = shellyplugsg3-e4b063d7f530
+bleDeviceId = E4:B0:63:D7:F5:32
+model = S3PL-00112EU
+Gen 3
+firmware = 1.7.5
+```
+
+It is already represented through the Wi-Fi/install path, so the BLE-only dashboard card is intentionally hidden for that same canonical physical identity.
+
+## Current state / do not redo
+
+The current slice is accepted. Do not rebuild BLE Add, SavedBlePlug persistence, BLE runtime polling, or the BLE-only dashboard card unless a concrete bug appears.
+
+Do not rerun the accepted software/hardware sequence by default.
+
+## Exact next engineering action
+
+Continue with the next BLE reliability item:
+
+1. stale `bleDeviceId` rediscovery:
+   - reconnect failure / stale locator;
+   - scan advertisements;
+   - verify candidate using `Shelly.GetDeviceInfo.id`;
+   - only replace the stored locator when canonical physical identity matches;
+2. BLE Plug detail/settings surface and only safe/useful BLE settings;
 3. pairing/bonding policy for firmware that requires it;
 4. optional dual-transport representation for one physical Plug;
 5. optional transport selection/fallback policy.
+
+Do not implement automatic BLE↔Wi-Fi fallback as part of locator rediscovery.
 
 ## Restart checklist for a new chat
 
@@ -302,9 +317,7 @@ work on branch work/shelly-ble-transport
 check fresh branch HEAD
 check fresh Local Agent bootstrap + binding
 confirm no active duplicate task
-run focused software validation
-run final pnpm check
-then S22 read-only -> OFF/ON/OFF -> verified final OFF
+continue from accepted BLE runtime/dashboard checkpoint
 leave Wi-Fi implementation unchanged
 ```
 
