@@ -24,7 +24,7 @@ The phone configures and diagnoses. The Shelly executes the installed automation
 
 The project is in MVP/beta with a stable architecture, an accepted UX baseline and verified real-hardware paths on Samsung S22+ + Shelly Plug S Gen3 over both Wi-Fi and BLE.
 
-The BLE management foundation is accepted: independent Bluetooth Add, BLE-only dashboard status/relay control, read-only Detail/Info, stale-locator recovery and real S22+ hardware evidence. The next safe BLE work is deliberately narrower: decide which read-only Device/settings information belongs on BLE, then add mutations, pairing/bonding or dual-transport policy only as explicitly approved slices.
+The BLE management foundation is accepted: independent Bluetooth Add, BLE-only dashboard status/relay control, read-only Detail/Info, stale-locator recovery and real S22+ hardware evidence. The next read-only Device slice is implemented in software: BLE-only Detail now reads LED mode/brightness/night-mode state, physical-button mode and Shelly Cloud enabled/connection state through the same verified BLE session and locator-recovery boundary. Real-phone acceptance of that expanded Device presentation is still pending. BLE settings mutations, pairing/bonding and automatic dual-transport behavior remain separate explicitly approved work.
 
 See [Roadmap](docs/ROADMAP.md) and [Current handoff](docs/HANDOFF_NEXT_CHAT.md) for the exact next-session contract.
 
