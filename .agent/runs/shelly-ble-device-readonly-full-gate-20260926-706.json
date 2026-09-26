@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-device-readonly-full-gate-20260926-706",
+  "task_digest": "b50ceb822ba26fc07d7d25ad48facb69de26fb39976f2429e229909bf4a37877",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T18:14:56.292740+00:00",
+  "attempt_id": "346bcc4a5b98ad2d0dd03242",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 27948,
+  "updated_at": "2026-09-26T18:14:56.581819+00:00",
+  "pid": 27948
+}

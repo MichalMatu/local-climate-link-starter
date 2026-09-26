@@ -1,0 +1,88 @@
+{
+  "id": "shelly-ble-readonly-recovery-unify-fix-20260926-620",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": true,
+  "started_at": "2026-09-26T16:43:05.201087+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"486db40f90ec16d9dceac7d6266eb50fdfc86064\"; test -z \"$(git status --short)\"",
+      "exit_code": 0,
+      "output": "",
+      "elapsed_seconds": 0.421,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 5,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "python3 - <<'PY'\nimport json, subprocess\nfrom pathlib import Path\nraw = subprocess.check_output(['git','show','origin/agent-control:.agent/tasks/shelly-ble-readonly-recovery-unify-20260926-619.json'], text=True)\ntask = json.loads(raw)\ncommand = task['commands'][1]\ncommand = command.replace(\"replace_once('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts', 'BlePlugRuntimeReadError', 'BlePlugReadError')\", \"p = Path('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts'); p.write_text(p.read_text().replace('BlePlugRuntimeReadError', 'BlePlugReadError'))\")\ncommand = command.replace(\"replace_once('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts', 'isRecoverableBlePlugRuntimeReadError', 'isRecoverableBlePlugReadError')\", \"p = Path('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts'); p.write_text(p.read_text().replace('isRecoverableBlePlugRuntimeReadError', 'isRecoverableBlePlugReadError'))\")\nsubprocess.run(['bash','-lc', command], check=True)\nPY",
+      "exit_code": 1,
+      "output": "fatal: invalid object name 'origin/agent-control'.\nTraceback (most recent call last):\n  File \"<stdin>\", line 3, in <module>\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py\", line 472, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n               **kwargs).stdout\n               ^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py\", line 577, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['git', 'show', 'origin/agent-control:.agent/tasks/shelly-ble-readonly-recovery-unify-20260926-619.json']' returned non-zero exit status 128.\n",
+      "elapsed_seconds": 0.443,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.11,
+      "output_policy": "stream",
+      "captured_output_chars": 901,
+      "output_truncated": false,
+      "current_rss_mb": 3.11,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 5,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 5,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.421
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 5,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.443
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.095
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.072
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T16:43:07.851307+00:00",
+  "task_digest": "2dbfdb79d69fba282f1098e391baa12799f8e3704bf4153c760ff6b6acf01d9a",
+  "idle_timeout": 900,
+  "task_timeout": 9000,
+  "memory_limit_mb": 4096,
+  "attempt_id": "d258c96a82423a2f9d833cef",
+  "daemon_version": "4.18.25"
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-readonly-detail-boundary-finalize-20260926-614",
+  "task_digest": "f41515b6bccf162d58c7bc1783985fae4687768f298bdf8881a2ec8f8affe8b1",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T15:29:52.573826+00:00",
+  "attempt_id": "e4e16f2ebb76055241c63bbd",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 79743,
+  "updated_at": "2026-09-26T15:29:52.890967+00:00",
+  "pid": 79743
+}

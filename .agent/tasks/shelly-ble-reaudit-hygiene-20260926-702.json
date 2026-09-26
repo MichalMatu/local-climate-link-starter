@@ -1,0 +1,27 @@
+{
+  "id": "shelly-ble-reaudit-hygiene-20260926-702",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "test \"$(git rev-parse HEAD)\" = \"fcb6ded01a23490afd909f3aa8386c8fe72c4b4e\" && git status --short --branch",
+    "git ls-files | grep -Ei '(^|/)(dummy|tmp|temp|backup|bak|old|copy)([._/-]|$)|\\.(bak|orig|rej|tmp|swp|log)$|(^|/)\\.DS_Store$' || true",
+    "git status --short --untracked-files=all",
+    "git ls-files 'apps/mobile/src/**' 'packages/**' | grep -E '\\.(ts|tsx|css)$' | xargs wc -l | sort -nr | head -60",
+    "git grep -n -E 'TODO|FIXME|HACK|XXX' -- ':!pnpm-lock.yaml' || true",
+    "git grep -n -E 'fetch\\(|BleClient|Preferences\\.|localStorage|setInterval\\(|setTimeout\\(' -- 'apps/mobile/src/**/*.ts' 'apps/mobile/src/**/*.tsx' || true",
+    "git grep -n -E 'SHELLY_BLE_SPIKE|BLE spike|old hardware-first|historical.*BLE|historical/lab' -- README.md AGENTS.md docs ':!docs/testing/**' || true",
+    "git grep -n 'e75c77cb-7589-4452-94b2-decc97ff85a1' -- . || true",
+    "git ls-files 'docs/**' | sort",
+    "git ls-files | awk 'index($0,\"/\")==0 {print}' | sort",
+    "pnpm quality:repo",
+    "pnpm format:check",
+    "git diff --check"
+  ]
+}

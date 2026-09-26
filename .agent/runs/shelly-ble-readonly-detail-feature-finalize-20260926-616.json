@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-readonly-detail-feature-finalize-20260926-616",
+  "task_digest": "eade709aab7c48b4734170021a7c3278dc7f0f75ed9fb272f98b118c99b5a6de",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T15:38:25.346291+00:00",
+  "attempt_id": "3e8682e10eed987e32b5b592",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 86279,
+  "updated_at": "2026-09-26T15:38:25.763740+00:00",
+  "pid": 86279
+}

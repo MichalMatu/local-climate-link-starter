@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-device-cloud-format-20260926-708",
+  "task_digest": "9b42aadb36e8231d89d677468df3096199f6f45bc1915ec720a68e7756ad63cc",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T18:22:09.548090+00:00",
+  "attempt_id": "618cde6fc2cf7db0e0dc6d08",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 38277,
+  "updated_at": "2026-09-26T18:22:09.843861+00:00",
+  "pid": 38277
+}

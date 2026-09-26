@@ -1,0 +1,20 @@
+{
+  "id": "shelly-ble-device-readonly-validate-20260926-705",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 3600,
+  "idle_timeout": 600,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"9b8c1d01eb8e1bb1ea58ba5e77173f47b4248352\"; test -z \"$(git status --short)\"",
+    "python3 - <<'PY'\nfrom pathlib import Path\np = Path('packages/shelly-client/src/__tests__/plugsUi.test.ts')\ns = p.read_text()\nanchor = \"  it('returns a clean unsupported state without calling PLUGS_UI', async () => {\\n\"\ninsert = \"  it('reads config without requiring mutation support', async () => {\\n    const transport = new RecordingTransport([\\n      { ok: true, value: { methods: ['PLUGS_UI.GetConfig'] } },\\n      { ok: true, value: fullConfig }\\n    ]);\\n    const client = new RpcShellyPlugsUiClient(transport);\\n\\n    await expect(client.readConfig()).resolves.toMatchObject({\\n      ok: true,\\n      value: { supported: true, config: fullConfig }\\n    });\\n    expect(transport.requests).toEqual([\\n      { method: 'Shelly.ListMethods' },\\n      { method: 'PLUGS_UI.GetConfig' }\\n    ]);\\n  });\\n\\n\" + anchor\nif anchor not in s:\n    raise SystemExit('anchor not found')\np.write_text(s.replace(anchor, insert, 1))\nPY",
+    "pnpm exec prettier --write packages/shelly-client/src/plugsUi.ts packages/shelly-client/src/__tests__/plugsUi.test.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.ts apps/mobile/src/features/plugs/data/plugReadOnlyDetail.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugReadOnlyDetail.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugReadOnlyDetail.test.ts apps/mobile/src/features/plugs/flows/useBlePlugReadOnlyDetailFlow.ts apps/mobile/src/features/plugs/components/BlePlugDeviceReadOnlyPanel.tsx apps/mobile/src/features/plugs/components/BlePlugDeviceReadOnlyPanel.test.tsx apps/mobile/src/features/plugs/screens/BlePlugDetailScreen.tsx",
+    "pnpm --filter @lcl/shelly-client test -- plugsUi.test.ts && pnpm --filter @lcl/mobile test -- src/features/plugs/components/BlePlugDeviceReadOnlyPanel.test.tsx src/features/plugs/flows/readSavedBlePlugReadOnlyDetail.test.ts src/features/plugs/data/plugReadOnlyManagementTarget.test.ts && pnpm --filter @lcl/shelly-client typecheck && pnpm --filter @lcl/mobile typecheck && pnpm quality:repo && pnpm format:check && git diff --check",
+    "git status --short && git diff --stat",
+    "git add packages/shelly-client/src/__tests__/plugsUi.test.ts && git commit -m 'Test read-only PLUGS_UI config access' && git push origin HEAD:work/shelly-ble-transport"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-readonly-detail-final-gate-20260926-610",
+  "task_digest": "1d6739f1dfbb73761d9f787f056d31c25c4b6ec3cfe7831e6b159e9905ff381a",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T14:55:10.686019+00:00",
+  "attempt_id": "073ec4064abac64789ca0b19",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 45418,
+  "updated_at": "2026-09-26T14:55:10.962465+00:00",
+  "pid": 45418
+}

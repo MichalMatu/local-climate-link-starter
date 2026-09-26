@@ -1,0 +1,9 @@
+{
+  "event": "invalid_task_rejected",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "updated_at": "2026-09-26T18:03:40.841005+00:00",
+  "task_id": "shelly-ble-device-readonly-slice-20260926-704",
+  "daemon_version": "4.18.25",
+  "pid": 15022
+}

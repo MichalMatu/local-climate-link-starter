@@ -1,0 +1,87 @@
+{
+  "id": "shelly-mobile-full-suite-failure-triage-20260926-623",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "started_at": "2026-09-26T17:08:33.460567+00:00",
+  "command_timeout": 7200,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"1db4d3fae8b889838cd25cba5dd4eb85b20b6fa6\"; test -z \"$(git status --short)\"",
+      "exit_code": 0,
+      "output": "",
+      "elapsed_seconds": 0.423,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set +e; pnpm --filter @lcl/mobile exec vitest run --reporter=json --outputFile=/tmp/mobile-vitest.json >/tmp/mobile-vitest.stdout 2>/tmp/mobile-vitest.stderr; status=$?; set -e; python3 - <<'PY'\nimport json\nfrom pathlib import Path\np=Path('/tmp/mobile-vitest.json')\nif not p.exists():\n    print('VITEST_JSON_MISSING')\n    print(Path('/tmp/mobile-vitest.stderr').read_text()[-12000:])\n    raise SystemExit(0)\ndata=json.loads(p.read_text())\nprint(f\"SUMMARY failed_tests={data.get('numFailedTests')} passed_tests={data.get('numPassedTests')} failed_suites={data.get('numFailedTestSuites')} passed_suites={data.get('numPassedTestSuites')}\")\nfor result in data.get('testResults', []):\n    failed=[a for a in result.get('assertionResults', []) if a.get('status') == 'failed']\n    if not failed:\n        continue\n    print('FILE', result.get('name'))\n    for a in failed:\n        print('TEST', ' > '.join(a.get('ancestorTitles', []) + [a.get('title','')]))\n        msgs=a.get('failureMessages') or []\n        for msg in msgs:\n            compact=' '.join(str(msg).split())\n            print('ERROR', compact[:1800])\nPY\nexit 0",
+      "exit_code": 0,
+      "output": "SUMMARY failed_tests=0 passed_tests=352 failed_suites=0 passed_suites=148\n",
+      "elapsed_seconds": 45.516,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1720.27,
+      "output_policy": "stream",
+      "captured_output_chars": 74,
+      "output_truncated": false,
+      "current_rss_mb": 1048.27,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.423
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 45.516
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.12
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.071
+  },
+  "finished_at": "2026-09-26T17:09:21.498690+00:00",
+  "task_digest": "a5a7c15913ecc77b67c0e65a2c790e4965629f8372479a94348343075a88b6b7",
+  "idle_timeout": 900,
+  "task_timeout": 9000,
+  "memory_limit_mb": 4096,
+  "attempt_id": "2916276b9bc0248a5e393dec",
+  "daemon_version": "4.18.25"
+}

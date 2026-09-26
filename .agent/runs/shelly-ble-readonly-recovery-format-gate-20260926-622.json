@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-readonly-recovery-format-gate-20260926-622",
+  "task_digest": "021a79152d7273954fa45a65931b94ab83036587cf37d5a4ff8a48b5e4c94462",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T16:58:01.539713+00:00",
+  "attempt_id": "eb84564c00c8c28f4e22056f",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 18436,
+  "updated_at": "2026-09-26T16:58:02.550036+00:00",
+  "pid": 18436
+}

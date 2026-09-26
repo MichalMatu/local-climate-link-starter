@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-golden-docs-cleanup-20260926-625",
+  "task_digest": "560e28225883cb27d50eb0ef2e672d2850db98ba8094e36a010411420e00d6e5",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T17:21:30.944862+00:00",
+  "attempt_id": "741d2ddb149152c8e404d666",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 60798,
+  "updated_at": "2026-09-26T17:21:31.228442+00:00",
+  "pid": 60798
+}

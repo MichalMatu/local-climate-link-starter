@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-readonly-detail-format-push-20260926-613",
+  "task_digest": "dc5de5ccc5b040f3b881451b24525565008ff3c1f35d8050a4e9db74ce6eb6fa",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T15:19:11.555465+00:00",
+  "attempt_id": "c445401597c92e3465b1173d",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 68751,
+  "updated_at": "2026-09-26T15:19:11.851616+00:00",
+  "pid": 68751
+}

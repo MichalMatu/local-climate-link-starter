@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-docs-reaudit-update-20260926-703",
+  "task_digest": "a2bd085a8d49d15344de897545affd9385bcbcc92670f17119667d1baa3b27be",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T17:57:18.243698+00:00",
+  "attempt_id": "6b4c7115af6eb11933451dac",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 3911,
+  "updated_at": "2026-09-26T17:57:18.530687+00:00",
+  "pid": 3911
+}

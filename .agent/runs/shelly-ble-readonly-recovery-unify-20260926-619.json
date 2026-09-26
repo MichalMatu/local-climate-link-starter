@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-readonly-recovery-unify-20260926-619",
+  "task_digest": "31a33ce0d0ae2db1b5e1d6a7d9a1c2334beec109d4b3c9881e585900966b163a",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T16:34:49.795036+00:00",
+  "attempt_id": "e81071fa1b8d07f848da55af",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 72940,
+  "updated_at": "2026-09-26T16:34:50.393811+00:00",
+  "pid": 72940
+}

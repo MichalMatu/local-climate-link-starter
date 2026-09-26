@@ -1,0 +1,17 @@
+{
+  "id": "shelly-ble-device-readonly-full-gate-20260926-706",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"deb7520fb66c499345a4ec227dac101847d63ca3\"; test -z \"$(git status --short)\"",
+    "pnpm check:full",
+    "git status --short && git diff --check"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "shelly-ble-reaudit-hygiene-20260926-701",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 1800,
+  "idle_timeout": 600,
+  "task_timeout": 3600,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"fcb6ded01a23490afd909f3aa8386c8fe72c4b4e\"; printf '%s\\n' '=== STATUS ==='; git status --short --branch; printf '%s\\n' '=== TRACKED SUSPICIOUS FILES ==='; git ls-files | grep -Ei '(^|/)(dummy|tmp|temp|backup|bak|old|copy)([._/-]|$)|\\.(bak|orig|rej|tmp|swp|log)$|(^|/)\\.DS_Store$' || true; printf '%s\\n' '=== UNTRACKED / IGNORED TOP LEVEL ==='; git status --short --untracked-files=all; printf '%s\\n' '=== LARGEST TRACKED FILES ==='; git ls-files -z | xargs -0 -I{} sh -c 'wc -c < \"$1\" | tr -d \" \\"; printf \" %s\\n\" \"$1\"' sh '{}' | sort -nr | head -40",
+    "set -euo pipefail; printf '%s\\n' '=== LARGEST TS/TSX/CSS FILES BY LINES ==='; git ls-files 'apps/mobile/src/**' 'packages/**' | grep -E '\\.(ts|tsx|css)$' | xargs wc -l | sort -nr | head -60; printf '%s\\n' '=== TODO FIXME HACK XXX ==='; git grep -n -E 'TODO|FIXME|HACK|XXX' -- ':!pnpm-lock.yaml' || true",
+    "set -euo pipefail; printf '%s\\n' '=== ARCHITECTURE ESCAPE HATCHES ==='; git grep -n -E 'fetch\\(|BleClient|Preferences\\.|localStorage|setInterval\\(|setTimeout\\(' -- 'apps/mobile/src/**/*.ts' 'apps/mobile/src/**/*.tsx' || true; printf '%s\\n' '=== DUPLICATE / HISTORICAL BLE DOC REFERENCES ==='; git grep -n -E 'SHELLY_BLE_SPIKE|BLE spike|old hardware-first|historical.*BLE|historical/lab' -- README.md AGENTS.md docs ':!docs/testing/**' || true; printf '%s\\n' '=== BINDING LEAK CHECK (WORK BRANCH) ==='; git grep -n 'e75c77cb-7589-4452-94b2-decc97ff85a1' -- . || true",
+    "set -euo pipefail; printf '%s\\n' '=== DOC INVENTORY ==='; git ls-files 'docs/**' | sort; printf '%s\\n' '=== ROOT INVENTORY ==='; git ls-files | awk 'index($0,\"/\")==0 {print}' | sort; printf '%s\\n' '=== QUALITY REPO ==='; pnpm quality:repo; printf '%s\\n' '=== FORMAT CHECK ==='; pnpm format:check; printf '%s\\n' '=== DIFF CHECK ==='; git diff --check"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "shelly-ble-device-readonly-slice-20260926-704",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-26T18:03:37.800325+00:00",
+  "daemon_version": "4.18.25",
+  "error": "JSONDecodeError: Expecting ',' delimiter: line 14 column 5711 (char 6194)"
+}

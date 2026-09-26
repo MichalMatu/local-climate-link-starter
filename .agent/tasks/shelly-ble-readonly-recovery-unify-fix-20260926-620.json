@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ble-readonly-recovery-unify-fix-20260926-620",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": true,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 9000,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"486db40f90ec16d9dceac7d6266eb50fdfc86064\"; test -z \"$(git status --short)\"",
+    "python3 - <<'PY'\nimport json, subprocess\nfrom pathlib import Path\nraw = subprocess.check_output(['git','show','origin/agent-control:.agent/tasks/shelly-ble-readonly-recovery-unify-20260926-619.json'], text=True)\ntask = json.loads(raw)\ncommand = task['commands'][1]\ncommand = command.replace(\"replace_once('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts', 'BlePlugRuntimeReadError', 'BlePlugReadError')\", \"p = Path('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts'); p.write_text(p.read_text().replace('BlePlugRuntimeReadError', 'BlePlugReadError'))\")\ncommand = command.replace(\"replace_once('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts', 'isRecoverableBlePlugRuntimeReadError', 'isRecoverableBlePlugReadError')\", \"p = Path('apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts'); p.write_text(p.read_text().replace('isRecoverableBlePlugRuntimeReadError', 'isRecoverableBlePlugReadError'))\")\nsubprocess.run(['bash','-lc', command], check=True)\nPY",
+    "python3 - <<'PY'\nimport json, subprocess\nraw = subprocess.check_output(['git','show','origin/agent-control:.agent/tasks/shelly-ble-readonly-recovery-unify-20260926-619.json'], text=True)\ntask = json.loads(raw)\nsubprocess.run(['bash','-lc', task['commands'][2]], check=True)\nPY",
+    "pnpm check",
+    "python3 - <<'PY'\nimport json, subprocess\nraw = subprocess.check_output(['git','show','origin/agent-control:.agent/tasks/shelly-ble-readonly-recovery-unify-20260926-619.json'], text=True)\ntask = json.loads(raw)\nsubprocess.run(['bash','-lc', task['commands'][3]], check=True)\nPY"
+  ]
+}

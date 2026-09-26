@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-device-readonly-validate-20260926-705",
+  "task_digest": "8c7c0256051dddefb45512161a6745271496da4b6a8ae41d36ab73034c01a902",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T18:10:39.160745+00:00",
+  "attempt_id": "8a6f3f934036492745caf1fe",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 19325,
+  "updated_at": "2026-09-26T18:10:40.072243+00:00",
+  "pid": 19325
+}

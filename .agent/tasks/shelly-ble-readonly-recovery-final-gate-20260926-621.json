@@ -1,0 +1,20 @@
+{
+  "id": "shelly-ble-readonly-recovery-final-gate-20260926-621",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 10800,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"aa3cd140e8378f5446ceefc9e8d9c172aea23fb4\"; test -z \"$(git status --short)\"",
+    "pnpm exec prettier --check apps/mobile/src/features/plugs/data/blePlugReadOnlyError.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.test.ts apps/mobile/src/features/plugs/data/plugInformation.ts apps/mobile/src/features/plugs/data/plugInformation.test.ts apps/mobile/src/features/plugs/flows/recoverSavedBlePlugLocator.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugInformation.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugInformation.test.ts apps/mobile/src/features/plugs/flows/useBlePlugInformationFlow.ts",
+    "pnpm --filter @lcl/mobile exec vitest run src/features/plugs/data/plugReadOnlyManagementTarget.test.ts src/features/plugs/data/plugInformation.test.ts src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts src/features/plugs/flows/readSavedBlePlugInformation.test.ts src/features/plugs/components/PlugInfoPanel.test.tsx",
+    "pnpm --filter @lcl/mobile typecheck && pnpm exec eslint apps/mobile/src/features/plugs/data/blePlugReadOnlyError.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.test.ts apps/mobile/src/features/plugs/data/plugInformation.ts apps/mobile/src/features/plugs/data/plugInformation.test.ts apps/mobile/src/features/plugs/flows/recoverSavedBlePlugLocator.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugInformation.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugInformation.test.ts apps/mobile/src/features/plugs/flows/useBlePlugInformationFlow.ts && pnpm quality:repo && git diff --check",
+    "pnpm check",
+    "pnpm e2e:responsive"
+  ]
+}

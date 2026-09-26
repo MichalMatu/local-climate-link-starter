@@ -1,0 +1,16 @@
+{
+  "id": "shelly-mobile-full-suite-failure-triage-20260926-623",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 7200,
+  "idle_timeout": 900,
+  "task_timeout": 9000,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"1db4d3fae8b889838cd25cba5dd4eb85b20b6fa6\"; test -z \"$(git status --short)\"",
+    "set +e; pnpm --filter @lcl/mobile exec vitest run --reporter=json --outputFile=/tmp/mobile-vitest.json >/tmp/mobile-vitest.stdout 2>/tmp/mobile-vitest.stderr; status=$?; set -e; python3 - <<'PY'\nimport json\nfrom pathlib import Path\np=Path('/tmp/mobile-vitest.json')\nif not p.exists():\n    print('VITEST_JSON_MISSING')\n    print(Path('/tmp/mobile-vitest.stderr').read_text()[-12000:])\n    raise SystemExit(0)\ndata=json.loads(p.read_text())\nprint(f\"SUMMARY failed_tests={data.get('numFailedTests')} passed_tests={data.get('numPassedTests')} failed_suites={data.get('numFailedTestSuites')} passed_suites={data.get('numPassedTestSuites')}\")\nfor result in data.get('testResults', []):\n    failed=[a for a in result.get('assertionResults', []) if a.get('status') == 'failed']\n    if not failed:\n        continue\n    print('FILE', result.get('name'))\n    for a in failed:\n        print('TEST', ' > '.join(a.get('ancestorTitles', []) + [a.get('title','')]))\n        msgs=a.get('failureMessages') or []\n        for msg in msgs:\n            compact=' '.join(str(msg).split())\n            print('ERROR', compact[:1800])\nPY\nexit 0"
+  ]
+}

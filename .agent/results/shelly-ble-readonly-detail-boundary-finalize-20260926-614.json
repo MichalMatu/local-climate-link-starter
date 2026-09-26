@@ -1,0 +1,60 @@
+{
+  "id": "shelly-ble-readonly-detail-boundary-finalize-20260926-614",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": true,
+  "started_at": "2026-09-26T15:29:50.172398+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"78780d6e91f1669b76a20ce527167dd38bb1ac80\"; test -z \"$(git status --short)\"; git cat-file -e d6f1da39f^{commit}; test \"$(git rev-parse d6f1da39f^)\" = \"7c03261d7\"; test \"$(git rev-parse 7c03261d7^)\" = \"78780d6e91f1669b76a20ce527167dd38bb1ac80\"; git reset --hard d6f1da39f",
+      "exit_code": 1,
+      "output": "",
+      "elapsed_seconds": 0.465,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 4,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 4,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 0.465
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.095
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.075
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T15:29:52.573826+00:00",
+  "task_digest": "f41515b6bccf162d58c7bc1783985fae4687768f298bdf8881a2ec8f8affe8b1",
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "attempt_id": "e4e16f2ebb76055241c63bbd",
+  "daemon_version": "4.18.25"
+}

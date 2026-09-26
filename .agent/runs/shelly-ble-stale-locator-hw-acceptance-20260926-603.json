@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-stale-locator-hw-acceptance-20260926-603",
+  "task_digest": "5243325e1e1f39cd3e7969ae6f8995ddb378e4a95474dd9c830e2d135610921a",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T13:50:29.259459+00:00",
+  "attempt_id": "d30e81ddc5327be480ece5d5",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 74237,
+  "updated_at": "2026-09-26T13:50:29.807569+00:00",
+  "pid": 74237
+}

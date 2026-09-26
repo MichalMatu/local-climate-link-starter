@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-mobile-full-suite-failure-triage-20260926-623",
+  "task_digest": "a5a7c15913ecc77b67c0e65a2c790e4965629f8372479a94348343075a88b6b7",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T17:09:21.498690+00:00",
+  "attempt_id": "2916276b9bc0248a5e393dec",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 44572,
+  "updated_at": "2026-09-26T17:09:21.765398+00:00",
+  "pid": 44572
+}

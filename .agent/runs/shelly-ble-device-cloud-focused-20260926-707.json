@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-device-cloud-focused-20260926-707",
+  "task_digest": "2da70a7c638d4bd3f1107283754d1c208c19c2c767088cf5237d60152457bfd7",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T18:19:19.329897+00:00",
+  "attempt_id": "4339cb442eb213290d2cce76",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 35293,
+  "updated_at": "2026-09-26T18:19:19.878138+00:00",
+  "pid": 35293
+}
