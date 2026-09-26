@@ -59,6 +59,10 @@ export {
   type BleOnlyPlugCardProps
 } from './components/BleOnlyPlugCard.js';
 export {
+  BleOnlyPlugDashboardCards,
+  type BleOnlyPlugDashboardCardsProps
+} from './components/BleOnlyPlugDashboardCards.js';
+export {
   PlugAddSpeedDial,
   type PlugAddSpeedDialProps,
   type PlugAddTransport
