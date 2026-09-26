@@ -1,9 +1,27 @@
-export { readPlugInformation, type PlugInformation } from './data/plugInformation.js';
+export {
+  readPlugInformation,
+  readPlugInformationFromTarget,
+  readBlePlugInformation,
+  type PlugInformation
+} from './data/plugInformation.js';
+export {
+  withVerifiedPlugReadOnlyClient,
+  type PlugReadOnlyManagementDependencies,
+  type PlugReadOnlyManagementTarget
+} from './data/plugReadOnlyManagementTarget.js';
 export {
   usePlugInformationFlow,
   plugInformationQueryKey
 } from './flows/usePlugInformationFlow.js';
-export { PlugInfoPanel, type PlugInfoPanelProps } from './components/PlugInfoPanel.js';
+export {
+  useBlePlugInformationFlow,
+  blePlugInformationQueryKey
+} from './flows/useBlePlugInformationFlow.js';
+export {
+  PlugInfoPanel,
+  type PlugInfoConnection,
+  type PlugInfoPanelProps
+} from './components/PlugInfoPanel.js';
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
