@@ -1,11 +1,19 @@
 .plug-add-speed-dial {
+  --plug-add-speed-dial-action-size: var(--lcl-size-control-min-height);
+  --plug-add-speed-dial-distance: calc(
+    var(--lcl-size-control-min-height) + var(--lcl-spacing-md)
+  );
+  --plug-add-speed-dial-trigger-size: calc(
+    var(--lcl-size-control-min-height) + var(--lcl-spacing-md)
+  );
+
   bottom: calc(
     var(--app-bottom-nav-height) + var(--lcl-spacing-md) + env(safe-area-inset-bottom)
   );
-  height: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-md));
+  height: var(--plug-add-speed-dial-trigger-size);
   position: fixed;
   right: var(--lcl-fluid-shell-padding);
-  width: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-md));
+  width: var(--plug-add-speed-dial-trigger-size);
   z-index: var(--lcl-z-index-header);
 }
 
@@ -16,54 +24,69 @@
 }
 
 .plug-add-speed-dial__trigger {
+  background: var(--lcl-color-accent);
+  border: var(--lcl-border-width-sm) solid transparent;
+  box-shadow: var(--lcl-shadow-md);
+  color: var(--lcl-color-accent-contrast);
   inset: 0;
+  transition:
+    background var(--lcl-motion-fast),
+    border-color var(--lcl-motion-fast),
+    box-shadow var(--lcl-motion-fast),
+    color var(--lcl-motion-fast),
+    transform var(--lcl-motion-fast);
 }
 
-.plug-add-speed-dial__trigger .dashboard-fab__icon {
-  transition: transform var(--lcl-motion-fast);
+.plug-add-speed-dial__trigger:hover,
+.plug-add-speed-dial__trigger:focus-visible {
+  background: var(--lcl-color-accent-strong);
 }
 
-.plug-add-speed-dial--expanded .plug-add-speed-dial__trigger .dashboard-fab__icon {
-  transform: rotate(45deg);
+.plug-add-speed-dial--expanded .plug-add-speed-dial__trigger {
+  background: var(--lcl-color-surface-muted);
+  border-color: var(--lcl-color-border);
+  box-shadow: var(--lcl-shadow-sm);
+  color: var(--lcl-color-text-muted);
+  transform: scale(0.94);
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__trigger:hover,
+.plug-add-speed-dial--expanded .plug-add-speed-dial__trigger:focus-visible {
+  background: var(--lcl-color-surface);
+  border-color: var(--lcl-color-accent);
+  color: var(--lcl-color-text);
 }
 
 .plug-add-speed-dial__action {
-  --plug-add-speed-dial-offset-x: 0;
-  --plug-add-speed-dial-offset-y: calc(
-    -1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-lg))
-  );
-
   align-items: center;
   background: var(--lcl-color-surface);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-round);
   box-shadow: var(--lcl-shadow-md);
-  color: var(--lcl-color-text);
+  color: var(--lcl-color-text-muted);
   cursor: pointer;
   display: inline-flex;
-  height: var(--lcl-size-control-min-height);
+  height: var(--plug-add-speed-dial-action-size);
   justify-content: center;
+  left: 50%;
   opacity: 0;
   padding: 0;
   pointer-events: none;
-  left: 50%;
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%) scale(0.72);
   transition:
     opacity var(--lcl-motion-fast),
     transform var(--lcl-motion-fast),
+    background var(--lcl-motion-fast),
     border-color var(--lcl-motion-fast),
+    box-shadow var(--lcl-motion-fast),
     color var(--lcl-motion-fast);
-  width: var(--lcl-size-control-min-height);
+  width: var(--plug-add-speed-dial-action-size);
 }
 
-.plug-add-speed-dial__action[data-radial-slot='left'] {
-  --plug-add-speed-dial-offset-x: calc(-1 * var(--lcl-spacing-md));
-}
-
-.plug-add-speed-dial__action[data-radial-slot='right'] {
-  --plug-add-speed-dial-offset-x: var(--lcl-spacing-md);
+.plug-add-speed-dial__action:disabled {
+  cursor: default;
 }
 
 .plug-add-speed-dial__action svg {
@@ -71,25 +94,37 @@
   width: var(--lcl-size-control-icon-size);
 }
 
-.plug-add-speed-dial__action:hover,
-.plug-add-speed-dial__action:focus-visible {
-  border-color: var(--lcl-color-accent);
-  color: var(--lcl-color-accent);
-}
-
 .plug-add-speed-dial--expanded .plug-add-speed-dial__action {
+  background: var(--lcl-color-accent);
+  border-color: var(--lcl-color-accent);
+  color: var(--lcl-color-accent-contrast);
   opacity: 1;
   pointer-events: auto;
-  transform: translate(
-      calc(-50% + var(--plug-add-speed-dial-offset-x)),
-      calc(-50% + var(--plug-add-speed-dial-offset-y))
-    )
-    scale(1);
+}
+
+.plug-add-speed-dial--expanded
+  .plug-add-speed-dial__action[data-speed-dial-slot='above'] {
+  transform: translate(-50%, calc(-50% - var(--plug-add-speed-dial-distance))) scale(1);
+  transition-delay: 0ms;
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__action[data-speed-dial-slot='left'] {
+  transform: translate(calc(-50% - var(--plug-add-speed-dial-distance)), -50%) scale(1);
+  transition-delay: 25ms;
+}
+
+.plug-add-speed-dial--expanded .plug-add-speed-dial__action:hover,
+.plug-add-speed-dial--expanded .plug-add-speed-dial__action:focus-visible {
+  background: var(--lcl-color-accent-strong);
+  border-color: var(--lcl-color-accent-strong);
+  box-shadow: var(--lcl-shadow-lg);
+  color: var(--lcl-color-accent-contrast);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .plug-add-speed-dial__trigger .dashboard-fab__icon,
+  .plug-add-speed-dial__trigger,
   .plug-add-speed-dial__action {
     transition: none;
+    transition-delay: 0ms;
   }
 }
