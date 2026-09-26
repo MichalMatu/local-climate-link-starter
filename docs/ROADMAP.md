@@ -87,9 +87,9 @@ Done in this track:
 - focused software validation, one full `pnpm check`, and real Samsung S22 saved-runtime acceptance on 2026-09-26;
 - factory-fresh Plug `shellyplugsg3-e4b063e3e298` accepted with BLE status read and final stable `relayOn=false` after manual relay exercise.
 
-### BLE locator resilience — SOFTWARE DONE, HARDWARE ACCEPTANCE PENDING
+### BLE locator resilience — DONE
 
-Read-only stale-locator recovery is implemented on `work/shelly-ble-transport`:
+Read-only stale-locator recovery is implemented and hardware-accepted on `work/shelly-ble-transport`:
 
 - normal reads use the saved locator without scanning;
 - only retryable BLE `shelly-offline` / `timeout` read failures may start one bounded rediscovery cycle;
@@ -102,7 +102,7 @@ Read-only stale-locator recovery is implemented on `work/shelly-ble-transport`:
 
 Focused recovery validation passed 4 Vitest files / 23 tests, mobile typecheck, focused Prettier/ESLint, `quality:ux`, `quality:repo` and `git diff --check`. Combined BLE UX + recovery validation passed 10 Vitest files / 46 tests plus the existing responsive Plug-route Playwright test at all five canonical viewports.
 
-Real stale-locator acceptance remains deferred to a user-present session. It should deliberately invalidate/substitute the locator, prove scan -> `GetDeviceInfo.id` match -> locator replacement -> successful read, and require no relay mutation.
+Real Samsung S22+ stale-locator acceptance passed on 2026-09-26 using factory-fresh Plug `shellyplugsg3-e4b063e3e298`. The saved locator was deliberately changed from `E4:B0:63:E3:E2:9A` to stale `02:00:00:00:00:01`; the read-only runtime path recovered through BLE scanning/canonical identity verification, persisted `E4:B0:63:E3:E2:9A` again, preserved `physicalId` and saved metadata, and settled to a successful `0.0 W / 245 V / 0 Wh` read with relay OFF, controls enabled and no alerts. No relay toggle or settings mutation was performed. Android Bluetooth logs showed the recovery scan followed by successful GATT reconnects to the target address suffix `E2:9A`.
 
 ### Active next slice — read-only BLE Plug detail / Info target design
 
@@ -110,12 +110,13 @@ The first read-only audit found that this is not a mechanical transport swap: cu
 
 Continue in this order:
 
-1. audit the existing Plug detail surface and define which existing Shelly management reads/settings are safe and useful over BLE;
-2. implement the read-only BLE Plug detail/Info surface first only if the ownership/target model is mechanically clear; otherwise leave the audit checkpoint for a product decision;
-3. implement only explicitly approved settings mutations, preserving the no-ambiguous-retry rule;
-4. pairing/bonding policy for firmware that requires it;
-5. optional dual-transport representation for one physical Plug;
-6. optional transport selection/fallback policy.
+1. define the narrow verified read-only management target/transport boundary without changing `PlugSettingsTarget`;
+2. define transport-neutral Info rows and BLE-only replacements for Wi-Fi address/RSSI;
+3. implement the BLE-only read-only Detail/Info surface with focused tests;
+4. implement only explicitly approved settings mutations, preserving the no-ambiguous-retry rule;
+5. pairing/bonding policy for firmware that requires it;
+6. optional dual-transport representation for one physical Plug;
+7. optional transport selection/fallback policy.
 
 The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
 
