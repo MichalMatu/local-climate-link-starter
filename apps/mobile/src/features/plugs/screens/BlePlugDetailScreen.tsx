@@ -62,7 +62,10 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
         )}
         {detailQuery.data && (
           <>
-            <BlePlugDeviceReadOnlyPanel settings={detailQuery.data.deviceSettings} />
+            <BlePlugDeviceReadOnlyPanel
+              settings={detailQuery.data.deviceSettings}
+              cloud={detailQuery.data.cloud}
+            />
             <PlugInfoPanel
               connection={{
                 transport: 'bluetooth',
