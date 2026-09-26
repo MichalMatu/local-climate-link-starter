@@ -21,6 +21,8 @@ export const useBlePlugReadOnlyDetailFlow = (plug: SavedBlePlug | undefined) => 
     },
     enabled: Boolean(plug),
     retry: false,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
