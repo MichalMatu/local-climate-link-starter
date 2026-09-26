@@ -87,28 +87,29 @@ Done in this track:
 - focused software validation, one full `pnpm check`, and real Samsung S22 saved-runtime acceptance on 2026-09-26;
 - factory-fresh Plug `shellyplugsg3-e4b063e3e298` accepted with BLE status read and final stable `relayOn=false` after manual relay exercise.
 
-### Active next slice — BLE locator resilience
+### BLE locator resilience — SOFTWARE DONE, HARDWARE ACCEPTANCE PENDING
 
-A persisted `bleDeviceId` is a reconnect locator, not physical identity. It may become unusable or change independently of the canonical Shelly identity. Recovery must be conservative:
+Read-only stale-locator recovery is implemented on `work/shelly-ble-transport`:
 
-1. treat normalized `Shelly.GetDeviceInfo.id` as the only acceptance identity;
-2. on a read-only BLE connection/locator failure, allow one bounded rediscovery attempt;
-3. scan Shelly advertisements and use advertisement metadata only to prioritize candidates, never to prove identity;
-4. inspect candidates with `Shelly.GetDeviceInfo` until the canonical `physicalId` matches the saved Plug;
-5. only then replace the stored `bleDeviceId`; preserve the user's custom Plug name and refresh verified device metadata if appropriate;
-6. after a successful locator replacement, an idempotent/read-only status operation may be retried once;
-7. never automatically retry an ambiguous mutating BLE RPC. A relay/settings mutation failure must surface to the user; locator recovery may prepare a later explicit retry, but must not silently replay the mutation;
-8. do not add BLE↔Wi-Fi fallback as part of this slice;
-9. cover success, no-match, wrong-identity, scan/inspect failure, locator persistence and no-mutation-retry behavior with focused tests before hardware acceptance.
+- normal reads use the saved locator without scanning;
+- only retryable BLE `shelly-offline` / `timeout` read failures may start one bounded rediscovery cycle;
+- advertisement name and RSSI only prioritize candidates; normalized `Shelly.GetDeviceInfo.id` is the acceptance identity;
+- a matching candidate replaces only `bleDeviceId`, preserving the user's custom Plug name, then retries the original read exactly once;
+- concurrent recovery for one physical Plug is single-flight;
+- wrong identity, no match, scan failure and inspection failure never replace the locator;
+- relay/settings/script/config mutations are not automatically replayed;
+- BLE↔Wi-Fi fallback remains out of scope.
 
-After locator resilience is software-green, hardware acceptance should deliberately invalidate or substitute the locator in a controlled way, verify rediscovery resolves the same canonical physical Plug, and finish with an explicit read-only state. Hardware mutation is not required to accept locator recovery itself.
+Focused recovery validation passed 4 Vitest files / 23 tests, mobile typecheck, focused Prettier/ESLint, `quality:ux`, `quality:repo` and `git diff --check`. Combined BLE UX + recovery validation passed 10 Vitest files / 46 tests plus the existing responsive Plug-route Playwright test at all five canonical viewports.
 
-### After locator resilience
+Real stale-locator acceptance remains deferred to a user-present session. It should deliberately invalidate/substitute the locator, prove scan -> `GetDeviceInfo.id` match -> locator replacement -> successful read, and require no relay mutation.
+
+### Active next slice — read-only BLE Plug detail / Info audit
 
 Continue in this order:
 
 1. audit the existing Plug detail surface and define which existing Shelly management reads/settings are safe and useful over BLE;
-2. implement the read-only BLE Plug detail/Info surface first, reusing existing client/domain contracts where cleanly possible;
+2. implement the read-only BLE Plug detail/Info surface first only if the ownership/target model is mechanically clear; otherwise leave the audit checkpoint for a product decision;
 3. implement only explicitly approved settings mutations, preserving the no-ambiguous-retry rule;
 4. pairing/bonding policy for firmware that requires it;
 5. optional dual-transport representation for one physical Plug;

@@ -1,6 +1,6 @@
 # Handoff — Shelly BLE management / autonomous overnight work
 
-Status: **2026-09-26 — BLE-only runtime/dashboard accepted; UX polish first, locator resilience second**
+Status: **2026-09-26 — Phase 0 UX + stale BLE locator recovery software-green; final combined gate pending**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -122,13 +122,31 @@ pnpm check -> GREEN
 
 Do not rerun the old acceptance sequence just to re-prove the old checkpoint.
 
+## Overnight software checkpoint — current chat
+
+Completed commits on `work/shelly-ble-transport`:
+
+```text
+9feadd7be22b0e273516f0e4331008d751a9a8e4  Polish BLE plug discovery UX
+4adb8bbb6ff836a759d0fc6084d9aaacd43b8ba9  Recover stale BLE plug locators on reads
+7a1f68044e6f8add0d89c950577449b3d5e8a20c  Format BLE locator recovery
+```
+
+Phase 0 focused validation passed 7 Vitest files / 26 tests, mobile typecheck, focused Prettier/ESLint, `quality:ux`, `quality:repo` and `git diff --check`. Locator recovery focused validation passed 4 Vitest files / 23 tests with the same focused gates. Combined validation passed 10 Vitest files / 46 tests and the existing responsive Plug-route Playwright coverage at `360x800`, `390x844`, `412x915`, `768x1024` and `1440x900` (5/5).
+
+The recovery boundary is read-only only: a retryable `shelly-offline` / `timeout` status read may perform one bounded scan; only normalized `Shelly.GetDeviceInfo.id` can authorize locator replacement; the refreshed locator is persisted without changing the custom Plug name; the read is retried once; concurrent recovery is single-flight per physical Plug. Relay/settings/script/config mutations do not use this recovery path and are never automatically replayed.
+
+A Phase 0 push attempt triggered the repository pre-push hook unexpectedly. Its `pnpm check` stopped immediately at the pre-existing formatting issue in this handoff file, before later check stages. That attempt is not the final combined acceptance gate. This checkpoint formats the handoff before the one required final combined `pnpm check`.
+
+Real stale-locator hardware acceptance remains deferred until the user is present. No real device mutation was performed during this overnight work.
+
 ---
 
 # AUTONOMOUS OVERNIGHT MISSION
 
 Work autonomously only inside the bounded scope below. Make small cohesive commits and keep this handoff updated with exact checkpoints/results.
 
-## Phase 0 — user-requested BLE UX polish — DO FIRST
+## Phase 0 — user-requested BLE UX polish — SOFTWARE DONE
 
 These are concrete UX defects/requests observed on the real Samsung S22 after BLE runtime acceptance.
 
@@ -317,7 +335,7 @@ Run focused Prettier/Vitest/typecheck/ESLint plus `quality:ux`, `quality:repo`, 
 
 ---
 
-## Phase A — stale `bleDeviceId` recovery / BLE locator resilience
+## Phase A — stale `bleDeviceId` recovery / BLE locator resilience — SOFTWARE DONE, HARDWARE PENDING
 
 `SavedBlePlug.bleDeviceId` is a reconnect locator, not physical identity. It may become unusable while the physical Shelly remains the same device.
 
