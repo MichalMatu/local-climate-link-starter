@@ -50,6 +50,28 @@ describe('RpcShellyCloudClient', () => {
     ]);
   });
 
+  it('reads Cloud config and status without requiring mutation support', async () => {
+    const transport = new RecordingTransport([
+      { ok: true, value: { methods: ['Cloud.GetConfig', 'Cloud.GetStatus'] } },
+      { ok: true, value: { enable: true, server: null } },
+      { ok: true, value: { connected: true } }
+    ]);
+
+    await expect(new RpcShellyCloudClient(transport).readConfig()).resolves.toEqual({
+      ok: true,
+      value: {
+        supported: true,
+        config: { enable: true, server: null },
+        status: { connected: true }
+      }
+    });
+    expect(transport.requests).toEqual([
+      { method: 'Shelly.ListMethods' },
+      { method: 'Cloud.GetConfig' },
+      { method: 'Cloud.GetStatus' }
+    ]);
+  });
+
   it('returns unsupported without calling Cloud endpoints when the writable surface is missing', async () => {
     const transport = new RecordingTransport([
       { ok: true, value: { methods: ['Cloud.GetConfig', 'Cloud.GetStatus'] } }
