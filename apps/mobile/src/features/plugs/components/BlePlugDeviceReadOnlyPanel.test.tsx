@@ -55,4 +55,25 @@ describe('BlePlugDeviceReadOnlyPanel', () => {
     expect(screen.getByText('Not connected')).toBeVisible();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('keeps Cloud visible when PLUGS_UI is not available', () => {
+    render(
+      <I18nProvider>
+        <BlePlugDeviceReadOnlyPanel
+          settings={{ supported: false }}
+          cloud={{
+            supported: true,
+            config: { enable: true, server: null },
+            status: { connected: true }
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Shelly Cloud')).toBeVisible();
+    expect(screen.getByText('Cloud connection')).toBeVisible();
+    expect(screen.getByText('enabled')).toBeVisible();
+    expect(screen.getByText('Connected')).toBeVisible();
+    expect(screen.queryByText('LED mode')).not.toBeInTheDocument();
+  });
 });
