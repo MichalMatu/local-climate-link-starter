@@ -90,7 +90,7 @@ Done in this track:
 
 ### BLE locator resilience — DONE
 
-Read-only stale-locator recovery is implemented, shared by dashboard runtime/status and BLE Detail/Info, and hardware-accepted on `work/shelly-ble-transport`:
+Read-only stale-locator recovery is implemented, shared by dashboard runtime/status and BLE Detail, and hardware-accepted on `work/shelly-ble-transport`:
 
 - normal reads use the saved locator without scanning;
 - only retryable BLE `shelly-offline` / `timeout` read failures may start one bounded rediscovery cycle;
@@ -105,29 +105,36 @@ Focused recovery validation passed 4 Vitest files / 23 tests, mobile typecheck, 
 
 Real Samsung S22+ stale-locator acceptance passed on 2026-09-26 using factory-fresh Plug `shellyplugsg3-e4b063e3e298`. The saved locator was deliberately changed from `E4:B0:63:E3:E2:9A` to stale `02:00:00:00:00:01`; the read-only runtime path recovered through BLE scanning/canonical identity verification, persisted `E4:B0:63:E3:E2:9A` again, preserved `physicalId` and saved metadata, and settled to a successful `0.0 W / 245 V / 0 Wh` read with relay OFF, controls enabled and no alerts. No relay toggle or settings mutation was performed. Android Bluetooth logs showed the recovery scan followed by successful GATT reconnects to the target address suffix `E2:9A`.
 
-### Read-only BLE Plug detail / Info — DONE
+### Read-only BLE Plug Detail / Device / Info — SOFTWARE DONE, HARDWARE ACCEPTANCE PENDING
 
-A narrow verified read-only management boundary now supports both Wi-Fi and BLE without changing the existing Wi-Fi-shaped `PlugSettingsTarget` or introducing a fake HTTP target. BLE reads verify normalized `Shelly.GetDeviceInfo.id` against the saved canonical `physicalId`, and the BLE transport is disconnected in `finally`.
+The verified read-only management boundary supports Wi-Fi and BLE without changing the existing Wi-Fi-shaped mutation target or introducing a fake HTTP target. BLE reads verify normalized `Shelly.GetDeviceInfo.id` against the saved canonical `physicalId`, reuse one verified BLE transport for the Detail read model, disconnect in `finally`, and retain the existing 30-second refresh cadence.
 
-The accepted UI slice adds a BLE-only read-only Plug detail route from the dashboard card and keeps presentation transport-aware:
+The BLE-only Detail now reads and presents a deliberately small Device subset:
 
-- common Info rows remain shared;
-- Wi-Fi detail keeps `baseUrl` and Wi-Fi RSSI behavior;
-- BLE detail shows the BLE reconnect locator plus advertisement name instead of Wi-Fi-only rows;
-- BLE-only detail omits installed-runtime resource rows;
-- no LED/button/Cloud/script/config mutation surface was added;
-- no automatic retry of ambiguous mutations was introduced;
-- new capability code lives behind feature boundaries (`features/plugs` and `features/dashboard`) while app routing remains composition-only.
+- `PLUGS_UI.GetConfig`: LED mode, power-mode brightness when available, night-mode state/window/brightness and physical-button input mode;
+- `Cloud.GetConfig` + `Cloud.GetStatus`: Shelly Cloud enabled state and connection state;
+- existing Info identity/firmware/health rows through the same verified Detail session.
 
-Accepted commit `c3ffc6667f4f35b95091c740307dc9a29dc7bbcf` passed focused typecheck/Vitest/ESLint and the repository pre-push gate. Follow-up `aa3cd140e8378f5446ceefc9e8d9c172aea23fb4` extracted one shared locator-rediscovery flow for runtime/status and Detail/Info without adding mutation retry; `1db4d3fae8b889838cd25cba5dd4eb85b20b6fa6` is its formatting checkpoint. Final technical gate `shelly-ble-final-technical-gate-20260926-624` passed full `pnpm check` with 352/352 mobile tests and all four canonical pre-push E2E scenarios.
+The read-only getters do not require the corresponding setter to exist. PLUGS_UI and Cloud capability presentation is independent, so a firmware exposing one does not hide the other. Unsupported surfaces degrade without creating mutation controls. Wi-Fi Device mutation flows remain unchanged and are not forced through the new BLE read model merely for reuse.
+
+Architecture/ownership rules for this slice:
+
+- `features/plugs` owns the read model, bounded locator recovery and presentation;
+- package clients own RPC schemas/capability detection;
+- the screen does not call raw BLE/RPC;
+- one combined BLE Detail query replaces the older parallel Info-only query/recovery pipeline;
+- a recoverable read failure triggers at most one bounded locator recovery and one retry of the combined read;
+- no LED/button/Cloud mutation, script/config mutation, automatic mutation replay or BLE↔Wi-Fi fallback was added.
+
+Software validation is green, including shelly-client tests, the full mobile Vitest suite, typechecks, repository/feature gates and formatting. The earlier Detail/Info hardware evidence still applies to the transport/recovery foundation, but the expanded LED/button/Cloud Device presentation has not yet been accepted on the S22+ and must not be marked hardware-complete until that real-device check is recorded.
 
 Safe next work:
 
-1. audit which **read-only** Device/settings information is worth exposing over BLE, if any;
-2. implement settings mutations only when explicitly approved, preserving canonical identity verification and the no-ambiguous-retry rule;
-3. pairing/bonding policy for firmware that requires it;
-4. optional dual-transport representation for one physical Plug;
-5. optional transport selection/fallback policy.
+1. install the current branch on the Samsung S22+ and accept the expanded BLE-only Device/Info presentation against the factory-fresh Plug, read-only only;
+2. record the dated hardware evidence in `docs/testing/hardware-matrix.md` after the real-phone check;
+3. implement BLE settings mutations only when explicitly approved, preserving canonical identity verification and the no-ambiguous-retry rule;
+4. pairing/bonding policy for firmware that requires it;
+5. optional dual-transport representation and only then an explicit transport selection/fallback policy.
 
 The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
 
