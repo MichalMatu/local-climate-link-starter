@@ -16,7 +16,13 @@ The project is pre-release. Development-only persisted state, script names and i
 
 ## Identity and recovery
 
-Shelly physical identity is `Shelly.GetDeviceInfo.id`, normalized consistently. URL/IP is transport location, not durable identity.
+Shelly physical identity is normalized `Shelly.GetDeviceInfo.id`.
+
+Transport locators are not identity:
+
+- Wi-Fi IP / `baseUrl` is a Wi-Fi locator;
+- Android BLE address / CoreBluetooth UUID / saved `bleDeviceId` is a BLE reconnect locator;
+- advertisement name is discovery metadata only.
 
 Before relay mutations, runtime replacement or destructive operations, the app verifies that the endpoint still belongs to the stored Shelly device. A mismatch stops before mutation.
 
@@ -120,11 +126,27 @@ Plug detail visual hierarchy is intentional: the tab surface is flat by default;
 
 ## Transport direction
 
-Current production management uses local HTTP RPC.
+Wi-Fi and Bluetooth are independent management/add transports for the same physical Shelly Plug. Neither transport owns product identity or automation ownership.
 
-Two future BLE directions remain intentionally separate:
+The shared transport boundary is:
 
-1. **BLE sensors** — additional sensor types such as soil moisture should reuse the existing typed sensor/config/diagnostic model.
-2. **Shelly management over BLE** — must start with a real-hardware feasibility spike. If sufficient RPC lifecycle support exists, implement a shared `ShellyRpcTransport` with HTTP and BLE adapters rather than duplicating product logic.
+```text
+product/feature flow
+  -> RpcShellyClient / ShellyRpcTransport
+      -> HTTP adapter
+      -> BLE adapter
+```
 
-BLE transport must not fork automation ownership, persistence, safety or business logic.
+Current state:
+
+- local HTTP RPC remains the stable Wi-Fi management path;
+- BLE RPC framing, chunking, timeout handling, serialization and the mobile GATT binding are implemented and have real-hardware evidence;
+- BLE-only add flow verifies normalized `Shelly.GetDeviceInfo.id` and persists a separate `SavedBlePlug` keyed by physical identity;
+- the BLE-only dashboard runtime/status/relay slice is implemented but requires its own final software + S22 acceptance before being called complete;
+- no automatic BLE↔Wi-Fi fallback or transport merging is implemented yet.
+
+`SavedBlePlug` must not be forced into HTTP `ShellyDraftDevice` with a fake `baseUrl`. A future dual-transport record may represent both locators for one physical Plug, but canonical identity remains normalized `Shelly.GetDeviceInfo.id` and transport selection must stay separate from business logic.
+
+Mutating BLE RPC is never blindly retried after timeout/disconnect because the remote mutation result may be ambiguous.
+
+BLE sensor support remains a separate concern from Shelly management over BLE. New sensor types should continue to reuse the typed sensor/config/diagnostic model rather than coupling sensor discovery to the Plug management transport.
