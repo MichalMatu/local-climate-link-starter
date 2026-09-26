@@ -6,11 +6,6 @@ export const PlugBluetoothAddPage = () => {
   const bluetooth = usePlugBleAddFlow();
   const savedPlugs = useSavedBlePlugStore((state) => state.plugs);
   const saveCandidate = useSavedBlePlugStore((state) => state.saveCandidate);
-  const verifiedCandidateSaved =
-    bluetooth.verifiedCandidate !== null &&
-    savedPlugs.some(
-      (plug) => plug.physicalId === bluetooth.verifiedCandidate?.physicalId
-    );
 
   return (
     <main className="demo-shell hardware-shell">
@@ -19,18 +14,15 @@ export const PlugBluetoothAddPage = () => {
           scanning={bluetooth.scanning}
           candidates={bluetooth.candidates}
           inspectingDeviceId={bluetooth.inspectingDeviceId}
-          verifiedCandidate={bluetooth.verifiedCandidate}
-          verifiedCandidateSaved={verifiedCandidateSaved}
+          verifiedCandidates={bluetooth.verifiedCandidates}
+          savedPhysicalIds={savedPlugs.map((plug) => plug.physicalId)}
           error={bluetooth.error}
           onStart={bluetooth.startScan}
           onStop={bluetooth.stopScan}
-          onInspect={(candidate) => {
-            void bluetooth.inspectCandidate(candidate);
-          }}
-          onSaveVerified={() => {
-            if (bluetooth.verifiedCandidate) {
-              saveCandidate(bluetooth.verifiedCandidate);
-            }
+          onAdd={(candidate) => {
+            void bluetooth.verifyCandidate(candidate).then((verified) => {
+              if (verified) saveCandidate(verified);
+            });
           }}
         />
       </section>

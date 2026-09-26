@@ -28,6 +28,11 @@
 }
 
 .plug-add-speed-dial__action {
+  --plug-add-speed-dial-offset-x: 0;
+  --plug-add-speed-dial-offset-y: calc(
+    -1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-lg))
+  );
+
   align-items: center;
   background: var(--lcl-color-surface);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
@@ -41,16 +46,24 @@
   opacity: 0;
   padding: 0;
   pointer-events: none;
+  left: 50%;
   position: absolute;
-  right: calc(var(--lcl-spacing-sm) / 2);
-  top: calc(var(--lcl-spacing-sm) / 2);
-  transform: translate(0, 0) scale(0.72);
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.72);
   transition:
     opacity var(--lcl-motion-fast),
     transform var(--lcl-motion-fast),
     border-color var(--lcl-motion-fast),
     color var(--lcl-motion-fast);
   width: var(--lcl-size-control-min-height);
+}
+
+.plug-add-speed-dial__action[data-radial-slot='left'] {
+  --plug-add-speed-dial-offset-x: calc(-1 * var(--lcl-spacing-md));
+}
+
+.plug-add-speed-dial__action[data-radial-slot='right'] {
+  --plug-add-speed-dial-offset-x: var(--lcl-spacing-md);
 }
 
 .plug-add-speed-dial__action svg {
@@ -67,20 +80,9 @@
 .plug-add-speed-dial--expanded .plug-add-speed-dial__action {
   opacity: 1;
   pointer-events: auto;
-}
-
-.plug-add-speed-dial--expanded .plug-add-speed-dial__action--bluetooth {
   transform: translate(
-      0,
-      calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-lg)))
-    )
-    scale(1);
-}
-
-.plug-add-speed-dial--expanded .plug-add-speed-dial__action--wifi {
-  transform: translate(
-      calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-md))),
-      calc(-1 * (var(--lcl-size-control-min-height) + var(--lcl-spacing-sm)))
+      calc(-50% + var(--plug-add-speed-dial-offset-x)),
+      calc(-50% + var(--plug-add-speed-dial-offset-y))
     )
     scale(1);
 }

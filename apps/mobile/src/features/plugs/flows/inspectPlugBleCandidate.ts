@@ -7,6 +7,7 @@ import { createShellyBleTransport } from '../../../platform/shellyBleTransport.j
 import {
   buildVerifiedPlugBleCandidate,
   type PlugBleAdvertisement,
+  type PlugBlePreview,
   type VerifiedPlugBleCandidate
 } from '../data/plugBleOnboarding.js';
 
@@ -42,6 +43,22 @@ const unwrap = <T>(result: Result<T>, operation: string): T => {
   );
 };
 
+const readPreview = async (client: RpcShellyClient): Promise<PlugBlePreview | null> => {
+  try {
+    const status = await client.getStatus();
+    if (!status.ok) return null;
+    return {
+      relayOn: status.value.relayOn,
+      powerW: status.value.telemetry.powerW ?? null,
+      voltageV: status.value.telemetry.voltageV ?? null,
+      currentA: status.value.telemetry.currentA ?? null,
+      localTime: status.value.clock.localTime ?? null
+    };
+  } catch {
+    return null;
+  }
+};
+
 export const inspectPlugBleCandidate = async (
   advertisement: PlugBleAdvertisement,
   options: InspectPlugBleCandidateOptions = {},
@@ -55,17 +72,19 @@ export const inspectPlugBleCandidate = async (
     createShellyBleTransport(advertisement.deviceId);
 
   try {
-    const deviceInfo = unwrap(
-      await new RpcShellyClient(transport).getDeviceInfo(),
-      'Shelly.GetDeviceInfo'
-    );
-
-    return buildVerifiedPlugBleCandidate({
+    const client = new RpcShellyClient(transport);
+    const deviceInfo = unwrap(await client.getDeviceInfo(), 'Shelly.GetDeviceInfo');
+    const verified = buildVerifiedPlugBleCandidate({
       bleDeviceId: advertisement.deviceId,
       advertisementName: advertisement.name,
       rssi: advertisement.rssi,
       deviceInfo
     });
+
+    return {
+      ...verified,
+      preview: await readPreview(client)
+    };
   } finally {
     await transport.disconnect();
   }

@@ -56,9 +56,7 @@ export const scanPlugBleCandidates = async ({
   try {
     for await (const advertisement of scanner.startScan({ timeoutMs })) {
       const candidate = toPlugAdvertisement(advertisement);
-      if (!candidate) {
-        continue;
-      }
+      if (!candidate) continue;
       mergeCandidate(candidates, candidate);
       onCandidate?.(candidate);
     }
@@ -66,7 +64,5 @@ export const scanPlugBleCandidates = async ({
     await scanner.stopScan().catch(() => undefined);
   }
 
-  return [...candidates.values()].sort(
-    (left, right) => (right.rssi ?? -999) - (left.rssi ?? -999)
-  );
+  return [...candidates.values()];
 };

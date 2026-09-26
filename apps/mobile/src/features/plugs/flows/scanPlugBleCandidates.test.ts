@@ -7,9 +7,7 @@ class FakeScanner implements BleScanner {
   constructor(private readonly advertisements: NormalizedBleAdvertisement[]) {}
 
   async *startScan(): AsyncIterable<NormalizedBleAdvertisement> {
-    for (const advertisement of this.advertisements) {
-      yield advertisement;
-    }
+    for (const advertisement of this.advertisements) yield advertisement;
   }
 
   async stopScan(): Promise<void> {
@@ -33,7 +31,7 @@ const advertisement = (
 });
 
 describe('scanPlugBleCandidates', () => {
-  it('returns only Shelly Plug advertisements sorted by signal strength', async () => {
+  it('returns only Shelly Plug advertisements in first-seen order', async () => {
     const scanner = new FakeScanner([
       advertisement('sensor', 'LYWSD03MMC', -30),
       advertisement('plug-weak', 'ShellyPlugSG3-AAAA', -60),
@@ -43,27 +41,26 @@ describe('scanPlugBleCandidates', () => {
     const candidates = await scanPlugBleCandidates({ scanner });
 
     expect(candidates.map((candidate) => candidate.deviceId)).toEqual([
-      'plug-strong',
-      'plug-weak'
+      'plug-weak',
+      'plug-strong'
     ]);
     expect(scanner.stopCalls).toBe(1);
   });
 
-  it('deduplicates repeated advertisements by platform BLE handle', async () => {
+  it('updates repeated advertisements in place without changing first-seen order', async () => {
     const scanner = new FakeScanner([
-      advertisement('E4:B0:63:E3:E2:9A', 'ShellyPlugSG3-E4B063E3E298', -55),
-      advertisement('e4:b0:63:e3:e2:9a', 'ShellyPlugSG3-E4B063E3E298', -42)
+      advertisement('plug-a', 'ShellyPlugSG3-A', -70),
+      advertisement('plug-b', 'ShellyPlugSG3-B', -40),
+      advertisement('PLUG-A', 'ShellyPlugSG3-A', -20)
     ]);
 
     const candidates = await scanPlugBleCandidates({ scanner });
 
-    expect(candidates).toEqual([
-      {
-        deviceId: 'e4:b0:63:e3:e2:9a',
-        name: 'ShellyPlugSG3-E4B063E3E298',
-        rssi: -42
-      }
+    expect(candidates.map((candidate) => candidate.deviceId)).toEqual([
+      'PLUG-A',
+      'plug-b'
     ]);
+    expect(candidates[0]?.rssi).toBe(-20);
   });
 
   it('streams discovered candidates to the caller', async () => {

@@ -20,14 +20,14 @@ const advertisement = (
 });
 
 class FakeScanner implements BleScanner {
+  startCalls = 0;
   stopCalls = 0;
 
   constructor(private readonly items: NormalizedBleAdvertisement[]) {}
 
   async *startScan(): AsyncIterable<NormalizedBleAdvertisement> {
-    for (const item of this.items) {
-      yield item;
-    }
+    this.startCalls += 1;
+    for (const item of this.items) yield item;
   }
 
   async stopScan(): Promise<void> {
@@ -43,31 +43,33 @@ const verified = (deviceId: string): VerifiedPlugBleCandidate => ({
   model: 'S3PL-00112EU',
   generation: 3,
   firmwareId: '1.7.5',
-  matterEnabled: false
+  matterEnabled: false,
+  preview: null
 });
 
 describe('usePlugBleAddFlow', () => {
-  it('discovers Shelly Plugs and sorts them by signal strength', async () => {
+  it('auto-starts exactly once and preserves first-seen candidate order', async () => {
     const scanner = new FakeScanner([
-      advertisement('weak', 'ShellyPlugSG3-WEAK', -70),
-      advertisement('sensor', 'LYWSD03MMC', -20),
-      advertisement('strong', 'ShellyPlugSG3-STRONG', -35)
+      advertisement('first', 'ShellyPlugSG3-FIRST', -70),
+      advertisement('second', 'ShellyPlugSG3-SECOND', -35),
+      advertisement('FIRST', 'ShellyPlugSG3-FIRST', -20)
     ]);
-    const { result } = renderHook(() =>
-      usePlugBleAddFlow({ createScanner: () => scanner })
-    );
-
-    act(() => result.current.startScan());
+    const createScanner = vi.fn(() => scanner);
+    const { result, rerender } = renderHook(() => usePlugBleAddFlow({ createScanner }));
 
     await waitFor(() => expect(result.current.scanning).toBe(false));
+    rerender();
+
+    expect(createScanner).toHaveBeenCalledTimes(1);
+    expect(scanner.startCalls).toBe(1);
     expect(result.current.candidates.map((item) => item.deviceId)).toEqual([
-      'strong',
-      'weak'
+      'FIRST',
+      'second'
     ]);
-    expect(scanner.stopCalls).toBe(1);
+    expect(result.current.candidates[0]?.rssi).toBe(-20);
   });
 
-  it('stops phone scanning before inspecting a selected candidate', async () => {
+  it('does not start an overlapping scan', async () => {
     let releaseScan: (() => void) | undefined;
     const scanner: BleScanner = {
       async *startScan() {
@@ -76,48 +78,72 @@ describe('usePlugBleAddFlow', () => {
           releaseScan = resolve;
         });
       },
-      stopScan: vi.fn(async () => {
-        releaseScan?.();
-      })
+      stopScan: vi.fn(async () => releaseScan?.())
+    };
+    const createScanner = vi.fn(() => scanner);
+    const { result } = renderHook(() => usePlugBleAddFlow({ createScanner }));
+
+    await waitFor(() => expect(result.current.scanning).toBe(true));
+    act(() => result.current.startScan());
+    expect(createScanner).toHaveBeenCalledTimes(1);
+
+    act(() => result.current.stopScan());
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+  });
+
+  it('stops phone scanning before verifying a selected candidate', async () => {
+    let releaseScan: (() => void) | undefined;
+    const scanner: BleScanner = {
+      async *startScan() {
+        yield advertisement('plug', 'ShellyPlugSG3-AABBCCDDEEFF', -40);
+        await new Promise<void>((resolve) => {
+          releaseScan = resolve;
+        });
+      },
+      stopScan: vi.fn(async () => releaseScan?.())
     };
     const inspectCandidate = vi.fn(async () => verified('plug'));
+    const createScanner = vi.fn(() => scanner);
     const { result } = renderHook(() =>
-      usePlugBleAddFlow({ createScanner: () => scanner, inspectCandidate })
+      usePlugBleAddFlow({ createScanner, inspectCandidate })
     );
 
-    act(() => result.current.startScan());
     await waitFor(() => expect(result.current.candidates).toHaveLength(1));
 
     await act(async () => {
-      await result.current.inspectCandidate(result.current.candidates[0]!);
+      await result.current.verifyCandidate(result.current.candidates[0]!);
     });
 
     expect(scanner.stopScan).toHaveBeenCalled();
     expect(inspectCandidate).toHaveBeenCalledWith(
       expect.objectContaining({ deviceId: 'plug' })
     );
-    expect(result.current.verifiedCandidate?.physicalId).toBe(
+    expect(result.current.verifiedCandidates[0]?.physicalId).toBe(
       'shellyplugsg3-aabbccddeeff'
     );
+    expect(result.current.verifiedCandidates).toHaveLength(1);
   });
 
-  it('surfaces inspection errors without leaving an inspecting state', async () => {
+  it('returns null for verification failure so an unverified candidate cannot be saved', async () => {
     const inspectCandidate = vi.fn(async () => {
       throw new Error('GATT unavailable');
     });
-    const { result } = renderHook(() => usePlugBleAddFlow({ inspectCandidate }));
+    const { result } = renderHook(() =>
+      usePlugBleAddFlow({ autoStart: false, inspectCandidate })
+    );
 
+    let resolved: VerifiedPlugBleCandidate | null = verified('unexpected');
     await act(async () => {
-      await result.current.inspectCandidate({
+      resolved = await result.current.verifyCandidate({
         deviceId: 'plug',
         name: 'ShellyPlugSG3-AABBCCDDEEFF',
         rssi: -40
       });
     });
 
+    expect(resolved).toBeNull();
     expect(result.current.error).toBe('GATT unavailable');
-    expect(result.current.inspectingDeviceId).toBeNull();
-    expect(result.current.verifiedCandidate).toBeNull();
+    expect(result.current.verifiedCandidates).toHaveLength(0);
   });
 
   it('stops an active scanner when the hook unmounts', async () => {
@@ -129,15 +155,11 @@ describe('usePlugBleAddFlow', () => {
           releaseScan = resolve;
         });
       },
-      stopScan: vi.fn(async () => {
-        releaseScan?.();
-      })
+      stopScan: vi.fn(async () => releaseScan?.())
     };
-    const { result, unmount } = renderHook(() =>
-      usePlugBleAddFlow({ createScanner: () => scanner })
-    );
+    const createScanner = vi.fn(() => scanner);
+    const { result, unmount } = renderHook(() => usePlugBleAddFlow({ createScanner }));
 
-    act(() => result.current.startScan());
     await waitFor(() => expect(result.current.scanning).toBe(true));
     unmount();
 

@@ -91,13 +91,8 @@ export const BleOnlyPlugCard = ({ plug, onNameChange }: BleOnlyPlugCardProps) =>
         </button>
       </div>
 
-      {(runtime.isPending || runtime.isRelayPending || hasError) && (
+      {hasError && (
         <footer className="automation-card__footer">
-          {(runtime.isPending || runtime.isRelayPending) && (
-            <div className="automation-card__status" role="status">
-              <span>{t('dashboard.refreshing')}</span>
-            </div>
-          )}
           {runtime.isError && (
             <div
               className="automation-card__status automation-card__status--offline"

@@ -25,6 +25,7 @@ export const PlugAddSpeedDial = ({ onSelect }: PlugAddSpeedDialProps) => {
     >
       <button
         className="plug-add-speed-dial__action plug-add-speed-dial__action--wifi"
+        data-radial-slot="left"
         type="button"
         aria-label="Wi-Fi"
         title="Wi-Fi"
@@ -35,6 +36,7 @@ export const PlugAddSpeedDial = ({ onSelect }: PlugAddSpeedDialProps) => {
       </button>
       <button
         className="plug-add-speed-dial__action plug-add-speed-dial__action--bluetooth"
+        data-radial-slot="right"
         type="button"
         aria-label={t('common.bluetooth')}
         title={t('common.bluetooth')}

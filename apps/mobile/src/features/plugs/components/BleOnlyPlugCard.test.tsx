@@ -71,15 +71,26 @@ describe('BleOnlyPlugCard', () => {
     expect(runtime.turnRelayOff).not.toHaveBeenCalled();
   });
 
-  it('exposes pending and read error states explicitly', () => {
+  it('keeps pending state accessible without rendering a Refreshing footer', () => {
     runtime.isPending = true;
     runtime.isError = true;
 
     renderCard();
 
-    expect(screen.getByRole('status')).toHaveTextContent('Refreshing from Shelly');
+    expect(screen.queryByText('Refreshing from Shelly')).not.toBeInTheDocument();
+    expect(screen.getByRole('article')).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach Shelly');
     expect(screen.getByRole('button', { name: 'ON' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'OFF' })).toBeDisabled();
+  });
+
+  it('keeps relay mutation errors visible without a normal pending footer', () => {
+    runtime.isRelayPending = true;
+    runtime.isRelayError = true;
+
+    renderCard();
+
+    expect(screen.queryByText('Refreshing from Shelly')).not.toBeInTheDocument();
+    expect(screen.getByText('Could not safely change automation state.')).toBeVisible();
   });
 });

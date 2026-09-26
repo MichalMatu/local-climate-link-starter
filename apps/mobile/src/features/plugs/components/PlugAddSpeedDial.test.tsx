@@ -48,6 +48,19 @@ describe('PlugAddSpeedDial', () => {
     );
   });
 
+  it('assigns symmetric radial slots to the two transport actions', () => {
+    renderDial();
+
+    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toHaveAttribute(
+      'data-radial-slot',
+      'left'
+    );
+    expect(screen.getByRole('button', { name: 'Bluetooth' })).toHaveAttribute(
+      'data-radial-slot',
+      'right'
+    );
+  });
+
   it.each([
     ['Wi-Fi', 'wifi'],
     ['Bluetooth', 'bluetooth']

@@ -7,15 +7,28 @@ import {
   type PlugBluetoothAddPanelProps
 } from './PlugBluetoothAddPanel.js';
 
+const candidate = {
+  deviceId: 'AA:BB',
+  name: 'ShellyPlugSG3-AABB',
+  rssi: -40
+};
+
 const verifiedCandidate: VerifiedPlugBleCandidate = {
-  bleDeviceId: 'AA:BB',
-  advertisementName: 'ShellyPlugSG3-AABB',
+  bleDeviceId: candidate.deviceId,
+  advertisementName: candidate.name,
   rssi: -40,
   physicalId: 'shellyplugsg3-aabb',
   model: 'S3PL-00112EU',
   generation: 3,
   firmwareId: '1.7.5',
-  matterEnabled: false
+  matterEnabled: false,
+  preview: {
+    relayOn: false,
+    powerW: 4.2,
+    voltageV: 230,
+    currentA: 0.02,
+    localTime: '12:34'
+  }
 };
 
 const renderPanel = (overrides: Partial<PlugBluetoothAddPanelProps> = {}) => {
@@ -23,13 +36,12 @@ const renderPanel = (overrides: Partial<PlugBluetoothAddPanelProps> = {}) => {
     scanning: false,
     candidates: [],
     inspectingDeviceId: null,
-    verifiedCandidate: null,
-    verifiedCandidateSaved: false,
+    verifiedCandidates: [],
+    savedPhysicalIds: [],
     error: null,
     onStart: vi.fn(),
     onStop: vi.fn(),
-    onInspect: vi.fn(),
-    onSaveVerified: vi.fn(),
+    onAdd: vi.fn(),
     ...overrides
   };
   render(
@@ -44,46 +56,47 @@ describe('PlugBluetoothAddPanel', () => {
   beforeEach(() => setLocalePreference('en'));
   afterEach(() => setLocalePreference('system'));
 
-  it('shows verified physical identity without any Wi-Fi provisioning controls', () => {
-    renderPanel({ verifiedCandidate });
-
-    expect(screen.getByText('shellyplugsg3-aabb')).toBeInTheDocument();
-    expect(screen.getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Wi-Fi network name')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Wi-Fi password')).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'Connect to Wi-Fi' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('passes the selected advertisement to identity inspection', () => {
-    const candidate = {
-      deviceId: 'AA:BB',
-      name: 'ShellyPlugSG3-AABB',
-      rssi: -40
-    };
+  it('presents Add directly on every candidate without an Info step', () => {
     const props = renderPanel({ candidates: [candidate] });
 
-    fireEvent.click(screen.getByRole('button', { name: `Info: ${candidate.name}` }));
+    expect(screen.queryByRole('button', { name: `Info: ${candidate.name}` })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: `Add: ${candidate.name}` }));
 
-    expect(props.onInspect).toHaveBeenCalledWith(candidate);
+    expect(props.onAdd).toHaveBeenCalledWith(candidate);
   });
 
-  it('saves a verified BLE-only plug and exposes the persisted state', () => {
-    const props = renderPanel({ verifiedCandidate });
+  it('renders canonical metadata and read-only preview after verification', () => {
+    renderPanel({ candidates: [candidate], verifiedCandidates: [verifiedCandidate] });
 
-    fireEvent.click(
-      screen.getByRole('button', { name: `Add: ${verifiedCandidate.physicalId}` })
-    );
-
-    expect(props.onSaveVerified).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(verifiedCandidate.physicalId)).toBeVisible();
+    expect(screen.getByText('S3PL-00112EU, gen 3')).toBeVisible();
+    expect(screen.getByText('4.2 W')).toBeVisible();
+    expect(screen.getByText('230 V')).toBeVisible();
+    expect(screen.getByText('0.02 A')).toBeVisible();
+    expect(screen.getByText('12:34')).toBeVisible();
   });
 
-  it('disables saving when the verified physical device is already stored', () => {
-    renderPanel({ verifiedCandidate, verifiedCandidateSaved: true });
+  it('shows Added disabled only after canonical physical identity is saved', () => {
+    renderPanel({
+      candidates: [candidate],
+      verifiedCandidates: [verifiedCandidate],
+      savedPhysicalIds: [verifiedCandidate.physicalId]
+    });
 
     expect(
       screen.getByRole('button', { name: `Added: ${verifiedCandidate.physicalId}` })
     ).toBeDisabled();
+  });
+
+  it('keeps Add available when preview failed after successful identity verification', () => {
+    renderPanel({
+      candidates: [candidate],
+      verifiedCandidates: [{ ...verifiedCandidate, preview: null }]
+    });
+
+    expect(
+      screen.getByRole('button', { name: `Add: ${verifiedCandidate.physicalId}` })
+    ).toBeEnabled();
+    expect(screen.getAllByText('—')).toHaveLength(4);
   });
 });

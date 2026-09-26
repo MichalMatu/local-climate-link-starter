@@ -6,6 +6,14 @@ export type PlugBleAdvertisement = {
   rssi: number | null;
 };
 
+export type PlugBlePreview = {
+  relayOn: boolean;
+  powerW: number | null;
+  voltageV: number | null;
+  currentA: number | null;
+  localTime: string | null;
+};
+
 export type VerifiedPlugBleCandidate = {
   bleDeviceId: string;
   advertisementName: string;
@@ -15,6 +23,7 @@ export type VerifiedPlugBleCandidate = {
   generation: number;
   firmwareId: string | null;
   matterEnabled: boolean | null;
+  preview?: PlugBlePreview | null;
 };
 
 export const buildVerifiedPlugBleCandidate = (input: {

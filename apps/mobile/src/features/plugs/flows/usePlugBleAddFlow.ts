@@ -12,6 +12,7 @@ import {
 } from './scanPlugBleCandidates.js';
 
 export type UsePlugBleAddFlowDependencies = {
+  autoStart?: boolean;
   createScanner?(): BleScanner;
   inspectCandidate?(candidate: PlugBleAdvertisement): Promise<VerifiedPlugBleCandidate>;
 };
@@ -21,11 +22,12 @@ export type UsePlugBleAddFlowResult = {
   scanning: boolean;
   error: string | null;
   inspectingDeviceId: string | null;
-  verifiedCandidate: VerifiedPlugBleCandidate | null;
+  verifiedCandidates: VerifiedPlugBleCandidate[];
   startScan(): void;
   stopScan(): void;
-  inspectCandidate(candidate: PlugBleAdvertisement): Promise<void>;
-  clearVerifiedCandidate(): void;
+  verifyCandidate(
+    candidate: PlugBleAdvertisement
+  ): Promise<VerifiedPlugBleCandidate | null>;
 };
 
 const errorMessage = (error: unknown): string =>
@@ -36,11 +38,28 @@ const mergeCandidate = (
   candidate: PlugBleAdvertisement
 ): PlugBleAdvertisement[] => {
   const key = candidate.deviceId.toLowerCase();
-  const next = [
-    ...current.filter((item) => item.deviceId.toLowerCase() !== key),
-    candidate
-  ];
-  return next.sort((left, right) => (right.rssi ?? -999) - (left.rssi ?? -999));
+  const index = current.findIndex((item) => item.deviceId.toLowerCase() === key);
+  if (index < 0) return [...current, candidate];
+
+  const next = [...current];
+  next[index] = {
+    ...current[index],
+    ...candidate,
+    rssi: candidate.rssi ?? current[index]?.rssi ?? null
+  };
+  return next;
+};
+
+const mergeVerifiedCandidate = (
+  current: readonly VerifiedPlugBleCandidate[],
+  candidate: VerifiedPlugBleCandidate
+): VerifiedPlugBleCandidate[] => {
+  const key = candidate.bleDeviceId.toLowerCase();
+  const index = current.findIndex((item) => item.bleDeviceId.toLowerCase() === key);
+  if (index < 0) return [...current, candidate];
+  const next = [...current];
+  next[index] = candidate;
+  return next;
 };
 
 export const usePlugBleAddFlow = (
@@ -50,18 +69,21 @@ export const usePlugBleAddFlow = (
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inspectingDeviceId, setInspectingDeviceId] = useState<string | null>(null);
-  const [verifiedCandidate, setVerifiedCandidate] =
-    useState<VerifiedPlugBleCandidate | null>(null);
+  const [verifiedCandidates, setVerifiedCandidates] = useState<
+    VerifiedPlugBleCandidate[]
+  >([]);
   const scannerRef = useRef<BleScanner | null>(null);
   const scanGenerationRef = useRef(0);
+  const autoStart = dependencies.autoStart ?? true;
+  const createScannerOverride = dependencies.createScanner;
+  const inspectCandidateImpl = dependencies.inspectCandidate ?? inspectPlugBleCandidate;
 
   const createScanner = useCallback(
     () =>
-      dependencies.createScanner?.() ??
+      createScannerOverride?.() ??
       new CapacitorBleScanner({ platform: Capacitor.getPlatform() }),
-    [dependencies]
+    [createScannerOverride]
   );
-  const inspectCandidateImpl = dependencies.inspectCandidate ?? inspectPlugBleCandidate;
 
   const stopScanNow = useCallback(async (): Promise<void> => {
     scanGenerationRef.current += 1;
@@ -76,12 +98,14 @@ export const usePlugBleAddFlow = (
   }, [stopScanNow]);
 
   const startScan = useCallback(() => {
+    if (scannerRef.current) return;
+
     const generation = scanGenerationRef.current + 1;
     scanGenerationRef.current = generation;
     const scanner = createScanner();
     scannerRef.current = scanner;
     setCandidates([]);
-    setVerifiedCandidate(null);
+    setVerifiedCandidates([]);
     setError(null);
     setScanning(true);
     void scanPlugBleCandidates({
@@ -107,16 +131,18 @@ export const usePlugBleAddFlow = (
       });
   }, [createScanner]);
 
-  const inspectCandidate = useCallback(
-    async (candidate: PlugBleAdvertisement): Promise<void> => {
+  const verifyCandidate = useCallback(
+    async (candidate: PlugBleAdvertisement): Promise<VerifiedPlugBleCandidate | null> => {
       await stopScanNow();
       setError(null);
-      setVerifiedCandidate(null);
       setInspectingDeviceId(candidate.deviceId);
       try {
-        setVerifiedCandidate(await inspectCandidateImpl(candidate));
+        const verified = await inspectCandidateImpl(candidate);
+        setVerifiedCandidates((current) => mergeVerifiedCandidate(current, verified));
+        return verified;
       } catch (caught) {
         setError(errorMessage(caught));
+        return null;
       } finally {
         setInspectingDeviceId(null);
       }
@@ -124,26 +150,21 @@ export const usePlugBleAddFlow = (
     [inspectCandidateImpl, stopScanNow]
   );
 
-  const clearVerifiedCandidate = useCallback(() => {
-    setVerifiedCandidate(null);
-  }, []);
-
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    if (autoStart) startScan();
+    return () => {
       void stopScanNow();
-    },
-    [stopScanNow]
-  );
+    };
+  }, [autoStart, startScan, stopScanNow]);
 
   return {
     candidates,
     scanning,
     error,
     inspectingDeviceId,
-    verifiedCandidate,
+    verifiedCandidates,
     startScan,
     stopScan,
-    inspectCandidate,
-    clearVerifiedCandidate
+    verifyCandidate
   };
 };
