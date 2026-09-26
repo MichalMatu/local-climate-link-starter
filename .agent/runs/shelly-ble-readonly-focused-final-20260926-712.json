@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 3,
   "total": 3,
-  "command": "pnpm --filter @lcl/shelly-client test -- cloud.test.ts plugsUi.test.ts && pnpm --filter @lcl/mobile test -- src/features/plugs/components/BlePlugDeviceReadOnlyPanel.test.tsx src/features/plugs/flows/readSavedBlePlugReadOnlyDetail.test.ts src/features/plugs/data/plugReadOnlyManagementTarget.test.ts",
-  "pid": 52874,
+  "command": "pnpm --filter @lcl/mobile typecheck && pnpm --filter @lcl/shelly-client typecheck && pnpm quality:repo && pnpm format:check && git diff --check",
+  "pid": 54172,
   "timeout": 3600,
   "idle_timeout": 600,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-26T18:30:27.491856+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-09-26T18:31:21.301143+00:00",
+  "stage_name": "command-3",
+  "stage_index": 3,
   "stage_total": 3,
   "stage_phase": "commands",
   "task_id": "shelly-ble-readonly-focused-final-20260926-712",
@@ -18,5 +18,5 @@
   "task_digest": "23b15413bee92362a58a0de6b502fec57a052a1c8160aaab641b31b836a4b461",
   "daemon_version": "4.18.25",
   "daemon_pid": 52705,
-  "updated_at": "2026-09-26T18:30:27.569820+00:00"
+  "updated_at": "2026-09-26T18:31:21.398658+00:00"
 }
