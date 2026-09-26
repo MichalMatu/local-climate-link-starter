@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ble-readonly-postcleanup-gate-20260926-710",
+  "task_digest": "14482de29e2fe27ecdde20512aaee6f4688b469ed25e9f94ad5cd451dac47d11",
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-09-26T18:26:38.441729+00:00",
+  "attempt_id": "dd3e2b0819d3d59e977f7126",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 47876,
+  "updated_at": "2026-09-26T18:26:38.441814+00:00",
+  "pid": 47876
+}
