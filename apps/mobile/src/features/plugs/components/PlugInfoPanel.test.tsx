@@ -22,9 +22,10 @@ const information = {
       uptimeSec: 3600,
       localTime: '12:34',
       timeSynced: true,
-      lastSyncUnixTimeSec: null
+      lastSyncUnixTimeSec: undefined
     },
-    matterEnabled: false
+    matterEnabled: false,
+    bluetooth: 'enabled'
   }
 } as PlugInformation;
 

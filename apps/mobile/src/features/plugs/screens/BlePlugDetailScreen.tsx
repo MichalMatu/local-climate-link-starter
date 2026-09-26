@@ -1,20 +1,15 @@
-import { useTranslation } from '../app/i18n.js';
-import { AppPageBack } from '../components/AppPageBack.js';
-import {
-  PlugInfoPanel,
-  useBlePlugInformationFlow,
-  useSavedBlePlugStore
-} from '../features/plugs/index.js';
+import { useTranslation } from '../../../app/i18n.js';
+import { AppPageBack } from '../../../components/AppPageBack.js';
+import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
+import { useBlePlugInformationFlow } from '../flows/useBlePlugInformationFlow.js';
+import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
 
 export type BlePlugDetailScreenProps = {
   physicalId: string;
   onBack(): void;
 };
 
-export const BlePlugDetailScreen = ({
-  physicalId,
-  onBack
-}: BlePlugDetailScreenProps) => {
+export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenProps) => {
   const { t } = useTranslation();
   const plug = useSavedBlePlugStore((state) =>
     state.plugs.find((candidate) => candidate.physicalId === physicalId)

@@ -382,7 +382,10 @@ const ClimateInstallationDetail = ({
         {activeTab === 'info' && (
           <section>
             <PlugInfoPanel
-              target={installation.shelly}
+              connection={{
+                transport: 'wifi',
+                baseUrl: installation.shelly.baseUrl
+              }}
               information={informationQuery.data}
               loading={informationQuery.isPending}
               error={informationQuery.isError}

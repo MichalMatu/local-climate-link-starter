@@ -23,6 +23,10 @@ export {
   type PlugInfoPanelProps
 } from './components/PlugInfoPanel.js';
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
+export {
+  BlePlugDetailScreen,
+  type BlePlugDetailScreenProps
+} from './screens/BlePlugDetailScreen.js';
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
   buildVerifiedPlugBleCandidate,

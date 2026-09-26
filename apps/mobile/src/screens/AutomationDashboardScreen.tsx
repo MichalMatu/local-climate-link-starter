@@ -14,6 +14,7 @@ import {
   useSavedBlePlugStore,
   type PlugAddTransport
 } from '../features/plugs/index.js';
+import { isDashboardRuntimeQuery } from '../features/dashboard/index.js';
 import {
   useHardwareSetupDraftStore,
   type ShellyDraftDevice
@@ -41,17 +42,6 @@ import { useSensorSetupFlow } from '../flows/hardware-setup/usePhoneSensorFlow.j
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
 import './AutomationDashboardScreen.css';
-
-const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
-  const root = query.queryKey[0];
-  return (
-    root === 'installed-automation-diagnostics' ||
-    root === 'installed-automation-control' ||
-    root === 'time-automation-runtime' ||
-    root === 'plain-shelly-runtime' ||
-    root === 'saved-ble-plug-runtime'
-  );
-};
 
 type AutomationCardProps = {
   installation: InstalledAutomation;
@@ -463,6 +453,7 @@ type AutomationDashboardScreenProps = {
   onAddThermometer(): void;
   onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
+  onOpenBlePlug(physicalId: string): void;
   onOpenPlugSettings(deviceId: string): void;
 };
 
@@ -472,6 +463,7 @@ export const AutomationDashboardScreen = ({
   onAddThermometer,
   onAddAutomation,
   onOpenInstallation,
+  onOpenBlePlug,
   onOpenPlugSettings
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
@@ -581,6 +573,7 @@ export const AutomationDashboardScreen = ({
                 ...installations.map((installation) => installation.shelly.deviceId)
               ]}
               onNameChange={renameSavedBlePlug}
+              onOpen={onOpenBlePlug}
             />
           </>
         ) : (

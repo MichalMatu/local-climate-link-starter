@@ -13,12 +13,13 @@ import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
-import { PlugBluetoothAddPage } from '../features/plugs/index.js';
+import { BlePlugDetailScreen, PlugBluetoothAddPage } from '../features/plugs/index.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import {
   automationDetailRoute,
   prepareAutomationEditRoute
 } from './automationEditNavigation.js';
+import { activeNavigationForRoute, type AppRoute } from './appRouteModel.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
@@ -31,46 +32,6 @@ const HardwareSetupScreen = lazy(async () => {
   return { default: module.HardwareSetupScreen };
 });
 
-type SetupRouteIntent = SetupIntent;
-type DashboardRoute = { type: 'dashboard'; kind?: AppNavigationKind };
-type SetupRoute = {
-  type: 'setup';
-  intent: SetupRouteIntent;
-  sourceKind: AppNavigationKind;
-  shellyId?: string;
-  editInstallationId?: string;
-};
-type DeviceAddReturnRoute = DashboardRoute | SetupRoute;
-type DeviceAddRoute = {
-  type: 'device-add';
-  device: 'plug' | 'sensor';
-  sourceKind: AppNavigationKind;
-  returnTo: DeviceAddReturnRoute;
-  sensorMode?: 'manual' | 'phone-scan';
-  plugTransport?: 'wifi' | 'bluetooth';
-};
-type InstallationRoute = {
-  type: 'installation';
-  installationId: string;
-  kind: AppNavigationKind;
-};
-type PlugSettingsRoute = { type: 'plug-settings'; deviceId: string };
-type PlugBleReturnRoute = PlugSettingsRoute | InstallationRoute;
-type PlugBleDiscoveryRoute = {
-  type: 'plug-ble-discovery';
-  deviceId: string;
-  returnTo: PlugBleReturnRoute;
-};
-type PrimaryAppRoute =
-  | DashboardRoute
-  | DeviceAddRoute
-  | PlugSettingsRoute
-  | PlugBleDiscoveryRoute
-  | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
-  | SetupRoute
-  | InstallationRoute;
-type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
-
 const RouteFallback = () => {
   const { t } = useTranslation();
   return (
@@ -82,23 +43,14 @@ const RouteFallback = () => {
   );
 };
 
-const activeNavigationForRoute = (route: AppRoute): AppNavigationKind | 'settings' => {
-  if (route.type === 'settings') return 'settings';
-  if (route.type === 'dashboard') return route.kind ?? 'climate';
-  if (route.type === 'installation') return route.kind;
-  if (route.type === 'plug-settings' || route.type === 'plug-ble-discovery') {
-    return 'climate';
-  }
-  if (route.type === 'device-add') return route.sourceKind;
-  return route.sourceKind;
-};
-
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'settings') return route.returnTo;
   if (route.type === 'installation') return { type: 'dashboard', kind: route.kind };
   if (route.type === 'device-add') return route.returnTo;
   if (route.type === 'plug-ble-discovery') return route.returnTo;
-  if (route.type === 'plug-settings') return { type: 'dashboard', kind: 'climate' };
+  if (route.type === 'plug-settings' || route.type === 'ble-plug-detail') {
+    return { type: 'dashboard', kind: 'climate' };
+  }
   if (route.type === 'setup') {
     if (route.editInstallationId) {
       return automationDetailRoute(route.editInstallationId);
@@ -234,7 +186,15 @@ export const AppRoutes = () => {
             kind: 'climate'
           })
         }
+        onOpenBlePlug={(physicalId) => navigate({ type: 'ble-plug-detail', physicalId })}
         onOpenPlugSettings={(deviceId) => navigate({ type: 'plug-settings', deviceId })}
+      />
+    );
+  } else if (route.type === 'ble-plug-detail') {
+    content = (
+      <BlePlugDetailScreen
+        physicalId={route.physicalId}
+        onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
       />
     );
   } else if (route.type === 'plug-settings') {

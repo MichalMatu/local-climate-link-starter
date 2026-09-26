@@ -224,6 +224,7 @@ const renderDashboard = (
           onAddThermometer={onAddThermometer}
           onAddAutomation={onAddAutomation}
           onOpenInstallation={onOpenInstallation}
+          onOpenBlePlug={vi.fn()}
           onOpenPlugSettings={onOpenPlugSettings}
         />
       </QueryClientProvider>

@@ -51,8 +51,7 @@ const assertMatchingPhysicalIdentity = async (
     throw new Error('Shelly did not expose a stable device id.');
   }
   if (
-    normalizeShellyDeviceId(remoteDeviceId) !==
-    normalizeShellyDeviceId(target.physicalId)
+    normalizeShellyDeviceId(remoteDeviceId) !== normalizeShellyDeviceId(target.physicalId)
   ) {
     throw new Error('Shelly identity does not match the saved Plug.');
   }
