@@ -116,6 +116,8 @@ They are presentation/navigation boundaries, not new ownership models:
 - **Script** presents the managed runtime source/preview and code-loading feedback only;
 - **Info** presents device identity, firmware/network/health information, script/runtime resource diagnostics and destructive device-removal entry points.
 
+The Wi-Fi Plug Detail keeps editable Device cards. A BLE-only Plug uses the same product taxonomy but currently exposes Device as a compact read-only summary: LED mode plus supported brightness/night-mode state, physical-button mode and Shelly Cloud enabled/connection state. That BLE surface must not grow mutation controls until a mutation-specific product and transport contract is explicitly approved.
+
 Device-setting forms keep a local draft. Background refetches may refresh the server/device baseline, but must not overwrite a dirty user draft. A successful save establishes the newly confirmed device state as the next baseline.
 
 Legacy nested Settings, Diagnostics and Script detail pages were removed after their data was moved to the correct surface. Do not reintroduce parallel nested pages for the same data.
@@ -143,7 +145,10 @@ Current state:
 - BLE RPC framing, chunking, timeout handling, serialization and the mobile GATT binding are implemented and have real-hardware evidence;
 - BLE-only add flow verifies normalized `Shelly.GetDeviceInfo.id` and persists a separate `SavedBlePlug` keyed by physical identity;
 - the BLE-only dashboard runtime/status/relay slice is accepted and remains the BLE management baseline;
-- read-only BLE recovery treats `bleDeviceId` as a replaceable locator across dashboard runtime/status and BLE Detail/Info: retryable offline/timeout reads may perform one bounded scan, accept only a normalized `Shelly.GetDeviceInfo.id` match, persist the refreshed locator and retry the original read once; concurrent recovery for one physical Plug is single-flight;
+- read-only BLE recovery treats `bleDeviceId` as a replaceable locator across dashboard runtime/status and BLE Detail: retryable offline/timeout reads may perform one bounded scan, accept only a normalized `Shelly.GetDeviceInfo.id` match, persist the refreshed locator and retry the original read once; concurrent recovery for one physical Plug is single-flight;
+- BLE Detail uses one verified transport session for its transport-neutral read model instead of opening independent Info/Device GATT pipelines; identity is verified before the read model proceeds, and the transport disconnects in `finally`;
+- package-level read clients may expose getter-only capability detection independently from setter availability; this is used for read-only `PLUGS_UI.GetConfig` and `Cloud.GetConfig`/`Cloud.GetStatus` without changing existing Wi-Fi mutation flows;
+- the BLE Device read model intentionally includes only user-meaningful Shelly-owned state: LED, physical-button mode and Shelly Cloud; low-value Wi-Fi/system/server diagnostics stay out of that Device summary;
 - mutating BLE RPC stays outside locator recovery and is never automatically replayed after an ambiguous failure;
 - no automatic BLE↔Wi-Fi fallback or transport merging is implemented yet.
 
