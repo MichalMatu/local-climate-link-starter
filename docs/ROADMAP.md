@@ -104,7 +104,9 @@ Focused recovery validation passed 4 Vitest files / 23 tests, mobile typecheck, 
 
 Real stale-locator acceptance remains deferred to a user-present session. It should deliberately invalidate/substitute the locator, prove scan -> `GetDeviceInfo.id` match -> locator replacement -> successful read, and require no relay mutation.
 
-### Active next slice — read-only BLE Plug detail / Info audit
+### Active next slice — read-only BLE Plug detail / Info target design
+
+The first read-only audit found that this is not a mechanical transport swap: current detail composition is installation-centric, `PlugSettingsTarget` requires an HTTP `baseUrl`, and Info presentation contains Wi-Fi-only rows. Do not force `SavedBlePlug` into that target or refactor stable Wi-Fi in place. First define a narrow verified read-only management target/transport boundary and the transport-neutral Info row set.
 
 Continue in this order:
 

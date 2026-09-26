@@ -1,6 +1,6 @@
 # Handoff — Shelly BLE management / autonomous overnight work
 
-Status: **2026-09-26 — Phase 0 UX + stale BLE locator recovery software-green; final combined gate pending**
+Status: **2026-09-26 — Phase 0 UX + stale BLE locator recovery software-green; final `pnpm check` GREEN; hardware acceptance pending; read-only detail audit checkpointed**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -138,7 +138,29 @@ The recovery boundary is read-only only: a retryable `shelly-offline` / `timeout
 
 A Phase 0 push attempt triggered the repository pre-push hook unexpectedly. Its `pnpm check` stopped immediately at the pre-existing formatting issue in this handoff file, before later check stages. That attempt is not the final combined acceptance gate. This checkpoint formats the handoff before the one required final combined `pnpm check`.
 
+Final combined acceptance gate:
+
+```text
+shelly-ble-overnight-final-check-20260926-517
+head e202483735459f53e15294e74effc73db7e945b5
+pnpm check -> GREEN
+```
+
+The full gate passed formatting, lint, `quality:ux`, `quality:repo`, workspace typecheck, all tests, core coverage and build.
+
 Real stale-locator hardware acceptance remains deferred until the user is present. No real device mutation was performed during this overnight work.
+
+## Read-only BLE detail/settings audit checkpoint
+
+The allowed post-green audit is complete. No detail/settings implementation was started because the next slice is **not mechanically obvious without a product/target-model decision**:
+
+- the only current Plug detail composition is `InstallationDetailScreen`, which is built around an `InstalledAutomation`; a BLE-only `SavedBlePlug` has no existing detail-route/navigation contract;
+- `PlugSettingsTarget` is explicitly Wi-Fi shaped (`deviceId` + required `baseUrl`) and verifies identity through the HTTP transport; forcing `SavedBlePlug` into it would recreate the fake-HTTP-target problem the architecture forbids;
+- `readPlugInformation` itself uses transport-neutral `RpcShellyClient` reads after transport creation, but `PlugInfoPanel` assumes a Wi-Fi target: clickable `baseUrl`, Wi-Fi RSSI and installed-runtime resource diagnostics around it;
+- LED, button-mode and Cloud data modules have clean read functions at the Shelly-client level, but their mobile target boundary is also `PlugSettingsTarget` and each module is paired with mutation code; reusing those reads over BLE requires a deliberate read-only transport target rather than changing the stable Wi-Fi target in place;
+- the BLE-only dashboard card intentionally exposes only name/runtime/relay today and has no detail-open action.
+
+Safe next design decision: add a narrow read-only management target/transport boundary that can represent either verified HTTP or verified BLE without changing `PlugSettingsTarget`, then decide which Info rows are transport-neutral and what replaces Wi-Fi-only address/RSSI rows on a BLE-only Plug. Do not expose settings mutations until separately approved, and do not refactor the stable Wi-Fi lifecycle merely for reuse.
 
 ---
 
@@ -495,4 +517,4 @@ Preferred later hardware acceptance:
 
 ## Current next-chat instruction in one sentence
 
-First implement and focused-validate the user-requested BLE UX polish (symmetric Add FAB actions, no visible Refreshing footer, auto-scan, stable first-seen ordering, direct Add/Added candidate cards and bounded read-only preview where cohesive), then implement conservative stale-`bleDeviceId` recovery for read-only runtime without mutation replay or Wi-Fi changes, then run one combined final `pnpm check` and leave hardware acceptance for the user.
+Phase 0 UX and read-only stale-`bleDeviceId` recovery are software-green with final `pnpm check` GREEN; next, design the narrow read-only BLE Plug detail/Info target boundary described above, while leaving real stale-locator hardware acceptance for a user-present session and keeping all BLE settings mutations out of scope until explicitly approved.
