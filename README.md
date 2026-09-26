@@ -22,12 +22,9 @@ The phone configures and diagnoses. The Shelly executes the installed automation
 
 ## Current product status
 
-The project is in MVP/beta with a stable architecture, an accepted UX baseline and a verified real-hardware path on Samsung S22+ + Shelly Plug S Gen3.
+The project is in MVP/beta with a stable architecture, an accepted UX baseline and verified real-hardware paths on Samsung S22+ + Shelly Plug S Gen3 over both Wi-Fi and BLE.
 
-The UX stabilization pass is complete. The next planned product expansions are:
-
-1. BLE soil-moisture input through the existing typed sensor/config model;
-2. a real-hardware feasibility spike for managing Shelly over BLE, reusing the same ownership and RPC transport boundaries.
+The BLE management foundation is accepted: independent Bluetooth Add, BLE-only dashboard status/relay control, read-only Detail/Info, stale-locator recovery and real S22+ hardware evidence. The next safe BLE work is deliberately narrower: decide which read-only Device/settings information belongs on BLE, then add mutations, pairing/bonding or dual-transport policy only as explicitly approved slices.
 
 See [Roadmap](docs/ROADMAP.md) and [Current handoff](docs/HANDOFF_NEXT_CHAT.md) for the exact next-session contract.
 
@@ -53,6 +50,8 @@ The active documentation set is intentionally small:
 - [Roadmap](docs/ROADMAP.md)
 - [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
 - [Hardware test matrix](docs/testing/hardware-matrix.md)
+- [UX visual contract](docs/UX_VISUAL_CONTRACT.md)
+- [UX visual gallery](docs/UX_VISUAL_GALLERY.md)
 
 Repository operating rules live in [AGENTS.md](AGENTS.md) and the nearest directory-level `AGENTS.md` files.
 

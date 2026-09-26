@@ -31,6 +31,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract. Both collapsed and expanded product states are visually baseline-protected.
 9. Navigation chevrons are icon components, never font glyphs such as `‹` or `›`, so their geometry is stable across browser and Android font fallback.
 10. Inline titles that cross a `plug-detail-framed-section` border use one consistent legend treatment: the title text is masked by the owning page/surface background and uses the shared tight line-height. Do not mix transparent-border-crossing titles with background-masked titles for the same surface role.
+11. The Add Plug speed-dial keeps the primary `+` fixed with no layout shift. When expanded, Wi-Fi sits exactly above the trigger and Bluetooth exactly to its left at the same center-to-center distance; transport actions take the accent treatment while the `+` becomes a muted anchor. Trigger re-press, outside pointer interaction and Escape collapse the dial, and `prefers-reduced-motion` removes transition timing.
 
 ## Surface taxonomy
 

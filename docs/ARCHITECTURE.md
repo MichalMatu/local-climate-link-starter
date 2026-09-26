@@ -143,7 +143,7 @@ Current state:
 - BLE RPC framing, chunking, timeout handling, serialization and the mobile GATT binding are implemented and have real-hardware evidence;
 - BLE-only add flow verifies normalized `Shelly.GetDeviceInfo.id` and persists a separate `SavedBlePlug` keyed by physical identity;
 - the BLE-only dashboard runtime/status/relay slice is accepted and remains the BLE management baseline;
-- read-only BLE runtime recovery treats `bleDeviceId` as a replaceable locator: retryable offline/timeout reads may perform one bounded scan, accept only a normalized `Shelly.GetDeviceInfo.id` match, persist the refreshed locator and retry the read once; concurrent recovery for one physical Plug is single-flight;
+- read-only BLE recovery treats `bleDeviceId` as a replaceable locator across dashboard runtime/status and BLE Detail/Info: retryable offline/timeout reads may perform one bounded scan, accept only a normalized `Shelly.GetDeviceInfo.id` match, persist the refreshed locator and retry the original read once; concurrent recovery for one physical Plug is single-flight;
 - mutating BLE RPC stays outside locator recovery and is never automatically replayed after an ambiguous failure;
 - no automatic BLE↔Wi-Fi fallback or transport merging is implemented yet.
 

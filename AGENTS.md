@@ -14,11 +14,7 @@ Before changing code:
 5. fetch fresh `main` and `agent-control:.agent/status/daemon.json`;
 6. verify that no duplicate Local Agent task is running.
 
-Current Local Agent binding:
-
-```text
-e75c77cb-7589-4452-94b2-decc97ff85a1
-```
+Local Agent bindings are conversation-scoped runtime state. Never persist a binding in repository documentation or copy one from an older handoff; use only the fresh bootstrap supplied to the active conversation.
 
 If historical docs disagree with current code or the canonical docs above, current code +
 canonical docs win.
@@ -212,8 +208,7 @@ Prefer direct GitHub edits when the diff is deterministic and reviewable.
 
 Use Local Agent for local command execution, builds/tests, native Android/iOS work,
 physical BLE/Shelly validation, USB/serial, signing or device-only network conditions.
-Do not run a second coding agent through Local Agent. Always check the daemon first and
-use the exact binding from this file/handoff.
+Do not run a second coding agent through Local Agent. Always check the daemon first and use the exact binding from the current conversation bootstrap. Never store that binding in repository documentation.
 
 Temporary screenshots, traces, APKs and Local Agent artifacts are not product source and
 must not be committed unless intentionally promoted to a long-lived fixture.

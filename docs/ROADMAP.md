@@ -68,7 +68,7 @@ The implementation treats byte 4 as a bitfield and maps its low-two-bit state as
 
 Regression coverage uses captured six-byte TP357 and seven-byte TP357S frames. Enclosure color is not used as a protocol discriminator.
 
-## 5. Shelly management over BLE — IN PROGRESS
+## 5. Shelly management over BLE — FOUNDATION DONE / EXPANSION IN PROGRESS
 
 The BLE management foundation, independent BLE Add/persistence and BLE-only dashboard runtime are implemented and accepted.
 
@@ -82,6 +82,7 @@ Done in this track:
 - mobile GATT binding through the existing Capacitor BLE client;
 - real Samsung S22 + Shelly Plug S Gen3 identity/status/relay evidence;
 - independent Bluetooth Add flow using `Shelly.GetDeviceInfo.id` as canonical physical identity;
+- polished Add Plug speed-dial with aligned Wi-Fi-above / Bluetooth-left geometry, explicit expanded-state hierarchy, click-away/Escape collapse and reduced-motion support;
 - separate BLE-only persistence through `SavedBlePlug`, keyed by physical identity rather than BLE locator;
 - BLE-only dashboard status/relay runtime with explicit read/mutation state and no fake HTTP `baseUrl`;
 - focused software validation, one full `pnpm check`, and real Samsung S22 saved-runtime acceptance on 2026-09-26;
@@ -89,7 +90,7 @@ Done in this track:
 
 ### BLE locator resilience — DONE
 
-Read-only stale-locator recovery is implemented and hardware-accepted on `work/shelly-ble-transport`:
+Read-only stale-locator recovery is implemented, shared by dashboard runtime/status and BLE Detail/Info, and hardware-accepted on `work/shelly-ble-transport`:
 
 - normal reads use the saved locator without scanning;
 - only retryable BLE `shelly-offline` / `timeout` read failures may start one bounded rediscovery cycle;
@@ -118,7 +119,7 @@ The accepted UI slice adds a BLE-only read-only Plug detail route from the dashb
 - no automatic retry of ambiguous mutations was introduced;
 - new capability code lives behind feature boundaries (`features/plugs` and `features/dashboard`) while app routing remains composition-only.
 
-Accepted commit `c3ffc6667f4f35b95091c740307dc9a29dc7bbcf` passed focused typecheck/Vitest/ESLint and the repository pre-push gate. The pre-push gate completed full `pnpm check`, including all workspace tests, coverage and builds, followed by the canonical 4 responsive E2E cases; push to `work/shelly-ble-transport` succeeded.
+Accepted commit `c3ffc6667f4f35b95091c740307dc9a29dc7bbcf` passed focused typecheck/Vitest/ESLint and the repository pre-push gate. Follow-up `aa3cd140e8378f5446ceefc9e8d9c172aea23fb4` extracted one shared locator-rediscovery flow for runtime/status and Detail/Info without adding mutation retry; `1db4d3fae8b889838cd25cba5dd4eb85b20b6fa6` is its formatting checkpoint. Final technical gate `shelly-ble-final-technical-gate-20260926-624` passed full `pnpm check` with 352/352 mobile tests and all four canonical pre-push E2E scenarios.
 
 Safe next work:
 
