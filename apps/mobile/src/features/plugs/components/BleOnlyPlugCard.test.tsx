@@ -36,10 +36,10 @@ const plug: SavedBlePlug = {
   matterEnabled: false
 };
 
-const renderCard = () =>
+const renderCard = (onOpen = vi.fn()) =>
   render(
     <I18nProvider>
-      <BleOnlyPlugCard plug={plug} onNameChange={vi.fn()} />
+      <BleOnlyPlugCard plug={plug} onNameChange={vi.fn()} onOpen={onOpen} />
     </I18nProvider>
   );
 
@@ -69,6 +69,14 @@ describe('BleOnlyPlugCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'ON' }));
     expect(runtime.turnRelayOn).toHaveBeenCalledOnce();
     expect(runtime.turnRelayOff).not.toHaveBeenCalled();
+  });
+
+  it('opens the read-only Plug detail from the card menu', () => {
+    const onOpen = vi.fn();
+    renderCard(onOpen);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Info: BLE lamp' }));
+    expect(onOpen).toHaveBeenCalledOnce();
   });
 
   it('keeps pending state accessible without rendering a Refreshing footer', () => {
