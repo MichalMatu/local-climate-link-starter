@@ -1,7 +1,4 @@
-import type {
-  ShellyCloudReadResult,
-  ShellyPlugsUiReadResult
-} from '@lcl/shelly-client';
+import type { ShellyCloudReadResult, ShellyPlugsUiReadResult } from '@lcl/shelly-client';
 import { DiagnosticRow } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
@@ -87,7 +84,9 @@ export const BlePlugDeviceReadOnlyPanel = ({
             />
             <DiagnosticRow
               label={cloudCopy.connection}
-              value={cloud.status.connected ? cloudCopy.connected : cloudCopy.disconnected}
+              value={
+                cloud.status.connected ? cloudCopy.connected : cloudCopy.disconnected
+              }
             />
           </>
         )}
