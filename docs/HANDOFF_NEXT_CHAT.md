@@ -98,9 +98,10 @@ The read-only Device work passed:
 
 - `shelly-ble-device-readonly-full-gate-20260926-706`: full `pnpm check:full`, including mobile 355/355 at that checkpoint and responsive Playwright 36/36;
 - `shelly-ble-readonly-postcleanup-gate-20260926-710`: shelly-client 98/98, mobile 352/352 after obsolete Info-pipeline removal, both typechecks, repository/feature gates, Prettier and `git diff --check`;
-- `shelly-ble-readonly-focused-final-20260926-712`: latest LED/button/Cloud behavior, both typechecks, repository gates and Prettier all green.
+- `shelly-ble-readonly-focused-final-20260926-712`: latest LED/button/Cloud behavior, both typechecks, repository gates and Prettier all green;
+- `shelly-ble-readonly-final-full-gate-20260926-713` on exact head `fe478b6b5ffacb60124562cbfe339f2a9cde4ab5`: full `pnpm check:full` PASS with shelly-client 98/98, mobile 353/353, responsive Playwright 36/36, plus formatting, lint, UX/repository gates, workspace typecheck, core coverage and builds.
 
-The varying mobile total reflects deletion of the obsolete Info-only recovery test/pipeline, not relaxed assertions or skipped production behavior.
+The varying mobile total reflects removal of the obsolete Info-only recovery test/pipeline and addition of the independent Device-section regression, not relaxed assertions or skipped production behavior.
 
 ## Real-device evidence already accepted
 
