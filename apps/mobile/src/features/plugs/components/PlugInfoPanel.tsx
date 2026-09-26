@@ -1,16 +1,20 @@
 import { DiagnosticRow, StatusBadge } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import type { PlugInformation } from '../data/plugInformation.js';
-import type { PlugSettingsTarget } from '../data/plugSettingsTarget.js';
 import './PlugSettingsSurface.css';
 
+export type PlugInfoConnection =
+  | { transport: 'wifi'; baseUrl: string }
+  | { transport: 'bluetooth'; bleDeviceId: string; advertisementName: string };
+
 export type PlugInfoPanelProps = {
-  target: PlugSettingsTarget;
+  connection: PlugInfoConnection;
   information?: PlugInformation | undefined;
   loading?: boolean;
   error?: boolean;
   deviceRamFreeBytes?: number | null | undefined;
   deviceRamTotalBytes?: number | null | undefined;
+  showResourceRows?: boolean;
 };
 
 const formatNumber = (
@@ -37,12 +41,13 @@ const formatUptime = (value: number | undefined, missing: string): string => {
 };
 
 export const PlugInfoPanel = ({
-  target,
+  connection,
   information,
   loading = false,
   error = false,
   deviceRamFreeBytes,
-  deviceRamTotalBytes
+  deviceRamTotalBytes,
+  showResourceRows = true
 }: PlugInfoPanelProps) => {
   const { locale, t } = useTranslation();
   const missing = t('common.missing');
@@ -86,16 +91,27 @@ export const PlugInfoPanel = ({
           label={t('common.firmware')}
           value={deviceInfo.firmwareId ?? missing}
         />
-        <DiagnosticRow
-          href={target.baseUrl}
-          label={t('hardware.shelly.addressSettings')}
-          linkLabel={t('hardware.shelly.openPanelLabel', { address: target.baseUrl })}
-          value={target.baseUrl}
-        />
-        <DiagnosticRow
-          label={t('hardware.metrics.wifiRssi')}
-          value={formatNumber(telemetry.wifiRssiDbm, ' dBm', missing, 0)}
-        />
+        {connection.transport === 'wifi' ? (
+          <>
+            <DiagnosticRow
+              href={connection.baseUrl}
+              label={t('hardware.shelly.addressSettings')}
+              linkLabel={t('hardware.shelly.openPanelLabel', {
+                address: connection.baseUrl
+              })}
+              value={connection.baseUrl}
+            />
+            <DiagnosticRow
+              label={t('hardware.metrics.wifiRssi')}
+              value={formatNumber(telemetry.wifiRssiDbm, ' dBm', missing, 0)}
+            />
+          </>
+        ) : (
+          <DiagnosticRow
+            label={t('common.bluetooth')}
+            value={`${connection.bleDeviceId} · ${connection.advertisementName || missing}`}
+          />
+        )}
         <DiagnosticRow
           label={t('hardware.shelly.uptime')}
           value={formatUptime(status.clock.uptimeSec, missing)}
@@ -130,14 +146,18 @@ export const PlugInfoPanel = ({
             {status.matterEnabled ? t('common.enabled') : t('common.disabled')}
           </StatusBadge>
         </div>
-        <DiagnosticRow
-          label={t('hardware.diagnostics.deviceRamFree')}
-          value={formatBytes(deviceRamFreeBytes, missing)}
-        />
-        <DiagnosticRow
-          label={t('hardware.diagnostics.deviceRamTotal')}
-          value={formatBytes(deviceRamTotalBytes, missing)}
-        />
+        {showResourceRows && (
+          <>
+            <DiagnosticRow
+              label={t('hardware.diagnostics.deviceRamFree')}
+              value={formatBytes(deviceRamFreeBytes, missing)}
+            />
+            <DiagnosticRow
+              label={t('hardware.diagnostics.deviceRamTotal')}
+              value={formatBytes(deviceRamTotalBytes, missing)}
+            />
+          </>
+        )}
       </div>
     </section>
   );
