@@ -1,7 +1,4 @@
-import {
-  FakeShellyClient,
-  type ShellyRpcTransport
-} from '@lcl/shelly-client';
+import { FakeShellyClient, type ShellyRpcTransport } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
 import {
   readBlePlugRuntimeStatus,
