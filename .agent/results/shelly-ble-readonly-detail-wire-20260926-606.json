@@ -1,9 +1,0 @@
-{
-  "id": "shelly-ble-readonly-detail-wire-20260926-606",
-  "status": "failed",
-  "failure_reason": "invalid_task_file",
-  "started_at": null,
-  "finished_at": "2026-09-26T14:22:25.532653+00:00",
-  "daemon_version": "4.18.25",
-  "error": "ValueError: resources must be declared explicitly"
-}
