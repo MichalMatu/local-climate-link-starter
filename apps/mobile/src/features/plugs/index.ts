@@ -1,7 +1,6 @@
 export {
   readPlugInformation,
   readPlugInformationFromTarget,
-  readBlePlugInformation,
   type PlugInformation
 } from './data/plugInformation.js';
 export {
@@ -13,10 +12,6 @@ export {
   usePlugInformationFlow,
   plugInformationQueryKey
 } from './flows/usePlugInformationFlow.js';
-export {
-  useBlePlugInformationFlow,
-  blePlugInformationQueryKey
-} from './flows/useBlePlugInformationFlow.js';
 export {
   PlugInfoPanel,
   type PlugInfoConnection,
