@@ -31,7 +31,10 @@ export const readPlugReadOnlyDetailFromTarget = async (
       const deviceInfoResult = await client.getDeviceInfo();
       const statusResult = await client.getStatus();
       const deviceSettingsResult = await plugsUiClient.readConfig();
-      const unwrap = target.transport === 'bluetooth' ? unwrapBlePlugReadOnlyResult : unwrapShellyResult;
+      const unwrap =
+        target.transport === 'bluetooth'
+          ? unwrapBlePlugReadOnlyResult
+          : unwrapShellyResult;
 
       return {
         information: {
