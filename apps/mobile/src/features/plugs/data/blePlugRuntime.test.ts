@@ -57,4 +57,46 @@ describe('BLE Plug runtime boundary', () => {
     expect(afterOff.value.relayOn).toBe(false);
     expect(disconnect).toHaveBeenCalledTimes(2);
   });
+
+  it('serializes overlapping operations for the same BLE locator', async () => {
+    const client = new FakeShellyClient();
+    const originalGetStatus = client.getStatus.bind(client);
+    const originalSetRelayOn = client.setRelayOn.bind(client);
+    const events: string[] = [];
+    let releaseRead!: () => void;
+    let markReadStarted!: () => void;
+    const readGate = new Promise<void>((resolve) => {
+      releaseRead = resolve;
+    });
+    const readStarted = new Promise<void>((resolve) => {
+      markReadStarted = resolve;
+    });
+
+    vi.spyOn(client, 'getStatus').mockImplementation(async () => {
+      events.push('read:start');
+      markReadStarted();
+      await readGate;
+      events.push('read:end');
+      return originalGetStatus();
+    });
+    vi.spyOn(client, 'setRelayOn').mockImplementation(async () => {
+      events.push('write:start');
+      const result = await originalSetRelayOn();
+      events.push('write:end');
+      return result;
+    });
+
+    const { dependencies } = createDependencies(client);
+    const plug = { bleDeviceId: 'BLE-LOCATOR-SERIAL' };
+    const readPromise = readBlePlugRuntimeStatus(plug, dependencies);
+    await readStarted;
+
+    const relayPromise = setBlePlugRelay(plug, true, dependencies);
+    await Promise.resolve();
+    expect(events).toEqual(['read:start']);
+
+    releaseRead();
+    await Promise.all([readPromise, relayPromise]);
+    expect(events).toEqual(['read:start', 'read:end', 'write:start', 'write:end']);
+  });
 });

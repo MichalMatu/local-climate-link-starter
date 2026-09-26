@@ -32,18 +32,43 @@ const defaultDependencies: BlePlugRuntimeDependencies = {
   createClient: (transport) => new RpcShellyClient(transport)
 };
 
+const operationCompletionByDeviceId = new Map<string, Promise<void>>();
+
+const serializeBlePlugOperation = async <T>(
+  deviceId: string,
+  work: () => Promise<T>
+): Promise<T> => {
+  const previous = operationCompletionByDeviceId.get(deviceId) ?? Promise.resolve();
+  let release!: () => void;
+  const completion = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  operationCompletionByDeviceId.set(deviceId, completion);
+
+  await previous;
+  try {
+    return await work();
+  } finally {
+    release();
+    if (operationCompletionByDeviceId.get(deviceId) === completion) {
+      operationCompletionByDeviceId.delete(deviceId);
+    }
+  }
+};
+
 const withBlePlugClient = async <T>(
   plug: Pick<SavedBlePlug, 'bleDeviceId'>,
   work: (client: BlePlugRuntimeClient) => Promise<T>,
   dependencies: BlePlugRuntimeDependencies
-): Promise<T> => {
-  const transport = dependencies.createTransport(plug.bleDeviceId);
-  try {
-    return await work(dependencies.createClient(transport));
-  } finally {
-    await transport.disconnect().catch(() => undefined);
-  }
-};
+): Promise<T> =>
+  serializeBlePlugOperation(plug.bleDeviceId, async () => {
+    const transport = dependencies.createTransport(plug.bleDeviceId);
+    try {
+      return await work(dependencies.createClient(transport));
+    } finally {
+      await transport.disconnect().catch(() => undefined);
+    }
+  });
 
 export const readBlePlugRuntimeStatus = async (
   plug: Pick<SavedBlePlug, 'bleDeviceId'>,
