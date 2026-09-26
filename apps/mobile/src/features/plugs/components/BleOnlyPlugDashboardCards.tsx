@@ -6,12 +6,14 @@ export type BleOnlyPlugDashboardCardsProps = {
   plugs: readonly SavedBlePlug[];
   representedPhysicalIds: readonly string[];
   onNameChange(physicalId: string, value: string): void;
+  onOpen(physicalId: string): void;
 };
 
 export const BleOnlyPlugDashboardCards = ({
   plugs,
   representedPhysicalIds,
-  onNameChange
+  onNameChange,
+  onOpen
 }: BleOnlyPlugDashboardCardsProps) =>
   plugs
     .filter(
@@ -25,5 +27,6 @@ export const BleOnlyPlugDashboardCards = ({
         key={`ble-plug:${plug.physicalId}`}
         plug={plug}
         onNameChange={(value) => onNameChange(plug.physicalId, value)}
+        onOpen={() => onOpen(plug.physicalId)}
       />
     ));
