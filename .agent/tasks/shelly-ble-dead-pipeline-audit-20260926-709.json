@@ -1,0 +1,18 @@
+{
+  "id": "shelly-ble-dead-pipeline-audit-20260926-709",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 900,
+  "idle_timeout": 300,
+  "task_timeout": 1800,
+  "memory_limit_mb": 2048,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"5ca6c3cd62c93c4cd441b3cd73c997323dac067c\"; test -z \"$(git status --short)\"",
+    "git grep -n -E 'useBlePlugInformationFlow|blePlugInformationQueryKey|readSavedBlePlugInformation|readBlePlugInformation' -- apps/mobile/src || true",
+    "git grep -n -E 'readPlugReadOnlyDetailFromTarget|readBlePlugReadOnlyDetail|useBlePlugReadOnlyDetailFlow' -- apps/mobile/src || true",
+    "git status --short && git diff --check"
+  ]
+}
