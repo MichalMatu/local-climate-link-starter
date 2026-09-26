@@ -1,6 +1,6 @@
 # Handoff — Shelly BLE management
 
-Status: **2026-09-26 — BLE management foundation, stale-locator resilience, read-only Detail/Info and Add speed-dial polish accepted**
+Status: **2026-09-26 — BLE management foundation accepted; repository/documentation re-audit clean; next BLE slice remains read-only Device/settings scoping**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -21,10 +21,18 @@ Local Agent bindings are conversation-scoped. Always use the fresh bootstrap sup
 
 ## Accepted checkpoint
 
-Technical head before this documentation cleanup:
+Last behavior-changing technical head:
 
 ```text
 1db4d3fae8b889838cd25cba5dd4eb85b20b6fa6  Format BLE read-only recovery flow
+```
+
+Documentation / hygiene checkpoints:
+
+```text
+fcb6ded01a23490afd909f3aa8386c8fe72c4b4e  Consolidate BLE management documentation
+ee6e94f170bf156f99f15fdfe7b6cad9fefb6e98  chore: remove empty repository dummy file
+5928accdbe070941091075e3e9573033da69a9fe  chore: retire obsolete root scratchpad
 ```
 
 Important accepted checkpoints:
@@ -81,6 +89,14 @@ Full dated evidence belongs in `docs/testing/hardware-matrix.md`.
 - canonical pre-push responsive/visual E2E **4/4**.
 
 An earlier full-suite attempt transiently timed out three UI tests under load; an immediate diagnostic rerun passed 352/352 and the final full gate above also passed 352/352. No production change was made to hide or relax those tests.
+
+## Repository / architecture re-audit
+
+Read-only Local Agent task `shelly-ble-reaudit-hygiene-20260926-702` re-checked the accepted BLE branch before cleanup. It confirmed a clean worktree with no untracked files, no active-chat Local Agent binding persisted on the work branch, no text TODO/FIXME/HACK/XXX backlog, and no new raw BLE/fetch ownership escape in Plug feature presentation. `pnpm quality:repo`, `pnpm format:check` and `git diff --check` all passed.
+
+The Plug BLE slice remains correctly layered: persistence/identity live in feature data/state, bounded locator recovery and BLE orchestration live in flows, and presentation stays in components/screens. Legacy size hotspots still exist outside this slice (`AutomationDashboardScreen.tsx`, `InstallationDetailScreen.tsx`, global `theme.css` and several large test files); treat them as review alarms only when those areas are materially touched.
+
+Repository hygiene cleanup removed the empty tracked root `dummy` file and the obsolete pre-v1 root scratchpad `pomysly.txt`; its historical contents remain available in Git history. Intentional `artifacts/ux-reference` material and hardware-artifact placeholders were preserved.
 
 ## Safe next work
 

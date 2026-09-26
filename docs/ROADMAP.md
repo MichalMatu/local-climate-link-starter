@@ -131,7 +131,9 @@ Safe next work:
 
 The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
 
-## 6. Shelly Script Library + simple configurators — AFTER BLE RUNTIME ACCEPTANCE
+## 6. Shelly Script Library + simple configurators — LATER
+
+The former BLE-runtime prerequisite is satisfied, but this track is not active while BLE management expansion remains the current focus.
 
 A curated script catalog may expose useful official/approved Shelly scripts through a simple `choose -> configure -> install/run` flow. Reuse the same identity, ownership, transport, install-safety and recovery rules.
 
