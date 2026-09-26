@@ -8,8 +8,10 @@ import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { EditablePlugName } from '../components/EditablePlugName.js';
 import {
+  BleOnlyPlugCard,
   isSameShellyDevice,
   PlugAddSpeedDial,
+  useSavedBlePlugStore,
   type PlugAddTransport
 } from '../features/plugs/index.js';
 import {
@@ -46,7 +48,8 @@ const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
     root === 'installed-automation-diagnostics' ||
     root === 'installed-automation-control' ||
     root === 'time-automation-runtime' ||
-    root === 'plain-shelly-runtime'
+    root === 'plain-shelly-runtime' ||
+    root === 'saved-ble-plug-runtime'
   );
 };
 
@@ -480,6 +483,8 @@ export const AutomationDashboardScreen = ({
   const setShellyDeviceName = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceName
   );
+  const savedBlePlugs = useSavedBlePlugStore((state) => state.plugs);
+  const renameSavedBlePlug = useSavedBlePlugStore((state) => state.renamePlug);
   const queryClient = useQueryClient();
   const activeKind = initialKind ?? 'climate';
   useEffect(() => {
@@ -526,7 +531,17 @@ export const AutomationDashboardScreen = ({
   const unmatchedInstallations = installations.filter(
     (installation) => !matchedInstallationIds.has(installation.id)
   );
-  const hasPlugEntries = plugEntries.length > 0 || unmatchedInstallations.length > 0;
+  const visibleBleOnlyPlugs = savedBlePlugs.filter(
+    (plug) =>
+      !shellyDevices.some((device) => isSameShellyDevice(device.id, plug.physicalId)) &&
+      !installations.some((installation) =>
+        isSameShellyDevice(installation.shelly.deviceId, plug.physicalId)
+      )
+  );
+  const hasPlugEntries =
+    plugEntries.length > 0 ||
+    unmatchedInstallations.length > 0 ||
+    visibleBleOnlyPlugs.length > 0;
 
   return (
     <main
@@ -564,6 +579,13 @@ export const AutomationDashboardScreen = ({
                 installation={installation}
                 onOpen={onOpenInstallation}
                 onNameChange={renameInstalledPlug}
+              />
+            ))}
+            {visibleBleOnlyPlugs.map((plug) => (
+              <BleOnlyPlugCard
+                key={`ble-plug:${plug.physicalId}`}
+                plug={plug}
+                onNameChange={(value) => renameSavedBlePlug(plug.physicalId, value)}
               />
             ))}
           </>
