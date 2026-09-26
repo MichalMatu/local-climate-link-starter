@@ -48,10 +48,16 @@ describe('BLE Plug runtime boundary', () => {
     const plug = { bleDeviceId: 'BLE-LOCATOR-2' };
 
     await setBlePlugRelay(plug, true, dependencies);
-    expect((await client.getStatus()).value).toMatchObject({ relayOn: true });
+    const afterOn = await client.getStatus();
+    expect(afterOn.ok).toBe(true);
+    if (!afterOn.ok) throw new Error(afterOn.error.technicalMessage);
+    expect(afterOn.value.relayOn).toBe(true);
 
     await setBlePlugRelay(plug, false, dependencies);
-    expect((await client.getStatus()).value).toMatchObject({ relayOn: false });
+    const afterOff = await client.getStatus();
+    expect(afterOff.ok).toBe(true);
+    if (!afterOff.ok) throw new Error(afterOff.error.technicalMessage);
+    expect(afterOff.value.relayOn).toBe(false);
     expect(disconnect).toHaveBeenCalledTimes(2);
   });
 });
