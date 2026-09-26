@@ -8,10 +8,7 @@ import { createShellyBleTransport } from '../../../platform/shellyBleTransport.j
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
 import type { SavedBlePlug } from './savedBlePlug.js';
 
-export type BlePlugRuntimeStatus = Pick<
-  ShellyStatus,
-  'relayOn' | 'telemetry' | 'clock'
->;
+export type BlePlugRuntimeStatus = Pick<ShellyStatus, 'relayOn' | 'telemetry' | 'clock'>;
 
 type BlePlugRuntimeClient = Pick<
   ShellyClient,
