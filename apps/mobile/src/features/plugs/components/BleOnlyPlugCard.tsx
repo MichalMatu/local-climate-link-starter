@@ -1,4 +1,4 @@
-import { IconAlertTriangle, IconPlug } from '@tabler/icons-react';
+import { IconAlertTriangle, IconDotsVertical, IconPlug } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
 import { EditablePlugName } from '../../../components/EditablePlugName.js';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
@@ -7,6 +7,7 @@ import { useSavedBlePlugRuntime } from '../flows/useSavedBlePlugRuntime.js';
 export type BleOnlyPlugCardProps = {
   plug: SavedBlePlug;
   onNameChange(value: string): void;
+  onOpen(): void;
 };
 
 const formatMetric = (
@@ -23,7 +24,7 @@ const formatEnergy = (value: number | null | undefined): string => {
   return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
-export const BleOnlyPlugCard = ({ plug, onNameChange }: BleOnlyPlugCardProps) => {
+export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardProps) => {
   const { t } = useTranslation();
   const runtime = useSavedBlePlugRuntime(plug);
   const relayState = runtime.status?.relayOn;
@@ -50,6 +51,15 @@ export const BleOnlyPlugCard = ({ plug, onNameChange }: BleOnlyPlugCardProps) =>
             {t('common.bluetooth')} · {plug.model}
           </p>
         </div>
+        <button
+          className="automation-card__menu"
+          type="button"
+          aria-label={`${t('common.info')}: ${plug.name}`}
+          title={t('common.info')}
+          onClick={onOpen}
+        >
+          <IconDotsVertical aria-hidden="true" />
+        </button>
       </header>
 
       <div
