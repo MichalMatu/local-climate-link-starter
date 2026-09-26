@@ -165,7 +165,9 @@ export const createLedOffPatch = (): ShellyPlugsUiLedsPatch => ({
 export class RpcShellyPlugsUiClient {
   constructor(private readonly transport: ShellyRpcTransport) {}
 
-  async read(): Promise<Result<ShellyPlugsUiReadResult>> {
+  private async readWithRequirements(
+    requireWrite: boolean
+  ): Promise<Result<ShellyPlugsUiReadResult>> {
     const methodsResponse = await this.transport.call<unknown>({
       method: RPC_METHODS.ShellyListMethods
     });
@@ -180,7 +182,7 @@ export class RpcShellyPlugsUiClient {
 
     const canRead = parsedMethods.data.methods.includes(RPC_METHODS.PlugsUiGetConfig);
     const canWrite = parsedMethods.data.methods.includes(RPC_METHODS.PlugsUiSetConfig);
-    if (!canRead || !canWrite) {
+    if (!canRead || (requireWrite && !canWrite)) {
       return { ok: true, value: { supported: false } };
     }
 
@@ -203,6 +205,14 @@ export class RpcShellyPlugsUiClient {
           }
         }
       : { ok: false, error: validationError(parsedConfig.error.message) };
+  }
+
+  async readConfig(): Promise<Result<ShellyPlugsUiReadResult>> {
+    return this.readWithRequirements(false);
+  }
+
+  async read(): Promise<Result<ShellyPlugsUiReadResult>> {
+    return this.readWithRequirements(true);
   }
 
   async setLeds(patch: ShellyPlugsUiLedsPatch): Promise<Result<ShellyPlugsUiSetResult>> {
