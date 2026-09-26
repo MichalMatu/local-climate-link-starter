@@ -55,6 +55,10 @@ export {
   type PlugBluetoothAddPanelProps
 } from './components/PlugBluetoothAddPanel.js';
 export {
+  BleOnlyPlugCard,
+  type BleOnlyPlugCardProps
+} from './components/BleOnlyPlugCard.js';
+export {
   PlugAddSpeedDial,
   type PlugAddSpeedDialProps,
   type PlugAddTransport
