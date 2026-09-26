@@ -7,7 +7,7 @@ describe('BlePlugDeviceReadOnlyPanel', () => {
   beforeEach(() => setLocalePreference('en'));
   afterEach(() => setLocalePreference('system'));
 
-  it('renders compact read-only LED and physical-button state without mutation controls', () => {
+  it('renders compact read-only Device state without mutation controls', () => {
     render(
       <I18nProvider>
         <BlePlugDeviceReadOnlyPanel
@@ -37,6 +37,11 @@ describe('BlePlugDeviceReadOnlyPanel', () => {
             },
             controlCapabilities: { buttonInputMode: true }
           }}
+          cloud={{
+            supported: true,
+            config: { enable: false, server: 'shelly.example' },
+            status: { connected: false }
+          }}
         />
       </I18nProvider>
     );
@@ -44,6 +49,10 @@ describe('BlePlugDeviceReadOnlyPanel', () => {
     expect(screen.getByText('Show ON/OFF')).toBeVisible();
     expect(screen.getByText('enabled · 10% · 22:00–06:00')).toBeVisible();
     expect(screen.getByText('Controls relay')).toBeVisible();
+    expect(screen.getByText('Shelly Cloud')).toBeVisible();
+    expect(screen.getByText('Cloud connection')).toBeVisible();
+    expect(screen.getAllByText('disabled')).toHaveLength(1);
+    expect(screen.getByText('Not connected')).toBeVisible();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });
