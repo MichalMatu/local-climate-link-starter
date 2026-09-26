@@ -31,23 +31,20 @@ export const readPlugReadOnlyDetailFromTarget = async (
       const client = new RpcShellyClient(transport);
       const plugsUiClient = new RpcShellyPlugsUiClient(transport);
       const cloudClient = new RpcShellyCloudClient(transport);
-
-      const deviceInfoResult = await client.getDeviceInfo();
-      const statusResult = await client.getStatus();
-      const deviceSettingsResult = await plugsUiClient.readConfig();
-      const cloudResult = await cloudClient.readConfig();
       const unwrap =
         target.transport === 'bluetooth'
           ? unwrapBlePlugReadOnlyResult
           : unwrapShellyResult;
 
+      const deviceInfo = unwrap(await client.getDeviceInfo());
+      const status = unwrap(await client.getStatus());
+      const deviceSettings = unwrap(await plugsUiClient.readConfig());
+      const cloud = unwrap(await cloudClient.readConfig());
+
       return {
-        information: {
-          deviceInfo: unwrap(deviceInfoResult),
-          status: unwrap(statusResult)
-        },
-        deviceSettings: unwrap(deviceSettingsResult),
-        cloud: unwrap(cloudResult)
+        information: { deviceInfo, status },
+        deviceSettings,
+        cloud
       };
     },
     dependencies
