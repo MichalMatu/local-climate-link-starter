@@ -70,7 +70,9 @@ export const setBlePlugRelay = async (
   await withBlePlugClient(
     plug,
     async (client) => {
-      unwrapShellyResult(relayOn ? await client.setRelayOn() : await client.setRelayOff());
+      unwrapShellyResult(
+        relayOn ? await client.setRelayOn() : await client.setRelayOff()
+      );
     },
     dependencies
   );
