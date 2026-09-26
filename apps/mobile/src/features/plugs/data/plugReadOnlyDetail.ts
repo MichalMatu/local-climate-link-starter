@@ -1,6 +1,8 @@
 import {
   RpcShellyClient,
+  RpcShellyCloudClient,
   RpcShellyPlugsUiClient,
+  type ShellyCloudReadResult,
   type ShellyPlugsUiReadResult
 } from '@lcl/shelly-client';
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
@@ -16,6 +18,7 @@ import type { SavedBlePlug } from './savedBlePlug.js';
 export type PlugReadOnlyDetail = {
   information: PlugInformation;
   deviceSettings: ShellyPlugsUiReadResult;
+  cloud: ShellyCloudReadResult;
 };
 
 export const readPlugReadOnlyDetailFromTarget = async (
@@ -27,10 +30,12 @@ export const readPlugReadOnlyDetailFromTarget = async (
     async (transport) => {
       const client = new RpcShellyClient(transport);
       const plugsUiClient = new RpcShellyPlugsUiClient(transport);
+      const cloudClient = new RpcShellyCloudClient(transport);
 
       const deviceInfoResult = await client.getDeviceInfo();
       const statusResult = await client.getStatus();
       const deviceSettingsResult = await plugsUiClient.readConfig();
+      const cloudResult = await cloudClient.readConfig();
       const unwrap =
         target.transport === 'bluetooth'
           ? unwrapBlePlugReadOnlyResult
@@ -41,7 +46,8 @@ export const readPlugReadOnlyDetailFromTarget = async (
           deviceInfo: unwrap(deviceInfoResult),
           status: unwrap(statusResult)
         },
-        deviceSettings: unwrap(deviceSettingsResult)
+        deviceSettings: unwrap(deviceSettingsResult),
+        cloud: unwrap(cloudResult)
       };
     },
     dependencies
