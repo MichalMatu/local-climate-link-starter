@@ -70,7 +70,7 @@ Regression coverage uses captured six-byte TP357 and seven-byte TP357S frames. E
 
 ## 5. Shelly management over BLE — IN PROGRESS
 
-The hardware feasibility spike is complete and the BLE management foundation is implemented.
+The BLE management foundation, independent BLE Add/persistence and BLE-only dashboard runtime are implemented and accepted.
 
 Done in this track:
 
@@ -80,27 +80,39 @@ Done in this track:
 - no automatic retry of ambiguous mutating RPC;
 - `BleShellyRpcTransport` behind the existing `ShellyRpcTransport` boundary;
 - mobile GATT binding through the existing Capacitor BLE client;
-- real Samsung S22 + Shelly Plug S Gen3 identity/status/relay evidence, including explicit `OFF -> ON -> OFF` with final OFF;
+- real Samsung S22 + Shelly Plug S Gen3 identity/status/relay evidence;
 - independent Bluetooth Add flow using `Shelly.GetDeviceInfo.id` as canonical physical identity;
 - separate BLE-only persistence through `SavedBlePlug`, keyed by physical identity rather than BLE locator;
-- implemented BLE-only dashboard status/relay slice with explicit read/mutation state and no fake HTTP `baseUrl`.
+- BLE-only dashboard status/relay runtime with explicit read/mutation state and no fake HTTP `baseUrl`;
+- focused software validation, one full `pnpm check`, and real Samsung S22 saved-runtime acceptance on 2026-09-26;
+- factory-fresh Plug `shellyplugsg3-e4b063e3e298` accepted with BLE status read and final stable `relayOn=false` after manual relay exercise.
 
-Current acceptance slice still pending:
+### Active next slice — BLE locator resilience
 
-1. focused software validation for the new BLE-only runtime/dashboard code;
-2. one full `pnpm check` after focused checks pass;
-3. Samsung S22 read-only status through the **new saved BLE runtime path**;
-4. authorized `OFF -> ON -> OFF` through that new path with an explicit final `relayOn=false` read.
+A persisted `bleDeviceId` is a reconnect locator, not physical identity. It may become unusable or change independently of the canonical Shelly identity. Recovery must be conservative:
 
-Do not substitute earlier transport-spike hardware evidence for acceptance of the new saved-runtime/dashboard slice.
+1. treat normalized `Shelly.GetDeviceInfo.id` as the only acceptance identity;
+2. on a read-only BLE connection/locator failure, allow one bounded rediscovery attempt;
+3. scan Shelly advertisements and use advertisement metadata only to prioritize candidates, never to prove identity;
+4. inspect candidates with `Shelly.GetDeviceInfo` until the canonical `physicalId` matches the saved Plug;
+5. only then replace the stored `bleDeviceId`; preserve the user's custom Plug name and refresh verified device metadata if appropriate;
+6. after a successful locator replacement, an idempotent/read-only status operation may be retried once;
+7. never automatically retry an ambiguous mutating BLE RPC. A relay/settings mutation failure must surface to the user; locator recovery may prepare a later explicit retry, but must not silently replay the mutation;
+8. do not add BLE↔Wi-Fi fallback as part of this slice;
+9. cover success, no-match, wrong-identity, scan/inspect failure, locator persistence and no-mutation-retry behavior with focused tests before hardware acceptance.
 
-After this slice is accepted, continue in this order:
+After locator resilience is software-green, hardware acceptance should deliberately invalidate or substitute the locator in a controlled way, verify rediscovery resolves the same canonical physical Plug, and finish with an explicit read-only state. Hardware mutation is not required to accept locator recovery itself.
 
-1. stale `bleDeviceId` rediscovery policy: scan, verify `Shelly.GetDeviceInfo.id`, then replace locator;
-2. BLE Plug detail/settings surface and the explicit set of settings safe/useful over BLE;
-3. pairing/bonding policy for firmware that requires it;
-4. optional dual-transport representation for one physical Plug;
-5. optional transport selection/fallback policy.
+### After locator resilience
+
+Continue in this order:
+
+1. audit the existing Plug detail surface and define which existing Shelly management reads/settings are safe and useful over BLE;
+2. implement the read-only BLE Plug detail/Info surface first, reusing existing client/domain contracts where cleanly possible;
+3. implement only explicitly approved settings mutations, preserving the no-ambiguous-retry rule;
+4. pairing/bonding policy for firmware that requires it;
+5. optional dual-transport representation for one physical Plug;
+6. optional transport selection/fallback policy.
 
 The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
 
@@ -132,6 +144,6 @@ Soil-moisture support is intentionally off the active near-term path. If resumed
 
 ## Working rule
 
-Prefer small vertical slices, focused regressions and one final full repository gate. Use `pnpm check:full` whenever responsive E2E is part of the acceptance surface. Hardware-facing behavior requires real-device acceptance and an explicit final relay state.
+Prefer small vertical slices, focused regressions and one final full repository gate. Use `pnpm check:full` whenever responsive E2E is part of the acceptance surface. Hardware-facing behavior requires real-device acceptance and an explicit final relay state when a relay mutation is exercised.
 
 Keep active work on one clearly named branch, merge completed slices promptly, and delete retired work branches after the merged `main` is re-verified. Preserve intentionally parked branches from separate tracks instead of deleting them as incidental cleanup.
