@@ -272,7 +272,8 @@ describe('readSavedBlePlugRuntimeStatus', () => {
   it('bounds identity inspection even when many Shelly advertisements are present', async () => {
     const candidates = Array.from(
       { length: PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES + 3 },
-      (_, index) => advertisement(`candidate-${index}`, `ShellyPlugSG3-${index}`, -40 - index)
+      (_, index) =>
+        advertisement(`candidate-${index}`, `ShellyPlugSG3-${index}`, -40 - index)
     );
     const inspectCandidate = vi.fn(async (candidate: PlugBleAdvertisement) =>
       verified(candidate.deviceId, `shellyplugsg3-wrong-${candidate.deviceId}`)

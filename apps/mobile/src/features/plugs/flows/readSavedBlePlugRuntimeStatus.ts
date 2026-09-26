@@ -66,8 +66,7 @@ const prioritizeCandidates = (
     .sort((left, right) => {
       const namePriority = Number(right.nameMatch) - Number(left.nameMatch);
       if (namePriority !== 0) return namePriority;
-      const rssiPriority =
-        (right.candidate.rssi ?? -999) - (left.candidate.rssi ?? -999);
+      const rssiPriority = (right.candidate.rssi ?? -999) - (left.candidate.rssi ?? -999);
       if (rssiPriority !== 0) return rssiPriority;
       return left.index - right.index;
     })

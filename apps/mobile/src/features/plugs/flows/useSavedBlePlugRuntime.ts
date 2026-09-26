@@ -1,9 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
-import {
-  setBlePlugRelay,
-  type BlePlugRuntimeStatus
-} from '../data/blePlugRuntime.js';
+import { setBlePlugRelay, type BlePlugRuntimeStatus } from '../data/blePlugRuntime.js';
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
 import { readSavedBlePlugRuntimeStatus } from './readSavedBlePlugRuntimeStatus.js';
 
