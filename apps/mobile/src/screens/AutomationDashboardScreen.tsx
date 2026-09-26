@@ -532,7 +532,9 @@ export const AutomationDashboardScreen = ({
     (installation) => !matchedInstallationIds.has(installation.id)
   );
   const hasPlugEntries =
-    plugEntries.length > 0 || unmatchedInstallations.length > 0 || savedBlePlugs.length > 0;
+    plugEntries.length > 0 ||
+    unmatchedInstallations.length > 0 ||
+    savedBlePlugs.length > 0;
 
   return (
     <main
