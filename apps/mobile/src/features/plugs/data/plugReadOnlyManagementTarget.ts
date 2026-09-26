@@ -57,9 +57,9 @@ const assertMatchingPhysicalIdentity = async (
   }
 };
 
-export const withVerifiedPlugReadOnlyClient = async <T>(
+export const withVerifiedPlugReadOnlyTransport = async <T>(
   target: PlugReadOnlyManagementTarget,
-  work: (client: ReadOnlyShellyClient) => Promise<T>,
+  work: (transport: ShellyRpcTransport) => Promise<T>,
   dependencies: PlugReadOnlyManagementDependencies = defaultDependencies
 ): Promise<T> => {
   if (target.transport === 'wifi') {
@@ -67,15 +67,26 @@ export const withVerifiedPlugReadOnlyClient = async <T>(
       deviceId: target.physicalId,
       baseUrl: target.baseUrl
     });
-    return work(dependencies.createClient(transport));
+    return work(transport);
   }
 
   const transport = dependencies.createBleTransport(target.bleDeviceId);
   try {
     const client = dependencies.createClient(transport);
     await assertMatchingPhysicalIdentity(target, client);
-    return await work(client);
+    return await work(transport);
   } finally {
     await transport.disconnect().catch(() => undefined);
   }
 };
+
+export const withVerifiedPlugReadOnlyClient = async <T>(
+  target: PlugReadOnlyManagementTarget,
+  work: (client: ReadOnlyShellyClient) => Promise<T>,
+  dependencies: PlugReadOnlyManagementDependencies = defaultDependencies
+): Promise<T> =>
+  withVerifiedPlugReadOnlyTransport(
+    target,
+    async (transport) => work(dependencies.createClient(transport)),
+    dependencies
+  );
