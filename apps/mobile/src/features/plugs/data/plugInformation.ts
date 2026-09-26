@@ -6,7 +6,6 @@ import {
   type PlugReadOnlyManagementDependencies,
   type PlugReadOnlyManagementTarget
 } from './plugReadOnlyManagementTarget.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
 import type { PlugSettingsTarget } from './plugSettingsTarget.js';
 
 export type PlugInformation = {
@@ -47,13 +46,4 @@ export const readPlugInformation = async (
     transport: 'wifi',
     physicalId: target.deviceId,
     baseUrl: target.baseUrl
-  });
-
-export const readBlePlugInformation = async (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
-): Promise<PlugInformation> =>
-  readPlugInformationFromTarget({
-    transport: 'bluetooth',
-    physicalId: plug.physicalId,
-    bleDeviceId: plug.bleDeviceId
   });
