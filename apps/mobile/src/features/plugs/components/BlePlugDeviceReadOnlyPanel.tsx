@@ -20,7 +20,7 @@ export const BlePlugDeviceReadOnlyPanel = ({
   const buttonCopy = deviceButtonModeCopy[locale];
   const cloudCopy = deviceCloudCopy[locale];
 
-  if (!settings.supported) {
+  if (!settings.supported && !cloud.supported) {
     return (
       <section className="plug-detail-framed-section">
         <h3 className="plug-detail-framed-section__title">
@@ -31,15 +31,17 @@ export const BlePlugDeviceReadOnlyPanel = ({
     );
   }
 
-  const { config, capabilities, controlCapabilities } = settings;
+  const config = settings.supported ? settings.config : null;
+  const capabilities = settings.supported ? settings.capabilities : null;
+  const controlCapabilities = settings.supported ? settings.controlCapabilities : null;
   const ledModeLabel =
-    config.leds.mode === 'power'
+    config?.leds.mode === 'power'
       ? ledCopy.power
-      : config.leds.mode === 'switch'
+      : config?.leds.mode === 'switch'
         ? ledCopy.switch
         : ledCopy.off;
-  const nightMode = config.leds.night_mode;
-  const buttonMode = config.controls?.['switch:0']?.in_mode;
+  const nightMode = config?.leds.night_mode;
+  const buttonMode = config?.controls?.['switch:0']?.in_mode;
   const nightModeValue = nightMode?.enable
     ? [
         t('common.enabled'),
@@ -58,17 +60,17 @@ export const BlePlugDeviceReadOnlyPanel = ({
         {t('hardware.shelly.settings')}
       </h3>
       <div className="plug-info-grid">
-        <DiagnosticRow label={ledCopy.currentMode} value={ledModeLabel} />
-        {config.leds.mode === 'power' && capabilities.powerBrightness && (
+        {config && <DiagnosticRow label={ledCopy.currentMode} value={ledModeLabel} />}
+        {config?.leds.mode === 'power' && capabilities?.powerBrightness && (
           <DiagnosticRow
             label={ledCopy.powerBrightness}
             value={`${config.leds.colors?.power?.brightness ?? 0}%`}
           />
         )}
-        {capabilities.nightMode && (
+        {capabilities?.nightMode && (
           <DiagnosticRow label={ledCopy.nightMode} value={nightModeValue} />
         )}
-        {controlCapabilities.buttonInputMode && buttonMode && (
+        {controlCapabilities?.buttonInputMode && buttonMode && (
           <DiagnosticRow
             label={buttonCopy.currentMode}
             value={
