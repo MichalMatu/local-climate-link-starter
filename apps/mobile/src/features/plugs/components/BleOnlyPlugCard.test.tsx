@@ -77,8 +77,8 @@ describe('BleOnlyPlugCard', () => {
 
     renderCard();
 
-    expect(screen.getByRole('status')).toHaveTextContent('Refreshing data from Shelly');
-    expect(screen.getByRole('alert')).toHaveTextContent('Unable to connect to Shelly');
+    expect(screen.getByRole('status')).toHaveTextContent('Refreshing from Shelly');
+    expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach Shelly');
     expect(screen.getByRole('button', { name: 'ON' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'OFF' })).toBeDisabled();
   });
