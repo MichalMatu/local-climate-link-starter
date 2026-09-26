@@ -129,6 +129,23 @@ describe('RpcShellyPlugsUiClient', () => {
     });
   });
 
+  it('reads config without requiring mutation support', async () => {
+    const transport = new RecordingTransport([
+      { ok: true, value: { methods: ['PLUGS_UI.GetConfig'] } },
+      { ok: true, value: fullConfig }
+    ]);
+    const client = new RpcShellyPlugsUiClient(transport);
+
+    await expect(client.readConfig()).resolves.toMatchObject({
+      ok: true,
+      value: { supported: true, config: fullConfig }
+    });
+    expect(transport.requests).toEqual([
+      { method: 'Shelly.ListMethods' },
+      { method: 'PLUGS_UI.GetConfig' }
+    ]);
+  });
+
   it('returns a clean unsupported state without calling PLUGS_UI', async () => {
     const transport = new RecordingTransport([
       { ok: true, value: { methods: ['Shelly.GetStatus', 'Switch.Set'] } }
