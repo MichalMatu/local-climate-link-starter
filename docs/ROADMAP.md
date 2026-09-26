@@ -4,7 +4,7 @@
 
 The product model and Plug lifecycle are stabilized:
 
-- physical Shelly identity is canonical; URL/IP is transport only;
+- physical Shelly identity is canonical; transport locators are not identity;
 - a saved Plug is useful with or without automation;
 - Forget Plug is distinct from Uninstall Automation;
 - Climate and Time verify runtime/device identity before mutation;
@@ -68,21 +68,43 @@ The implementation treats byte 4 as a bitfield and maps its low-two-bit state as
 
 Regression coverage uses captured six-byte TP357 and seven-byte TP357S frames. Enclosure color is not used as a protocol discriminator.
 
-## 5. Shelly management over BLE — NEXT, HARDWARE SPIKE FIRST
+## 5. Shelly management over BLE — IN PROGRESS
 
-Run a narrow real-hardware RPC-over-BLE spike before broad product implementation. Reuse the existing `ShellyRpcTransport` ownership boundary so HTTP and BLE remain transport adapters over the same product logic.
+The hardware feasibility spike is complete and the BLE management foundation is implemented.
 
-First acceptance slice:
+Done in this track:
 
-1. connect/bond to the known development Shelly Plug S Gen3 as required by the device;
-2. verify physical identity with `Shelly.GetDeviceInfo`;
-3. verify the read-only status path needed by management;
-4. execute `OFF -> ON -> OFF` through the BLE transport and explicitly confirm final relay OFF;
-5. document framing, payload-size, retry, timeout and connection-lifecycle constraints observed on real hardware.
+- official Shelly BLE RPC framing and UUIDs;
+- multi-chunk response handling, request-id validation, size limits and serialized RPC calls;
+- timeout/abort handling and connection invalidation;
+- no automatic retry of ambiguous mutating RPC;
+- `BleShellyRpcTransport` behind the existing `ShellyRpcTransport` boundary;
+- mobile GATT binding through the existing Capacitor BLE client;
+- real Samsung S22 + Shelly Plug S Gen3 identity/status/relay evidence, including explicit `OFF -> ON -> OFF` with final OFF;
+- independent Bluetooth Add flow using `Shelly.GetDeviceInfo.id` as canonical physical identity;
+- separate BLE-only persistence through `SavedBlePlug`, keyed by physical identity rather than BLE locator;
+- implemented BLE-only dashboard status/relay slice with explicit read/mutation state and no fake HTTP `baseUrl`.
 
-Do not port the exclusive Climate script lifecycle until identity/status/relay control is proven reliable. BLE must not fork automation ownership, persistence, safety or business logic, and the existing HTTP transport must remain fully functional.
+Current acceptance slice still pending:
 
-## 6. Shelly Script Library + simple configurators — AFTER BLE FOUNDATION
+1. focused software validation for the new BLE-only runtime/dashboard code;
+2. one full `pnpm check` after focused checks pass;
+3. Samsung S22 read-only status through the **new saved BLE runtime path**;
+4. authorized `OFF -> ON -> OFF` through that new path with an explicit final `relayOn=false` read.
+
+Do not substitute earlier transport-spike hardware evidence for acceptance of the new saved-runtime/dashboard slice.
+
+After this slice is accepted, continue in this order:
+
+1. stale `bleDeviceId` rediscovery policy: scan, verify `Shelly.GetDeviceInfo.id`, then replace locator;
+2. BLE Plug detail/settings surface and the explicit set of settings safe/useful over BLE;
+3. pairing/bonding policy for firmware that requires it;
+4. optional dual-transport representation for one physical Plug;
+5. optional transport selection/fallback policy.
+
+The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
+
+## 6. Shelly Script Library + simple configurators — AFTER BLE RUNTIME ACCEPTANCE
 
 A curated script catalog may expose useful official/approved Shelly scripts through a simple `choose -> configure -> install/run` flow. Reuse the same identity, ownership, transport, install-safety and recovery rules.
 
