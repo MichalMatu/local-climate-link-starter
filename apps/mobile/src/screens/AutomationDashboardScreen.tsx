@@ -8,7 +8,7 @@ import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { EditablePlugName } from '../components/EditablePlugName.js';
 import {
-  BleOnlyPlugCard,
+  BleOnlyPlugDashboardCards,
   isSameShellyDevice,
   PlugAddSpeedDial,
   useSavedBlePlugStore,
@@ -531,17 +531,8 @@ export const AutomationDashboardScreen = ({
   const unmatchedInstallations = installations.filter(
     (installation) => !matchedInstallationIds.has(installation.id)
   );
-  const visibleBleOnlyPlugs = savedBlePlugs.filter(
-    (plug) =>
-      !shellyDevices.some((device) => isSameShellyDevice(device.id, plug.physicalId)) &&
-      !installations.some((installation) =>
-        isSameShellyDevice(installation.shelly.deviceId, plug.physicalId)
-      )
-  );
   const hasPlugEntries =
-    plugEntries.length > 0 ||
-    unmatchedInstallations.length > 0 ||
-    visibleBleOnlyPlugs.length > 0;
+    plugEntries.length > 0 || unmatchedInstallations.length > 0 || savedBlePlugs.length > 0;
 
   return (
     <main
@@ -581,13 +572,14 @@ export const AutomationDashboardScreen = ({
                 onNameChange={renameInstalledPlug}
               />
             ))}
-            {visibleBleOnlyPlugs.map((plug) => (
-              <BleOnlyPlugCard
-                key={`ble-plug:${plug.physicalId}`}
-                plug={plug}
-                onNameChange={(value) => renameSavedBlePlug(plug.physicalId, value)}
-              />
-            ))}
+            <BleOnlyPlugDashboardCards
+              plugs={savedBlePlugs}
+              representedPhysicalIds={[
+                ...shellyDevices.map((device) => device.id),
+                ...installations.map((installation) => installation.shelly.deviceId)
+              ]}
+              onNameChange={renameSavedBlePlug}
+            />
           </>
         ) : (
           <div className="dashboard-kind-empty" role="status">
