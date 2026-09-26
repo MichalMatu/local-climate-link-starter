@@ -24,7 +24,8 @@ const detail = {
     deviceInfo: { id: plug.physicalId },
     status: {}
   },
-  deviceSettings: { supported: false }
+  deviceSettings: { supported: false },
+  cloud: { supported: false }
 } as PlugReadOnlyDetail;
 
 const advertisement: PlugBleAdvertisement = {
