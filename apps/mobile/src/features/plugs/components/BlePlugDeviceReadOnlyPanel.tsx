@@ -1,20 +1,27 @@
-import type { ShellyPlugsUiReadResult } from '@lcl/shelly-client';
+import type {
+  ShellyCloudReadResult,
+  ShellyPlugsUiReadResult
+} from '@lcl/shelly-client';
 import { DiagnosticRow } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
+import { deviceCloudCopy } from '../../../app/locales/deviceCloud.js';
 import { deviceLedCopy } from '../../../app/locales/deviceLed.js';
 import './PlugSettingsSurface.css';
 
 export type BlePlugDeviceReadOnlyPanelProps = {
   settings: ShellyPlugsUiReadResult;
+  cloud: ShellyCloudReadResult;
 };
 
 export const BlePlugDeviceReadOnlyPanel = ({
-  settings
+  settings,
+  cloud
 }: BlePlugDeviceReadOnlyPanelProps) => {
   const { locale, t } = useTranslation();
   const ledCopy = deviceLedCopy[locale];
   const buttonCopy = deviceButtonModeCopy[locale];
+  const cloudCopy = deviceCloudCopy[locale];
 
   if (!settings.supported) {
     return (
@@ -71,6 +78,18 @@ export const BlePlugDeviceReadOnlyPanel = ({
               buttonMode === 'momentary' ? buttonCopy.momentary : buttonCopy.detached
             }
           />
+        )}
+        {cloud.supported && (
+          <>
+            <DiagnosticRow
+              label={cloudCopy.title}
+              value={cloud.config.enable ? t('common.enabled') : t('common.disabled')}
+            />
+            <DiagnosticRow
+              label={cloudCopy.connection}
+              value={cloud.status.connected ? cloudCopy.connected : cloudCopy.disconnected}
+            />
+          </>
         )}
       </div>
     </section>
