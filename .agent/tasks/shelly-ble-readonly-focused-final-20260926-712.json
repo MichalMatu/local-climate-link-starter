@@ -1,0 +1,17 @@
+{
+  "id": "shelly-ble-readonly-focused-final-20260926-712",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "resources": [],
+  "command_timeout": 3600,
+  "idle_timeout": 600,
+  "task_timeout": 5400,
+  "memory_limit_mb": 4096,
+  "commands": [
+    "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"8b240cfc925022020fed3ceb0d11321e3a7ef53a\"; test -z \"$(git status --short)\"",
+    "pnpm --filter @lcl/shelly-client test -- cloud.test.ts plugsUi.test.ts && pnpm --filter @lcl/mobile test -- src/features/plugs/components/BlePlugDeviceReadOnlyPanel.test.tsx src/features/plugs/flows/readSavedBlePlugReadOnlyDetail.test.ts src/features/plugs/data/plugReadOnlyManagementTarget.test.ts",
+    "pnpm --filter @lcl/mobile typecheck && pnpm --filter @lcl/shelly-client typecheck && pnpm quality:repo && pnpm format:check && git diff --check"
+  ]
+}
