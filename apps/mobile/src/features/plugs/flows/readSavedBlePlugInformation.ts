@@ -1,8 +1,5 @@
 import { isRecoverableBlePlugReadOnlyError } from '../data/blePlugReadOnlyError.js';
-import {
-  readBlePlugInformation,
-  type PlugInformation
-} from '../data/plugInformation.js';
+import { readBlePlugInformation, type PlugInformation } from '../data/plugInformation.js';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
 import {
   recoverSavedBlePlugLocator,
