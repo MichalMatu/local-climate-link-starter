@@ -1,7 +1,8 @@
 import { useTranslation } from '../../../app/i18n.js';
 import { AppPageBack } from '../../../components/AppPageBack.js';
+import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
-import { useBlePlugInformationFlow } from '../flows/useBlePlugInformationFlow.js';
+import { useBlePlugReadOnlyDetailFlow } from '../flows/useBlePlugReadOnlyDetailFlow.js';
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
 
 export type BlePlugDetailScreenProps = {
@@ -14,7 +15,7 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
   const plug = useSavedBlePlugStore((state) =>
     state.plugs.find((candidate) => candidate.physicalId === physicalId)
   );
-  const informationQuery = useBlePlugInformationFlow(plug);
+  const detailQuery = useBlePlugReadOnlyDetailFlow(plug);
 
   if (!plug) {
     return (
@@ -37,18 +38,42 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
           {t('common.bluetooth')} · {plug.model}
         </p>
       </section>
-      <section className="plug-detail-surface" aria-label={t('common.info')}>
-        <PlugInfoPanel
-          connection={{
-            transport: 'bluetooth',
-            bleDeviceId: plug.bleDeviceId,
-            advertisementName: plug.advertisementName
-          }}
-          information={informationQuery.data}
-          loading={informationQuery.isPending}
-          error={informationQuery.isError}
-          showResourceRows={false}
-        />
+      <section className="plug-detail-surface">
+        {detailQuery.isPending && (
+          <section className="plug-detail-framed-section">
+            <h3 className="plug-detail-framed-section__title">
+              {t('hardware.shelly.settings')}
+            </h3>
+            <div className="plug-detail-loading" role="status">
+              <span className="plug-detail-loading__spinner" aria-hidden="true" />
+              <span>{t('common.refreshing')}</span>
+            </div>
+          </section>
+        )}
+        {detailQuery.isError && (
+          <section className="plug-detail-framed-section">
+            <h3 className="plug-detail-framed-section__title">
+              {t('hardware.shelly.settings')}
+            </h3>
+            <p className="plug-settings-feedback plug-settings-feedback--warning">
+              {t('dashboard.readFailed')}
+            </p>
+          </section>
+        )}
+        {detailQuery.data && (
+          <>
+            <BlePlugDeviceReadOnlyPanel settings={detailQuery.data.deviceSettings} />
+            <PlugInfoPanel
+              connection={{
+                transport: 'bluetooth',
+                bleDeviceId: plug.bleDeviceId,
+                advertisementName: plug.advertisementName
+              }}
+              information={detailQuery.data.information}
+              showResourceRows={false}
+            />
+          </>
+        )}
       </section>
     </main>
   );
